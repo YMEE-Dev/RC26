@@ -16,14 +16,14 @@
   <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
 {% endif %}
 
-{%- unless settings.type_header_font.system?
+{% comment %} {%- unless settings.type_header_font.system?
   and settings.type_base_font.system?
   and settings.type_nav_font.system?
   and settings.type_btn_font.system?
   and settings.type_subheading_font.system?
 -%}
   <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
-{%- endunless -%}
+{%- endunless -%} {% endcomment %}
 
 <!-- Title and description ================================================ -->
 {% capture seo_title %}
@@ -76,7 +76,6 @@
 {%- endif -%}
 
 {%- liquid
-  assign heading_font = settings.type_header_font
   assign subheading_font = settings.type_subheading_font
   assign base_font = settings.type_base_font
   assign nav_font = settings.type_nav_font
@@ -143,7 +142,14 @@
 
 <!-- CSS ================================================================== -->
 {% style %}
-  {{ heading_font | font_face: font_display: 'swap' }}
+  @font-face {
+    font-family: 'Portrait LS';
+    src: url('{{ 'Portrait-Medium-Cy.otf' | asset_url }}') format('opentype');
+    font-display: swap;
+    font-style: normal;
+    font-weight: 500;
+  }
+
   {{ base_font | font_face: font_display: 'swap' }}
   {{ nav_font | font_face: font_display: 'swap' }}
   {{ btn_font | font_face: font_display: 'swap' }}
@@ -453,9 +459,9 @@
 
     --LETTER-SPACING-BODY: {{ settings.body_letter_spacing | divided_by: 1000.0 | append: 'em' }};
 
-    --FONT-STACK-HEADING: {{ heading_font.family }}, {{ heading_font.fallback_families }};
-    --FONT-WEIGHT-HEADING: {{ heading_font.weight }};
-    --FONT-STYLE-HEADING: {{ heading_font.style }};
+    --FONT-STACK-HEADING: 'Portrait LS', serif;
+    --FONT-WEIGHT-HEADING: 500;
+    --FONT-STYLE-HEADING: normal;
 
     --FONT-UPPERCASE-HEADING: {{ heading_font_uppercase }};
     --LETTER-SPACING-HEADING: {{ settings.heading_letter_spacing | divided_by: 1000.0 | append: 'em' }};
@@ -490,8 +496,12 @@
     --COLUMNS-MEDIUM: 3;
     --COLUMNS-SMALL: 2;
     --COLUMNS-MOBILE: 1;
-
+    
     {%- if settings.grid_style == 'compact' -%}
+      --COLUMNS: 4;
+      --COLUMNS-MEDIUM: 3;
+      --COLUMNS-SMALL: 2;
+      --COLUMNS-MOBILE: 1;
       --LAYOUT-OUTER: 32px;
       --LAYOUT-GUTTER: 32px;
       --LAYOUT-OUTER-MEDIUM: 22px;
@@ -618,9 +628,7 @@
 {%- unless settings.type_base_font.system? -%}
   <link rel="preload" as="font" href="{{ settings.type_base_font | font_url }}" type="font/woff2" crossorigin>
 {%- endunless -%}
-{%- unless settings.type_header_font.system? -%}
-  <link rel="preload" as="font" href="{{ settings.type_header_font | font_url }}" type="font/woff2" crossorigin>
-{%- endunless -%}
+<link rel="preload" as="font" href="{{ 'Portrait-Medium-Cy.otf' | asset_url }}" type="font/otf" crossorigin>
 {%- unless settings.type_nav_font.system? -%}
   <link rel="preload" as="font" href="{{ settings.type_nav_font | font_url }}" type="font/woff2" crossorigin>
 {%- endunless -%}

@@ -9,7 +9,7 @@
     <meta name="description" content="{{ 'gift_cards.issued.subtext' | t }}">
     <link rel="canonical" href="{{ canonical_url }}">
 
-    {%- unless settings.type_header_font.system? and settings.type_base_font.system? -%}
+    {%- unless settings.type_base_font.system? -%}
       <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
     {%- endunless -%}
 
@@ -18,7 +18,6 @@
     {%- liquid
       assign scheme = settings.color_schemes | first
 
-      assign heading_font = settings.type_header_font
       assign base_font = settings.type_base_font
 
       assign base_font_bold = base_font | font_modify: 'weight', 'bolder'
@@ -43,7 +42,14 @@
     -%}
 
     {% style %}
-      {{ heading_font | font_face: font_display: 'swap' }}
+      @font-face {
+        font-family: 'Portrait LS';
+        src: url('{{ 'Portrait-Medium-Cy.otf' | asset_url }}') format('opentype');
+        font-display: swap;
+        font-style: normal;
+        font-weight: 500;
+      }
+
       {{ base_font | font_face: font_display: 'swap' }}
 
       {% if base_font_bold %}
@@ -73,9 +79,9 @@
 
         --LETTER-SPACING-BODY: {{ settings.body_letter_spacing | divided_by: 1000.0 | append: 'em' }};
 
-        --FONT-STACK-HEADING: {{ heading_font.family }}, {{ heading_font.fallback_families }};
-        --FONT-WEIGHT-HEADING: {{ heading_font.weight }};
-        --FONT-STYLE-HEADING: {{ heading_font.style }};
+        --FONT-STACK-HEADING: 'Portrait LS', serif;
+        --FONT-WEIGHT-HEADING: 500;
+        --FONT-STYLE-HEADING: normal;
 
         --FONT-UPPERCASE-HEADING: {{ heading_font_uppercase }};
         --LETTER-SPACING-HEADING: {{ settings.heading_letter_spacing | divided_by: 1000.0 | append: 'em' }};
@@ -103,9 +109,7 @@
     {%- unless settings.type_base_font.system? -%}
       <link rel="preload" as="font" href="{{ settings.type_base_font | font_url }}" type="font/woff2" crossorigin>
     {%- endunless -%}
-    {%- unless settings.type_header_font.system? -%}
-      <link rel="preload" as="font" href="{{ settings.type_header_font | font_url }}" type="font/woff2" crossorigin>
-    {%- endunless -%}
+    <link rel="preload" as="font" href="{{ 'Portrait-Medium-Cy.otf' | asset_url }}" type="font/otf" crossorigin>
 
     {{ 'template-gift-card.css' | asset_url | stylesheet_tag }}
 
