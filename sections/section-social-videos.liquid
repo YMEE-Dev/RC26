@@ -1,0 +1,441 @@
+{%- liquid
+  assign animation_order = 0
+  assign animation_anchor = '#SocialVideos--' | append: section.id
+  assign heading = section.settings.heading
+  assign text = section.settings.text
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign has_content = false
+  assign layout_desktop = section.settings.layout_desktop
+  assign layout_mobile = section.settings.layout_mobile
+  assign blocks_per_row = section.settings.blocks_per_row | default: 4
+  assign columns_desktop = blocks_per_row | plus: 0
+  assign columns_medium = 3
+  assign columns_small = 2
+  assign columns_mobile = layout_mobile | plus: 0
+  assign aspect_ratio = section.settings.aspect_ratio | default: 1
+
+  if heading != blank or text != blank
+    assign has_content = true
+  endif
+
+  if columns_desktop == 2 or columns_desktop == 4
+    assign columns_medium = 2
+  endif
+
+  if layout_mobile == 'slider'
+    assign columns_mobile = 2
+  endif
+
+  capture grid_classes
+    echo 'grid'
+
+    if layout_desktop == 'slider'
+      echo ' grid--slider'
+    endif
+
+    if layout_mobile == 'slider'
+      echo ' grid--mobile-slider'
+    else
+      echo ' grid--mobile-vertical'
+    endif
+  endcapture
+
+  capture sizes
+    if layout_desktop == 'slider'
+      if settings.grid_style == 'compact'
+        echo '(min-width: 1400px) calc(100vw * 0.28), (min-width: 750px) calc(100vw * 0.38), calc(100vw - 82px)'
+      else
+        echo '(min-width: 1400px) calc((100vw - 100px) * 0.28), (min-width: 750px) calc((100vw - 32px) * 0.38), calc(100vw - 82px)'
+      endif
+    else
+      if settings.grid_style == 'compact'
+        echo '(min-width: 1400px) calc(100vw / ' | append: columns_desktop | append: '), (min-width: 750px) calc(100vw / ' | append: columns_medium | append: '), (min-width: 480px) calc(100vw / ' | append: columns_small | append: '), calc(100vw / ' | append: columns_mobile | append: ')'
+      else
+        echo '(min-width: 1400px) calc((100vw - 100px) / ' | append: columns_desktop | append: ' - 32px), (min-width: 750px) calc((100vw - 32px) / ' | append: columns_medium | append: ' - 22px), (min-width: 480px) calc((100vw - 32px) / ' | append: columns_small | append: ' - 16px), calc((100vw - 32px) / ' | append: columns_mobile | append: ')'
+      endif
+    endif
+  endcapture
+-%}
+
+{%- style -%}
+  #SocialVideos--{{ section.id }} {
+     --PT: {{ section.settings.padding_top }}px;
+     --PB: {{ section.settings.padding_bottom }}px;
+
+     {%- if has_content -%}
+       --PT-MOBILE: max({{ section.settings.padding_top }}px, calc(var(--gutter) * 2));
+     {%- endif -%}
+
+     --COLUMNS: {{ columns_desktop }};
+     --COLUMNS-MEDIUM: {{ columns_medium }};
+     --COLUMNS-SMALL: {{ columns_small }};
+     --COLUMNS-MOBILE: {{ columns_mobile }};
+     --SOCIAL-VIDEO-ASPECT-RATIO: {{ 1 | divided_by: aspect_ratio }};
+   }
+{%- endstyle -%}
+
+<script src="{{ 'social-videos.js' | asset_url }}" defer="defer"></script>
+
+<section
+  id="SocialVideos--{{ section.id }}"
+  class="section-social-videos section-padding {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="social-videos"
+>
+  <div class="grid-container {{ section.settings.width }}">
+    {%- if has_content -%}
+      <div class="grid__heading-holder {{ section.settings.align_text }}">
+        <div class="grid__heading-text">
+          {%- if heading != blank -%}
+            {%- liquid
+              assign animation_order = animation_order | plus: 1
+              assign heading_tag = 'h2'
+
+              unless section.settings.heading_tag == 'automatic' or section.settings.heading_tag == blank
+                assign heading_tag = section.settings.heading_tag
+              endunless
+            -%}
+
+            <{{ heading_tag }}
+              class="grid__heading {{ section.settings.heading_font_size }}"
+              data-aos="hero"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-order="{{ animation_order }}"
+            >
+              {{- heading -}}
+            </{{ heading_tag }}>
+          {%- endif -%}
+
+          {%- if text != blank -%}
+            {%- liquid
+              assign animation_order = animation_order | plus: 1
+            -%}
+
+            <div
+              class="grid__text {{ section.settings.text_font_size }}"
+              data-aos="hero"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-order="{{ animation_order }}"
+            >
+              {{- text -}}
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <social-videos>
+        {%- capture video_items -%}
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign animation_order = animation_order | plus: 1
+              assign video = block.settings.video
+              assign image = block.settings.image | default: video.preview_image
+              assign badge_text = block.settings.badge_text
+            -%}
+
+            <div
+              class="grid-item social-video__item"
+              data-grid-item
+              data-social-video-item
+              {{ block.shopify_attributes }}
+            >
+              <div
+                class="social-video__wrapper"
+                data-aos="img-in"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-order="{{ animation_order }}"
+              >
+                <div class="social-video__thumbnail">
+                  {%- render 'image' image: image, sizes: sizes, aspect_ratio: aspect_ratio, cover: true -%}
+                </div>
+
+                {%- if video -%}
+                  <div class="social-video__video">
+                    {{ video | video_tag: autoplay: false, loop: true, muted: true, controls: false }}
+                  </div>
+                {%- endif -%}
+
+                <div class="social-video__content align--bottom-right">
+                  <div class="social-video__button-wrapper">
+                    <button
+                      class="social-video__button"
+                      type="button"
+                      data-video-play
+                      aria-label="{{ 'general.accessibility.play_video' | t }}"
+                    >
+                      {%- render 'icon-play' -%}
+                      {%- render 'icon-pause' -%}
+                    </button>
+
+                    {%- if badge_text != blank -%}
+                      <span class="social-video__text">
+                        {{- badge_text -}}
+                      </span>
+                    {%- endif -%}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          {%- endfor -%}
+        {%- endcapture -%}
+
+        {%- if layout_desktop == 'slider' -%}
+          <grid-slider align-arrows>
+            <div
+              class="{{ grid_classes }}"
+              data-grid-slider
+            >
+              {{ video_items }}
+            </div>
+          </grid-slider>
+        {%- else -%}
+          <div class="{{ grid_classes }}">
+            {{ video_items }}
+          </div>
+        {%- endif -%}
+      </social-videos>
+    {%- else -%}
+      {%- render 'no-blocks' -%}
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Social videos",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "label": "Heading",
+      "id": "heading",
+      "type": "text",
+      "default": "Social videos"
+    },
+    {
+      "type": "select",
+      "id": "heading_font_size",
+      "label": "Heading size",
+      "default": "heading-medium",
+      "options": [
+        {"value": "heading-mini", "label": "Mini"},
+        {"value": "heading-x-small", "label": "Extra small"},
+        {"value": "heading-small", "label": "Small"},
+        {"value": "heading-medium", "label": "Medium"},
+        {"value": "heading-large", "label": "Large"},
+        {"value": "heading-x-large", "label": "Extra large"}
+      ]
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text"
+    },
+    {
+      "type": "select",
+      "id": "text_font_size",
+      "label": "Text size",
+      "info": "Automatically generated by the base size. Applies only when content in Text field is set to Paragraph.",
+      "default": "body-medium",
+      "options": [
+        {"value": "body-x-small", "label": "Extra small"},
+        {"value": "body-small", "label": "Small"},
+        {"value": "body-medium", "label": "Medium"},
+        {"value": "body-large", "label": "Large"},
+        {"value": "body-x-large", "label": "Extra large"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "align_text",
+      "label": "Text alignment",
+      "default": "text-center",
+      "options": [
+        {"value": "text-left", "label": "Left"},
+        {"value": "text-center", "label": "Centered"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper--full-padded",
+      "options": [
+        {"value": "wrapper--full", "label": "Full width"},
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"}
+      ]
+    },
+    {
+      "type": "range",
+      "id": "aspect_ratio",
+      "min": 0.5,
+      "max": 1.5,
+      "step": 0.1,
+      "unit": ":1",
+      "label": "Video aspect ratio",
+      "info": "Wide to tall",
+      "default": 1
+    },
+    {
+      "type": "header",
+      "content": "Desktop"
+    },
+    {
+      "type": "select",
+      "id": "layout_desktop",
+      "label": "Style",
+      "options": [
+        {
+          "value": "grid",
+          "label": "Grid"
+        },
+        {
+          "value": "slider",
+          "label": "Slider"
+        }
+      ],
+      "default": "grid"
+    },
+    {
+      "type": "range",
+      "id": "blocks_per_row",
+      "label": "Videos per row",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 4,
+      "visible_if": "{{ section.settings.layout_desktop == 'grid' }}"
+    },
+    {
+      "type": "header",
+      "content": "Mobile"
+    },
+    {
+      "type": "select",
+      "id": "layout_mobile",
+      "label": "Style",
+      "options": [
+        {
+          "value": "1",
+          "label": "Grid"
+        },
+        {
+          "value": "slider",
+          "label": "Slider"
+        }
+      ],
+      "default": "slider"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Top",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 50
+    },
+    {
+      "type": "header",
+      "content": "Advanced"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading SEO tag",
+      "default": "automatic",
+      "options": [
+        {"value": "automatic", "label": "Automatic"},
+        {"value": "h1", "label": "H1"},
+        {"value": "h2", "label": "H2"},
+        {"value": "h3", "label": "H3"},
+        {"value": "h4", "label": "H4"},
+        {"value": "h5", "label": "H5"},
+        {"value": "h6", "label": "H6"}
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "type": "video",
+      "name": "Video",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Thumbnail"
+        },
+        {
+          "type": "video",
+          "id": "video",
+          "label": "Video"
+        },
+        {
+          "type": "text",
+          "id": "badge_text",
+          "label": "Badge text",
+          "default": "@instagram"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Social videos",
+      "category": "Storytelling",
+      "blocks": [
+        {
+          "type": "video"
+        },
+        {
+          "type": "video"
+        },
+        {
+          "type": "video"
+        },
+        {
+          "type": "video"
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "aside", "footer"]
+  }
+}
+{% endschema %}

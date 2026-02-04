@@ -1,0 +1,180 @@
+{% comment %}
+  Renders a list of product's price (regular, sale)
+
+  Accepts:
+  - product: {Object} Product Liquid object (optional)
+  - onboarding_product: {Boolean} Renders a placeholder price (optional)
+  - use_variant: {Boolean} Renders selected or first variant price instead of overall product pricing (optional)
+  - show_badges: {Boolean} Renders 'Sale' and 'Sold Out' tags if the product matches the condition (optional)
+  - price_class: {String} Adds a price class to the price element (optional)
+  - price_font_size: {String} Adds a price font size to the price element (optional)
+  - show_compare_at_price: {Boolean} Renders the compare at price if the product matches the condition (optional)
+
+  Usage:
+  {% render 'price', product: product %}
+{% endcomment %}
+{%- liquid
+  if use_variant
+    assign target = product.selected_or_first_available_variant
+  elsif onboarding_product
+    assign target = null
+  else
+    assign target = product
+  endif
+
+  assign compare_at_price = target.compare_at_price
+  assign price = target.price
+  assign price_min = product.price_min
+  assign price_max = product.price_max
+  assign available = target.available | default: false
+
+  if compare_at_price > price
+    assign is_on_sale = true
+  endif
+
+  if target.price == 0
+    assign money_price = 'general.money.free' | t
+  else
+    assign money_price = target.price | money
+  endif
+
+  assign money_price_min = price_min | money
+  assign money_price_max = price_max | money
+
+  assign has_units = false
+  if target.unit_price_measurement != null
+    assign has_units = true
+    assign unit_price = target.unit_price | money
+  endif
+
+  if settings.currency_code_enable
+    if target.price == 0
+      assign money_price = 'general.money.free' | t
+    else
+      assign money_price = target.price | money_with_currency
+    endif
+
+    if has_units
+      assign unit_price = target.unit_price | money_with_currency
+    endif
+
+    assign money_price_min = price_min | money_with_currency
+    assign money_price_max = price_max | money_with_currency
+  endif
+
+  if target == product and product.price_varies
+    assign money_price = 'products.product.price.from_price_html' | t: price: money_price
+  endif
+
+  if onboarding_product
+    assign money_price = 1999 | money
+  endif
+
+  assign sale_badge = settings.sale_badge
+
+  if settings.final_sale or product.metafields.theme.final_sale.type == 'boolean' and product.metafields.theme.final_sale.value == true
+    assign final_sale = true
+  endif
+
+  if target.metafields.theme.final_sale.type == 'boolean' and target.metafields.theme.final_sale.value == true
+    assign final_sale = true
+  endif
+-%}
+
+{%- unless target == null and onboarding_product == null -%}
+  <div
+    class="
+      price product__price
+      {%- if price_class %} {{ price_class }}{% endif -%}
+      {%- if price_font_size != blank %} {{ price_font_size }}{% endif -%}
+      {%- if available == false %} price--sold-out{% endif -%}
+      {%- if is_on_sale %} price--on-sale product__price--sale{% endif -%}
+      {%- if product.price_varies == false and product.compare_at_price_varies %} price--no-compare{% endif -%}
+      {%- if show_badges %} price--show-badge{% endif -%}
+    "
+  >
+    <div class="price__container">
+      <div class="price__regular">
+        <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
+        <span class="price-item price-item--regular">{{ money_price }}</span>
+      </div>
+
+      {% if compare_at_price > price %}
+        <div class="price__sale">
+          <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.sale_price' | t }}</span>
+          <span class="price-item price-item--sale price-item--last">
+            {{ money_price }}
+          </span>
+
+          <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
+          <span>
+            <s class="price-item price-item--regular">
+              {% if settings.currency_code_enable %}
+                {{ compare_at_price | money_with_currency }}
+              {% else %}
+                {{ compare_at_price | money }}
+              {% endif %}
+            </s>
+          </span>
+        </div>
+      {% endif %}
+
+      <small class="unit-price caption{% if target.unit_price_measurement == nil %} hidden{% endif %}">
+        <span class="visually-hidden">{{ 'products.product.price.unit_price' | t }}</span>
+        <span class="price-item price-item--last">
+          <span>{{- unit_price -}}</span>
+          <span aria-hidden="true">/</span>
+          <span class="visually-hidden">&nbsp;{{ 'general.accessibility.unit_price_separator' | t }}&nbsp;</span>
+          <span>
+            {%- if target.unit_price_measurement.reference_value != 1 -%}
+              {{- target.unit_price_measurement.reference_value -}}
+            {%- endif -%}
+            {{ target.unit_price_measurement.reference_unit }}
+          </span>
+        </span>
+      </small>
+    </div>
+
+    {%- if sale_badge or final_sale -%}
+      <div
+        class="product__sale"
+        data-price-off
+      >
+        {%- if sale_badge and is_on_sale -%}
+          <span
+            class="product__price--off"
+            data-price-off-badge
+          >
+            {% if settings.sale_badge_type == 'percentage' %}
+              <span>{{ compare_at_price | minus: price | times: 100.0 | divided_by: compare_at_price | round }}%</span>
+            {% else %}
+              {%- liquid
+                assign price_difference = compare_at_price | minus: price
+
+                if settings.currency_code_enable
+                  assign price_difference = price_difference | money_with_currency
+                else
+                  assign price_difference = price_difference | money
+                endif
+              -%}
+              <span>{{ price_difference }}</span>
+            {% endif %}
+            {{ 'products.product.off' | t }}
+          </span>
+        {%- endif -%}
+
+        {%- if is_on_sale and final_sale -%}
+          <div class="product__final-sale-wrap">
+            <div class="product__final-sale">{{ 'products.product.final_sale' | t }}</div>
+            <tooltip-component
+              class="product__final-sale-question"
+              data-tooltip="<div style='--text: var(--COLOR-SALE);'>{{ settings.final_sale_tooltip | replace: '"', "'" }}</div>"
+            >
+              {%- render 'icon-question' -%}
+            </tooltip-component>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+{% endunless %}

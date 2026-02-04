@@ -1,0 +1,97 @@
+{% comment %}
+  Renders list of products in grid layout
+
+  Accepts:
+  - block: {Object} The block object (required)
+
+  Usage:
+  {% render 'product-popup', block: block %}
+{% endcomment %}
+
+{%- liquid
+  assign link_text = block.settings.title
+  assign popup_content = block.settings.page.content | default: block.settings.text
+  assign text_font_size = block.settings.text_font_size
+  assign show_icon = block.settings.show_icon
+  assign image = block.settings.image
+  assign icon_size = block.settings.icon_size
+  assign icon_color = block.settings.icon_color
+
+  capture block_style
+    echo 'style="'
+    echo '--block-padding-bottom: ' | append: block.settings.padding_bottom | append: 'px;'
+    echo '"'
+  endcapture
+
+  capture icon_style
+    echo 'style="'
+    echo '--icon-size: ' | append: icon_size | append: 'px;'
+    if icon_color != blank and icon_color != 'rgba(0,0,0,0)'
+      echo '--icons: ' | append: icon_color | append: ';'
+    endif
+    echo '"'
+  endcapture
+-%}
+
+<popup-component class="product__block block-padding" {{ block_style }}>
+  <div class="block__icon__container block__icon__container--full">
+    {%- if show_icon -%}
+      <div class="block__icon" data-aos="img-in" {{ icon_style }}>
+        {%- liquid
+          if image
+            assign icon_width = icon_size
+            assign icon_width_x2 = icon_width | times: 2
+            assign icon_sizes = icon_width | append: 'px'
+            assign icon_widths = icon_width | append: ', ' | append: icon_width_x2
+
+            render 'image', image: image, width: icon_width_x2, sizes: icon_sizes, widths: icon_widths, show_backfill: false
+          else
+            render 'animated-icon', filename: block.settings.icon_name
+          endif
+        -%}
+      </div>
+    {%- endif -%}
+
+    <a
+      class="radio__legend__link text-link"
+      href="{{ block.settings.page.url | default: "#"}}"
+      data-popup-open
+      {{ block.shopify_attributes }}
+    >
+      {{ link_text | escape }}
+    </a>
+  </div>
+
+  <dialog
+    class="drawer"
+    aria-hidden="true"
+    inert
+    data-popup-drwaer
+    data-scroll-lock-required
+  >
+    <form method="dialog">
+      <button class="visually-hidden" aria-label="{{ 'general.accessibility.close' | t }}"></button>
+    </form>
+
+    <div class="drawer__inner {{ text_font_size }}" data-scroll-lock-scrollable>
+      <div class="drawer__head">
+        <h3 class="drawer__heading">
+          {{ link_text | escape }}
+        </h3>
+
+        <button
+          type="button"
+          class="drawer__close"
+          data-popup-close
+          aria-label="{{ 'general.accessibility.close' | t }}"
+        >
+          {%- render 'icon-cancel' -%}
+        </button>
+      </div>
+
+      <div class="drawer__body product__popup__content" data-pickup-drawer-body data-scroll-lock-scrollable>
+        {{ popup_content }}
+      </div>
+    </div>
+  </dialog>
+</popup-component>

@@ -1,0 +1,23 @@
+{% comment %}
+  Renders a badge
+
+  Accepts:
+  - badge_class: {String} the class of the badge (required)
+  - badge_text: {String} the text of the badge (required)
+  - aos_delay: {String} the delay for the AOS animation (required)
+  - aos_duration: {String} the duration for the AOS animation (required)
+  - aos_anchor: {String} the anchor for the AOS animation (required)
+
+  Usage:
+  {% render 'product-badge', badge_class: badge_class, badge_text: badge_text, aos_delay: aos_delay, aos_duration: aos_duration, aos_anchor: aos_anchor %}
+{% endcomment %}
+
+<span
+  class="{{ badge_class }}"
+  data-aos="fade"
+  data-aos-delay="{{ aos_delay }}"
+  data-aos-duration="{{ aos_duration }}"
+  data-aos-anchor="{{ aos_anchor }}"
+>
+  {{ badge_text }}
+</span>

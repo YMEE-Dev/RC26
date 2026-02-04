@@ -1,0 +1,101 @@
+{% comment %}
+  Renders order product list, upsell products, or bundle products on Cart page and Cart drawer
+
+  Accepts:
+  - block: {Object} Block object (required)
+
+  Usage:
+  {% render 'cart-block-upsell', block: block %}
+{% endcomment %}
+
+{%- liquid
+  assign upsell_auto_open = block.settings.upsell_auto_open
+  assign is_product_list = false
+  assign is_bundle_products = false
+  assign is_upsell_products = false
+  if block.type == 'product-list'
+    assign is_product_list = true
+  elsif block.type == 'bundle-products'
+    assign is_bundle_products = true
+  elsif block.type == 'upsell-products'
+    assign is_upsell_products = true
+  endif
+
+  capture upsell_products
+    render 'cart-line-items', part: 'upsell-items'
+  endcapture
+
+  capture bundle_products
+    render 'cart-line-items', part: 'bundle-items'
+  endcapture
+
+  capture product_list
+    for product in block.settings.product_list
+      render 'upsell-product', upsell_product: product, is_product_list: true, is_cart: true
+    endfor
+  endcapture
+-%}
+{%- if request.design_mode
+  or is_product_list == false
+  or block.settings.product_list.count > 0
+  and product_list != blank
+  and is_product_list
+  or upsell_products != blank
+  or bundle_products != blank
+-%}
+  <details
+    class="cart__widget cart__widget--products accordion"
+    {% if upsell_auto_open and product_list != blank or bundle_products != blank or upsell_products != blank %}
+      open="true"
+    {% endif %}
+    data-collapsible
+    {% if is_bundle_products %}
+      data-bundle-widget
+    {% else %}
+      data-upsell-widget
+    {% endif %}
+    {% if upsell_auto_open %}
+      data-upsell-auto-open
+    {% endif %}
+  >
+    <summary class="cart__widget__title" data-collapsible-trigger>
+      {%- if is_product_list -%}
+        {{ block.settings.title }}
+      {%- elsif is_bundle_products -%}
+        {{ block.settings.bundle_title }}
+      {%- else -%}
+        {{- 'cart.general.pair_products' | t -}}
+      {%- endif -%}
+
+      {%- render 'icon-nav-arrow-down' -%}
+    </summary>
+
+    <div
+      class="cart__widget__content"
+      {% if upsell_auto_open and product_list != blank or bundle_products != blank or upsell_products != blank %}
+        style="height: auto;"
+      {% endif %}
+      data-collapsible-body
+    >
+      <div class="cart__widget__content__inner" data-collapsible-content>
+        <div
+          class="cart__widget__products"
+          {% if is_upsell_products %}
+            data-upsell-products
+          {% endif %}
+          {% if is_bundle_products %}
+            data-bundle-products
+          {% endif %}
+        >
+          {%- if is_product_list -%}
+            {{ product_list }}
+          {%- elsif is_bundle_products -%}
+            {{ bundle_products }}
+          {%- else -%}
+            {{ upsell_products }}
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </details>
+{%- endif -%}

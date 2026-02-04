@@ -1,0 +1,72 @@
+{%- liquid
+  assign section_id = unique | default: section.id
+  assign current_variant = product.selected_or_first_available_variant
+  assign variant_inventory = current_variant.inventory_quantity
+  assign show_inventory_counter = block.settings.show_inventory_counter
+  assign max_inventory = block.settings.max_inventory
+  assign show_notice = block.settings.show_notice
+  assign status = ''
+
+  assign in_stock_color = block.settings.in_stock_color
+  assign low_stock_color = block.settings.low_stock_color
+  assign out_of_stock_color = block.settings.out_of_stock_color
+
+  if current_variant.inventory_management and current_variant.inventory_policy == 'deny'
+    if variant_inventory > 0 and variant_inventory <= max_inventory
+      assign status = 'low-stock'
+    elsif variant_inventory > 0 and variant_inventory > max_inventory and show_notice == 'always'
+      assign status = 'in-stock'
+    elsif variant_inventory < 1 and show_notice == 'always'
+      assign status = 'out-of-stock'
+    endif
+  endif
+
+  assign status_color = ''
+  if status == 'in-stock'
+    assign status_color = in_stock_color
+  elsif status == 'low-stock'
+    assign status_color = low_stock_color
+  elsif status == 'out-of-stock'
+    assign status_color = out_of_stock_color
+  endif
+
+  capture icon_color_style
+    if status_color != blank and status_color.alpha != 0
+      echo ' style="--icon-color: ' | append: status_color | append: '"'
+    endif
+  endcapture
+-%}
+
+<div
+  class="product__block variant__countdown block-padding"
+  id="Inventory-{{ section_id }}"
+  {{ block.shopify_attributes }}
+  {{ block_style }}
+>
+  {%- case status -%}
+    {%- when 'in-stock' -%}
+      <span class="variant__countdown--in" {{ icon_color_style }}>
+        {% render 'icon-in-stock' %}
+        <span class="variant__countdown-text">{{ 'products.product.in_stock' | t }}</span>
+      </span>
+    {%- when 'low-stock' -%}
+      {%- if show_inventory_counter -%}
+        <span class="variant__countdown--low" {{ icon_color_style }}>
+          {% render 'icon-low-inventory' %}
+          <span class="variant__countdown-text">
+            {{- 'products.product.remaining_html' | t: inventory: variant_inventory -}}
+          </span>
+        </span>
+      {%- else -%}
+        <span class="variant__countdown--low" {{ icon_color_style }}>
+          {% render 'icon-low-inventory' %}
+          <span class="variant__countdown-text">{{ 'products.product.remaining_no_count' | t }}</span>
+        </span>
+      {%- endif -%}
+    {%- when 'out-of-stock' -%}
+      <span class="variant__countdown--out" {{ icon_color_style }}>
+        {% render 'icon-out-of-stock' %}
+        <span class="variant__countdown-text">{{ 'products.product.out_of_stock' | t }}</span>
+      </span>
+  {%- endcase -%}
+</div>

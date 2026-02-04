@@ -1,0 +1,44 @@
+{% comment %}
+  Renders discount code form on Cart page and Cart drawer
+
+  Accepts:
+  - block: {Object} Block object (required)
+
+  Usage:
+  {% render 'cart-block-discount', block: block %}
+{% endcomment %}
+
+<details
+  class="cart__widget cart__widget--discount accordion"
+  data-collapsible
+>
+  <summary class="cart__widget__title" data-collapsible-trigger>
+    {{- 'cart.general.discount_code_label' | t -}}
+
+    {%- render 'icon-nav-arrow-down' -%}
+  </summary>
+
+  <div class="cart__widget__content" data-collapsible-body>
+    <div class="cart__widget__content__inner" data-collapsible-content>
+      <p class="cart__errors__content cart__errors__inner hidden" data-discount-error-message role="alert"></p>
+      <input
+        type="text"
+        class="cart__field"
+        data-discount-input
+        placeholder="{{ 'cart.general.discount_code_placeholder' | t }}"
+        aria-label="{{ 'cart.general.discount_code_placeholder' | t }}"
+        value="{{ cart.discount_applications.first.title }}"
+      >
+
+      <input type="hidden" name="discount" value="" data-discount-field>
+
+      <button
+        class="btn btn--outline btn--primary btn--full"
+        type="button"
+        data-apply-discount
+      >
+        {{ 'cart.general.apply_button' | t }}
+      </button>
+    </div>
+  </div>
+</details>
