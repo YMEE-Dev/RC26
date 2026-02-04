@@ -195,6 +195,8 @@
   {%- endunless -%}
 {%- endstyle -%}
 
+{{ 'custom-menu.css' | asset_url | stylesheet_tag }}
+
 {%- capture toolbar -%}
   {%- render 'header-toolbar' block: toolbar_block -%}
 {%- endcapture -%}
@@ -591,6 +593,70 @@
     }
   </script>
 {%- endif -%}
+
+{% javascript %}
+  document.addEventListener('DOMContentLoaded', () => {
+    const initMenuImages = () => {
+      const images = Array.from(document.querySelectorAll('.tmenu_collection > img'))
+      if (images.length > 1) {
+        images.slice(1).forEach((img) => img.classList.add('hide-menu-image'))
+      }
+
+      const links = document.querySelectorAll('a.tmenu_item_link')
+      if (!links.length || !images.length) return
+
+      const imageByAlt = new Map()
+      images.forEach((img) => {
+        const alt = img.getAttribute('alt') || ''
+        if (alt) imageByAlt.set(alt.trim(), img)
+      })
+
+      const showImageForTitle = (title) => {
+        images.forEach((img) => img.classList.add('hide-menu-image'))
+        const match = imageByAlt.get((title || '').trim())
+        if (match) match.classList.remove('hide-menu-image')
+      }
+
+      links.forEach((link) => {
+        link.addEventListener('mouseenter', () => {
+          showImageForTitle(link.textContent)
+        })
+        link.addEventListener('focus', () => {
+          showImageForTitle(link.textContent)
+        })
+      })
+    }
+
+    const rootSelector = '.tmenu_item.tmenu_item--root.tmenu_item_level_0.tmenu_item_submenu_type_mega'
+    let initialized = false
+
+    const runOnce = () => {
+      if (initialized) return
+      initialized = true
+      initMenuImages()
+    }
+
+    const observeRoot = (root) => {
+      const rootObserver = new MutationObserver(() => runOnce())
+      rootObserver.observe(root, { childList: true, subtree: true })
+    }
+
+    const rootItem = document.querySelector(rootSelector)
+    if (rootItem) {
+      observeRoot(rootItem)
+      return
+    }
+
+    const bodyObserver = new MutationObserver(() => {
+      const foundRoot = document.querySelector(rootSelector)
+      if (!foundRoot) return
+      bodyObserver.disconnect()
+      observeRoot(foundRoot)
+    })
+
+    bodyObserver.observe(document.body, { childList: true, subtree: true })
+  })
+{% endjavascript %}
 
 {% schema %}
 {
