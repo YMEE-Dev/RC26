@@ -52,10 +52,10 @@
     assign logo = transparent_logo
   endif
 
-  assign logo_width = section.settings.logo_max_limit
+  assign logo_width = "400"
   assign logo_width_15x = logo_width | times: 1.5 | round
   assign logo_width_2x = logo_width | times: 2 | round
-  assign logo_width_mobile = section.settings.logo_max_limit_mobile
+  assign logo_width_mobile = "200"
   assign logo_width_mobile_15x = logo_width_mobile | times: 1.5 | round
   assign logo_width_mobile_2x = logo_width_mobile | times: 2 | round
   assign logo_sizes = '(min-width: 750px) ' | append: logo_width | append: 'px, (min-width: ' | append: logo_width_mobile_2x | append: 'px) ' | append: logo_width_mobile | append: 'px, calc((100vw - 64px) * 0.5)'
@@ -202,10 +202,11 @@
 {%- endcapture -%}
 
 {%- capture logos -%}
+  {%- assign default_variant = section.settings.logo_default_variant | default: 'light' -%}
   {%- if transparent_header and transparent_logo != blank and logo != blank -%}
     {%- assign has_transparent_logo = true -%}
   {%- endif -%}
-  <div class="header__logo{% if logo %} header__logo--image{% endif %}{% if has_transparent_logo %} header__logo--has-transparent{% endif %}">
+  <div class="header__logo{% if logo %} header__logo--image{% endif %}{% if has_transparent_logo %} header__logo--has-transparent{% endif %} logo-variant--{{ default_variant }}" data-logo-default="{{ default_variant }}">
     <a class="header__logo__link" href="{{ routes.root_url }}" data-logo-link>
       {%- if logo != blank -%}
         {%- liquid
@@ -214,21 +215,12 @@
         -%}
       {%- else -%}
         {%- liquid
-          assign classes = ''
-          assign title_length = shop.name | size
-          assign oneword = true
-          if shop.name contains ' ' or shop.name contains '-'
-            assign oneword = false
-          endif
-          if title_length > 15
-            assign classes = classes | append: ' header__logo__text--long'
-            if oneword
-              assign classes = classes | append: ' header__logo__text--break'
-            endif
-          endif
+          assign logo_light = 'RC_LOGO_light.svg' | asset_url
+          assign logo_dark = 'RC_LOGO_dark.svg' | asset_url
         -%}
-        <div class="header__logo__text {{ classes }}">
-          <span>{{ shop.name }}</span>
+        <div class="header__logo__fallback">
+          <img src="{{ logo_light }}" alt="{{ shop.name }} light logo" class="logo__img logo__img--variant" data-logo-variant="light">
+          <img src="{{ logo_dark }}" alt="{{ shop.name }} dark logo" class="logo__img logo__img--variant" data-logo-variant="dark">
         </div>
       {%- endif -%}
 
@@ -439,24 +431,6 @@
       </div>
     {%- endif -%}
 
-    {%- if section.settings.enable_search -%}
-      <div class="header__desktop__button">
-        <header-search-popdown>
-          <details>
-            <summary class="navlink navlink--search{% if show_icons == false %} navlink--toplevel{% endif %}" aria-haspopup="dialog" title="{{ 'general.search.search' | t }}">
-              {%- render 'icon-search' -%}
-              {%- render 'icon-cancel' -%}
-              <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.search' | t }}</span>
-            </summary>
-
-            {%- render 'header-search-popdown', unique: 'desktop' -%}
-
-            <span class="underlay" data-popdown-underlay></span>
-          </details>
-        </header-search-popdown>
-      </div>
-    {%- endif -%}
-
     <div class="header__desktop__button">
       <a href="{{ routes.cart_url }}" class="navlink {{ navlink_cart_classes }}" title="{{ 'cart.general.title' | t }}" data-cart-toggle>
         {{ cart_status }}
@@ -523,7 +497,26 @@
             <div class="header__desktop__upper header__desktop__upper--reverse" data-takes-space-wrapper>
               <div data-child-takes-space class="header__desktop__bar__l">{{ logos }}</div>
 
-              <div data-child-takes-space class="header__desktop__bar__c">{{ menu }}</div>
+              <div data-child-takes-space class="header__desktop__bar__c">
+                {%- if section.settings.enable_search -%}
+                  <div class="header__desktop__button">
+                    <header-search-popdown>
+                      <details>
+                        <summary class="navlink navlink--search{% if show_icons == false %} navlink--toplevel{% endif %}" aria-haspopup="dialog" title="{{ 'general.search.search' | t }}">
+                          {%- render 'icon-search' -%}
+                          {%- render 'icon-cancel' -%}
+                          <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.search' | t }}</span>
+                        </summary>
+
+                        {%- render 'header-search-popdown', unique: 'desktop' -%}
+
+                        <span class="underlay" data-popdown-underlay></span>
+                      </details>
+                    </header-search-popdown>
+                  </div>
+                {%- endif -%}
+                {{ menu }}
+              </div>
 
               <div data-child-takes-space class="header__desktop__bar__r">{{ buttons }}</div>
             </div>
@@ -627,6 +620,29 @@
       })
     }
 
+    const initLogoVariant = (root) => {
+      const logo = document.querySelector('.header__logo')
+      if (!logo) return
+
+      const defaultVariant = logo.dataset.logoDefault || 'light'
+      const applyVariant = (variant) => {
+        logo.classList.toggle('logo-variant--light', variant === 'light')
+        logo.classList.toggle('logo-variant--dark', variant === 'dark')
+      }
+
+      const updateVariant = () => {
+        const shouldDark = root && root.classList.contains('tmenu_item_active')
+        applyVariant(shouldDark ? 'dark' : defaultVariant)
+      }
+
+      updateVariant()
+
+      if (!root) return
+
+      const observer = new MutationObserver(() => updateVariant())
+      observer.observe(root, { attributes: true, attributeFilter: ['class'] })
+    }
+
     const rootSelector = '.tmenu_item.tmenu_item--root.tmenu_item_level_0.tmenu_item_submenu_type_mega'
     let initialized = false
 
@@ -637,6 +653,7 @@
     }
 
     const observeRoot = (root) => {
+      initLogoVariant(root)
       const rootObserver = new MutationObserver(() => runOnce())
       rootObserver.observe(root, { childList: true, subtree: true })
     }
@@ -751,28 +768,20 @@
       "info": "300 x 90px .jpg recommended. [Learn more](http://presidiodev.com/link/broadcast/images)"
     },
     {
-      "type": "header",
-      "content": "Layout"
-    },
-    {
-      "type": "range",
-      "id": "logo_max_limit",
-      "min": 30,
-      "max": 495,
-      "step": 5,
-      "unit": "px",
-      "label": "Desktop width",
-      "default": 120
-    },
-    {
-      "type": "range",
-      "id": "logo_max_limit_mobile",
-      "min": 30,
-      "max": 250,
-      "step": 5,
-      "unit": "px",
-      "label": "Mobile width",
-      "default": 120
+      "type": "select",
+      "id": "logo_default_variant",
+      "label": "Default logo variant",
+      "default": "light",
+      "options": [
+        {
+          "value": "light",
+          "label": "Light"
+        },
+        {
+          "value": "dark",
+          "label": "Dark"
+        }
+      ]
     },
     {
       "type": "header",
@@ -952,7 +961,7 @@
       "type": "range",
       "id": "padding_top",
       "min": 5,
-      "max": 40,
+      "max": 42,
       "step": 1,
       "unit": "px",
       "label": "Top",
@@ -962,7 +971,7 @@
       "type": "range",
       "id": "padding_bottom",
       "min": 5,
-      "max": 40,
+      "max": 42,
       "step": 1,
       "unit": "px",
       "label": "Bottom",
