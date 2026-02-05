@@ -6760,7 +6760,11 @@ body:has([data-header-transparent]) .header__mobile__bottom {
 .header__desktop__bar__c {
   order: 1;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  gap: 18px;
+}
+.header__desktop__bar__c .navlink--search{
+  padding: 0;
 }
 .header__desktop__upper--reverse .header__desktop__bar__c {
   order: unset;
@@ -6799,9 +6803,13 @@ body:has([data-header-transparent]) .header__mobile__bottom {
 }
 @media only screen and (min-width: 750px) {
   .header__mobile__button .navlink:not(.navlink--toplevel),
-.header__desktop__button .navlink:not(.navlink--toplevel) {
+  .header__desktop__button .navlink:not(.navlink--toplevel) {
     padding-left: 11px;
     padding-right: 11px;
+  }
+  .header__desktop__button .navlink.navlink--search {
+    padding-left: 0;
+    padding-right: 0;
   }
 }
 

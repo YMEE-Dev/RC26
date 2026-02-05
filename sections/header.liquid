@@ -202,11 +202,10 @@
 {%- endcapture -%}
 
 {%- capture logos -%}
-  {%- assign default_variant = section.settings.logo_default_variant | default: 'light' -%}
   {%- if transparent_header and transparent_logo != blank and logo != blank -%}
     {%- assign has_transparent_logo = true -%}
   {%- endif -%}
-  <div class="header__logo{% if logo %} header__logo--image{% endif %}{% if has_transparent_logo %} header__logo--has-transparent{% endif %} logo-variant--{{ default_variant }}" data-logo-default="{{ default_variant }}">
+  <div class="header__logo{% if logo %} header__logo--image{% endif %}{% if has_transparent_logo %} header__logo--has-transparent{% endif %}">
     <a class="header__logo__link" href="{{ routes.root_url }}" data-logo-link>
       {%- if logo != blank -%}
         {%- liquid
@@ -215,12 +214,21 @@
         -%}
       {%- else -%}
         {%- liquid
-          assign logo_light = 'RC_LOGO_light.svg' | asset_url
-          assign logo_dark = 'RC_LOGO_dark.svg' | asset_url
+          assign classes = ''
+          assign title_length = shop.name | size
+          assign oneword = true
+          if shop.name contains ' ' or shop.name contains '-'
+            assign oneword = false
+          endif
+          if title_length > 15
+            assign classes = classes | append: ' header__logo__text--long'
+            if oneword
+              assign classes = classes | append: ' header__logo__text--break'
+            endif
+          endif
         -%}
-        <div class="header__logo__fallback">
-          <img src="{{ logo_light }}" alt="{{ shop.name }} light logo" class="logo__img logo__img--variant" data-logo-variant="light">
-          <img src="{{ logo_dark }}" alt="{{ shop.name }} dark logo" class="logo__img logo__img--variant" data-logo-variant="dark">
+        <div class="header__logo__text {{ classes }}">
+          <span>{{ shop.name }}</span>
         </div>
       {%- endif -%}
 
@@ -620,29 +628,6 @@
       })
     }
 
-    const initLogoVariant = (root) => {
-      const logo = document.querySelector('.header__logo')
-      if (!logo) return
-
-      const defaultVariant = logo.dataset.logoDefault || 'light'
-      const applyVariant = (variant) => {
-        logo.classList.toggle('logo-variant--light', variant === 'light')
-        logo.classList.toggle('logo-variant--dark', variant === 'dark')
-      }
-
-      const updateVariant = () => {
-        const shouldDark = root && root.classList.contains('tmenu_item_active')
-        applyVariant(shouldDark ? 'dark' : defaultVariant)
-      }
-
-      updateVariant()
-
-      if (!root) return
-
-      const observer = new MutationObserver(() => updateVariant())
-      observer.observe(root, { attributes: true, attributeFilter: ['class'] })
-    }
-
     const rootSelector = '.tmenu_item.tmenu_item--root.tmenu_item_level_0.tmenu_item_submenu_type_mega'
     let initialized = false
 
@@ -653,7 +638,6 @@
     }
 
     const observeRoot = (root) => {
-      initLogoVariant(root)
       const rootObserver = new MutationObserver(() => runOnce())
       rootObserver.observe(root, { childList: true, subtree: true })
     }
@@ -766,22 +750,6 @@
       "id": "logo",
       "label": "Image",
       "info": "300 x 90px .jpg recommended. [Learn more](http://presidiodev.com/link/broadcast/images)"
-    },
-    {
-      "type": "select",
-      "id": "logo_default_variant",
-      "label": "Default logo variant",
-      "default": "light",
-      "options": [
-        {
-          "value": "light",
-          "label": "Light"
-        },
-        {
-          "value": "dark",
-          "label": "Dark"
-        }
-      ]
     },
     {
       "type": "header",
