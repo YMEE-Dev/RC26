@@ -9,7 +9,7 @@
     <meta name="description" content="{{ 'gift_cards.issued.subtext' | t }}">
     <link rel="canonical" href="{{ canonical_url }}">
 
-    {%- unless settings.type_base_font.system? -%}
+    {%- unless settings.type_body_font.system? -%}
       <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
     {%- endunless -%}
 
@@ -18,7 +18,7 @@
     {%- liquid
       assign scheme = settings.color_schemes | first
 
-      assign base_font = settings.type_base_font
+      assign base_font = settings.type_body_font
 
       assign base_font_bold = base_font | font_modify: 'weight', 'bolder'
       assign base_font_100 = base_font | font_modify: 'weight', '+100'
@@ -58,19 +58,10 @@
 
       :root {
         /* === Typography ===*/
-        --FONT-HEADING-MINI: {{ settings.heading_mini | append: 'px' }};
-        --FONT-HEADING-X-SMALL: {{ settings.heading_x_small | append: 'px' }};
-        --FONT-HEADING-SMALL: {{ settings.heading_small | append: 'px' }};
-        --FONT-HEADING-MEDIUM: {{ settings.heading_medium | append: 'px' }};
-        --FONT-HEADING-LARGE: {{ settings.heading_large | append: 'px' }};
-        --FONT-HEADING-X-LARGE: {{ settings.heading_x_large | append: 'px' }};
-
-        --FONT-HEADING-MINI-MOBILE: {{ settings.heading_mini_mobile | append: 'px' }};
-        --FONT-HEADING-X-SMALL-MOBILE: {{ settings.heading_x_small_mobile | append: 'px' }};
-        --FONT-HEADING-SMALL-MOBILE: {{ settings.heading_small_mobile | append: 'px' }};
-        --FONT-HEADING-MEDIUM-MOBILE: {{ settings.heading_medium_mobile | append: 'px' }};
-        --FONT-HEADING-LARGE-MOBILE: {{ settings.heading_large_mobile | append: 'px' }};
-        --FONT-HEADING-X-LARGE-MOBILE: {{ settings.heading_x_large_mobile | append: 'px' }};
+        --FONT-DISPLAY-M: {{ settings.display_m_size | append: 'px' }};
+        --FONT-DISPLAY-S: {{ settings.display_s_size | append: 'px' }};
+        --FONT-HEADLINE: {{ settings.headline_size | append: 'px' }};
+        --FONT-TITLE: {{ settings.title_size | append: 'px' }};
 
         --FONT-STACK-BODY: {{ base_font.family }}, {{ base_font.fallback_families }};
         --FONT-STYLE-BODY: {{ base_font.style }};
@@ -106,8 +97,8 @@
       }
     {% endstyle %}
 
-    {%- unless settings.type_base_font.system? -%}
-      <link rel="preload" as="font" href="{{ settings.type_base_font | font_url }}" type="font/woff2" crossorigin>
+    {%- unless settings.type_body_font.system? -%}
+      <link rel="preload" as="font" href="{{ settings.type_body_font | font_url }}" type="font/woff2" crossorigin>
     {%- endunless -%}
     <link rel="preload" as="font" href="{{ 'Portrait-Medium-Cy.otf' | asset_url }}" type="font/otf" crossorigin>
 

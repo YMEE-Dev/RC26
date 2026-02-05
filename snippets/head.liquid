@@ -16,11 +16,8 @@
   <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
 {% endif %}
 
-{% comment %} {%- unless settings.type_header_font.system?
-  and settings.type_base_font.system?
-  and settings.type_nav_font.system?
+{% comment %} {%- unless settings.type_body_font.system?
   and settings.type_btn_font.system?
-  and settings.type_subheading_font.system?
 -%}
   <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
 {%- endunless -%} {% endcomment %}
@@ -76,9 +73,10 @@
 {%- endif -%}
 
 {%- liquid
-  assign subheading_font = settings.type_subheading_font
-  assign base_font = settings.type_base_font
-  assign nav_font = settings.type_nav_font
+  assign body_font = settings.type_body_font
+  assign subheading_font = body_font
+  assign base_font = body_font
+  assign nav_font = body_font
   assign btn_font = settings.type_btn_font
 
   assign base_font_bold = base_font | font_modify: 'weight', 'bolder'
@@ -96,7 +94,7 @@
     assign base_font_bold = base_font_400
   endif
 
-  assign base_font_italic = settings.type_base_font | font_modify: 'style', 'italic'
+  assign base_font_italic = body_font | font_modify: 'style', 'italic'
   assign base_font_bold_italic = base_font_bold | font_modify: 'style', 'italic'
 
   assign nav_font_bold = nav_font | font_modify: 'weight', 'bolder'
@@ -117,11 +115,6 @@
   assign heading_font_uppercase = 'none'
   if settings.type_header_uppercase
     assign heading_font_uppercase = 'uppercase'
-  endif
-
-  assign subheading_font_uppercase = 'none'
-  if settings.type_sub_uppercase
-    assign subheading_font_uppercase = 'uppercase'
   endif
 
   case settings.swatch_size
@@ -432,25 +425,21 @@
       --ICON-ADD-CART: url( "{{ 'icon-add-cart.svg' | asset_url }}" );
       --ICON-ARROW-LEFT: url( "{{ 'icon-nav-arrow-left.svg' | asset_url }}" );
       --ICON-ARROW-RIGHT: url( "{{ 'icon-nav-arrow-right.svg' | asset_url }}" );
-      --ICON-SELECT: url("{{ 'icon-select.svg' | asset_url }}");
+    --ICON-SELECT: url("{{ 'icon-select.svg' | asset_url }}");
     {% endif %}
 
     --PRODUCT-GRID-ASPECT-RATIO: {{ settings.product_grid_aspect_ratio | times: 100 }}%;
 
     /* === Typography ===*/
-    --FONT-HEADING-MINI: {{ settings.heading_mini | append: 'px' }};
-    --FONT-HEADING-X-SMALL: {{ settings.heading_x_small | append: 'px' }};
-    --FONT-HEADING-SMALL: {{ settings.heading_small | append: 'px' }};
-    --FONT-HEADING-MEDIUM: {{ settings.heading_medium | append: 'px' }};
-    --FONT-HEADING-LARGE: {{ settings.heading_large | append: 'px' }};
-    --FONT-HEADING-X-LARGE: {{ settings.heading_x_large | append: 'px' }};
+    --FONT-DISPLAY-M: {{ settings.display_m_size | append: 'px' }};
+    --FONT-DISPLAY-S: {{ settings.display_s_size | append: 'px' }};
+    --FONT-HEADLINE: {{ settings.headline_size | append: 'px' }};
+    --FONT-TITLE: {{ settings.title_size | append: 'px' }};
 
-    --FONT-HEADING-MINI-MOBILE: {{ settings.heading_mini_mobile | append: 'px' }};
-    --FONT-HEADING-X-SMALL-MOBILE: {{ settings.heading_x_small_mobile | append: 'px' }};
-    --FONT-HEADING-SMALL-MOBILE: {{ settings.heading_small_mobile | append: 'px' }};
-    --FONT-HEADING-MEDIUM-MOBILE: {{ settings.heading_medium_mobile | append: 'px' }};
-    --FONT-HEADING-LARGE-MOBILE: {{ settings.heading_large_mobile | append: 'px' }};
-    --FONT-HEADING-X-LARGE-MOBILE: {{ settings.heading_x_large_mobile | append: 'px' }};
+    --LINE-HEIGHT-DISPLAY-M: {{ settings.display_m_line_height | append: 'px' }};
+    --LINE-HEIGHT-DISPLAY-S: {{ settings.display_s_line_height | append: 'px' }};
+    --LINE-HEIGHT-HEADLINE: {{ settings.headline_line_height | append: 'px' }};
+    --LINE-HEIGHT-TITLE: {{ settings.title_line_height | append: 'px' }};
 
     --FONT-STACK-BODY: {{ base_font.family }}, {{ base_font.fallback_families }};
     --FONT-STYLE-BODY: {{ base_font.style }};
@@ -469,22 +458,39 @@
     --FONT-STACK-SUBHEADING: {{ subheading_font.family }}, {{ subheading_font.fallback_families }};
     --FONT-WEIGHT-SUBHEADING: {{ subheading_font.weight }};
     --FONT-STYLE-SUBHEADING: {{ subheading_font.style }};
-    --FONT-SIZE-SUBHEADING-DESKTOP: {{ settings.subheading_size_desktop | append: 'px' }};
-    --FONT-SIZE-SUBHEADING-MOBILE: {{ settings.subheading_size_mobile | append: 'px' }};
-
-    --FONT-UPPERCASE-SUBHEADING: {{ subheading_font_uppercase }};
-    --LETTER-SPACING-SUBHEADING: {{ settings.sub_letter_spacing | divided_by: 1000.0 | append: 'em' }};
+    --FONT-SIZE-SUBHEADING: {{ settings.headline_size | append: 'px' }};
 
     --FONT-STACK-NAV: {{ nav_font.family }}, {{ nav_font.fallback_families }};
     --FONT-WEIGHT-NAV: {{ nav_font.weight }};
     --FONT-WEIGHT-NAV-BOLD: {{ nav_font_bold.weight | default: 700 }};
     --FONT-STYLE-NAV: {{ nav_font.style }};
-    --FONT-SIZE-NAV: {{ settings.nav_font_size | append: 'px' }};
+    --FONT-SIZE-NAV: {{ settings.nav_text_size | append: 'px' }};
+    --LINE-HEIGHT-NAV: {{ settings.nav_text_line_height | append: 'px' }};
 
 
     --LETTER-SPACING-NAV: {{ settings.nav_letter_spacing | divided_by: 1000.0 | append: 'em' }};
 
-    --FONT-SIZE-BASE: {{ settings.base_font_size | append: 'px' }};
+    --FONT-SIZE-BASE: {{ settings.body_text_size | append: 'px' }};
+    --LINE-HEIGHT-BODY: {{ settings.body_text_line_height | append: 'px' }};
+
+    --FONT-SIZE-INPUT-TEXT: {{ settings.input_text_size | append: 'px' }};
+    --LINE-HEIGHT-INPUT-TEXT: {{ settings.input_text_line_height | append: 'px' }};
+
+    --FONT-SIZE-INPUT-LABEL: {{ settings.input_label_size | append: 'px' }};
+    --LINE-HEIGHT-INPUT-LABEL: {{ settings.input_label_line_height | append: 'px' }};
+
+    --FONT-SIZE-INPUT-HELPER: {{ settings.input_helper_size | append: 'px' }};
+    --LINE-HEIGHT-INPUT-HELPER: {{ settings.input_helper_line_height | append: 'px' }};
+
+    --FONT-SIZE-CAPTION: {{ settings.caption_size | append: 'px' }};
+    --LINE-HEIGHT-CAPTION: {{ settings.caption_line_height | append: 'px' }};
+
+    --FONT-SIZE-LEGAL: {{ settings.legal_size | append: 'px' }};
+    --LINE-HEIGHT-LEGAL: {{ settings.legal_line_height | append: 'px' }};
+    --FONT-SIZE-PRICE: {{ settings.price_text_size | append: 'px' }};
+    --LINE-HEIGHT-PRICE: {{ settings.price_text_line_height | append: 'px' }};
+    --FONT-SIZE-LABEL: {{ settings.label_text_size | append: 'px' }};
+    --LINE-HEIGHT-LABEL: {{ settings.label_text_line_height | append: 'px' }};
 
     /* === Parallax ===*/
     --PARALLAX-STRENGTH-MIN: {{ settings.parallax_strength | plus: 100.0 | append: '%' }};
@@ -540,13 +546,14 @@
     --BTN-FONT-STACK: {{ btn_font.family }}, {{ btn_font.fallback_families }};
     --BTN-FONT-WEIGHT: {{ btn_font.weight }};
     --BTN-FONT-STYLE: {{ btn_font.style }};
-    --BTN-FONT-SIZE: {{ settings.btn_size }}px;
+    --BTN-FONT-SIZE: {{ settings.button_text_size }}px;
+    --BTN-LINE-HEIGHT: {{ settings.button_text_line_height }}px;
     --BTN-SIZE-SMALL: {{ settings.button_small }}px;
     --BTN-SIZE-MEDIUM: {{ settings.button_medium }}px;
     --BTN-SIZE-LARGE: {{ settings.button_large }}px;
 
-    {%- assign font_size_base_decimal = settings.base_font_size | append: '.0' -%}
-    --BTN-FONT-SIZE-BODY: {{ settings.btn_size | divided_by: font_size_base_decimal }}rem;
+    {%- assign font_size_base_decimal = settings.body_text_size | append: '.0' -%}
+    --BTN-FONT-SIZE-BODY: {{ settings.button_text_size | divided_by: font_size_base_decimal }}rem;
 
     --BTN-LETTER-SPACING: {{ settings.btn_letter_spacing | divided_by: 1000.0 | append: 'em' }};
     --BTN-UPPERCASE: {% if settings.btn_caps %}uppercase{% else %}none{% endif %};
@@ -625,18 +632,12 @@
   }
 {% endstyle %}
 
-{%- unless settings.type_base_font.system? -%}
-  <link rel="preload" as="font" href="{{ settings.type_base_font | font_url }}" type="font/woff2" crossorigin>
+{%- unless settings.type_body_font.system? -%}
+  <link rel="preload" as="font" href="{{ settings.type_body_font | font_url }}" type="font/woff2" crossorigin>
 {%- endunless -%}
 <link rel="preload" as="font" href="{{ 'Portrait-Medium-Cy.otf' | asset_url }}" type="font/otf" crossorigin>
-{%- unless settings.type_nav_font.system? -%}
-  <link rel="preload" as="font" href="{{ settings.type_nav_font | font_url }}" type="font/woff2" crossorigin>
-{%- endunless -%}
 {%- unless settings.type_btn_font.system? -%}
   <link rel="preload" as="font" href="{{ settings.type_btn_font | font_url }}" type="font/woff2" crossorigin>
-{%- endunless -%}
-{%- unless settings.type_subheading_font.system? -%}
-  <link rel="preload" as="font" href="{{ settings.type_subheading_font | font_url }}" type="font/woff2" crossorigin>
 {%- endunless -%}
 
 {{ 'theme.css' | asset_url | stylesheet_tag }}

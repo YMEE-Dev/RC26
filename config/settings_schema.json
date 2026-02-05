@@ -207,24 +207,34 @@
     "name": "Typography",
     "settings": [
       {
-        "type": "header",
-        "content": "Header navigation"
+        "type": "font_picker",
+        "id": "type_body_font",
+        "label": "Body font",
+        "default": "inter_n4"
       },
       {
-        "type": "font_picker",
-        "id": "type_nav_font",
-        "label": "Font",
-        "default": "poppins_n4"
+        "type": "header",
+        "content": "Navigation"
       },
       {
         "type": "range",
-        "id": "nav_font_size",
-        "min": 10,
+        "id": "nav_text_size",
+        "min": 8,
+        "max": 30,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop font size",
+        "default": 12
+      },
+      {
+        "type": "range",
+        "id": "nav_text_line_height",
+        "min": 8,
         "max": 50,
         "step": 1,
         "unit": "px",
-        "label": "Font size",
-        "default": 16
+        "label": "Desktop line height",
+        "default": 24
       },
       {
         "type": "range",
@@ -243,80 +253,14 @@
         "default": false
       },
       {
-        "type": "header",
-        "content": "Body text"
-      },
-      {
-        "type": "font_picker",
-        "id": "type_base_font",
-        "label": "Font",
-        "default": "poppins_n4"
-      },
-      {
-        "type": "range",
-        "id": "base_font_size",
-        "min": 12,
-        "max": 22,
-        "step": 1,
-        "unit": "px",
-        "label": "Base size",
-        "default": 16
-      },
-      {
         "type": "range",
         "id": "body_letter_spacing",
         "min": -25,
         "max": 200,
         "step": 25,
         "unit": "%",
-        "label": "Letter spacing",
+        "label": "Body letter spacing",
         "default": 0
-      },
-      {
-        "type": "header",
-        "content": "Subheadings"
-      },
-      {
-        "type": "font_picker",
-        "id": "type_subheading_font",
-        "label": "Font",
-        "default": "poppins_n4"
-      },
-      {
-        "type": "range",
-        "id": "sub_letter_spacing",
-        "min": -25,
-        "max": 200,
-        "step": 25,
-        "unit": "%",
-        "label": "Letter spacing",
-        "default": 100
-      },
-      {
-        "type": "checkbox",
-        "id": "type_sub_uppercase",
-        "label": "Uppercase",
-        "default": true
-      },
-      {
-        "type": "range",
-        "id": "subheading_size_desktop",
-        "min": 10,
-        "max": 60,
-        "step": 1,
-        "unit": "px",
-        "label": "Desktop size",
-        "default": 16
-      },
-      {
-        "type": "range",
-        "id": "subheading_size_mobile",
-        "min": 10,
-        "max": 60,
-        "step": 1,
-        "unit": "px",
-        "label": "Mobile size",
-        "default": 14
       },
       {
         "type": "header",
@@ -343,132 +287,340 @@
         "default": false
       },
       {
-        "type": "paragraph",
-        "content": "Desktop sizes"
+        "type": "header",
+        "content": "Display L"
       },
       {
         "type": "range",
-        "id": "heading_mini",
-        "min": 10,
-        "max": 50,
-        "step": 1,
-        "unit": "px",
-        "label": "Mini",
-        "default": 10
-      },
-      {
-        "type": "range",
-        "id": "heading_x_small",
-        "min": 10,
-        "max": 50,
-        "step": 1,
-        "unit": "px",
-        "label": "Extra small",
-        "default": 16
-      },
-      {
-        "type": "range",
-        "id": "heading_small",
-        "min": 10,
-        "max": 75,
-        "step": 1,
-        "unit": "px",
-        "label": "Small",
-        "default": 20
-      },
-      {
-        "type": "range",
-        "id": "heading_medium",
+        "id": "display_l_size",
         "min": 10,
         "max": 100,
         "step": 1,
         "unit": "px",
-        "label": "Medium",
-        "default": 30
-      },
-      {
-        "type": "range",
-        "id": "heading_large",
-        "min": 10,
-        "max": 150,
-        "step": 2,
-        "unit": "px",
-        "label": "Large",
+        "label": "Desktop font size",
         "default": 40
       },
       {
         "type": "range",
-        "id": "heading_x_large",
-        "min": 10,
-        "max": 200,
-        "step": 2,
-        "unit": "px",
-        "label": "Extra large",
-        "default": 50
-      },
-      {
-        "type": "paragraph",
-        "content": "Mobile sizes"
-      },
-      {
-        "type": "range",
-        "id": "heading_mini_mobile",
-        "min": 10,
-        "max": 50,
-        "step": 1,
-        "unit": "px",
-        "label": "Mini",
-        "default": 10
-      },
-      {
-        "type": "range",
-        "id": "heading_x_small_mobile",
-        "min": 10,
-        "max": 50,
-        "step": 1,
-        "unit": "px",
-        "label": "Extra small",
-        "default": 12
-      },
-      {
-        "type": "range",
-        "id": "heading_small_mobile",
-        "min": 10,
-        "max": 75,
-        "step": 1,
-        "unit": "px",
-        "label": "Small",
-        "default": 16
-      },
-      {
-        "type": "range",
-        "id": "heading_medium_mobile",
+        "id": "display_l_line_height",
         "min": 10,
         "max": 100,
         "step": 1,
         "unit": "px",
-        "label": "Medium",
-        "default": 24
+        "label": "Desktop line height",
+        "default": 48
+      },
+      {
+        "type": "header",
+        "content": "Display M"
       },
       {
         "type": "range",
-        "id": "heading_large_mobile",
+        "id": "display_m_size",
         "min": 10,
-        "max": 150,
-        "step": 2,
+        "max": 100,
+        "step": 1,
         "unit": "px",
-        "label": "Large",
+        "label": "Desktop font size",
+        "default": 36
+      },
+      {
+        "type": "range",
+        "id": "display_m_line_height",
+        "min": 10,
+        "max": 100,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop line height",
+        "default": 44
+      },
+      {
+        "type": "header",
+        "content": "Display S"
+      },
+      {
+        "type": "range",
+        "id": "display_s_size",
+        "min": 10,
+        "max": 100,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop font size",
         "default": 32
       },
       {
         "type": "range",
-        "id": "heading_x_large_mobile",
+        "id": "display_s_line_height",
         "min": 10,
-        "max": 200,
-        "step": 5,
+        "max": 100,
+        "step": 1,
         "unit": "px",
-        "label": "Extra large",
-        "default": 45
+        "label": "Desktop line height",
+        "default": 40
+      },
+      {
+        "type": "header",
+        "content": "Headline"
+      },
+      {
+        "type": "range",
+        "id": "headline_size",
+        "min": 10,
+        "max": 80,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop font size",
+        "default": 24
+      },
+      {
+        "type": "range",
+        "id": "headline_line_height",
+        "min": 10,
+        "max": 100,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop line height",
+        "default": 32
+      },
+      {
+        "type": "header",
+        "content": "Title"
+      },
+      {
+        "type": "range",
+        "id": "title_size",
+        "min": 10,
+        "max": 60,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop font size",
+        "default": 16
+      },
+      {
+        "type": "range",
+        "id": "title_line_height",
+        "min": 10,
+        "max": 80,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop line height",
+        "default": 22
+      },
+      {
+        "type": "header",
+        "content": "Body text"
+      },
+      {
+        "type": "range",
+        "id": "body_text_size",
+        "min": 10,
+        "max": 40,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop font size",
+        "default": 14
+      },
+      {
+        "type": "range",
+        "id": "body_text_line_height",
+        "min": 10,
+        "max": 60,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop line height",
+        "default": 22
+      },
+      {
+        "type": "header",
+        "content": "Input / Text"
+      },
+      {
+        "type": "range",
+        "id": "input_text_size",
+        "min": 10,
+        "max": 40,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop font size",
+        "default": 14
+      },
+      {
+        "type": "range",
+        "id": "input_text_line_height",
+        "min": 10,
+        "max": 60,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop line height",
+        "default": 22
+      },
+      {
+        "type": "header",
+        "content": "Input / Label"
+      },
+      {
+        "type": "range",
+        "id": "input_label_size",
+        "min": 8,
+        "max": 30,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop font size",
+        "default": 11
+      },
+      {
+        "type": "range",
+        "id": "input_label_line_height",
+        "min": 8,
+        "max": 50,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop line height",
+        "default": 16
+      },
+      {
+        "type": "header",
+        "content": "Input / Helper"
+      },
+      {
+        "type": "range",
+        "id": "input_helper_size",
+        "min": 8,
+        "max": 30,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop font size",
+        "default": 11
+      },
+      {
+        "type": "range",
+        "id": "input_helper_line_height",
+        "min": 8,
+        "max": 50,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop line height",
+        "default": 16
+      },
+      {
+        "type": "header",
+        "content": "Caption"
+      },
+      {
+        "type": "range",
+        "id": "caption_size",
+        "min": 8,
+        "max": 30,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop font size",
+        "default": 12
+      },
+      {
+        "type": "range",
+        "id": "caption_line_height",
+        "min": 8,
+        "max": 50,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop line height",
+        "default": 20
+      },
+      {
+        "type": "header",
+        "content": "Legal"
+      },
+      {
+        "type": "range",
+        "id": "legal_size",
+        "min": 8,
+        "max": 24,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop font size",
+        "default": 10
+      },
+      {
+        "type": "range",
+        "id": "legal_line_height",
+        "min": 8,
+        "max": 40,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop line height",
+        "default": 14
+      },
+      {
+        "type": "header",
+        "content": "Button (all caps)"
+      },
+      {
+        "type": "range",
+        "id": "button_text_size",
+        "min": 8,
+        "max": 30,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop font size",
+        "default": 12
+      },
+      {
+        "type": "range",
+        "id": "button_text_line_height",
+        "min": 8,
+        "max": 50,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop line height",
+        "default": 16
+      },
+      {
+        "type": "header",
+        "content": "Price"
+      },
+      {
+        "type": "range",
+        "id": "price_text_size",
+        "min": 8,
+        "max": 30,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop font size",
+        "default": 12
+      },
+      {
+        "type": "range",
+        "id": "price_text_line_height",
+        "min": 8,
+        "max": 50,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop line height",
+        "default": 16
+      },
+      {
+        "type": "header",
+        "content": "Label (all caps)"
+      },
+      {
+        "type": "range",
+        "id": "label_text_size",
+        "min": 8,
+        "max": 30,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop font size",
+        "default": 11
+      },
+      {
+        "type": "range",
+        "id": "label_text_line_height",
+        "min": 8,
+        "max": 50,
+        "step": 1,
+        "unit": "px",
+        "label": "Desktop line height",
+        "default": 16
       }
     ]
   },
@@ -491,16 +643,6 @@
           { "label": "Rounded", "value": "rounded" },
           { "label": "Pill", "value": "pill" }
         ]
-      },
-      {
-        "type": "range",
-        "id": "btn_size",
-        "min": 10,
-        "max": 24,
-        "step": 1,
-        "unit": "px",
-        "label": "Font size",
-        "default": 13
       },
       {
         "type": "range",
