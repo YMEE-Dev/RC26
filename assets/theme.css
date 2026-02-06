@@ -6435,6 +6435,10 @@ hover-disclosure {
   transition: top 0.2s linear;
 }
 
+.header__wrapper[data-header-transparent] {
+  --bg: transparent;
+}
+
 .header__desktop {
   --text: var(--COLOR-HEADER-LINK);
   --link: var(--COLOR-HEADER-LINK);
@@ -6581,6 +6585,10 @@ body:has([data-header-transparent]) .header__mobile__bottom {
   isolation: isolate;
 }
 
+.header__logo--image .header__logo__link {
+  padding-bottom: var(--logo-padding);
+}
+
 @media only screen and (min-width: 750px) {
   .header__logo__link {
     --logo-width: var(--logo-width-desktop);
@@ -6599,6 +6607,7 @@ body:has([data-header-transparent]) .header__mobile__bottom {
   width: 100%;
   height: 0;
   font-size: 0;
+  padding-bottom: var(--logo-padding);
 }
 
 .header__logo__svg,

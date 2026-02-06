@@ -41,15 +41,19 @@
   assign main_menu_linklist = section.settings.main_menu_linklist | default: 'main-menu'
   assign secondary_menu_linklist = section.settings.secondary_menu_linklist
 
-  assign logo = section.settings.logo
-  assign transparent_logo = section.settings.transparent_logo
-
-  if template.name == 'product' and section.settings.transparent_product_page
-    assign transparent_logo = section.settings.transparent_logo_pdp
+  assign logo_variant = section.settings.logo_variant | default: 'light'
+  assign logo_asset = 'RC_LOGO_light.svg'
+  assign logo_denom = 814 | divided_by: 76
+  assign transparent_logo_asset = 'RC_LOGO_dark.svg'
+  if logo_variant == 'dark'
+    assign logo_asset = 'RC_LOGO_dark.svg'
+    assign logo_denom = 800 | divided_by: 74
+    assign transparent_logo_asset = 'RC_LOGO_light.svg'
   endif
-
-  if transparent_logo != blank and logo == blank
-    assign logo = transparent_logo
+  assign transparent_logo_pdp = section.settings.transparent_logo_pdp
+  assign use_transparent_logo_pdp = false
+  if template.name == 'product' and section.settings.transparent_product_page and transparent_logo_pdp != blank
+    assign use_transparent_logo_pdp = true
   endif
 
   assign logo_width = "400"
@@ -61,8 +65,7 @@
   assign logo_sizes = '(min-width: 750px) ' | append: logo_width | append: 'px, (min-width: ' | append: logo_width_mobile_2x | append: 'px) ' | append: logo_width_mobile | append: 'px, calc((100vw - 64px) * 0.5)'
   assign logo_widths = logo_width | append: ',' | append: logo_width_15x | append: ',' | append: logo_width_2x | append: ',' | append: logo_width_mobile | append: ',' | append: logo_width_mobile_15x | append: ',' | append: logo_width_mobile_2x
 
-  if logo != blank
-    assign logo_denom = logo.aspect_ratio | default: 1
+  if logo_asset != blank
     assign logo_height = logo_width | divided_by: logo_denom
     assign logo_height_mobile = logo_width_mobile | divided_by: logo_denom
     assign menu_height = logo_height | at_least: menu_height_default
@@ -71,7 +74,7 @@
     assign header_height = menu_height | floor | plus: padding_top | plus: padding_bottom
     assign header_height_medium = menu_height_medium | floor | plus: padding_top_medium | plus: padding_bottom_medium
     assign header_height_mobile = menu_height_mobile | floor | plus: padding_top_mobile | plus: padding_bottom_mobile
-    assign logo_padding = 1 | divided_by: logo_denom | times: 100 | append: '%'
+    assign logo_padding = 50 | divided_by: logo_denom | append: '%'
   else
     assign header_height = menu_height_default | plus: padding_top | plus: padding_bottom
     assign header_height_medium = menu_height_medium_default | plus: padding_top_medium | plus: padding_bottom_medium
@@ -182,7 +185,7 @@
     {% endif %}
   }
 
-  {%- if logo != blank -%}
+  {%- if logo_asset != blank -%}
     .header__logo__link {
       --logo-padding: {{ logo_padding }};
       --logo-width-desktop: {{ logo_width }}px;
@@ -202,16 +205,22 @@
 {%- endcapture -%}
 
 {%- capture logos -%}
-  {%- if transparent_header and transparent_logo != blank and logo != blank -%}
+  {%- if transparent_header and logo_asset != blank -%}
     {%- assign has_transparent_logo = true -%}
   {%- endif -%}
-  <div class="header__logo{% if logo %} header__logo--image{% endif %}{% if has_transparent_logo %} header__logo--has-transparent{% endif %}">
+  <div class="header__logo header__logo--image{% if has_transparent_logo %} header__logo--has-transparent{% endif %}">
     <a class="header__logo__link" href="{{ routes.root_url }}" data-logo-link>
-      {%- if logo != blank -%}
-        {%- liquid
-          assign alt = logo.alt | default: shop.name | strip_html | escape
-          render 'image' image: logo, width: logo_width_2x, sizes: logo_sizes, widths: logo_widths, aspect_ratio: logo_denom, alt: alt, modifier: 'logo__img logo__img--color', fetchpriority: 'high', preload: true, show_backfill: false
-        -%}
+      {%- if logo_asset != blank -%}
+        {%- assign logo_alt = shop.name | strip_html | escape -%}
+        <img
+          class="logo__img logo__img--color"
+          src="{{ logo_asset | asset_url }}"
+          width="{{ logo_width }}"
+          height="{{ logo_height | round }}"
+          alt="{{ logo_alt }}"
+          loading="eager"
+          fetchpriority="high"
+        />
       {%- else -%}
         {%- liquid
           assign classes = ''
@@ -232,12 +241,25 @@
         </div>
       {%- endif -%}
 
-      {%- liquid
-        if has_transparent_logo
-          assign alt = transparent_logo.alt | default: shop.name | strip_html | escape
-          render 'image' image: transparent_logo, width: logo_width_2x, sizes: logo_sizes, widths: logo_widths, aspect_ratio: transparent_logo.aspect_ratio, alt: alt, modifier: 'logo__img logo__img--transparent', fetchpriority: 'high', preload: true, show_backfill: false
-        endif
-      -%}
+      {%- if has_transparent_logo -%}
+        {%- if use_transparent_logo_pdp -%}
+          {%- liquid
+            assign alt = transparent_logo_pdp.alt | default: shop.name | strip_html | escape
+            render 'image' image: transparent_logo_pdp, width: logo_width_2x, sizes: logo_sizes, widths: logo_widths, aspect_ratio: transparent_logo_pdp.aspect_ratio, alt: alt, modifier: 'logo__img logo__img--transparent', fetchpriority: 'high', preload: true, show_backfill: false
+          -%}
+        {%- else -%}
+          {%- assign transparent_alt = shop.name | strip_html | escape -%}
+          <img
+            class="logo__img logo__img--transparent"
+            src="{{ transparent_logo_asset | asset_url }}"
+            width="{{ logo_width }}"
+            height="{{ logo_height | round }}"
+            alt="{{ transparent_alt }}"
+            loading="eager"
+            fetchpriority="high"
+          />
+        {%- endif -%}
+      {%- endif -%}
     </a>
   </div>
 {%- endcapture -%}
@@ -558,8 +580,8 @@
     "@context": "http://schema.org",
     "@type": "Organization",
     "name": {{ shop.name | json }},
-    {% if logo %}
-      "logo": {{ logo | image_url: width: 500 | prepend: "https:" | json }},
+    {% if logo_asset %}
+      "logo": {{ logo_asset | asset_url | prepend: "https:" | json }},
     {% endif %}
     "sameAs": [
       {{ settings.twitter_link | json }},
@@ -746,10 +768,15 @@
       "content": "Logo"
     },
     {
-      "type": "image_picker",
-      "id": "logo",
-      "label": "Image",
-      "info": "300 x 90px .jpg recommended. [Learn more](http://presidiodev.com/link/broadcast/images)"
+      "type": "select",
+      "id": "logo_variant",
+      "label": "Asset logo",
+      "info": "Select the light or dark logo that ships with the theme.",
+      "default": "light",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
     },
     {
       "type": "header",
@@ -877,12 +904,6 @@
     {
       "type": "header",
       "content": "Transparent header"
-    },
-    {
-      "type": "image_picker",
-      "id": "transparent_logo",
-      "label": "Logo",
-      "info": "300 x 90px .png recommended. [Learn more](http://presidiodev.com/link/broadcast/images)"
     },
     {
       "type": "checkbox",
