@@ -434,6 +434,9 @@
 {%- endcapture -%}
 
 {%- capture buttons -%}
+  {% comment %} the right menu will go here instead of the account icon {% endcomment %}
+  <nav class="header__menu--right"></nav>
+
   <div class="header__desktop__buttons{% if show_icons == false %} header__desktop__buttons--text{% else %} header__desktop__buttons--icons{% endif %}{% if settings.type_nav_caps %} caps{% endif %}">
     {%- if section.settings.header_style != 'logo_above' -%}
       {{ cta }}
@@ -461,14 +464,14 @@
       </div>
     {%- endif -%}
 
-    {%- if shop.customer_accounts_enabled -%}
+    {% comment %} {%- if shop.customer_accounts_enabled -%}
       <div class="header__desktop__button">
         <a href="{{ routes.account_url }}" class="navlink{% if show_icons == false %} navlink--toplevel{% endif %}" title="{{ 'customer.account.title' | t }}">
           {%- render 'icon-profile-circled' -%}
           <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.account' | t }}</span>
         </a>
       </div>
-    {%- endif -%}
+    {%- endif -%} {% endcomment %}
 
     <div class="header__desktop__button">
       <a href="{{ routes.cart_url }}" class="navlink {{ navlink_cart_classes }}" title="{{ 'cart.general.title' | t }}" data-cart-toggle>
@@ -479,7 +482,7 @@
 {%- endcapture -%}
 
 {%- capture menu -%}
-  <nav class="header__menu{% if settings.type_nav_caps %} caps{% endif %}" {{ highlight_style }}>
+  <nav class="header__menu header__menu--left{% if settings.type_nav_caps %} caps{% endif %}" {{ highlight_style }}>
     {%- for link in linklists[main_menu_linklist].links -%}
       {%- render 'nav-item', link: link, index: forloop.index, highlight_item: highlight_item -%}
     {%- endfor -%}
@@ -512,6 +515,7 @@
     role="banner"
     data-header-height
     data-aos="fade"
+    data-header-desktop
   >
     {%- if toolbar != blank -%}
       {{ toolbar }}
@@ -630,6 +634,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     const initMenuImages = () => {
       const images = Array.from(document.querySelectorAll('.tmenu_collection > img'))
+      if (!images.length) return
       if (images.length > 1) {
         images.slice(1).forEach((img) => img.classList.add('hide-menu-image'))
       }
@@ -659,34 +664,72 @@
       })
     }
 
+    const setHeaderOverlay = (enable) => {
+      const header = document.querySelector('[data-header-desktop]')
+      if (!header) return
+      if (enable) {
+        header.style.backgroundColor = '#377d71cc'
+      } else {
+        header.style.backgroundColor = ''
+      }
+    }
+
     const rootSelector = '.tmenu_item.tmenu_item--root.tmenu_item_level_0.tmenu_item_submenu_type_mega'
     let initialized = false
 
-    const runOnce = () => {
-      if (initialized) return
-      initialized = true
+    const applyMenuOpenStyles = () => {
       initMenuImages()
+      setHeaderOverlay(true)
     }
 
     const observeRoot = (root) => {
-      const rootObserver = new MutationObserver(() => runOnce())
-      rootObserver.observe(root, { childList: true, subtree: true })
+      const isActive = (node) =>
+        node instanceof HTMLElement &&
+        (node.classList.contains('tmenu_item_active') || node.closest('.tmenu_item_active'))
+
+      let lastActive = false
+
+      const handleMutations = (mutations) => {
+        if (!initialized) {
+          initialized = true
+          applyMenuOpenStyles()
+        }
+
+        const activeNow = mutations.some((m) => {
+          if (isActive(m.target)) return true
+          if (Array.from(m.addedNodes || []).some(isActive)) return true
+          if (m.type === 'attributes' && m.target instanceof HTMLElement && isActive(m.target)) return true
+          return false
+        })
+
+        if (activeNow && !lastActive) {
+          applyMenuOpenStyles()
+        } else if (!activeNow && lastActive) {
+          setHeaderOverlay(false)
+        }
+
+        lastActive = activeNow
+      }
+
+      new MutationObserver(handleMutations).observe(root, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class']
+      })
     }
 
-    const rootItem = document.querySelector(rootSelector)
-    if (rootItem) {
-      observeRoot(rootItem)
-      return
+    const rootItems = Array.from(document.querySelectorAll(rootSelector))
+    if (rootItems.length) {
+      rootItems.forEach(observeRoot)
+    } else {
+      new MutationObserver((mutations, observer) => {
+        const foundRoots = Array.from(document.querySelectorAll(rootSelector))
+        if (!foundRoots.length) return
+        observer.disconnect()
+        foundRoots.forEach(observeRoot)
+      }).observe(document.body, { childList: true, subtree: true })
     }
-
-    const bodyObserver = new MutationObserver(() => {
-      const foundRoot = document.querySelector(rootSelector)
-      if (!foundRoot) return
-      bodyObserver.disconnect()
-      observeRoot(foundRoot)
-    })
-
-    bodyObserver.observe(document.body, { childList: true, subtree: true })
 
     // interaction observer to change menu items color based on background (only for desktop)
     //get luminance
@@ -719,6 +762,7 @@
       return [255, 255, 255]; // fallback
     }
 
+    // header observer function for the light/dark switching based on the background of the section in view
     const initHeaderObserver = () => {
       const headerDesktops = Array.from(document.querySelectorAll('.header__desktop'));
       const logoLinks = Array.from(
@@ -727,7 +771,7 @@
       const transparentImages = Array.from(document.querySelectorAll('.logo__img.logo__img--transparent'));
       const isDesktopViewport = window.matchMedia('(min-width: 750px)').matches;
 
-    if (!(headerDesktops.length && logoLinks.length && isDesktopViewport)) {
+      if (!(headerDesktops.length && logoLinks.length && isDesktopViewport)) {
         return;
       }
 
@@ -799,6 +843,7 @@
       const sectionsToObserve = Array.from(
         document.querySelectorAll('section, .shopify-section, [data-section-id]')
       );
+
       if (sectionsToObserve.length) {
         const intersectionObserver = new IntersectionObserver(
           entries => {
@@ -812,7 +857,7 @@
           },
           {
             // Trigger near the top: shrink the root so entries intersect when their
-            // top approaches the top 15% of the viewport.
+            // top approaches the top 10% of the viewport.
             rootMargin: '-10% 0px -90% 0px'
           }
         );
