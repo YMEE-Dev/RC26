@@ -631,6 +631,7 @@
 {%- endif -%}
 
 {% javascript %}
+  // custom menu logics
   document.addEventListener('DOMContentLoaded', () => {
     const initMenuImages = () => {
       const images = Array.from(document.querySelectorAll('.tmenu_collection > img'))
@@ -666,11 +667,14 @@
 
     const setHeaderOverlay = (enable) => {
       const header = document.querySelector('[data-header-desktop]')
+      const logo = document.querySelector('.header__desktop .header__logo__link')
       if (!header) return
       if (enable) {
         header.style.backgroundColor = '#377d71cc'
+        logo.style.filter = 'opacity(40%)'
       } else {
         header.style.backgroundColor = ''
+        logo.style.filter = ''
       }
     }
 
@@ -683,10 +687,6 @@
     }
 
     const observeRoot = (root) => {
-      const isActive = (node) =>
-        node instanceof HTMLElement &&
-        (node.classList.contains('tmenu_item_active') || node.closest('.tmenu_item_active'))
-
       let lastActive = false
 
       const handleMutations = (mutations) => {
@@ -695,12 +695,7 @@
           applyMenuOpenStyles()
         }
 
-        const activeNow = mutations.some((m) => {
-          if (isActive(m.target)) return true
-          if (Array.from(m.addedNodes || []).some(isActive)) return true
-          if (m.type === 'attributes' && m.target instanceof HTMLElement && isActive(m.target)) return true
-          return false
-        })
+        const activeNow = Boolean(document.querySelector('.tmenu_item_active'))
 
         if (activeNow && !lastActive) {
           applyMenuOpenStyles()
