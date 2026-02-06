@@ -42,13 +42,15 @@
   assign secondary_menu_linklist = section.settings.secondary_menu_linklist
 
   assign logo_variant = section.settings.logo_variant | default: 'light'
-  assign logo_asset = 'RC_LOGO_light.svg'
+  assign logo_light_asset = 'RC_LOGO_light.svg'
+  assign logo_dark_asset = 'RC_LOGO_dark.svg'
+  assign logo_asset = logo_light_asset
   assign logo_denom = 814 | divided_by: 76
-  assign transparent_logo_asset = 'RC_LOGO_dark.svg'
+  assign transparent_logo_asset = logo_dark_asset
   if logo_variant == 'dark'
-    assign logo_asset = 'RC_LOGO_dark.svg'
+    assign logo_asset = logo_dark_asset
     assign logo_denom = 800 | divided_by: 74
-    assign transparent_logo_asset = 'RC_LOGO_light.svg'
+    assign transparent_logo_asset = logo_light_asset
   endif
   assign transparent_logo_pdp = section.settings.transparent_logo_pdp
   assign use_transparent_logo_pdp = false
@@ -209,7 +211,14 @@
     {%- assign has_transparent_logo = true -%}
   {%- endif -%}
   <div class="header__logo header__logo--image{% if has_transparent_logo %} header__logo--has-transparent{% endif %}">
-    <a class="header__logo__link" href="{{ routes.root_url }}" data-logo-link>
+    <a
+      class="header__logo__link"
+      href="{{ routes.root_url }}"
+      data-logo-link
+      data-logo-light="{{ logo_light_asset | asset_url }}"
+      data-logo-dark="{{ logo_dark_asset | asset_url }}"
+      data-logo-default="{{ logo_variant }}"
+    >
       {%- if logo_asset != blank -%}
         {%- assign logo_alt = shop.name | strip_html | escape -%}
         <img
@@ -678,6 +687,143 @@
     })
 
     bodyObserver.observe(document.body, { childList: true, subtree: true })
+
+    // interaction observer to change menu items color based on background (only for desktop)
+    //get luminance
+    function getLuminance(rgb) {
+      const [r, g, b] = rgb.map(v => {
+        v /= 255;
+        return v <= 0.03928
+          ? v / 12.92
+          : Math.pow((v + 0.055) / 1.055, 2.4);
+      });
+
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    }
+
+    // get the background color
+    function getBackgroundRGB(element) {
+      let el = element;
+
+      while (el && el !== document.documentElement) {
+        const bg = getComputedStyle(el).backgroundColor;
+
+        if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") {
+          const match = bg.match(/\d+/g);
+          if (match) return match.map(Number);
+        }
+
+        el = el.parentElement;
+      }
+
+      return [255, 255, 255]; // fallback
+    }
+
+    const initHeaderObserver = () => {
+      const headerDesktops = Array.from(document.querySelectorAll('.header__desktop'));
+      const logoLinks = Array.from(
+        document.querySelectorAll('.header__logo__link[data-logo-light][data-logo-dark]')
+      );
+      const transparentImages = Array.from(document.querySelectorAll('.logo__img.logo__img--transparent'));
+      const isDesktopViewport = window.matchMedia('(min-width: 750px)').matches;
+
+    if (!(headerDesktops.length && logoLinks.length && isDesktopViewport)) {
+        return;
+      }
+
+      const rootStyles = getComputedStyle(document.documentElement);
+      const getCssVariable = (name, fallback) => {
+        const value = rootStyles.getPropertyValue(name).trim();
+        return value || fallback;
+      };
+      const colors = {
+        light: {
+          link: getCssVariable('--COLOR-MENU-TRANSPARENT', '#fff'),
+          hover: getCssVariable(
+            '--COLOR-MENU-TRANSPARENT-HOVER',
+            getCssVariable('--COLOR-MENU-TRANSPARENT', '#fff')
+          )
+        },
+        dark: {
+          link: getCssVariable('--COLOR-HEADER-LINK', '#111'),
+          hover: getCssVariable(
+            '--COLOR-HEADER-LINK-HOVER',
+            getCssVariable('--COLOR-HEADER-LINK', '#111')
+          )
+        }
+      };
+
+      const logoLightUrl = logoLinks[0].dataset.logoLight;
+      const logoDarkUrl = logoLinks[0].dataset.logoDark;
+
+      const setHeaderColors = (mode) => {
+        const resolvedMode = mode === 'light' ? 'light' : 'dark';
+        const colorSet = colors[resolvedMode];
+        headerDesktops.forEach(desktop => {
+          desktop.style.setProperty('--link', colorSet.link);
+          desktop.style.setProperty('--link-hover', colorSet.hover);
+        });
+      };
+
+      const setLogoSource = (mode) => {
+        const logoUrl = mode === 'light' ? logoLightUrl : logoDarkUrl;
+        if (!logoUrl) return;
+
+        logoLinks.forEach(link => {
+          const img = link.querySelector('.logo__img.logo__img--color');
+          if (!img) return;
+          if (img.getAttribute('src') === logoUrl) return;
+          img.setAttribute('src', logoUrl);
+        });
+        transparentImages.forEach(img => {
+          if (img.getAttribute('src') === logoUrl) return;
+          img.setAttribute('src', logoUrl);
+        });
+      };
+
+      const defaultModeRaw = logoLinks[0].dataset.logoDefault;
+      const defaultMode = defaultModeRaw ? defaultModeRaw.trim() : 'light';
+      let currentMode = defaultMode === 'light' ? 'light' : 'dark';
+
+      const applyMode = (mode) => {
+        const resolvedMode = mode === 'light' ? 'light' : 'dark';
+        if (currentMode === resolvedMode) return;
+        currentMode = resolvedMode;
+        setHeaderColors(currentMode);
+        setLogoSource(currentMode);
+      };
+
+      setHeaderColors(currentMode);
+      setLogoSource(currentMode);
+
+      const sectionsToObserve = Array.from(
+        document.querySelectorAll('section, .shopify-section, [data-section-id]')
+      );
+      if (sectionsToObserve.length) {
+        const intersectionObserver = new IntersectionObserver(
+          entries => {
+            entries.forEach(entry => {
+              if (!entry.isIntersecting) return;
+              const rgb = getBackgroundRGB(entry.target);
+              const luminance = getLuminance(rgb);
+              const mode = luminance < 0.5 ? 'light' : 'dark';
+              applyMode(mode);
+            });
+          },
+          {
+            // Trigger near the top: shrink the root so entries intersect when their
+            // top approaches the top 15% of the viewport.
+            rootMargin: '-10% 0px -90% 0px'
+          }
+        );
+
+        sectionsToObserve.forEach(section => intersectionObserver.observe(section));
+      }
+    };
+
+    // Run now and on load (in case DOMContentLoaded fired before sections render)
+    initHeaderObserver();
+    window.addEventListener('load', initHeaderObserver, { once: true });
   })
 {% endjavascript %}
 
