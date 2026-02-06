@@ -633,74 +633,63 @@
 {% javascript %}
   // custom menu logics
   document.addEventListener('DOMContentLoaded', () => {
-    // header bars scroll animation (desktop only)
+    /* Helpers */
+    const selectAll = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel))
     const isDesktop = () => window.matchMedia('(min-width: 750px)').matches
+
+    /* Scroll animation */
     let lastY = window.scrollY
     let ticking = false
-
-    const handleScroll = () => {
+    const toggleHeaderHide = () => {
       if (!isDesktop()) {
         document.body.classList.remove('header-scroll-hide')
         lastY = window.scrollY
         return
       }
-
       const currentY = window.scrollY
       const atTop = currentY <= 0
       const goingDown = currentY > lastY + 1
       const goingUp = currentY < lastY - 1
-
       if (atTop || goingUp) {
         document.body.classList.remove('header-scroll-hide')
       } else if (goingDown) {
         document.body.classList.add('header-scroll-hide')
       }
-
       lastY = currentY
     }
+    window.addEventListener('scroll', () => {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        toggleHeaderHide()
+        ticking = false
+      })
+    }, { passive: true })
 
-    window.addEventListener(
-      'scroll',
-      () => {
-        if (ticking) return
-        ticking = true
-        requestAnimationFrame(() => {
-          handleScroll()
-          ticking = false
-        })
-      },
-      { passive: true }
-    )
-
+    /* Menu images + overlay */
     const initMenuImages = () => {
-      const images = Array.from(document.querySelectorAll('.tmenu_collection > img'))
+      const images = selectAll('.tmenu_collection > img')
       if (!images.length) return
-      if (images.length > 1) {
-        images.slice(1).forEach((img) => img.classList.add('hide-menu-image'))
-      }
+      if (images.length > 1) images.slice(1).forEach(img => img.classList.add('hide-menu-image'))
 
-      const links = document.querySelectorAll('a.tmenu_item_link.tmenu_item_content_alignment_right')
-      if (!links.length || !images.length) return
+      const links = selectAll('a.tmenu_item_link.tmenu_item_content_alignment_right')
+      if (!links.length) return
 
       const imageByAlt = new Map()
-      images.forEach((img) => {
+      images.forEach(img => {
         const alt = img.getAttribute('alt') || ''
         if (alt) imageByAlt.set(alt.trim(), img)
       })
 
       const showImageForTitle = (title) => {
-        images.forEach((img) => img.classList.add('hide-menu-image'))
+        images.forEach(img => img.classList.add('hide-menu-image'))
         const match = imageByAlt.get((title || '').trim())
         if (match) match.classList.remove('hide-menu-image')
       }
 
-      links.forEach((link) => {
-        link.addEventListener('mouseenter', () => {
-          showImageForTitle(link.textContent)
-        })
-        link.addEventListener('focus', () => {
-          showImageForTitle(link.textContent)
-        })
+      links.forEach(link => {
+        link.addEventListener('mouseenter', () => showImageForTitle(link.textContent))
+        link.addEventListener('focus', () => showImageForTitle(link.textContent))
       })
     }
 
@@ -708,13 +697,8 @@
       const header = document.querySelector('[data-header-desktop]')
       const logo = document.querySelector('.header__desktop .header__logo__link')
       if (!header) return
-      if (enable) {
-        header.style.backgroundColor = '#377d71cc'
-        logo.style.filter = 'opacity(40%)'
-      } else {
-        header.style.backgroundColor = ''
-        logo.style.filter = ''
-      }
+      header.style.backgroundColor = enable ? '#377d71cc' : ''
+      if (logo) logo.style.filter = enable ? 'opacity(40%)' : ''
     }
 
     const rootSelector = '.tmenu_item.tmenu_item--root.tmenu_item_level_0.tmenu_item_submenu_type_mega'
@@ -727,24 +711,16 @@
 
     const observeRoot = (root) => {
       let lastActive = false
-
-      const handleMutations = (mutations) => {
+      const handleMutations = () => {
         if (!initialized) {
           initialized = true
           applyMenuOpenStyles()
         }
-
         const activeNow = Boolean(document.querySelector('.tmenu_item_active'))
-
-        if (activeNow && !lastActive) {
-          applyMenuOpenStyles()
-        } else if (!activeNow && lastActive) {
-          setHeaderOverlay(false)
-        }
-
+        if (activeNow && !lastActive) applyMenuOpenStyles()
+        else if (!activeNow && lastActive) setHeaderOverlay(false)
         lastActive = activeNow
       }
-
       new MutationObserver(handleMutations).observe(root, {
         childList: true,
         subtree: true,
@@ -753,156 +729,116 @@
       })
     }
 
-    const rootItems = Array.from(document.querySelectorAll(rootSelector))
-    if (rootItems.length) {
-      rootItems.forEach(observeRoot)
+    const roots = selectAll(rootSelector)
+    if (roots.length) {
+      roots.forEach(observeRoot)
     } else {
-      new MutationObserver((mutations, observer) => {
-        const foundRoots = Array.from(document.querySelectorAll(rootSelector))
-        if (!foundRoots.length) return
+      new MutationObserver((_, observer) => {
+        const found = selectAll(rootSelector)
+        if (!found.length) return
         observer.disconnect()
-        foundRoots.forEach(observeRoot)
+        found.forEach(observeRoot)
       }).observe(document.body, { childList: true, subtree: true })
     }
 
-    // interaction observer to change menu items color based on background (only for desktop)
-    //get luminance
-    function getLuminance(rgb) {
+    /* Header light/dark switcher */
+    const getLuminance = (rgb) => {
       const [r, g, b] = rgb.map(v => {
-        v /= 255;
-        return v <= 0.03928
-          ? v / 12.92
-          : Math.pow((v + 0.055) / 1.055, 2.4);
-      });
-
-      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        const n = v / 255
+        return n <= 0.03928 ? n / 12.92 : Math.pow((n + 0.055) / 1.055, 2.4)
+      })
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b
     }
 
-    // get the background color
-    function getBackgroundRGB(element) {
-      let el = element;
-
+    const getBackgroundRGB = (element) => {
+      let el = element
       while (el && el !== document.documentElement) {
-        const bg = getComputedStyle(el).backgroundColor;
-
-        if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") {
-          const match = bg.match(/\d+/g);
-          if (match) return match.map(Number);
+        const bg = getComputedStyle(el).backgroundColor
+        if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+          const match = bg.match(/\d+/g)
+          if (match) return match.map(Number)
         }
-
-        el = el.parentElement;
+        el = el.parentElement
       }
-
-      return [255, 255, 255]; // fallback
+      return [255, 255, 255]
     }
 
-    // header observer function for the light/dark switching based on the background of the section in view
     const initHeaderObserver = () => {
-      const headerDesktops = Array.from(document.querySelectorAll('.header__desktop'));
-      const logoLinks = Array.from(
-        document.querySelectorAll('.header__logo__link[data-logo-light][data-logo-dark]')
-      );
-      const transparentImages = Array.from(document.querySelectorAll('.logo__img.logo__img--transparent'));
-      const isDesktopViewport = window.matchMedia('(min-width: 750px)').matches;
+      const headerDesktops = selectAll('.header__desktop')
+      const logoLinks = selectAll('.header__logo__link[data-logo-light][data-logo-dark]')
+      const transparentImages = selectAll('.logo__img.logo__img--transparent')
+      if (!(headerDesktops.length && logoLinks.length && isDesktop())) return
 
-      if (!(headerDesktops.length && logoLinks.length && isDesktopViewport)) {
-        return;
-      }
-
-      const rootStyles = getComputedStyle(document.documentElement);
+      const rootStyles = getComputedStyle(document.documentElement)
       const getCssVariable = (name, fallback) => {
-        const value = rootStyles.getPropertyValue(name).trim();
-        return value || fallback;
-      };
+        const value = rootStyles.getPropertyValue(name).trim()
+        return value || fallback
+      }
       const colors = {
         light: {
           link: getCssVariable('--COLOR-MENU-TRANSPARENT', '#fff'),
-          hover: getCssVariable(
-            '--COLOR-MENU-TRANSPARENT-HOVER',
-            getCssVariable('--COLOR-MENU-TRANSPARENT', '#fff')
-          )
+          hover: getCssVariable('--COLOR-MENU-TRANSPARENT-HOVER', getCssVariable('--COLOR-MENU-TRANSPARENT', '#fff'))
         },
         dark: {
           link: getCssVariable('--COLOR-HEADER-LINK', '#111'),
-          hover: getCssVariable(
-            '--COLOR-HEADER-LINK-HOVER',
-            getCssVariable('--COLOR-HEADER-LINK', '#111')
-          )
+          hover: getCssVariable('--COLOR-HEADER-LINK-HOVER', getCssVariable('--COLOR-HEADER-LINK', '#111'))
         }
-      };
+      }
 
-      const logoLightUrl = logoLinks[0].dataset.logoLight;
-      const logoDarkUrl = logoLinks[0].dataset.logoDark;
+      const logoLightUrl = logoLinks[0].dataset.logoLight
+      const logoDarkUrl = logoLinks[0].dataset.logoDark
 
       const setHeaderColors = (mode) => {
-        const resolvedMode = mode === 'light' ? 'light' : 'dark';
-        const colorSet = colors[resolvedMode];
+        const colorSet = colors[mode === 'light' ? 'light' : 'dark']
         headerDesktops.forEach(desktop => {
-          desktop.style.setProperty('--link', colorSet.link);
-          desktop.style.setProperty('--link-hover', colorSet.hover);
-        });
-      };
+          desktop.style.setProperty('--link', colorSet.link)
+          desktop.style.setProperty('--link-hover', colorSet.hover)
+        })
+      }
 
       const setLogoSource = (mode) => {
-        const logoUrl = mode === 'light' ? logoLightUrl : logoDarkUrl;
-        if (!logoUrl) return;
-
+        const logoUrl = mode === 'light' ? logoLightUrl : logoDarkUrl
+        if (!logoUrl) return
         logoLinks.forEach(link => {
-          const img = link.querySelector('.logo__img.logo__img--color');
-          if (!img) return;
-          if (img.getAttribute('src') === logoUrl) return;
-          img.setAttribute('src', logoUrl);
-        });
+          const img = link.querySelector('.logo__img.logo__img--color')
+          if (img && img.getAttribute('src') !== logoUrl) img.setAttribute('src', logoUrl)
+        })
         transparentImages.forEach(img => {
-          if (img.getAttribute('src') === logoUrl) return;
-          img.setAttribute('src', logoUrl);
-        });
-      };
-
-      const defaultModeRaw = logoLinks[0].dataset.logoDefault;
-      const defaultMode = defaultModeRaw ? defaultModeRaw.trim() : 'light';
-      let currentMode = defaultMode === 'light' ? 'light' : 'dark';
-
-      const applyMode = (mode) => {
-        const resolvedMode = mode === 'light' ? 'light' : 'dark';
-        if (currentMode === resolvedMode) return;
-        currentMode = resolvedMode;
-        setHeaderColors(currentMode);
-        setLogoSource(currentMode);
-      };
-
-      setHeaderColors(currentMode);
-      setLogoSource(currentMode);
-
-      const sectionsToObserve = Array.from(
-        document.querySelectorAll('section, .shopify-section, [data-section-id]')
-      );
-
-      if (sectionsToObserve.length) {
-        const intersectionObserver = new IntersectionObserver(
-          entries => {
-            entries.forEach(entry => {
-              if (!entry.isIntersecting) return;
-              const rgb = getBackgroundRGB(entry.target);
-              const luminance = getLuminance(rgb);
-              const mode = luminance < 0.5 ? 'light' : 'dark';
-              applyMode(mode);
-            });
-          },
-          {
-            // Trigger near the top: shrink the root so entries intersect when their
-            // top approaches the top 10% of the viewport.
-            rootMargin: '-10% 0px -90% 0px'
-          }
-        );
-
-        sectionsToObserve.forEach(section => intersectionObserver.observe(section));
+          if (img.getAttribute('src') !== logoUrl) img.setAttribute('src', logoUrl)
+        })
       }
-    };
 
-    // Run now and on load (in case DOMContentLoaded fired before sections render)
-    initHeaderObserver();
-    window.addEventListener('load', initHeaderObserver, { once: true });
+      const defaultMode = (logoLinks[0].dataset.logoDefault || 'light').trim() === 'light' ? 'light' : 'dark'
+      let currentMode = defaultMode
+      const applyMode = (mode) => {
+        const resolved = mode === 'light' ? 'light' : 'dark'
+        if (resolved === currentMode) return
+        currentMode = resolved
+        setHeaderColors(currentMode)
+        setLogoSource(currentMode)
+      }
+
+      setHeaderColors(currentMode)
+      setLogoSource(currentMode)
+
+      const sectionsToObserve = selectAll('section, .shopify-section, [data-section-id]')
+      if (!sectionsToObserve.length) return
+
+      const intersectionObserver = new IntersectionObserver(
+        entries => {
+          entries.forEach(entry => {
+            if (!entry.isIntersecting) return
+            const luminance = getLuminance(getBackgroundRGB(entry.target))
+            applyMode(luminance < 0.5 ? 'light' : 'dark')
+          })
+        },
+        { rootMargin: '-10% 0px -90% 0px' }
+      )
+      sectionsToObserve.forEach(section => intersectionObserver.observe(section))
+    }
+
+    initHeaderObserver()
+    window.addEventListener('load', initHeaderObserver, { once: true })
   })
 {% endjavascript %}
 
