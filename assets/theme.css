@@ -6755,6 +6755,21 @@ body:has([data-header-transparent]) .header__mobile__bottom {
   align-self: stretch;
   min-width: 0;
   z-index: 999;
+  transition-duration: 0.3s !important;
+  transition-timing-function: ease-in;
+  transition-property: transform;
+}
+
+body.header-scroll-hide .header__desktop__bar__c {
+  transform: translateX(-110%);
+}
+
+body.header-scroll-hide .header__desktop__bar__l {
+  transform: translateY(-200%);
+}
+
+body.header-scroll-hide .header__desktop__bar__r {
+  transform: translateX(110%);
 }
 
 .header__desktop__bar__l {

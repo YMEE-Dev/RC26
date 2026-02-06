@@ -633,6 +633,45 @@
 {% javascript %}
   // custom menu logics
   document.addEventListener('DOMContentLoaded', () => {
+    // header bars scroll animation (desktop only)
+    const isDesktop = () => window.matchMedia('(min-width: 750px)').matches
+    let lastY = window.scrollY
+    let ticking = false
+
+    const handleScroll = () => {
+      if (!isDesktop()) {
+        document.body.classList.remove('header-scroll-hide')
+        lastY = window.scrollY
+        return
+      }
+
+      const currentY = window.scrollY
+      const atTop = currentY <= 0
+      const goingDown = currentY > lastY + 1
+      const goingUp = currentY < lastY - 1
+
+      if (atTop || goingUp) {
+        document.body.classList.remove('header-scroll-hide')
+      } else if (goingDown) {
+        document.body.classList.add('header-scroll-hide')
+      }
+
+      lastY = currentY
+    }
+
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (ticking) return
+        ticking = true
+        requestAnimationFrame(() => {
+          handleScroll()
+          ticking = false
+        })
+      },
+      { passive: true }
+    )
+
     const initMenuImages = () => {
       const images = Array.from(document.querySelectorAll('.tmenu_collection > img'))
       if (!images.length) return
