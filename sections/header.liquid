@@ -702,16 +702,11 @@
       })
     }
 
-    const setHeaderOverlay = () => {
-      /* overlay now handled by CSS :has selector for active mega menu items */
-    }
-
     const rootSelector = '.tmenu_item.tmenu_item--root.tmenu_item_level_0.tmenu_item_submenu_type_mega'
     let initialized = false
 
     const applyMenuOpenStyles = () => {
       initMenuImages()
-      setHeaderOverlay(true)
     }
 
     const observeRoot = (root) => {
@@ -723,7 +718,6 @@
         }
         const activeNow = Boolean(document.querySelector('.tmenu_item_active'))
         if (activeNow && !lastActive) applyMenuOpenStyles()
-        else if (!activeNow && lastActive) setHeaderOverlay(false)
         lastActive = activeNow
       }
       new MutationObserver(handleMutations).observe(root, {

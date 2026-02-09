@@ -7761,7 +7761,7 @@ body.header-scroll-hide .header__desktop__bar__r {
 .header__desktop__bar__r {
   order: 3;
   justify-content: flex-end;
-  align-items: center;
+  align-items: flex-start;
 }
 
 /* Apply overlay when a mega menu item is active (uses :has, supported in modern evergreen browsers) */
@@ -7769,9 +7769,32 @@ body.header-scroll-hide .header__desktop__bar__r {
 [data-header-desktop]:has(.tmenu_item.tmenu_item_active) {
   background-color: #377d71cc;
 }
+
 [data-header-desktop]:has(.tmenu_nav.tmenu_item_has_child.tmenu_item_active) .header__logo__link,
 [data-header-desktop]:has(.tmenu_item.tmenu_item_active) .header__logo__link {
   filter: opacity(40%);
+}
+
+/* Dim sibling root items when one is active */
+.header__menu.header__menu--right a.navlink:hover,
+.tmenu_item--root.tmenu_item_level_0:not(.tmenu_item_has_child):hover,
+.tmenu_nav:has(.tmenu_item--root.tmenu_item_level_0.tmenu_item_active) .tmenu_item--root.tmenu_item_level_0:not(.tmenu_item_active) {
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+
+.tmenu_item--root.tmenu_item_level_0.tmenu_item_active {
+  opacity: 1;
+}
+
+/* Dim right-side header menu links when a root mega item is active */
+[data-header-desktop]:has(.tmenu_item--root.tmenu_item_level_0.tmenu_item_active) .header__menu.header__menu--right .navlink:not(.tmenu_item_active) {
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+
+[data-header-desktop]:has(.tmenu_item--root.tmenu_item_level_0.tmenu_item_active) .header__menu.header__menu--right .navlink.tmenu_item_active {
+  opacity: 1;
 }
 
 .header__desktop__buttons {
@@ -8248,7 +8271,9 @@ body:not(.has-line-design) .header__dropdown {
   letter-spacing: 1.2px;
 }
 
-
+.header__menu.header__menu--right>.navlink:hover {
+  color: var(--link-hover) !important;
+}
 
 /* ============================================================================
   #Large Meganav
