@@ -676,12 +676,23 @@
     }, { passive: true })
 
     /* Menu images + overlay */
-    const initMenuImages = () => {
-      const images = selectAll('.tmenu_collection > img')
-      if (!images.length) return
-      if (images.length > 1) images.slice(1).forEach(img => img.classList.add('hide-menu-image'))
+    let currentImage = null
 
-      const links = selectAll('a.tmenu_item_link.tmenu_item_content_alignment_right')
+    const initMenuImages = () => {
+      const images = selectAll('.tmenu_collection--notext > img')
+      if (!images.length) return
+      if (!currentImage || images.includes(currentImage) === false) {
+        currentImage = images[0]
+      }
+      images.forEach(img => {
+        if (img === currentImage) {
+          img.classList.remove('hide-menu-image')
+        } else {
+          img.classList.add('hide-menu-image')
+        }
+      })
+
+      const links = selectAll('.tmenu_item_layout_collection a.tmenu_item_link.tmenu_item_content_alignment_right')
       if (!links.length) return
 
       const imageByAlt = new Map()
@@ -691,9 +702,15 @@
       })
 
       const showImageForTitle = (title) => {
-        images.forEach(img => img.classList.add('hide-menu-image'))
         const match = imageByAlt.get((title || '').trim())
-        if (match) match.classList.remove('hide-menu-image')
+        if (match) {
+          images.forEach(img => img.classList.add('hide-menu-image'))
+          match.classList.remove('hide-menu-image')
+          currentImage = match
+        } else if (currentImage) {
+          // keep last shown image visible when there's no match for the hovered link
+          currentImage.classList.remove('hide-menu-image')
+        }
       }
 
       links.forEach(link => {
