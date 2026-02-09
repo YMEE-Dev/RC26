@@ -439,10 +439,10 @@
   {%- if right_menu_linklist != blank and linklists[right_menu_linklist].links.size > 0 -%}
     <nav class="header__menu header__menu--right{% if settings.type_nav_caps %} caps{% endif %}">
       {%- for link in linklists[right_menu_linklist].links -%}
-        {%- render 'nav-item', link: link, index: forloop.index, highlight_item: blank -%}
+        <a class="navlink" href="{{ link.url }}">
+          <span class="navtext">{{ link.title }}</span>
+        </a>
       {%- endfor -%}
-      <div class="hover__bar"></div>
-      <div class="hover__bg"></div>
     </nav>
   {%- endif -%}
 
