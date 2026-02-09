@@ -40,6 +40,7 @@
 
   assign main_menu_linklist = section.settings.main_menu_linklist | default: 'main-menu'
   assign secondary_menu_linklist = section.settings.secondary_menu_linklist
+  assign right_menu_linklist = section.settings.right_menu_linklist
 
   assign logo_variant = section.settings.logo_variant | default: 'light'
   assign logo_light_asset = 'RC_LOGO_light.svg'
@@ -434,8 +435,16 @@
 {%- endcapture -%}
 
 {%- capture buttons -%}
-  {% comment %} the right menu will go here instead of the account icon {% endcomment %}
-  <nav class="header__menu--right"></nav>
+  {% comment %} optional right-side desktop menu {% endcomment %}
+  {%- if right_menu_linklist != blank and linklists[right_menu_linklist].links.size > 0 -%}
+    <nav class="header__menu header__menu--right{% if settings.type_nav_caps %} caps{% endif %}">
+      {%- for link in linklists[right_menu_linklist].links -%}
+        {%- render 'nav-item', link: link, index: forloop.index, highlight_item: blank -%}
+      {%- endfor -%}
+      <div class="hover__bar"></div>
+      <div class="hover__bg"></div>
+    </nav>
+  {%- endif -%}
 
   <div class="header__desktop__buttons{% if show_icons == false %} header__desktop__buttons--text{% else %} header__desktop__buttons--icons{% endif %}{% if settings.type_nav_caps %} caps{% endif %}">
     {%- if section.settings.header_style != 'logo_above' -%}
@@ -526,7 +535,7 @@
         {{ minimal }}
       </div>
 
-      <div class="header__desktop" data-header-desktop>
+      <div class="header__desktop">
         {%- case section.settings.header_style -%}
           {%- when 'logo_beside' -%}
             <div class="header__desktop__upper" data-takes-space-wrapper>
@@ -693,12 +702,30 @@
       })
     }
 
+    let overlayHideTimeout = null
     const setHeaderOverlay = (enable) => {
+      if (overlayHideTimeout) {
+        clearTimeout(overlayHideTimeout)
+        overlayHideTimeout = null
+      }
+
       const header = document.querySelector('[data-header-desktop]')
-      const logo = document.querySelector('.header__desktop .header__logo__link')
+      const logos = selectAll('.header__desktop .header__logo__link')
       if (!header) return
-      header.style.backgroundColor = enable ? '#377d71cc' : ''
-      if (logo) logo.style.filter = enable ? 'opacity(40%)' : ''
+
+      const applyOverlay = (state) => {
+        header.style.backgroundColor = state ? '#377d71cc' : ''
+        header.classList.toggle('menu-open', state)
+        logos.forEach(logo => {
+          logo.style.filter = state ? 'opacity(40%)' : ''
+        })
+      }
+
+      if (enable) {
+        applyOverlay(true)
+      } else {
+        overlayHideTimeout = setTimeout(() => applyOverlay(false), 120)
+      }
     }
 
     const rootSelector = '.tmenu_item.tmenu_item--root.tmenu_item_level_0.tmenu_item_submenu_type_mega'
@@ -947,6 +974,12 @@
       "type": "link_list",
       "label": "Main menu",
       "id": "main_menu_linklist"
+    },
+    {
+      "type": "link_list",
+      "label": "Right menu (desktop)",
+      "id": "right_menu_linklist",
+      "info": "Optional menu displayed on the right side of the desktop header."
     },
     {
       "type": "checkbox",

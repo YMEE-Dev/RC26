@@ -79,7 +79,7 @@ header[data-header-desktop] {
   transition-property: all !important;
 }
 
-@media only screen and (min-width: 750px) {
+@media only screen and (min-width: 1399px) {
   header[data-header-desktop] {
     height: 150px !important;
   }
@@ -114,7 +114,11 @@ header[data-header-desktop] {
   opacity: 1;
 }
 
-.tmenu_item_active~.tmenu_item {
+.tmenu_nav .tmenu_item_has_child {
+  opacity: 1;
+}
+
+.menu-open .tmenu_item--root.tmenu_item_level_0:not(.tmenu_item_active)>.tmenu_item_link {
   opacity: 0.2;
   transition: opacity 250ms cubic-bezier(0.75, 0.00, 0.25, 1);
 }
