@@ -7764,6 +7764,16 @@ body.header-scroll-hide .header__desktop__bar__r {
   align-items: center;
 }
 
+/* Apply overlay when a mega menu item is active (uses :has, supported in modern evergreen browsers) */
+[data-header-desktop]:has(.tmenu_nav.tmenu_item_has_child.tmenu_item_active),
+[data-header-desktop]:has(.tmenu_item.tmenu_item_active) {
+  background-color: #377d71cc;
+}
+[data-header-desktop]:has(.tmenu_nav.tmenu_item_has_child.tmenu_item_active) .header__logo__link,
+[data-header-desktop]:has(.tmenu_item.tmenu_item_active) .header__logo__link {
+  filter: opacity(40%);
+}
+
 .header__desktop__buttons {
   display: flex;
   align-items: center;
