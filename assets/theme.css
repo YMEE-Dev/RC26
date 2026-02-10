@@ -4611,13 +4611,11 @@ details[disabled] [data-collapsible-body] {
 .h3,
 .h4,
 .h5,
-.h6,
 h1,
 h2,
 h3,
 h4,
 h5,
-h6,
 .article__author-bio h3,
 .blog-section .article__image .article__tags {
   font-family: var(--FONT-STACK-HEADING);
@@ -4666,6 +4664,9 @@ h6,
 .blog-section .article__image .article__tags {
   font-size: var(--FONT-TITLE);
   line-height: var(--LINE-HEIGHT-TITLE);
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: 1.6px;
 }
 
 .navlink {
@@ -7528,8 +7529,15 @@ body:has([data-header-transparent]) .header__mobile__bottom {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
+  gap: 24px;
   min-height: 46px;
   width: 100%;
+}
+
+.header__logo__meta {
+  display: flex;
+  flex-direction: row;
 }
 
 .header__logo__link {
@@ -7545,6 +7553,10 @@ body:has([data-header-transparent]) .header__mobile__bottom {
 
 .header__logo--image .header__logo__link {
   padding-bottom: var(--logo-padding);
+}
+
+.header__logo--image.header__logo--small .header__logo__link {
+  padding-bottom: var(--logo-padding_product);
 }
 
 @media only screen and (min-width: 750px) {
