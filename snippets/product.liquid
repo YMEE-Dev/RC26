@@ -10,6 +10,21 @@
   assign mobile_image_style = section.settings.mobile_image_style
   assign featured_media = current_variant.featured_media | default: product.featured_media
   assign featured_media_aspect_ratio = featured_media.aspect_ratio | default: 1
+  assign first_3d_model = product.media | where: 'media_type', 'model' | first
+
+  if template.name == 'product' and featured_product == false
+    if first_3d_model != blank
+      assign featured_media = first_3d_model
+      assign featured_media_aspect_ratio = featured_media.aspect_ratio | default: 1
+    endif
+  endif
+
+  assign ordered_media = product.media
+  if first_3d_model != blank
+    assign model_media = product.media | where: 'media_type', 'model'
+    assign non_model_media = product.media | reject: 'media_type', 'model'
+    assign ordered_media = model_media | concat: non_model_media
+  endif
   assign is_title_linked = true
   if template.name == 'product' and featured_product == false
     assign is_title_linked = false
@@ -168,6 +183,13 @@
       #MainProduct--{{ section.id }} .product__content {
         margin-top: 50px;
       }
+      @media (max-width: 767px) {
+        product-info.index-product .product__content {
+          margin-top: 16px;
+          padding-left: var(--inner);
+          padding-right: var(--inner);
+        }
+      }
 
       #MainProduct--{{ section.id }} .product__page {
         display: flex;
@@ -193,6 +215,7 @@
         overflow: hidden;
         width: 100%;
         height: var(--full-screen, var(--full-height, 100vh));
+        touch-action: pan-y;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__progress {
@@ -201,7 +224,7 @@
         right: 0;
         bottom: 0;
         height: 1px;
-        background: transparent;
+        background: #F9F9F9;
         z-index: 6;
         overflow: hidden;
         display: none;
@@ -225,7 +248,6 @@
       #MainProduct--{{ section.id }} .pdp-embla__container {
         display: flex;
         height: 100%;
-        touch-action: pan-y;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide {
@@ -238,6 +260,58 @@
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__photo,
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__media {
         height: 100%;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media {
+        padding-top: 0 !important;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        position: relative;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla__slide .shopify-model-viewer-ui__controls-overlay,
+      #MainProduct--{{ section.id }} .pdp-embla__slide .shopify-model-viewer-ui__controls-area,
+      #MainProduct--{{ section.id }} .pdp-embla__slide .shopify-model-viewer-ui__button {
+        display: none !important;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media > model-viewer,
+      #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media > video,
+      #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media > iframe {
+        width: 100%;
+        height: 100%;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media > model-viewer {
+        display: block;
+        margin: auto;
+        pointer-events: auto;
+        opacity: 0;
+        transition: opacity 200ms ease;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media .deferred-media__poster {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 1;
+        transition: opacity 200ms ease;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla__slide product-model .deferred-media__poster {
+        display: none !important;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media[loaded] .deferred-media__poster {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media[loaded] > model-viewer {
+        opacity: 1;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__photo {
@@ -280,7 +354,7 @@
 
       #MainProduct--{{ section.id }} .product__thumbs {
         position: absolute;
-        left: var(--inner);
+        left: var(--outer);
         top: 50%;
         transform: translateY(-50%);
         z-index: 6;
@@ -387,7 +461,21 @@
 
                   var embla = window.EmblaCarousel(viewport, {
                     loop: false,
-                    containScroll: 'trimSnaps'
+                    containScroll: 'trimSnaps',
+                    watchDrag: function (emblaApi, event) {
+                      var target = event && event.target;
+                      if (!target || !target.closest) return true;
+                      var isTouch = false;
+                      try {
+                        isTouch = window.matchMedia && window.matchMedia('(hover: none)').matches;
+                      } catch (e) {}
+
+                      if (!isTouch) {
+                        if (target.closest('model-viewer')) return false;
+                        if (target.closest('product-model')) return false;
+                      }
+                      return true;
+                    }
                   });
 
                   var progressBar = productImagesEl.querySelector('[data-embla-progress-bar]');
@@ -415,10 +503,15 @@
 
                     if (deferredMedia.hasAttribute('loaded')) return;
 
+                    if (typeof deferredMedia.loadContent === 'function') {
+                      deferredMedia.loadContent(false);
+                      return;
+                    }
+
                     var button = deferredMedia.querySelector('[data-deferred-media-button]');
                     if (!button) return;
 
-                    button.dispatchEvent(new Event('click', { bubbles: false }));
+                    button.click();
                   }
 
                   function setActiveMediaByIndex(index) {
@@ -517,14 +610,10 @@
             </script>
 
             {%- if product.media.size > 0 -%}
-              {%- if section.settings.enable_zoom -%}
-                <zoom-images>
-              {%- endif -%}
-
               <div class="pdp-embla">
                 <div class="pdp-embla__viewport" data-embla-viewport>
                   <div class="pdp-embla__container">
-                    {%- for media in product.media -%}
+                    {%- for media in ordered_media -%}
                       <div class="pdp-embla__slide" data-embla-slide>
                         {%- render 'media',
                           media: media,
@@ -555,7 +644,7 @@
                 {%- if thumbnails_enabled -%}
                   <product-thumbs class="product__thumbs">
                     <div class="product__thumbs__holder" data-thumbs-slider>
-                      {%- for media in product.media -%}
+                      {%- for media in ordered_media -%}
                         <div class="product__thumb{% if media == featured_media %} is-active{% endif %}" data-thumb-item>
                           <a
                             class="product__thumb__link"
@@ -582,27 +671,6 @@
                   </product-thumbs>
                 {%- endif -%}
               </div>
-
-              {%- if section.settings.enable_zoom -%}
-                </zoom-images>
-
-                {%- comment -%} Thumbnails template for Photoswipe {%- endcomment -%}
-                <template data-pswp-thumbs-template>
-                  {%- assign images = product.media | where: 'media_type', 'image' -%}
-
-                  {%- for image in images -%}
-                    {%- render 'image',
-                      image: image,
-                      width: 160,
-                      height: 160,
-                      sizes: '80px',
-                      widths: '80, 120, 160',
-                      aspect_ratio: 1,
-                      modifier: 'pswp__thumb'
-                    -%}
-                  {%- endfor -%}
-                </template>
-              {%- endif -%}
             {%- endif -%}
           {%- else -%}
             {%- if product.media.size > 0 -%}
@@ -612,13 +680,9 @@
                 data-product-media-list
               {%- endcapture -%}
 
-              {%- if section.settings.enable_zoom -%}
-                <zoom-images {{ product_slides_attributes }}>
-              {%- else -%}
-                <div {{ product_slides_attributes }}>
-              {%- endif -%}
+              <div {{ product_slides_attributes }}>
 
-              {%- for media in product.media -%}
+              {%- for media in ordered_media -%}
                 {%- render 'media',
                   media: media,
                   featured_media: featured_media,
@@ -629,33 +693,12 @@
                 -%}
               {%- endfor -%}
 
-              {%- if section.settings.enable_zoom -%}
-                </zoom-images>
-
-                {%- comment -%} Thumbnails template for Photoswipe {%- endcomment -%}
-                <template data-pswp-thumbs-template>
-                  {%- assign images = product.media | where: 'media_type', 'image' -%}
-
-                  {%- for image in images -%}
-                    {%- render 'image',
-                      image: image,
-                      width: 160,
-                      height: 160,
-                      sizes: '80px',
-                      widths: '80, 120, 160',
-                      aspect_ratio: 1,
-                      modifier: 'pswp__thumb'
-                    -%}
-                  {%- endfor -%}
-                </template>
-              {%- else -%}
-                </div>
-              {%- endif -%}
+              </div>
 
               {%- if thumbnails_enabled -%}
                 <product-thumbs class="product__thumbs">
                   <div class="product__thumbs__holder" data-thumbs-slider>
-                    {%- for media in product.media -%}
+                    {%- for media in ordered_media -%}
                       <div class="product__thumb{% if media == featured_media %} is-active{% endif %}" data-thumb-item>
                         <a
                           class="product__thumb__link"
@@ -1311,15 +1354,11 @@
     <script src="{{ 'product-thumbs.js' | asset_url }}" defer="defer"></script>
   {%- endif -%}
 
-  {%- if section.settings.enable_zoom -%}
-    <script src="{{ 'load-photoswipe.js' | asset_url }}" defer="defer"></script>
-    <script src="{{ 'zoom.js' | asset_url }}" defer="defer"></script>
-  {%- endif -%}
-
   {%- if first_3d_model -%}
     <script type="application/json" id="ProductJSON-{{ product.id }}">
       {{ product.media | where: 'media_type', 'model' | json }}
     </script>
+    <script src="{{ 'product-model.js' | asset_url }}" defer="defer"></script>
   {%- endif -%}
 
   <script type="application/ld+json">
