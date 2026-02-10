@@ -393,7 +393,8 @@
 
 {%- capture minimal -%}
   <div class="header__mobile__left">
-    <div class="header__mobile__button">
+    {% comment %} this section will be fixed on the bottom of the page {% endcomment %}
+    {% comment %} <div class="header__mobile__button">
       <button class="header__mobile__hamburger{% if show_icons == false %} navlink navlink--toplevel{% endif %}{% if settings.type_nav_caps %} caps{% endif %}"
         data-drawer-toggle="hamburger"
         aria-label="{{ 'general.accessibility.show_menu' | t }}"
@@ -407,7 +408,7 @@
 
         {%- render 'icon-menu' -%}
       </button>
-    </div>
+    </div> {% endcomment %}
 
     {%- if section.settings.enable_search -%}
       <div class="header__mobile__button{% if settings.type_nav_caps %} caps{% endif %}">
@@ -449,14 +450,14 @@
       </div>
     {%- endif -%}
 
-    {%- if shop.customer_accounts_enabled -%}
+    {% comment %} {%- if shop.customer_accounts_enabled -%}
       <div class="header__mobile__button">
         <a href="{{ routes.account_url }}" class="navlink{% if show_icons == false %} navlink--toplevel{% endif %}">
           {%- render 'icon-profile-circled' -%}
           <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.account' | t }}</span>
         </a>
       </div>
-    {%- endif -%}
+    {%- endif -%} {% endcomment %}
     <div class="header__mobile__button">
       <a href="{{ routes.cart_url }}" class="navlink {{ navlink_cart_classes }}" data-cart-toggle>
         {{ cart_status }}
