@@ -21,6 +21,12 @@
 
   assign search_block = section.blocks | where: 'type', 'search'
   assign search_block = search_block[0]
+
+  assign cart_item_count = cart.item_count
+
+  if cart_item_count > 9
+    assign cart_item_count = '9+'
+  endif
 -%}
 
 <mobile-menu
@@ -346,6 +352,20 @@
     -%}
   {%- endfor -%}
 
+{%- capture cart_status -%}
+  <div class="navlink__cart__content">
+    <span class="navtext">{{ 'layout.header.cart' | t }}</span>
+
+    <span class="header__cart__status__holder">
+      <cart-count class="header__cart__status navtext" data-status-separator=": " data-cart-count="{{ cart.item_count }}" data-limit="10">
+        {{ cart_item_count }}
+      </cart-count>
+
+      {%- render 'icon-cart' -%}
+    </span>
+  </div>
+{%- endcapture -%}
+
   <header-drawer
     class="drawer drawer--header{% if settings.type_nav_caps %} caps{% endif %}"
     data-drawer
@@ -354,16 +374,6 @@
   >
     <div class="drawer__inner" data-drawer-inner>
       <header class="drawer__head">
-        <button
-          class="drawer__close"
-          data-drawer-close
-          aria-label="{{ 'general.accessibility.show_menu' | t }}"
-          aria-haspopup="true"
-          aria-expanded="true"
-          aria-controls="mobile-menu-{{ section.id }}"
-        >
-          {%- render 'icon-cancel' -%}
-        </button>
 
         {%- if logo != blank -%}
           <a
@@ -383,6 +393,45 @@
         <div class="drawer__content" data-drawer-content>
           <div class="drawer__content__scroll" data-scroll-lock-scrollable>
             {{ dynamic_blocks }}
+          </div>
+        </div>
+        <div class="drawer__floating-menu" data-drawer-floating-menu>
+          {% comment %} search {% endcomment %}
+          <div class="drawer__floating__left">
+            <div class="drawer__floating__button{% if settings.type_nav_caps %} caps{% endif %}">
+              <header-search-popdown>
+                <details>
+                  <summary class="navlink navlink--search" aria-haspopup="dialog" title="{{ 'general.search.search' | t }}">
+                    {%- render 'icon-search' -%}
+                    {%- render 'icon-cancel' -%}
+                    <span class="navtext">{{ 'layout.header.search' | t }}</span>
+                  </summary>
+
+                  {%- render 'header-search-popdown', unique: 'mobile' -%}
+
+                  <span class="underlay" data-popdown-underlay></span>
+                </details>
+              </header-search-popdown>
+            </div>
+          </div>
+          {% comment %} close button {% endcomment %}
+          <button
+            class="drawer__close"
+            data-drawer-close
+            aria-label="{{ 'general.accessibility.show_menu' | t }}"
+            aria-haspopup="true"
+            aria-expanded="true"
+            aria-controls="mobile-menu-{{ section.id }}"
+          >
+            {%- render 'icon-cancel' -%}
+          </button>
+          {% comment %} cart {% endcomment %}
+           <div class="drawer__floating__right{% if settings.type_nav_caps %} caps{% endif %}">
+            <div class="drawer__floating__button">
+              <a href="{{ routes.cart_url }}" class="navlink {{ navlink_cart_classes }}" data-cart-toggle>
+                {{ cart_status }}
+              </a>
+            </div>
           </div>
         </div>
       </div>

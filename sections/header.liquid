@@ -392,42 +392,6 @@
 -%}
 
 {%- capture minimal -%}
-  <div class="header__mobile__left">
-    <div class="header__mobile__button ">
-      <button class="header__mobile__hamburger{% if show_icons == false %} navlink navlink--toplevel{% endif %}{% if settings.type_nav_caps %} caps{% endif %}"
-        data-drawer-toggle="hamburger"
-        aria-label="{{ 'general.accessibility.show_menu' | t }}"
-        aria-haspopup="true"
-        aria-expanded="false"
-        aria-controls="header-menu">
-
-        {%- if show_icons == false -%}
-          <small class="navtext">{{ 'layout.header.menu' | t }}</small>
-        {%- endif -%}
-
-        {%- render 'icon-menu' -%}
-      </button>
-    </div>
-
-    {%- if section.settings.enable_search -%}
-      <div class="header__mobile__button{% if settings.type_nav_caps %} caps{% endif %}">
-        <header-search-popdown>
-          <details>
-            <summary class="navlink navlink--search{% if show_icons == false %} navlink--toplevel{% endif %}" aria-haspopup="dialog" title="{{ 'general.search.search' | t }}">
-              {%- render 'icon-search' -%}
-              {%- render 'icon-cancel' -%}
-              <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.search' | t }}</span>
-            </summary>
-
-            {%- render 'header-search-popdown', unique: 'mobile' -%}
-
-            <span class="underlay" data-popdown-underlay></span>
-          </details>
-        </header-search-popdown>
-      </div>
-    {%- endif -%}
-  </div>
-
   {{ logos }}
 
   <div class="header__mobile__right{% if settings.type_nav_caps %} caps{% endif %}">
@@ -456,15 +420,18 @@
           <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.account' | t }}</span>
         </a>
       </div>
-    {%- endif -%} {% endcomment %}
-    <div class="header__mobile__button">
+    {% endcomment %}
+
+    {% comment %} 
+     <div class="header__mobile__button">
       <a href="{{ routes.cart_url }}" class="navlink {{ navlink_cart_classes }}" data-cart-toggle>
         {{ cart_status }}
       </a>
-    </div>
+    </div> 
+    {% endcomment %}
   </div>
 
-  {%- if secondary_menu_linklist != blank and linklists[secondary_menu_linklist].links.size > 0 -%}
+  {% comment %} {%- if secondary_menu_linklist != blank and linklists[secondary_menu_linklist].links.size > 0 -%}
     <div class="header__mobile__bottom">
       <nav class="header__mobile__nav{% if settings.type_nav_caps %} caps{% endif %}" data-mobile-nav>
         <div class="header__mobile__nav__scroller">
@@ -476,7 +443,7 @@
         </div>
       </nav>
     </div>
-  {%- endif -%}
+  {%- endif -%} {% endcomment %}
 {%- endcapture -%}
 
 {%- capture buttons -%}
@@ -576,6 +543,18 @@
     {%- endif -%}
 
     <div class="section-padding">
+      <div class="header__mobile__button">
+        <button class="header__mobile__hamburger{% if show_icons == false %} navlink navlink--toplevel{% endif %}{% if settings.type_nav_caps %} caps{% endif %}"
+          data-drawer-toggle="hamburger"
+          aria-label="{{ 'general.accessibility.show_menu' | t }}"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="header-menu"
+        >
+
+          {%- render 'icon-menu' -%}
+        </button>
+      </div>
       <div class="header__mobile">
         {{ minimal }}
       </div>
@@ -701,11 +680,11 @@
     let lastY = window.scrollY;
     let ticking = false;
     const toggleHeaderHide = () => {
-      if (!isDesktop()) {
-        document.body.classList.remove('header-scroll-hide');
-        lastY = window.scrollY;
-        return;
-      }
+      // if (!isDesktop()) {
+      //   document.body.classList.remove('header-scroll-hide');
+      //   lastY = window.scrollY;
+      //   return;
+      // }
       const currentY = window.scrollY;
       const atTop = currentY <= 0;
       const goingDown = currentY > lastY + 1;
@@ -835,6 +814,7 @@
     };
 
     const initHeaderObserver = () => {
+      const headerWrapper = document.querySelector('header.theme__header');
       const headerTargets = selectAll('.header__desktop, .header__mobile');
       const logoLinks = selectAll('.header__logo__link[data-logo-light][data-logo-dark]');
       const transparentImages = selectAll('.logo__img.logo__img--transparent');
@@ -861,6 +841,8 @@
 
       const setHeaderColors = (mode) => {
         const colorSet = colors[mode === 'light' ? 'light' : 'dark'];
+        headerWrapper.style.setProperty('--link', colorSet.link);
+        headerWrapper.style.setProperty('--link-hover', colorSet.hover);
         headerTargets.forEach((header) => {
           header.style.setProperty('--link', colorSet.link);
           header.style.setProperty('--link-hover', colorSet.hover);
