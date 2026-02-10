@@ -449,14 +449,14 @@
       </div>
     {%- endif -%}
 
-    {%- if shop.customer_accounts_enabled -%}
+    {% comment %} {%- if shop.customer_accounts_enabled -%}
       <div class="header__mobile__button">
         <a href="{{ routes.account_url }}" class="navlink{% if show_icons == false %} navlink--toplevel{% endif %}">
           {%- render 'icon-profile-circled' -%}
           <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.account' | t }}</span>
         </a>
       </div>
-    {%- endif -%}
+    {%- endif -%} {% endcomment %}
     <div class="header__mobile__button">
       <a href="{{ routes.cart_url }}" class="navlink {{ navlink_cart_classes }}" data-cart-toggle>
         {{ cart_status }}
@@ -835,10 +835,10 @@
     };
 
     const initHeaderObserver = () => {
-      const headerDesktops = selectAll('.header__desktop');
+      const headerTargets = selectAll('.header__desktop, .header__mobile');
       const logoLinks = selectAll('.header__logo__link[data-logo-light][data-logo-dark]');
       const transparentImages = selectAll('.logo__img.logo__img--transparent');
-      if (!(headerDesktops.length && logoLinks.length && isDesktop())) return;
+      if (!(headerTargets.length && logoLinks.length)) return;
 
       const rootStyles = getComputedStyle(document.documentElement);
       const getCssVariable = (name, fallback) => {
@@ -861,9 +861,9 @@
 
       const setHeaderColors = (mode) => {
         const colorSet = colors[mode === 'light' ? 'light' : 'dark'];
-        headerDesktops.forEach((desktop) => {
-          desktop.style.setProperty('--link', colorSet.link);
-          desktop.style.setProperty('--link-hover', colorSet.hover);
+        headerTargets.forEach((header) => {
+          header.style.setProperty('--link', colorSet.link);
+          header.style.setProperty('--link-hover', colorSet.hover);
         });
       };
 
