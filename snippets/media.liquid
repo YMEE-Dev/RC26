@@ -38,6 +38,10 @@
 
     assign image_sizes = '(min-width: 1400px) ' | append: image_width | append: 'px, (min-width: 750px) calc(50vw - 30px), calc(100vw - 32px)'
 
+    if template.name == 'product' and cover
+      assign image_sizes = '100vw'
+    endif
+
     render 'image' image: media.preview_image, sizes: image_sizes, loading: loading, fetchpriority: fetchpriority, preload: preload, attributes: attributes, aspect_ratio: media_aspect_ratio, cover: cover
 
   endcapture
