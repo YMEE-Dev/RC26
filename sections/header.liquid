@@ -40,15 +40,18 @@
 
   assign main_menu_linklist = section.settings.main_menu_linklist | default: 'main-menu'
   assign secondary_menu_linklist = section.settings.secondary_menu_linklist
+  assign right_menu_linklist = section.settings.right_menu_linklist
 
   assign logo_variant = section.settings.logo_variant | default: 'light'
-  assign logo_asset = 'RC_LOGO_light.svg'
+  assign logo_light_asset = 'RC_LOGO_light.svg'
+  assign logo_dark_asset = 'RC_LOGO_dark.svg'
+  assign logo_asset = logo_light_asset
   assign logo_denom = 814 | divided_by: 76
-  assign transparent_logo_asset = 'RC_LOGO_dark.svg'
+  assign transparent_logo_asset = logo_dark_asset
   if logo_variant == 'dark'
-    assign logo_asset = 'RC_LOGO_dark.svg'
+    assign logo_asset = logo_dark_asset
     assign logo_denom = 800 | divided_by: 74
-    assign transparent_logo_asset = 'RC_LOGO_light.svg'
+    assign transparent_logo_asset = logo_light_asset
   endif
   assign transparent_logo_pdp = section.settings.transparent_logo_pdp
   assign use_transparent_logo_pdp = false
@@ -209,7 +212,14 @@
     {%- assign has_transparent_logo = true -%}
   {%- endif -%}
   <div class="header__logo header__logo--image{% if has_transparent_logo %} header__logo--has-transparent{% endif %}">
-    <a class="header__logo__link" href="{{ routes.root_url }}" data-logo-link>
+    <a
+      class="header__logo__link"
+      href="{{ routes.root_url }}"
+      data-logo-link
+      data-logo-light="{{ logo_light_asset | asset_url }}"
+      data-logo-dark="{{ logo_dark_asset | asset_url }}"
+      data-logo-default="{{ logo_variant }}"
+    >
       {%- if logo_asset != blank -%}
         {%- assign logo_alt = shop.name | strip_html | escape -%}
         <img
@@ -425,6 +435,17 @@
 {%- endcapture -%}
 
 {%- capture buttons -%}
+  {% comment %} optional right-side desktop menu {% endcomment %}
+  {%- if right_menu_linklist != blank and linklists[right_menu_linklist].links.size > 0 -%}
+    <nav class="header__menu header__menu--right{% if settings.type_nav_caps %} caps{% endif %}">
+      {%- for link in linklists[right_menu_linklist].links -%}
+        <a class="navlink" href="{{ link.url }}">
+          <span class="navtext">{{ link.title }}</span>
+        </a>
+      {%- endfor -%}
+    </nav>
+  {%- endif -%}
+
   <div class="header__desktop__buttons{% if show_icons == false %} header__desktop__buttons--text{% else %} header__desktop__buttons--icons{% endif %}{% if settings.type_nav_caps %} caps{% endif %}">
     {%- if section.settings.header_style != 'logo_above' -%}
       {{ cta }}
@@ -452,14 +473,14 @@
       </div>
     {%- endif -%}
 
-    {%- if shop.customer_accounts_enabled -%}
+    {% comment %} {%- if shop.customer_accounts_enabled -%}
       <div class="header__desktop__button">
         <a href="{{ routes.account_url }}" class="navlink{% if show_icons == false %} navlink--toplevel{% endif %}" title="{{ 'customer.account.title' | t }}">
           {%- render 'icon-profile-circled' -%}
           <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.account' | t }}</span>
         </a>
       </div>
-    {%- endif -%}
+    {%- endif -%} {% endcomment %}
 
     <div class="header__desktop__button">
       <a href="{{ routes.cart_url }}" class="navlink {{ navlink_cart_classes }}" title="{{ 'cart.general.title' | t }}" data-cart-toggle>
@@ -470,7 +491,7 @@
 {%- endcapture -%}
 
 {%- capture menu -%}
-  <nav class="header__menu{% if settings.type_nav_caps %} caps{% endif %}" {{ highlight_style }}>
+  <nav class="header__menu header__menu--left{% if settings.type_nav_caps %} caps{% endif %}" {{ highlight_style }}>
     {%- for link in linklists[main_menu_linklist].links -%}
       {%- render 'nav-item', link: link, index: forloop.index, highlight_item: highlight_item -%}
     {%- endfor -%}
@@ -503,6 +524,7 @@
     role="banner"
     data-header-height
     data-aos="fade"
+    data-header-desktop
   >
     {%- if toolbar != blank -%}
       {{ toolbar }}
@@ -513,7 +535,7 @@
         {{ minimal }}
       </div>
 
-      <div class="header__desktop" data-header-desktop>
+      <div class="header__desktop">
         {%- case section.settings.header_style -%}
           {%- when 'logo_beside' -%}
             <div class="header__desktop__upper" data-takes-space-wrapper>
@@ -618,66 +640,221 @@
 {%- endif -%}
 
 {% javascript %}
+  // custom menu logics
   document.addEventListener('DOMContentLoaded', () => {
-    const initMenuImages = () => {
-      const images = Array.from(document.querySelectorAll('.tmenu_collection > img'))
-      if (images.length > 1) {
-        images.slice(1).forEach((img) => img.classList.add('hide-menu-image'))
-      }
+    /* Helpers */
+    const selectAll = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel))
+    const isDesktop = () => window.matchMedia('(min-width: 750px)').matches
 
-      const links = document.querySelectorAll('a.tmenu_item_link.tmenu_item_content_alignment_right')
-      if (!links.length || !images.length) return
+    /* Scroll animation */
+    let lastY = window.scrollY
+    let ticking = false
+    const toggleHeaderHide = () => {
+      if (!isDesktop()) {
+        document.body.classList.remove('header-scroll-hide')
+        lastY = window.scrollY
+        return
+      }
+      const currentY = window.scrollY
+      const atTop = currentY <= 0
+      const goingDown = currentY > lastY + 1
+      const goingUp = currentY < lastY - 1
+      if (atTop || goingUp) {
+        document.body.classList.remove('header-scroll-hide')
+      } else if (goingDown) {
+        document.body.classList.add('header-scroll-hide')
+      }
+      lastY = currentY
+    }
+    window.addEventListener('scroll', () => {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        toggleHeaderHide()
+        ticking = false
+      })
+    }, { passive: true })
+
+    /* Menu images + overlay */
+    let currentImage = null
+
+    const initMenuImages = () => {
+      const images = selectAll('.tmenu_collection--notext > img')
+      if (!images.length) return
+      if (!currentImage || images.includes(currentImage) === false) {
+        currentImage = images[0]
+      }
+      images.forEach(img => {
+        if (img === currentImage) {
+          img.classList.remove('hide-menu-image')
+        } else {
+          img.classList.add('hide-menu-image')
+        }
+      })
+
+      const links = selectAll('.tmenu_item_layout_collection a.tmenu_item_link.tmenu_item_content_alignment_right')
+      if (!links.length) return
 
       const imageByAlt = new Map()
-      images.forEach((img) => {
+      images.forEach(img => {
         const alt = img.getAttribute('alt') || ''
         if (alt) imageByAlt.set(alt.trim(), img)
       })
 
       const showImageForTitle = (title) => {
-        images.forEach((img) => img.classList.add('hide-menu-image'))
         const match = imageByAlt.get((title || '').trim())
-        if (match) match.classList.remove('hide-menu-image')
+        if (match) {
+          images.forEach(img => img.classList.add('hide-menu-image'))
+          match.classList.remove('hide-menu-image')
+          currentImage = match
+        } else if (currentImage) {
+          // keep last shown image visible when there's no match for the hovered link
+          currentImage.classList.remove('hide-menu-image')
+        }
       }
 
-      links.forEach((link) => {
-        link.addEventListener('mouseenter', () => {
-          showImageForTitle(link.textContent)
-        })
-        link.addEventListener('focus', () => {
-          showImageForTitle(link.textContent)
-        })
+      links.forEach(link => {
+        link.addEventListener('mouseenter', () => showImageForTitle(link.textContent))
+        link.addEventListener('focus', () => showImageForTitle(link.textContent))
       })
     }
 
     const rootSelector = '.tmenu_item.tmenu_item--root.tmenu_item_level_0.tmenu_item_submenu_type_mega'
     let initialized = false
 
-    const runOnce = () => {
-      if (initialized) return
-      initialized = true
+    const applyMenuOpenStyles = () => {
       initMenuImages()
     }
 
     const observeRoot = (root) => {
-      const rootObserver = new MutationObserver(() => runOnce())
-      rootObserver.observe(root, { childList: true, subtree: true })
+      let lastActive = false
+      const handleMutations = () => {
+        if (!initialized) {
+          initialized = true
+          applyMenuOpenStyles()
+        }
+        const activeNow = Boolean(document.querySelector('.tmenu_item_active'))
+        if (activeNow && !lastActive) applyMenuOpenStyles()
+        lastActive = activeNow
+      }
+      new MutationObserver(handleMutations).observe(root, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class']
+      })
     }
 
-    const rootItem = document.querySelector(rootSelector)
-    if (rootItem) {
-      observeRoot(rootItem)
-      return
+    const roots = selectAll(rootSelector)
+    if (roots.length) {
+      roots.forEach(observeRoot)
+    } else {
+      new MutationObserver((_, observer) => {
+        const found = selectAll(rootSelector)
+        if (!found.length) return
+        observer.disconnect()
+        found.forEach(observeRoot)
+      }).observe(document.body, { childList: true, subtree: true })
     }
 
-    const bodyObserver = new MutationObserver(() => {
-      const foundRoot = document.querySelector(rootSelector)
-      if (!foundRoot) return
-      bodyObserver.disconnect()
-      observeRoot(foundRoot)
-    })
+    /* Header light/dark switcher */
+    const getLuminance = (rgb) => {
+      const [r, g, b] = rgb.map(v => {
+        const n = v / 255
+        return n <= 0.03928 ? n / 12.92 : Math.pow((n + 0.055) / 1.055, 2.4)
+      })
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b
+    }
 
-    bodyObserver.observe(document.body, { childList: true, subtree: true })
+    const getBackgroundRGB = (element) => {
+      let el = element
+      while (el && el !== document.documentElement) {
+        const bg = getComputedStyle(el).backgroundColor
+        if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+          const match = bg.match(/\d+/g)
+          if (match) return match.map(Number)
+        }
+        el = el.parentElement
+      }
+      return [255, 255, 255]
+    }
+
+    const initHeaderObserver = () => {
+      const headerDesktops = selectAll('.header__desktop')
+      const logoLinks = selectAll('.header__logo__link[data-logo-light][data-logo-dark]')
+      const transparentImages = selectAll('.logo__img.logo__img--transparent')
+      if (!(headerDesktops.length && logoLinks.length && isDesktop())) return
+
+      const rootStyles = getComputedStyle(document.documentElement)
+      const getCssVariable = (name, fallback) => {
+        const value = rootStyles.getPropertyValue(name).trim()
+        return value || fallback
+      }
+      const colors = {
+        light: {
+          link: getCssVariable('--COLOR-MENU-TRANSPARENT', '#fff'),
+          hover: getCssVariable('--COLOR-MENU-TRANSPARENT-HOVER', getCssVariable('--COLOR-MENU-TRANSPARENT', '#fff'))
+        },
+        dark: {
+          link: getCssVariable('--COLOR-HEADER-LINK', '#111'),
+          hover: getCssVariable('--COLOR-HEADER-LINK-HOVER', getCssVariable('--COLOR-HEADER-LINK', '#111'))
+        }
+      }
+
+      const logoLightUrl = logoLinks[0].dataset.logoLight
+      const logoDarkUrl = logoLinks[0].dataset.logoDark
+
+      const setHeaderColors = (mode) => {
+        const colorSet = colors[mode === 'light' ? 'light' : 'dark']
+        headerDesktops.forEach(desktop => {
+          desktop.style.setProperty('--link', colorSet.link)
+          desktop.style.setProperty('--link-hover', colorSet.hover)
+        })
+      }
+
+      const setLogoSource = (mode) => {
+        const logoUrl = mode === 'light' ? logoLightUrl : logoDarkUrl
+        if (!logoUrl) return
+        logoLinks.forEach(link => {
+          const img = link.querySelector('.logo__img.logo__img--color')
+          if (img && img.getAttribute('src') !== logoUrl) img.setAttribute('src', logoUrl)
+        })
+        transparentImages.forEach(img => {
+          if (img.getAttribute('src') !== logoUrl) img.setAttribute('src', logoUrl)
+        })
+      }
+
+      const defaultMode = (logoLinks[0].dataset.logoDefault || 'light').trim() === 'light' ? 'light' : 'dark'
+      let currentMode = defaultMode
+      const applyMode = (mode) => {
+        const resolved = mode === 'light' ? 'light' : 'dark'
+        if (resolved === currentMode) return
+        currentMode = resolved
+        setHeaderColors(currentMode)
+        setLogoSource(currentMode)
+      }
+
+      setHeaderColors(currentMode)
+      setLogoSource(currentMode)
+
+      const sectionsToObserve = selectAll('section, .shopify-section, [data-section-id]')
+      if (!sectionsToObserve.length) return
+
+      const intersectionObserver = new IntersectionObserver(
+        entries => {
+          entries.forEach(entry => {
+            if (!entry.isIntersecting) return
+            const luminance = getLuminance(getBackgroundRGB(entry.target))
+            applyMode(luminance < 0.5 ? 'light' : 'dark')
+          })
+        },
+        { rootMargin: '-10% 0px -90% 0px' }
+      )
+      sectionsToObserve.forEach(section => intersectionObserver.observe(section))
+    }
+
+    initHeaderObserver()
+    window.addEventListener('load', initHeaderObserver, { once: true })
   })
 {% endjavascript %}
 
@@ -786,6 +963,12 @@
       "type": "link_list",
       "label": "Main menu",
       "id": "main_menu_linklist"
+    },
+    {
+      "type": "link_list",
+      "label": "Right menu (desktop)",
+      "id": "right_menu_linklist",
+      "info": "Optional menu displayed on the right side of the desktop header."
     },
     {
       "type": "checkbox",
