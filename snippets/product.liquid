@@ -218,6 +218,12 @@
         object-fit: contain;
       }
 
+      #MainProduct--{{ section.id }} .pdp-embla img {
+        border: 0;
+        outline: 0;
+        box-shadow: none;
+      }
+
       #MainProduct--{{ section.id }} .pdp-embla {
         position: relative;
         width: 100%;
@@ -312,6 +318,54 @@
         flex: 1 1 0;
         min-width: 0;
         height: 100%;
+      }
+
+      #MainProduct--{{ section.id }} {
+        --pdp-pair-catchup-shift: clamp(24px, 8vw, 120px);
+      }
+
+      @keyframes pdp-pair-catchup-next {
+        0% {
+          transform: translate3d(var(--pdp-pair-catchup-shift), 0, 0);
+        }
+
+        30% {
+          transform: translate3d(var(--pdp-pair-catchup-shift), 0, 0);
+        }
+
+        100% {
+          transform: translate3d(0, 0, 0);
+        }
+      }
+
+      @keyframes pdp-pair-catchup-prev {
+        0% {
+          transform: translate3d(calc(var(--pdp-pair-catchup-shift) * -1), 0, 0);
+        }
+
+        30% {
+          transform: translate3d(calc(var(--pdp-pair-catchup-shift) * -1), 0, 0);
+        }
+
+        100% {
+          transform: translate3d(0, 0, 0);
+        }
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-catchup='next'] .pdp-embla__pair__item:nth-child(2) .product__slide {
+        animation: pdp-pair-catchup-next 450ms ease both;
+        will-change: transform;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-catchup='prev'] .pdp-embla__pair__item:nth-child(1) .product__slide {
+        animation: pdp-pair-catchup-prev 450ms ease both;
+        will-change: transform;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-catchup] .pdp-embla__pair__item .product__slide {
+          animation: none;
+        }
       }
 
       #MainProduct--{{ section.id }} .pdp-thumbs--desktop .product__thumb__link {
@@ -736,10 +790,38 @@
 
                     var carousel = { el: carouselEl, embla: embla, prevBtn: prevBtn, nextBtn: nextBtn, progressBar: progressBar, updateArrows: updateArrows };
 
+                    var prevSelectedIndex = embla.selectedScrollSnap();
+                    var catchupTimer = null;
+
                     embla.on('select', function () {
                       var activeCarousel = getActiveCarousel();
-                      if (!activeCarousel || activeCarousel.el !== carouselEl) return;
                       var index = embla.selectedScrollSnap();
+
+                      if (carouselEl.classList.contains('pdp-embla--desktop')) {
+                        var direction = index > prevSelectedIndex ? 'next' : index < prevSelectedIndex ? 'prev' : null;
+                        prevSelectedIndex = index;
+
+                        if (catchupTimer) window.clearTimeout(catchupTimer);
+
+                        if (direction) {
+                          catchupTimer = window.setTimeout(function () {
+                            var slideEls = carouselEl.querySelectorAll('[data-embla-slide]');
+                            var slideEl = slideEls[index];
+                            if (!slideEl) return;
+                            if (!slideEl.querySelector('.pdp-embla__pair')) return;
+
+                            slideEl.removeAttribute('data-pair-catchup');
+                            slideEl.getBoundingClientRect();
+                            slideEl.setAttribute('data-pair-catchup', direction);
+                            window.setTimeout(function () {
+                              slideEl.removeAttribute('data-pair-catchup');
+                            }, 700);
+                          }, 220);
+                        }
+                      }
+
+                      if (!activeCarousel || activeCarousel.el !== carouselEl) return;
+
                       setActiveMediaByIndex(activeCarousel, index);
                       loadDeferredMediaByIndex(activeCarousel, index);
                       updateArrows();
