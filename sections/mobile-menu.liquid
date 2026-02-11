@@ -77,6 +77,8 @@
       assign has_background_color = false
       assign block_padding = ''
       assign pin_to_bottom = block.settings.pin_to_bottom
+      assign top_level_image = false
+      assign skip_block = false
 
       if pin_to_bottom
         assign animation_delay = block_index_pinned | times: animation_delay_increment | plus: animation_delay_initial
@@ -154,7 +156,9 @@
       endif
 
       if block.type == 'image'
+        assign skip_block = true
         assign image_alignment = block.settings.image_alignment
+
         capture image_block_alignment
           case image_alignment
             when 'left'
@@ -169,7 +173,7 @@
     -%}
 
     {%- capture block_content -%}
-      {%- unless block.type == 'search' -%}
+      {%- unless block.type == 'search' or skip_block -%}
         <div class="mobile-menu__block mobile-menu__block--{{ block.type }}{% if block.settings.width == 'half' %} mobile-menu__block--half{% endif %} block-padding"
           data-mobile-menu-block
           {{ block.shopify_attributes }}
@@ -654,6 +658,48 @@
           "step": 5,
           "unit": "%",
           "default": 20
+        },
+        {
+          "type": "header",
+          "content": "Menu placement"
+        },
+        {
+          "type": "select",
+          "id": "level_1_index",
+          "label": "Top-level menu item",
+          "default": "1",
+          "options": [
+            { "value": "1", "label": "1" },
+            { "value": "2", "label": "2" },
+            { "value": "3", "label": "3" },
+            { "value": "4", "label": "4" },
+            { "value": "5", "label": "5" },
+            { "value": "6", "label": "6" },
+            { "value": "7", "label": "7" },
+            { "value": "8", "label": "8" },
+            { "value": "9", "label": "9" },
+            { "value": "10", "label": "10" }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "level_2_index",
+          "label": "Second-level submenu item",
+          "info": "Choose the submenu position under the selected top-level item. Set to None to place at the top level.",
+          "default": "0",
+          "options": [
+            { "value": "0", "label": "None (top level)" },
+            { "value": "1", "label": "1" },
+            { "value": "2", "label": "2" },
+            { "value": "3", "label": "3" },
+            { "value": "4", "label": "4" },
+            { "value": "5", "label": "5" },
+            { "value": "6", "label": "6" },
+            { "value": "7", "label": "7" },
+            { "value": "8", "label": "8" },
+            { "value": "9", "label": "9" },
+            { "value": "10", "label": "10" }
+          ]
         },
         {
           "type": "header",
