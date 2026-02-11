@@ -394,44 +394,45 @@
 {%- capture minimal -%}
   {{ logos }}
 
-  <div class="header__mobile__right{% if settings.type_nav_caps %} caps{% endif %}">
-    {{ cta }}
+  {% comment %} 
+    <div class="header__mobile__right{% if settings.type_nav_caps %} caps{% endif %}">
+      {{ cta }}
 
-    {%- if header_popouts -%}
-      {%- assign unique = section.id | append: '-header-mobile-top' -%}
-      <div class="header__mobile__button desktop">
-        {%- render 'localization',
-          unique: unique,
-          show_locale_selector: show_locale_selector,
-          show_locale_code: show_locale_code,
-          show_globe_icon: show_globe_icon,
-          show_country_selector: show_country_selector,
-          show_country_flag: show_country_flag,
-          show_country_name: show_country_name,
-          class: 'header',
-          unique: section.id -%}
-      </div>
-    {%- endif -%}
+      {%- if header_popouts -%}
+        {%- assign unique = section.id | append: '-header-mobile-top' -%}
+        <div class="header__mobile__button desktop">
+          {%- render 'localization',
+            unique: unique,
+            show_locale_selector: show_locale_selector,
+            show_locale_code: show_locale_code,
+            show_globe_icon: show_globe_icon,
+            show_country_selector: show_country_selector,
+            show_country_flag: show_country_flag,
+            show_country_name: show_country_name,
+            class: 'header',
+            unique: section.id -%}
+        </div>
+      {%- endif -%}
 
-    {% comment %} {%- if shop.customer_accounts_enabled -%}
+      {%- if shop.customer_accounts_enabled -%}
+        <div class="header__mobile__button">
+          <a href="{{ routes.account_url }}" class="navlink{% if show_icons == false %} navlink--toplevel{% endif %}">
+            {%- render 'icon-profile-circled' -%}
+            <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.account' | t }}</span>
+          </a>
+        </div>
+      {%- endif -%}
+
+
       <div class="header__mobile__button">
-        <a href="{{ routes.account_url }}" class="navlink{% if show_icons == false %} navlink--toplevel{% endif %}">
-          {%- render 'icon-profile-circled' -%}
-          <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.account' | t }}</span>
+        <a href="{{ routes.cart_url }}" class="navlink {{ navlink_cart_classes }}" data-cart-toggle>
+          {{ cart_status }}
         </a>
-      </div>
-    {% endcomment %}
+      </div> 
+    </div>
+  {% endcomment %}
 
-    {% comment %} 
-     <div class="header__mobile__button">
-      <a href="{{ routes.cart_url }}" class="navlink {{ navlink_cart_classes }}" data-cart-toggle>
-        {{ cart_status }}
-      </a>
-    </div> 
-    {% endcomment %}
-  </div>
-
-  {% comment %} {%- if secondary_menu_linklist != blank and linklists[secondary_menu_linklist].links.size > 0 -%}
+  {%- if secondary_menu_linklist != blank and linklists[secondary_menu_linklist].links.size > 0 -%}
     <div class="header__mobile__bottom">
       <nav class="header__mobile__nav{% if settings.type_nav_caps %} caps{% endif %}" data-mobile-nav>
         <div class="header__mobile__nav__scroller">
@@ -443,7 +444,7 @@
         </div>
       </nav>
     </div>
-  {%- endif -%} {% endcomment %}
+  {%- endif -%}
 {%- endcapture -%}
 
 {%- capture buttons -%}
@@ -650,6 +651,25 @@
     ],
     "url": {{ shop.url | append: page.url | json }}
   }
+</script>
+
+<script>
+  (() => {
+    const header = document.querySelector('.theme__header');
+    const searchPopdown = header && header.querySelector('header-search-popdown');
+    if (!header || !searchPopdown) return;
+
+    const syncLogoVisibility = () => {
+      header.classList.toggle('search-open', searchPopdown.classList.contains('is-open'));
+    };
+
+    syncLogoVisibility();
+
+    new MutationObserver(syncLogoVisibility).observe(searchPopdown, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+  })();
 </script>
 
 {%- if template.name == 'index' -%}

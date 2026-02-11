@@ -357,11 +357,11 @@
     <span class="navtext">{{ 'layout.header.cart' | t }}</span>
 
     <span class="header__cart__status__holder">
+      {%- render 'icon-cart' -%}
+      
       <cart-count class="header__cart__status navtext" data-status-separator=": " data-cart-count="{{ cart.item_count }}" data-limit="10">
         {{ cart_item_count }}
       </cart-count>
-
-      {%- render 'icon-cart' -%}
     </span>
   </div>
 {%- endcapture -%}
@@ -428,7 +428,7 @@
           {% comment %} cart {% endcomment %}
            <div class="drawer__floating__right{% if settings.type_nav_caps %} caps{% endif %}">
             <div class="drawer__floating__button">
-              <a href="{{ routes.cart_url }}" class="navlink {{ navlink_cart_classes }}" data-cart-toggle>
+              <a href="{{ routes.cart_url }}" class="navlink navlink--cart navlink--cart--icon" data-cart-toggle>
                 {{ cart_status }}
               </a>
             </div>
