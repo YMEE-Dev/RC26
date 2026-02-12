@@ -25,6 +25,13 @@
     assign non_model_media = product.media | reject: 'media_type', 'model'
     assign ordered_media = model_media | concat: non_model_media
   endif
+
+  if template.name == 'product' and featured_product == false
+    if first_3d_model == blank
+      assign featured_media = ordered_media | first
+      assign featured_media_aspect_ratio = featured_media.aspect_ratio | default: 1
+    endif
+  endif
   assign is_title_linked = true
   if template.name == 'product' and featured_product == false
     assign is_title_linked = false
@@ -164,10 +171,35 @@
 
     {%- if template.name == 'product' and featured_product == false -%}
 
+      body.template-product header-component.js__header__stuck .theme__header::after {
+        content: "";
+        background: transparent;
+      }
+
+      body.template-product .header-sections {
+        background: transparent;
+      }
+
+      body.template-product .header__wrapper {
+        --bg: transparent;
+      }
+
+      body.template-product .header__mobile__bottom {
+        --bg: transparent;
+      }
+
+      body.template-product .main-content {
+        margin-top: 0;
+        padding-top: 0;
+      }
+
+      body.template-product .main-content > *:first-child {
+        margin-top: 0;
+      }
+
       #MainProduct--{{ section.id }} {
         padding-top: 0;
         padding-bottom: 0;
-        background: #F9F9F9;
       }
 
       #MainProduct--{{ section.id }} .product__wrapper {
@@ -206,9 +238,65 @@
         object-fit: contain;
       }
 
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item:not([data-pair-role='secondary']) .image-wrapper--cover {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item:not([data-pair-role='secondary']) .image-wrapper--cover img {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 80%;
+        object-fit: contain;
+        object-position: center;
+        margin: 10% 0;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla img {
+        border: 0;
+        outline: 0;
+        box-shadow: none;
+      }
+
       #MainProduct--{{ section.id }} .pdp-embla {
         position: relative;
         width: 100%;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop {
+        display: none;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--mobile {
+        display: block;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-thumbs--desktop {
+        display: none;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-thumbs--mobile {
+        display: block;
+      }
+
+      @media (min-width: 990px) {
+        #MainProduct--{{ section.id }} .pdp-embla--desktop {
+          display: block;
+        }
+
+        #MainProduct--{{ section.id }} .pdp-embla--mobile {
+          display: none;
+        }
+
+        #MainProduct--{{ section.id }} .pdp-thumbs--desktop {
+          display: block;
+        }
+
+        #MainProduct--{{ section.id }} .pdp-thumbs--mobile {
+          display: none;
+        }
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__viewport {
@@ -216,6 +304,14 @@
         width: 100%;
         height: var(--full-screen, var(--full-height, 100vh));
         touch-action: pan-y;
+      }
+
+      @media (min-width: 990px) {
+        #MainProduct--{{ section.id }} .pdp-embla__viewport {
+          margin-top: calc(-1*(var(--header-height, 0px) + var(--announcement-height, 0px)));
+          height: var(--full-screen, var(--full-height, 100vh));
+          min-height: 100vh;
+        }
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__progress {
@@ -256,10 +352,140 @@
         height: 100%;
       }
 
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair {
+        display: flex;
+        height: 100%;
+        width: 100%;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item {
+        flex: 1 1 0;
+        min-width: 0;
+        height: 100%;
+      }
+
+      @media (min-width: 990px) {
+        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item[data-pair-role='secondary'] {
+          position: relative;
+          outline: 2px solid currentcolor;
+          outline-offset: -2px;
+        }
+
+        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item[data-pair-role='secondary'] img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          text-indent: -100vw;
+          overflow: hidden;
+        }
+      }
+
+      @media (min-width: 990px) {
+        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-layout='70-30'] .pdp-embla__pair__item:first-child {
+          flex: 0 0 70%;
+        }
+
+        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-layout='70-30'] .pdp-embla__pair__item:nth-child(2) {
+          flex: 0 0 30%;
+        }
+      }
+
+      #MainProduct--{{ section.id }} {
+        --pdp-pair-catchup-shift: clamp(24px, 8vw, 120px);
+      }
+
+      @keyframes pdp-pair-catchup-next {
+        0% {
+          transform: translate3d(var(--pdp-pair-catchup-shift), 0, 0);
+        }
+
+        30% {
+          transform: translate3d(var(--pdp-pair-catchup-shift), 0, 0);
+        }
+
+        100% {
+          transform: translate3d(0, 0, 0);
+        }
+      }
+
+      @keyframes pdp-pair-catchup-prev {
+        0% {
+          transform: translate3d(calc(var(--pdp-pair-catchup-shift) * -1), 0, 0);
+        }
+
+        30% {
+          transform: translate3d(calc(var(--pdp-pair-catchup-shift) * -1), 0, 0);
+        }
+
+        100% {
+          transform: translate3d(0, 0, 0);
+        }
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-catchup='next'] .pdp-embla__pair__item:nth-child(2) .product__slide {
+        animation: pdp-pair-catchup-next 450ms ease both;
+        will-change: transform;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-catchup='prev'] .pdp-embla__pair__item:nth-child(1) .product__slide {
+        animation: pdp-pair-catchup-prev 450ms ease both;
+        will-change: transform;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-catchup] .pdp-embla__pair__item .product__slide {
+          animation: none;
+        }
+      }
+
+      #MainProduct--{{ section.id }} .pdp-thumbs--desktop .product__thumb__link {
+        display: block;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-thumbs--desktop .product__thumb__link img {
+        width: 45px;
+        height: 45px;
+        object-fit: cover;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-thumbs--desktop .product__thumb__link--pair img {
+        box-sizing: border-box;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-thumbs--desktop .product__thumb__link--pair {
+        display: flex;
+        flex-direction: column;
+        width: 45px;
+        height: 90px;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-thumbs--desktop .product__thumb__link--pair img {
+        width: 45px;
+        height: 45px;
+        display: block;
+        object-fit: cover;
+        border: 0;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-thumbs--desktop .product__thumb__link--pair::after {
+        content: '';
+        border-color: transparent;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-thumbs--desktop .product__thumb.is-active .product__thumb__link--pair::after {
+        border-color: #000;
+      }
+
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__slide,
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__photo,
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__media {
         height: 100%;
+      }
+
+      @media only screen and (max-width: 749px) {
+        #MainProduct--{{ section.id }} .pdp-embla__slide .product__slide {
+          width: 100%;
+        }
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media {
@@ -289,6 +515,15 @@
         pointer-events: auto;
         opacity: 0;
         transition: opacity 200ms ease;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla__slide model-viewer::part(default-progress-bar) {
+        background: rgba(0, 0, 0, 0.12);
+        height: 1px;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla__slide model-viewer::part(default-progress-mask) {
+        background: #000;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media .deferred-media__poster {
@@ -329,7 +564,7 @@
 
       #MainProduct--{{ section.id }} .pdp-embla__arrows {
         position: absolute;
-        left: 90%;
+        left: 50%;
         bottom: var(--inner);
         transform: translateX(-50%);
         display: flex;
@@ -355,11 +590,29 @@
       #MainProduct--{{ section.id }} .product__thumbs {
         position: absolute;
         left: var(--outer);
-        top: 50%;
-        transform: translateY(-50%);
+        top: 50vh;
+        transform: translateY(-100%);
         z-index: 6;
         display: block;
         margin: 0;
+      }
+
+      #MainProduct--{{ section.id }} .product__thumbs.pdp-thumbs--desktop {
+        display: none !important;
+      }
+
+      #MainProduct--{{ section.id }} .product__thumbs.pdp-thumbs--mobile {
+        display: none !important;
+      }
+
+      @media (min-width: 990px) {
+        #MainProduct--{{ section.id }} .product__thumbs.pdp-thumbs--desktop {
+          display: block !important;
+        }
+
+        #MainProduct--{{ section.id }} .product__thumbs.pdp-thumbs--mobile {
+          display: none !important;
+        }
       }
 
       #MainProduct--{{ section.id }} .product__thumbs__holder {
@@ -368,6 +621,13 @@
         gap: 0;
         max-height: calc(100vh - (var(--inner) * 2));
         overflow: auto;
+      }
+
+      @media (min-width: 990px) {
+        #MainProduct--{{ section.id }} .product__thumbs__holder {
+          gap: 0;
+          align-items: flex-start;
+        }
       }
 
       #MainProduct--{{ section.id }} .product__thumb {
@@ -423,10 +683,6 @@
           display: none;
         }
 
-        #MainProduct--{{ section.id }} .product__thumbs {
-          display: none;
-        }
-
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
           height: 80vh;
         }
@@ -450,51 +706,77 @@
 
             <script>
               (function () {
+                function ensurePageScrollUnlocked() {
+                  try {
+                    if (window.theme && typeof window.theme.hasOpenModals === 'function' && window.theme.hasOpenModals()) return;
+
+                    if (window.scrollLock) {
+                      if (typeof window.scrollLock.clearQueueScrollLocks === 'function') window.scrollLock.clearQueueScrollLocks();
+                      if (typeof window.scrollLock.enablePageScroll === 'function') window.scrollLock.enablePageScroll();
+                    }
+
+                    window.dispatchEvent(new CustomEvent('theme:scroll:unlock', { bubbles: true }));
+                    document.documentElement.removeAttribute('data-scroll-locked');
+
+                    if (document.body) {
+                      document.body.style.position = '';
+                      document.body.style.top = '';
+                      document.body.style.left = '';
+                      document.body.style.right = '';
+                      document.body.style.width = '';
+                    }
+                  } catch (e) {}
+                }
+
                 function initEmbla(productImagesEl) {
-                  var viewport = productImagesEl.querySelector('[data-embla-viewport]');
-                  if (!viewport || !window.EmblaCarousel) return;
+                  if (productImagesEl && productImagesEl.dataset && productImagesEl.dataset.emblaInitialized === 'true') return;
+                  if (!window.EmblaCarousel) return;
+
+                  var isDesktop = false;
+                  try {
+                    isDesktop = window.matchMedia && window.matchMedia('(min-width: 990px)').matches;
+                  } catch (e) {}
+
+                  var carouselEl = isDesktop
+                    ? productImagesEl.querySelector('.pdp-embla--desktop[data-embla-carousel]')
+                    : productImagesEl.querySelector('.pdp-embla--mobile[data-embla-carousel]');
+
+                  if (!carouselEl) return;
+
+                  if (productImagesEl && productImagesEl.dataset) productImagesEl.dataset.emblaInitialized = 'true';
+
+                  ensurePageScrollUnlocked();
 
                   productImagesEl.querySelectorAll('[data-media-id]').forEach(function (el) {
                     el.classList.remove('media--hidden');
                     el.classList.remove('media--hiding');
                   });
 
-                  var embla = window.EmblaCarousel(viewport, {
-                    loop: false,
-                    containScroll: 'trimSnaps',
-                    watchDrag: function (emblaApi, event) {
-                      var target = event && event.target;
-                      if (!target || !target.closest) return true;
-                      var isTouch = false;
-                      try {
-                        isTouch = window.matchMedia && window.matchMedia('(hover: none)').matches;
-                      } catch (e) {}
+                  var carousels = [];
 
-                      if (!isTouch) {
-                        if (target.closest('model-viewer')) return false;
-                        if (target.closest('product-model')) return false;
-                      }
-                      return true;
+                  function getActiveCarousel() {
+                    for (var i = 0; i < carousels.length; i++) {
+                      if (carousels[i].el && carousels[i].el.offsetParent !== null) return carousels[i];
                     }
-                  });
+                    return carousels[0];
+                  }
 
-                  var progressBar = productImagesEl.querySelector('[data-embla-progress-bar]');
-
-                  function updateProgressByIndex(index) {
-                    if (!progressBar) return;
-                    var slideCount = embla.scrollSnapList().length;
+                  function updateProgressByIndex(carousel, index) {
+                    if (!carousel || !carousel.progressBar) return;
+                    var slideCount = carousel.embla.scrollSnapList().length;
                     if (slideCount <= 1) {
-                      progressBar.style.width = '100%';
-                      progressBar.style.transform = 'translateX(0)';
+                      carousel.progressBar.style.width = '100%';
+                      carousel.progressBar.style.transform = 'translateX(0)';
                       return;
                     }
                     var segmentWidth = 100 / slideCount;
-                    progressBar.style.width = segmentWidth + '%';
-                    progressBar.style.transform = 'translateX(' + (index * 100) + '%)';
+                    carousel.progressBar.style.width = segmentWidth + '%';
+                    carousel.progressBar.style.transform = 'translateX(' + (index * 100) + '%)';
                   }
 
-                  function loadDeferredMediaByIndex(index) {
-                    var slideEls = productImagesEl.querySelectorAll('[data-embla-slide]');
+                  function loadDeferredMediaByIndex(carousel, index) {
+                    if (!carousel) return;
+                    var slideEls = carousel.el.querySelectorAll('[data-embla-slide]');
                     var slide = slideEls[index];
                     if (!slide) return;
 
@@ -514,8 +796,9 @@
                     button.click();
                   }
 
-                  function setActiveMediaByIndex(index) {
-                    var slideEls = productImagesEl.querySelectorAll('[data-embla-slide]');
+                  function setActiveMediaByIndex(carousel, index) {
+                    if (!carousel) return;
+                    var slideEls = carousel.el.querySelectorAll('[data-embla-slide]');
                     var slide = slideEls[index];
                     if (!slide) return;
                     var mediaEl = slide.querySelector('[data-media-id]');
@@ -523,66 +806,151 @@
                     productImagesEl.setAttribute('data-active-media', mediaEl.getAttribute('data-media-id'));
                   }
 
-                  function findIndexByMediaId(mediaId) {
-                    var mediaEl = productImagesEl.querySelector('[data-media-id="' + CSS.escape(mediaId) + '"]');
+                  function findIndexByMediaId(carousel, mediaId) {
+                    if (!carousel) return -1;
+                    var mediaEl = carousel.el.querySelector('[data-media-id="' + CSS.escape(mediaId) + '"]');
                     if (!mediaEl) return -1;
                     var slide = mediaEl.closest('[data-embla-slide]');
                     if (!slide) return -1;
-                    return Array.prototype.indexOf.call(productImagesEl.querySelectorAll('[data-embla-slide]'), slide);
+                    return Array.prototype.indexOf.call(carousel.el.querySelectorAll('[data-embla-slide]'), slide);
                   }
 
-                  var prevBtn = productImagesEl.querySelector('[data-embla-prev]');
-                  var nextBtn = productImagesEl.querySelector('[data-embla-next]');
+                  function makeCarousel(carouselEl) {
+                    if (carouselEl && carouselEl.dataset && carouselEl.dataset.emblaInitialized === 'true') return null;
+                    var viewport = carouselEl.querySelector('[data-embla-viewport]');
+                    if (!viewport) return null;
 
-                  function updateArrows() {
-                    if (prevBtn) prevBtn.disabled = !embla.canScrollPrev();
-                    if (nextBtn) nextBtn.disabled = !embla.canScrollNext();
+                    var embla = window.EmblaCarousel(viewport, {
+                      loop: false,
+                      containScroll: 'trimSnaps',
+                      watchDrag: function (emblaApi, event) {
+                        var target = event && event.target;
+                        if (!target || !target.closest) return true;
+                        var isTouch = false;
+                        try {
+                          isTouch = window.matchMedia && window.matchMedia('(hover: none)').matches;
+                        } catch (e) {}
+
+                        if (!isTouch) {
+                          if (target.closest('model-viewer')) return false;
+                          if (target.closest('product-model')) return false;
+                        }
+                        return true;
+                      }
+                    });
+
+                    var prevBtn = carouselEl.querySelector('[data-embla-prev]');
+                    var nextBtn = carouselEl.querySelector('[data-embla-next]');
+                    var progressBar = carouselEl.querySelector('[data-embla-progress-bar]');
+
+                    function updateArrows() {
+                      if (prevBtn) prevBtn.disabled = !embla.canScrollPrev();
+                      if (nextBtn) nextBtn.disabled = !embla.canScrollNext();
+                    }
+
+                    prevBtn && prevBtn.addEventListener('click', function (e) {
+                      e.preventDefault();
+                      embla.scrollPrev();
+                    });
+
+                    nextBtn && nextBtn.addEventListener('click', function (e) {
+                      e.preventDefault();
+                      embla.scrollNext();
+                    });
+
+                    var carousel = { el: carouselEl, embla: embla, prevBtn: prevBtn, nextBtn: nextBtn, progressBar: progressBar, updateArrows: updateArrows };
+
+                    var prevSelectedIndex = embla.selectedScrollSnap();
+                    var catchupTimer = null;
+
+                    embla.on('select', function () {
+                      var activeCarousel = getActiveCarousel();
+                      var index = embla.selectedScrollSnap();
+
+                      if (carouselEl.classList.contains('pdp-embla--desktop')) {
+                        var direction = index > prevSelectedIndex ? 'next' : index < prevSelectedIndex ? 'prev' : null;
+                        prevSelectedIndex = index;
+
+                        if (catchupTimer) window.clearTimeout(catchupTimer);
+
+                        if (direction) {
+                          catchupTimer = window.setTimeout(function () {
+                            var slideEls = carouselEl.querySelectorAll('[data-embla-slide]');
+                            var slideEl = slideEls[index];
+                            if (!slideEl) return;
+                            if (!slideEl.querySelector('.pdp-embla__pair')) return;
+
+                            slideEl.removeAttribute('data-pair-catchup');
+                            slideEl.getBoundingClientRect();
+                            slideEl.setAttribute('data-pair-catchup', direction);
+                            window.setTimeout(function () {
+                              slideEl.removeAttribute('data-pair-catchup');
+                            }, 700);
+                          }, 220);
+                        }
+                      }
+
+                      if (!activeCarousel || activeCarousel.el !== carouselEl) return;
+
+                      setActiveMediaByIndex(activeCarousel, index);
+                      loadDeferredMediaByIndex(activeCarousel, index);
+                      updateArrows();
+                      updateProgressByIndex(activeCarousel, index);
+                    });
+
+                    embla.on('reInit', function () {
+                      var activeCarousel = getActiveCarousel();
+                      if (!activeCarousel || activeCarousel.el !== carouselEl) return;
+                      updateArrows();
+                      updateProgressByIndex(activeCarousel, embla.selectedScrollSnap());
+                    });
+
+                    updateArrows();
+
+                    if (carouselEl && carouselEl.dataset) carouselEl.dataset.emblaInitialized = 'true';
+                    return carousel;
                   }
 
-                  prevBtn && prevBtn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    embla.scrollPrev();
-                  });
+                  var c = makeCarousel(carouselEl);
+                  if (c) carousels.push(c);
 
-                  nextBtn && nextBtn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    embla.scrollNext();
-                  });
+                  if (!carousels.length) return;
 
                   productImagesEl.addEventListener('theme:media:select', function (e) {
                     if (!e || !e.detail || !e.detail.id) return;
-                    var index = findIndexByMediaId(e.detail.id);
+                    var activeCarousel = getActiveCarousel();
+                    if (!activeCarousel) return;
+                    var index = findIndexByMediaId(activeCarousel, e.detail.id);
                     if (index < 0) return;
-                    embla.scrollTo(index);
-                    setActiveMediaByIndex(index);
-                    loadDeferredMediaByIndex(index);
-                  });
-
-                  embla.on('select', function () {
-                    var index = embla.selectedScrollSnap();
-                    setActiveMediaByIndex(index);
-                    loadDeferredMediaByIndex(index);
-                    updateArrows();
-                    updateProgressByIndex(index);
-                  });
-
-                  embla.on('reInit', function () {
-                    updateArrows();
-                    updateProgressByIndex(embla.selectedScrollSnap());
+                    activeCarousel.embla.scrollTo(index);
+                    setActiveMediaByIndex(activeCarousel, index);
+                    loadDeferredMediaByIndex(activeCarousel, index);
+                    activeCarousel.updateArrows && activeCarousel.updateArrows();
+                    updateProgressByIndex(activeCarousel, index);
                   });
 
                   var active = productImagesEl.getAttribute('data-active-media');
-                  if (active) {
-                    var startIndex = findIndexByMediaId(active);
-                    if (startIndex >= 0) {
-                      embla.scrollTo(startIndex, true);
-                      setActiveMediaByIndex(startIndex);
-                      loadDeferredMediaByIndex(startIndex);
-                    }
+
+                  function desiredIndexForCarousel(carousel) {
+                    if (!carousel) return 0;
+                    if (!active) return 0;
+                    var idx = findIndexByMediaId(carousel, active);
+                    return idx >= 0 ? idx : 0;
                   }
 
-                  updateArrows();
-                  updateProgressByIndex(embla.selectedScrollSnap());
+                  requestAnimationFrame(function () {
+                    carousels.forEach(function (carousel) {
+                      var startIndex = desiredIndexForCarousel(carousel);
+                      carousel.embla.scrollTo(startIndex, true);
+
+                      if (carousel.el && carousel.el.offsetParent !== null) {
+                        setActiveMediaByIndex(carousel, startIndex);
+                        loadDeferredMediaByIndex(carousel, startIndex);
+                        carousel.updateArrows && carousel.updateArrows();
+                        updateProgressByIndex(carousel, startIndex);
+                      }
+                    });
+                  });
                 }
 
                 function tryInit() {
@@ -591,26 +959,21 @@
 
                 document.addEventListener('DOMContentLoaded', function () {
                   var attempts = 0;
-                  var maxAttempts = 50;
-                  var interval = setInterval(function () {
+                  function poll() {
                     attempts += 1;
                     if (window.EmblaCarousel) {
-                      clearInterval(interval);
                       tryInit();
                       return;
                     }
-                    if (attempts >= maxAttempts) {
-                      clearInterval(interval);
-                    }
-                  }, 100);
-
-                  tryInit();
+                    if (attempts < 50) requestAnimationFrame(poll);
+                  }
+                  poll();
                 });
               })();
             </script>
 
             {%- if product.media.size > 0 -%}
-              <div class="pdp-embla">
+              <div class="pdp-embla pdp-embla--mobile" data-embla-carousel>
                 <div class="pdp-embla__viewport" data-embla-viewport>
                   <div class="pdp-embla__container">
                     {%- for media in ordered_media -%}
@@ -640,16 +1003,181 @@
                 <div class="pdp-embla__progress" aria-hidden="true">
                   <div class="pdp-embla__progress__bar" data-embla-progress-bar></div>
                 </div>
+              </div>
 
-                {%- if thumbnails_enabled -%}
-                  <product-thumbs class="product__thumbs">
-                    <div class="product__thumbs__holder" data-thumbs-slider>
-                      {%- for media in ordered_media -%}
+              <div class="pdp-embla pdp-embla--desktop" data-embla-carousel>
+                <div class="pdp-embla__viewport" data-embla-viewport>
+                  <div class="pdp-embla__container">
+                    {%- assign pdp_secondary_marker = 'pdp-30' -%}
+                    {%- assign second_media = product.media[1] -%}
+                    {%- assign pending_image = blank -%}
+                    {%- for media in ordered_media -%}
+                      {%- if media.media_type == 'image' -%}
+                        {%- if pending_image == blank -%}
+                          {%- assign pending_image = media -%}
+                        {%- else -%}
+                          {%- assign is_secondary_pair_image = false -%}
+                          {%- if media.alt and media.alt contains pdp_secondary_marker -%}
+                            {%- assign is_secondary_pair_image = true -%}
+                          {%- elsif second_media != blank and media.id == second_media.id -%}
+                            {%- assign is_secondary_pair_image = true -%}
+                          {%- endif -%}
+
+                          <div class="pdp-embla__slide" data-embla-slide{% if is_secondary_pair_image %} data-pair-layout="70-30"{% endif %}>
+                            <div class="pdp-embla__pair">
+                              <div class="pdp-embla__pair__item">
+                                {%- render 'media',
+                                  media: pending_image,
+                                  featured_media: featured_media,
+                                  enable_video_looping: enable_video_looping,
+                                  sectionkey: section.id,
+                                  image_width: image_width,
+                                  cover: true
+                                -%}
+                              </div>
+                              <div class="pdp-embla__pair__item"{% if is_secondary_pair_image %} data-pair-role="secondary"{% endif %}>
+                                {%- render 'media',
+                                  media: media,
+                                  featured_media: featured_media,
+                                  enable_video_looping: enable_video_looping,
+                                  sectionkey: section.id,
+                                  image_width: image_width,
+                                  cover: true
+                                -%}
+                              </div>
+                            </div>
+                          </div>
+                          {%- assign pending_image = blank -%}
+                        {%- endif -%}
+                      {%- else -%}
+                        {%- if pending_image != blank -%}
+                          <div class="pdp-embla__slide" data-embla-slide>
+                            {%- render 'media',
+                              media: pending_image,
+                              featured_media: featured_media,
+                              enable_video_looping: enable_video_looping,
+                              sectionkey: section.id,
+                              image_width: image_width,
+                              cover: true
+                            -%}
+                          </div>
+                          {%- assign pending_image = blank -%}
+                        {%- endif -%}
+
+                        <div class="pdp-embla__slide" data-embla-slide>
+                          {%- render 'media',
+                            media: media,
+                            featured_media: featured_media,
+                            enable_video_looping: enable_video_looping,
+                            sectionkey: section.id,
+                            image_width: image_width,
+                            cover: true
+                          -%}
+                        </div>
+                      {%- endif -%}
+                    {%- endfor -%}
+                    {%- if pending_image != blank -%}
+                      <div class="pdp-embla__slide" data-embla-slide>
+                        {%- render 'media',
+                          media: pending_image,
+                          featured_media: featured_media,
+                          enable_video_looping: enable_video_looping,
+                          sectionkey: section.id,
+                          image_width: image_width,
+                          cover: true
+                        -%}
+                      </div>
+                    {%- endif -%}
+                  </div>
+                </div>
+
+                <div class="pdp-embla__arrows" aria-label="{{ 'general.accessibility.controls' | t | escape }}">
+                  <button type="button" class="pdp-embla__arrow" data-embla-prev aria-label="{{ 'general.accessibility.previous' | t | escape }}">
+                    {%- render 'icon-nav-arrow-left' -%}
+                  </button>
+                  <button type="button" class="pdp-embla__arrow" data-embla-next aria-label="{{ 'general.accessibility.next' | t | escape }}">
+                    {%- render 'icon-nav-arrow-right' -%}
+                  </button>
+                </div>
+
+                <div class="pdp-embla__progress" aria-hidden="true">
+                  <div class="pdp-embla__progress__bar" data-embla-progress-bar></div>
+                </div>
+              </div>
+
+              {%- if thumbnails_enabled -%}
+                <product-thumbs class="product__thumbs pdp-thumbs--mobile">
+                  <div class="product__thumbs__holder" data-thumbs-slider>
+                    {%- for media in ordered_media -%}
+                      <div class="product__thumb{% if media == featured_media %} is-active{% endif %}" data-thumb-item>
+                        <a
+                          class="product__thumb__link"
+                          href="{{ media.preview_image.src | image_url }}"
+                          aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
+                          data-media-id="{{ section.id }}-{{ media.id }}"
+                          data-thumb-link
+                        >
+                          {%- liquid
+                            render 'image', image: media.preview_image, width: 90, height: 90, sizes: '45px', widths: '45, 60, 90, 120, 180', aspect_ratio: 1
+
+                            if media.media_type == 'video' or media.media_type == 'external_video'
+                              render 'icon-media-video'
+                            else
+                              if media.media_type == 'model'
+                                render 'icon-media-model'
+                              endif
+                            endif
+                          -%}
+                        </a>
+                      </div>
+                    {%- endfor -%}
+                  </div>
+                </product-thumbs>
+
+                <product-thumbs class="product__thumbs pdp-thumbs--desktop">
+                  <div class="product__thumbs__holder" data-thumbs-slider>
+                    {%- assign pending_image = blank -%}
+                    {%- for media in ordered_media -%}
+                      {%- if media.media_type == 'image' -%}
+                        {%- if pending_image == blank -%}
+                          {%- assign pending_image = media -%}
+                        {%- else -%}
+                          <div class="product__thumb{% if pending_image == featured_media or media == featured_media %} is-active{% endif %}" data-thumb-item>
+                            <a
+                              class="product__thumb__link product__thumb__link--pair"
+                              href="{{ pending_image.preview_image.src | image_url }}"
+                              data-media-id="{{ section.id }}-{{ pending_image.id }}"
+                              data-thumb-link
+                            >
+                              {%- liquid
+                                render 'image', image: pending_image.preview_image, width: 90, height: 90, sizes: '45px', widths: '45, 60, 90, 120, 180', aspect_ratio: 1
+                                render 'image', image: media.preview_image, width: 90, height: 90, sizes: '45px', widths: '45, 60, 90, 120, 180', aspect_ratio: 1
+                              -%}
+                            </a>
+                          </div>
+                          {%- assign pending_image = blank -%}
+                        {%- endif -%}
+                      {%- else -%}
+                        {%- if pending_image != blank -%}
+                          <div class="product__thumb{% if pending_image == featured_media %} is-active{% endif %}" data-thumb-item>
+                            <a
+                              class="product__thumb__link"
+                              href="{{ pending_image.preview_image.src | image_url }}"
+                              data-media-id="{{ section.id }}-{{ pending_image.id }}"
+                              data-thumb-link
+                            >
+                              {%- liquid
+                                render 'image', image: pending_image.preview_image, width: 90, height: 90, sizes: '45px', widths: '45, 60, 90, 120, 180', aspect_ratio: 1
+                              -%}
+                            </a>
+                          </div>
+                          {%- assign pending_image = blank -%}
+                        {%- endif -%}
+
                         <div class="product__thumb{% if media == featured_media %} is-active{% endif %}" data-thumb-item>
                           <a
                             class="product__thumb__link"
                             href="{{ media.preview_image.src | image_url }}"
-                            aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
                             data-media-id="{{ section.id }}-{{ media.id }}"
                             data-thumb-link
                           >
@@ -666,11 +1194,26 @@
                             -%}
                           </a>
                         </div>
-                      {%- endfor -%}
-                    </div>
-                  </product-thumbs>
-                {%- endif -%}
-              </div>
+                      {%- endif -%}
+                    {%- endfor -%}
+
+                    {%- if pending_image != blank -%}
+                      <div class="product__thumb{% if pending_image == featured_media %} is-active{% endif %}" data-thumb-item>
+                        <a
+                          class="product__thumb__link"
+                          href="{{ pending_image.preview_image.src | image_url }}"
+                          data-media-id="{{ section.id }}-{{ pending_image.id }}"
+                          data-thumb-link
+                        >
+                          {%- liquid
+                            render 'image', image: pending_image.preview_image, width: 90, height: 90, sizes: '45px', widths: '45, 60, 90, 120, 180', aspect_ratio: 1
+                          -%}
+                        </a>
+                      </div>
+                    {%- endif -%}
+                  </div>
+                </product-thumbs>
+              {%- endif -%}
             {%- endif -%}
           {%- else -%}
             {%- if product.media.size > 0 -%}
