@@ -184,8 +184,7 @@ header[data-header-desktop] {
   }
 
   .drawer__menu.tmenu_app .tmenu_item_level_0.tmenu_item_mobile.tmenu_item_active {
-    position: absolute;
-    top: 0;
+    position: relative;
   }
 
   .drawer__menu.tmenu_app .tmenu_item_mobile.tmenu_item_active>.tmenu_item_link {
@@ -297,14 +296,61 @@ header[data-header-desktop] {
     grid-row: 2;
   }
 
+  /* Vertical offset for active root items (negative margin equivalent) */
+  .drawer__menu.tmenu_app .tmenu_item_level_0.tmenu_item_mobile.tmenu_item_active {
+    margin-top: 0;
+  }
+
+  .drawer__menu.tmenu_app .tmenu_item_level_0.tmenu_item_mobile:nth-of-type(2).tmenu_item_active {
+    margin-top: calc(-45px * 1) !important;
+  }
+
+  .drawer__menu.tmenu_app .tmenu_item_level_0.tmenu_item_mobile:nth-of-type(3).tmenu_item_active {
+    margin-top: calc(-45px * 2) !important;
+  }
+
+  .drawer__menu.tmenu_app .tmenu_item_level_0.tmenu_item_mobile:nth-of-type(4).tmenu_item_active {
+    margin-top: calc(-45px * 3) !important;
+  }
+
+  .drawer__menu.tmenu_app .tmenu_item_level_0.tmenu_item_mobile:nth-of-type(5).tmenu_item_active {
+    margin-top: calc(-45px * 4) !important;
+  }
+
+  .drawer__menu.tmenu_app .tmenu_item_level_0.tmenu_item_mobile:nth-of-type(6).tmenu_item_active {
+    margin-top: calc(-45px * 5) !important;
+  }
+
+  .drawer__menu.tmenu_app .tmenu_item_level_0.tmenu_item_mobile:nth-of-type(7).tmenu_item_active {
+    margin-top: calc(-45px * 6) !important;
+  }
+
+  .drawer__menu.tmenu_app .tmenu_item_level_0.tmenu_item_mobile:nth-of-type(8).tmenu_item_active {
+    margin-top: calc(-45px * 7) !important;
+  }
+
+  .drawer__menu.tmenu_app .tmenu_item_level_0.tmenu_item_mobile:nth-of-type(9).tmenu_item_active {
+    margin-top: calc(-45px * 8) !important;
+  }
+
+  .drawer__menu.tmenu_app .tmenu_item_level_0.tmenu_item_mobile:nth-of-type(10).tmenu_item_active {
+    margin-top: calc(-45px * 9) !important;
+  }
+
   /* Third panel (row 2) image list layout */
   .drawer__menu.tmenu_app .tmenu_item_level_0.tmenu_item_mobile>.tmenu_submenu--mobile.tmenu_submenu>li.tmenu_item_level_1.tmenu_item_mobile:nth-of-type(3)>.tmenu_submenu {
     display: flex !important;
     flex-direction: row !important;
     gap: 10px;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     padding: 0 20px !important;
     margin: 0;
+    scrollbar-width: none;
+  }
+
+  .drawer__menu.tmenu_app .tmenu_item_level_0.tmenu_item_mobile>.tmenu_submenu--mobile.tmenu_submenu>li.tmenu_item_level_1.tmenu_item_mobile:nth-of-type(3)>.tmenu_submenu::-webkit-scrollbar {
+    display: none;
   }
 
   .drawer__menu.tmenu_app .tmenu_item_level_1.tmenu_item_mobile .tmenu_submenu .tmenu_item_level_2 {
