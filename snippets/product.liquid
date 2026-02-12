@@ -176,6 +176,27 @@
         background: transparent;
       }
 
+      body.template-product .header-sections {
+        background: transparent;
+      }
+
+      body.template-product .header__wrapper {
+        --bg: transparent;
+      }
+
+      body.template-product .header__mobile__bottom {
+        --bg: transparent;
+      }
+
+      body.template-product .main-content {
+        margin-top: 0;
+        padding-top: 0;
+      }
+
+      body.template-product .main-content > *:first-child {
+        margin-top: 0;
+      }
+
       #MainProduct--{{ section.id }} {
         padding-top: 0;
         padding-bottom: 0;
@@ -216,6 +237,22 @@
 
       #MainProduct--{{ section.id }} .product__images .image-wrapper--cover img {
         object-fit: contain;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item:not([data-pair-role='secondary']) .image-wrapper--cover {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item:not([data-pair-role='secondary']) .image-wrapper--cover img {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 80%;
+        object-fit: contain;
+        object-position: center;
+        margin: 10% 0;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla img {
@@ -270,6 +307,14 @@
         touch-action: pan-y;
       }
 
+      @media (min-width: 990px) {
+        #MainProduct--{{ section.id }} .pdp-embla__viewport {
+          margin-top: calc(-1*(var(--header-height, 0px) + var(--announcement-height, 0px)));
+          height: var(--full-screen, var(--full-height, 100vh));
+          min-height: 100vh;
+        }
+      }
+
       #MainProduct--{{ section.id }} .pdp-embla__progress {
         position: absolute;
         left: 0;
@@ -318,6 +363,43 @@
         flex: 1 1 0;
         min-width: 0;
         height: 100%;
+      }
+
+      @media (min-width: 990px) {
+        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item[data-pair-role='secondary'] {
+          position: relative;
+          outline: 2px solid currentcolor;
+          outline-offset: -2px;
+        }
+
+        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item[data-pair-role='secondary']::after {
+          content: "30%";
+          position: absolute;
+          top: var(--inner);
+          right: var(--inner);
+          padding: 6px 10px;
+          background: rgba(0, 0, 0, 0.7);
+          color: #fff;
+          font-size: 12px;
+          line-height: 1;
+          z-index: 2;
+        }
+
+        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item[data-pair-role='secondary'] img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+
+      @media (min-width: 990px) {
+        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-layout='70-30'] .pdp-embla__pair__item:first-child {
+          flex: 0 0 70%;
+        }
+
+        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-layout='70-30'] .pdp-embla__pair__item:nth-child(2) {
+          flex: 0 0 30%;
+        }
       }
 
       #MainProduct--{{ section.id }} {
@@ -938,13 +1020,22 @@
               <div class="pdp-embla pdp-embla--desktop" data-embla-carousel>
                 <div class="pdp-embla__viewport" data-embla-viewport>
                   <div class="pdp-embla__container">
+                    {%- assign pdp_secondary_marker = 'pdp-30' -%}
+                    {%- assign second_media = product.media[1] -%}
                     {%- assign pending_image = blank -%}
                     {%- for media in ordered_media -%}
                       {%- if media.media_type == 'image' -%}
                         {%- if pending_image == blank -%}
                           {%- assign pending_image = media -%}
                         {%- else -%}
-                          <div class="pdp-embla__slide" data-embla-slide>
+                          {%- assign is_secondary_pair_image = false -%}
+                          {%- if media.alt and media.alt contains pdp_secondary_marker -%}
+                            {%- assign is_secondary_pair_image = true -%}
+                          {%- elsif second_media != blank and media.id == second_media.id -%}
+                            {%- assign is_secondary_pair_image = true -%}
+                          {%- endif -%}
+
+                          <div class="pdp-embla__slide" data-embla-slide{% if is_secondary_pair_image %} data-pair-layout="70-30"{% endif %}>
                             <div class="pdp-embla__pair">
                               <div class="pdp-embla__pair__item">
                                 {%- render 'media',
@@ -956,7 +1047,7 @@
                                   cover: true
                                 -%}
                               </div>
-                              <div class="pdp-embla__pair__item">
+                              <div class="pdp-embla__pair__item"{% if is_secondary_pair_image %} data-pair-role="secondary"{% endif %}>
                                 {%- render 'media',
                                   media: media,
                                   featured_media: featured_media,
