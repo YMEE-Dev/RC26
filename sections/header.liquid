@@ -545,14 +545,14 @@
 
     <div class="section-padding">
       <div class="header__mobile__button">
-        <button class="header__mobile__hamburger{% if show_icons == false %} navlink navlink--toplevel{% endif %}{% if settings.type_nav_caps %} caps{% endif %}"
+        <button
+          class="header__mobile__hamburger{% if show_icons == false %} navlink navlink--toplevel{% endif %}{% if settings.type_nav_caps %} caps{% endif %}"
           data-drawer-toggle="hamburger"
           aria-label="{{ 'general.accessibility.show_menu' | t }}"
           aria-haspopup="true"
           aria-expanded="false"
           aria-controls="header-menu"
         >
-
           {%- render 'icon-menu' -%}
         </button>
       </div>
@@ -733,7 +733,7 @@
     let currentImage = null;
 
     const initMenuImages = () => {
-      const images = selectAll('.tmenu_collection--notext > img');
+      const images = selectAll('.tmenu_collection--above > img');
       if (!images.length) return;
       if (!currentImage || images.includes(currentImage) === false) {
         currentImage = images[0];
