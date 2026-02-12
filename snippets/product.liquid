@@ -381,12 +381,12 @@
       }
 
       @media (min-width: 990px) {
-        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-layout='70-30'] .pdp-embla__pair__item:first-child {
-          flex: 0 0 70%;
+        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-layout='60-40'] .pdp-embla__pair__item:first-child {
+          flex: 0 0 60%;
         }
 
-        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-layout='70-30'] .pdp-embla__pair__item:nth-child(2) {
-          flex: 0 0 30%;
+        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-layout='60-40'] .pdp-embla__pair__item:nth-child(2) {
+          flex: 0 0 40%;
         }
       }
 
@@ -1008,7 +1008,7 @@
               <div class="pdp-embla pdp-embla--desktop" data-embla-carousel>
                 <div class="pdp-embla__viewport" data-embla-viewport>
                   <div class="pdp-embla__container">
-                    {%- assign pdp_secondary_marker = 'pdp-30' -%}
+                    {%- assign pdp_secondary_marker = 'pdp-40' -%}
                     {%- assign second_media = product.media[1] -%}
                     {%- assign pending_image = blank -%}
                     {%- for media in ordered_media -%}
@@ -1019,11 +1019,11 @@
                           {%- assign is_secondary_pair_image = false -%}
                           {%- if media.alt and media.alt contains pdp_secondary_marker -%}
                             {%- assign is_secondary_pair_image = true -%}
-                          {%- elsif second_media != blank and media.id == second_media.id -%}
-                            {%- assign is_secondary_pair_image = true -%}
+                          {% comment %} {%- elsif second_media != blank and media.id == second_media.id -%}
+                            {%- assign is_secondary_pair_image = true -%} {% endcomment %}
                           {%- endif -%}
 
-                          <div class="pdp-embla__slide" data-embla-slide{% if is_secondary_pair_image %} data-pair-layout="70-30"{% endif %}>
+                          <div class="pdp-embla__slide" data-embla-slide{% if is_secondary_pair_image %} data-pair-layout="60-40"{% endif %}>
                             <div class="pdp-embla__pair">
                               <div class="pdp-embla__pair__item">
                                 {%- render 'media',
