@@ -212,14 +212,51 @@
         margin: 0;
       }
 
-      #MainProduct--{{ section.id }} .product__content {
-        margin-top: 50px;
-      }
       @media (max-width: 767px) {
+        #MainProduct--{{ section.id }} .product__content {
+          margin: 20px 0 0;
+        }
+
         product-info.index-product .product__content {
           margin-top: 16px;
           padding-left: var(--inner);
           padding-right: var(--inner);
+        }
+      }
+
+      @media (min-width: 990px) {
+
+        #MainProduct--{{ section.id }} .product__content {
+          margin: 50px auto 0 auto;
+          max-width: min(var(--content-max), 1200px);
+        }
+
+        #MainProduct--{{ section.id }} .form__width {
+          max-width: 100%;
+        }
+        
+        #MainProduct--{{ section.id }} .product__content-columns {
+          display: grid;
+          grid-template-columns: 7fr 3fr;
+          gap: var(--inner);
+          align-items: start;
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: var(--inner);
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price .product__price__wrap {
+          text-align: right;
+        }
+
+        #MainProduct--{{ section.id }} .product__content-columns__aside {
+          position: sticky;
+          top: var(--header-height, 0px);
+          align-self: start;
         }
       }
 
@@ -1346,7 +1383,82 @@
                 >
               {%- endif -%}
 
+              {%- liquid
+                assign title_block = section.blocks | where: 'type', 'title' | first
+                assign price_block = section.blocks | where: 'type', 'price' | first
+                assign description_block = section.blocks | where: 'type', 'description' | first
+                assign icon_blocks = section.blocks | where: 'type', 'icon'
+                assign aside_has_content = false
+
+                if show_buy_buttons or icon_blocks.size > 0
+                  assign aside_has_content = true
+                endif
+
+                assign title_block_style = ''
+                if title_block != blank and title_block.settings.padding_bottom
+                  assign title_block_style = '--block-padding-bottom: ' | append: title_block.settings.padding_bottom | append: 'px;'
+                  assign title_block_style = 'style="' | append: title_block_style | append: '"'
+                endif
+
+                assign price_block_style = ''
+                if price_block != blank and price_block.settings.padding_bottom
+                  assign price_block_style = '--block-padding-bottom: ' | append: price_block.settings.padding_bottom | append: 'px;'
+                  assign price_block_style = 'style="' | append: price_block_style | append: '"'
+                endif
+
+                assign description_block_style = ''
+                if description_block != blank and description_block.settings.padding_bottom
+                  assign description_block_style = '--block-padding-bottom: ' | append: description_block.settings.padding_bottom | append: 'px;'
+                  assign description_block_style = 'style="' | append: description_block_style | append: '"'
+                endif
+              -%}
+
+              <div class="product__content-columns">
+                <div class="product__content-columns__main">
+                  {%- if title_block != blank or price_block != blank -%}
+                    <div class="product__title-price">
+                      {%- if title_block != blank -%}
+                        {%- render 'product-title',
+                          product: product,
+                          block: title_block,
+                          block_style: title_block_style,
+                          is_title_linked: is_title_linked,
+                          onboarding_product: onboarding_product
+                        -%}
+                      {%- endif -%}
+
+                      {%- if price_block != blank -%}
+                        {%- render 'product-price',
+                          product: product,
+                          block: price_block,
+                          block_style: price_block_style,
+                          onboarding_product: onboarding_product
+                        -%}
+                      {%- endif -%}
+                    </div>
+                  {%- endif -%}
+
+                  {%- if description_block != blank -%}
+                    {%- render 'product-description',
+                      product: product,
+                      block: description_block,
+                      block_style: description_block_style
+                    -%}
+                  {%- endif -%}
+
               {%- for block in section.blocks -%}
+                {%- if title_block != blank and block.id == title_block.id -%}
+                  {%- continue -%}
+                {%- endif -%}
+                {%- if price_block != blank and block.id == price_block.id -%}
+                  {%- continue -%}
+                {%- endif -%}
+                {%- if description_block != blank and block.id == description_block.id -%}
+                  {%- continue -%}
+                {%- endif -%}
+                {%- if block.type == 'buttons' or block.type == 'icon' -%}
+                  {%- continue -%}
+                {%- endif -%}
                 {%- liquid
                   assign padding_bottom = block.settings.padding_bottom
                   assign bg_accent = block.settings.bg_color
@@ -1871,6 +1983,72 @@
                     </div>
                 {%- endcase -%}
               {%- endfor -%}
+
+                </div>
+
+                {%- if aside_has_content -%}
+                  <div class="product__content-columns__aside">
+                    {%- for block in section.blocks -%}
+                      {%- if block.type == 'buttons' -%}
+                        {%- liquid
+                          assign padding_bottom = block.settings.padding_bottom
+                          assign bg_accent = block.settings.bg_color
+                          assign icon_size = block.settings.icon_size
+
+                          capture block_style
+                            if padding_bottom
+                              echo '--block-padding-bottom: ' | append: block.settings.padding_bottom | append: 'px;'
+                            endif
+
+                            if block.type == 'upsell' or block.type == 'bundle-save' or block.type == 'complementary-products'
+                              unless bg_accent == 'rgba(0,0,0,0)' or bg_accent == blank
+                                echo '--bg-accent: ' | append: bg_accent | append: ';'
+                              endunless
+                            endif
+
+                            if icon_size
+                              echo '--icon-size:' | append: icon_size | append: 'px;'
+                            endif
+
+                            if block.type == 'countdown'
+                              assign bg_color = block.settings.bg_color
+                              assign text_color = block.settings.color
+
+                              unless bg_color == 'rgba(0,0,0,0)' or bg_color == blank
+                                echo '--bg: ' | append: bg_color | append: ';'
+                                echo '--countdown-padding: ' | append: 'var(--inner);'
+                              endunless
+
+                              unless text_color == 'rgba(0,0,0,0)' or text_color == blank
+                                echo '--text: ' | append: text_color | append: ';'
+                              endunless
+                            endif
+                          endcapture
+
+                          if block_style != blank
+                            assign block_style = 'style="' | append: block_style | append: '"'
+                          endif
+                        -%}
+
+                        {%- render 'product-buttons',
+                          block: block,
+                          block_style: block_style,
+                          product: product,
+                          product_form_id: product_form_id,
+                          preorder: preorder,
+                          onboarding_product: onboarding_product
+                        -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+
+                    {%- for block in section.blocks -%}
+                      {%- if block.type == 'icon' -%}
+                        {%- render 'icon', block: block, index: forloop.index0, is_product: true -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </div>
+                {%- endif -%}
+              </div>
             </div>
           </div>
         </div>
