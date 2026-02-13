@@ -7402,7 +7402,7 @@ hover-disclosure {
 
 .theme__header {
   position: absolute;
-  z-index: 2300;
+  z-index: 6002;
   width: 100%;
 }
 
@@ -9239,6 +9239,8 @@ html.supports-touch ticker-bar[data-slide]:not([paused]) .ticker--animated {
   display: flex;
   flex-direction: row-reverse;
   border: 0;
+  padding: 0 !important;
+  height: 86px;
 }
 
 .drawer--header .drawer__close {
@@ -10126,12 +10128,24 @@ header-search-popdown.is-open .search-popdown {
   fill: var(--link);
   mix-blend-mode: color-dodge;
   filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.05));
+  z-index: 5999;
+  transition: opacity 0.3s ease;
 }
 
 @media only screen and (min-width: 750px) {
   .header__mobile__hamburger {
     display: none;
   }
+}
+
+body:has(.drawer--header.is-open) .header__mobile__hamburger {
+  opacity: 0;
+  pointer-events: none;
+}
+
+body:has(.drawer--header:not(.is-open)) .header__mobile__hamburger {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 @media only screen and (min-width: 750px) {

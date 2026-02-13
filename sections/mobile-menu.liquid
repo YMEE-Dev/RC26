@@ -378,18 +378,20 @@
   >
     <div class="drawer__inner" data-drawer-inner>
       <header class="drawer__head">
-        {%- if logo != blank -%}
-          <a
-            class="header__logo__link header__logo__link--drawer"
-            href="{{ routes.root_url }}"
-            data-logo-link
-            style="{{ mobile_menu_logo_style }}"
-          >
-            {%- liquid
-              render 'image', image: logo, width: logo_width_2x, sizes: logo_width_2x, widths: logo_widths, show_backfill: false, loading: 'lazy', fetchpriority: 'high'
-            -%}
-          </a>
-        {%- endif -%}
+        {% comment %}
+          {%- if logo != blank -%}
+            <a
+              class="header__logo__link header__logo__link--drawer"
+              href="{{ routes.root_url }}"
+              data-logo-link
+              style="{{ mobile_menu_logo_style }}"
+            >
+              {%- liquid
+                render 'image', image: logo, width: logo_width_2x, sizes: logo_width_2x, widths: logo_widths, show_backfill: false, loading: 'lazy', fetchpriority: 'high'
+              -%}
+            </a>
+          {%- endif -%}
+        {% endcomment %}
       </header>
 
       <div class="drawer__body">
