@@ -14,7 +14,17 @@
   if section
     assign index = index | append: ''
     for block in section.blocks
-      if block.settings.position == index
+      assign position_path = block.settings.position
+
+      if position_path == blank and block.settings.level_1_index != blank
+        assign position_path = block.settings.level_1_index
+
+        if block.settings.level_2_index != blank and block.settings.level_2_index != '0'
+          assign position_path = position_path | append: 'x' | append: block.settings.level_2_index
+        endif
+      endif
+
+      if position_path == index
         assign block_count = block_count | plus: 1
       endif
     endfor
@@ -126,7 +136,17 @@
             {%- assign animation_delay = animation_delay | plus: animation_delay_additional -%}
 
             {%- for block in section.blocks -%}
-              {%- if block.settings.position == index -%}
+              {%- assign position_path = block.settings.position -%}
+
+              {%- if position_path == blank and block.settings.level_1_index != blank -%}
+                {%- assign position_path = block.settings.level_1_index -%}
+
+                {%- if block.settings.level_2_index != blank and block.settings.level_2_index != '0' -%}
+                  {%- assign position_path = position_path | append: 'x' | append: block.settings.level_2_index -%}
+                {%- endif -%}
+              {%- endif -%}
+
+              {%- if position_path == index -%}
                 {%- assign animation_delay = animation_delay | plus: animation_delay_next -%}
 
                 {%- capture header_blocks -%}
@@ -138,8 +158,10 @@
             {%- endfor -%}
 
             {%- if header_blocks != '' -%}
-              <div class="sliderule-grid blocks-{{ block_count }}">
-                {{ header_blocks }}
+              <div class="sliderow__image-wrapper sliderule-grid blocks-{{ block_count }}">
+                <div class="sliderow__image__scroll-container">
+                  {{ header_blocks }}
+                </div>
               </div>
             {%- endif -%}
           {%- endif -%}
