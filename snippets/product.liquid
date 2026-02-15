@@ -89,7 +89,7 @@
   assign sibling_color = product.metafields.theme.sibling_color.value | default: product.metafields.theme.sibling_colour.value | default: product.metafields.theme.siblings_color.value | default: product.metafields.theme.siblings_colour.value | default: product.metafields.theme.siblings_colors.value | default: product.metafields.theme.siblings_colours.value
 
   if section.settings.show_cart_bar and featured_product == false
-    assign show_cart_bar = true
+    assign show_cart_bar = false
   endif
 
   capture product_images_classlist
@@ -167,9 +167,15 @@
       --PB: {{ section.settings.padding_bottom }}px;
 
       --swatch-size: var(--swatch-size-product);
+      --pdp-sticky-bar-height: 100px;
+      --bg-color: #f9f9f9;
     }
 
     {%- if template.name == 'product' and featured_product == false -%}
+
+      body.template-product .header__desktop__upper {
+        overflow-x: hidden;
+      }
 
       body.template-product header-component.js__header__stuck .theme__header::after {
         content: "";
@@ -180,10 +186,7 @@
         background: transparent;
       }
 
-      body.template-product .header__wrapper {
-        --bg: transparent;
-      }
-
+      body.template-product .header__wrapper,
       body.template-product .header__mobile__bottom {
         --bg: transparent;
       }
@@ -212,14 +215,122 @@
         margin: 0;
       }
 
-      #MainProduct--{{ section.id }} .product__content {
-        margin-top: 50px;
-      }
       @media (max-width: 767px) {
+        #MainProduct--{{ section.id }} .product__content {
+          margin: 20px 0 0;
+        }
+
         product-info.index-product .product__content {
           margin-top: 16px;
           padding-left: var(--inner);
           padding-right: var(--inner);
+        }
+      }
+
+      @media (min-width: 990px) {
+
+        #MainProduct--{{ section.id }} .product__images {
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+          align-items: start;
+          margin: 0;
+        }
+
+        #MainProduct--{{ section.id }} .product__content {
+          margin: 0 auto;
+          padding: 0;
+        }
+
+        #MainProduct--{{ section.id }} .product__sticky-bar {
+          /* position: sticky;
+          top: calc(var(--header-height, 0px) + var(--announcement-height, 0px)); */
+          position: relative;
+          top: auto;
+          z-index: 6;
+          border-top: 1px solid var(--border);
+          margin: 0;
+          width: 100%;
+        }
+
+        #MainProduct--{{ section.id }} .product__sticky-bar__inner {
+          display: grid;
+          grid-template-columns: 7fr 3fr;
+          gap: 50px;
+          align-items: center;
+          min-height: var(--pdp-sticky-bar-height);
+          padding: 0;
+          max-width: min(var(--content-max), 1200px);
+          margin: 0 auto;
+        }
+
+        #MainProduct--{{ section.id }} .form__width {
+          max-width: min(var(--content-max), 1200px);
+        }
+
+        #MainProduct--{{ section.id }} .product__content-columns {
+          display: grid;
+          grid-template-columns: 7fr 3fr;
+          gap: var(--inner);
+          align-items: start;
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: var(--inner);
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price .block-padding {
+          margin: 0;
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price .product__price__wrap {
+          text-align: right;
+          flex-direction: row;
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price .product__price__wrap .product__price {
+          padding: 0;
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price .product__title {
+          margin: 0;
+          font-family: var(--FONT-STACK-BODY);
+          font-style: var(--FONT-STYLE-BODY);
+          font-weight: var(--FONT-WEIGHT-BODY);
+          font-size: var(--FONT-TITLE);
+          line-height: var(--LINE-HEIGHT-TITLE);
+          text-transform: uppercase;
+          max-width: 40ch;
+          color: var(--COLOR-TEXT-DARK);
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price .price-item,
+        #MainProduct--{{ section.id }} .product__description {
+          font-family: var(--FONT-STACK-BODY);
+          font-style: var(--FONT-STYLE-BODY);
+          font-weight: var(--FONT-WEIGHT-BODY);
+          font-size: var(--FONT-SIZE-BASE);
+          line-height: var(--LINE-HEIGHT-BODY);
+          color: var(--COLOR-TEXT-DARK);
+        }
+
+        #MainProduct--{{ section.id }} .product__description {
+          max-width: 60ch;
+        }
+
+        #MainProduct--{{ section.id }} .product__content-columns__aside {
+          position: sticky;
+          top: calc(var(--header-height, 0px) + var(--announcement-height, 0px));
+          align-self: start;
+          z-index: 9;
+        }
+
+        #MainProduct--{{ section.id }} .product__content-columns__aside .product__block--buttons {
+          margin-top: calc(var(--pdp-sticky-bar-height, 100px) * -1 / 1.4);
+          margin-bottom: 30px;
         }
       }
 
@@ -232,6 +343,10 @@
 
       #MainProduct--{{ section.id }} .product__images {
         position: relative;
+      }
+
+      #MainProduct--{{ section.id }} .product__images .image-wrapper--cover {
+        background-color: var(--bg-color);
       }
 
       #MainProduct--{{ section.id }} .product__images .image-wrapper--cover img {
@@ -248,10 +363,10 @@
         width: 100%;
         height: 100%;
         max-width: 100%;
-        max-height: 80%;
+        max-height: calc(100% - var(--header-height));
         object-fit: contain;
         object-position: center;
-        margin: 10% 0;
+        margin: var(--header-height) 0 0;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla img {
@@ -308,9 +423,9 @@
 
       @media (min-width: 990px) {
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          margin-top: calc(-1*(var(--header-height, 0px) + var(--announcement-height, 0px)));
-          height: var(--full-screen, var(--full-height, 100vh));
-          min-height: 100vh;
+          margin-top: 0;
+          height: calc(100vh - var(--pdp-sticky-bar-height, 100px));
+          min-height: 0;
         }
       }
 
@@ -320,7 +435,7 @@
         right: 0;
         bottom: 0;
         height: 1px;
-        background: #F9F9F9;
+        background: #f9f9f9;
         z-index: 6;
         overflow: hidden;
         display: none;
@@ -356,37 +471,47 @@
         display: flex;
         height: 100%;
         width: 100%;
+        overflow: hidden;
+        gap: 0;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item {
         flex: 1 1 0;
         min-width: 0;
         height: 100%;
+        backface-visibility: hidden;
+        transform: translateZ(0);
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        backface-visibility: hidden;
+        transform: translateZ(0);
       }
 
       @media (min-width: 990px) {
         #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item[data-pair-role='secondary'] {
           position: relative;
-          outline: 2px solid currentcolor;
-          outline-offset: -2px;
+          outline: 0;
+          box-shadow: inset 0 0 0 2px currentcolor;
         }
 
         #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item[data-pair-role='secondary'] img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
           text-indent: -100vw;
           overflow: hidden;
         }
       }
 
       @media (min-width: 990px) {
-        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-layout='70-30'] .pdp-embla__pair__item:first-child {
-          flex: 0 0 70%;
+        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-layout='60-40'] .pdp-embla__pair__item:first-child {
+          flex: 0 0 60%;
         }
 
-        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-layout='70-30'] .pdp-embla__pair__item:nth-child(2) {
-          flex: 0 0 30%;
+        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-layout='60-40'] .pdp-embla__pair__item:nth-child(2) {
+          flex: 0 0 40%;
         }
       }
 
@@ -590,7 +715,7 @@
       #MainProduct--{{ section.id }} .product__thumbs {
         position: absolute;
         left: var(--outer);
-        top: 50vh;
+        top: 50%;
         transform: translateY(-100%);
         z-index: 6;
         display: block;
@@ -1008,7 +1133,7 @@
               <div class="pdp-embla pdp-embla--desktop" data-embla-carousel>
                 <div class="pdp-embla__viewport" data-embla-viewport>
                   <div class="pdp-embla__container">
-                    {%- assign pdp_secondary_marker = 'pdp-30' -%}
+                    {%- assign pdp_secondary_marker = 'pdp-40' -%}
                     {%- assign second_media = product.media[1] -%}
                     {%- assign pending_image = blank -%}
                     {%- for media in ordered_media -%}
@@ -1019,11 +1144,11 @@
                           {%- assign is_secondary_pair_image = false -%}
                           {%- if media.alt and media.alt contains pdp_secondary_marker -%}
                             {%- assign is_secondary_pair_image = true -%}
-                          {%- elsif second_media != blank and media.id == second_media.id -%}
-                            {%- assign is_secondary_pair_image = true -%}
+                          {% comment %} {%- elsif second_media != blank and media.id == second_media.id -%}
+                            {%- assign is_secondary_pair_image = true -%} {% endcomment %}
                           {%- endif -%}
 
-                          <div class="pdp-embla__slide" data-embla-slide{% if is_secondary_pair_image %} data-pair-layout="70-30"{% endif %}>
+                          <div class="pdp-embla__slide" data-embla-slide{% if is_secondary_pair_image %} data-pair-layout="60-40"{% endif %}>
                             <div class="pdp-embla__pair">
                               <div class="pdp-embla__pair__item">
                                 {%- render 'media',
@@ -1319,6 +1444,75 @@
           {%- endif -%}
 
           {%- endif -%}
+        {%- liquid
+          assign title_block = section.blocks | where: 'type', 'title' | first
+          assign price_block = section.blocks | where: 'type', 'price' | first
+          assign buttons_block = section.blocks | where: 'type', 'buttons' | first
+
+          assign title_block_style = ''
+          if title_block != blank and title_block.settings.padding_bottom
+            assign title_block_style = '--block-padding-bottom: ' | append: title_block.settings.padding_bottom | append: 'px;'
+            assign title_block_style = 'style="' | append: title_block_style | append: '"'
+          endif
+
+          assign price_block_style = ''
+          if price_block != blank and price_block.settings.padding_bottom
+            assign price_block_style = '--block-padding-bottom: ' | append: price_block.settings.padding_bottom | append: 'px;'
+            assign price_block_style = 'style="' | append: price_block_style | append: '"'
+          endif
+
+          assign buttons_block_style = ''
+          if buttons_block != blank
+            assign bg_accent = buttons_block.settings.bg_color
+            assign icon_size = buttons_block.settings.icon_size
+
+            capture buttons_block_style
+              echo '--block-padding-bottom: 0px;'
+
+              if buttons_block.type == 'upsell' or buttons_block.type == 'bundle-save' or buttons_block.type == 'complementary-products'
+                unless bg_accent == 'rgba(0,0,0,0)' or bg_accent == blank
+                  echo '--bg-accent: ' | append: bg_accent | append: ';'
+                endunless
+              endif
+
+              if icon_size
+                echo '--icon-size:' | append: icon_size | append: 'px;'
+              endif
+            endcapture
+
+            if buttons_block_style != blank
+              assign buttons_block_style = 'style="' | append: buttons_block_style | append: '"'
+            endif
+          endif
+        -%}
+
+        {%- if title_block != blank or price_block != blank -%}
+          <div class="product__sticky-bar">
+            <div class="product__sticky-bar__inner">
+              <div class="product__title-price">
+                {%- if title_block != blank -%}
+                  {%- render 'product-title',
+                    product: product,
+                    block: title_block,
+                    block_style: title_block_style,
+                    is_title_linked: is_title_linked,
+                    onboarding_product: onboarding_product
+                  -%}
+                {%- endif -%}
+
+                {%- if price_block != blank -%}
+                  {%- render 'product-price',
+                    product: product,
+                    block: price_block,
+                    block_style: price_block_style,
+                    onboarding_product: onboarding_product
+                  -%}
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+        {%- endif -%}
+
         <div class="product__content">
           <div
             class="form__wrapper{% unless show_buy_buttons %} form__wrapper--no-buttons{% endunless %}{% unless current_variant.available or onboarding_product %} variant--soldout{% endunless %}{% if settings.form_style == 'classic' %} form__wrapper--classic{% else %} form__wrapper--modern{% endif %}{% if settings.show_newsletter %} show-product-notification{% endif %}"
@@ -1346,7 +1540,59 @@
                 >
               {%- endif -%}
 
+              {%- liquid
+                assign title_block = section.blocks | where: 'type', 'title' | first
+                assign price_block = section.blocks | where: 'type', 'price' | first
+                assign description_block = section.blocks | where: 'type', 'description' | first
+                assign icon_blocks = section.blocks | where: 'type', 'icon'
+                assign aside_has_content = false
+
+                if buttons_block != blank or icon_blocks.size > 0
+                  assign aside_has_content = true
+                endif
+
+                assign title_block_style = ''
+                if title_block != blank and title_block.settings.padding_bottom
+                  assign title_block_style = '--block-padding-bottom: ' | append: title_block.settings.padding_bottom | append: 'px;'
+                  assign title_block_style = 'style="' | append: title_block_style | append: '"'
+                endif
+
+                assign price_block_style = ''
+                if price_block != blank and price_block.settings.padding_bottom
+                  assign price_block_style = '--block-padding-bottom: ' | append: price_block.settings.padding_bottom | append: 'px;'
+                  assign price_block_style = 'style="' | append: price_block_style | append: '"'
+                endif
+
+                assign description_block_style = ''
+                if description_block != blank and description_block.settings.padding_bottom
+                  assign description_block_style = '--block-padding-bottom: ' | append: description_block.settings.padding_bottom | append: 'px;'
+                  assign description_block_style = 'style="' | append: description_block_style | append: '"'
+                endif
+              -%}
+
+              <div class="product__content-columns">
+                <div class="product__content-columns__main">
+                  {%- if description_block != blank -%}
+                    {%- render 'product-description',
+                      product: product,
+                      block: description_block,
+                      block_style: description_block_style
+                    -%}
+                  {%- endif -%}
+
               {%- for block in section.blocks -%}
+                {%- if title_block != blank and block.id == title_block.id -%}
+                  {%- continue -%}
+                {%- endif -%}
+                {%- if price_block != blank and block.id == price_block.id -%}
+                  {%- continue -%}
+                {%- endif -%}
+                {%- if description_block != blank and block.id == description_block.id -%}
+                  {%- continue -%}
+                {%- endif -%}
+                {%- if block.type == 'buttons' or block.type == 'icon' -%}
+                  {%- continue -%}
+                {%- endif -%}
                 {%- liquid
                   assign padding_bottom = block.settings.padding_bottom
                   assign bg_accent = block.settings.bg_color
@@ -1871,6 +2117,30 @@
                     </div>
                 {%- endcase -%}
               {%- endfor -%}
+
+                </div>
+
+                {%- if aside_has_content -%}
+                  <div class="product__content-columns__aside">
+                    {%- if buttons_block != blank -%}
+                      {%- render 'product-buttons',
+                        block: buttons_block,
+                        block_style: buttons_block_style,
+                        product: product,
+                        product_form_id: product_form_id,
+                        preorder: preorder,
+                        onboarding_product: onboarding_product
+                      -%}
+                    {%- endif -%}
+
+                    {%- for block in section.blocks -%}
+                      {%- if block.type == 'icon' -%}
+                        {%- render 'icon', block: block, index: forloop.index0, is_product: true -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </div>
+                {%- endif -%}
+              </div>
             </div>
           </div>
         </div>
