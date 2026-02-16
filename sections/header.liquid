@@ -59,10 +59,10 @@
     assign use_transparent_logo_pdp = true
   endif
 
-  assign logo_width = "400"
+  assign logo_width = '400'
   assign logo_width_15x = logo_width | times: 1.5 | round
   assign logo_width_2x = logo_width | times: 2 | round
-  assign logo_width_mobile = "200"
+  assign logo_width_mobile = '200'
   assign logo_width_mobile_15x = logo_width_mobile | times: 1.5 | round
   assign logo_width_mobile_2x = logo_width_mobile | times: 2 | round
   assign logo_sizes = '(min-width: 750px) ' | append: logo_width | append: 'px, (min-width: ' | append: logo_width_mobile_2x | append: 'px) ' | append: logo_width_mobile | append: 'px, calc((100vw - 64px) * 0.5)'
@@ -191,6 +191,7 @@
   {%- if logo_asset != blank -%}
     .header__logo__link {
       --logo-padding: {{ logo_padding }};
+      --logo-padding_product: {{ logo_padding | times: 0.60 }};
       --logo-width-desktop: {{ logo_width }}px;
       --logo-width-mobile: {{ logo_width_mobile }}px;
     }
@@ -211,7 +212,9 @@
   {%- if transparent_header and logo_asset != blank -%}
     {%- assign has_transparent_logo = true -%}
   {%- endif -%}
-  <div class="header__logo header__logo--image{% if has_transparent_logo %} header__logo--has-transparent{% endif %}">
+  <div class="header__logo header__logo--image{% if has_transparent_logo %} header__logo--has-transparent{% endif %}
+    {% unless template == 'index' %} header__logo--small{% endunless %}
+  ">
     <a
       class="header__logo__link"
       href="{{ routes.root_url }}"
@@ -220,57 +223,99 @@
       data-logo-dark="{{ logo_dark_asset | asset_url }}"
       data-logo-default="{{ logo_variant }}"
     >
-      {%- if logo_asset != blank -%}
-        {%- assign logo_alt = shop.name | strip_html | escape -%}
-        <img
-          class="logo__img logo__img--color"
-          src="{{ logo_asset | asset_url }}"
-          width="{{ logo_width }}"
-          height="{{ logo_height | round }}"
-          alt="{{ logo_alt }}"
-          loading="eager"
-          fetchpriority="high"
-        />
-      {%- else -%}
-        {%- liquid
-          assign classes = ''
-          assign title_length = shop.name | size
-          assign oneword = true
-          if shop.name contains ' ' or shop.name contains '-'
-            assign oneword = false
-          endif
-          if title_length > 15
-            assign classes = classes | append: ' header__logo__text--long'
-            if oneword
-              assign classes = classes | append: ' header__logo__text--break'
-            endif
-          endif
-        -%}
-        <div class="header__logo__text {{ classes }}">
-          <span>{{ shop.name }}</span>
-        </div>
-      {%- endif -%}
-
-      {%- if has_transparent_logo -%}
-        {%- if use_transparent_logo_pdp -%}
-          {%- liquid
-            assign alt = transparent_logo_pdp.alt | default: shop.name | strip_html | escape
-            render 'image' image: transparent_logo_pdp, width: logo_width_2x, sizes: logo_sizes, widths: logo_widths, aspect_ratio: transparent_logo_pdp.aspect_ratio, alt: alt, modifier: 'logo__img logo__img--transparent', fetchpriority: 'high', preload: true, show_backfill: false
-          -%}
-        {%- else -%}
-          {%- assign transparent_alt = shop.name | strip_html | escape -%}
+      <h1>
+        {%- if logo_asset != blank -%}
+          {%- assign logo_alt = shop.name | strip_html | escape -%}
           <img
-            class="logo__img logo__img--transparent"
-            src="{{ transparent_logo_asset | asset_url }}"
+            class="logo__img logo__img--color"
+            src="{{ logo_asset | asset_url }}"
             width="{{ logo_width }}"
             height="{{ logo_height | round }}"
-            alt="{{ transparent_alt }}"
+            alt="{{ logo_alt }}"
             loading="eager"
             fetchpriority="high"
           />
+        {%- else -%}
+          {%- liquid
+            assign classes = ''
+            assign title_length = shop.name | size
+            assign oneword = true
+            if shop.name contains ' ' or shop.name contains '-'
+              assign oneword = false
+            endif
+            if title_length > 15
+              assign classes = classes | append: ' header__logo__text--long'
+              if oneword
+                assign classes = classes | append: ' header__logo__text--break'
+              endif
+            endif
+          -%}
+          <div class="header__logo__text {{ classes }}">
+            <span>{{ shop.name }}</span>
+          </div>
         {%- endif -%}
-      {%- endif -%}
+  
+        {%- if has_transparent_logo -%}
+          {%- if use_transparent_logo_pdp -%}
+            {%- liquid
+              assign alt = transparent_logo_pdp.alt | default: shop.name | strip_html | escape
+              render 'image' image: transparent_logo_pdp, width: logo_width_2x, sizes: logo_sizes, widths: logo_widths, aspect_ratio: transparent_logo_pdp.aspect_ratio, alt: alt, modifier: 'logo__img logo__img--transparent', fetchpriority: 'high', preload: true, show_backfill: false
+            -%}
+          {%- else -%}
+            {%- assign transparent_alt = shop.name | strip_html | escape -%}
+            <img
+              class="logo__img logo__img--transparent"
+              src="{{ transparent_logo_asset | asset_url }}"
+              width="{{ logo_width }}"
+              height="{{ logo_height | round }}"
+              alt="{{ transparent_alt }}"
+              loading="eager"
+              fetchpriority="high"
+            />
+          {%- endif -%}
+        {%- endif -%}
+      </h1>
     </a>
+    {%- if template.name == 'product' or template contains 'collection' -%}
+      <div class="header__logo__meta">
+        {%- if template.name == 'product' -%}
+          {%- assign current_collection = collection | default: product.collections.first -%}
+          {%- assign has_collection = false -%}
+          {%- if current_collection != blank -%}
+            {%- assign has_collection = true -%}
+          {%- endif -%}
+          {%- assign has_type = false -%}
+          {%- if product.type != blank -%}
+            {%- assign has_type = true -%}
+          {%- endif -%}
+          <h6 class="header__logo__meta__line">
+            {%- if has_collection -%}
+              <span class="header__logo__meta__collection">
+                <a href="{{ current_collection.url }}">{{ current_collection.title }}</a>
+              </span>
+            {%- endif -%}
+            {%- if has_collection and has_type -%}
+              <span class="header__logo__meta__separator">/&nbsp;</span>
+            {%- endif -%}
+            {%- if has_type -%}
+              {%- assign type_handle = product.type | handleize -%}
+              {%- assign type_collection = collections[type_handle] -%}
+              <span class="header__logo__meta__type">
+                {%- if type_collection and type_collection.handle == type_handle -%}
+                  <a href="{{ type_collection.url }}">{{ product.type }}</a>
+                {%- else -%}
+                  {{ product.type }}
+                {%- endif -%}
+              </span>
+            {%- endif -%}
+          </h6>
+        {%- elsif template contains 'collection' and collection -%}
+          <h6 class="header__logo__meta__collection">
+            <a href="{{ collection.url }}">{{ collection.title }}</a>
+          </h6>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
   </div>
 {%- endcapture -%}
 
@@ -347,77 +392,45 @@
 -%}
 
 {%- capture minimal -%}
-  <div class="header__mobile__left">
-    <div class="header__mobile__button">
-      <button class="header__mobile__hamburger{% if show_icons == false %} navlink navlink--toplevel{% endif %}{% if settings.type_nav_caps %} caps{% endif %}"
-        data-drawer-toggle="hamburger"
-        aria-label="{{ 'general.accessibility.show_menu' | t }}"
-        aria-haspopup="true"
-        aria-expanded="false"
-        aria-controls="header-menu">
-
-        {%- if show_icons == false -%}
-          <small class="navtext">{{ 'layout.header.menu' | t }}</small>
-        {%- endif -%}
-
-        {%- render 'icon-menu' -%}
-      </button>
-    </div>
-
-    {%- if section.settings.enable_search -%}
-      <div class="header__mobile__button{% if settings.type_nav_caps %} caps{% endif %}">
-        <header-search-popdown>
-          <details>
-            <summary class="navlink navlink--search{% if show_icons == false %} navlink--toplevel{% endif %}" aria-haspopup="dialog" title="{{ 'general.search.search' | t }}">
-              {%- render 'icon-search' -%}
-              {%- render 'icon-cancel' -%}
-              <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.search' | t }}</span>
-            </summary>
-
-            {%- render 'header-search-popdown', unique: 'mobile' -%}
-
-            <span class="underlay" data-popdown-underlay></span>
-          </details>
-        </header-search-popdown>
-      </div>
-    {%- endif -%}
-  </div>
-
   {{ logos }}
 
-  <div class="header__mobile__right{% if settings.type_nav_caps %} caps{% endif %}">
-    {{ cta }}
+  {% comment %} 
+    <div class="header__mobile__right{% if settings.type_nav_caps %} caps{% endif %}">
+      {{ cta }}
 
-    {%- if header_popouts -%}
-      {%- assign unique = section.id | append: '-header-mobile-top' -%}
-      <div class="header__mobile__button desktop">
-        {%- render 'localization',
-          unique: unique,
-          show_locale_selector: show_locale_selector,
-          show_locale_code: show_locale_code,
-          show_globe_icon: show_globe_icon,
-          show_country_selector: show_country_selector,
-          show_country_flag: show_country_flag,
-          show_country_name: show_country_name,
-          class: 'header',
-          unique: section.id -%}
-      </div>
-    {%- endif -%}
+      {%- if header_popouts -%}
+        {%- assign unique = section.id | append: '-header-mobile-top' -%}
+        <div class="header__mobile__button desktop">
+          {%- render 'localization',
+            unique: unique,
+            show_locale_selector: show_locale_selector,
+            show_locale_code: show_locale_code,
+            show_globe_icon: show_globe_icon,
+            show_country_selector: show_country_selector,
+            show_country_flag: show_country_flag,
+            show_country_name: show_country_name,
+            class: 'header',
+            unique: section.id -%}
+        </div>
+      {%- endif -%}
 
-    {%- if shop.customer_accounts_enabled -%}
+      {%- if shop.customer_accounts_enabled -%}
+        <div class="header__mobile__button">
+          <a href="{{ routes.account_url }}" class="navlink{% if show_icons == false %} navlink--toplevel{% endif %}">
+            {%- render 'icon-profile-circled' -%}
+            <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.account' | t }}</span>
+          </a>
+        </div>
+      {%- endif -%}
+
+
       <div class="header__mobile__button">
-        <a href="{{ routes.account_url }}" class="navlink{% if show_icons == false %} navlink--toplevel{% endif %}">
-          {%- render 'icon-profile-circled' -%}
-          <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.account' | t }}</span>
+        <a href="{{ routes.cart_url }}" class="navlink {{ navlink_cart_classes }}" data-cart-toggle>
+          {{ cart_status }}
         </a>
-      </div>
-    {%- endif -%}
-    <div class="header__mobile__button">
-      <a href="{{ routes.cart_url }}" class="navlink {{ navlink_cart_classes }}" data-cart-toggle>
-        {{ cart_status }}
-      </a>
+      </div> 
     </div>
-  </div>
+  {% endcomment %}
 
   {%- if secondary_menu_linklist != blank and linklists[secondary_menu_linklist].links.size > 0 -%}
     <div class="header__mobile__bottom">
@@ -531,6 +544,18 @@
     {%- endif -%}
 
     <div class="section-padding">
+      <div class="header__mobile__button">
+        <button
+          class="header__mobile__hamburger{% if show_icons == false %} navlink navlink--toplevel{% endif %}{% if settings.type_nav_caps %} caps{% endif %}"
+          data-drawer-toggle="hamburger"
+          aria-label="{{ 'general.accessibility.show_menu' | t }}"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="header-menu"
+        >
+          {%- render 'icon-menu' -%}
+        </button>
+      </div>
       <div class="header__mobile">
         {{ minimal }}
       </div>
@@ -554,10 +579,16 @@
                   <div class="header__desktop__button">
                     <header-search-popdown>
                       <details>
-                        <summary class="navlink navlink--search{% if show_icons == false %} navlink--toplevel{% endif %}" aria-haspopup="dialog" title="{{ 'general.search.search' | t }}">
+                        <summary
+                          class="navlink navlink--search{% if show_icons == false %} navlink--toplevel{% endif %}"
+                          aria-haspopup="dialog"
+                          title="{{ 'general.search.search' | t }}"
+                        >
                           {%- render 'icon-search' -%}
                           {%- render 'icon-cancel' -%}
-                          <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.search' | t }}</span>
+                          <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">
+                            {{- 'layout.header.search' | t -}}
+                          </span>
                         </summary>
 
                         {%- render 'header-search-popdown', unique: 'desktop' -%}
@@ -622,6 +653,25 @@
   }
 </script>
 
+<script>
+  (() => {
+    const header = document.querySelector('.theme__header');
+    const searchPopdown = header && header.querySelector('header-search-popdown');
+    if (!header || !searchPopdown) return;
+
+    const syncLogoVisibility = () => {
+      header.classList.toggle('search-open', searchPopdown.classList.contains('is-open'));
+    };
+
+    syncLogoVisibility();
+
+    new MutationObserver(syncLogoVisibility).observe(searchPopdown, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+  })();
+</script>
+
 {%- if template.name == 'index' -%}
   {%- assign potential_action_target = shop.url | append: '/search?q={search_term_string}' -%}
   <script type="application/ld+json">
@@ -643,219 +693,372 @@
   // custom menu logics
   document.addEventListener('DOMContentLoaded', () => {
     /* Helpers */
-    const selectAll = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel))
-    const isDesktop = () => window.matchMedia('(min-width: 750px)').matches
+    const selectAll = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
+    const isDesktop = () => window.matchMedia('(min-width: 750px)').matches;
 
     /* Scroll animation */
-    let lastY = window.scrollY
-    let ticking = false
+    let lastY = window.scrollY;
+    let ticking = false;
     const toggleHeaderHide = () => {
-      if (!isDesktop()) {
-        document.body.classList.remove('header-scroll-hide')
-        lastY = window.scrollY
-        return
-      }
-      const currentY = window.scrollY
-      const atTop = currentY <= 0
-      const goingDown = currentY > lastY + 1
-      const goingUp = currentY < lastY - 1
+      // if (!isDesktop()) {
+      //   document.body.classList.remove('header-scroll-hide');
+      //   lastY = window.scrollY;
+      //   return;
+      // }
+      const currentY = window.scrollY;
+      const atTop = currentY <= 0;
+      const goingDown = currentY > lastY + 1;
+      const goingUp = currentY < lastY - 1;
       if (atTop || goingUp) {
-        document.body.classList.remove('header-scroll-hide')
+        document.body.classList.remove('header-scroll-hide');
       } else if (goingDown) {
-        document.body.classList.add('header-scroll-hide')
+        document.body.classList.add('header-scroll-hide');
       }
-      lastY = currentY
-    }
-    window.addEventListener('scroll', () => {
-      if (ticking) return
-      ticking = true
-      requestAnimationFrame(() => {
-        toggleHeaderHide()
-        ticking = false
-      })
-    }, { passive: true })
+      lastY = currentY;
+    };
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          toggleHeaderHide();
+          ticking = false;
+        });
+      },
+      { passive: true }
+    );
 
     /* Menu images + overlay */
-    let currentImage = null
+    let currentImage = null;
 
     const initMenuImages = () => {
-      const images = selectAll('.tmenu_collection--notext > img')
-      if (!images.length) return
+      const images = selectAll('.tmenu_collection--above > img');
+      if (!images.length) return;
       if (!currentImage || images.includes(currentImage) === false) {
-        currentImage = images[0]
+        currentImage = images[0];
       }
-      images.forEach(img => {
+      images.forEach((img) => {
         if (img === currentImage) {
-          img.classList.remove('hide-menu-image')
+          img.classList.remove('hide-menu-image');
         } else {
-          img.classList.add('hide-menu-image')
+          img.classList.add('hide-menu-image');
         }
-      })
+      });
 
-      const links = selectAll('.tmenu_item_layout_collection a.tmenu_item_link.tmenu_item_content_alignment_right')
-      if (!links.length) return
+      const links = selectAll('.tmenu_item_layout_collection a.tmenu_item_link.tmenu_item_content_alignment_right');
+      if (!links.length) return;
 
-      const imageByAlt = new Map()
-      images.forEach(img => {
-        const alt = img.getAttribute('alt') || ''
-        if (alt) imageByAlt.set(alt.trim(), img)
-      })
+      const imageByAlt = new Map();
+      images.forEach((img) => {
+        const alt = img.getAttribute('alt') || '';
+        if (alt) imageByAlt.set(alt.trim(), img);
+      });
 
       const showImageForTitle = (title) => {
-        const match = imageByAlt.get((title || '').trim())
+        const match = imageByAlt.get((title || '').trim());
         if (match) {
-          images.forEach(img => img.classList.add('hide-menu-image'))
-          match.classList.remove('hide-menu-image')
-          currentImage = match
+          images.forEach((img) => img.classList.add('hide-menu-image'));
+          match.classList.remove('hide-menu-image');
+          currentImage = match;
         } else if (currentImage) {
           // keep last shown image visible when there's no match for the hovered link
-          currentImage.classList.remove('hide-menu-image')
+          currentImage.classList.remove('hide-menu-image');
         }
-      }
+      };
 
-      links.forEach(link => {
-        link.addEventListener('mouseenter', () => showImageForTitle(link.textContent))
-        link.addEventListener('focus', () => showImageForTitle(link.textContent))
-      })
-    }
+      links.forEach((link) => {
+        link.addEventListener('mouseenter', () => showImageForTitle(link.textContent));
+        link.addEventListener('focus', () => showImageForTitle(link.textContent));
+      });
+    };
 
-    const rootSelector = '.tmenu_item.tmenu_item--root.tmenu_item_level_0.tmenu_item_submenu_type_mega'
-    let initialized = false
+    const rootSelector = '.tmenu_item.tmenu_item--root.tmenu_item_level_0.tmenu_item_submenu_type_mega';
+    let initialized = false;
 
     const applyMenuOpenStyles = () => {
-      initMenuImages()
-    }
+      initMenuImages();
+    };
 
     const observeRoot = (root) => {
-      let lastActive = false
+      let lastActive = false;
       const handleMutations = () => {
         if (!initialized) {
-          initialized = true
-          applyMenuOpenStyles()
+          initialized = true;
+          applyMenuOpenStyles();
         }
-        const activeNow = Boolean(document.querySelector('.tmenu_item_active'))
-        if (activeNow && !lastActive) applyMenuOpenStyles()
-        lastActive = activeNow
-      }
+        const activeNow = Boolean(document.querySelector('.tmenu_item_active'));
+        if (activeNow && !lastActive) applyMenuOpenStyles();
+        lastActive = activeNow;
+      };
       new MutationObserver(handleMutations).observe(root, {
         childList: true,
         subtree: true,
         attributes: true,
-        attributeFilter: ['class']
-      })
-    }
+        attributeFilter: ['class'],
+      });
+    };
 
-    const roots = selectAll(rootSelector)
+    const roots = selectAll(rootSelector);
     if (roots.length) {
-      roots.forEach(observeRoot)
+      roots.forEach(observeRoot);
     } else {
       new MutationObserver((_, observer) => {
-        const found = selectAll(rootSelector)
-        if (!found.length) return
-        observer.disconnect()
-        found.forEach(observeRoot)
-      }).observe(document.body, { childList: true, subtree: true })
+        const found = selectAll(rootSelector);
+        if (!found.length) return;
+        observer.disconnect();
+        found.forEach(observeRoot);
+      }).observe(document.body, { childList: true, subtree: true });
     }
 
     /* Header light/dark switcher */
     const getLuminance = (rgb) => {
-      const [r, g, b] = rgb.map(v => {
-        const n = v / 255
-        return n <= 0.03928 ? n / 12.92 : Math.pow((n + 0.055) / 1.055, 2.4)
-      })
-      return 0.2126 * r + 0.7152 * g + 0.0722 * b
-    }
+      const [r, g, b] = rgb.map((v) => {
+        const n = v / 255;
+        return n <= 0.03928 ? n / 12.92 : Math.pow((n + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
 
     const getBackgroundRGB = (element) => {
-      let el = element
+      let el = element;
       while (el && el !== document.documentElement) {
-        const bg = getComputedStyle(el).backgroundColor
+        const bg = getComputedStyle(el).backgroundColor;
         if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
-          const match = bg.match(/\d+/g)
-          if (match) return match.map(Number)
+          const match = bg.match(/\d+/g);
+          if (match) return match.map(Number);
         }
-        el = el.parentElement
+        el = el.parentElement;
       }
-      return [255, 255, 255]
-    }
+      return [255, 255, 255];
+    };
 
     const initHeaderObserver = () => {
-      const headerDesktops = selectAll('.header__desktop')
-      const logoLinks = selectAll('.header__logo__link[data-logo-light][data-logo-dark]')
-      const transparentImages = selectAll('.logo__img.logo__img--transparent')
-      if (!(headerDesktops.length && logoLinks.length && isDesktop())) return
+      const headerWrapper = document.querySelector('header.theme__header');
+      const drawerWrapper = document.querySelector('header-drawer.drawer--header');
+      const headerTargets = selectAll('.header__desktop, .header__mobile');
+      const logoLinks = selectAll('.header__logo__link[data-logo-light][data-logo-dark]');
+      const transparentImages = selectAll('.logo__img.logo__img--transparent');
+      if (!(headerTargets.length && logoLinks.length)) return;
 
-      const rootStyles = getComputedStyle(document.documentElement)
+      const rootStyles = getComputedStyle(document.documentElement);
       const getCssVariable = (name, fallback) => {
-        const value = rootStyles.getPropertyValue(name).trim()
-        return value || fallback
-      }
+        const value = rootStyles.getPropertyValue(name).trim();
+        return value || fallback;
+      };
       const colors = {
         light: {
-          link: getCssVariable('--COLOR-MENU-TRANSPARENT', '#fff'),
-          hover: getCssVariable('--COLOR-MENU-TRANSPARENT-HOVER', getCssVariable('--COLOR-MENU-TRANSPARENT', '#fff'))
+          link: '#fff',
+          hover: '#f0f0f0',
+        },
+        dimmedLight: {
+          link: '#e0e0e0',
+          hover: '#f0f0f0',
+        },
+        lightDark: {
+          link: '#9a9a9a',
+          hover: '#b0b0b0',
         },
         dark: {
-          link: getCssVariable('--COLOR-HEADER-LINK', '#111'),
-          hover: getCssVariable('--COLOR-HEADER-LINK-HOVER', getCssVariable('--COLOR-HEADER-LINK', '#111'))
-        }
-      }
+          link: '#000',
+          hover: '#222',
+        },
+      };
 
-      const logoLightUrl = logoLinks[0].dataset.logoLight
-      const logoDarkUrl = logoLinks[0].dataset.logoDark
+      const logoLightUrl = logoLinks[0].dataset.logoLight;
+      const logoDarkUrl = logoLinks[0].dataset.logoDark;
+      const drawerLogoMode = 'light';
+
+      const drawerIsOpen = () => drawerWrapper?.classList.contains('is-open');
 
       const setHeaderColors = (mode) => {
-        const colorSet = colors[mode === 'light' ? 'light' : 'dark']
-        headerDesktops.forEach(desktop => {
-          desktop.style.setProperty('--link', colorSet.link)
-          desktop.style.setProperty('--link-hover', colorSet.hover)
-        })
-      }
+        const colorSet = colors[mode] || colors.light;
+        headerWrapper.style.setProperty('--link', colorSet.link);
+        headerWrapper.style.setProperty('--link-hover', colorSet.hover);
+        headerTargets.forEach((header) => {
+          header.style.setProperty('--link', colorSet.link);
+          header.style.setProperty('--link-hover', colorSet.hover);
+        });
+      };
 
       const setLogoSource = (mode) => {
-        const logoUrl = mode === 'light' ? logoLightUrl : logoDarkUrl
-        if (!logoUrl) return
-        logoLinks.forEach(link => {
-          const img = link.querySelector('.logo__img.logo__img--color')
-          if (img && img.getAttribute('src') !== logoUrl) img.setAttribute('src', logoUrl)
-        })
-        transparentImages.forEach(img => {
-          if (img.getAttribute('src') !== logoUrl) img.setAttribute('src', logoUrl)
-        })
-      }
+        const useLightLogo = mode === 'light' || mode === 'dimmedLight';
+        const logoUrl = useLightLogo ? logoLightUrl : logoDarkUrl;
+        if (!logoUrl) return;
+        logoLinks.forEach((link) => {
+          const img = link.querySelector('.logo__img.logo__img--color');
+          if (img && img.getAttribute('src') !== logoUrl) img.setAttribute('src', logoUrl);
+        });
+        transparentImages.forEach((img) => {
+          if (img && img.getAttribute('src') !== logoUrl) img.setAttribute('src', logoUrl);
+        });
+      };
 
-      const defaultMode = (logoLinks[0].dataset.logoDefault || 'light').trim() === 'light' ? 'light' : 'dark'
-      let currentMode = defaultMode
+      const defaultModeRaw = (logoLinks[0].dataset.logoDefault || 'light').trim();
+      const defaultMode = ['light', 'dimmedLight', 'lightDark', 'dark'].includes(defaultModeRaw)
+        ? defaultModeRaw
+        : 'light';
+      let currentMode = defaultMode;
       const applyMode = (mode) => {
-        const resolved = mode === 'light' ? 'light' : 'dark'
-        if (resolved === currentMode) return
-        currentMode = resolved
-        setHeaderColors(currentMode)
-        setLogoSource(currentMode)
+        const resolved = mode || 'light';
+        if (resolved === currentMode) return;
+        currentMode = resolved;
+        setHeaderColors(currentMode);
+        if (!drawerIsOpen()) {
+          setLogoSource(currentMode);
+        }
+      };
+
+      const syncLogoWithDrawer = () => {
+        if (!drawerWrapper) return;
+        if (drawerIsOpen()) {
+          setLogoSource(drawerLogoMode);
+          return;
+        }
+        setLogoSource(currentMode);
+      };
+
+      setHeaderColors(currentMode);
+      setLogoSource(currentMode);
+      syncLogoWithDrawer();
+
+      if (drawerWrapper) {
+        document.addEventListener('theme:drawer:open', (event) => {
+          if (event.target !== drawerWrapper) return;
+          syncLogoWithDrawer();
+        });
+
+        document.addEventListener('theme:drawer:close', (event) => {
+          if (event.target !== drawerWrapper) return;
+          syncLogoWithDrawer();
+        });
+
+        new MutationObserver(syncLogoWithDrawer).observe(drawerWrapper, {
+          attributes: true,
+          attributeFilter: ['class'],
+        });
       }
 
-      setHeaderColors(currentMode)
-      setLogoSource(currentMode)
+      const sectionsToObserve = selectAll('section, .shopify-section, [data-section-id]');
+      if (!sectionsToObserve.length) return;
 
-      const sectionsToObserve = selectAll('section, .shopify-section, [data-section-id]')
-      if (!sectionsToObserve.length) return
+      const DEBUG_HEADER_OBSERVER = false;
 
-      const intersectionObserver = new IntersectionObserver(
-        entries => {
-          entries.forEach(entry => {
-            if (!entry.isIntersecting) return
-            const luminance = getLuminance(getBackgroundRGB(entry.target))
-            applyMode(luminance < 0.5 ? 'light' : 'dark')
-          })
+      const computeRootMargin = () => {
+        const h = window.innerHeight || document.documentElement.clientHeight || 0;
+        const target = 150;
+        const bottom = target - h; // negative when h > target
+        return `0px 0px ${bottom}px 0px`;
+      };
+
+      const marginToPx = (value, axisLength) => {
+        if (value.endsWith && value.endsWith('%')) {
+          return (parseFloat(value) / 100) * axisLength;
+        }
+        return parseFloat(value);
+      };
+
+      const parseRootMargin = (marginStr) => {
+        const [top, right, bottom, left] = marginStr.split(' ');
+        return {
+          top: marginToPx(top, window.innerHeight),
+          right: marginToPx(right, window.innerWidth),
+          bottom: marginToPx(bottom, window.innerHeight),
+          left: marginToPx(left, window.innerWidth),
+        };
+      };
+
+      const createOverlay = (label, color) => {
+        const existing = document.querySelector(`[data-header-observer-overlay="${label}"]`);
+        if (existing) return existing;
+        const el = document.createElement('div');
+        el.dataset.headerObserverOverlay = label;
+        el.classList.add('header-observer-overlay');
+        el.style.setProperty('--overlay-color', color);
+        el.textContent = label;
+        document.body.appendChild(el);
+        return el;
+      };
+
+      const updateOverlayPosition = (el, marginStr) => {
+        const m = parseRootMargin(marginStr);
+        const top = 0 - m.top;
+        const left = 0 - m.left;
+        const right = window.innerWidth + m.right;
+        const bottom = window.innerHeight + m.bottom;
+        el.style.top = `${top}px`;
+        el.style.left = `${left}px`;
+        el.style.width = `${right - left}px`;
+        el.style.height = `${bottom - top}px`;
+      };
+
+      let rootMargin = computeRootMargin();
+
+      let overlay;
+      const ensureOverlay = () => {
+        if (!DEBUG_HEADER_OBSERVER) return;
+        if (!overlay) {
+          overlay = createOverlay('header observer root', 'rgba(0, 128, 255, 0.2)');
+        }
+        rootMargin = computeRootMargin();
+        updateOverlayPosition(overlay, rootMargin);
+      };
+
+      let intersectionObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const luminance = getLuminance(getBackgroundRGB(entry.target));
+            console.log('luminance:', luminance);
+            if (luminance < 0.25) {
+              applyMode('light');
+            } else if (luminance < 0.5) {
+              applyMode('dimmedLight');
+            } else if (luminance < 0.75) {
+              applyMode('lightDark');
+            } else {
+              applyMode('dark');
+            }
+          });
         },
-        { rootMargin: '-10% 0px -90% 0px' }
-      )
-      sectionsToObserve.forEach(section => intersectionObserver.observe(section))
-    }
+        { rootMargin }
+      );
+      const observeAll = () => sectionsToObserve.forEach((section) => intersectionObserver.observe(section));
+      observeAll();
 
-    initHeaderObserver()
-    window.addEventListener('load', initHeaderObserver, { once: true })
-  })
+      const resetObserver = () => {
+        rootMargin = computeRootMargin();
+        intersectionObserver.disconnect();
+        intersectionObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              const luminance = getLuminance(getBackgroundRGB(entry.target));
+              console.log('luminance:', luminance);
+              if (luminance < 0.25) {
+                applyMode('light');
+              } else if (luminance < 0.5) {
+                applyMode('dimmedLight');
+              } else if (luminance < 0.75) {
+                applyMode('lightDark');
+              } else {
+                applyMode('dark');
+              }
+            });
+          },
+          { rootMargin }
+        );
+        observeAll();
+        ensureOverlay();
+      };
+
+      ensureOverlay();
+      window.addEventListener('resize', resetObserver);
+    };
+
+    initHeaderObserver();
+    window.addEventListener('load', initHeaderObserver, { once: true });
+  });
 {% endjavascript %}
 
 {% schema %}
@@ -885,10 +1088,10 @@
       "label": "Header",
       "default": "logo_beside",
       "options": [
-        {"value": "logo_above", "label": "Logo above menu"},
-        {"value": "logo_beside", "label": "Logo beside menu"},
-        {"value": "drawer", "label": "Mobile drawer menu"},
-        {"value": "logo_center_menu_left", "label": "Logo center menu left"}
+        { "value": "logo_above", "label": "Logo above menu" },
+        { "value": "logo_beside", "label": "Logo beside menu" },
+        { "value": "drawer", "label": "Mobile drawer menu" },
+        { "value": "logo_center_menu_left", "label": "Logo center menu left" }
       ]
     },
     {
@@ -936,8 +1139,8 @@
       "label": "Cart icon",
       "default": "bag",
       "options": [
-        {"value": "bag", "label": "Bag"},
-        {"value": "cart", "label": "Cart"}
+        { "value": "bag", "label": "Bag" },
+        { "value": "cart", "label": "Cart" }
       ]
     },
     {
@@ -951,8 +1154,8 @@
       "info": "Select the light or dark logo that ships with the theme.",
       "default": "light",
       "options": [
-        {"value": "light", "label": "Light"},
-        {"value": "dark", "label": "Dark"}
+        { "value": "light", "label": "Light" },
+        { "value": "dark", "label": "Dark" }
       ]
     },
     {
@@ -995,10 +1198,10 @@
       "label": "Color",
       "default": "btn--primary",
       "options": [
-        {"value": "btn--black", "label": "Black"},
-        {"value": "btn--white", "label": "White"},
-        {"value": "btn--primary", "label": "Primary"},
-        {"value": "btn--secondary", "label": "Secondary"}
+        { "value": "btn--black", "label": "Black" },
+        { "value": "btn--white", "label": "White" },
+        { "value": "btn--primary", "label": "Primary" },
+        { "value": "btn--secondary", "label": "Secondary" }
       ]
     },
     {
@@ -1014,12 +1217,6 @@
     {
       "type": "paragraph",
       "content": "Configure the hamburger menu in the Mobile menu section"
-    },
-    {
-      "type": "link_list",
-      "id": "secondary_menu_linklist",
-      "label": "Below header menu",
-      "info": "Visible on mobile below the header."
     },
     {
       "type": "header",
@@ -1161,16 +1358,16 @@
           "label": "Link position in main menu",
           "default": "1",
           "options": [
-            {"value": "1", "label": "Item 1"},
-            {"value": "2", "label": "Item 2"},
-            {"value": "3", "label": "Item 3"},
-            {"value": "4", "label": "Item 4"},
-            {"value": "5", "label": "Item 5"},
-            {"value": "6", "label": "Item 6"},
-            {"value": "7", "label": "Item 7"},
-            {"value": "8", "label": "Item 8"},
-            {"value": "9", "label": "Item 9"},
-            {"value": "10", "label": "Item 10"}
+            { "value": "1", "label": "Item 1" },
+            { "value": "2", "label": "Item 2" },
+            { "value": "3", "label": "Item 3" },
+            { "value": "4", "label": "Item 4" },
+            { "value": "5", "label": "Item 5" },
+            { "value": "6", "label": "Item 6" },
+            { "value": "7", "label": "Item 7" },
+            { "value": "8", "label": "Item 8" },
+            { "value": "9", "label": "Item 9" },
+            { "value": "10", "label": "Item 10" }
           ]
         },
         {
@@ -1206,9 +1403,9 @@
           "label": "Overlay type",
           "default": "text",
           "options": [
-            {"value": "disabled", "label": "Disabled"},
-            {"value": "opacity", "label": "Opacity overlay"},
-            {"value": "text", "label": "Text underlay"}
+            { "value": "disabled", "label": "Disabled" },
+            { "value": "opacity", "label": "Opacity overlay" },
+            { "value": "text", "label": "Text underlay" }
           ]
         },
         {
@@ -1226,12 +1423,12 @@
           "label": "Heading size",
           "default": "heading-medium",
           "options": [
-            {"value": "heading-mini", "label": "Mini"},
-            {"value": "heading-x-small", "label": "Extra small"},
-            {"value": "heading-small", "label": "Small"},
-            {"value": "heading-medium", "label": "Medium"},
-            {"value": "heading-large", "label": "Large"},
-            {"value": "heading-x-large", "label": "Extra large"}
+            { "value": "heading-mini", "label": "Mini" },
+            { "value": "heading-x-small", "label": "Extra small" },
+            { "value": "heading-small", "label": "Small" },
+            { "value": "heading-medium", "label": "Medium" },
+            { "value": "heading-large", "label": "Large" },
+            { "value": "heading-x-large", "label": "Extra large" }
           ]
         },
         {
@@ -1246,11 +1443,11 @@
           "info": "Automatically generated by the base size.",
           "default": "body-medium",
           "options": [
-            {"value": "body-x-small", "label": "Extra small"},
-            {"value": "body-small", "label": "Small"},
-            {"value": "body-medium", "label": "Medium"},
-            {"value": "body-large", "label": "Large"},
-            {"value": "body-x-large", "label": "Extra large"}
+            { "value": "body-x-small", "label": "Extra small" },
+            { "value": "body-small", "label": "Small" },
+            { "value": "body-medium", "label": "Medium" },
+            { "value": "body-large", "label": "Large" },
+            { "value": "body-x-large", "label": "Extra large" }
           ]
         },
         {
