@@ -848,12 +848,23 @@
       };
       const colors = {
         light: {
-          link: getCssVariable('--COLOR-MENU-TRANSPARENT', '#fff'),
-          hover: getCssVariable('--COLOR-MENU-TRANSPARENT-HOVER', getCssVariable('--COLOR-MENU-TRANSPARENT', '#fff')),
+          link: getCssVariable('--COLOR-MENU-TRANSPARENT', '#ffffff'),
+          hover: getCssVariable(
+            '--COLOR-MENU-TRANSPARENT-HOVER',
+            getCssVariable('--COLOR-MENU-TRANSPARENT', '#ffffff')
+          ),
+        },
+        dimmedLight: {
+          link: '#e0e0e0',
+          hover: '#f0f0f0',
+        },
+        lightDark: {
+          link: '#9a9a9a',
+          hover: '#b0b0b0',
         },
         dark: {
-          link: getCssVariable('--COLOR-HEADER-LINK', '#111'),
-          hover: getCssVariable('--COLOR-HEADER-LINK-HOVER', getCssVariable('--COLOR-HEADER-LINK', '#111')),
+          link: getCssVariable('--COLOR-HEADER-LINK', '#111111'),
+          hover: getCssVariable('--COLOR-HEADER-LINK-HOVER', getCssVariable('--COLOR-HEADER-LINK', '#111111')),
         },
       };
 
@@ -864,7 +875,7 @@
       const drawerIsOpen = () => drawerWrapper?.classList.contains('is-open');
 
       const setHeaderColors = (mode) => {
-        const colorSet = colors[mode === 'light' ? 'light' : 'dark'];
+        const colorSet = colors[mode] || colors.light;
         headerWrapper.style.setProperty('--link', colorSet.link);
         headerWrapper.style.setProperty('--link-hover', colorSet.hover);
         headerTargets.forEach((header) => {
@@ -874,7 +885,8 @@
       };
 
       const setLogoSource = (mode) => {
-        const logoUrl = mode === 'light' ? logoLightUrl : logoDarkUrl;
+        const useLightLogo = mode === 'light' || mode === 'dimmedLight';
+        const logoUrl = useLightLogo ? logoLightUrl : logoDarkUrl;
         if (!logoUrl) return;
         logoLinks.forEach((link) => {
           const img = link.querySelector('.logo__img.logo__img--color');
@@ -885,10 +897,13 @@
         });
       };
 
-      const defaultMode = (logoLinks[0].dataset.logoDefault || 'light').trim() === 'light' ? 'light' : 'dark';
+      const defaultModeRaw = (logoLinks[0].dataset.logoDefault || 'light').trim();
+      const defaultMode = ['light', 'dimmedLight', 'lightDark', 'dark'].includes(defaultModeRaw)
+        ? defaultModeRaw
+        : 'light';
       let currentMode = defaultMode;
       const applyMode = (mode) => {
-        const resolved = mode === 'light' ? 'light' : 'dark';
+        const resolved = mode || 'light';
         if (resolved === currentMode) return;
         currentMode = resolved;
         setHeaderColors(currentMode);
@@ -930,17 +945,118 @@
       const sectionsToObserve = selectAll('section, .shopify-section, [data-section-id]');
       if (!sectionsToObserve.length) return;
 
-      const intersectionObserver = new IntersectionObserver(
+      const DEBUG_HEADER_OBSERVER = false;
+
+      const computeRootMargin = () => {
+        const h = window.innerHeight || document.documentElement.clientHeight || 0;
+        const target = 150;
+        const bottom = target - h; // negative when h > target
+        return `0px 0px ${bottom}px 0px`;
+      };
+
+      const marginToPx = (value, axisLength) => {
+        if (value.endsWith && value.endsWith('%')) {
+          return (parseFloat(value) / 100) * axisLength;
+        }
+        return parseFloat(value);
+      };
+
+      const parseRootMargin = (marginStr) => {
+        const [top, right, bottom, left] = marginStr.split(' ');
+        return {
+          top: marginToPx(top, window.innerHeight),
+          right: marginToPx(right, window.innerWidth),
+          bottom: marginToPx(bottom, window.innerHeight),
+          left: marginToPx(left, window.innerWidth),
+        };
+      };
+
+      const createOverlay = (label, color) => {
+        const existing = document.querySelector(`[data-header-observer-overlay="${label}"]`);
+        if (existing) return existing;
+        const el = document.createElement('div');
+        el.dataset.headerObserverOverlay = label;
+        el.classList.add('header-observer-overlay');
+        el.style.setProperty('--overlay-color', color);
+        el.textContent = label;
+        document.body.appendChild(el);
+        return el;
+      };
+
+      const updateOverlayPosition = (el, marginStr) => {
+        const m = parseRootMargin(marginStr);
+        const top = 0 - m.top;
+        const left = 0 - m.left;
+        const right = window.innerWidth + m.right;
+        const bottom = window.innerHeight + m.bottom;
+        el.style.top = `${top}px`;
+        el.style.left = `${left}px`;
+        el.style.width = `${right - left}px`;
+        el.style.height = `${bottom - top}px`;
+      };
+
+      let rootMargin = computeRootMargin();
+
+      let overlay;
+      const ensureOverlay = () => {
+        if (!DEBUG_HEADER_OBSERVER) return;
+        if (!overlay) {
+          overlay = createOverlay('header observer root', 'rgba(0, 128, 255, 0.2)');
+        }
+        rootMargin = computeRootMargin();
+        updateOverlayPosition(overlay, rootMargin);
+      };
+
+      let intersectionObserver = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (!entry.isIntersecting) return;
             const luminance = getLuminance(getBackgroundRGB(entry.target));
-            applyMode(luminance < 0.5 ? 'light' : 'dark');
+            console.log('luminance:', luminance);
+            if (luminance < 0.25) {
+              applyMode('light');
+            } else if (luminance < 0.5) {
+              applyMode('dimmedLight');
+            } else if (luminance < 0.75) {
+              applyMode('lightDark');
+            } else {
+              applyMode('dark');
+            }
           });
         },
-        { rootMargin: '-10% 0px -90% 0px' }
+        { rootMargin }
       );
-      sectionsToObserve.forEach((section) => intersectionObserver.observe(section));
+      const observeAll = () => sectionsToObserve.forEach((section) => intersectionObserver.observe(section));
+      observeAll();
+
+      const resetObserver = () => {
+        rootMargin = computeRootMargin();
+        intersectionObserver.disconnect();
+        intersectionObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              const luminance = getLuminance(getBackgroundRGB(entry.target));
+              console.log('luminance:', luminance);
+              if (luminance < 0.25) {
+                applyMode('light');
+              } else if (luminance < 0.5) {
+                applyMode('dimmedLight');
+              } else if (luminance < 0.75) {
+                applyMode('lightDark');
+              } else {
+                applyMode('dark');
+              }
+            });
+          },
+          { rootMargin }
+        );
+        observeAll();
+        ensureOverlay();
+      };
+
+      ensureOverlay();
+      window.addEventListener('resize', resetObserver);
     };
 
     initHeaderObserver();
