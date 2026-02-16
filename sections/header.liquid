@@ -835,6 +835,7 @@
 
     const initHeaderObserver = () => {
       const headerWrapper = document.querySelector('header.theme__header');
+      const drawerWrapper = document.querySelector('header-drawer.drawer--header');
       const headerTargets = selectAll('.header__desktop, .header__mobile');
       const logoLinks = selectAll('.header__logo__link[data-logo-light][data-logo-dark]');
       const transparentImages = selectAll('.logo__img.logo__img--transparent');
@@ -858,6 +859,9 @@
 
       const logoLightUrl = logoLinks[0].dataset.logoLight;
       const logoDarkUrl = logoLinks[0].dataset.logoDark;
+      const drawerLogoMode = 'light';
+
+      const drawerIsOpen = () => drawerWrapper?.classList.contains('is-open');
 
       const setHeaderColors = (mode) => {
         const colorSet = colors[mode === 'light' ? 'light' : 'dark'];
@@ -888,11 +892,40 @@
         if (resolved === currentMode) return;
         currentMode = resolved;
         setHeaderColors(currentMode);
+        if (!drawerIsOpen()) {
+          setLogoSource(currentMode);
+        }
+      };
+
+      const syncLogoWithDrawer = () => {
+        if (!drawerWrapper) return;
+        if (drawerIsOpen()) {
+          setLogoSource(drawerLogoMode);
+          return;
+        }
         setLogoSource(currentMode);
       };
 
       setHeaderColors(currentMode);
       setLogoSource(currentMode);
+      syncLogoWithDrawer();
+
+      if (drawerWrapper) {
+        document.addEventListener('theme:drawer:open', (event) => {
+          if (event.target !== drawerWrapper) return;
+          syncLogoWithDrawer();
+        });
+
+        document.addEventListener('theme:drawer:close', (event) => {
+          if (event.target !== drawerWrapper) return;
+          syncLogoWithDrawer();
+        });
+
+        new MutationObserver(syncLogoWithDrawer).observe(drawerWrapper, {
+          attributes: true,
+          attributeFilter: ['class'],
+        });
+      }
 
       const sectionsToObserve = selectAll('section, .shopify-section, [data-section-id]');
       if (!sectionsToObserve.length) return;
