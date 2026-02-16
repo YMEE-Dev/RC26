@@ -848,11 +848,8 @@
       };
       const colors = {
         light: {
-          link: getCssVariable('--COLOR-MENU-TRANSPARENT', '#ffffff'),
-          hover: getCssVariable(
-            '--COLOR-MENU-TRANSPARENT-HOVER',
-            getCssVariable('--COLOR-MENU-TRANSPARENT', '#ffffff')
-          ),
+          link: '#fff',
+          hover: '#f0f0f0',
         },
         dimmedLight: {
           link: '#e0e0e0',
@@ -863,8 +860,8 @@
           hover: '#b0b0b0',
         },
         dark: {
-          link: getCssVariable('--COLOR-HEADER-LINK', '#111111'),
-          hover: getCssVariable('--COLOR-HEADER-LINK-HOVER', getCssVariable('--COLOR-HEADER-LINK', '#111111')),
+          link: '#000',
+          hover: '#222',
         },
       };
 
@@ -893,7 +890,7 @@
           if (img && img.getAttribute('src') !== logoUrl) img.setAttribute('src', logoUrl);
         });
         transparentImages.forEach((img) => {
-          if (img.getAttribute('src') !== logoUrl) img.setAttribute('src', logoUrl);
+          if (img && img.getAttribute('src') !== logoUrl) img.setAttribute('src', logoUrl);
         });
       };
 
