@@ -1,6 +1,5 @@
 {%- liquid
   assign text_color = section.settings.color
-  assign bg_color = section.settings.bg_color
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign sub_collections = linklists[collection.handle].links
   assign sub_collection_html = ''
@@ -17,9 +16,10 @@
         --text: {{ text_color }};
       {%- endunless -%}
 
-      {%- unless bg_color == 'rgba(0,0,0,0)' or bg_color == blank -%}
-        --bg: {{ bg_color }};
-      {%- endunless -%}
+      {%  if section.settings.subcollection_bg %}
+        background: url({{ section.settings.subcollection_bg | image_url }});
+        background-repeat: round;
+      {% endif %}
     }
   {%- endstyle -%}
 
@@ -35,6 +35,7 @@
           endif
 
           assign sub_collection_handle = sublink.object.handle
+          assign sub_collection_title = sublink.title
           assign sub_collection_handle_separator = sub_collection_handle | append: ',' | prepend: ','
           assign sub_collection = collections[sub_collection_handle]
 
@@ -62,9 +63,8 @@
 
                   {%- render 'image' image: image, sizes: sizes, cover: true -%}
                 </div>
-                <div class="image-overlay-bottom"></div>
                 <div class="subcollection__text">
-                  <p class="subcollection__title h4">{{ sub_collection.title }}</p>
+                  <p class="subcollection__title navlink">{{ sub_collection_title }}</p>
                   {%- if sub_collection.description != '' and section.settings.subcollection_description -%}
                     <div class="subcollection__description">{{ sub_collection.description }}</div>
                   {%- endif -%}
@@ -119,6 +119,7 @@
 {% schema %}
 {
   "name": "Subcollections",
+  "class": "section-overlay-header",
   "settings": [
     {
       "type": "paragraph",
@@ -139,6 +140,11 @@
         }
       ],
       "default": "grid"
+    },
+    {
+      "type": "image_picker",
+      "id": "subcollection_bg",
+      "label": "Background image"
     },
     {
       "type": "checkbox",
@@ -176,12 +182,6 @@
       "id": "color",
       "label": "Text",
       "default": "#ffffff",
-      "alpha": true
-    },
-    {
-      "type": "color",
-      "id": "bg_color",
-      "label": "Background",
       "alpha": true
     },
     {

@@ -4671,6 +4671,8 @@ h6,
 .navlink {
   font-size: var(--FONT-SIZE-NAV);
   line-height: var(--LINE-HEIGHT-NAV);
+  text-transform: uppercase;
+  color: #FFF;
 }
 
 button,
@@ -21861,6 +21863,7 @@ body.has-line-design.grid-compact .collection__products .grid,
  * Subcollection
  */
 .subcollections {
+  padding-top: calc(var(--header-height) + 20px);
   --link: var(--text);
   position: relative;
   overflow: hidden;
@@ -21894,6 +21897,10 @@ body.has-line-design.grid-compact .collection__products .grid,
   left: 0;
 }
 
+.subcollection__image .image-wrapper img {
+  object-fit: contain;
+}
+
 .subcollection__link:hover .subcollection__image {
   transform: scale(1);
 }
@@ -21904,16 +21911,10 @@ body.has-line-design.grid-compact .collection__products .grid,
   top: 0;
   left: 0;
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: flex-end;
-  padding: 20px;
   width: 100%;
   height: 100%;
-}
-
-body.is-focused .subcollection__item:focus-within .image-overlay-bottom {
-  outline: 5px auto var(--accent);
-  outline-offset: -1px;
 }
 
 .subcollection__text {
