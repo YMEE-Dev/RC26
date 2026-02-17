@@ -24,6 +24,17 @@
   {%- endcomment -%}
   {%- assign gift_content = nil -%}
   
+  {%- comment -%}
+    Debug: Check the actual value
+  {%- endcomment -%}
+  <!-- DEBUG: shop.metafields.info_gift_packaging type = {{ shop.metafields.info_gift_packaging.type }} -->
+  <!-- DEBUG: shop.metafields.info_gift_packaging value = {{ shop.metafields.info_gift_packaging.value }} -->
+  
+  {%- if shop.metafields.info_gift_packaging.value != blank -%}
+    {%- assign gift_content = shop.metafields.info_gift_packaging.value -%}
+    <!-- DEBUG: Found metaobject value: {{ gift_content | json }} -->
+  {%- endif -%}
+  
   {%- if product and product.metafields.info_gift_packaging != blank -%}
     {%- assign gift_content = product.metafields.info_gift_packaging.value -%}
   {%- elsif collection and collection.metafields.info_gift_packaging != blank -%}
