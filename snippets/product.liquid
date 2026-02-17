@@ -484,6 +484,39 @@
         transform: translateZ(0);
       }
 
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-gallery-layout='intro'] .pdp-embla__pair {
+        position: relative;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-gallery-layout='intro'] {
+        flex: 0 0 100%;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-gallery-layout='intro'] .pdp-embla__pair__item--primary {
+        flex: 0 0 100%;
+        max-width: 100%;
+        transition: flex-basis 500ms ease, max-width 500ms ease;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-gallery-layout='intro'] .pdp-embla__pair__item--incoming {
+        position: absolute;
+        top: 0;
+        left: 100%;
+        width: 50%;
+        transform: translate3d(0, 0, 0);
+        transition: transform 500ms ease;
+        pointer-events: none;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop[data-intro-revealed='true'] .pdp-embla__slide[data-gallery-layout='intro'] .pdp-embla__pair__item--primary {
+        flex-basis: 50%;
+        max-width: 50%;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop[data-intro-revealed='true'] .pdp-embla__slide[data-gallery-layout='intro'] .pdp-embla__pair__item--incoming {
+        transform: translate3d(-100%, 0, 0);
+      }
+
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item img {
         display: block;
         width: 100%;
@@ -887,6 +920,11 @@
                     return carousels[0];
                   }
 
+                  function escapeAttrValue(value) {
+                    if (typeof CSS !== 'undefined' && CSS.escape) return CSS.escape(String(value));
+                    return String(value).replace(/"/g, '\\"');
+                  }
+
                   function updateProgressByIndex(carousel, index) {
                     if (!carousel || !carousel.progressBar) return;
                     var slideCount = carousel.embla.scrollSnapList().length;
@@ -897,7 +935,7 @@
                     }
                     var segmentWidth = 100 / slideCount;
                     carousel.progressBar.style.width = segmentWidth + '%';
-                    carousel.progressBar.style.transform = 'translateX(' + (index * 100) + '%)';
+                    carousel.progressBar.style.transform = 'translateX(' + (segmentWidth * index) + '%)';
                   }
 
                   function loadDeferredMediaByIndex(carousel, index) {
@@ -906,7 +944,15 @@
                     var slide = slideEls[index];
                     if (!slide) return;
 
-                    var deferredMedia = slide.querySelector('deferred-media, product-model');
+                    var primaryMediaId = slide.getAttribute('data-primary-media-id');
+                    var primaryMediaEl = null;
+                    if (primaryMediaId) {
+                      primaryMediaEl = slide.querySelector('[data-media-id="' + escapeAttrValue(primaryMediaId) + '"]');
+                    }
+
+                    var deferredMedia = primaryMediaEl
+                      ? primaryMediaEl.querySelector('deferred-media, product-model')
+                      : slide.querySelector('deferred-media, product-model');
                     if (!deferredMedia) return;
 
                     if (deferredMedia.hasAttribute('loaded')) return;
@@ -927,6 +973,13 @@
                     var slideEls = carousel.el.querySelectorAll('[data-embla-slide]');
                     var slide = slideEls[index];
                     if (!slide) return;
+
+                    var primaryMediaId = slide.getAttribute('data-primary-media-id');
+                    if (primaryMediaId) {
+                      productImagesEl.setAttribute('data-active-media', primaryMediaId);
+                      return;
+                    }
+
                     var mediaEl = slide.querySelector('[data-media-id]');
                     if (!mediaEl) return;
                     productImagesEl.setAttribute('data-active-media', mediaEl.getAttribute('data-media-id'));
@@ -934,11 +987,18 @@
 
                   function findIndexByMediaId(carousel, mediaId) {
                     if (!carousel) return -1;
-                    var mediaEl = carousel.el.querySelector('[data-media-id="' + CSS.escape(mediaId) + '"]');
+                    var targetMediaId = String(mediaId);
+                    var slideEls = carousel.el.querySelectorAll('[data-embla-slide]');
+
+                    for (var i = 0; i < slideEls.length; i++) {
+                      if (slideEls[i].getAttribute('data-primary-media-id') === targetMediaId) return i;
+                    }
+
+                    var mediaEl = carousel.el.querySelector('[data-media-id="' + escapeAttrValue(targetMediaId) + '"]');
                     if (!mediaEl) return -1;
                     var slide = mediaEl.closest('[data-embla-slide]');
                     if (!slide) return -1;
-                    return Array.prototype.indexOf.call(carousel.el.querySelectorAll('[data-embla-slide]'), slide);
+                    return Array.prototype.indexOf.call(slideEls, slide);
                   }
 
                   function makeCarousel(carouselEl) {
@@ -968,19 +1028,49 @@
                     var prevBtn = carouselEl.querySelector('[data-embla-prev]');
                     var nextBtn = carouselEl.querySelector('[data-embla-next]');
                     var progressBar = carouselEl.querySelector('[data-embla-progress-bar]');
+                    var isDesktopCarousel = carouselEl.classList.contains('pdp-embla--desktop');
+                    var hasIntroStage = isDesktopCarousel && !!carouselEl.querySelector('[data-gallery-layout="intro"] .pdp-embla__pair__item--incoming');
+                    var introRevealed = !hasIntroStage;
+
+                    function setIntroRevealedState(revealed) {
+                      if (!hasIntroStage) return;
+                      introRevealed = !!revealed;
+                      if (introRevealed) carouselEl.setAttribute('data-intro-revealed', 'true');
+                      else carouselEl.removeAttribute('data-intro-revealed');
+                    }
+
+                    setIntroRevealedState(introRevealed);
 
                     function updateArrows() {
-                      if (prevBtn) prevBtn.disabled = !embla.canScrollPrev();
-                      if (nextBtn) nextBtn.disabled = !embla.canScrollNext();
+                      var selectedIndex = embla.selectedScrollSnap();
+                      var canPrev = embla.canScrollPrev();
+                      var canNext = embla.canScrollNext();
+
+                      if (hasIntroStage && selectedIndex === 0 && introRevealed) canPrev = true;
+                      if (hasIntroStage && selectedIndex === 0 && !introRevealed) canNext = true;
+
+                      if (prevBtn) prevBtn.disabled = !canPrev;
+                      if (nextBtn) nextBtn.disabled = !canNext;
                     }
 
                     prevBtn && prevBtn.addEventListener('click', function (e) {
                       e.preventDefault();
+                      if (hasIntroStage && embla.selectedScrollSnap() === 0 && introRevealed) {
+                        setIntroRevealedState(false);
+                        setActiveMediaByIndex({ el: carouselEl }, 0);
+                        updateArrows();
+                        return;
+                      }
                       embla.scrollPrev();
                     });
 
                     nextBtn && nextBtn.addEventListener('click', function (e) {
                       e.preventDefault();
+                      if (hasIntroStage && embla.selectedScrollSnap() === 0 && !introRevealed) {
+                        setIntroRevealedState(true);
+                        updateArrows();
+                        return;
+                      }
                       embla.scrollNext();
                     });
 
@@ -993,7 +1083,9 @@
                       var activeCarousel = getActiveCarousel();
                       var index = embla.selectedScrollSnap();
 
-                      if (carouselEl.classList.contains('pdp-embla--desktop')) {
+                      if (isDesktopCarousel) {
+                        if (index > 0) setIntroRevealedState(true);
+
                         var direction = index > prevSelectedIndex ? 'next' : index < prevSelectedIndex ? 'prev' : null;
                         prevSelectedIndex = index;
 
@@ -1134,26 +1226,46 @@
               <div class="pdp-embla pdp-embla--desktop" data-embla-carousel>
                 <div class="pdp-embla__viewport" data-embla-viewport>
                   <div class="pdp-embla__container">
-                    {%- assign pdp_secondary_marker = 'pdp-40' -%}
-                    {%- assign second_media = product.media[1] -%}
-                    {%- assign pending_image = blank -%}
-                    {%- for media in ordered_media -%}
-                      {%- if media.media_type == 'image' -%}
-                        {%- if pending_image == blank -%}
-                          {%- assign pending_image = media -%}
-                        {%- else -%}
-                          {%- assign is_secondary_pair_image = false -%}
-                          {%- if media.alt and media.alt contains pdp_secondary_marker -%}
-                            {%- assign is_secondary_pair_image = true -%}
-                          {% comment %} {%- elsif second_media != blank and media.id == second_media.id -%}
-                            {%- assign is_secondary_pair_image = true -%} {% endcomment %}
+                    {%- assign media_count = ordered_media.size -%}
+                    {%- if media_count > 0 -%}
+                      {%- assign intro_media = ordered_media[0] -%}
+                      {%- assign intro_next_media = ordered_media[1] -%}
+                      <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="intro" data-primary-media-id="{{ section.id }}-{{ intro_media.id }}">
+                        <div class="pdp-embla__pair">
+                          <div class="pdp-embla__pair__item pdp-embla__pair__item--primary">
+                            {%- render 'media',
+                              media: intro_media,
+                              featured_media: featured_media,
+                              enable_video_looping: enable_video_looping,
+                              sectionkey: section.id,
+                              image_width: image_width,
+                              cover: true
+                            -%}
+                          </div>
+                          {%- if intro_next_media != blank -%}
+                            <div class="pdp-embla__pair__item pdp-embla__pair__item--incoming" aria-hidden="true">
+                              {%- render 'media',
+                                media: intro_next_media,
+                                featured_media: featured_media,
+                                enable_video_looping: enable_video_looping,
+                                sectionkey: section.id,
+                                image_width: image_width,
+                                cover: true
+                              -%}
+                            </div>
                           {%- endif -%}
+                        </div>
+                      </div>
 
-                          <div class="pdp-embla__slide" data-embla-slide{% if is_secondary_pair_image %} data-pair-layout="60-40"{% endif %}>
+                      {%- if media_count > 2 -%}
+                        {%- for media in ordered_media offset: 2 -%}
+                          {%- assign previous_index = forloop.index -%}
+                          {%- assign previous_media = ordered_media[previous_index] -%}
+                          <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="pair" data-primary-media-id="{{ section.id }}-{{ media.id }}">
                             <div class="pdp-embla__pair">
                               <div class="pdp-embla__pair__item">
                                 {%- render 'media',
-                                  media: pending_image,
+                                  media: previous_media,
                                   featured_media: featured_media,
                                   enable_video_looping: enable_video_looping,
                                   sectionkey: section.id,
@@ -1161,7 +1273,7 @@
                                   cover: true
                                 -%}
                               </div>
-                              <div class="pdp-embla__pair__item"{% if is_secondary_pair_image %} data-pair-role="secondary"{% endif %}>
+                              <div class="pdp-embla__pair__item">
                                 {%- render 'media',
                                   media: media,
                                   featured_media: featured_media,
@@ -1173,46 +1285,8 @@
                               </div>
                             </div>
                           </div>
-                          {%- assign pending_image = blank -%}
-                        {%- endif -%}
-                      {%- else -%}
-                        {%- if pending_image != blank -%}
-                          <div class="pdp-embla__slide" data-embla-slide>
-                            {%- render 'media',
-                              media: pending_image,
-                              featured_media: featured_media,
-                              enable_video_looping: enable_video_looping,
-                              sectionkey: section.id,
-                              image_width: image_width,
-                              cover: true
-                            -%}
-                          </div>
-                          {%- assign pending_image = blank -%}
-                        {%- endif -%}
-
-                        <div class="pdp-embla__slide" data-embla-slide>
-                          {%- render 'media',
-                            media: media,
-                            featured_media: featured_media,
-                            enable_video_looping: enable_video_looping,
-                            sectionkey: section.id,
-                            image_width: image_width,
-                            cover: true
-                          -%}
-                        </div>
+                        {%- endfor -%}
                       {%- endif -%}
-                    {%- endfor -%}
-                    {%- if pending_image != blank -%}
-                      <div class="pdp-embla__slide" data-embla-slide>
-                        {%- render 'media',
-                          media: pending_image,
-                          featured_media: featured_media,
-                          enable_video_looping: enable_video_looping,
-                          sectionkey: section.id,
-                          image_width: image_width,
-                          cover: true
-                        -%}
-                      </div>
                     {%- endif -%}
                   </div>
                 </div>
