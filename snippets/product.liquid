@@ -2225,13 +2225,7 @@
       </button>
 
       <div class="drawer__body">
-        {%- case block.settings.layout_type -%}
-          {%- when 'stacked_editorial' -%}
-            {%- render 'drawer-layout-stacked', block: block -%}
-
-          {%- else -%}
-            {%- render 'drawer-layout-image-text', block: block -%}
-        {%- endcase -%}
+        {%- render 'drawer-content-composite', block: block, template: block.settings.drawer_content_template -%}
       </div>
     </div>
     <span class="underlay drawer__underlay" data-drawer-underlay></span>
