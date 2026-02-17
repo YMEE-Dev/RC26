@@ -7,11 +7,17 @@
 
 <div class="drawer-gift-packaging">
   {%- comment -%}
-    Debug: Check what metafields exist
+    Debug: Check all metafields to find the correct structure
   {%- endcomment -%}
-  <!-- DEBUG: shop.metafields.info = {{ shop.metafields.info | json }} -->
-  <!-- DEBUG: product.metafields.info = {{ product.metafields.info | json }} -->
-  <!-- DEBUG: collection.metafields.info = {{ collection.metafields.info | json }} -->
+  <!-- DEBUG: ALL shop metafields = {{ shop.metafields | json }} -->
+  
+  {%- comment -%}
+    Try different possible structures
+  {%- endcomment -%}
+  <!-- DEBUG: Try 1 - shop.metafields.info.gift_packaging = {{ shop.metafields.info.gift_packaging | json }} -->
+  <!-- DEBUG: Try 2 - shop.metafields.gift_packaging.info = {{ shop.metafields.gift_packaging.info | json }} -->
+  <!-- DEBUG: Try 3 - shop.metafields.info_gift_packaging = {{ shop.metafields.info_gift_packaging | json }} -->
+  <!-- DEBUG: Try 4 - shop.metafields.gift_packaging_info = {{ shop.metafields.gift_packaging_info | json }} -->
   
   {%- comment -%}
     Get gift packaging content from dedicated metafields
