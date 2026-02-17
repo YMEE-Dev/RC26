@@ -11,12 +11,12 @@
   {%- endcomment -%}
   {%- assign free_shipping_content = nil -%}
   
-  {%- if shop.metafields.free_shipping.info != blank -%}
-    {%- assign free_shipping_content = shop.metafields.free_shipping.info.value -%}
-  {%- elsif product and product.metafields.free_shipping.info != blank -%}
+  {%- if product and product.metafields.free_shipping.info != blank -%}
     {%- assign free_shipping_content = product.metafields.free_shipping.info.value -%}
   {%- elsif collection and collection.metafields.free_shipping.info != blank -%}
     {%- assign free_shipping_content = collection.metafields.free_shipping.info.value -%}
+  {%- elsif shop.metafields.free_shipping.info != blank -%}
+    {%- assign free_shipping_content = shop.metafields.free_shipping.info.value -%}
   {%- endif -%}
   
   {%- comment -%}
