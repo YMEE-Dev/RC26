@@ -460,12 +460,29 @@
       #MainProduct--{{ section.id }} .pdp-embla__container {
         display: flex;
         height: 100%;
+        margin: 0;
+        padding: 0;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide {
         flex: 0 0 100%;
         min-width: 0;
         height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide {
+        flex: 0 0 50%;
+        box-sizing: border-box;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-gallery-layout='intro'] {
+        flex: 0 0 100%;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__viewport {
+        overflow: hidden;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair {
@@ -1006,9 +1023,10 @@
                     var viewport = carouselEl.querySelector('[data-embla-viewport]');
                     if (!viewport) return null;
 
-                    var embla = window.EmblaCarousel(viewport, {
+                    var emblaOptions = {
                       loop: false,
                       containScroll: 'trimSnaps',
+                      slidesToScroll: 1,
                       watchDrag: function (emblaApi, event) {
                         var target = event && event.target;
                         if (!target || !target.closest) return true;
@@ -1023,7 +1041,14 @@
                         }
                         return true;
                       }
-                    });
+                    };
+
+                    if (isDesktopCarousel) {
+                      emblaOptions.align = 0;
+                      emblaOptions.containScroll = 'keepSnaps';
+                    }
+
+                    var embla = window.EmblaCarousel(viewport, emblaOptions);
 
                     var prevBtn = carouselEl.querySelector('[data-embla-prev]');
                     var nextBtn = carouselEl.querySelector('[data-embla-next]');
@@ -1076,36 +1101,12 @@
 
                     var carousel = { el: carouselEl, embla: embla, prevBtn: prevBtn, nextBtn: nextBtn, progressBar: progressBar, updateArrows: updateArrows };
 
-                    var prevSelectedIndex = embla.selectedScrollSnap();
-                    var catchupTimer = null;
-
                     embla.on('select', function () {
                       var activeCarousel = getActiveCarousel();
                       var index = embla.selectedScrollSnap();
 
                       if (isDesktopCarousel) {
                         if (index > 0) setIntroRevealedState(true);
-
-                        var direction = index > prevSelectedIndex ? 'next' : index < prevSelectedIndex ? 'prev' : null;
-                        prevSelectedIndex = index;
-
-                        if (catchupTimer) window.clearTimeout(catchupTimer);
-
-                        if (direction) {
-                          catchupTimer = window.setTimeout(function () {
-                            var slideEls = carouselEl.querySelectorAll('[data-embla-slide]');
-                            var slideEl = slideEls[index];
-                            if (!slideEl) return;
-                            if (!slideEl.querySelector('.pdp-embla__pair')) return;
-
-                            slideEl.removeAttribute('data-pair-catchup');
-                            slideEl.getBoundingClientRect();
-                            slideEl.setAttribute('data-pair-catchup', direction);
-                            window.setTimeout(function () {
-                              slideEl.removeAttribute('data-pair-catchup');
-                            }, 700);
-                          }, 220);
-                        }
                       }
 
                       if (!activeCarousel || activeCarousel.el !== carouselEl) return;
@@ -1259,20 +1260,8 @@
 
                       {%- if media_count > 2 -%}
                         {%- for media in ordered_media offset: 2 -%}
-                          {%- assign previous_index = forloop.index -%}
-                          {%- assign previous_media = ordered_media[previous_index] -%}
-                          <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="pair" data-primary-media-id="{{ section.id }}-{{ media.id }}">
+                          <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="single" data-primary-media-id="{{ section.id }}-{{ media.id }}">
                             <div class="pdp-embla__pair">
-                              <div class="pdp-embla__pair__item">
-                                {%- render 'media',
-                                  media: previous_media,
-                                  featured_media: featured_media,
-                                  enable_video_looping: enable_video_looping,
-                                  sectionkey: section.id,
-                                  image_width: image_width,
-                                  cover: true
-                                -%}
-                              </div>
                               <div class="pdp-embla__pair__item">
                                 {%- render 'media',
                                   media: media,
@@ -1336,81 +1325,28 @@
 
                 <product-thumbs class="product__thumbs pdp-thumbs--desktop">
                   <div class="product__thumbs__holder" data-thumbs-slider>
-                    {%- assign pending_image = blank -%}
                     {%- for media in ordered_media -%}
-                      {%- if media.media_type == 'image' -%}
-                        {%- if pending_image == blank -%}
-                          {%- assign pending_image = media -%}
-                        {%- else -%}
-                          <div class="product__thumb{% if pending_image == featured_media or media == featured_media %} is-active{% endif %}" data-thumb-item>
-                            <a
-                              class="product__thumb__link product__thumb__link--pair"
-                              href="{{ pending_image.preview_image.src | image_url }}"
-                              data-media-id="{{ section.id }}-{{ pending_image.id }}"
-                              data-thumb-link
-                            >
-                              {%- liquid
-                                render 'image', image: pending_image.preview_image, width: 90, height: 90, sizes: '45px', widths: '45, 60, 90, 120, 180', aspect_ratio: 1
-                                render 'image', image: media.preview_image, width: 90, height: 90, sizes: '45px', widths: '45, 60, 90, 120, 180', aspect_ratio: 1
-                              -%}
-                            </a>
-                          </div>
-                          {%- assign pending_image = blank -%}
-                        {%- endif -%}
-                      {%- else -%}
-                        {%- if pending_image != blank -%}
-                          <div class="product__thumb{% if pending_image == featured_media %} is-active{% endif %}" data-thumb-item>
-                            <a
-                              class="product__thumb__link"
-                              href="{{ pending_image.preview_image.src | image_url }}"
-                              data-media-id="{{ section.id }}-{{ pending_image.id }}"
-                              data-thumb-link
-                            >
-                              {%- liquid
-                                render 'image', image: pending_image.preview_image, width: 90, height: 90, sizes: '45px', widths: '45, 60, 90, 120, 180', aspect_ratio: 1
-                              -%}
-                            </a>
-                          </div>
-                          {%- assign pending_image = blank -%}
-                        {%- endif -%}
-
-                        <div class="product__thumb{% if media == featured_media %} is-active{% endif %}" data-thumb-item>
-                          <a
-                            class="product__thumb__link"
-                            href="{{ media.preview_image.src | image_url }}"
-                            data-media-id="{{ section.id }}-{{ media.id }}"
-                            data-thumb-link
-                          >
-                            {%- liquid
-                              render 'image', image: media.preview_image, width: 90, height: 90, sizes: '45px', widths: '45, 60, 90, 120, 180', aspect_ratio: 1
-
-                              if media.media_type == 'video' or media.media_type == 'external_video'
-                                render 'icon-media-video'
-                              else
-                                if media.media_type == 'model'
-                                  render 'icon-media-model'
-                                endif
-                              endif
-                            -%}
-                          </a>
-                        </div>
-                      {%- endif -%}
-                    {%- endfor -%}
-
-                    {%- if pending_image != blank -%}
-                      <div class="product__thumb{% if pending_image == featured_media %} is-active{% endif %}" data-thumb-item>
+                      <div class="product__thumb{% if media == featured_media %} is-active{% endif %}" data-thumb-item>
                         <a
                           class="product__thumb__link"
-                          href="{{ pending_image.preview_image.src | image_url }}"
-                          data-media-id="{{ section.id }}-{{ pending_image.id }}"
+                          href="{{ media.preview_image.src | image_url }}"
+                          data-media-id="{{ section.id }}-{{ media.id }}"
                           data-thumb-link
                         >
                           {%- liquid
-                            render 'image', image: pending_image.preview_image, width: 90, height: 90, sizes: '45px', widths: '45, 60, 90, 120, 180', aspect_ratio: 1
+                            render 'image', image: media.preview_image, width: 90, height: 90, sizes: '45px', widths: '45, 60, 90, 120, 180', aspect_ratio: 1
+
+                            if media.media_type == 'video' or media.media_type == 'external_video'
+                              render 'icon-media-video'
+                            else
+                              if media.media_type == 'model'
+                                render 'icon-media-model'
+                              endif
+                            endif
                           -%}
                         </a>
                       </div>
-                    {%- endif -%}
+                    {%- endfor -%}
                   </div>
                 </product-thumbs>
               {%- endif -%}
