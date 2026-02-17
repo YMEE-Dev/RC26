@@ -3839,7 +3839,7 @@
             this.querySelectorAll(selectors$h.drawerClose)?.forEach((button) => {
               button.addEventListener('click', () => {
                 this.hideDrawer();
-              });
+              }, 800);
             });
 
             document.addEventListener('keyup', (event) => {

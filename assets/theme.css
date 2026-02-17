@@ -3567,6 +3567,7 @@ body.is-focused .highlights__item:focus {
   opacity: 0;
   background: var(--underlay-bg);
   transition: opacity 0.3s ease 0.1s, visibility 0s linear 0.4s;
+  backdrop-filter: blur(30px);
 }
 
 .expanded~.underlay,
@@ -3577,7 +3578,6 @@ details[open=true] .underlay,
   opacity: var(--underlay-opacity);
   transition-duration: 0.3s, 0s;
   transition-delay: 0.1s, 0s;
-  backdrop-filter: blur(30px);
 }
 
 dialog {
@@ -9247,7 +9247,7 @@ html.supports-touch ticker-bar[data-slide]:not([paused]) .ticker--animated {
 }
 
 .drawer--header.is-open .drawer__inner {
-  animation: slideInLeft 0.3s ease;
+  animation: slideInLeft 1s cubic-bezier(0.7, 0, 0.3, 1);
   animation-fill-mode: forwards;
 }
 
@@ -10148,7 +10148,11 @@ header-search-popdown.is-open .search-popdown {
   width: auto;
   fill: var(--link);
   z-index: 5999;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease, transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.header__mobile__hamburger:active {
+  transform: translate(-50%, 10px) scale(0.9);
 }
 
 @media only screen and (min-width: 960px) {
