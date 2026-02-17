@@ -833,8 +833,58 @@
       return [255, 255, 255];
     };
 
+    const computeImageLuminance = (imgEl) =>
+      new Promise((resolve) => {
+        if (!imgEl) return resolve(null);
+        const src = imgEl.currentSrc || imgEl.src;
+        if (!src) return resolve(null);
+
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.src = src;
+        img.decode?.().catch(() => {});
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1;
+            canvas.height = 1;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, 1, 1);
+            const data = ctx.getImageData(0, 0, 1, 1).data;
+            resolve(getLuminance([data[0], data[1], data[2]]));
+          } catch (err) {
+            resolve(null);
+          }
+        };
+        img.onerror = () => resolve(null);
+      });
+
+    const computeBackgroundImageLuminance = (url) =>
+      new Promise((resolve) => {
+        if (!url) return resolve(null);
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.src = url;
+        img.decode?.().catch(() => {});
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1;
+            canvas.height = 1;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, 1, 1);
+            const data = ctx.getImageData(0, 0, 1, 1).data;
+            resolve(getLuminance([data[0], data[1], data[2]]));
+          } catch (err) {
+            resolve(null);
+          }
+        };
+        img.onerror = () => resolve(null);
+      });
+
     const initHeaderObserver = () => {
       const headerWrapper = document.querySelector('header.theme__header');
+      const body = document.querySelector('body');
       const drawerWrapper = document.querySelector('header-drawer.drawer--header');
       const headerTargets = selectAll('.header__desktop, .header__mobile');
       const logoLinks = selectAll('.header__logo__link[data-logo-light][data-logo-dark]');
@@ -873,6 +923,7 @@
 
       const setHeaderColors = (mode) => {
         const colorSet = colors[mode] || colors.light;
+        body.style.setProperty('--globaltext', colorSet.link);
         headerWrapper.style.setProperty('--link', colorSet.link);
         headerWrapper.style.setProperty('--link-hover', colorSet.hover);
         headerTargets.forEach((header) => {
@@ -939,16 +990,25 @@
         });
       }
 
-      const sectionsToObserve = selectAll('section, .shopify-section, [data-section-id]');
+      let sectionsToObserve = selectAll(
+        'main .shopify-section section, main .shopify-section collection-component, main .shopify-section [data-section-id]'
+      );
+      console.log('header observer init', { sections: sectionsToObserve });
       if (!sectionsToObserve.length) return;
 
       const DEBUG_HEADER_OBSERVER = false;
+      const APPLY_DEBOUNCE = 150;
+      const thresholds = [0, 0.25, 0.5, 0.75, 1];
 
       const computeRootMargin = () => {
         const h = window.innerHeight || document.documentElement.clientHeight || 0;
-        const target = 150;
+        const headerEl = document.querySelector('[data-header-height]');
+        const headerHeight = headerEl ? headerEl.offsetHeight : 0;
+        // Pull the root box down to just beneath the header so we sample what's under it.
+        const top = `-${headerHeight}px`;
+        const target = 200;
         const bottom = target - h; // negative when h > target
-        return `0px 0px ${bottom}px 0px`;
+        return `${top} 0px ${bottom}px 0px`;
       };
 
       const marginToPx = (value, axisLength) => {
@@ -992,8 +1052,112 @@
         el.style.height = `${bottom - top}px`;
       };
 
-      let rootMargin = computeRootMargin();
+      const luminanceCache = new WeakMap();
 
+      const findBackgroundImage = (sectionEl) =>
+        sectionEl.querySelector(
+          '[data-header-luminance-img], .subcollections__bg img, .hero__bg img, .section-background img, .banner__media img, .image-with-text__image img'
+        );
+
+      const findElementBackgroundImage = (el) => {
+        let node = el;
+        while (node && node !== document.documentElement) {
+          const style = getComputedStyle(node);
+          const bgImage = style.backgroundImage;
+          if (bgImage && bgImage !== 'none' && !bgImage.startsWith('linear-gradient')) {
+            const match = bgImage.match(/url\(["']?(.*?)["']?\)/);
+            if (match && match[1]) {
+              return match[1];
+            }
+          }
+          node = node.parentElement;
+        }
+        return null;
+      };
+
+      const applyLuminanceMode = (luminance) => {
+        if (luminance < 0.25) {
+          applyMode('light');
+        } else if (luminance < 0.5) {
+          applyMode('dimmedLight');
+        } else if (luminance < 0.75) {
+          applyMode('lightDark');
+        } else {
+          applyMode('dark');
+        }
+      };
+
+      const logLuminance = (luminance, sectionEl, source) => {
+        if (!DEBUG_HEADER_OBSERVER) return;
+        console.log('header luminance', {
+          luminance,
+          source,
+          section: sectionEl.dataset.sectionId || sectionEl.id || sectionEl.className,
+        });
+      };
+
+      const applyForSection = (sectionEl) => {
+        const cached = luminanceCache.get(sectionEl);
+        if (cached !== undefined) {
+          logLuminance(cached, sectionEl, 'cache');
+          applyLuminanceMode(cached);
+          return;
+        }
+
+        const img = findBackgroundImage(sectionEl);
+        const bgUrl = findElementBackgroundImage(sectionEl);
+
+        if (img) {
+          computeImageLuminance(img).then((lum) => {
+            const luminance = lum ?? getLuminance(getBackgroundRGB(sectionEl));
+            luminanceCache.set(sectionEl, luminance);
+            logLuminance(luminance, sectionEl, lum !== null ? 'image' : 'background');
+            applyLuminanceMode(luminance);
+          });
+          return;
+        }
+
+        if (bgUrl) {
+          computeBackgroundImageLuminance(bgUrl).then((lum) => {
+            const luminance = lum ?? getLuminance(getBackgroundRGB(sectionEl));
+            luminanceCache.set(sectionEl, luminance);
+            logLuminance(luminance, sectionEl, lum !== null ? 'background-image' : 'background');
+            applyLuminanceMode(luminance);
+          });
+          return;
+        }
+
+        const luminance = getLuminance(getBackgroundRGB(sectionEl));
+        luminanceCache.set(sectionEl, luminance);
+        logLuminance(luminance, sectionEl, 'background');
+        applyLuminanceMode(luminance);
+      };
+
+      const debounceFn = (fn, wait) => {
+        if (window.theme && typeof window.theme.debounce === 'function') {
+          return window.theme.debounce(fn, wait);
+        }
+        let timer;
+        return (...args) => {
+          clearTimeout(timer);
+          timer = setTimeout(() => fn(...args), wait);
+        };
+      };
+
+      const scheduleApply = debounceFn(applyForSection, APPLY_DEBOUNCE);
+
+      const pickTopEntry = (entries) => {
+        const visible = entries.filter((entry) => entry.isIntersecting);
+        if (!visible.length) return null;
+        return visible.sort((a, b) => {
+          if (b.intersectionRatio !== a.intersectionRatio) {
+            return b.intersectionRatio - a.intersectionRatio;
+          }
+          return a.boundingClientRect.top - b.boundingClientRect.top;
+        })[0];
+      };
+
+      let rootMargin = computeRootMargin();
       let overlay;
       const ensureOverlay = () => {
         if (!DEBUG_HEADER_OBSERVER) return;
@@ -1004,60 +1168,43 @@
         updateOverlayPosition(overlay, rootMargin);
       };
 
-      let intersectionObserver = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
-            const luminance = getLuminance(getBackgroundRGB(entry.target));
-            console.log('luminance:', luminance);
-            if (luminance < 0.25) {
-              applyMode('light');
-            } else if (luminance < 0.5) {
-              applyMode('dimmedLight');
-            } else if (luminance < 0.75) {
-              applyMode('lightDark');
-            } else {
-              applyMode('dark');
-            }
-          });
-        },
-        { rootMargin }
-      );
-      const observeAll = () => sectionsToObserve.forEach((section) => intersectionObserver.observe(section));
-      observeAll();
+      const onIntersect = (entries) => {
+        const entry = pickTopEntry(entries);
+        if (!entry) return;
+        scheduleApply(entry.target);
+      };
 
-      const resetObserver = () => {
-        rootMargin = computeRootMargin();
-        intersectionObserver.disconnect();
-        intersectionObserver = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (!entry.isIntersecting) return;
-              const luminance = getLuminance(getBackgroundRGB(entry.target));
-              console.log('luminance:', luminance);
-              if (luminance < 0.25) {
-                applyMode('light');
-              } else if (luminance < 0.5) {
-                applyMode('dimmedLight');
-              } else if (luminance < 0.75) {
-                applyMode('lightDark');
-              } else {
-                applyMode('dark');
-              }
-            });
-          },
-          { rootMargin }
+      let intersectionObserver;
+      const observeAll = () => {
+        sectionsToObserve = selectAll(
+          'main .shopify-section section, main .shopify-section collection-component, main .shopify-section [data-section-id]'
         );
+        sectionsToObserve.forEach((section) => intersectionObserver.observe(section));
+      };
+
+      const startObserver = () => {
+        rootMargin = computeRootMargin();
+        intersectionObserver = new IntersectionObserver(onIntersect, { rootMargin, threshold: thresholds });
         observeAll();
         ensureOverlay();
       };
 
-      ensureOverlay();
+      const resetObserver = () => {
+        intersectionObserver && intersectionObserver.disconnect();
+        startObserver();
+      };
+
+      startObserver();
       window.addEventListener('resize', resetObserver);
     };
 
-    initHeaderObserver();
-    window.addEventListener('load', initHeaderObserver, { once: true });
+    window.addEventListener(
+      'load',
+      () => {
+        initHeaderObserver();
+      },
+      { once: true }
+    );
   });
 {% endjavascript %}
 

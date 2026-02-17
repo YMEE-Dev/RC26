@@ -18,13 +18,16 @@
 
       {%  if section.settings.subcollection_bg %}
         background: url({{ section.settings.subcollection_bg | image_url }});
-        background-repeat: round;
+        background-repeat: initial;
+        background-position: center;
+        background-size: cover;
       {% endif %}
     }
   {%- endstyle -%}
 
   <section
     class="subcollections collection-{{ collection.handle }} section-padding {{ color_scheme }}"
+    data-section-id="{{ section.id }}"
     id="Subcollections--{{ section.id }}"
   >
     {%- if sub_collections.size > 0 -%}
@@ -61,7 +64,7 @@
                     (min-width: 750px) (calc(100vw - 16px) / 3), calc(100vw - 32px)
                   {%- endcapture -%}
 
-                  {%- render 'image' image: image, sizes: sizes, cover: true -%}
+                  {%- render 'image' image: image, sizes: sizes, cover: true, show_backfill: false -%}
                 </div>
                 <div class="subcollection__text">
                   <p class="subcollection__title navlink">{{ sub_collection_title }}</p>
@@ -102,7 +105,7 @@
           </div>
         {%- endcapture -%}
 
-        <div class="grid-outer">
+        <div class="">
           {%- if layout_slider -%}
             <grid-slider>
               {{ sub_collection_html }}
