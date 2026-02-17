@@ -24,23 +24,12 @@
   {%- endcomment -%}
   {%- assign gift_content = nil -%}
   
-  {%- comment -%}
-    Debug: Check specific metafield values
-  {%- endcomment -%}
-  <!-- DEBUG: shop.metafields.info.gift_packaging = {{ shop.metafields.info.gift_packaging | json }} -->
-  <!-- DEBUG: gift_content after assignment = {{ gift_content | json }} -->
-  
-  {%- if product and product.metafields.info.gift_packaging != blank -%}
-    {%- assign gift_content = product.metafields.info.gift_packaging.value -%}
-    <!-- DEBUG: Found at product level: {{ gift_content | json }} -->
-  {%- elsif collection and collection.metafields.info.gift_packaging != blank -%}
-    {%- assign gift_content = collection.metafields.info.gift_packaging.value -%}
-    <!-- DEBUG: Found at collection level: {{ gift_content | json }} -->
-  {%- elsif shop.metafields.info.gift_packaging != blank -%}
-    {%- assign gift_content = shop.metafields.info.gift_packaging.value -%}
-    <!-- DEBUG: Found at shop level: {{ gift_content | json }} -->
-  {%- else -%}
-    <!-- DEBUG: No metafield found anywhere! -->
+  {%- if product and product.metafields.info_gift_packaging != blank -%}
+    {%- assign gift_content = product.metafields.info_gift_packaging.value -%}
+  {%- elsif collection and collection.metafields.info_gift_packaging != blank -%}
+    {%- assign gift_content = collection.metafields.info_gift_packaging.value -%}
+  {%- elsif shop.metafields.info_gift_packaging != blank -%}
+    {%- assign gift_content = shop.metafields.info_gift_packaging.value -%}
   {%- endif -%}
   
   {%- comment -%}
