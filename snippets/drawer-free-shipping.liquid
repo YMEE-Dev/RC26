@@ -11,12 +11,12 @@
   {%- endcomment -%}
   {%- assign free_shipping_content = nil -%}
   
-  {%- if product and product.metafields.info.free_shipping_info != blank -%}
-    {%- assign free_shipping_content = product.metafields.info.free_shipping_info.value -%}
-  {%- elsif collection and collection.metafields.info.free_shipping_info != blank -%}
-    {%- assign free_shipping_content = collection.metafields.info.free_shipping_info.value -%}
-  {%- elsif shop.metafields.info.free_shipping_info != blank -%}
-    {%- assign free_shipping_content = shop.metafields.info.free_shipping_info.value -%}
+  {%- if product and product.metafields.info_free_shipping_info != blank -%}
+    {%- assign free_shipping_content = product.metafields.info_free_shipping_info.value -%}
+  {%- elsif collection and collection.metafields.info_free_shipping_info != blank -%}
+    {%- assign free_shipping_content = collection.metafields.info_free_shipping_info.value -%}
+  {%- elsif shop.metafields.info_free_shipping_info != blank -%}
+    {%- assign free_shipping_content = shop.metafields.info_free_shipping_info.value -%}
   {%- endif -%}
   
   {%- comment -%}
@@ -52,29 +52,30 @@
 
 {% stylesheet %}
   .drawer-free-shipping {
-    padding: 20px;
+    padding: 80px 40px 40px 40px;
+    height: 100%;
   }
-  
+
   .free-shipping__content {
     display: flex;
     flex-direction: column;
     height: 100%;
   }
-  
+
   .free-shipping__text-content {
     flex: 1;
   }
-  
+
   .free-shipping__image {
     margin-top: auto;
     text-align: center;
   }
-  
+
   .free-shipping__image img {
     max-width: 100%;
     height: auto;
   }
-  
+
   .free-shipping__title {
     margin-bottom: 15px;
     color: #000;
@@ -84,7 +85,7 @@
     font-weight: 500;
     line-height: 36px;
   }
-  
+
   .free-shipping__description {
     margin-bottom: 20px;
     color: #000;
@@ -94,7 +95,7 @@
     font-weight: 400;
     line-height: 22px;
   }
-  
+
   .free-shipping__default {
     text-align: center;
     padding: 40px 20px;
