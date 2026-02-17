@@ -1,0 +1,84 @@
+{% doc %}
+  Renders gift packaging information in a drawer.
+  This snippet uses metaobjects for content management.
+  
+  @param {object} block - The block object containing drawer settings
+{% enddoc %}
+
+<div class="drawer-gift-packaging">
+  {%- comment -%}
+    Get gift packaging content from dedicated metafields
+  {%- endcomment -%}
+  {%- assign gift_content = nil -%}
+  
+  {%- if shop.metafields.gift_packaging.info != blank -%}
+    {%- assign gift_content = shop.metafields.gift_packaging.info.value -%}
+  {%- elsif product and product.metafields.gift_packaging.info != blank -%}
+    {%- assign gift_content = product.metafields.gift_packaging.info.value -%}
+  {%- elsif collection and collection.metafields.gift_packaging.info != blank -%}
+    {%- assign gift_content = collection.metafields.gift_packaging.info.value -%}
+  {%- endif -%}
+  
+  {%- comment -%}
+    Display metaobject content if available
+  {%- endcomment -%}
+  {%- if gift_content != blank -%}
+    <div class="gift-packaging__content">
+      {%- if gift_content.image != blank -%}
+        <div class="gift-packaging__image">
+          {{ gift_content.image | image_url: width: 600 | image_tag }}
+        </div>
+      {%- endif -%}
+      
+      {%- if gift_content.title != blank -%}
+        <h2 class="gift-packaging__title">{{ gift_content.title }}</h2>
+      {%- endif -%}
+      
+      {%- if gift_content.description != blank -%}
+        <div class="gift-packaging__description">
+          {{ gift_content.description }}
+        </div>
+      {%- endif -%}
+    </div>
+  {%- else -%}
+    <div class="gift-packaging__default">
+      <h2>Gift Packaging</h2>
+      <p>Gift packaging information will appear here once configured.</p>
+    </div>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .drawer-gift-packaging {
+    padding: 20px;
+  }
+  
+  .gift-packaging__image {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .gift-packaging__image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+  
+  .gift-packaging__title {
+    margin-bottom: 15px;
+    font-size: 24px;
+    font-weight: 600;
+    text-align: center;
+  }
+  
+  .gift-packaging__description {
+    line-height: 1.6;
+    color: #333;
+  }
+  
+  .gift-packaging__default {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+  }
+{% endstylesheet %}
