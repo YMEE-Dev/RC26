@@ -2225,7 +2225,12 @@
       </button>
 
       <div class="drawer__body">
-        {%- render block.settings.drawer_snippet, block: block -%}
+        {%- case block.settings.drawer_snippet -%}
+          {%- when 'drawer-free-shipping' -%}
+            {%- render 'drawer-free-shipping', block: block -%}
+          {%- when 'drawer-gift-packaging' -%}
+            {%- render 'drawer-gift-packaging', block: block -%}
+        {%- endcase -%}
       </div>
     </div>
     <span class="underlay drawer__underlay" data-drawer-underlay></span>
