@@ -1,0 +1,137 @@
+{% doc %}
+  Renders free shipping information in a drawer.
+  This snippet uses metaobjects for content management.
+  
+  @param {object} block - The block object containing drawer settings
+{% enddoc %}
+
+<div class="drawer-free-shipping">
+  {%- comment -%}
+    Get free shipping content from dedicated metafields
+  {%- endcomment -%}
+  {%- assign free_shipping_content = nil -%}
+  
+  {%- if shop.metafields.free_shipping.info != blank -%}
+    {%- assign free_shipping_content = shop.metafields.free_shipping.info.value -%}
+  {%- elsif product and product.metafields.free_shipping.info != blank -%}
+    {%- assign free_shipping_content = product.metafields.free_shipping.info.value -%}
+  {%- elsif collection and collection.metafields.free_shipping.info != blank -%}
+    {%- assign free_shipping_content = collection.metafields.free_shipping.info.value -%}
+  {%- endif -%}
+  
+  {%- comment -%}
+    Display metaobject content if available
+  {%- endcomment -%}
+  {%- if free_shipping_content != blank -%}
+    <div class="free-shipping__content">
+      {%- if free_shipping_content.image != blank -%}
+        <div class="free-shipping__image">
+          {{ free_shipping_content.image | image_url: width: 600 | image_tag }}
+        </div>
+      {%- endif -%}
+      
+      {%- if free_shipping_content.title != blank -%}
+        <h2 class="free-shipping__title">{{ free_shipping_content.title }}</h2>
+      {%- endif -%}
+      
+      {%- if free_shipping_content.description != blank -%}
+        <div class="free-shipping__description">
+          {{ free_shipping_content.description }}
+        </div>
+      {%- endif -%}
+    </div>
+  {%- else -%}
+    <div class="free-shipping__default">
+      <h2>Free Shipping</h2>
+      <p>Free shipping information will appear here once configured.</p>
+    </div>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .drawer-free-shipping {
+    padding: 20px;
+  }
+  
+  .free-shipping__image {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .free-shipping__image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+  
+  .free-shipping__heading,
+  .free-shipping__title {
+    margin-bottom: 15px;
+    font-size: 24px;
+    font-weight: 600;
+    text-align: center;
+  }
+  
+  .free-shipping__text,
+  .free-shipping__description {
+    margin-bottom: 20px;
+    line-height: 1.6;
+    color: #333;
+  }
+  
+  .free-shipping__threshold {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f0f8f0;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 18px;
+    color: #2d5a2d;
+  }
+  
+  .free-shipping__delivery {
+    margin: 15px 0;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+  }
+  
+  .free-shipping__options {
+    margin-top: 30px;
+  }
+  
+  .free-shipping__options h3 {
+    margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  .shipping-option {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .shipping-option:last-child {
+    border-bottom: none;
+  }
+  
+  .shipping-option__name {
+    font-weight: 500;
+  }
+  
+  .shipping-option__price {
+    font-weight: 600;
+    color: #000;
+  }
+  
+  .free-shipping__default {
+    text-align: center;
+    padding: 40px 20px;
+  }
+  
+  .free-shipping__default h2 {
+    margin-bottom: 10px;
+  }
+{% endstylesheet %}
