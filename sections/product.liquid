@@ -2121,13 +2121,19 @@
         },
         {
           "type": "select",
-          "id": "layout_type",
-          "label": "Layout",
-          "default": "image_text_split",
+          "id": "drawer_content_template",
+          "label": "Drawer content template",
+          "default": "composite",
           "options": [
-            {"value": "image_text_split", "label": "2 columns: Image + text"},
-            {"value": "stacked_editorial", "label": "Stacked: Title + text + accordion + image"}
+            {"value": "composite", "label": "Composite (Intro + Products + FAQ)"},
+            {"value": "intro", "label": "Intro only"},
+            {"value": "products", "label": "Products only"},
+            {"value": "faq", "label": "FAQ only"}
           ]
+        },
+        {
+          "type": "header",
+          "content": "Content: Intro"
         },
         {
           "type": "text",
@@ -2162,14 +2168,19 @@
         {
           "type": "text",
           "id": "heading",
-          "label": "Drawer heading",
+          "label": "Intro heading",
           "default": "Need help?"
         },
         {
           "type": "richtext",
           "id": "text",
-          "label": "Drawer content",
+          "label": "Intro text",
           "default": "<p>Add content for this drawer in the Theme Editor.</p>"
+        },
+        {
+          "type": "image_picker",
+          "id": "intro_image",
+          "label": "Intro image"
         },
         {
           "type": "page",
@@ -2177,63 +2188,66 @@
           "label": "Optional page content"
         },
         {
-          "type": "image_picker",
-          "id": "split_image",
-          "label": "Image",
-          "visible_if": "{{ block.settings.layout_type == 'image_text_split' }}"
+          "type": "header",
+          "content": "Content: Product tiles"
+        },
+        {
+          "type": "text",
+          "id": "products_heading",
+          "label": "Products heading",
+          "default": "You may also like"
+        },
+        {
+          "type": "product_list",
+          "id": "products",
+          "label": "Products",
+          "limit": 8
         },
         {
           "type": "header",
-          "content": "Layout: Stacked",
-          "visible_if": "{{ block.settings.layout_type == 'stacked_editorial' }}"
-        },
-        {
-          "type": "image_picker",
-          "id": "stacked_image",
-          "label": "Bottom image",
-          "visible_if": "{{ block.settings.layout_type == 'stacked_editorial' }}"
+          "content": "Content: FAQ"
         },
         {
           "type": "text",
-          "id": "accordion_title_1",
-          "label": "Accordion row 1 title",
-          "default": "Accordion row 1",
-          "visible_if": "{{ block.settings.layout_type == 'stacked_editorial' }}"
-        },
-        {
-          "type": "richtext",
-          "id": "accordion_text_1",
-          "label": "Accordion row 1 content",
-          "default": "<p>Add accordion content.</p>",
-          "visible_if": "{{ block.settings.layout_type == 'stacked_editorial' }}"
+          "id": "faq_heading",
+          "label": "FAQ heading",
+          "default": "Frequently asked questions"
         },
         {
           "type": "text",
-          "id": "accordion_title_2",
-          "label": "Accordion row 2 title",
-          "default": "Accordion row 2",
-          "visible_if": "{{ block.settings.layout_type == 'stacked_editorial' }}"
+          "id": "faq_title_1",
+          "label": "FAQ row 1 title",
+          "default": "FAQ row 1"
         },
         {
           "type": "richtext",
-          "id": "accordion_text_2",
-          "label": "Accordion row 2 content",
-          "default": "<p>Add accordion content.</p>",
-          "visible_if": "{{ block.settings.layout_type == 'stacked_editorial' }}"
+          "id": "faq_text_1",
+          "label": "FAQ row 1 content",
+          "default": "<p>Add FAQ content.</p>"
         },
         {
           "type": "text",
-          "id": "accordion_title_3",
-          "label": "Accordion row 3 title",
-          "default": "Accordion row 3",
-          "visible_if": "{{ block.settings.layout_type == 'stacked_editorial' }}"
+          "id": "faq_title_2",
+          "label": "FAQ row 2 title",
+          "default": "FAQ row 2"
         },
         {
           "type": "richtext",
-          "id": "accordion_text_3",
-          "label": "Accordion row 3 content",
-          "default": "<p>Add accordion content.</p>",
-          "visible_if": "{{ block.settings.layout_type == 'stacked_editorial' }}"
+          "id": "faq_text_2",
+          "label": "FAQ row 2 content",
+          "default": "<p>Add FAQ content.</p>"
+        },
+        {
+          "type": "text",
+          "id": "faq_title_3",
+          "label": "FAQ row 3 title",
+          "default": "FAQ row 3"
+        },
+        {
+          "type": "richtext",
+          "id": "faq_text_3",
+          "label": "FAQ row 3 content",
+          "default": "<p>Add FAQ content.</p>"
         }
       ]
     }
