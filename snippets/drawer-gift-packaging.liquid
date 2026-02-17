@@ -7,16 +7,23 @@
 
 <div class="drawer-gift-packaging">
   {%- comment -%}
+    Debug: Check what metafields exist
+  {%- endcomment -%}
+  <!-- DEBUG: shop.metafields.gift_packaging = {{ shop.metafields.gift_packaging | json }} -->
+  <!-- DEBUG: product.metafields.gift_packaging = {{ product.metafields.gift_packaging | json }} -->
+  <!-- DEBUG: collection.metafields.gift_packaging = {{ collection.metafields.gift_packaging | json }} -->
+  
+  {%- comment -%}
     Get gift packaging content from dedicated metafields
   {%- endcomment -%}
   {%- assign gift_content = nil -%}
   
-  {%- if shop.metafields.gift_packaging.info != blank -%}
-    {%- assign gift_content = shop.metafields.gift_packaging.info.value -%}
-  {%- elsif product and product.metafields.gift_packaging.info != blank -%}
+  {%- if product and product.metafields.gift_packaging.info != blank -%}
     {%- assign gift_content = product.metafields.gift_packaging.info.value -%}
   {%- elsif collection and collection.metafields.gift_packaging.info != blank -%}
     {%- assign gift_content = collection.metafields.gift_packaging.info.value -%}
+  {%- elsif shop.metafields.gift_packaging.info != blank -%}
+    {%- assign gift_content = shop.metafields.gift_packaging.info.value -%}
   {%- endif -%}
   
   {%- comment -%}
