@@ -2126,8 +2126,7 @@
           "default": "image_text_split",
           "options": [
             {"value": "image_text_split", "label": "2 columns: Image + text"},
-            {"value": "stacked_editorial", "label": "Stacked: Title + text + accordion + image"},
-            {"value": "custom_content", "label": "Custom content (Liquid)"}
+            {"value": "stacked_editorial", "label": "Stacked: Title + text + accordion + image"}
           ]
         },
         {
@@ -2164,44 +2163,24 @@
           "type": "text",
           "id": "heading",
           "label": "Drawer heading",
-          "default": "Need help?",
-          "visible_if": "{{ block.settings.layout_type != 'custom_content' }}"
+          "default": "Need help?"
         },
         {
           "type": "richtext",
           "id": "text",
           "label": "Drawer content",
-          "default": "<p>Add content for this drawer in the Theme Editor.</p>",
-          "visible_if": "{{ block.settings.layout_type != 'custom_content' }}"
+          "default": "<p>Add content for this drawer in the Theme Editor.</p>"
         },
         {
           "type": "page",
           "id": "page",
-          "label": "Optional page content",
-          "visible_if": "{{ block.settings.layout_type != 'custom_content' }}"
-        },
-        {
-          "type": "header",
-          "content": "Layout: Image + text",
-          "visible_if": "{{ block.settings.layout_type == 'image_text_split' }}"
+          "label": "Optional page content"
         },
         {
           "type": "image_picker",
           "id": "split_image",
           "label": "Image",
           "visible_if": "{{ block.settings.layout_type == 'image_text_split' }}"
-        },
-        {
-          "type": "header",
-          "content": "Layout: Custom content",
-          "visible_if": "{{ block.settings.layout_type == 'custom_content' }}"
-        },
-        {
-          "type": "liquid",
-          "id": "custom_liquid",
-          "label": "Custom Liquid",
-          "info": "Add any custom markup/Liquid for this drawer (for example product tiles).",
-          "visible_if": "{{ block.settings.layout_type == 'custom_content' }}"
         },
         {
           "type": "header",
