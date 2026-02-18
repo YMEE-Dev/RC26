@@ -944,6 +944,8 @@
                     var viewport = carouselEl.querySelector('[data-embla-viewport]');
                     if (!viewport) return null;
 
+                    var isDesktopCarousel = carouselEl.classList.contains('pdp-embla--desktop');
+
                     var emblaOptions = {
                       loop: false,
                       containScroll: 'trimSnaps',
@@ -977,7 +979,6 @@
                     var prevBtn = carouselEl.querySelector('[data-embla-prev]');
                     var nextBtn = carouselEl.querySelector('[data-embla-next]');
                     var progressBar = carouselEl.querySelector('[data-embla-progress-bar]');
-                    var isDesktopCarousel = carouselEl.classList.contains('pdp-embla--desktop');
                     var hasIntroStage = isDesktopCarousel && carouselEl.querySelectorAll('[data-embla-slide]').length > 0;
                     var carouselStarted = false;
 
@@ -1007,9 +1008,7 @@
                       if (hasIntroStage && carouselStarted && embla.selectedScrollSnap() === 1) {
                         setCarouselStarted(false);
                         updateArrows();
-                        requestAnimationFrame(function() {
-                          embla.scrollTo(0, true);
-                        });
+                        embla.scrollPrev();
                         return;
                       }
                       embla.scrollPrev();
@@ -1031,13 +1030,11 @@
                       var activeCarousel = getActiveCarousel();
                       var index = embla.selectedScrollSnap();
 
-                      // Remove active class from all slides
                       var slides = carouselEl.querySelectorAll('[data-embla-slide]');
                       slides.forEach(function(slide) {
                         slide.classList.remove('pdp-embla__slide--active');
                       });
 
-                      // Add active class to current slide
                       if (slides[index]) {
                         slides[index].classList.add('pdp-embla__slide--active');
                       }
@@ -1056,6 +1053,28 @@
                       loadDeferredMediaByIndex(activeCarousel, index);
                       updateArrows();
                       updateProgressByIndex(activeCarousel, index);
+                      
+                      if (isDesktopCarousel && carouselStarted) {
+                        var thumbs = productImagesEl.querySelectorAll('.product__thumb');
+                        thumbs.forEach(function(thumb) {
+                          thumb.classList.remove('is-active');
+                        });
+                        
+                        if (thumbs[index]) {
+                          thumbs[index].classList.add('is-active');
+                        }
+                        if (thumbs[index + 1]) {
+                          thumbs[index + 1].classList.add('is-active');
+                        }
+                      } else {
+                        var thumbs = productImagesEl.querySelectorAll('.product__thumb');
+                        thumbs.forEach(function(thumb) {
+                          thumb.classList.remove('is-active');
+                        });
+                        if (thumbs[index]) {
+                          thumbs[index].classList.add('is-active');
+                        }
+                      }
                     });
 
                     embla.on('reInit', function () {
@@ -1081,16 +1100,13 @@
                     var activeCarousel = getActiveCarousel();
                     if (!activeCarousel) return;
                     
-                    // Check if this is desktop carousel and we're on first slide
                     var isDesktop = activeCarousel.el.classList.contains('pdp-embla--desktop');
                     var isStarted = activeCarousel.el.classList.contains('pdp-embla--started');
                     var currentIndex = activeCarousel.embla.selectedScrollSnap();
                     var targetIndex = findIndexByMediaId(activeCarousel, e.detail.id);
                     
-                    // Special handling for first slide behavior
                     if (isDesktop && !isStarted && currentIndex === 0) {
                       if (targetIndex === 1) {
-                        // Clicking second thumbnail should behave like next button
                         activeCarousel.el.classList.add('pdp-embla--started');
                         activeCarousel.updateArrows && activeCarousel.updateArrows();
                         setActiveMediaByIndex(activeCarousel, 1);
@@ -1100,7 +1116,6 @@
                       }
                     }
                     
-                    // Handle clicking first thumbnail when in 50/50 mode
                     if (isDesktop && isStarted && targetIndex === 0) {
                       activeCarousel.el.classList.remove('pdp-embla--started');
                       activeCarousel.embla.scrollTo(0, true);
