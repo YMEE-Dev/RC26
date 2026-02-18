@@ -733,6 +733,21 @@
         padding: 0;
       }
 
+      #MainProduct--{{ section.id }} .product__thumb.is-active:not(.prev-active):not(.single-active) {
+        transform: translateY(0.5px);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #MainProduct--{{ section.id }} .product__thumb.is-active.prev-active {
+        transform: translateY(-0.5px);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #MainProduct--{{ section.id }} .product__thumb.is-active.single-active {
+        transform: translateY(0);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
       #MainProduct--{{ section.id }} .product__thumb::after {
         content: none;
       }
@@ -753,6 +768,7 @@
         border: 1px solid transparent;
         pointer-events: none;
         z-index: 2;
+        transition: border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       #MainProduct--{{ section.id }} .product__thumb__link img {
@@ -772,6 +788,19 @@
       }
 
       #MainProduct--{{ section.id }} .product__thumb.is-active .product__thumb__link::after {
+        border-color: #000;
+      }
+
+      #MainProduct--{{ section.id }} .product__thumb.is-active:not(.prev-active):not(.single-active) .product__thumb__link::after {
+        border-bottom-color: transparent;
+      }
+
+      #MainProduct--{{ section.id }} .product__thumb.is-active.prev-active .product__thumb__link::after {
+        border-top-color: transparent;
+        border-bottom-color: #000;
+      }
+
+      #MainProduct--{{ section.id }} .product__thumb.is-active.single-active .product__thumb__link::after {
         border-color: #000;
       }
 
@@ -1039,49 +1068,143 @@
                         slides[index].classList.add('pdp-embla__slide--active');
                       }
 
-                      if (isDesktopCarousel) {
-                        if (index > 0 && !carouselStarted) {
-                          setCarouselStarted(true);
-                        } else if (index === 0 && carouselStarted) {
-                          setCarouselStarted(false);
-                        }
-                      }
-
-                      if (!activeCarousel || activeCarousel.el !== carouselEl) return;
-
                       setActiveMediaByIndex(activeCarousel, index);
                       loadDeferredMediaByIndex(activeCarousel, index);
                       updateArrows();
                       updateProgressByIndex(activeCarousel, index);
                       
-                      if (isDesktopCarousel && carouselStarted) {
-                        var thumbs = productImagesEl.querySelectorAll('.product__thumb');
+                      if (!isDesktopCarousel) {
+                        var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--mobile .product__thumb');
                         thumbs.forEach(function(thumb) {
                           thumb.classList.remove('is-active');
                         });
-                        
                         if (thumbs[index]) {
                           thumbs[index].classList.add('is-active');
-                        }
-                        if (thumbs[index + 1]) {
-                          thumbs[index + 1].classList.add('is-active');
                         }
                       } else {
-                        var thumbs = productImagesEl.querySelectorAll('.product__thumb');
+                        var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
                         thumbs.forEach(function(thumb) {
-                          thumb.classList.remove('is-active');
+                          thumb.classList.remove('is-active', 'prev-active', 'single-active');
                         });
-                        if (thumbs[index]) {
-                          thumbs[index].classList.add('is-active');
+                        
+                        var currentIndex = index;
+                        var activeCount = 0;
+                        
+                        if (thumbs[currentIndex]) {
+                          thumbs[currentIndex].classList.add('is-active');
+                          activeCount++;
+                        }
+                        
+                        var slideSize = embla.slideNodes().length > 0 ? embla.slideNodes()[0].offsetWidth : 0;
+                        var containerSize = embla.containerNode().offsetWidth;
+                        var slidesPerView = Math.ceil(containerSize / slideSize);
+                        
+                        for (var i = 1; i < slidesPerView; i++) {
+                          if (thumbs[currentIndex + i]) {
+                            thumbs[currentIndex + i].classList.add('is-active', 'prev-active');
+                            activeCount++;
+                          }
+                        }
+                        
+                        // Add single-active class if only one thumb is active
+                        if (activeCount === 1 && thumbs[currentIndex]) {
+                          thumbs[currentIndex].classList.add('single-active');
                         }
                       }
                     });
+
+                    embla.on('scroll', function () {
+                      if (isDesktopCarousel) {
+                        
+                      }
+                    });
+
+                    embla.on('slidesinview', function (emblaApi, event) {
+                      if (isDesktopCarousel) {
+                        var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
+                        thumbs.forEach(function(thumb) {
+                          thumb.classList.remove('is-active', 'prev-active', 'single-active');
+                        });
+                        
+                        var visibleIndexes = event.detail.slidesInView || [];
+                        
+                        visibleIndexes.forEach(function(slideIndex, index) {
+                          if (thumbs[slideIndex]) {
+                            thumbs[slideIndex].classList.add('is-active');
+                            if (index > 0) {
+                              thumbs[slideIndex].classList.add('prev-active');
+                            }
+                          }
+                        });
+                        
+                        // Add single-active class if only one thumb is active
+                        if (visibleIndexes.length === 1 && thumbs[visibleIndexes[0]]) {
+                          thumbs[visibleIndexes[0]].classList.add('single-active');
+                        }
+                      }
+                    });
+
+                    if (isDesktopCarousel) {
+                      var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
+                      thumbs.forEach(function(thumb) {
+                        thumb.classList.remove('is-active', 'prev-active', 'single-active');
+                      });
+                      
+                      var currentIndex = embla.selectedScrollSnap();
+                      var activeCount = 0;
+                      
+                      if (thumbs[currentIndex]) {
+                        thumbs[currentIndex].classList.add('is-active');
+                        activeCount++;
+                      }
+                      
+                      var slideSize = embla.slideNodes().length > 0 ? embla.slideNodes()[0].offsetWidth : 0;
+                      var containerSize = embla.containerNode().offsetWidth;
+                      var slidesPerView = Math.ceil(containerSize / slideSize);
+                      
+                      for (var i = 1; i < slidesPerView; i++) {
+                        if (thumbs[currentIndex + i]) {
+                          thumbs[currentIndex + i].classList.add('is-active', 'prev-active');
+                          activeCount++;
+                        }
+                      }
+                      
+                      // Add single-active class if only one thumb is active
+                      if (activeCount === 1 && thumbs[currentIndex]) {
+                        thumbs[currentIndex].classList.add('single-active');
+                      }
+                    }
 
                     embla.on('reInit', function () {
                       var activeCarousel = getActiveCarousel();
                       if (!activeCarousel || activeCarousel.el !== carouselEl) return;
                       updateArrows();
                       updateProgressByIndex(activeCarousel, embla.selectedScrollSnap());
+                      
+                      // Update thumbnails for desktop based on visible slides
+                      if (isDesktopCarousel) {
+                        var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
+                        thumbs.forEach(function(thumb) {
+                          thumb.classList.remove('is-active');
+                        });
+                        
+                        // Get currently selected slide as fallback
+                        var currentIndex = embla.selectedScrollSnap();
+                        if (thumbs[currentIndex]) {
+                          thumbs[currentIndex].classList.add('is-active');
+                        }
+                        
+                        // Check nearby slides that might be visible
+                        var slideSize = embla.slideNodes().length > 0 ? embla.slideNodes()[0].offsetWidth : 0;
+                        var containerSize = embla.containerNode().offsetWidth;
+                        var slidesPerView = Math.ceil(containerSize / slideSize);
+                        
+                        for (var i = 1; i < slidesPerView; i++) {
+                          if (thumbs[currentIndex + i]) {
+                            thumbs[currentIndex + i].classList.add('is-active');
+                          }
+                        }
+                      }
                     });
 
                     updateArrows();
@@ -1153,6 +1276,41 @@
                         loadDeferredMediaByIndex(carousel, startIndex);
                         carousel.updateArrows && carousel.updateArrows();
                         updateProgressByIndex(carousel, startIndex);
+                        
+                        // Update thumbnails based on carousel type
+                        if (carousel.el.classList.contains('pdp-embla--desktop')) {
+                          // Desktop: Update thumbnails based on visible slides
+                          var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
+                          thumbs.forEach(function(thumb) {
+                            thumb.classList.remove('is-active');
+                          });
+                          
+                          // Get currently selected slide as fallback
+                          var currentIndex = carousel.embla.selectedScrollSnap();
+                          if (thumbs[currentIndex]) {
+                            thumbs[currentIndex].classList.add('is-active');
+                          }
+                          
+                          // Check nearby slides that might be visible
+                          var slideSize = carousel.embla.slideNodes().length > 0 ? carousel.embla.slideNodes()[0].offsetWidth : 0;
+                          var containerSize = carousel.embla.containerNode().offsetWidth;
+                          var slidesPerView = Math.ceil(containerSize / slideSize);
+                          
+                          for (var i = 1; i < slidesPerView; i++) {
+                            if (thumbs[currentIndex + i]) {
+                              thumbs[currentIndex + i].classList.add('is-active');
+                            }
+                          }
+                        } else {
+                          // Mobile: Update single thumbnail based on selected index
+                          var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--mobile .product__thumb');
+                          thumbs.forEach(function(thumb) {
+                            thumb.classList.remove('is-active');
+                          });
+                          if (thumbs[startIndex]) {
+                            thumbs[startIndex].classList.add('is-active');
+                          }
+                        }
                       }
                     });
                   });
