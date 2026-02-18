@@ -1056,6 +1056,7 @@
                     var isDesktopCarousel = carouselEl.classList.contains('pdp-embla--desktop');
                     var hasIntroStage = isDesktopCarousel && !!carouselEl.querySelector('[data-gallery-layout="intro"] .pdp-embla__pair__item--incoming');
                     var introRevealed = !hasIntroStage;
+                    var switchedToPairScroll = false;
 
                     function setIntroRevealedState(revealed) {
                       if (!hasIntroStage) return;
@@ -1104,6 +1105,17 @@
                     embla.on('select', function () {
                       var activeCarousel = getActiveCarousel();
                       var index = embla.selectedScrollSnap();
+
+                      // Remove active class from all slides
+                      var slides = carouselEl.querySelectorAll('[data-embla-slide]');
+                      slides.forEach(function(slide) {
+                        slide.classList.remove('pdp-embla__slide--active');
+                      });
+
+                      // Add active class to current slide
+                      if (slides[index]) {
+                        slides[index].classList.add('pdp-embla__slide--active');
+                      }
 
                       if (isDesktopCarousel) {
                         if (index > 0) setIntroRevealedState(true);
