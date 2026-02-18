@@ -757,6 +757,9 @@
 <script src="{{ 'vendor.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'theme.dev.js' | asset_url }}" defer="defer"></script>
 
+{%- if template.name == 'product' -%}
+  <script src="{{ 'side-drawer.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
 {%- if request.design_mode -%}
   <script
     src="{{ 'theme-editor.js' | asset_url }}"

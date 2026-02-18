@@ -240,6 +240,7 @@
         #MainProduct--{{ section.id }} .product__content {
           margin: 0 auto;
           padding: 0;
+          width: 100%;
         }
 
         #MainProduct--{{ section.id }} .product__sticky-bar {
@@ -1545,9 +1546,10 @@
                 assign price_block = section.blocks | where: 'type', 'price' | first
                 assign description_block = section.blocks | where: 'type', 'description' | first
                 assign icon_blocks = section.blocks | where: 'type', 'icon'
+                assign side_drawer_blocks = section.blocks | where: 'type', 'side_drawer'
                 assign aside_has_content = false
 
-                if buttons_block != blank or icon_blocks.size > 0
+                if buttons_block != blank or icon_blocks.size > 0 or side_drawer_blocks.size > 0
                   assign aside_has_content = true
                 endif
 
@@ -2138,7 +2140,27 @@
                         {%- render 'icon', block: block, index: forloop.index0, is_product: true -%}
                       {%- endif -%}
                     {%- endfor -%}
+
+                    {%- for block in side_drawer_blocks -%}
+                      {%- liquid
+                        assign drawer_id = block.settings.drawer_id | strip | handleize
+                        if drawer_id == blank
+                          assign drawer_id = block.id
+                        endif
+                      -%}
+
+                      <div class="product__block" {{ block.shopify_attributes }}>
+                        {% render 'link-with-icon',
+                          text: block.settings.trigger_text,
+                          drawer_open: drawer_id,
+                          icon: block.settings.trigger_icon,
+                          icon_position: block.settings.trigger_icon_position,
+                          content_alignment: block.settings.trigger_alignment
+                        %}
+                      </div>
+                    {%- endfor -%}
                   </div>
+
                 {%- endif -%}
               </div>
             </div>
@@ -2178,3 +2200,39 @@
     {{ product | structured_data }}
   </script>
 </product-info>
+
+{%- assign side_drawer_blocks = section.blocks | where: 'type', 'side_drawer' -%}
+
+{%- for block in side_drawer_blocks -%}
+  {%- liquid
+    assign drawer_id = block.settings.drawer_id | strip | handleize
+    if drawer_id == blank
+      assign drawer_id = block.id
+    endif
+  -%}
+
+  <side-drawer
+    class="drawer"
+    data-drawer="{{ drawer_id }}"
+    id="side-drawer-{{ block.id }}"
+    data-drawer-size="{{ block.settings.drawer_size }}"
+    data-drawer-direction="{{ block.settings.drawer_direction }}"
+    {{ block.shopify_attributes }}
+  >
+    <div class="drawer__inner" data-drawer-inner>
+      <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+        {% render 'icon-close' %}
+      </button>
+
+      <div class="drawer__body">
+        {%- case block.settings.drawer_snippet -%}
+          {%- when 'drawer-free-shipping' -%}
+            {%- render 'drawer-free-shipping', block: block -%}
+          {%- when 'drawer-gift-packaging' -%}
+            {%- render 'drawer-gift-packaging', block: block -%}
+        {%- endcase -%}
+      </div>
+    </div>
+    <span class="underlay drawer__underlay" data-drawer-underlay></span>
+  </side-drawer>
+{%- endfor -%}
