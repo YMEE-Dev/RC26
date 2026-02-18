@@ -244,8 +244,6 @@
         }
 
         #MainProduct--{{ section.id }} .product__sticky-bar {
-          /* position: sticky;
-          top: calc(var(--header-height, 0px) + var(--announcement-height, 0px)); */
           position: relative;
           top: auto;
           z-index: 6;
@@ -335,6 +333,14 @@
         }
       }
 
+      @media (max-width: 767px) {
+         #MainProduct--{{ section.id }} .product__sticky-bar {
+          padding-top: 20px;
+          padding-left: var(--inner);
+          padding-right: var(--inner);
+        }
+      }
+
       #MainProduct--{{ section.id }} .product__page {
         display: flex;
         flex-direction: column;
@@ -346,9 +352,9 @@
         position: relative;
       }
 
-      #MainProduct--{{ section.id }} .product__images .image-wrapper--cover {
+      /* #MainProduct--{{ section.id }} .product__images .image-wrapper--cover {
         background-color: var(--bg-color);
-      }
+      } */
 
       #MainProduct--{{ section.id }} .product__images .image-wrapper--cover img {
         object-fit: contain;
@@ -897,12 +903,18 @@
                     var slideCount = carousel.embla.scrollSnapList().length;
                     if (slideCount <= 1) {
                       carousel.progressBar.style.width = '100%';
-                      carousel.progressBar.style.transform = 'translateX(0)';
+                      carousel.progressBar.style.left = '0%';
                       return;
                     }
-                    var segmentWidth = 100 / slideCount;
-                    carousel.progressBar.style.width = segmentWidth + '%';
-                    carousel.progressBar.style.transform = 'translateX(' + (segmentWidth * index) + '%)';
+                    
+                    // Calculate scroll progress
+                    var scrollProgress = carousel.embla.scrollProgress();
+                    var clampedProgress = Math.max(0, Math.min(1, scrollProgress));
+                    
+                    // Update progress bar
+                    carousel.progressBar.style.width = (clampedProgress * 100) + '%';
+                    carousel.progressBar.style.left = '0%';
+                    carousel.progressBar.style.transform = 'translateX(0)';
                   }
 
                   function loadDeferredMediaByIndex(carousel, index) {
@@ -1114,8 +1126,13 @@
                     });
 
                     embla.on('scroll', function () {
-                      if (isDesktopCarousel) {
-                        
+                      // Update progress bar during scroll
+                      if (progressBar) {
+                        var scrollProgress = embla.scrollProgress();
+                        var clampedProgress = Math.max(0, Math.min(1, scrollProgress));
+                        progressBar.style.width = (clampedProgress * 100) + '%';
+                        progressBar.style.left = '0%';
+                        progressBar.style.transform = 'translateX(0)';
                       }
                     });
 
