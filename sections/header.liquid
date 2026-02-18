@@ -200,6 +200,14 @@
   {%- unless transparent_header -%}
     .main-content > .shopify-section:first-of-type .backdrop--linear:before { display: none; }
   {%- endunless -%}
+
+  /* Show the header underlay when the tmenu root item is active */
+  .header__wrapper:has(.tmenu_item--root.tmenu_item_level_0.tmenu_item_active) > .underlay {
+    visibility: visible;
+    opacity: var(--underlay-opacity);
+    transition-duration: 0.3s, 0s;
+    transition-delay: 0.1s, 0s;
+  }
 {%- endstyle -%}
 
 {{ 'custom-menu.css' | asset_url | stylesheet_tag }}
@@ -624,6 +632,7 @@
       </div>
     </div>
   </header>
+  <span class="underlay" data-popdown-underlay></span>
 </header-component>
 
 <div class="header__backfill" data-header-backfill></div>
