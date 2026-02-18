@@ -1085,10 +1085,10 @@
                     var isDesktop = activeCarousel.el.classList.contains('pdp-embla--desktop');
                     var isStarted = activeCarousel.el.classList.contains('pdp-embla--started');
                     var currentIndex = activeCarousel.embla.selectedScrollSnap();
+                    var targetIndex = findIndexByMediaId(activeCarousel, e.detail.id);
                     
                     // Special handling for first slide behavior
                     if (isDesktop && !isStarted && currentIndex === 0) {
-                      var targetIndex = findIndexByMediaId(activeCarousel, e.detail.id);
                       if (targetIndex === 1) {
                         // Clicking second thumbnail should behave like next button
                         activeCarousel.el.classList.add('pdp-embla--started');
@@ -1100,13 +1100,22 @@
                       }
                     }
                     
-                    var index = findIndexByMediaId(activeCarousel, e.detail.id);
-                    if (index < 0) return;
-                    activeCarousel.embla.scrollTo(index);
-                    setActiveMediaByIndex(activeCarousel, index);
-                    loadDeferredMediaByIndex(activeCarousel, index);
+                    // Handle clicking first thumbnail when in 50/50 mode
+                    if (isDesktop && isStarted && targetIndex === 0) {
+                      activeCarousel.el.classList.remove('pdp-embla--started');
+                      activeCarousel.updateArrows && activeCarousel.updateArrows();
+                      setActiveMediaByIndex(activeCarousel, 0);
+                      loadDeferredMediaByIndex(activeCarousel, 0);
+                      updateProgressByIndex(activeCarousel, 0);
+                      return;
+                    }
+                    
+                    if (targetIndex < 0) return;
+                    activeCarousel.embla.scrollTo(targetIndex);
+                    setActiveMediaByIndex(activeCarousel, targetIndex);
+                    loadDeferredMediaByIndex(activeCarousel, targetIndex);
                     activeCarousel.updateArrows && activeCarousel.updateArrows();
-                    updateProgressByIndex(activeCarousel, index);
+                    updateProgressByIndex(activeCarousel, targetIndex);
                   });
 
                   var active = productImagesEl.getAttribute('data-active-media');
