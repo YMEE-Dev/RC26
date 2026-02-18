@@ -462,6 +462,7 @@
         height: 100%;
         margin: 0;
         padding: 0;
+        align-items: stretch;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide {
@@ -475,9 +476,10 @@
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide {
         flex: 0 0 50%;
         box-sizing: border-box;
+        transition: flex-basis 500ms ease;
       }
 
-      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-gallery-layout='intro'] {
+      #MainProduct--{{ section.id }} .pdp-embla--desktop:not(.pdp-embla--started) .pdp-embla__slide:first-child {
         flex: 0 0 100%;
       }
 
@@ -499,39 +501,6 @@
         height: 100%;
         backface-visibility: hidden;
         transform: translateZ(0);
-      }
-
-      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-gallery-layout='intro'] .pdp-embla__pair {
-        position: relative;
-      }
-
-      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-gallery-layout='intro'] {
-        flex: 0 0 100%;
-      }
-
-      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-gallery-layout='intro'] .pdp-embla__pair__item--primary {
-        flex: 0 0 100%;
-        max-width: 100%;
-        transition: flex-basis 500ms ease, max-width 500ms ease;
-      }
-
-      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-gallery-layout='intro'] .pdp-embla__pair__item--incoming {
-        position: absolute;
-        top: 0;
-        left: 100%;
-        width: 50%;
-        transform: translate3d(0, 0, 0);
-        transition: transform 500ms ease;
-        pointer-events: none;
-      }
-
-      #MainProduct--{{ section.id }} .pdp-embla--desktop[data-intro-revealed='true'] .pdp-embla__slide[data-gallery-layout='intro'] .pdp-embla__pair__item--primary {
-        flex-basis: 50%;
-        max-width: 50%;
-      }
-
-      #MainProduct--{{ section.id }} .pdp-embla--desktop[data-intro-revealed='true'] .pdp-embla__slide[data-gallery-layout='intro'] .pdp-embla__pair__item--incoming {
-        transform: translate3d(-100%, 0, 0);
       }
 
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item img {
@@ -563,54 +532,6 @@
 
         #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-layout='60-40'] .pdp-embla__pair__item:nth-child(2) {
           flex: 0 0 40%;
-        }
-      }
-
-      #MainProduct--{{ section.id }} {
-        --pdp-pair-catchup-shift: clamp(24px, 8vw, 120px);
-      }
-
-      @keyframes pdp-pair-catchup-next {
-        0% {
-          transform: translate3d(var(--pdp-pair-catchup-shift), 0, 0);
-        }
-
-        30% {
-          transform: translate3d(var(--pdp-pair-catchup-shift), 0, 0);
-        }
-
-        100% {
-          transform: translate3d(0, 0, 0);
-        }
-      }
-
-      @keyframes pdp-pair-catchup-prev {
-        0% {
-          transform: translate3d(calc(var(--pdp-pair-catchup-shift) * -1), 0, 0);
-        }
-
-        30% {
-          transform: translate3d(calc(var(--pdp-pair-catchup-shift) * -1), 0, 0);
-        }
-
-        100% {
-          transform: translate3d(0, 0, 0);
-        }
-      }
-
-      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-catchup='next'] .pdp-embla__pair__item:nth-child(2) .product__slide {
-        animation: pdp-pair-catchup-next 450ms ease both;
-        will-change: transform;
-      }
-
-      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-catchup='prev'] .pdp-embla__pair__item:nth-child(1) .product__slide {
-        animation: pdp-pair-catchup-prev 450ms ease both;
-        will-change: transform;
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-catchup] .pdp-embla__pair__item .product__slide {
-          animation: none;
         }
       }
 
@@ -1044,8 +965,11 @@
                     };
 
                     if (isDesktopCarousel) {
-                      emblaOptions.align = 0;
-                      emblaOptions.containScroll = 'keepSnaps';
+                      emblaOptions.align = 'start';
+                      emblaOptions.containScroll = 'trimSnaps';
+                      emblaOptions.slidesToScroll = 1;
+                      emblaOptions.dragFree = false;
+                      emblaOptions.loop = false;
                     }
 
                     var embla = window.EmblaCarousel(viewport, emblaOptions);
@@ -1054,26 +978,25 @@
                     var nextBtn = carouselEl.querySelector('[data-embla-next]');
                     var progressBar = carouselEl.querySelector('[data-embla-progress-bar]');
                     var isDesktopCarousel = carouselEl.classList.contains('pdp-embla--desktop');
-                    var hasIntroStage = isDesktopCarousel && !!carouselEl.querySelector('[data-gallery-layout="intro"] .pdp-embla__pair__item--incoming');
-                    var introRevealed = !hasIntroStage;
-                    var switchedToPairScroll = false;
+                    var hasIntroStage = isDesktopCarousel && carouselEl.querySelectorAll('[data-embla-slide]').length > 0;
+                    var carouselStarted = false;
 
-                    function setIntroRevealedState(revealed) {
+                    function setCarouselStarted(started) {
                       if (!hasIntroStage) return;
-                      introRevealed = !!revealed;
-                      if (introRevealed) carouselEl.setAttribute('data-intro-revealed', 'true');
-                      else carouselEl.removeAttribute('data-intro-revealed');
+                      carouselStarted = !!started;
+                      if (carouselStarted) {
+                        carouselEl.classList.add('pdp-embla--started');
+                      } else {
+                        carouselEl.classList.remove('pdp-embla--started');
+                      }
                     }
 
-                    setIntroRevealedState(introRevealed);
+                    setCarouselStarted(carouselStarted);
 
                     function updateArrows() {
                       var selectedIndex = embla.selectedScrollSnap();
                       var canPrev = embla.canScrollPrev();
                       var canNext = embla.canScrollNext();
-
-                      if (hasIntroStage && selectedIndex === 0 && introRevealed) canPrev = true;
-                      if (hasIntroStage && selectedIndex === 0 && !introRevealed) canNext = true;
 
                       if (prevBtn) prevBtn.disabled = !canPrev;
                       if (nextBtn) nextBtn.disabled = !canNext;
@@ -1081,10 +1004,12 @@
 
                     prevBtn && prevBtn.addEventListener('click', function (e) {
                       e.preventDefault();
-                      if (hasIntroStage && embla.selectedScrollSnap() === 0 && introRevealed) {
-                        setIntroRevealedState(false);
-                        setActiveMediaByIndex({ el: carouselEl }, 0);
+                      if (hasIntroStage && carouselStarted && embla.selectedScrollSnap() === 1) {
+                        setCarouselStarted(false);
                         updateArrows();
+                        requestAnimationFrame(function() {
+                          embla.scrollTo(0, true);
+                        });
                         return;
                       }
                       embla.scrollPrev();
@@ -1092,8 +1017,8 @@
 
                     nextBtn && nextBtn.addEventListener('click', function (e) {
                       e.preventDefault();
-                      if (hasIntroStage && embla.selectedScrollSnap() === 0 && !introRevealed) {
-                        setIntroRevealedState(true);
+                      if (hasIntroStage && !carouselStarted && embla.selectedScrollSnap() === 0) {
+                        setCarouselStarted(true);
                         updateArrows();
                         return;
                       }
@@ -1118,7 +1043,11 @@
                       }
 
                       if (isDesktopCarousel) {
-                        if (index > 0) setIntroRevealedState(true);
+                        if (index > 0 && !carouselStarted) {
+                          setCarouselStarted(true);
+                        } else if (index === 0 && carouselStarted) {
+                          setCarouselStarted(false);
+                        }
                       }
 
                       if (!activeCarousel || activeCarousel.el !== carouselEl) return;
@@ -1151,6 +1080,26 @@
                     if (!e || !e.detail || !e.detail.id) return;
                     var activeCarousel = getActiveCarousel();
                     if (!activeCarousel) return;
+                    
+                    // Check if this is desktop carousel and we're on first slide
+                    var isDesktop = activeCarousel.el.classList.contains('pdp-embla--desktop');
+                    var isStarted = activeCarousel.el.classList.contains('pdp-embla--started');
+                    var currentIndex = activeCarousel.embla.selectedScrollSnap();
+                    
+                    // Special handling for first slide behavior
+                    if (isDesktop && !isStarted && currentIndex === 0) {
+                      var targetIndex = findIndexByMediaId(activeCarousel, e.detail.id);
+                      if (targetIndex === 1) {
+                        // Clicking second thumbnail should behave like next button
+                        activeCarousel.el.classList.add('pdp-embla--started');
+                        activeCarousel.updateArrows && activeCarousel.updateArrows();
+                        setActiveMediaByIndex(activeCarousel, 1);
+                        loadDeferredMediaByIndex(activeCarousel, 1);
+                        updateProgressByIndex(activeCarousel, 1);
+                        return;
+                      }
+                    }
+                    
                     var index = findIndexByMediaId(activeCarousel, e.detail.id);
                     if (index < 0) return;
                     activeCarousel.embla.scrollTo(index);
@@ -1243,9 +1192,9 @@
                     {%- if media_count > 0 -%}
                       {%- assign intro_media = ordered_media[0] -%}
                       {%- assign intro_next_media = ordered_media[1] -%}
-                      <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="intro" data-primary-media-id="{{ section.id }}-{{ intro_media.id }}">
+                      <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="single" data-primary-media-id="{{ section.id }}-{{ intro_media.id }}">
                         <div class="pdp-embla__pair">
-                          <div class="pdp-embla__pair__item pdp-embla__pair__item--primary">
+                          <div class="pdp-embla__pair__item">
                             {%- render 'media',
                               media: intro_media,
                               featured_media: featured_media,
@@ -1255,8 +1204,13 @@
                               cover: true
                             -%}
                           </div>
-                          {%- if intro_next_media != blank -%}
-                            <div class="pdp-embla__pair__item pdp-embla__pair__item--incoming" aria-hidden="true">
+                        </div>
+                      </div>
+
+                      {%- if intro_next_media != blank -%}
+                        <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="single" data-primary-media-id="{{ section.id }}-{{ intro_next_media.id }}">
+                          <div class="pdp-embla__pair">
+                            <div class="pdp-embla__pair__item">
                               {%- render 'media',
                                 media: intro_next_media,
                                 featured_media: featured_media,
@@ -1266,9 +1220,9 @@
                                 cover: true
                               -%}
                             </div>
-                          {%- endif -%}
+                          </div>
                         </div>
-                      </div>
+                      {%- endif -%}
 
                       {%- if media_count > 2 -%}
                         {%- for media in ordered_media offset: 2 -%}
