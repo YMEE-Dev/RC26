@@ -250,6 +250,7 @@
           border-top: 1px solid var(--border);
           margin: 0;
           width: 100%;
+          box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
         }
 
         #MainProduct--{{ section.id }} .product__sticky-bar__inner {
@@ -330,6 +331,14 @@
         #MainProduct--{{ section.id }} .product__content-columns__aside .product__block--buttons {
           margin-top: calc(var(--pdp-sticky-bar-height, 100px) * -1 / 1.4);
           margin-bottom: 30px;
+        }
+      }
+
+      @media (max-width: 767px) {
+         #MainProduct--{{ section.id }} .product__sticky-bar {
+          padding-top: 20px;
+          padding-left: var(--inner);
+          padding-right: var(--inner);
         }
       }
 
@@ -724,6 +733,7 @@
         gap: 0;
         max-height: calc(100vh - (var(--inner) * 2));
         overflow: auto;
+        box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
       }
 
       @media (min-width: 990px) {
@@ -749,7 +759,7 @@
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
-      #MainProduct--{{ section.id }} .product__thumb.is-active.single-active {
+      #MainProduct--{{ section.id }} .product__thumb.is-active.single-active:last-child {
         transform: translateY(0);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
@@ -1084,6 +1094,46 @@
                       loadDeferredMediaByIndex(activeCarousel, index);
                       updateArrows();
                       updateProgressByIndex(activeCarousel, index);
+                      
+                      // Force update thumbnails after select to ensure active states are correct
+                      setTimeout(function() {
+                        if (isDesktopCarousel) {
+                          var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
+                          var slideNodes = embla.slideNodes();
+                          var slidesInView = [];
+                          
+                          // Determine which slides are visible based on scroll position
+                          var scrollProgress = embla.scrollProgress();
+                          var containerSize = embla.containerNode().offsetWidth;
+                          var slideSize = slideNodes.length > 0 ? slideNodes[0].offsetWidth : 0;
+                          var slidesPerView = Math.ceil(containerSize / slideSize);
+                          
+                          // Calculate visible slides based on current index and slides per view
+                          for (var i = 0; i < slidesPerView; i++) {
+                            if (index + i < slideNodes.length) {
+                              slidesInView.push(index + i);
+                            }
+                          }
+                          
+                          // Update thumbnail states
+                          thumbs.forEach(function(thumb) {
+                            thumb.classList.remove('is-active', 'prev-active', 'single-active');
+                          });
+                          
+                          slidesInView.forEach(function(slideIndex, idx) {
+                            if (thumbs[slideIndex]) {
+                              thumbs[slideIndex].classList.add('is-active');
+                              if (idx > 0) {
+                                thumbs[slideIndex].classList.add('prev-active');
+                              }
+                            }
+                          });
+                          
+                          if (slidesInView.length === 1 && thumbs[slidesInView[0]]) {
+                            thumbs[slidesInView[0]].classList.add('single-active');
+                          }
+                        }
+                      }, 50);
                       
                       if (!isDesktopCarousel) {
                         var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--mobile .product__thumb');
