@@ -1103,6 +1103,7 @@
                     // Handle clicking first thumbnail when in 50/50 mode
                     if (isDesktop && isStarted && targetIndex === 0) {
                       activeCarousel.el.classList.remove('pdp-embla--started');
+                      activeCarousel.embla.scrollTo(0, true);
                       activeCarousel.updateArrows && activeCarousel.updateArrows();
                       setActiveMediaByIndex(activeCarousel, 0);
                       loadDeferredMediaByIndex(activeCarousel, 0);
