@@ -3797,6 +3797,7 @@
 
             this.a11y = window.theme.a11y;
             this.isAnimating = false;
+            this.openTimeout = null;
             this.drawer = this;
             this.drawerInner = this.querySelector(selectors$h.drawerInner);
             this.underlay = this.querySelector(selectors$h.underlay);
@@ -3839,7 +3840,7 @@
             this.querySelectorAll(selectors$h.drawerClose)?.forEach((button) => {
               button.addEventListener('click', () => {
                 this.hideDrawer();
-              }, 800);
+              });
             });
 
             document.addEventListener('keyup', (event) => {
@@ -3856,29 +3857,47 @@
           }
 
           showDrawer() {
-            if (this.isAnimating) return;
+            if (this.isAnimating || this.classList.contains(classes$d.open)) return;
 
             this.isAnimating = true;
 
-            this.triggerButton?.setAttribute('aria-expanded', true);
-            this.classList.add(classes$d.open, classes$d.animated);
-
-            document.dispatchEvent(new CustomEvent('theme:scroll:lock', {bubbles: true}));
-
-            if (this.drawerInner) {
-              this.a11y.removeTrapFocus();
-
-              window.theme.waitForAnimationEnd(this.drawerInner).then(() => {
-                this.isAnimating = false;
-
-                this.a11y.trapFocus(this.drawerInner, {
-                  elementToFocus: this.querySelector(selectors$h.focusable),
-                });
-              });
+            if (this.openTimeout) {
+              clearTimeout(this.openTimeout);
             }
+
+            this.openTimeout = setTimeout(() => {
+              this.openTimeout = null;
+
+              this.triggerButton?.setAttribute('aria-expanded', true);
+              this.classList.add(classes$d.open, classes$d.animated);
+
+              document.dispatchEvent(new CustomEvent('theme:scroll:lock', {bubbles: true}));
+
+              if (this.drawerInner) {
+                this.a11y.removeTrapFocus();
+
+                window.theme.waitForAnimationEnd(this.drawerInner).then(() => {
+                  this.isAnimating = false;
+
+                  this.a11y.trapFocus(this.drawerInner, {
+                    elementToFocus: this.querySelector(selectors$h.focusable),
+                  });
+                });
+              } else {
+                this.isAnimating = false;
+              }
+            }, 500);
           }
 
           hideDrawer() {
+            if (this.openTimeout) {
+              clearTimeout(this.openTimeout);
+              this.openTimeout = null;
+              this.isAnimating = false;
+              this.triggerButton?.setAttribute('aria-expanded', false);
+              return;
+            }
+
             if (this.isAnimating || !this.classList.contains(classes$d.open)) return;
 
             this.isAnimating = true;

@@ -705,6 +705,18 @@
     const selectAll = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
     const isDesktop = () => window.matchMedia('(min-width: 750px)').matches;
 
+    /* Mobile hamburger press animation */
+    const hamburgerButtons = selectAll('.header__mobile__hamburger');
+    hamburgerButtons.forEach((btn) => {
+      const triggerPress = () => {
+        btn.classList.remove('is-pressed');
+        void btn.offsetWidth; // restart animation
+        btn.classList.add('is-pressed');
+      };
+      btn.addEventListener('click', triggerPress);
+      btn.addEventListener('animationend', () => btn.classList.remove('is-pressed'));
+    });
+
     /* Scroll animation */
     let lastY = window.scrollY;
     let ticking = false;

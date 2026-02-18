@@ -3321,7 +3321,6 @@ body.is-focused .highlights__item:focus {
 
 [data-scroll-locked] .js__header__stuck,
 [data-scroll-locked] .theme__header,
-[data-scroll-locked] .collection__nav,
 [data-scroll-locked] .announcement__wrapper,
 [data-scroll-locked] .announcement__bar-outer,
 [data-scroll-locked] .search__popdown__outer,
@@ -3330,7 +3329,6 @@ body.is-focused .highlights__item:focus {
 }
 
 [data-scroll-locked] .js__header__stuck,
-[data-scroll-locked] .collection__nav,
 [data-scroll-locked] .announcement__bar,
 [data-scroll-locked] .announcement__slider,
 [data-scroll-locked] .search__popdown__outer,
@@ -10142,18 +10140,25 @@ header-search-popdown.is-open .search-popdown {
   height: 100%;
   height: 100%;
   left: 50%;
-  bottom: -80vh;
+  bottom: 0;
+  top: 60vh;
   transform: translate(-50%, 10px);
+  transform-origin: center;
   cursor: pointer;
   height: auto;
   width: auto;
   fill: var(--link);
   z-index: 5999;
-  transition: opacity 0.3s ease, transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: opacity 400ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform, opacity;
 }
 
 .header__mobile__hamburger:active {
-  transform: translate(-50%, 10px) scale(0.9);
+  transform: translate(-50%, 10px) scale(0.96);
+}
+
+.header__mobile__hamburger.is-pressed {
+  animation: hamburger-press 1000ms ease-in-out forwards;
 }
 
 @media only screen and (min-width: 960px) {
@@ -10191,6 +10196,28 @@ body:has(.drawer--header:not(.is-open)) .header__mobile__hamburger {
   --icon-size: 24px;
 }
 
+@keyframes hamburger-press {
+  0% {
+    transform: translate(-50%, 10px) scale(1);
+    opacity: 1;
+  }
+
+  40% {
+    transform: translate(-50%, 10px) scale(1.25);
+    opacity: 0.5;
+  }
+
+  80% {
+    transform: translate(-50%, 10px) scale(0.9);
+    opacity: 0.2;
+  }
+
+  100% {
+    transform: translate(-50%, 10px) scale(1);
+    opacity: 0;
+  }
+}
+
 @media only screen and (max-width: 749px) {
   .header__mobile__button .navlink__cart__content>.navtext {
     display: none;
@@ -10208,18 +10235,17 @@ body:has(.drawer--header:not(.is-open)) .header__mobile__hamburger {
 /*====== start floating mobile nav ======*/
 .drawer__floating-menu {
   position: fixed;
-  top: auto;
   left: 0;
   right: 0;
-  bottom: 8vh;
+  top: 50vh;
   z-index: 5601;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   height: 50px;
   transform: translate(0, -50%);
-  align-items: center;
   padding: 0 var(--inner);
+  align-items: center;
 }
 
 .drawer__floating-menu>* {
@@ -10240,6 +10266,17 @@ body:has(.drawer--header:not(.is-open)) .header__mobile__hamburger {
   font-weight: 600;
   line-height: 20px;
   letter-spacing: 1.2px;
+}
+
+/* Safari override: keep previous positioning */
+@supports (font: -apple-system-body) {
+  .drawer__floating-menu {
+    top: 88vh;
+  }
+
+  .header__mobile__hamburger {
+    bottom: -78vh;
+  }
 }
 
 .drawer__floating__left .drawer__floating__button {
