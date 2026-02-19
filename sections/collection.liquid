@@ -1,5 +1,7 @@
 <!-- /sections/collections.liquid -->
 
+{{ 'custom-collection.css' | asset_url | stylesheet_tag }}
+
 {%- liquid
   assign enable_infinity_scroll = settings.enable_infinity_scroll
   assign enable_sort = section.settings.enable_sort
@@ -264,23 +266,39 @@
                   assign counter_grid = counter_grid | plus: 1
                   assign items_on_row_remaining = items_on_row_remaining | minus: 1
 
-                  if collection
+                  assign product_storytelling = false
+                  assign product_type = product.type | downcase
+                  if product_type == 'storytelling' or product_type contains 'storytelling'
+                    assign product_storytelling = true
+                  endif
+
+                  if product_storytelling
+                    render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false
+                  else
                     render 'product-grid-item', product: product, index: forloop.index, sizes: image_sizes
                   endif
                 endfor
               -%}
 
             {%- else -%}
-              {%- for product in collection.products -%}
-                {%- assign grid_int = section.settings.grid | times: 1 -%}
-                {%- assign animation_delay = forloop.index0 | modulo: grid_int | times: 1 -%}
-                {%- render 'product-grid-item',
-                  product: product,
-                  animation_delay: animation_delay,
-                  index: forloop.index,
-                  sizes: image_sizes
-                -%}
-              {%- endfor -%}
+              {%- liquid
+                for product in collection.products
+                  assign grid_int = section.settings.grid | times: 1
+                  assign animation_delay = forloop.index0 | modulo: grid_int | times: 1
+
+                  assign product_storytelling = false
+                  assign product_type = product.type | downcase
+                  if product_type == 'storytelling' or product_type contains 'storytelling'
+                    assign product_storytelling = true
+                  endif
+
+                  if product_storytelling
+                    render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false
+                  else
+                    render 'product-grid-item', product: product, animation_delay: animation_delay, index: forloop.index, sizes: image_sizes
+                  endif
+                endfor
+              -%}
             {%- endif -%}
           {%- else -%}
             <div class="no-results">

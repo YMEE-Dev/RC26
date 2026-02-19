@@ -3484,7 +3484,7 @@
           }
 
           checkWidth() {
-            if (document.body.clientWidth < this.minWidth) {
+            if (document.body.clientWidth < 960) {
               this.classList.add('js__show__mobile');
 
               // Update --header-height CSS variable when switching to a mobile nav

@@ -721,11 +721,6 @@
     let lastY = window.scrollY;
     let ticking = false;
     const toggleHeaderHide = () => {
-      // if (!isDesktop()) {
-      //   document.body.classList.remove('header-scroll-hide');
-      //   lastY = window.scrollY;
-      //   return;
-      // }
       const currentY = window.scrollY;
       const atTop = currentY <= 0;
       const goingDown = currentY > lastY + 1;
@@ -767,6 +762,7 @@
         }
       });
 
+      // DISCLAMER: find links that should trigger image changes - these are right-aligned links in mega menu collections
       const links = selectAll('.tmenu_item_layout_collection a.tmenu_item_link.tmenu_item_content_alignment_right');
       if (!links.length) return;
 

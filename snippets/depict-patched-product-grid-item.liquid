@@ -619,7 +619,11 @@
         data-product-link="{{ product_url }}"
       >
         {%- if product.media.size > 0 -%}
-          <div class="product-item__bg" data-product-image-default data-depict-default-image="{{ product.featured_media.preview_image.src }}">
+          <div
+            class="product-item__bg"
+            data-product-image-default
+            data-depict-default-image="{{ product.featured_media.preview_image.src }}"
+          >
             {%- liquid
               assign fetchpriority = 'auto'
               assign preload = false
@@ -682,7 +686,10 @@
           </div>
 
           {%- if double_img -%}
-            <hover-images class="product-item__bg__under" data-depict-hover-image="{{ product.media[1].preview_image.src }}">
+            <hover-images
+              class="product-item__bg__under"
+              data-depict-hover-image="{{ product.media[1].preview_image.src }}"
+            >
               <div class="product-item__bg__slider" data-hover-slider>
                 {%- for media in product.media limit: settings.image_hover_limit -%}
                   <div
@@ -741,7 +748,7 @@
     >
       <div class="product-item__info {{ settings.product_grid_font_size }}">
         <a class="product-link" href="{{ product_url }}" data-product-link="{{ product_url }}">
-          <p class="product-item__title">{{ product.title | strip_html | escape }}</p>
+          <p class="navlink product-item__title">{{ product.title | strip_html | escape }}</p>
 
           <div class="product-item__price__holder{% if has_siblings %} has-siblings{% endif %}">
             {%- if any_sibling_cutline or product_item_cutline != blank -%}
