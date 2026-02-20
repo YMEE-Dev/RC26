@@ -25,7 +25,11 @@
       {% sections 'group-overlay' %}
 
       <!-- CONTENT -->
-      <main role="main" id="MainContent" class="main-content">
+      <main
+        role="main"
+        id="MainContent"
+        class="main-content main-content--{{ template.name | handle }}{% if template.suffix != blank %} main-content--{{ template.name | handle }}-{{ template.suffix | handle }}{% endif %}"
+      >
         {{ content_for_layout }}
       </main>
     </div>

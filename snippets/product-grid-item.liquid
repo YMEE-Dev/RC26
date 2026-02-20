@@ -208,7 +208,7 @@
                     <tooltip-component
                       class="swatches swatch__button swatch__button--{{ settings.swatch_style }}"
                       data-swatch-button
-                      data-tooltip="{{ option_value }}"
+                      {% comment %} data-tooltip="{{ option_value }}" {% endcomment %}
                       data-swatch-variant="{{ option_value.variant.id }}"
                       data-swatch-variant-name="{{ option_value.variant.title }}"
                       data-swatch-image="{{ option_value.variant.featured_media.preview_image.src }}"
@@ -598,6 +598,7 @@
     class="grid-item product-item {{ swatches_class }} {{ alignment_class }} {{ overlay_text_class }} {{ quickview_class }} {{ product_card_class }}{% if modifier_class != blank %} {{ modifier_class }}{% endif %}"
     id="{{ item_unique }}"
     data-grid-item
+    data-product-available="{{ product.available }}"
     data-url="{{ product.url }}"
     data-swap-id="true"
     {{ attributes }}
@@ -732,7 +733,7 @@
     >
       <div class="product-item__info {{ settings.product_grid_font_size }}">
         <a class="product-link" href="{{ product_url }}" data-product-link="{{ product_url }}">
-          <p class="product-item__title">{{ product.title | strip_html | escape }}</p>
+          <p class="navlink product-item__title">{{ product.title | strip_html | escape }}</p>
 
           <div class="product-item__price__holder{% if has_siblings %} has-siblings{% endif %}">
             {%- if any_sibling_cutline or product_item_cutline != blank -%}

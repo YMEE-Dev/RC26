@@ -16,11 +16,13 @@
   <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
 {% endif %}
 
-{% comment %} {%- unless settings.type_body_font.system?
-  and settings.type_btn_font.system?
--%}
-  <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
-{%- endunless -%} {% endcomment %}
+{% comment %}
+  {%- unless settings.type_body_font.system?
+    and settings.type_btn_font.system?
+  -%}
+    <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+  {%- endunless -%}
+{% endcomment %}
 
 <!-- Title and description ================================================ -->
 {% capture seo_title %}
@@ -468,7 +470,7 @@
     --LINE-HEIGHT-NAV: {{ settings.nav_text_line_height | append: 'px' }};
 
 
-    --LETTER-SPACING-NAV: {{ settings.nav_letter_spacing | divided_by: 1000.0 | append: 'em' }};
+    --LETTER-SPACING-NAV: {{ settings.nav_letter_spacing | divided_by: 10.0 | append: 'px' }};
 
     --FONT-SIZE-BASE: {{ settings.body_text_size | append: 'px' }};
     --LINE-HEIGHT-BODY: {{ settings.body_text_line_height | append: 'px' }};
@@ -502,7 +504,7 @@
     --COLUMNS-MEDIUM: 6;
     --COLUMNS-SMALL: 2;
     --COLUMNS-MOBILE: 2;
-    
+
     {%- if settings.grid_style == 'compact' -%}
       --LAYOUT-OUTER: 32px;
       --LAYOUT-GUTTER: 32px;
