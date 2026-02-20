@@ -10237,7 +10237,8 @@ body:has(.drawer--header:not(.is-open)) .header__mobile__hamburger {
   position: fixed;
   left: 0;
   right: 0;
-  top: 50vh;
+  top: auto;
+  bottom: 50vh;
   z-index: 5601;
   display: flex;
   flex-direction: row;
@@ -10246,6 +10247,7 @@ body:has(.drawer--header:not(.is-open)) .header__mobile__hamburger {
   transform: translate(0, -50%);
   padding: 0 var(--inner);
   align-items: center;
+  color: var(--globaltext);
 }
 
 .drawer__floating-menu>* {
@@ -10253,6 +10255,11 @@ body:has(.drawer--header:not(.is-open)) .header__mobile__hamburger {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.drawer__floating-menu .icon {
+  color: var(--globaltext);
+  stroke: var(--globaltext);
 }
 
 .drawer__floating__button {
@@ -10271,7 +10278,8 @@ body:has(.drawer--header:not(.is-open)) .header__mobile__hamburger {
 /* Safari override: keep previous positioning */
 @supports (font: -apple-system-body) {
   .drawer__floating-menu {
-    top: 88vh;
+    top: 80vh;
+    bottom: auto
   }
 
   .header__mobile__hamburger {
@@ -20731,7 +20739,7 @@ body.has-line-design.grid-compact .collection__products .grid,
 @media only screen and (max-width: 960px) {
   .collection__nav {
     top: -45px;
-    justify-self: flex-end;
+    justify-content: flex-end;
   }
 
   .collection__nav .availability_filter-wrapper {
