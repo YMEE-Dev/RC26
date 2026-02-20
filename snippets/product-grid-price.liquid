@@ -11,24 +11,28 @@
 
 {%- liquid
   if settings.currency_code_enable
-    assign product_price_min = product.price_min | money_with_currency
-    assign product_compare_at_price = product.compare_at_price | money_with_currency
+    assign currency_code = cart.currency.iso_code | default: shop.currency
+    assign product_price_min = product.price_min | money_without_currency
+    assign product_price_max = product.price_max | money_without_currency
+    assign product_compare_at_price = product.compare_at_price | money_without_currency
+    assign product_price_min = currency_code | append: ' ' | append: product_price_min
+    assign product_compare_at_price = currency_code | append: ' ' | append: product_compare_at_price
   else
     assign product_price_min = product.price_min | money
+    assign product_price_max = product.price_max | money
     assign product_compare_at_price = product.compare_at_price | money
   endif
+
+  assign product_price_range = product_price_min | append: ' - ' | append: product_price_max
 -%}
 
 <span class="price{% if product.compare_at_price > product.price %} sale{% endif %}">
   {% if product.available %}
     <span class="new-price">
-      {% if product.price_varies %}
-        <small>{{ 'products.general.from' | t }}</small>
-      {% endif %}
-      {%- if product.price == 0 and product.price_varies == false -%}
+      {%- if product.price_min == 0 and product.price_max == 0 -%}
         {{ 'general.money.free' | t }}
       {%- else -%}
-        {{ product_price_min }}
+        {{ product_price_range }}
       {%- endif -%}
     </span>
     {% if product.compare_at_price > product.price %}
