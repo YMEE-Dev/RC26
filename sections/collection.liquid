@@ -177,15 +177,22 @@
     {%- if enable_sort or enable_filters -%}
       <nav class="collection__nav {{ align_classes }}" data-collection-nav>
         <div class="availability_filter-wrapper" data-availability-filter>
-          <button
+          <a
+            href="{{ collection.url | split: '-' | first }}"
             type="button"
             class="availability-filter__button navlink is-active"
-            data-availability-filter-button
-            data-availability-filter-value="all"
+
             aria-pressed="true"
           >
             View all
-          </button>
+          </a>
+        </div>
+        {%- if sub_collection_links_html != blank -%}
+          <div class="subcollection_links-wrapper">
+            {{- sub_collection_links_html -}}
+          </div>
+        {%- endif -%}
+        <div class="popout_filters-wrapper">
           <button
             type="button"
             class="availability-filter__button navlink"
@@ -195,13 +202,6 @@
           >
             Available now
           </button>
-        </div>
-        {%- if sub_collection_links_html != blank -%}
-          <div class="subcollection_links-wrapper">
-            {{- sub_collection_links_html -}}
-          </div>
-        {%- endif -%}
-        <div class="popout_filters-wrapper">
           {%- if enable_filters -%}
             {%- liquid
               assign filter_active_count = 0

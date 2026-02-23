@@ -448,14 +448,14 @@
     --FONT-WEIGHT-BODY: {{ base_font.weight }};
     --FONT-WEIGHT-BODY-BOLD: {{ base_font_bold.weight | default: 700 }};
 
-    --LETTER-SPACING-BODY: {{ settings.body_letter_spacing | divided_by: 1000.0 | append: 'em' }};
+    --LETTER-SPACING-BODY: {{ settings.body_letter_spacing | divided_by: 10.0 | append: 'px' }};
 
     --FONT-STACK-HEADING: 'Portrait LS', serif;
     --FONT-WEIGHT-HEADING: 500;
     --FONT-STYLE-HEADING: normal;
 
     --FONT-UPPERCASE-HEADING: {{ heading_font_uppercase }};
-    --LETTER-SPACING-HEADING: {{ settings.heading_letter_spacing | divided_by: 1000.0 | append: 'em' }};
+    --LETTER-SPACING-HEADING: {{ settings.heading_letter_spacing | divided_by: 10.0 | append: 'px' }};
 
     --FONT-STACK-SUBHEADING: {{ subheading_font.family }}, {{ subheading_font.fallback_families }};
     --FONT-WEIGHT-SUBHEADING: {{ subheading_font.weight }};
@@ -553,7 +553,7 @@
     {%- assign font_size_base_decimal = settings.body_text_size | append: '.0' -%}
     --BTN-FONT-SIZE-BODY: {{ settings.button_text_size | divided_by: font_size_base_decimal }}rem;
 
-    --BTN-LETTER-SPACING: {{ settings.btn_letter_spacing | divided_by: 1000.0 | append: 'em' }};
+    --BTN-LETTER-SPACING: {{ settings.btn_letter_spacing | append: '%' }};
     --BTN-UPPERCASE: {% if settings.btn_caps %}uppercase{% else %}none{% endif %};
     --BTN-TEXT-ARROW-OFFSET: {% if settings.btn_caps %}-1px{% else %}0px{% endif %};
 
