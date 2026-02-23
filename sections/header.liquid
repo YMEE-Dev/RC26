@@ -329,20 +329,6 @@
                 {%- endif -%}
               </span>
             {%- endif -%}
-            {%- if has_collection and has_type -%}
-              <span class="header__logo__meta__separator">/&nbsp;</span>
-            {%- endif -%}
-            {%- if has_type -%}
-              {%- assign type_handle = product.type | handleize -%}
-              {%- assign type_collection = collections[type_handle] -%}
-              <span class="header__logo__meta__type">
-                {%- if type_collection and type_collection.handle == type_handle -%}
-                  <a href="{{ type_collection.url }}">{{ product.type }}</a>
-                {%- else -%}
-                  {{ product.type }}
-                {%- endif -%}
-              </span>
-            {%- endif -%}
           </h6>
         {%- elsif template contains 'collection' and collection -%}
           <h6 class="header__logo__meta__collection">
