@@ -52,7 +52,10 @@
 
           <div class="grid-item subcollection__item" data-grid-item>
             <div class="subcollection__inner">
-              <a class="subcollection__link" href="{{ sub_collection.url }}">
+              <a
+                class="subcollection__link{% if sub_collection.handle == collection.handle %} is-active{% endif %}"
+                href="{{ sub_collection.url }}"
+              >
                 <div class="subcollection__image">
                   {%- assign image = sub_collection.image -%}
 
@@ -105,7 +108,7 @@
           </div>
         {%- endcapture -%}
 
-        <div class="">
+        <div style="mix-blend-mode: multiply;">
           {%- if layout_slider -%}
             <grid-slider>
               {{ sub_collection_html }}

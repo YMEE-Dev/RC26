@@ -3429,12 +3429,15 @@
 
             this.style = this.dataset.style;
             this.desktop = this.querySelector('[data-header-desktop]');
+            this.body = document.body;
+            this.isCollectionTemplate = this.body.classList.contains('template-collection');
             this.deadLinks = document.querySelectorAll('.navlink[href="#"]');
             this.resizeObserver = null;
             this.checkWidth = this.checkWidth.bind(this);
             this.isSticky = this.hasAttribute('data-header-sticky');
+            this.scrollHideEvent = (e) => this.toggleHeaderHideOnScroll(e);
 
-            document.body.classList.toggle('has-header-sticky', this.isSticky);
+            this.body.classList.toggle('has-header-sticky', this.isSticky);
           }
 
           connectedCallback() {
@@ -3442,6 +3445,7 @@
             this.drawerToggleEvent();
             this.cartToggleEvent();
             this.initSticky();
+            this.initHeaderScrollHide();
 
             if (this.style !== 'drawer' && this.desktop) {
               this.minWidth = this.getMinWidth();
@@ -3551,6 +3555,39 @@
             this.stickOnLoad();
           }
 
+          initHeaderScrollHide() {
+            document.addEventListener('theme:scroll', this.scrollHideEvent);
+            this.toggleHeaderHideOnScroll({
+              detail: {
+                position: window.scrollY,
+                down: false,
+                up: false,
+              },
+            });
+          }
+
+          toggleHeaderHideOnScroll(e) {
+            const position = typeof e?.detail?.position === 'number' ? e.detail.position : window.scrollY;
+            const atTop = position <= 0;
+            const goingDown = Boolean(e?.detail?.down);
+            const goingUp = Boolean(e?.detail?.up);
+
+            if (this.isCollectionTemplate) {
+              if (atTop) {
+                this.body.classList.remove('header-scroll-hide');
+              } else if (goingDown) {
+                this.body.classList.add('header-scroll-hide');
+              }
+              return;
+            }
+
+            if (atTop || goingUp) {
+              this.body.classList.remove('header-scroll-hide');
+            } else if (goingDown) {
+              this.body.classList.add('header-scroll-hide');
+            }
+          }
+
           listen() {
             document.addEventListener('theme:scroll', this.scrollEvent);
             document.addEventListener('shopify:section:load', this.updateHeaderOffset);
@@ -3625,6 +3662,8 @@
             } else {
               document.removeEventListener('theme:resize', this.checkWidth);
             }
+
+            document.removeEventListener('theme:scroll', this.scrollHideEvent);
 
             if (this.isSticky) {
               document.removeEventListener('theme:scroll', this.scrollEvent);

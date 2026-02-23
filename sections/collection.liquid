@@ -386,6 +386,15 @@
       }
       window.__collectionAvailabilityFilterInit = true;
 
+      const updateCollectionNavStickyState = (root = document) => {
+        root.querySelectorAll('[data-collection-nav]').forEach((nav) => {
+          const stickyTop = Number.parseFloat(window.getComputedStyle(nav).top) || 0;
+          const navTop = nav.getBoundingClientRect().top;
+          const isStuck = window.scrollY > 0 && navTop <= stickyTop + 1;
+          nav.classList.toggle('is-stuck', isStuck);
+        });
+      };
+
       const filterItems = (component, filterValue) => {
         if (!component) return;
 
@@ -414,6 +423,7 @@
 
         component.dataset.availabilityFilterReady = 'true';
         filterItems(component, 'all');
+        updateCollectionNavStickyState(component);
 
         const productsGrid = component.querySelector('[data-products-grid]');
         if (!productsGrid) return;
@@ -432,6 +442,8 @@
         scope.querySelectorAll('collection-component').forEach((component) => {
           initComponent(component);
         });
+
+        updateCollectionNavStickyState(scope);
       };
 
       document.addEventListener('click', (event) => {
@@ -453,8 +465,19 @@
         initAll(document);
       }
 
+      document.addEventListener('theme:scroll', () => {
+        updateCollectionNavStickyState(document);
+      });
+
+      document.addEventListener('theme:resize', () => {
+        updateCollectionNavStickyState(document);
+      });
+
       document.addEventListener('shopify:section:load', (event) => {
         initAll(event.target);
+        requestAnimationFrame(() => {
+          updateCollectionNavStickyState(event.target);
+        });
       });
     })();
   </script>

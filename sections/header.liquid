@@ -299,7 +299,34 @@
           <h6 class="header__logo__meta__line">
             {%- if has_collection -%}
               <span class="header__logo__meta__collection">
-                <a href="{{ current_collection.url }}">{{ current_collection.title }}</a>
+                {%- assign current_collection_title = current_collection.title -%}
+                {%- if current_collection_title contains ' - ' -%}
+                  {%- liquid
+                    assign parent_collection_title = current_collection_title | split: ' - ' | first | strip
+                    assign child_collection_title = current_collection_title | remove_first: parent_collection_title | remove_first: ' - ' | strip
+                  -%}
+                  {%- if parent_collection_title != blank -%}
+                    {%- if child_collection_title != blank -%}
+                      {%- liquid
+                        assign parent_collection_handle = parent_collection_title | handleize
+                        assign parent_collection_obj = collections[parent_collection_handle]
+                        assign parent_collection_url = '/collections/' | append: parent_collection_handle
+                        if parent_collection_obj != blank
+                          assign parent_collection_url = parent_collection_obj.url
+                        endif
+                      -%}
+                      <a href="{{ parent_collection_url }}">{{ parent_collection_title }}</a>
+                      <span class="header__logo__meta__separator">&nbsp;/&nbsp;</span>
+                      <span class="header__logo__meta__subcollection">{{ child_collection_title }}</span>
+                    {%- else -%}
+                      <a href="{{ current_collection.url }}">{{ current_collection.title }}</a>
+                    {%- endif -%}
+                  {%- else -%}
+                    <a href="{{ current_collection.url }}">{{ current_collection.title }}</a>
+                  {%- endif -%}
+                {%- else -%}
+                  <a href="{{ current_collection.url }}">{{ current_collection.title }}</a>
+                {%- endif -%}
               </span>
             {%- endif -%}
             {%- if has_collection and has_type -%}
@@ -319,7 +346,34 @@
           </h6>
         {%- elsif template contains 'collection' and collection -%}
           <h6 class="header__logo__meta__collection">
-            <a href="{{ collection.url }}">{{ collection.title }}</a>
+            {%- assign collection_title = collection.title -%}
+            {%- if collection_title contains ' - ' -%}
+              {%- liquid
+                assign parent_collection_title = collection_title | split: ' - ' | first | strip
+                assign child_collection_title = collection_title | remove_first: parent_collection_title | remove_first: ' - ' | strip
+              -%}
+              {%- if parent_collection_title != blank -%}
+                {%- if child_collection_title != blank -%}
+                  {%- liquid
+                    assign parent_collection_handle = parent_collection_title | handleize
+                    assign parent_collection_obj = collections[parent_collection_handle]
+                    assign parent_collection_url = '/collections/' | append: parent_collection_handle
+                    if parent_collection_obj != blank
+                      assign parent_collection_url = parent_collection_obj.url
+                    endif
+                  -%}
+                  <a href="{{ parent_collection_url }}">{{ parent_collection_title }}</a>
+                  <span class="header__logo__meta__separator">&nbsp;/&nbsp;</span>
+                  <span class="header__logo__meta__subcollection">{{ child_collection_title }}</span>
+                {%- else -%}
+                  <a href="{{ collection.url }}">{{ collection.title }}</a>
+                {%- endif -%}
+              {%- else -%}
+                <span>{{ collection.title }}</span>
+              {%- endif -%}
+            {%- else -%}
+              <span>{{ collection.title }}</span>
+            {%- endif -%}
           </h6>
         {%- endif -%}
       </div>
@@ -717,33 +771,7 @@
       btn.addEventListener('animationend', () => btn.classList.remove('is-pressed'));
     });
 
-    /* Scroll animation */
-    let lastY = window.scrollY;
-    let ticking = false;
-    const toggleHeaderHide = () => {
-      const currentY = window.scrollY;
-      const atTop = currentY <= 0;
-      const goingDown = currentY > lastY + 1;
-      const goingUp = currentY < lastY - 1;
-      if (atTop || goingUp) {
-        document.body.classList.remove('header-scroll-hide');
-      } else if (goingDown) {
-        document.body.classList.add('header-scroll-hide');
-      }
-      lastY = currentY;
-    };
-    window.addEventListener(
-      'scroll',
-      () => {
-        if (ticking) return;
-        ticking = true;
-        requestAnimationFrame(() => {
-          toggleHeaderHide();
-          ticking = false;
-        });
-      },
-      { passive: true }
-    );
+    /* Scroll animation for header visibility is handled in assets/theme.dev.js */
 
     /* Menu images + overlay */
     let currentImage = null;
@@ -794,21 +822,39 @@
 
     const rootSelector = '.tmenu_item.tmenu_item--root.tmenu_item_level_0.tmenu_item_submenu_type_mega';
     let initialized = false;
+    let tmenuIsActive = false;
+    let tmenuScrollLocked = false;
 
     const applyMenuOpenStyles = () => {
       initMenuImages();
     };
 
+    const setTmenuScrollLock = (shouldLock) => {
+      if (shouldLock && !tmenuScrollLocked) {
+        document.dispatchEvent(new CustomEvent('theme:scroll:lock', { bubbles: true }));
+        tmenuScrollLocked = true;
+      }
+
+      if (!shouldLock && tmenuScrollLocked) {
+        document.dispatchEvent(new CustomEvent('theme:scroll:unlock', { bubbles: true }));
+        tmenuScrollLocked = false;
+      }
+    };
+
     const observeRoot = (root) => {
-      let lastActive = false;
       const handleMutations = () => {
         if (!initialized) {
           initialized = true;
           applyMenuOpenStyles();
         }
         const activeNow = Boolean(document.querySelector('.tmenu_item_active'));
-        if (activeNow && !lastActive) applyMenuOpenStyles();
-        lastActive = activeNow;
+        if (activeNow && !tmenuIsActive) {
+          applyMenuOpenStyles();
+        }
+        if (activeNow !== tmenuIsActive) {
+          setTmenuScrollLock(activeNow);
+          tmenuIsActive = activeNow;
+        }
       };
       new MutationObserver(handleMutations).observe(root, {
         childList: true,
