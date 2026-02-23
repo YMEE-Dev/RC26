@@ -674,15 +674,39 @@
           </div>
 
           {%- if double_img -%}
+            {%- liquid
+              assign skip_first_hover_slide = false
+              assign second_media_source = ''
+              assign second_media_name = ''
+
+              if product.media.size > 1
+                assign second_media_source = product.media[1].src | default: product.media[1].preview_image.src | default: ''
+                assign second_media_name = second_media_source | split: '/' | last | split: '?' | first | downcase | strip
+              endif
+            -%}
+            <script>
+              console.log('{{ second_media_name }}');
+            </script>
+
             <hover-images class="product-item__bg__under">
               <div class="product-item__bg__slider" data-hover-slider>
                 {%- for media in product.media limit: settings.image_hover_limit -%}
+                  {%- liquid
+                    assign hover_slide_attr = ''
+                    assign scale_class = ''
+
+                    if second_media_name contains 'wear' or second_media_name contains 'model'
+                      unless forloop.first
+                        assign hover_slide_attr = ' data-hover-slide'
+                      endunless
+                    else
+                      assign hover_slide_attr = ' data-hover-slide'
+                      assign scale_class = ' product-item__bg__slide--scale'
+                    endif
+                  -%}
                   <div
-                    class="product-item__bg__slide{% if media.media_type == 'video' or media.media_type == 'external_video' %} deferred-media{% endif %}"
-                    {% unless forloop.first %}
-                      data-hover-slide
-                    {% endunless %}
-                    data-hover-slide-touch
+                    class="product-item__bg__slide{% if media.media_type == 'video' or media.media_type == 'external_video' %} deferred-media{% endif %}{{ scale_class }}"
+                    data-hover-slide-touch{{ hover_slide_attr }}
                   >
                     {%- if media.media_type == 'video' or media.media_type == 'external_video' -%}
                       {%- liquid
@@ -753,27 +777,28 @@
                 {{- product_item_cutline -}}
               </span>
             {%- endif -%}
-
-            <div class="product-item__price" data-product-price>
-              {%- render 'product-grid-price', product: product, current_variant: current_variant -%}
-            </div>
           </div>
         </a>
 
-        {%- if siblings_html != blank -%}
-          {{ siblings_html }}
-        {%- elsif has_colors -%}
-          <div class="product-item__swatches__holder product-item__swatches__holder--{{ settings.swatch_style }} product-item__swatches__holder--{{ settings.collection_swatch_style }}">
-            {{ swatches }}
-
-            <span class="product-item__swatches__count">
-              <span data-swatch-count>
-                {{- count }}
-                {{- count | pluralize: count_string_one, count_string_other -}}
-              </span>
-            </span>
+        <div class="product-item__swatches-wrapper">
+          <div class="product-item__price" data-product-price>
+            {%- render 'product-grid-price', product: product, current_variant: current_variant -%}
           </div>
-        {%- endif -%}
+          {%- if siblings_html != blank -%}
+            {{ siblings_html }}
+          {%- elsif has_colors -%}
+            <div class="product-item__swatches__holder product-item__swatches__holder--{{ settings.swatch_style }} product-item__swatches__holder--{{ settings.collection_swatch_style }}">
+              {{ swatches }}
+
+              <span class="product-item__swatches__count">
+                <span data-swatch-count>
+                  {{- count }}
+                  {{- count | pluralize: count_string_one, count_string_other -}}
+                </span>
+              </span>
+            </div>
+          {%- endif -%}
+        </div>
 
         {%- comment -%} Recently viewed indicator {%- endcomment -%}
         {% if show_recently_viewed_indicator %}

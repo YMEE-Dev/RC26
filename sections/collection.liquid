@@ -9,6 +9,8 @@
   assign filter_layout = section.settings.filter_layout
   assign show_recently_viewed_indicator = settings.show_recently_viewed_indicator
   assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign sub_collections = linklists[collection.handle].links
+  assign sub_collection_links_limit = 6
 
   if filter_layout == 'inline-open'
     assign filters_expanded = true
@@ -129,6 +131,40 @@
     data-sort="{{ enable_sort }}"
     data-collection="{{ collection.url | default: '/collections/all' }}"
   >
+    {%- capture sub_collection_links_html -%}
+      {%- if sub_collections.size > 0 -%}
+        {%- assign sub_collection_links_counter = 0 -%}
+        {%- for sublink in sub_collections -%}
+          {%- liquid
+            if sublink.type != 'collection_link' or sublink.object.handle == blank
+              continue
+            endif
+
+            assign sub_collection_handle = sublink.object.handle
+            assign sub_collection_title = sublink.title
+            assign sub_collection_handle_separator = sub_collection_handle | append: ',' | prepend: ','
+            assign sub_collection = collections[sub_collection_handle]
+
+            if sublink.object.handle contains sub_collection_handle_separator
+              continue
+            endif
+          -%}
+
+          <a
+            class="subcollection_links-link navlink{% if sub_collection.handle == collection.handle %} is-active{% endif %}"
+            href="{{ sub_collection.url }}"
+          >
+            {{- sub_collection_title -}}
+          </a>
+
+          {%- assign sub_collection_links_counter = sub_collection_links_counter | plus: 1 -%}
+          {%- if sub_collection_links_counter >= sub_collection_links_limit -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endcapture -%}
+
     {%- assign align_classes = '' -%}
     {%- if enable_sort -%}
       {%- assign align_classes = align_classes | append: ' collection__nav--sort ' -%}
@@ -160,6 +196,11 @@
             Available now
           </button>
         </div>
+        {%- if sub_collection_links_html != blank -%}
+          <div class="subcollection_links-wrapper">
+            {{- sub_collection_links_html -}}
+          </div>
+        {%- endif -%}
         <div class="popout_filters-wrapper">
           {%- if enable_filters -%}
             {%- liquid

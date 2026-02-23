@@ -5634,7 +5634,7 @@
           if (this.swatchesStyle == 'text' || this.swatchesStyle == 'text-slider') {
             if (this.swatchesStyle == 'text') return;
 
-            this.swatchCount.addEventListener('mouseenter', () => {
+            this.productItem.addEventListener('mouseenter', () => {
               if (this.hideSwatchesTimer) clearTimeout(this.hideSwatchesTimer);
 
               this.productInfo.classList.add(classes$7.stopEvents);
@@ -5642,7 +5642,7 @@
             });
 
             // Prevent color swatches blinking on mouse move
-            this.productInfo.addEventListener('mouseleave', () => {
+            this.productItem.addEventListener('mouseleave', () => {
               this.hideSwatchesTimer = setTimeout(() => {
                 this.productInfo.classList.remove(classes$7.stopEvents);
                 this.swatchFieldset.classList.remove(classes$7.visible);
@@ -5700,6 +5700,8 @@
 
     const selectors$8 = {
       flickityButton: '.flickity-prev-next-button',
+      hoverScaleSlide: '.product-item__bg__slide--scale',
+      productItem: '[data-grid-item]',
       productLink: '[data-product-link]',
       slide: '[data-hover-slide]',
       slideTouch: '[data-hover-slide-touch]',
@@ -5716,12 +5718,15 @@
 
         this.flkty = null;
         this.slider = this.querySelector(selectors$8.slider);
+        this.productItem = this.closest(selectors$8.productItem);
         this.handleScroll = this.handleScroll.bind(this);
         this.recentlyViewed = this.closest(selectors$8.recentlyViewed);
         this.hovered = false;
 
         this.mouseEnterEvent = () => this.mouseEnterActions();
         this.mouseLeaveEvent = () => this.mouseLeaveActions();
+        this.productItemMouseEnterEvent = () => this.toggleScaledSlides(true);
+        this.productItemMouseLeaveEvent = () => this.toggleScaledSlides(false);
 
         this.addEventListener('mouseenter', this.mouseEnterEvent);
         this.addEventListener('mouseleave', this.mouseLeaveEvent);
@@ -5737,6 +5742,11 @@
         } else {
           this.initBasedOnDevice();
         }
+
+        if (this.productItem) {
+          this.productItem.addEventListener('mouseenter', this.productItemMouseEnterEvent);
+          this.productItem.addEventListener('mouseleave', this.productItemMouseLeaveEvent);
+        }
       }
 
       disconnectedCallback() {
@@ -5748,6 +5758,11 @@
 
         this.removeEventListener('mouseenter', this.mouseEnterEvent);
         this.removeEventListener('mouseleave', this.mouseLeaveEvent);
+
+        if (this.productItem) {
+          this.productItem.removeEventListener('mouseenter', this.productItemMouseEnterEvent);
+          this.productItem.removeEventListener('mouseleave', this.productItemMouseLeaveEvent);
+        }
       }
 
       initBasedOnDevice() {
@@ -5814,6 +5829,12 @@
         this.hovered = false;
 
         this.videoActions();
+      }
+
+      toggleScaledSlides(isScaled) {
+        this.querySelectorAll(selectors$8.hoverScaleSlide).forEach((slide) => {
+          slide.classList.toggle('is-scaled', isScaled);
+        });
       }
 
       videoActions() {
