@@ -114,7 +114,7 @@
         {%- assign text_columns_class = block.settings.text_columns | prepend: 'columns--' -%}
         {%- assign animation_order = animation_order | plus: 1 -%}
         <div
-          class="hero__rte {{ block.settings.text_font_size }} {{ text_columns_class }}"
+          class="hero__rte caption {{ text_columns_class }}"
           data-aos="hero"
           data-aos-anchor="{{ animation_anchor }}"
           data-aos-order="{{ animation_order }}"
@@ -254,8 +254,11 @@
 </div>
 
 {% stylesheet %}
+  .hero__title {
+    text-transform: capitalize;
+  }
   .brick__block__text .hero__content {
-    gap: 38px;
+    gap: 40px;
     height: 100%;
   }
   .suggested-collections__wrapper {
@@ -269,7 +272,7 @@
   }
   .suggested-collections__wrapper .label {
     display: block;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     color: #a7a7a7;
   }
 
