@@ -43,7 +43,8 @@
         
         {%- if warranty_content.accordions != blank -%}
           <div class="warranty__accordions">
-            {%- for accordion in warranty_content.accordions -%}
+            {%- assign accordions = warranty_content.accordions | json -%}
+            {%- for accordion in accordions -%}
               <div class="warranty__accordion">
                 <details class="accordion" data-collapsible>
                   <summary class="accordion__title" data-collapsible-trigger>
