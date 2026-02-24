@@ -24,19 +24,21 @@
   {%- endcomment -%}
   {%- if free_shipping_content != blank -%}
     <div class="free-shipping__content">
+      <div class="free-shipping__text-content">
+        {%- if free_shipping_content.title != blank -%}
+          <h2 class="free-shipping__title">{{ free_shipping_content.title }}</h2>
+        {%- endif -%}
+        
+        {%- if free_shipping_content.description != blank -%}
+          <div class="free-shipping__description">
+            {{ free_shipping_content.description | metafield_tag }}
+          </div>
+        {%- endif -%}
+      </div>
+      
       {%- if free_shipping_content.image != blank -%}
         <div class="free-shipping__image">
           {{ free_shipping_content.image | image_url: width: 600 | image_tag }}
-        </div>
-      {%- endif -%}
-      
-      {%- if free_shipping_content.title != blank -%}
-        <h2 class="free-shipping__title">{{ free_shipping_content.title }}</h2>
-      {%- endif -%}
-      
-      {%- if free_shipping_content.description != blank -%}
-        <div class="free-shipping__description">
-          {{ free_shipping_content.description | metafield_tag }}
         </div>
       {%- endif -%}
     </div>
