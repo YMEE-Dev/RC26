@@ -11,36 +11,35 @@
 
 {%- liquid
   if settings.currency_code_enable
-    assign currency_code = cart.currency.iso_code | default: shop.currency
-    assign product_price_min = product.price_min | money_without_currency
-    assign product_price_max = product.price_max | money_without_currency
-    assign product_compare_at_price = product.compare_at_price | money_without_currency
-    assign product_price_min = currency_code | append: ' ' | append: product_price_min
-    assign product_compare_at_price = currency_code | append: ' ' | append: product_compare_at_price
+    assign product_price_min = product.price_min | money_with_currency
+    assign product_compare_at_price = product.compare_at_price | money_with_currency
+    assign product_price_min = product_price_min | replace: ',00', '' | replace: '.00', ''
+    assign product_compare_at_price = product_compare_at_price | replace: ',00', '' | replace: '.00', ''
   else
-    assign product_price_min = product.price_min | money
-    assign product_price_max = product.price_max | money
-    assign product_compare_at_price = product.compare_at_price | money
+    assign product_price_min = product.price_min | money_without_trailing_zeros
+    assign product_compare_at_price = product.compare_at_price | money_without_trailing_zeros
   endif
-
-  assign product_price_range = product_price_min | append: ' - ' | append: product_price_max
 -%}
 
 <span class="price{% if product.compare_at_price > product.price %} sale{% endif %}">
-  {% if product.available %}
-    <span class="new-price">
-      {%- if product.price_min == 0 and product.price_max == 0 -%}
-        {{ 'general.money.free' | t }}
-      {%- else -%}
-        {{ product_price_range }}
-      {%- endif -%}
-    </span>
-    {% if product.compare_at_price > product.price %}
-      <span class="old-price">{{ product_compare_at_price }}</span>
+  <span class="new-price">
+    {% if product.price_varies %}
+      <small>{{ 'products.general.from' | t }}</small>
     {% endif %}
-  {% else %}
-    <span class="sold-out">{{ 'products.product.sold_out' | t }}</span>
+    {%- if product.price == 0 and product.price_varies == false -%}
+      {{ 'general.money.free' | t }}
+    {%- else -%}
+      {{ product_price_min }}
+    {%- endif -%}
+  </span>
+  {% if product.compare_at_price > product.price %}
+    <span class="old-price">{{ product_compare_at_price }}</span>
   {% endif %}
+  {% comment %}
+    {% unless product.available %}
+      <span class="sold-out">{{ 'products.product.sold_out' | t }}</span>
+    {% endunless %}
+  {% endcomment %}
 </span>
 {% if current_variant.unit_price %}
   {% capture unit_price_separator %}
@@ -53,14 +52,18 @@
     {% endif %}
     {{ current_variant.unit_price_measurement.reference_unit }}
   {% endcapture %}
+  {%- liquid
+    if settings.currency_code_enable
+      assign unit_price_value = current_variant.unit_price | money_with_currency
+      assign unit_price_value = unit_price_value | replace: ',00', '' | replace: '.00', ''
+    else
+      assign unit_price_value = current_variant.unit_price | money_without_trailing_zeros
+    endif
+  -%}
   <br>
   <span class="visually-hidden visually-hidden--inline">{{ 'products.product.unit_price_label' | t }}</span>
   <span class="unit small">
-    {%- if settings.currency_code_enable -%}
-      {{- current_variant.unit_price | money_with_currency -}}
-    {%- else -%}
-      {{- current_variant.unit_price | money -}}
-    {%- endif -%}
+    {{- unit_price_value -}}
     {{- unit_price_separator -}}
     {{- unit_price_base_unit -}}
   </span>
