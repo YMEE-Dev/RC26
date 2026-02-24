@@ -1,987 +1,1883 @@
 {%- comment -%}
   Section: RC Heritage Timeline
-  Page: /pages/heritage  or /pages/our-story
-  Usage: Add to templates/page.rc-timeline.json
+  Source migrated from assets/preview.html
 {%- endcomment -%}
 
 {%- style -%}
-  /* ─────────────────────────────────────────
-     RC Heritage Timeline — Section Styles
-  ───────────────────────────────────────── */
-  :root {
-    --rc-ruby:      #B3261E;
-    --rc-green:     #26564C;
-    --rc-teal:      #397E70;
-    --rc-gold:      #B29437;
-    --rc-white:     #FFFFFF;
-    --rc-light:     #E5E5E5;
-    --rc-offwhite:  #F9F9F9;
-    --rc-dark:      #1A1A1A;
-    --rc-font-head: 'Portrait LC', Georgia, serif;
-    --rc-font-body: 'Inter', Helvetica, Arial, sans-serif;
-  }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: #0b1d17; overflow-x: hidden; }
+    img { display: block; max-width: 100%; }
+    a { text-decoration: none; color: inherit; }
 
-  .rct * { box-sizing: border-box; margin: 0; padding: 0; }
-  .rct img { display: block; max-width: 100%; }
-  .rct a { text-decoration: none; color: inherit; }
-
-  /* ── Section Navigation ── */
-  .rct-nav {
-    position: sticky;
-    top: 0;
-    z-index: 200;
-    background: var(--rc-green);
-    width: 100%;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-  }
-  .rct-nav__inner {
-    display: flex;
-    align-items: stretch;
-    justify-content: center;
-    height: 50px;
-    max-width: 1728px;
-    margin: 0 auto;
-  }
-  .rct-nav__tab {
-    display: flex;
-    align-items: center;
-    padding: 0 32px;
-    color: var(--rc-white);
-    font-family: var(--rc-font-body);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    border-right: 1px solid rgba(255,255,255,0.15);
-    transition: background 0.25s ease;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  .rct-nav__tab:first-child { border-left: 1px solid rgba(255,255,255,0.15); }
-  .rct-nav__tab.is-active,
-  .rct-nav__tab:hover { background: var(--rc-gold); }
-
-  /* ── Hero ── */
-  .rct-hero {
-    position: relative;
-    width: 100%;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    overflow: hidden;
-  }
-  .rct-hero__bg {
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-  }
-  .rct-hero__vignette {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at center, rgba(255,255,255,0) 0%, rgba(46,46,46,0.75) 100%);
-  }
-  .rct-hero__content {
-    position: relative;
-    z-index: 2;
-    padding: 60px 80px 80px;
-    color: var(--rc-white);
-    max-width: 640px;
-  }
-  .rct-hero__eyebrow {
-    font-family: var(--rc-font-body);
-    font-size: 14px;
-    font-weight: 400;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-    opacity: 0.85;
-  }
-  .rct-hero__title {
-    font-family: var(--rc-font-head);
-    font-size: clamp(36px, 5vw, 60px);
-    font-weight: 500;
-    line-height: 1.15;
-    margin-bottom: 48px;
-  }
-  .rct-hero__scroll {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    font-family: var(--rc-font-body);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-  .rct-hero__scroll-line {
-    display: block;
-    width: 32px;
-    height: 1px;
-    background: var(--rc-white);
-    animation: rct-scroll-pulse 2s ease-in-out infinite;
-  }
-  @keyframes rct-scroll-pulse {
-    0%, 100% { width: 32px; opacity: 1; }
-    50% { width: 56px; opacity: 0.6; }
-  }
-
-  /* ── History ── */
-  .rct-history {
-    position: relative;
-    background: var(--rc-dark);
-    padding: 120px 80px;
-    overflow: hidden;
-  }
-  .rct-history__inner {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 80px;
-    align-items: center;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-  .rct-history__text {
-    color: var(--rc-white);
-    align-self: start;
-    margin-top: -18px;
-    margin-left: -20px;
-  }
-  .rct-history__title {
-    font-family: var(--rc-font-head);
-    font-size: clamp(28px, 4vw, 40px);
-    font-weight: 500;
-    margin-bottom: 32px;
-  }
-  .rct-history__body p {
-    font-family: var(--rc-font-body);
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.75;
-    color: rgba(255,255,255,0.85);
-    margin-bottom: 20px;
-  }
-  .rct-history__image {
-    position: relative;
-    width: min(700px, 100%);
-    justify-self: end;
-    align-self: end;
-    margin-top: 34px;
-    aspect-ratio: 1 / 1;
-    overflow: hidden;
-  }
-  .rct-history__image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  /* ── The Creator ── */
-  .rct-creator {
-    position: relative;
-    background: var(--rc-offwhite);
-    overflow: hidden;
-  }
-  .rct-creator__inner {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    min-height: 700px;
-  }
-  .rct-creator__image {
-    position: relative;
-    overflow: hidden;
-  }
-  .rct-creator__image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .rct-creator__text {
-    background: var(--rc-offwhite);
-    padding: 80px 72px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-  .rct-creator__title {
-    font-family: var(--rc-font-head);
-    font-size: clamp(28px, 4vw, 40px);
-    font-weight: 500;
-    color: #000;
-    margin-bottom: 28px;
-  }
-  .rct-creator__body p {
-    font-family: var(--rc-font-body);
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.75;
-    color: #111;
-    margin-bottom: 20px;
-  }
-
-  /* ── The Ruby ── */
-  .rct-ruby {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-  }
-  .rct-ruby__bg {
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center;
-  }
-  .rct-ruby__vignette {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(20,10,10,0.5) 100%);
-  }
-  .rct-ruby__inner {
-    position: relative;
-    z-index: 2;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 80px;
-    align-items: center;
-    padding: 100px 80px;
-    max-width: 1400px;
-    margin: 0 auto;
-    width: 100%;
-  }
-  .rct-ruby__text { color: var(--rc-white); }
-  .rct-ruby__title {
-    font-family: var(--rc-font-head);
-    font-size: clamp(28px, 4vw, 40px);
-    font-weight: 500;
-    margin-bottom: 28px;
-  }
-  .rct-ruby__body p {
-    font-family: var(--rc-font-body);
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.75;
-    color: rgba(255,255,255,0.88);
-    margin-bottom: 20px;
-  }
-  .rct-ruby__gem {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .rct-ruby__gem img {
-    width: min(366px, 80%);
-    height: auto;
-    filter: drop-shadow(0 20px 60px rgba(179,38,30,0.4));
-  }
-
-  /* ── Timeline Section ── */
-  .rct-timeline-section {
-    background: var(--rc-ruby);
-    padding: 100px 0 120px;
-    overflow: hidden;
-  }
-  .rct-timeline-section__header {
-    text-align: center;
-    padding: 0 80px 80px;
-  }
-  .rct-timeline-section__title {
-    font-family: var(--rc-font-head);
-    font-size: clamp(28px, 4vw, 40px);
-    font-weight: 500;
-    color: var(--rc-white);
-    margin-bottom: 16px;
-  }
-
-  /* Timeline early era (light bg) */
-  .rct-timeline--light {
-    background: var(--rc-light);
-    padding: 80px 0;
-    margin-bottom: 0;
-  }
-  .rct-timeline--light .rct-timeline__year { color: #000; }
-  .rct-timeline--light .rct-timeline__body { color: #111; }
-  .rct-timeline--light .rct-timeline__line { background: #999; }
-  .rct-timeline--light .rct-timeline__dot {
-    background: #000;
-    border-color: var(--rc-light);
-  }
-
-  /* Shared timeline structure */
-  .rct-timeline {
-    position: relative;
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 0 40px;
-  }
-  .rct-timeline__spine {
-    position: absolute;
-    left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background: rgba(255,255,255,0.25);
-    transform: translateX(-50%);
-  }
-  .rct-timeline--light .rct-timeline__spine { background: rgba(0,0,0,0.15); }
-
-  .rct-timeline__item {
-    display: grid;
-    grid-template-columns: 1fr 60px 1fr;
-    gap: 0;
-    align-items: start;
-    margin-bottom: 60px;
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
-  }
-  .rct-timeline__item.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  /* Left-side event */
-  .rct-timeline__item--left .rct-timeline__event {
-    grid-column: 1;
-    text-align: right;
-    padding-right: 40px;
-    padding-top: 4px;
-  }
-  .rct-timeline__item--left .rct-timeline__center { grid-column: 2; }
-  .rct-timeline__item--left .rct-timeline__media { grid-column: 3; padding-left: 40px; }
-
-  /* Right-side event */
-  .rct-timeline__item--right .rct-timeline__media { grid-column: 1; padding-right: 40px; }
-  .rct-timeline__item--right .rct-timeline__center { grid-column: 2; }
-  .rct-timeline__item--right .rct-timeline__event {
-    grid-column: 3;
-    text-align: left;
-    padding-left: 40px;
-    padding-top: 4px;
-  }
-
-  .rct-timeline__center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-  }
-  .rct-timeline__dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--rc-white);
-    border: 3px solid var(--rc-ruby);
-    flex-shrink: 0;
-    margin-top: 8px;
-  }
-  .rct-timeline__connector {
-    flex: 1;
-    width: 1px;
-    min-height: 20px;
-    background: rgba(255,255,255,0.25);
-  }
-
-  .rct-timeline__year {
-    font-family: var(--rc-font-head);
-    font-size: clamp(24px, 3vw, 40px);
-    font-weight: 500;
-    color: var(--rc-white);
-    line-height: 1.2;
-    margin-bottom: 10px;
-  }
-  .rct-timeline__body {
-    font-family: var(--rc-font-body);
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.7;
-    color: rgba(255,255,255,0.85);
-  }
-  .rct-timeline__cta {
-    display: inline-block;
-    margin-top: 14px;
-    font-family: var(--rc-font-body);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--rc-white);
-    border-bottom: 1px solid rgba(255,255,255,0.5);
-    padding-bottom: 2px;
-    transition: border-color 0.2s, opacity 0.2s;
-  }
-  .rct-timeline__cta:hover { border-color: var(--rc-white); opacity: 0.75; }
-  .rct-timeline--light .rct-timeline__cta { color: #000; border-color: rgba(0,0,0,0.4); }
-  .rct-timeline--light .rct-timeline__cta:hover { border-color: #000; }
-
-  .rct-timeline__media img {
-    width: 100%;
-    max-width: 397px;
-    height: 240px;
-    object-fit: cover;
-    display: block;
-  }
-  .rct-timeline__media--empty { min-height: 1px; }
-
-  /* Today special block */
-  .rct-timeline__item--today .rct-timeline__year {
-    font-size: clamp(20px, 2.5vw, 32px);
-    letter-spacing: 0.05em;
-  }
-
-  /* ── Collections ── */
-  .rct-collections {
-    background: var(--rc-green);
-    padding: 80px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-    align-items: stretch;
-    min-height: 480px;
-  }
-  .rct-collections__text {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding-right: 60px;
-  }
-  .rct-collections__eyebrow {
-    font-family: var(--rc-font-body);
-    font-size: 16px;
-    font-weight: 400;
-    color: var(--rc-white);
-    margin-bottom: 32px;
-    letter-spacing: 0.05em;
-  }
-  .rct-collections__list {
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 12px;
-  }
-  .rct-collections__list li a {
-    font-family: var(--rc-font-head);
-    font-size: clamp(20px, 2.5vw, 32px);
-    font-weight: 500;
-    color: var(--rc-teal);
-    transition: color 0.2s;
-    line-height: 1.4;
-  }
-  .rct-collections__list li a:hover,
-  .rct-collections__list li.is-active a {
-    color: var(--rc-white);
-  }
-  .rct-collections__image {
-    position: relative;
-    overflow: hidden;
-  }
-  .rct-collections__image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  /* ── Fade-in utility ── */
-  .rct-fade {
-    opacity: 0;
-    transform: translateY(24px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-  }
-  .rct-fade.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .rct-fade--delay-1 { transition-delay: 0.1s; }
-  .rct-fade--delay-2 { transition-delay: 0.2s; }
-  .rct-fade--delay-3 { transition-delay: 0.3s; }
-
-  /* ── Responsive ── */
-  @media (max-width: 900px) {
-    .rct-history__inner,
-    .rct-creator__inner,
-    .rct-ruby__inner,
-    .rct-collections {
-      grid-template-columns: 1fr;
+    :root {
+      --ruby:   #B3261E;
+      --green:  #26564C;
+      --teal:   #397E70;
+      --dark:   #27574D;
+      --gold:   #B29437;
+      --white:  #FFFFFF;
+      --light:  #E5E5E5;
+      --timeline-ruby-red: #A21616;
+      --head:   'Portrait LC', Georgia, serif;
+      --body:   'Inter', sans-serif;
     }
-    .rct-history,
-    .rct-creator__text,
-    .rct-ruby__inner {
-      padding: 60px 24px;
+
+    /* ═══════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════ */
+    .hero {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
+      background: transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
-    .rct-history__text {
-      margin-top: 0;
+
+    /* Background image — fixed so it persists through history section on scroll */
+    .hero__bg {
+      position: fixed;
+      inset: 0;
+      background: url('{{ 'figma-images/hero-bg.jpg' | asset_url }}') center / cover no-repeat;
+      filter: brightness(0.55);
+      z-index: -2;
+    }
+
+    /* Vignette — also fixed, sits on top of bg layer */
+    .hero__vignette {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 90% 90% at 50% 50%,
+          transparent 0%,
+          rgba(5, 14, 10, 0.664) 55%,
+          rgba(3, 9, 6, 0.923) 100%),
+        linear-gradient(to bottom,
+          rgba(0,0,0,0.3) 0%,
+          transparent 25%,
+          transparent 75%,
+          rgba(0, 0, 0, 0.749) 100%);
+    }
+
+    /* Decorative 4-petal ornament — centered behind text */
+    .hero__ornament {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      transform: translateY(calc(-50% - 18px));
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.9s ease, transform 0.9s ease;
+      pointer-events: none;
+    }
+    .hero.hero--ornament-in .hero__ornament {
+      opacity: 0.62;
+      transform: translateY(-50%);
+    }
+    .hero__lottie {
+      width: min(620px, 76vw);
+      height: min(640px, 78vw);
+      display: block;
+      position: relative;
+      z-index: 2;
+      transform-origin: center;
+      animation: hero-flower-float 8s ease-in-out infinite;
+    }
+    .hero__lottie svg {
+      overflow: visible;
+    }
+    .hero__lottie svg path[stroke] {
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.68))
+              drop-shadow(0 0 22px rgba(39,87,77,0.58));
+      animation: lottie-line-glow-fade 2.6s ease-in-out infinite;
+    }
+    @keyframes lottie-line-glow-fade {
+      0% { opacity: 0.32; }
+      35% { opacity: 1; }
+      100% { opacity: 0.35; }
+    }
+    .hero__ornament-fallback {
+      display: none !important;
+      width: min(520px, 70vw);
+      height: auto;
+      position: relative;
+      z-index: 1;
+      transform-origin: center;
+      animation: hero-flower-float 8s ease-in-out infinite;
+    }
+    @keyframes hero-flower-float {
+      0%, 100% { transform: scale(1); opacity: 0.95; }
+      50% { transform: scale(1.035); opacity: 1; }
+    }
+
+    /* Text content */
+    .hero__content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      opacity: 0;
+      transform: translateY(-24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .hero.hero--text-in .hero__content {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .hero__eyebrow,
+    .hero__title {
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .hero.hero--text-in .hero__eyebrow {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 0.08s;
+    }
+    .hero.hero--text-in .hero__title {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 0.2s;
+    }
+    .hero__eyebrow {
+      font-family: var(--body);
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 16px;
+    }
+    .hero__title {
+      font-family: var(--head);
+      font-size: 40px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      line-height: 1.1;
+      color: var(--white);
+    }
+
+    /* Scroll CTA */
+    .hero__scroll {
+      position: absolute;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      transition: opacity 0.55s ease, transform 0.55s ease;
+      transform: translate(-50%, -10px);
+    }
+    .hero.hero--scroll-in .hero__scroll {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+    .hero__scroll.is-hidden {
+      opacity: 0;
+      transform: translate(-50%, 8px);
+      pointer-events: none;
+    }
+    .hero.hero--scroll-in .hero__scroll.is-hidden {
+      opacity: 0;
+      transform: translate(-50%, 8px);
+      pointer-events: none;
+    }
+    .hero__scroll-label {
+      font-family: var(--body);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.75);
+    }
+    .hero__scroll-line {
+      width: 1px;
+      height: 28px;
+      background: rgba(255,255,255,0.5);
+      animation: line-pulse 2s ease-in-out infinite;
+    }
+    @keyframes line-pulse {
+      0%,100% { height: 28px; opacity: 0.5; }
+      50%      { height: 44px; opacity: 1; }
+    }
+    /* ═══════════════════════════════════════
+       SECTION NAV  (custom pill shape)
+    ═══════════════════════════════════════ */
+    .section-nav {
+      position: fixed;
+      bottom: 42px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      width: 814px;
+      max-width: 95vw;
+    }
+    .section-nav.nav-intro {
+      opacity: 0;
+      transform: translate(-50%, -16px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .section-nav.nav-intro.nav-intro-run {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+    .section-nav__shape {
+      position: relative;
+      width: 100%;
+    }
+    .section-nav__shape svg.nav-bg {
+      width: 100%;
+      height: auto;
+      display: block;
+      transform-origin: 50% 50%;
+      transform-box: fill-box;
+    }
+    /* Highlight paths — hidden by default */
+    .nav-highlight { display: none; }
+    .nav-highlight.is-active { display: block; }
+    /* Clickable tab overlays on top of SVG */
+    .section-nav__tabs {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: 193fr 207fr 211fr 203fr;
+    }
+    .section-nav__tab {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--body);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.75);
+      cursor: pointer;
+      transition: color 0.2s, opacity 0.45s ease, transform 0.45s ease;
+      user-select: none;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .section-nav__tab.is-active { color: var(--white); }
+    .section-nav__tabs {
+      opacity: 1;
+      transition: opacity 0.45s ease;
+    }
+    .section-nav.nav-intro .nav-bg {
+      transform: scaleX(0.16);
+      opacity: 0.96;
+      filter: saturate(0.94);
+    }
+    .section-nav.nav-intro.nav-intro-run .nav-bg {
+      animation: nav-shape-expand 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .section-nav.nav-intro .section-nav__tabs {
+      pointer-events: none;
+    }
+    .section-nav.nav-intro .section-nav__tab {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    .section-nav.nav-ready .section-nav__tabs {
+      pointer-events: auto;
+    }
+    .section-nav.nav-ready .section-nav__tab {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .section-nav.nav-ready .section-nav__tab:nth-child(1) { transition-delay: 0.04s; }
+    .section-nav.nav-ready .section-nav__tab:nth-child(2) { transition-delay: 0.12s; }
+    .section-nav.nav-ready .section-nav__tab:nth-child(3) { transition-delay: 0.20s; }
+    .section-nav.nav-ready .section-nav__tab:nth-child(4) { transition-delay: 0.28s; }
+    @keyframes nav-shape-expand {
+      0% {
+        transform: scaleX(0.16);
+        opacity: 0.96;
+        filter: saturate(0.94);
+      }
+      100% {
+        transform: scaleX(1);
+        opacity: 1;
+        filter: saturate(1);
+      }
+    }
+
+    /* ═══════════════════════════════════════
+       HISTORY
+    ═══════════════════════════════════════ */
+    .history {
+      background: transparent;
+      padding: 120px 0;
+      min-height: 1000px;
+    }
+    .history__inner {
+      display: grid;
+      grid-template-columns: 1fr minmax(360px, 520px) 1fr;
+      gap: 56px;
+      align-items: center;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .history__left {
+      color: var(--white);
+      align-self: start;
+      margin-top: 120px;
       margin-left: 0;
     }
-    .rct-history__image {
-      justify-self: start;
+    .history__right {
+      color: var(--white);
       align-self: start;
+      margin-top: 340px;
+      margin-bottom: 0;
+      padding-right: 0;
+    }
+    .history__title {
+      font-family: var(--head);
+      font-size: clamp(28px,4vw,40px);
+      font-weight: 500;
+      color: var(--white);
+      margin-bottom: 28px;
+    }
+    .history__left p, .history__right p {
+      font-size: 14px;
+      line-height: 1.85;
+      color: rgba(255,255,255,0.78);
+    }
+        .history__center {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .history__center img {
+      width: 1060px;
+      max-width: none;
+      height: auto;
+      mix-blend-mode: screen;
+      display: block;
+      opacity: 0;
+      transform: rotate(-18deg);
+      backface-visibility: hidden;
+      transform-origin: center;
+      will-change: transform;
+    }
+    .history__center.fade {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+
+    /* ═══════════════════════════════════════
+       THE CREATOR
+    ═══════════════════════════════════════ */
+    .creator {
+      position: relative;
+      background: transparent;
+      overflow: visible;
+    }
+    .creator__inner {
+      display: grid;
+      grid-template-columns: 644px 1fr;
+      gap: 50px;
+      align-items: start;
+      max-width: none;
+      width: 100%;
+      margin: 0 auto;
+      padding: 80px 80px 140px;
+      min-height: 780px;
+    }
+    .creator__image {
+      margin-top: -140px;
+      margin-left: 170px;
+      overflow: visible;
+      z-index: 2;
+    }
+    .creator__image img {
+      width: 580px;
+      height: auto;
+      object-fit: cover;
+      display: block;
+    }
+    .creator__text {
+      position: relative;
+      z-index: 3;
+      max-width: 620px;
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+    .creator__title {
+      font-family: var(--head);
+      font-size: clamp(28px,4vw,40px);
+      font-weight: 500;
+      color: #fff;
+      margin-bottom: 28px;
+    }
+    .creator__body p {
+      font-size: 14px;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 18px;
+    }
+    .creator__body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+    .creator__body p:last-child { margin-bottom: 0; }
+    .creator__vicenza {
+      position: absolute;
+      right: 0;
+      bottom: -130px;
+      width: 760px;
+      max-width: 100%;
+      height: auto;
+      pointer-events: none;
+      mix-blend-mode: multiply;
+      z-index: 1;
+    }
+
+    /* ═══════════════════════════════════════
+       THE RUBY
+    ═══════════════════════════════════════ */
+    .ruby-section {
+      position: relative;
+      min-height: auto;
+      display: flex;
+      align-items: center;
+      overflow: visible;
+      background: transparent;
+      padding: 120px 0 0px;
+      margin-bottom: -350px;
+      z-index: 2;
+      isolation: isolate;
+    }
+    .ruby-section__bg {
+      display: none;
+    }
+    .ruby-section__overlay {
+      display: none;
+    }
+    .ruby-section__inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 90px 100px;
+      max-width: none;
+      margin: 0 auto;
+      width: min(1232px, calc(100% - 48px));
+      min-height: 700px;
+      background: url('{{ 'figma-images/ruby-section.jpg' | asset_url }}') center / cover no-repeat;
+    }
+    .ruby-section__content {
+      width: min(380px, 38%);
+      margin-left: auto;
+      padding-top: 130px;
+    }
+    .ruby-section__title {
+      font-family: var(--head);
+      font-size: clamp(28px,4vw,40px);
+      font-weight: 500;
+      color: var(--white);
+      margin-bottom: 28px;
+    }
+    .ruby-section__body p {
+      font-size: 14px;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.85);
+      margin-bottom: 18px;
+    }
+    .ruby-section__gem {
+      display: none;
+    }
+    .ruby-section__gem img {
+      width: min(366px, 80%);
+      filter: drop-shadow(0 20px 60px rgba(179,38,30,0.5));
+    }
+
+    /* ═══════════════════════════════════════
+       TIMELINE
+    ═══════════════════════════════════════ */
+    .timeline-section {
+      position: relative;
+      background: var(--light);
+      padding: 500px 0 0;
+      overflow: visible;
+      margin-top: 0;
+      z-index: 1;
+    }
+    .timeline-section__title,
+    .era-light,
+    .timeline-era--ruby {
+      position: relative;
+      z-index: 2;
+    }
+    .timeline-era--ruby__map {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -160px;
+      z-index: 1;
+      pointer-events: none;
+      mix-blend-mode: multiply;
+      opacity: 0.95;
+    }
+    .timeline-era--ruby__map img {
+      display: block;
+      width: min(1200px, 100%);
+      height: auto;
+      margin: 0 auto;
+    }
+.timeline-transition {
+      position: relative;
+      margin-top: -60px;
+      margin-bottom: 1200px;
+      height: 0px;
+      pointer-events: none;
+      overflow: visible;
+      z-index: 0;
+      display: flex;
+      justify-content: center;
+      background: transparent;
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+    }
+    .timeline-transition__shape-svg {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 0;
+      width: 100vw;
+      max-width: none;
+      height: auto;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.98;
+      mix-blend-mode: normal;
+    }
+    .timeline-transition__shape-base {
+      fill: url(#timeline-transition-shape-texture);
+    }
+    .timeline-transition__shape-overlay {
+      fill: var(--timeline-ruby-red);
+      mix-blend-mode: multiply;
+      opacity: 0.92;
+    }
+    .timeline-transition__flower-red-svg {
+      position: absolute;
+      left: 50%;
+      top: calc(clamp(26px, 4.2vw, 72px) - 500px);
+      transform: translateX(-50%);
+      width: 100vw;
+      max-width: none;
+      height: auto;
+      z-index: 2;
+      pointer-events: none;
+      mix-blend-mode: multiply;
+      opacity: 0.95;
+    }
+.timeline-transition__flower-svg {
+      position: absolute;
+      left: 50%;
+      top: calc(clamp(26px, 4.2vw, 72px) - 500px);
+      transform: translateX(-50%);
+      width: 100vw;
+      max-width: none;
+      height: auto;
+      z-index: 3;
+      pointer-events: none;
+      mix-blend-mode: normal;
+    }
+    .timeline-transition__flower-svg .flower-red {
+      mix-blend-mode: multiply;
+    }
+    .timeline-transition__flower-svg .flower-green {
+      mix-blend-mode: normal;
+    }
+    .rebranding {
+      position: relative;
+      background: transparent;
+      padding: 80px 0 24px;
+      min-height: auto;
+      display: block;
+      z-index: 6;
+      margin-bottom: 300px;
+    }
+    .rebranding__logo {
+      position: relative;
+      width: min(850px, 92vw);
+      height: auto;
+      min-height: 180px;
+      display: block;
+      margin: 0 auto;
+    }
+    .timeline-section__title {
+      font-family: var(--head);
+      font-size: clamp(28px,4vw,40px);
+      font-weight: 500;
+      color: #111;
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 0 40px;
+    }
+
+    /* Light band for early years */
+    .era-light {
+      background: transparent;
+      padding: 40px 0 0;
+      overflow: visible;
+      position: relative;
+      z-index: 3;
+    }
+
+    .timeline {
+      position: relative;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 56px;
+      overflow: visible;
+    }
+    .timeline__spine {
+      position: absolute;
+      left: 50%; top: 0; bottom: 0;
+      width: 1px;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(179, 38, 30, 0.5) 0 5px,
+        transparent 5px 10px
+      );
+      transform: translateX(-50%);
+      clip-path: inset(0 0 100% 0);
+      will-change: clip-path;
+    }
+    .era-light .timeline__spine {
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(179, 38, 30, 0.5) 0 5px,
+        transparent 5px 10px
+      );
+    }
+
+    .tl-item {
+      display: grid;
+      grid-template-columns: 1fr 70px 1fr;
+      align-items: start;
+      row-gap: 0px;
+      margin-bottom: 0px;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    .tl-item.visible { opacity: 1; }
+    .tl-item .tl-event,
+    .tl-item .tl-media {
       margin-top: 20px;
     }
-    .rct-creator__image { min-height: 400px; }
-    .rct-hero__content { padding: 40px 24px 60px; }
-    .rct-timeline { padding: 0 16px; }
-    .rct-timeline__item {
-      grid-template-columns: 1fr;
-      grid-template-rows: auto;
-    }
-    .rct-timeline__item--left .rct-timeline__event,
-    .rct-timeline__item--right .rct-timeline__event {
+
+    .tl-item--left .tl-event {
       grid-column: 1;
+      grid-row: 1;
       text-align: left;
-      padding: 0 0 16px 24px;
-      border-left: 2px solid rgba(255,255,255,0.3);
-      margin-left: 6px;
+      padding-right: 130px;
     }
-    .rct-timeline--light .rct-timeline__item--left .rct-timeline__event,
-    .rct-timeline--light .rct-timeline__item--right .rct-timeline__event {
-      border-color: rgba(0,0,0,0.15);
-    }
-    .rct-timeline__center { display: none; }
-    .rct-timeline__item--left .rct-timeline__media,
-    .rct-timeline__item--right .rct-timeline__media {
+    .tl-item--left .tl-media {
       grid-column: 1;
-      padding: 16px 0 0;
+      grid-row: 2;
+      padding-right: 130px;
     }
-    .rct-timeline__spine { display: none; }
-    .rct-collections__text { padding-right: 0; padding-bottom: 40px; }
-    .rct-collections__image { min-height: 300px; }
-    .rct-nav__tab { padding: 0 16px; font-size: 10px; }
-  }
+    .tl-item--left .tl-center {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+    }
+    .tl-item--right .tl-event {
+      grid-column: 3;
+      grid-row: 1;
+      text-align: left;
+      padding-left: 130px;
+    }
+    .tl-item--right .tl-media {
+      grid-column: 3;
+      grid-row: 2;
+      padding-left: 130px;
+    }
+    .tl-item--right .tl-center {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+    }
+
+    .tl-center { display:flex; flex-direction:column; align-items:center; }
+    .tl-dot {
+      background: transparent;
+      border: 0;
+      color: #111;
+      font-family: var(--head);
+      font-size: 40px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      line-height: 1.1;
+      margin-top: 30px;
+      margin-bottom: 30px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 2;
+      background: var(--light);
+      padding: 0 6px;
+    }
+    .tl-connector {
+      width: 1px;
+      min-height: 54px;
+      flex: 1;
+      background: transparent;
+    }
+    .era-light .tl-connector { background: transparent; }
+
+    .tl-year {
+      font-family: var(--head);
+      font-size: clamp(22px,3vw,38px);
+      font-weight: 500;
+      color: #111;
+      margin-bottom: 10px;
+      line-height: 1.2;
+    }
+    .tl-event .tl-year { display: none; }
+    .tl-body { font-size:14px; line-height:1.75; color:#222; }
+    .tl-cta {
+      display:inline-block; margin-top:12px;
+      font-size:11px; font-weight:600; letter-spacing:0.1em;
+      text-transform:uppercase; color:#111;
+      border-bottom:1px solid rgba(0,0,0,0.35); padding-bottom:2px;
+    }
+    .tl-media img { width:100%; max-width:368px; height:auto; object-fit:cover; }
+    .tl-item--1977 .tl-media img { max-width: 390px; }
+    .tl-item--1984 .tl-media img { width: min(780px, 100%); max-width: 780px; }
+    .tl-item--2014 .tl-media img { max-width: 300px; }
+    .tl-item--2000 .tl-media img {
+      height: 100px;
+      width: auto;
+      max-width: none;
+    }
+    .tl-media--empty { min-height:1px; }
+
+    .timeline-break {
+      position: relative;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 56px 190px;
+      overflow: visible;
+      z-index: 4;
+    }
+    .timeline-break__line {
+      display: none;
+    }
+    .timeline-break__dot {
+      background: transparent;
+      border: 0;
+      color: #111;
+      font-family: var(--head);
+      font-size: 40px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      line-height: 1.1;
+      margin: 30px auto;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+      background: var(--light);
+      padding: 0 6px;
+    }
+    .timeline-break__event {
+      max-width: 420px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .timeline-break__year { display: none; }
+    .timeline-break__body {
+      font-size: 14px;
+      line-height: 1.75;
+      color: #222;
+      margin-top: 10px;
+    }
+    .timeline-break__ruby {
+      position: absolute;
+      left: 50%;
+      bottom: -228px;
+      transform: translateX(-50%);
+      width: min(440px, 42vw);
+      height: auto;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .timeline-break__event {
+      opacity: 0;
+      transition: opacity 0.7s ease;
+    }
+    .timeline-break__event.visible {
+      opacity: 1;
+    }
+    .timeline-break__ruby,
+    .timeline-break__dot {
+      opacity: 0;
+      transition: opacity 0.7s ease;
+    }
+    .timeline-break__ruby.visible,
+    .timeline-break__dot.visible { opacity: 1; }
+
+    .timeline-era--ruby {
+      position: relative;
+      margin-top: 0;
+      padding: 180px 0 0px;
+      overflow: visible;
+      z-index: 1;
+      isolation: isolate;
+      background: url('{{ 'figma-images/hero-bg.jpg' | asset_url }}') center center / cover no-repeat fixed;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+    .timeline-era--ruby::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--timeline-ruby-red);
+      mix-blend-mode: multiply;
+      opacity: 0.92;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .timeline-era--ruby .timeline {
+      position: relative;
+      z-index: 2;
+    }
+    .timeline-era--ruby .timeline__spine {
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(179, 38, 30, 0.5) 0 5px,
+        transparent 5px 10px
+      );
+    }
+    .timeline-era--ruby .tl-dot {
+      color: var(--white);
+      background: transparent;
+    }
+    .timeline-era--ruby .tl-year { color: var(--white); }
+    .timeline-era--ruby .tl-body { color: rgba(255,255,255,0.88); }
+    .timeline-era--ruby .tl-cta {
+      color: var(--white);
+      border-color: rgba(255,255,255,0.5);
+    }
+    .era-light .tl-item:last-child { margin-bottom: 0; }
+
+    .tl-item--today .tl-dot { color: #fff; }
+    .tl-item--today .tl-event {
+      grid-column: 1 / span 3;
+      grid-row: 2;
+      text-align: center;
+      margin-top: 40px;
+      max-width: 440px;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 0;
+    }
+    .tl-item--today .tl-media { display: none; }
+    .tl-item--today .tl-body {
+      margin-top: 52px;
+    }
+
+    /* ═══════════════════════════════════════
+       COLLECTIONS
+    ═══════════════════════════════════════ */
+    .collections {
+      background: transparent;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 480px;
+      padding: 80px;
+      gap: 60px;
+      align-items: center;
+    }
+    .collections__eyebrow {
+      font-size: 16px;
+      color: var(--white);
+      margin-bottom: 32px;
+    }
+    .collections__list { list-style:none; display:flex; flex-wrap:wrap; gap:2px 12px; }
+    .collections__list li a {
+      font-family: var(--head);
+      font-size: clamp(18px,2.2vw,30px);
+      font-weight: 500;
+      color: var(--teal);
+      transition: color 0.2s;
+      line-height: 1.5;
+    }
+    .collections__list li a:hover { color: var(--white); }
+    .collections__img { overflow:hidden; }
+    .collections__img img { width:100%; height:100%; object-fit:cover; }
+
+    /* ═══════════════════════════════════════
+       FADE UTILITY
+    ═══════════════════════════════════════ */
+    .fade { opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .7s ease; }
+    .fade.d1 { transition-delay:.1s; }
+    .fade.d2 { transition-delay:.22s; }
+    .fade.visible { opacity:1; transform:none; }
+
+    /* ── Responsive ── */
+    @media (max-width:860px) {
+      .history__inner, .creator__inner, .ruby-section__inner, .collections { grid-template-columns:1fr; }
+      .history, .ruby-section__inner, .collections { padding:60px 24px; }
+      .history__left {
+        margin-top: 0;
+        margin-left: 0;
+      }
+      .history__right {
+        align-self: start;
+        margin-top: 16px;
+        margin-bottom: 0;
+        padding-right: 0;
+      }
+      .history__center img { width: min(680px, 92vw); }
+      .timeline-break {
+        padding: 8px 24px 120px;
+      }
+      .tl-dot,
+      .timeline-break__dot { font-size: 40px; }
+      .timeline-break__ruby {
+        bottom: -150px;
+        width: min(320px, 70vw);
+      }
+      .timeline-era--ruby {
+        padding: 140px 0 320px;
+        background-attachment: scroll, scroll;
+      }
+      .timeline-transition {
+        margin-top: -20px;
+        margin-bottom: 560px;
+        height: 420px;
+      }
+      .timeline-transition__shape-svg {
+        width: 100vw;
+        top: -2px;
+      }
+      .timeline-transition__flower-svg {
+        width: 100vw;
+        max-width: none;
+        top: calc(clamp(22px, 5vw, 54px) - 500px);
+      }
+      .rebranding {
+        padding: 80px 0 32px;
+        min-height: auto;
+      }
+      .rebranding__logo {
+        width: min(850px, 94vw);
+        min-height: 140px;
+      }
+      .creator { overflow: visible; }
+      .creator__inner {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        padding: 60px 24px 120px;
+        min-height: auto;
+      }
+      .creator__image {
+        margin-top: 0;
+        margin-left: 0;
+      }
+      .creator__image img {
+        width: 100%;
+        height: auto;
+        max-width: 580px;
+      }
+      .creator__text {
+        max-width: none;
+        margin-top: 0;
+      }
+      .creator__body {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+      .creator__vicenza {
+        right: 24px;
+        width: min(420px, 72vw);
+      }
+      .ruby-section {
+        padding: 60px 0 80px;
+      }
+      .ruby-section__inner {
+        min-height: 520px;
+        padding: 48px 28px;
+        justify-content: center;
+        width: min(1232px, calc(100% - 32px));
+      }
+      .ruby-section__content {
+        width: min(420px, 100%);
+      }
+      .tl-item { grid-template-columns:1fr; margin-bottom:40px; }
+      .tl-item .tl-event,
+      .tl-item .tl-media { margin-top: 0; }
+      .tl-item--left .tl-event, .tl-item--right .tl-event {
+        grid-column:1; text-align:left; padding:0 0 12px 20px;
+        border-left:2px solid rgba(255,255,255,0.25); margin-left:5px;
+      }
+      .era-light .tl-item--left .tl-event, .era-light .tl-item--right .tl-event { border-color:rgba(0,0,0,0.15); }
+      .tl-center, .timeline__spine { display:none; }
+      .tl-item--left .tl-media, .tl-item--right .tl-media { grid-column:1; padding:12px 0 0; }
+      .section-nav { bottom: 24px; }
+      .hero__scroll { bottom: 110px; }
+    }
 {%- endstyle -%}
 
-<div class="rct">
 
-  {%- comment -%} ── Section Navigation ── {%- endcomment -%}
-  <nav class="rct-nav" aria-label="Heritage sections">
-    <div class="rct-nav__inner">
-      <a class="rct-nav__tab is-active" href="#rct-history" data-section="rct-history">History</a>
-      <a class="rct-nav__tab" href="#rct-creator" data-section="rct-creator">The Creator</a>
-      <a class="rct-nav__tab" href="#rct-ruby" data-section="rct-ruby">The Ruby</a>
-      <a class="rct-nav__tab" href="#rct-timeline" data-section="rct-timeline">Timeline</a>
+<!-- ════════════════════════════════════════
+     HERO
+════════════════════════════════════════ -->
+<section class="hero" id="hero">
+  <div class="hero__bg"></div>
+  <div class="hero__vignette"></div>
+
+  <!-- Decorative 4-petal ornament -->
+  <div class="hero__ornament">
+    <div class="hero__lottie" id="hero-lottie" aria-hidden="true"></div>
+    <svg class="hero__ornament-fallback" width="460" height="474" viewBox="0 0 460 474" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g filter="url(#filter0_d_3465_714)">
+        <mask id="path-1-inside-1_3465_714" fill="white">
+          <path d="M257.807 274.486C273.754 297.022 279.418 309.308 279.418 330.306C279.418 356.938 262.949 385.107 232.059 405.585C201.169 385.107 184.7 356.938 184.7 330.306C184.7 309.308 190.364 297.022 206.331 274.486L202.214 272.428L190.364 286.253C159.996 321.595 151.741 338.497 151.741 354.36C151.741 394.816 200.646 427.082 220.731 455.252L228.443 466H235.653L243.386 455.252C263.471 427.602 312.377 394.816 312.377 354.36C312.377 338.476 304.142 321.574 273.754 286.253L261.924 272.428L257.807 274.486ZM14.8052 221.742L4 229.435V236.607L14.8052 244.278C43.6261 264.756 75.54 312.905 116.232 312.905C132.199 312.905 149.17 304.714 184.7 274.507L198.598 262.719L196.529 258.623C173.874 274.507 161.522 280.12 140.936 280.12C113.64 280.12 85.3421 263.218 65.2573 233.01C85.3421 202.782 113.661 185.901 140.936 185.901C161.522 185.901 173.874 191.535 196.529 207.418L198.598 203.323L184.7 191.556C149.17 161.348 132.199 153.137 116.232 153.137C75.5609 153.137 43.1245 201.784 14.8052 221.763M275.3 191.535L261.402 203.302L263.45 207.398C286.106 191.514 298.457 185.88 319.044 185.88C346.318 185.88 374.637 202.782 394.722 232.99C374.637 263.197 346.318 280.099 319.044 280.099C298.457 280.099 286.106 274.465 263.45 258.602L261.402 262.698L275.3 274.486C310.83 304.693 327.821 312.884 343.768 312.884C384.439 312.884 416.353 264.735 445.195 244.258L456 236.586V229.414L445.195 221.722C416.876 201.743 384.439 153.095 343.768 153.095C327.801 153.095 310.809 161.286 275.3 191.514M228.464 0L220.752 10.7482C200.667 38.9182 151.762 71.1838 151.762 111.64C151.762 127.503 159.996 144.405 190.384 179.747L202.235 193.572L206.352 191.514C190.384 168.978 184.721 156.692 184.721 136.214C184.721 109.083 201.712 80.9133 232.08 60.9345C262.447 80.9133 279.438 109.083 279.438 136.214C279.438 156.692 273.775 168.978 257.828 191.514L261.945 193.572L273.775 179.747C304.163 144.405 312.397 127.503 312.397 111.64C312.397 71.1838 264.014 39.438 243.407 10.7482L235.674 0H228.464Z"/>
+        </mask>
+        <path d="M257.807 274.486C273.754 297.022 279.418 309.308 279.418 330.306C279.418 356.938 262.949 385.107 232.059 405.585C201.169 385.107 184.7 356.938 184.7 330.306C184.7 309.308 190.364 297.022 206.331 274.486L202.214 272.428L190.364 286.253C159.996 321.595 151.741 338.497 151.741 354.36C151.741 394.816 200.646 427.082 220.731 455.252L228.443 466H235.653L243.386 455.252C263.471 427.602 312.377 394.816 312.377 354.36C312.377 338.476 304.142 321.574 273.754 286.253L261.924 272.428L257.807 274.486ZM14.8052 221.742L4 229.435V236.607L14.8052 244.278C43.6261 264.756 75.54 312.905 116.232 312.905C132.199 312.905 149.17 304.714 184.7 274.507L198.598 262.719L196.529 258.623C173.874 274.507 161.522 280.12 140.936 280.12C113.64 280.12 85.3421 263.218 65.2573 233.01C85.3421 202.782 113.661 185.901 140.936 185.901C161.522 185.901 173.874 191.535 196.529 207.418L198.598 203.323L184.7 191.556C149.17 161.348 132.199 153.137 116.232 153.137C75.5609 153.137 43.1245 201.784 14.8052 221.763M275.3 191.535L261.402 203.302L263.45 207.398C286.106 191.514 298.457 185.88 319.044 185.88C346.318 185.88 374.637 202.782 394.722 232.99C374.637 263.197 346.318 280.099 319.044 280.099C298.457 280.099 286.106 274.465 263.45 258.602L261.402 262.698L275.3 274.486C310.83 304.693 327.821 312.884 343.768 312.884C384.439 312.884 416.353 264.735 445.195 244.258L456 236.586V229.414L445.195 221.722C416.876 201.743 384.439 153.095 343.768 153.095C327.801 153.095 310.809 161.286 275.3 191.514M228.464 0L220.752 10.7482C200.667 38.9182 151.762 71.1838 151.762 111.64C151.762 127.503 159.996 144.405 190.384 179.747L202.235 193.572L206.352 191.514C190.384 168.978 184.721 156.692 184.721 136.214C184.721 109.083 201.712 80.9133 232.08 60.9345C262.447 80.9133 279.438 109.083 279.438 136.214C279.438 156.692 273.775 168.978 257.828 191.514L261.945 193.572L273.775 179.747C304.163 144.405 312.397 127.503 312.397 111.64C312.397 71.1838 264.014 39.438 243.407 10.7482L235.674 0H228.464Z" fill="#27574D" mask="url(#path-1-inside-1_3465_714)"/>
+      </g>
+      <defs>
+        <filter id="filter0_d_3465_714" x="0" y="0" width="460" height="474" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+          <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+          <feOffset dy="4"/>
+          <feGaussianBlur stdDeviation="2"/>
+          <feComposite in2="hardAlpha" operator="out"/>
+          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_3465_714"/>
+          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_3465_714" result="shape"/>
+        </filter>
+      </defs>
+    </svg>
+  </div>
+
+  <!-- Centered text -->
+  <div class="hero__content fade">
+    <p class="hero__eyebrow">SINCE 1996</p>
+    <h1 class="hero__title">Our Heritage</h1>
+  </div>
+
+  <!-- Scroll CTA -->
+  <div class="hero__scroll">
+    <span class="hero__scroll-label">SCROLL TO DISCOVER OUR STORY</span>
+    <span class="hero__scroll-line"></span>
+  </div>
+
+  <!-- Nav (fixed to viewport bottom — moved outside hero below) -->
+  <nav class="section-nav" aria-label="Page sections" style="display:none!important">
+    <div class="section-nav__shape">
+      <!-- Single SVG: background + shaped highlights + dividers -->
+      <svg class="nav-bg" viewBox="0 0 814 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M34.7305 1H778.762C784.657 1.00012 790.067 4.57408 795.223 9.1416C797.788 11.4147 800.23 13.8755 802.618 16.1982C804.986 18.5016 807.305 20.6729 809.565 22.2842V22.2852L812.5 24.3945V25.6143L809.566 27.7158C807.308 29.3267 804.99 31.4991 802.623 33.8027C800.236 36.1251 797.795 38.5855 795.229 40.8584C790.103 45.3997 784.723 48.9576 778.862 48.998H34.7305C28.8352 48.998 23.4245 45.4239 18.2686 40.8564C15.7027 38.5835 13.2608 36.1233 10.873 33.8008C8.65216 31.6406 6.47441 29.596 4.34766 28.0215L3.92285 27.7129L1 25.6133V24.3916L3.92285 22.2852C6.18196 20.6742 8.50119 18.5016 10.8691 16.1973C13.2555 13.875 15.6961 11.4144 18.2617 9.1416C23.4175 4.57429 28.8308 1 34.7305 1Z"
+              fill="#27574D" fill-opacity="0.6"/>
+
+        <!-- ── Tab highlight shapes (one per tab) ── -->
+
+        <!-- HISTORY: left pointed tip → x=193 -->
+        <path class="nav-highlight" id="hl-0"
+          d="M1 25.61 L3.92 27.71 L4.35 28.02
+             C6.47 29.6,8.65 31.64,10.87 33.8
+             C13.26 36.12,15.7 38.58,18.27 40.86
+             C23.42 45.4,28.84 49,34.73 49
+             H193 V1
+             H34.73 C28.83 1,23.42 4.57,18.26 9.14
+             C15.7 11.41,13.26 13.88,10.87 16.2
+             C8.5 18.5,6.18 20.67,3.92 22.28
+             L1 24.39 Z"
+          fill="#5E7D77" fill-opacity="0.55"/>
+
+        <!-- THE CREATOR: x=193 → x=407 -->
+        <path class="nav-highlight" id="hl-1"
+          d="M193 1 H407 V49 H193 Z"
+          fill="#5E7D77" fill-opacity="0.55"/>
+
+        <!-- THE RUBY: x=407 → x=611 -->
+        <path class="nav-highlight" id="hl-2"
+          d="M407 1 H611 V49 H407 Z"
+          fill="#5E7D77" fill-opacity="0.55"/>
+
+        <!-- TIMELINE: x=611 → right pointed tip -->
+        <path class="nav-highlight" id="hl-3"
+          d="M611 1
+             H778.76 C784.66 1,790.07 4.57,795.22 9.14
+             C797.79 11.41,800.23 13.88,802.62 16.2
+             C804.99 18.5,807.31 20.67,809.57 22.28
+             L812.5 24.39 V25.61
+             L809.57 27.72
+             C807.31 29.33,804.99 31.5,802.62 33.8
+             C800.24 36.12,797.8 38.58,795.23 40.86
+             C790.1 45.4,784.72 49,778.86 49
+             H611 Z"
+          fill="#5E7D77" fill-opacity="0.55"/>
+
+        <!-- ── Background pill outline ── -->
+        <path d="M34.7305 1H778.762C784.657 1.00012 790.067 4.57408 795.223 9.1416C797.788 11.4147 800.23 13.8755 802.618 16.1982C804.986 18.5016 807.305 20.6729 809.565 22.2842V22.2852L812.5 24.3945V25.6143L809.566 27.7158C807.308 29.3267 804.99 31.4991 802.623 33.8027C800.236 36.1251 797.795 38.5855 795.229 40.8584C790.103 45.3997 784.723 48.9576 778.862 48.998H34.7305C28.8352 48.998 23.4245 45.4239 18.2686 40.8564C15.7027 38.5835 13.2608 36.1233 10.873 33.8008C8.65216 31.6406 6.47441 29.596 4.34766 28.0215L3.92285 27.7129L1 25.6133V24.3916L3.92285 22.2852C6.18196 20.6742 8.50119 18.5016 10.8691 16.1973C13.2555 13.875 15.6961 11.4144 18.2617 9.1416C23.4175 4.57429 28.8308 1 34.7305 1Z"
+              fill="none" stroke="#27574D" stroke-width="2"/>
+
+        <!-- ── Dividers ── -->
+        <line x1="193" y1="4" x2="193" y2="46" stroke="#27574D" stroke-width="1.5" stroke-opacity="0.8"/>
+        <line x1="407" y1="4" x2="407" y2="46" stroke="#27574D" stroke-width="1.5" stroke-opacity="0.8"/>
+        <line x1="611" y1="4" x2="611" y2="46" stroke="#27574D" stroke-width="1.5" stroke-opacity="0.8"/>
+      </svg>
+
+      <!-- Interactive tab labels (invisible hit areas, positioned over SVG) -->
+      <div class="section-nav__tabs">
+        <a class="section-nav__tab" data-idx="0" data-section="rct-history"  href="#rct-history">History</a>
+        <a class="section-nav__tab"           data-idx="1" data-section="rct-creator"  href="#rct-creator">The Creator</a>
+        <a class="section-nav__tab"           data-idx="2" data-section="rct-ruby"     href="#rct-ruby">The Ruby</a>
+        <a class="section-nav__tab"           data-idx="3" data-section="rct-timeline" href="#rct-timeline">Timeline</a>
+      </div>
     </div>
   </nav>
+</section>
 
-  {%- comment -%} ── Hero ── {%- endcomment -%}
-  <section id="rct-history" class="rct-hero" aria-label="Our Heritage">
-    <div class="rct-hero__bg" style="background-image: url('{{ section.settings.hero_image | image_url: width: 2000 }}');"></div>
-    <div class="rct-hero__vignette"></div>
-    <div class="rct-hero__content">
-      <p class="rct-hero__eyebrow rct-fade">{{ section.settings.hero_eyebrow }}</p>
-      <h1 class="rct-hero__title rct-fade rct-fade--delay-1">{{ section.settings.hero_title }}</h1>
-      <span class="rct-hero__scroll rct-fade rct-fade--delay-2">
-        <span class="rct-hero__scroll-line"></span>
-        {{ section.settings.hero_scroll_label }}
-      </span>
+<!-- ════════════════════════════════════════
+     FIXED NAV PILL (always bottom of screen)
+════════════════════════════════════════ -->
+<nav class="section-nav" aria-label="Page sections">
+  <div class="section-nav__shape">
+    <svg class="nav-bg" viewBox="0 0 814 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M34.7305 1H778.762C784.657 1.00012 790.067 4.57408 795.223 9.1416C797.788 11.4147 800.23 13.8755 802.618 16.1982C804.986 18.5016 807.305 20.6729 809.565 22.2842V22.2852L812.5 24.3945V25.6143L809.566 27.7158C807.308 29.3267 804.99 31.4991 802.623 33.8027C800.236 36.1251 797.795 38.5855 795.229 40.8584C790.103 45.3997 784.723 48.9576 778.862 48.998H34.7305C28.8352 48.998 23.4245 45.4239 18.2686 40.8564C15.7027 38.5835 13.2608 36.1233 10.873 33.8008C8.65216 31.6406 6.47441 29.596 4.34766 28.0215L3.92285 27.7129L1 25.6133V24.3916L3.92285 22.2852C6.18196 20.6742 8.50119 18.5016 10.8691 16.1973C13.2555 13.875 15.6961 11.4144 18.2617 9.1416C23.4175 4.57429 28.8308 1 34.7305 1Z"
+            fill="#27574D" fill-opacity="0.6"/>
+      <path class="nav-highlight" id="hl-0"
+        d="M1 25.61 L3.92 27.71 L4.35 28.02
+           C6.47 29.6,8.65 31.64,10.87 33.8
+           C13.26 36.12,15.7 38.58,18.27 40.86
+           C23.42 45.4,28.84 49,34.73 49
+           H193 V1
+           H34.73 C28.83 1,23.42 4.57,18.26 9.14
+           C15.7 11.41,13.26 13.88,10.87 16.2
+           C8.5 18.5,6.18 20.67,3.92 22.28
+           L1 24.39 Z"
+        fill="#5E7D77" fill-opacity="0.55"/>
+      <path class="nav-highlight" id="hl-1"
+        d="M193 1 H407 V49 H193 Z"
+        fill="#5E7D77" fill-opacity="0.55"/>
+      <path class="nav-highlight" id="hl-2"
+        d="M407 1 H611 V49 H407 Z"
+        fill="#5E7D77" fill-opacity="0.55"/>
+      <path class="nav-highlight" id="hl-3"
+        d="M611 1
+           H778.76 C784.66 1,790.07 4.57,795.22 9.14
+           C797.79 11.41,800.23 13.88,802.62 16.2
+           C804.99 18.5,807.31 20.67,809.57 22.28
+           L812.5 24.39 V25.61
+           L809.57 27.72
+           C807.31 29.33,804.99 31.5,802.62 33.8
+           C800.24 36.12,797.8 38.58,795.23 40.86
+           C790.1 45.4,784.72 49,778.86 49
+           H611 Z"
+        fill="#5E7D77" fill-opacity="0.55"/>
+      <path d="M34.7305 1H778.762C784.657 1.00012 790.067 4.57408 795.223 9.1416C797.788 11.4147 800.23 13.8755 802.618 16.1982C804.986 18.5016 807.305 20.6729 809.565 22.2842V22.2852L812.5 24.3945V25.6143L809.566 27.7158C807.308 29.3267 804.99 31.4991 802.623 33.8027C800.236 36.1251 797.795 38.5855 795.229 40.8584C790.103 45.3997 784.723 48.9576 778.862 48.998H34.7305C28.8352 48.998 23.4245 45.4239 18.2686 40.8564C15.7027 38.5835 13.2608 36.1233 10.873 33.8008C8.65216 31.6406 6.47441 29.596 4.34766 28.0215L3.92285 27.7129L1 25.6133V24.3916L3.92285 22.2852C6.18196 20.6742 8.50119 18.5016 10.8691 16.1973C13.2555 13.875 15.6961 11.4144 18.2617 9.1416C23.4175 4.57429 28.8308 1 34.7305 1Z"
+            fill="none" stroke="#27574D" stroke-width="2"/>
+      <line x1="193" y1="4" x2="193" y2="46" stroke="#27574D" stroke-width="1.5" stroke-opacity="0.8"/>
+      <line x1="407" y1="4" x2="407" y2="46" stroke="#27574D" stroke-width="1.5" stroke-opacity="0.8"/>
+      <line x1="611" y1="4" x2="611" y2="46" stroke="#27574D" stroke-width="1.5" stroke-opacity="0.8"/>
+    </svg>
+    <div class="section-nav__tabs">
+      <a class="section-nav__tab" data-idx="0" data-section="rct-history"  href="#rct-history">History</a>
+      <a class="section-nav__tab"           data-idx="1" data-section="rct-creator"  href="#rct-creator">The Creator</a>
+      <a class="section-nav__tab"           data-idx="2" data-section="rct-ruby"     href="#rct-ruby">The Ruby</a>
+      <a class="section-nav__tab"           data-idx="3" data-section="rct-timeline" href="#rct-timeline">Timeline</a>
     </div>
-  </section>
+  </div>
+</nav>
 
-  {%- comment -%} ── History ── {%- endcomment -%}
-  <section class="rct-history">
-    <div class="rct-history__inner">
-      <div class="rct-history__text">
-        <h2 class="rct-history__title rct-fade">History</h2>
-        <div class="rct-history__body">
-          <p class="rct-fade rct-fade--delay-1">In 1996, Roberto Coin introduced Appassionata, the first collection to feature a hidden ruby — a symbol of protection, passion and prosperity. This signature detail became the heart of the Maison.</p>
-          <p class="rct-fade rct-fade--delay-2">Guided by Roberto Coin's creative vision and brought to life by master Italian artisans, the brand quickly gained international recognition. In 2000, he became a founding member of the World Diamond Council, supporting the Kimberley Process. Today, the Maison is present in over 60 countries worldwide, and the ruby remains its enduring symbol.</p>
-        </div>
-      </div>
-      <div class="rct-history__image rct-fade rct-fade--delay-1">
-        {%- if section.settings.history_image -%}
-          <img src="{{ section.settings.history_image | image_url: width: 700 }}"
-               alt="Roberto Coin Heritage"
-               width="700" height="700"
-               loading="lazy">
-        {%- endif -%}
-      </div>
-    </div>
-  </section>
+<!-- ════════════════════════════════════════
+     HISTORY
+════════════════════════════════════════ -->
+<section id="rct-history" class="history">
+  <div class="history__inner">
 
-  {%- comment -%} ── The Creator ── {%- endcomment -%}
-  <section id="rct-creator" class="rct-creator" aria-label="The Creator">
-    <div class="rct-creator__inner">
-      <div class="rct-creator__image">
-        {%- if section.settings.creator_image -%}
-          <img src="{{ section.settings.creator_image | image_url: width: 900 }}"
-               alt="Roberto Coin"
-               width="900" height="1229"
-               loading="lazy">
-        {%- endif -%}
-      </div>
-      <div class="rct-creator__text">
-        <h2 class="rct-creator__title rct-fade">The Creator</h2>
-        <div class="rct-creator__body">
-          <p class="rct-fade rct-fade--delay-1">Roberto Coin's journey did not begin in jewelry. After a successful career in luxury hospitality across Europe, he returned to Italy and immersed himself in the goldsmith tradition of Vicenza. In 1984, he began designing under his own name — marking the start of a new creative chapter.</p>
-          <p class="rct-fade rct-fade--delay-2">At 33, he returned to Italy and immersed himself in the goldsmith tradition of Vicenza — the historic heart of Italian jewelry. In 1984, he began designing under his own name, transforming experience into creativity and vision into craftsmanship. That decision marked the true beginning of the Maison.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  {%- comment -%} ── The Ruby ── {%- endcomment -%}
-  <section id="rct-ruby" class="rct-ruby" aria-label="The Ruby">
-    <div class="rct-ruby__bg" style="background-image: url('{{ section.settings.ruby_bg_image | image_url: width: 2000 }}');"></div>
-    <div class="rct-ruby__vignette"></div>
-    <div class="rct-ruby__inner">
-      <div class="rct-ruby__text">
-        <h2 class="rct-ruby__title rct-fade">The Ruby</h2>
-        <div class="rct-ruby__body">
-          <p class="rct-fade rct-fade--delay-1">Roberto Coin chose the ruby as the hidden signature of his creations. Inspired by ancient cultures, where the ruby symbolized protection, vitality and passion, he transformed it into a discreet talisman worn close to the skin.</p>
-          <p class="rct-fade rct-fade--delay-2">Set inside every jewel, the ruby is not meant to be seen — but to be felt. A quiet symbol of strength, courage and enduring beauty that connects each creation to its wearer.</p>
-        </div>
-      </div>
-      <div class="rct-ruby__gem rct-fade rct-fade--delay-1">
-        {%- if section.settings.ruby_gem_image -%}
-          <img src="{{ section.settings.ruby_gem_image | image_url: width: 400 }}"
-               alt="Roberto Coin Hidden Ruby"
-               width="366" height="366"
-               loading="lazy">
-        {%- endif -%}
-      </div>
-    </div>
-  </section>
-
-  {%- comment -%} ── Timeline — Early Era (light background) ── {%- endcomment -%}
-  <section id="rct-timeline" class="rct-timeline-section" aria-label="The Timeline">
-
-    <div class="rct-timeline-section__header">
-      <h2 class="rct-timeline-section__title rct-fade">The Timeline</h2>
+    <!-- Left: title + first paragraph -->
+    <div class="history__left">
+      <h2 class="history__title fade">History</h2>
+      <p class="fade d1">In 1996, Roberto Coin introduced Appassionata, the first collection to feature a hidden ruby, a symbol of protection, passion and prosperity. This signature detail became the heart of the Maison.</p>
     </div>
 
-    {%- comment -%} Early years — light background {%- endcomment -%}
-    <div class="rct-timeline--light" style="background: var(--rc-light);">
-      <div class="rct-timeline">
-        <div class="rct-timeline__spine"></div>
-
-        {%- comment -%} 1977 {%- endcomment -%}
-        <div class="rct-timeline__item rct-timeline__item--right">
-          <div class="rct-timeline__media rct-timeline__media--empty"></div>
-          <div class="rct-timeline__center">
-            <div class="rct-timeline__dot"></div>
-            <div class="rct-timeline__connector"></div>
-          </div>
-          <div class="rct-timeline__event">
-            <div class="rct-timeline__year">1977</div>
-            <p class="rct-timeline__body">Roberto Coin returned to his homeland of Italy to study the goldsmithing tradition under the guidance of renowned Italian teachers. He launched his jewelry trade on the British market.</p>
-          </div>
-        </div>
-
-        {%- comment -%} 1984 {%- endcomment -%}
-        <div class="rct-timeline__item rct-timeline__item--left">
-          <div class="rct-timeline__event">
-            <div class="rct-timeline__year">1984</div>
-            <p class="rct-timeline__body">He began designing and creating jewelry for some of the most prestigious international brands.</p>
-          </div>
-          <div class="rct-timeline__center">
-            <div class="rct-timeline__dot"></div>
-            <div class="rct-timeline__connector"></div>
-          </div>
-          <div class="rct-timeline__media">
-            {%- if section.settings.timeline_img_1984 -%}
-              <img src="{{ section.settings.timeline_img_1984 | image_url: width: 400 }}" alt="1984" loading="lazy">
-            {%- endif -%}
-          </div>
-        </div>
-
-        {%- comment -%} 1996 {%- endcomment -%}
-        <div class="rct-timeline__item rct-timeline__item--right">
-          <div class="rct-timeline__media">
-            {%- if section.settings.timeline_img_1996 -%}
-              <img src="{{ section.settings.timeline_img_1996 | image_url: width: 400 }}" alt="1996" loading="lazy">
-            {%- endif -%}
-          </div>
-          <div class="rct-timeline__center">
-            <div class="rct-timeline__dot"></div>
-            <div class="rct-timeline__connector"></div>
-          </div>
-          <div class="rct-timeline__event">
-            <div class="rct-timeline__year">1996</div>
-            <p class="rct-timeline__body">He launched his brand Roberto Coin in the United States with the Appassionata collection and began signing his creations with a small ruby.</p>
-          </div>
-        </div>
-
-      </div>{%- comment -%} /.rct-timeline {%- endcomment -%}
-    </div>{%- comment -%} /.rct-timeline--light {%- endcomment -%}
-
-    {%- comment -%} Later years — dark red background {%- endcomment -%}
-    <div class="rct-timeline">
-      <div class="rct-timeline__spine"></div>
-
-      {%- comment -%} 2000 {%- endcomment -%}
-      <div class="rct-timeline__item rct-timeline__item--left" style="padding-top: 60px;">
-        <div class="rct-timeline__event">
-          <div class="rct-timeline__year">2000</div>
-          <p class="rct-timeline__body">Becomes a founding member of the World Diamond Council, reinforcing a commitment to ethical sourcing.</p>
-        </div>
-        <div class="rct-timeline__center">
-          <div class="rct-timeline__dot"></div>
-          <div class="rct-timeline__connector"></div>
-        </div>
-        <div class="rct-timeline__media rct-timeline__media--empty"></div>
-      </div>
-
-      {%- comment -%} 2003 {%- endcomment -%}
-      <div class="rct-timeline__item rct-timeline__item--right">
-        <div class="rct-timeline__media">
-          {%- if section.settings.timeline_img_2003 -%}
-            <img src="{{ section.settings.timeline_img_2003 | image_url: width: 400 }}" alt="Cento Collection 2003" loading="lazy">
-          {%- endif -%}
-        </div>
-        <div class="rct-timeline__center">
-          <div class="rct-timeline__dot"></div>
-          <div class="rct-timeline__connector"></div>
-        </div>
-        <div class="rct-timeline__event">
-          <div class="rct-timeline__year">2003</div>
-          <p class="rct-timeline__body">He launched the Cento collection, his revolutionary diamond with 100 facets.</p>
-          {%- if section.settings.cento_url != blank -%}
-            <a class="rct-timeline__cta" href="{{ section.settings.cento_url }}">Discover Cento Collection</a>
-          {%- endif -%}
-        </div>
-      </div>
-
-      {%- comment -%} 2006 {%- endcomment -%}
-      <div class="rct-timeline__item rct-timeline__item--left">
-        <div class="rct-timeline__event">
-          <div class="rct-timeline__year">2006</div>
-          <p class="rct-timeline__body">He opened his first single-brand boutique in Atlanta, USA.</p>
-        </div>
-        <div class="rct-timeline__center">
-          <div class="rct-timeline__dot"></div>
-          <div class="rct-timeline__connector"></div>
-        </div>
-        <div class="rct-timeline__media rct-timeline__media--empty"></div>
-      </div>
-
-      {%- comment -%} 2007 {%- endcomment -%}
-      <div class="rct-timeline__item rct-timeline__item--right">
-        <div class="rct-timeline__media rct-timeline__media--empty"></div>
-        <div class="rct-timeline__center">
-          <div class="rct-timeline__dot"></div>
-          <div class="rct-timeline__connector"></div>
-        </div>
-        <div class="rct-timeline__event">
-          <div class="rct-timeline__year">2007</div>
-          <p class="rct-timeline__body">He opened his first European single-brand boutique in Rome.</p>
-        </div>
-      </div>
-
-      {%- comment -%} 2008 {%- endcomment -%}
-      <div class="rct-timeline__item rct-timeline__item--left">
-        <div class="rct-timeline__event">
-          <div class="rct-timeline__year">2008</div>
-          <p class="rct-timeline__body">He opened his first single-brand boutique in Dubai and founded the Middle East LLC, in partnership with local partner, Damas.</p>
-        </div>
-        <div class="rct-timeline__center">
-          <div class="rct-timeline__dot"></div>
-          <div class="rct-timeline__connector"></div>
-        </div>
-        <div class="rct-timeline__media">
-          {%- if section.settings.timeline_img_2008 -%}
-            <img src="{{ section.settings.timeline_img_2008 | image_url: width: 400 }}" alt="Dubai boutique 2008" loading="lazy">
-          {%- endif -%}
-        </div>
-      </div>
-
-      {%- comment -%} 2013 {%- endcomment -%}
-      <div class="rct-timeline__item rct-timeline__item--right">
-        <div class="rct-timeline__media">
-          {%- if section.settings.timeline_img_2013 -%}
-            <img src="{{ section.settings.timeline_img_2013 | image_url: width: 400 }}" alt="CNN 2013" loading="lazy">
-          {%- endif -%}
-        </div>
-        <div class="rct-timeline__center">
-          <div class="rct-timeline__dot"></div>
-          <div class="rct-timeline__connector"></div>
-        </div>
-        <div class="rct-timeline__event">
-          <div class="rct-timeline__year">2013</div>
-          <p class="rct-timeline__body">CNN released its third feature on Roberto Coin, highlighting the Maison's creative vision and the Love in Verona collection.</p>
-        </div>
-      </div>
-
-      {%- comment -%} 2014 {%- endcomment -%}
-      <div class="rct-timeline__item rct-timeline__item--left">
-        <div class="rct-timeline__event">
-          <div class="rct-timeline__year">2014</div>
-          <p class="rct-timeline__body">The collection Pois Moi is awarded Best Italian Collection in the World — affirming the Maison's creative excellence.</p>
-          {%- if section.settings.pois_moi_url != blank -%}
-            <a class="rct-timeline__cta" href="{{ section.settings.pois_moi_url }}">Discover Pois Moi Collection</a>
-          {%- endif -%}
-        </div>
-        <div class="rct-timeline__center">
-          <div class="rct-timeline__dot"></div>
-          <div class="rct-timeline__connector"></div>
-        </div>
-        <div class="rct-timeline__media">
-          {%- if section.settings.timeline_img_2014 -%}
-            <img src="{{ section.settings.timeline_img_2014 | image_url: width: 400 }}" alt="Pois Moi 2014" loading="lazy">
-          {%- endif -%}
-        </div>
-      </div>
-
-      {%- comment -%} 2018 {%- endcomment -%}
-      <div class="rct-timeline__item rct-timeline__item--right">
-        <div class="rct-timeline__media">
-          {%- if section.settings.timeline_img_2018 -%}
-            <img src="{{ section.settings.timeline_img_2018 | image_url: width: 400 }}" alt="2018" loading="lazy">
-          {%- endif -%}
-        </div>
-        <div class="rct-timeline__center">
-          <div class="rct-timeline__dot"></div>
-          <div class="rct-timeline__connector"></div>
-        </div>
-        <div class="rct-timeline__event">
-          <div class="rct-timeline__year">2018</div>
-          <p class="rct-timeline__body">He began personally inspecting each of the brand's diamonds, using a special laser incision on the gem to guarantee its 100% natural origin.</p>
-        </div>
-      </div>
-
-      {%- comment -%} 2021 {%- endcomment -%}
-      <div class="rct-timeline__item rct-timeline__item--left">
-        <div class="rct-timeline__event">
-          <div class="rct-timeline__year">2021</div>
-          <p class="rct-timeline__body">He received an award from the Phillips Collection in Washington for his contribution to American culture and was honored at Vicenzaoro as President of the Best Corporate Social Responsibility Brand.</p>
-        </div>
-        <div class="rct-timeline__center">
-          <div class="rct-timeline__dot"></div>
-          <div class="rct-timeline__connector"></div>
-        </div>
-        <div class="rct-timeline__media">
-          {%- if section.settings.timeline_img_2021 -%}
-            <img src="{{ section.settings.timeline_img_2021 | image_url: width: 400 }}" alt="2021" loading="lazy">
-          {%- endif -%}
-        </div>
-      </div>
-
-      {%- comment -%} 2025 {%- endcomment -%}
-      <div class="rct-timeline__item rct-timeline__item--right">
-        <div class="rct-timeline__media">
-          {%- if section.settings.timeline_img_2025 -%}
-            <img src="{{ section.settings.timeline_img_2025 | image_url: width: 400 }}" alt="2025" loading="lazy">
-          {%- endif -%}
-        </div>
-        <div class="rct-timeline__center">
-          <div class="rct-timeline__dot"></div>
-          <div class="rct-timeline__connector"></div>
-        </div>
-        <div class="rct-timeline__event">
-          <div class="rct-timeline__year">2025</div>
-          <p class="rct-timeline__body">Roberto Coin received the Lifetime Achievement Award in Jewelry at the Fashion Group International Night of Stars Gala in Dallas.</p>
-        </div>
-      </div>
-
-      {%- comment -%} Today {%- endcomment -%}
-      <div class="rct-timeline__item rct-timeline__item--left rct-timeline__item--today">
-        <div class="rct-timeline__event">
-          <div class="rct-timeline__year">Today</div>
-          <p class="rct-timeline__body">Present in over 60 countries worldwide. The ruby has become an enduring symbol of the Maison.</p>
-          <p class="rct-timeline__body" style="margin-top: 12px; font-style: italic; opacity: 0.7;">A renewed identity in Verde Amazzonite reflects harmony, strength and daring grace — while the ruby remains the eternal heart of the Maison.</p>
-        </div>
-        <div class="rct-timeline__center">
-          <div class="rct-timeline__dot" style="background: var(--rc-gold); border-color: var(--rc-ruby); width: 16px; height: 16px;"></div>
-        </div>
-        <div class="rct-timeline__media">
-          {%- if section.settings.timeline_img_today -%}
-            <img src="{{ section.settings.timeline_img_today | image_url: width: 400 }}" alt="Today" loading="lazy">
-          {%- endif -%}
-        </div>
-      </div>
-
-    </div>{%- comment -%} /.rct-timeline {%- endcomment -%}
-  </section>
-
-  {%- comment -%} ── Collections ── {%- endcomment -%}
-  <section class="rct-collections" aria-label="Discover our Collections">
-    <div class="rct-collections__text">
-      <p class="rct-collections__eyebrow rct-fade">Discover our Collections</p>
-      <ul class="rct-collections__list">
-        {%- assign collections_list = "Venetian Medallions,Princess Flower,Love in Verona,Venetian Princess,Art Deco,Tiaré,Sauvage Privé,Animalier,Carousel,Diamond Princess,Domino,Jasmine,Navarra,Princess,Princess Star" | split: "," -%}
-        {%- for coll in collections_list -%}
-          <li>
-            <a href="{{ coll | downcase | replace: ' ', '-' | prepend: '/collections/' }}">{{ coll }}</a>
-          </li>
-        {%- endfor -%}
-      </ul>
+    <!-- Center: ring illustration with multiply blend -->
+    <div class="history__center fade">
+      <img src="{{ 'figma-images/History-Ring drawing.png' | asset_url }}" alt="Roberto Coin ring illustration">
     </div>
-    <div class="rct-collections__image">
-      {%- if section.settings.collections_image -%}
-        <img src="{{ section.settings.collections_image | image_url: width: 800 }}"
-             alt="Roberto Coin Collections"
-             loading="lazy">
-      {%- endif -%}
+
+    <!-- Right: second paragraph -->
+    <div class="history__right">
+      <p class="fade d1">Guided by Roberto Coin's creative vision and brought to life by master Italian artisans, the brand quickly gained international recognition. In 2000, he became a founding member of the World Diamond Council, supporting the Kimberley Process. Today, the Maison is present in over 60 countries worldwide, and the ruby remains its enduring symbol.</p>
     </div>
-  </section>
 
-</div>{%- comment -%} /.rct {%- endcomment -%}
+  </div>
+</section>
 
-<script>
-  (function () {
-    /* ── Scroll-spy: highlight active nav tab ── */
-    var tabs = document.querySelectorAll('.rct-nav__tab');
-    var sections = ['rct-history', 'rct-creator', 'rct-ruby', 'rct-timeline'].map(function (id) {
-      return document.getElementById(id);
-    }).filter(Boolean);
+<!-- ════════════════════════════════════════
+     THE CREATOR
+════════════════════════════════════════ -->
+<section id="rct-creator" class="creator">
+  <div class="creator__inner">
+    <div class="creator__image">
+      <img src="{{ 'figma-images/creator-portrait.jpg' | asset_url }}" alt="Roberto Coin">
+    </div>
+    <div class="creator__text">
+      <h2 class="creator__title fade">The Creator</h2>
+      <div class="creator__body">
+        <p class="fade d1">Roberto Coin’s journey did not begin in jewelry. After a successful career in luxury hospitality across Europe, he returned to Italy and immersed himself in the goldsmith tradition of Vicenza. In 1984, he began designing under his own name, marking the start of a new creative chapter.</p>
+        <p class="fade d2">At 33, he returned to Italy and immersed himself in the goldsmith tradition of Vicenza, the historic heart of Italian jewelry. In 1984, he began designing under his own name, transforming experience into creativity and vision into craftsmanship. That decision marked the true beginning of the Maison.</p>
+      </div>
+    </div>
+  </div>
+  <img class="creator__vicenza" src="{{ 'figma-images/Vicenza_drawing_image.png' | asset_url }}" alt="Vicenza drawing">
+</section>
 
-    function getActiveSection() {
-      var scrollY = window.scrollY + 80;
-      var active = sections[0];
-      sections.forEach(function (sec) {
-        if (sec.getBoundingClientRect().top + window.scrollY <= scrollY) active = sec;
+<!-- ════════════════════════════════════════
+     THE RUBY
+════════════════════════════════════════ -->
+<section id="rct-ruby" class="ruby-section">
+  <div class="ruby-section__bg"></div>
+  <div class="ruby-section__overlay"></div>
+  <div class="ruby-section__inner">
+    <div class="ruby-section__content">
+      <h2 class="ruby-section__title fade">The Ruby</h2>
+      <div class="ruby-section__body">
+        <p class="fade d1">Roberto Coin chose the ruby as the hidden signature of his creations.</p>
+
+        <p class="fade d2">Inspired by ancient cultures, where the ruby symbolized protection, vitality and passion, he transformed it into a discreet talisman worn close to the skin.</p>
+
+        <p class="fade">Set inside every jewel, the ruby is not meant to be seen but to be felt. A quiet symbol of strength, courage and enduring beauty that connects each creation to its wearer.</p>
+      </div>
+    </div>
+    <div class="ruby-section__gem fade d1">
+      <img src="{{ 'figma-images/ruby-gem.png' | asset_url }}" alt="The Hidden Ruby">
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     TIMELINE
+════════════════════════════════════════ -->
+<section id="rct-timeline" class="timeline-section">
+  <h2 class="timeline-section__title fade">The Timeline</h2>
+
+  <!-- Early era — light background -->
+  <div class="era-light">
+    <div class="timeline">
+      <div class="timeline__spine"></div>
+
+      <div class="tl-item tl-item--left tl-item--1977">
+        <div class="tl-media"><img src="{{ 'figma-images/1977.png' | asset_url }}" alt="1977"></div>
+        <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+        <div class="tl-event">
+          <div class="tl-year">1977</div>
+          <p class="tl-body">Roberto Coin returned to his homeland of Italy to study the goldsmithing tradition. He launched his jewelry trade on the British market.</p>
+        </div>
+      </div>
+
+      <div class="tl-item tl-item--right tl-item--1984">
+        <div class="tl-event">
+          <div class="tl-year">1984</div>
+          <p class="tl-body">He began designing and creating jewelry for some of the most prestigious international brands.</p>
+        </div>
+        <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+        <div class="tl-media"><img src="{{ 'figma-images/RC_Drawing image 1.png' | asset_url }}" alt="1984"></div>
+      </div>
+    </div>
+
+    <div class="timeline-break">
+      <div class="timeline-break__line"></div>
+      <div class="timeline-break__dot" data-year="1996"></div>
+      <div class="timeline-break__event">
+        <p class="timeline-break__body">He launched his brand in the United States with the Appassionata collection and began signing his creations with a small ruby.</p>
+      </div>
+      <img class="timeline-break__ruby" src="{{ 'figma-images/RUBY Trasnparent  1.png' | asset_url }}" alt="1996 Ruby">
+    </div>
+  </div>
+
+  <!-- Later era — ruby red background -->
+  <div class="timeline-era--ruby">
+    <div class="timeline-era--ruby__map">
+      <img src="{{ 'figma-images/world map.png' | asset_url }}" alt="World map">
+    </div>
+    <div class="timeline">
+      <div class="timeline__spine"></div>
+
+      <div class="tl-item tl-item--left tl-item--2000" style="padding-top:0">
+        <div class="tl-event">
+          <div class="tl-year">2000</div>
+          <p class="tl-body">He became one of the founders and a member of the Board of Directors of the World Diamond Council, the organization that established the Kimberley Process in collaboration with the United Nations.</p>
+        </div>
+        <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+        <div class="tl-media"><img src="{{ 'figma-images/GroupDiamond.svg' | asset_url }}" alt="2000 Group Diamond"></div>
+      </div>
+
+    <div class="tl-item tl-item--right">
+      <div class="tl-media"><img src="{{ 'figma-images/timeline-2003.jpg' | asset_url }}" alt="Cento 2003"></div>
+      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+      <div class="tl-event">
+        <div class="tl-year">2003</div>
+        <p class="tl-body">He launched the Cento collection, his revolutionary diamond with 100 facets.</p>
+        <a class="tl-cta" href="#">Discover Cento Collection</a>
+      </div>
+    </div>
+
+    <div class="tl-item tl-item--left tl-item--2014">
+      <div class="tl-event">
+        <div class="tl-year">2006</div>
+        <p class="tl-body">He opened his first single-brand boutique in Atlanta, USA.</p>
+      </div>
+      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+      <div class="tl-media"><img src="{{ 'figma-images/timeline-1996.jpg' | asset_url }}" alt="2006 Atlanta Boutique"></div>
+    </div>
+
+    <div class="tl-item tl-item--right">
+      <div class="tl-media"><img src="{{ 'figma-images/Roberto_Coin_Store Dubai.png' | asset_url }}" alt="2007 Dubai Store"></div>
+      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+      <div class="tl-event">
+        <div class="tl-year">2007</div>
+        <p class="tl-body">He opened his first single-brand boutique in Dubai and founded the Middle East LLC, in partnership with local partner, Damas.</p>
+      </div>
+    </div>
+
+    <div class="tl-item tl-item--left">
+      <div class="tl-event">
+        <div class="tl-year">2008</div>
+        <p class="tl-body">He opened his first European single-brand boutique in Rome.</p>
+      </div>
+      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+      <div class="tl-media"><img src="{{ 'figma-images/Roberto Coin Store Rome.png' | asset_url }}" alt="2008 Rome Store"></div>
+    </div>
+
+    <div class="tl-item tl-item--right">
+      <div class="tl-media"><img src="{{ 'figma-images/Roberto Coin Award.png' | asset_url }}" alt="2013 Roberto Coin Award"></div>
+      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+      <div class="tl-event">
+        <div class="tl-year">2013</div>
+        <p class="tl-body">He was recognized by the Phillips Collection in Washington for his contribution to American culture and honored at Vicenzaoro for Corporate Social Responsibility.</p>
+      </div>
+    </div>
+
+    <div class="tl-item tl-item--left">
+      <div class="tl-event">
+        <div class="tl-year">2014</div>
+        <p class="tl-body">His collection, Pois Moi, was awarded the Best Italian Collection in the World at the Vicenza Fair during the Andrea Palladio International Jewelry Awards.</p>
+        <a class="tl-cta" href="#">Discover Pois Moi Collection</a>
+      </div>
+      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+      <div class="tl-media"><img src="{{ 'figma-images/RC_Poismois.png' | asset_url }}" alt="2014 RC Pois Moi"></div>
+    </div>
+
+    <div class="tl-item tl-item--right">
+      <div class="tl-media"><img src="{{ 'figma-images/RC_Diamons.png' | asset_url }}" alt="2018"></div>
+      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+      <div class="tl-event">
+        <div class="tl-year">2018</div>
+        <p class="tl-body">He began personally inspecting each of the brand's diamonds, using a special laser incision to guarantee 100% natural origin.</p>
+      </div>
+    </div>
+
+    <div class="tl-item tl-item--left">
+      <div class="tl-event">
+        <div class="tl-year">2021</div>
+        <p class="tl-body">CNN released its third feature on Roberto Coin, highlighting the Maison’s creative vision and the Love in Verona collection.</p>
+      </div>
+      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+      <div class="tl-media"><img src="{{ 'figma-images/RC_Princessflower.png' | asset_url }}" alt="2021 RC Princess Flower"></div>
+    </div>
+
+    <div class="tl-item tl-item--right">
+      <div class="tl-event">
+        <div class="tl-year">2022</div>
+        <p class="tl-body">He created an enchanting collection for the second season of Emily in Paris.</p>
+      </div>
+      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+      <div class="tl-media"><img src="{{ 'figma-images/RC_Emily in Paris.png' | asset_url }}" alt="2022 Emily in Paris"></div>
+    </div>
+
+    <div class="tl-item tl-item--left">
+      <div class="tl-event">
+        <div class="tl-year">2025</div>
+        <p class="tl-body">Roberto Coin received the Lifetime Achievement Award in Jewelry at the Fashion Group International Night of Stars Gala in Dallas and was invited as a guest speaker at the United Nations Fashion &amp; Lifestyle Network, promoting innovation, responsibility and sustainable growth.</p>
+      </div>
+      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+      <div class="tl-media"><img src="{{ 'figma-images/Lifetimachievment award.png' | asset_url }}" alt="2025"></div>
+    </div>
+
+      <div class="tl-item tl-item--left tl-item--today">
+
+        <div class="tl-event">
+          <div class="tl-year">Today</div>
+          <p class="tl-body">Present in over 60 countries worldwide. The ruby has become an enduring symbol of the Maison.</p>
+        </div>
+        <div class="tl-center"><div class="tl-dot"></div></div>
+        <div class="tl-media"><img src="{{ 'figma-images/timeline-today.jpg' | asset_url }}" alt="Today"></div>
+      </div>
+    </div>
+        <div class="timeline-transition" aria-hidden="true">
+      <svg class="timeline-transition__flower-red-svg" width="1729" height="1660" viewBox="0 0 1729 1660" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 0V1121.05H352.51L376.91 1103.65C440.96 1058.17 514.35 947.54 606.41 947.54C642.45 947.54 680.9 966.11 761.32 1034.88L792.74 1061.68L800.97 1039.49L774.17 1008.07C705.5 927.76 686.83 945.22 686.83 853.16C686.83 761.1 797.46 687.71 842.94 623.66L860.41 599.16H876.67L894.14 623.66C940.72 688.92 1050.25 761.1 1050.25 853.16C1050.25 889.2 1031.68 927.65 962.91 1008.07L936.11 1039.49H935.68L935.11 1061.68L966.53 1034.88C1046.84 966.21 1029.38 947.54 1121.44 947.54C1213.5 947.54 1286.89 1058.17 1350.94 1103.65L1375.34 1121.05H1728.01V0H0Z" fill="url(#paint0_linear_3833_3435)"/>
+        <defs>
+          <linearGradient id="paint0_linear_3833_3435" x1="864.005" y1="0" x2="864.005" y2="1121.05" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#2E0606" stop-opacity="0"/>
+            <stop offset="0.24" stop-color="#2E0606" stop-opacity="1"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <svg class="timeline-transition__flower-svg" width="1729" height="1660" viewBox="0 0 1729 1660" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1121.43 1310.96C1213.49 1310.96 1285.67 1201.43 1350.93 1154.85L1375.43 1137.38V1121.12L1350.93 1103.65C1286.88 1058.17 1213.49 947.54 1121.43 947.54C1029.37 947.54 1046.84 966.21 966.52 1034.88L935.1 1061.68L938.61 1069.81C992.22 1029.05 1024.85 1011.58 1077.25 1011.58C1129.65 1011.58 1211.17 1053.54 1260.17 1129.24C1211.28 1204.94 1142.51 1246.9 1077.25 1246.9C1011.99 1246.9 992.22 1229.43 938.61 1188.67L935.1 1196.8L966.52 1223.6C1046.93 1292.37 1085.38 1310.94 1121.43 1310.94M606.41 1310.96C642.55 1310.96 681 1292.29 761.32 1223.62L792.74 1196.82L789.23 1188.69C735.62 1229.45 702.99 1246.92 650.59 1246.92C598.19 1246.92 516.57 1204.96 467.67 1129.26C516.56 1053.56 585.33 1011.6 650.59 1011.6C715.85 1011.6 735.62 1029.07 789.23 1069.83L792.74 1061.7L761.32 1034.9C680.91 966.13 642.46 947.56 606.41 947.56C514.35 947.56 440.96 1058.19 376.91 1103.67L352.41 1121.14V1137.4L376.91 1154.87C442.17 1201.45 514.35 1310.98 606.41 1310.98M860.4 1659.32H876.66L894.13 1634.82C939.61 1570.77 1050.24 1497.38 1050.24 1405.32C1050.24 1313.26 1031.57 1330.73 962.9 1250.41L936.1 1218.99L927.97 1222.5C968.73 1276.11 986.2 1308.74 986.2 1361.14C986.2 1413.54 943.13 1496.27 868.54 1544.06C793.95 1496.27 750.88 1426.4 750.88 1361.14C750.88 1295.88 768.35 1276.11 809.11 1222.5L800.98 1218.99L774.18 1250.41C705.41 1330.82 686.84 1369.27 686.84 1405.32C686.84 1497.38 797.47 1570.77 842.95 1634.82L860.42 1659.32H860.4ZM800.97 1039.49L809.1 1035.98C768.34 982.37 750.87 949.74 750.87 897.34C750.87 844.94 792.83 763.32 868.53 714.42C944.23 763.31 986.19 832.08 986.19 897.34C986.19 962.6 968.72 982.37 927.96 1035.98L936.09 1039.49L962.89 1008.07C1031.66 927.66 1050.23 889.21 1050.23 853.16C1050.23 761.1 940.7 688.92 894.12 623.66L876.65 599.16H860.39L842.92 623.66C797.44 687.71 686.81 761.1 686.81 853.16C686.81 945.22 705.48 927.75 774.15 1008.07L800.95 1039.49H800.97Z" fill="#27574D"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     REBRANDING
+════════════════════════════════════════ -->
+<section class="rebranding" id="rct-rebranding">
+  <div class="rebranding__logo" id="rebranding-logo-lottie" aria-hidden="true"></div>
+</section>
+
+<!-- ════════════════════════════════════════
+     COLLECTIONS
+════════════════════════════════════════ -->
+<section class="collections">
+  <div>
+    <p class="collections__eyebrow fade">Discover our Collections</p>
+    <ul class="collections__list">
+      <li><a href="#">Venetian Medallions</a></li><li><a href="#">Princess Flower</a></li>
+      <li><a href="#">Love in Verona</a></li><li><a href="#">Venetian Princess</a></li>
+      <li><a href="#">Art Deco</a></li><li><a href="#">Tiaré</a></li>
+      <li><a href="#">Sauvage Privé</a></li><li><a href="#">Animalier</a></li>
+      <li><a href="#">Carousel</a></li><li><a href="#">Diamond Princess</a></li>
+      <li><a href="#">Domino</a></li><li><a href="#">Jasmine</a></li>
+      <li><a href="#">Navarra</a></li><li><a href="#">Princess</a></li>
+      <li><a href="#">Princess Star</a></li>
+    </ul>
+  </div>
+  <div class="collections__img fade d1">
+    <img src="{{ 'figma-images/collections-bg.jpg' | asset_url }}" alt="Collections">
+  </div>
+</section>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
+<script src="https://unpkg.com/lottie-web@5.12.2/build/player/lottie.min.js"></script>
+<script src="{{ 'figma-images/RC_Flower.data.js' | asset_url }}"></script>
+<script src="{{ 'figma-images/RobertoCoin_logo.data.js' | asset_url }}"></script>
+
+{% javascript %}
+(function(){
+  // Target only the fixed nav (not the hidden one inside hero)
+  var fixedNav = document.querySelector('.section-nav:not([style])');
+  var heroSection = document.getElementById('hero');
+  var tabs = fixedNav ? fixedNav.querySelectorAll('.section-nav__tab') : document.querySelectorAll('.section-nav__tab');
+  var highlights = fixedNav
+    ? fixedNav.querySelectorAll('.nav-highlight')
+    : document.querySelectorAll('.nav-highlight');
+  var activeIdx = 0;
+  var hoverIdx = -1;
+  var heroScrollCta = document.querySelector('.hero__scroll');
+  var historySection = document.querySelector('.history');
+  var historyRing = document.querySelector('.history__center img');
+  var historyRotateStart = -18;
+  var historyRotateEnd = 40;
+  var scrollTicking = false;
+  var timelineLines = document.querySelectorAll('.timeline__spine, .timeline-break__line');
+  var timelineItems = document.querySelectorAll('.tl-item');
+  var timelineBreak = document.querySelector('.timeline-break');
+  var heroOrnament = document.querySelector('.hero__ornament');
+  var heroLottieContainer = document.getElementById('hero-lottie');
+  var rebrandingLogoContainer = document.getElementById('rebranding-logo-lottie');
+  var navScrollRaf = null;
+  var isNavAutoScrolling = false;
+
+  function initHeroLottie(){
+    if (!heroOrnament || !heroLottieContainer || !window.lottie) return;
+    function loadFromData(){
+      if (!window.__RC_FLOWER_DATA) return null;
+      var fallback = window.lottie.loadAnimation({
+        container: heroLottieContainer,
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        animationData: window.__RC_FLOWER_DATA
       });
-      return active;
+      fallback.addEventListener('DOMLoaded', function(){
+        fallback.loop = true;
+        fallback.goToAndPlay(0, true);
+        heroOrnament.classList.add('has-lottie');
+      });
+      return fallback;
     }
 
-    function updateNav() {
-      var active = getActiveSection();
-      tabs.forEach(function (tab) {
-        var id = tab.getAttribute('data-section');
-        tab.classList.toggle('is-active', active && active.id === id);
+    try {
+      var anim = window.lottie.loadAnimation({
+        container: heroLottieContainer,
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        path: '{{ 'figma-images/RC_Flower.json' | asset_url }}?cb=' + Date.now()
+      });
+      anim.addEventListener('DOMLoaded', function(){
+        anim.loop = true;
+        anim.goToAndPlay(0, true);
+        heroOrnament.classList.add('has-lottie');
+      });
+      anim.addEventListener('data_failed', function(){
+        try { anim.destroy(); } catch (_e) {}
+        loadFromData();
+      });
+    } catch (_err) {
+      loadFromData();
+    }
+  }
+
+  function initRebrandingLogoLottie(){
+    if (!rebrandingLogoContainer || !window.lottie) return;
+    var logoAnim = null;
+    var played = false;
+
+    function getWordmarkOnlyData(){
+      if (!window.__ROBERTCOIN_LOGO_DATA) return null;
+      try {
+        var data = JSON.parse(JSON.stringify(window.__ROBERTCOIN_LOGO_DATA));
+        if (Array.isArray(data.layers)) {
+          data.layers = data.layers.filter(function(layer){
+            var name = (layer && layer.nm ? String(layer.nm) : '');
+            return !/flower/i.test(name);
+          });
+        }
+        return data;
+      } catch (_e) {
+        return null;
+      }
+    }
+
+    function loadFromData(){
+      var filteredData = getWordmarkOnlyData();
+      if (!filteredData) return null;
+      return window.lottie.loadAnimation({
+        container: rebrandingLogoContainer,
+        renderer: 'svg',
+        loop: false,
+        autoplay: false,
+        animationData: filteredData
       });
     }
 
-    window.addEventListener('scroll', updateNav, { passive: true });
-    updateNav();
+    logoAnim = loadFromData();
 
-    /* ── Smooth scroll on tab click ── */
-    tabs.forEach(function (tab) {
-      tab.addEventListener('click', function (e) {
-        e.preventDefault();
-        var targetId = tab.getAttribute('data-section');
-        var target = document.getElementById(targetId);
-        if (target) {
-          var navH = document.querySelector('.rct-nav').offsetHeight;
-          var top = target.getBoundingClientRect().top + window.scrollY - navH;
-          window.scrollTo({ top: top, behavior: 'smooth' });
+    if (!logoAnim) return;
+
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (!played && entry.isIntersecting) {
+          played = true;
+          logoAnim.goToAndPlay(0, true);
+          io.disconnect();
         }
       });
+    }, { threshold: 0.3 });
+    io.observe(rebrandingLogoContainer);
+  }
+
+
+  function hydrateTimelineYearMarkers(){
+    document.querySelectorAll('.tl-item').forEach(function(item){
+      var year = item.querySelector('.tl-year');
+      var dot = item.querySelector('.tl-dot');
+      if (year && dot) dot.textContent = year.textContent.trim();
     });
 
-    /* ── Intersection Observer: fade-in animations ── */
-    if ('IntersectionObserver' in window) {
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-            io.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.12 });
-
-      document.querySelectorAll('.rct-fade, .rct-timeline__item').forEach(function (el) {
-        io.observe(el);
-      });
-    } else {
-      /* Fallback: show everything for old browsers */
-      document.querySelectorAll('.rct-fade, .rct-timeline__item').forEach(function (el) {
-        el.classList.add('is-visible');
-      });
+    var breakYear = document.querySelector('.timeline-break__year');
+    var breakDot = document.querySelector('.timeline-break__dot');
+    if (breakDot) {
+      if (breakYear) breakDot.textContent = breakYear.textContent.trim();
+      else if (breakDot.dataset.year) breakDot.textContent = breakDot.dataset.year;
     }
-  })();
-</script>
+  }
+
+  function renderNavState() {
+    var idx = hoverIdx >= 0 ? hoverIdx : activeIdx;
+    tabs.forEach(function(t){ t.classList.remove('is-active'); });
+    highlights.forEach(function(h){ if(h) h.classList.remove('is-active'); });
+    if (tabs[idx]) tabs[idx].classList.add('is-active');
+    if (highlights[idx]) highlights[idx].classList.add('is-active');
+  }
+  function setActive(idx) {
+    activeIdx = idx;
+    renderNavState();
+  }
+  function clearActive() {
+    activeIdx = -1;
+    renderNavState();
+  }
+  function setHover(idx) {
+    hoverIdx = idx;
+    renderNavState();
+  }
+  function clearHover() {
+    hoverIdx = -1;
+    renderNavState();
+  }
+
+  function smoothScrollToY(targetY, duration) {
+    if (navScrollRaf) {
+      window.cancelAnimationFrame(navScrollRaf);
+      navScrollRaf = null;
+    }
+    var startY = window.scrollY || window.pageYOffset;
+    var delta = targetY - startY;
+    if (Math.abs(delta) < 1) return;
+    var startTime = null;
+
+    function easeInOutSine(t) {
+      return -(Math.cos(Math.PI * t) - 1) / 2;
+    }
+
+    isNavAutoScrolling = true;
+    function step(ts) {
+      if (!startTime) startTime = ts;
+      var elapsed = ts - startTime;
+      var progress = Math.min(elapsed / duration, 1);
+      var eased = easeInOutSine(progress);
+      window.scrollTo(0, startY + (delta * eased));
+      if (progress < 1) {
+        navScrollRaf = window.requestAnimationFrame(step);
+      } else {
+        navScrollRaf = null;
+        isNavAutoScrolling = false;
+      }
+    }
+
+    navScrollRaf = window.requestAnimationFrame(step);
+  }
+
+  clearActive();
+
+  if (heroSection) {
+    setTimeout(function(){ heroSection.classList.add('hero--ornament-in'); }, 60);
+    setTimeout(function(){ heroSection.classList.add('hero--text-in'); }, 700);
+    setTimeout(function(){ heroSection.classList.add('hero--scroll-in'); }, 1020);
+  }
+
+  if (fixedNav) {
+    fixedNav.classList.add('nav-intro');
+    setTimeout(function(){
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          fixedNav.classList.add('nav-intro-run');
+        });
+      });
+    }, 980);
+    setTimeout(function(){
+      fixedNav.classList.add('nav-ready');
+    }, 1800);
+    setTimeout(function(){
+      fixedNav.classList.remove('nav-intro');
+      fixedNav.classList.remove('nav-intro-run');
+    }, 3060);
+  }
+
+  tabs.forEach(function(tab){
+    tab.addEventListener('mouseenter', function(){
+      var idx = parseInt(tab.getAttribute('data-idx'));
+      setHover(idx);
+    });
+    tab.addEventListener('mouseleave', clearHover);
+    tab.addEventListener('click', function(e){
+      e.preventDefault();
+      var idx = parseInt(tab.getAttribute('data-idx'));
+      setActive(idx);
+      var target = document.getElementById(tab.getAttribute('data-section'));
+      if (target) {
+        var targetY = target.getBoundingClientRect().top + window.scrollY - 20;
+        var distance = Math.abs(targetY - (window.scrollY || window.pageYOffset));
+        var duration = Math.max(1200, Math.min(2200, distance * 1.05));
+        smoothScrollToY(targetY, duration);
+      }
+    });
+  });
+
+  /* ── Scroll-spy ── */
+  var sections = ['rct-history','rct-creator','rct-ruby','rct-timeline']
+    .map(function(id){ return document.getElementById(id); }).filter(Boolean);
+
+  function updateNav(){
+    var y = window.scrollY + 100;
+    var found = -1;
+    sections.forEach(function(s,i){ if(s && s.getBoundingClientRect().top + window.scrollY <= y) found = i; });
+    if (found === -1) {
+      if (activeIdx !== -1) clearActive();
+    } else if (found !== activeIdx) {
+      setActive(found);
+    }
+    if (heroScrollCta) heroScrollCta.classList.toggle('is-hidden', window.scrollY > 0);
+  }
+
+  function updateHistoryRingRotation(){
+    if (!historySection || !historyRing) return;
+    var rect = historySection.getBoundingClientRect();
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+
+    // Progress only while the section is crossing the viewport.
+    var startPoint = vh * 0.9;
+    var endPoint = -rect.height * 0.35;
+    var progress = (startPoint - rect.top) / (startPoint - endPoint);
+    progress = Math.max(0, Math.min(1, progress));
+
+    var angle = historyRotateStart + (historyRotateEnd - historyRotateStart) * progress;
+    var fadeProgress = (progress - 0.05) / 0.3;
+    fadeProgress = Math.max(0, Math.min(1, fadeProgress));
+    historyRing.style.transform = 'rotate(' + angle.toFixed(2) + 'deg)';
+    historyRing.style.opacity = fadeProgress.toFixed(3);
+  }
+
+  function updateTimelineLineDraw(){
+    if (!timelineLines.length) return;
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    timelineLines.forEach(function(line){
+      var rect = line.getBoundingClientRect();
+      var start = vh * 0.88;
+      var end = vh * 0.16;
+      var progress = (start - rect.top) / (rect.height + start - end);
+      progress = Math.max(0, Math.min(1, progress));
+      line.style.clipPath = 'inset(0 0 ' + ((1 - progress) * 100).toFixed(2) + '% 0)';
+    });
+  }
+
+  function updateTimelineItemRevealByLine(){
+    if (!timelineItems.length) return;
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+
+    timelineItems.forEach(function(item){
+      if (item.classList.contains('visible')) return;
+
+      var timeline = item.closest('.timeline');
+      var spine = timeline ? timeline.querySelector('.timeline__spine') : null;
+      var dot = item.querySelector('.tl-dot');
+      if (!timeline || !spine || !dot) return;
+
+      var spineRect = spine.getBoundingClientRect();
+      var dotRect = dot.getBoundingClientRect();
+
+      var start = vh * 0.9;
+      var end = vh * 0.16;
+      var progress = (start - spineRect.top) / (spineRect.height + start - end);
+      progress = Math.max(0, Math.min(1, progress));
+
+      // Line tip in viewport coordinates.
+      var lineTipY = spineRect.top + (progress * spineRect.height);
+      var dotCenterY = dotRect.top + (dotRect.height * 0.5);
+
+      // Show "Today" once it reaches mid-viewport instead of waiting for late line progression.
+      if (item.classList.contains('tl-item--today')) {
+        if (dotCenterY <= vh * 0.7) item.classList.add('visible');
+        return;
+      }
+
+      var revealThreshold = item.closest('.timeline-era--ruby') ? 24 : 16;
+
+      if (lineTipY >= dotCenterY - revealThreshold) item.classList.add('visible');
+    });
+  }
+
+  function updateTimelineBreakRevealByLine(){
+    if (!timelineBreak) return;
+    var lightTimeline = document.querySelector('.era-light .timeline');
+    var spine = lightTimeline ? lightTimeline.querySelector('.timeline__spine') : null;
+    var breakDot = timelineBreak.querySelector('.timeline-break__dot');
+    if (!spine || !breakDot) return;
+
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    var spineRect = spine.getBoundingClientRect();
+    var breakDotRect = breakDot.getBoundingClientRect();
+    var breakCenterY = breakDotRect.top + (breakDotRect.height * 0.5);
+
+    var start = vh * 0.88;
+    var end = vh * 0.16;
+    var progress = (start - spineRect.top) / (spineRect.height + start - end);
+    progress = Math.max(0, Math.min(1, progress));
+    var lineTipY = spineRect.top + (progress * spineRect.height);
+    var lineToBreakDistance = breakCenterY - spineRect.bottom;
+
+    // Reveal 1996 when the drawn line is near the breakpoint zone.
+    var isLineNearBreak =
+      (progress >= 0.88 && lineToBreakDistance <= vh * 0.22) ||
+      (lineTipY >= breakCenterY - 20);
+
+    if (isLineNearBreak) {
+      var eventEl = timelineBreak.querySelector('.timeline-break__event');
+      var rubyEl = timelineBreak.querySelector('.timeline-break__ruby');
+      if (eventEl) eventEl.classList.add('visible');
+      if (breakDot) breakDot.classList.add('visible');
+      if (rubyEl) rubyEl.classList.add('visible');
+    }
+  }
+
+  function onScroll(){
+    if (scrollTicking) return;
+    scrollTicking = true;
+    window.requestAnimationFrame(function(){
+      updateNav();
+      if (!isNavAutoScrolling) {
+        updateHistoryRingRotation();
+        updateTimelineLineDraw();
+        updateTimelineItemRevealByLine();
+        updateTimelineBreakRevealByLine();
+      }
+      scrollTicking = false;
+    });
+  }
+
+  window.addEventListener('scroll', onScroll, { passive:true });
+  window.addEventListener('resize', function(){
+    updateHistoryRingRotation();
+    updateTimelineLineDraw();
+  });
+  hydrateTimelineYearMarkers();
+  initHeroLottie();
+  initRebrandingLogoLottie();
+  updateNav();
+  updateHistoryRingRotation();
+  updateTimelineLineDraw();
+  updateTimelineItemRevealByLine();
+  updateTimelineBreakRevealByLine();
+
+  /* ── Fade-in on scroll ── */
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting){ e.target.classList.add('visible'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade:not(.hero__content)').forEach(function(el){ io.observe(el); });
+})();
+{% endjavascript %}
 
 {% schema %}
 {
