@@ -89,7 +89,7 @@
   assign sibling_color = product.metafields.theme.sibling_color.value | default: product.metafields.theme.sibling_colour.value | default: product.metafields.theme.siblings_color.value | default: product.metafields.theme.siblings_colour.value | default: product.metafields.theme.siblings_colors.value | default: product.metafields.theme.siblings_colours.value
 
   if section.settings.show_cart_bar and featured_product == false
-    assign show_cart_bar = true
+    assign show_cart_bar = false
   endif
 
   capture product_images_classlist
@@ -167,19 +167,42 @@
       --PB: {{ section.settings.padding_bottom }}px;
 
       --swatch-size: var(--swatch-size-product);
+      --pdp-sticky-bar-height: 100px;
+      --bg-color: #f9f9f9;
     }
 
     {%- if template.name == 'product' and featured_product == false -%}
+
+      body.template-product .header__desktop__upper {
+        overflow-x: hidden;
+      }
 
       body.template-product header-component.js__header__stuck .theme__header::after {
         content: "";
         background: transparent;
       }
 
+      body.template-product .header-sections {
+        background: transparent;
+      }
+
+      body.template-product .header__wrapper,
+      body.template-product .header__mobile__bottom {
+        --bg: transparent;
+      }
+
+      body.template-product .main-content {
+        margin-top: 0;
+        padding-top: 0;
+      }
+
+      body.template-product .main-content > *:first-child {
+        margin-top: 0;
+      }
+
       #MainProduct--{{ section.id }} {
         padding-top: 0;
         padding-bottom: 0;
-        background: #F9F9F9;
       }
 
       #MainProduct--{{ section.id }} .product__wrapper {
@@ -192,12 +215,135 @@
         margin: 0;
       }
 
-      #MainProduct--{{ section.id }} .product__content {
-        margin-top: 50px;
-      }
       @media (max-width: 767px) {
+        #MainProduct--{{ section.id }} .product__content {
+          margin: 20px 0 0;
+        }
+
         product-info.index-product .product__content {
           margin-top: 16px;
+          padding-left: var(--inner);
+          padding-right: var(--inner);
+        }
+      }
+
+      @media (min-width: 990px) {
+
+        #MainProduct--{{ section.id }} .product__images {
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+          align-items: start;
+          margin: 0;
+        }
+
+        #MainProduct--{{ section.id }} .product__content {
+          margin: 0 auto;
+          padding: 0;
+          width: 100%;
+        }
+
+        #MainProduct--{{ section.id }} .product__sticky-bar {
+          position: relative;
+          top: auto;
+          z-index: 6;
+          border-top: 1px solid var(--border);
+          margin: 0;
+          width: 100%;
+        }
+
+        #MainProduct--{{ section.id }} .product__sticky-bar__inner {
+          display: grid;
+          grid-template-columns: 7fr 3fr;
+          gap: 50px;
+          align-items: center;
+          min-height: var(--pdp-sticky-bar-height);
+          padding: 0;
+          max-width: min(var(--content-max), 1200px);
+          margin: 0 auto;
+        }
+
+        #MainProduct--{{ section.id }} .form__width {
+          max-width: min(var(--content-max), 1200px);
+        }
+
+        #MainProduct--{{ section.id }} .product__content-columns {
+          display: grid;
+          grid-template-columns: 7fr 3fr;
+          gap: var(--inner);
+          align-items: start;
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: var(--inner);
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price .block-padding {
+          margin: 0;
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price .product__price__wrap {
+          text-align: right;
+          flex-direction: row;
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price .product__price__wrap .product__price {
+          padding: 0;
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price .product__title {
+          margin: 0;
+          font-family: var(--FONT-STACK-BODY);
+          font-style: var(--FONT-STYLE-BODY);
+          font-weight: var(--FONT-WEIGHT-BODY);
+          font-size: var(--FONT-TITLE);
+          line-height: var(--LINE-HEIGHT-TITLE);
+          text-transform: uppercase;
+          max-width: 40ch;
+          color: var(--COLOR-TEXT-DARK);
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price .price-item,
+        #MainProduct--{{ section.id }} .product__description {
+          font-family: var(--FONT-STACK-BODY);
+          font-style: var(--FONT-STYLE-BODY);
+          font-weight: var(--FONT-WEIGHT-BODY);
+          font-size: var(--FONT-SIZE-BASE);
+          line-height: var(--LINE-HEIGHT-BODY);
+          color: var(--COLOR-TEXT-DARK);
+        }
+
+        #MainProduct--{{ section.id }} .product__description {
+          max-width: 60ch;
+        }
+
+        #MainProduct--{{ section.id }} .product__content-columns__aside {
+          position: sticky;
+          top: calc(var(--header-height, 0px) + var(--announcement-height, 0px));
+          align-self: start;
+          z-index: 9;
+        }
+
+        #MainProduct--{{ section.id }} .product__content-columns__aside .product__block--buttons {
+          margin-top: calc(var(--pdp-sticky-bar-height, 100px) * -1 / 1.4);
+          margin-bottom: 30px;
+        }
+      }
+
+      @media (max-width: 767px) {
+         #MainProduct--{{ section.id }} .product__sticky-bar {
+          padding-top: 20px;
+          padding-left: var(--inner);
+          padding-right: var(--inner);
+        }
+      }
+
+      @media (max-width: 767px) {
+         #MainProduct--{{ section.id }} .product__sticky-bar {
+          padding-top: 20px;
           padding-left: var(--inner);
           padding-right: var(--inner);
         }
@@ -214,8 +360,34 @@
         position: relative;
       }
 
+      /* #MainProduct--{{ section.id }} .product__images .image-wrapper--cover {
+        background-color: var(--bg-color);
+      } */
+
       #MainProduct--{{ section.id }} .product__images .image-wrapper--cover img {
         object-fit: contain;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item:not([data-pair-role='secondary']) .image-wrapper--cover {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item:not([data-pair-role='secondary']) .image-wrapper--cover img {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: calc(100% - var(--header-height));
+        object-fit: contain;
+        object-position: center;
+        margin: var(--header-height) 0 0;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla img {
+        border: 0;
+        outline: 0;
+        box-shadow: none;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla {
@@ -264,13 +436,21 @@
         touch-action: pan-y;
       }
 
+      @media (min-width: 990px) {
+        #MainProduct--{{ section.id }} .pdp-embla__viewport {
+          margin-top: 0;
+          height: calc(100vh - var(--pdp-sticky-bar-height, 100px));
+          min-height: 0;
+        }
+      }
+
       #MainProduct--{{ section.id }} .pdp-embla__progress {
         position: absolute;
         left: 0;
         right: 0;
         bottom: 0;
         height: 1px;
-        background: #F9F9F9;
+        background: #f9f9f9;
         z-index: 6;
         overflow: hidden;
         display: none;
@@ -294,24 +474,79 @@
       #MainProduct--{{ section.id }} .pdp-embla__container {
         display: flex;
         height: 100%;
+        margin: 0;
+        padding: 0;
+        align-items: stretch;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide {
         flex: 0 0 100%;
         min-width: 0;
         height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide {
+        flex: 0 0 50%;
+        box-sizing: border-box;
+        transition: flex-basis 500ms ease;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop:not(.pdp-embla--started) .pdp-embla__slide:first-child {
+        flex: 0 0 100%;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__viewport {
+        overflow: hidden;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair {
         display: flex;
         height: 100%;
         width: 100%;
+        overflow: hidden;
+        gap: 0;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item {
         flex: 1 1 0;
         min-width: 0;
         height: 100%;
+        backface-visibility: hidden;
+        transform: translateZ(0);
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        backface-visibility: hidden;
+        transform: translateZ(0);
+      }
+
+      @media (min-width: 990px) {
+        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item[data-pair-role='secondary'] {
+          position: relative;
+          outline: 0;
+          box-shadow: inset 0 0 0 2px currentcolor;
+        }
+
+        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item[data-pair-role='secondary'] img {
+          text-indent: -100vw;
+          overflow: hidden;
+        }
+      }
+
+      @media (min-width: 990px) {
+        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-layout='60-40'] .pdp-embla__pair__item:first-child {
+          flex: 0 0 60%;
+        }
+
+        #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-pair-layout='60-40'] .pdp-embla__pair__item:nth-child(2) {
+          flex: 0 0 40%;
+        }
       }
 
       #MainProduct--{{ section.id }} .pdp-thumbs--desktop .product__thumb__link {
@@ -466,7 +701,7 @@
       #MainProduct--{{ section.id }} .product__thumbs {
         position: absolute;
         left: var(--outer);
-        top: 50vh;
+        top: 50%;
         transform: translateY(-100%);
         z-index: 6;
         display: block;
@@ -497,6 +732,7 @@
         gap: 0;
         max-height: calc(100vh - (var(--inner) * 2));
         overflow: auto;
+        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
       }
 
       @media (min-width: 990px) {
@@ -510,6 +746,21 @@
         width: 45px;
         margin: 0;
         padding: 0;
+      }
+
+      #MainProduct--{{ section.id }} .product__thumb.is-active:not(.prev-active):not(.single-active) {
+        transform: translateY(0.5px);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #MainProduct--{{ section.id }} .product__thumb.is-active.prev-active {
+        transform: translateY(-0.5px);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #MainProduct--{{ section.id }} .product__thumb.is-active.single-active:last-child {
+        transform: translateY(0);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       #MainProduct--{{ section.id }} .product__thumb::after {
@@ -532,6 +783,7 @@
         border: 1px solid transparent;
         pointer-events: none;
         z-index: 2;
+        transition: border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       #MainProduct--{{ section.id }} .product__thumb__link img {
@@ -551,6 +803,19 @@
       }
 
       #MainProduct--{{ section.id }} .product__thumb.is-active .product__thumb__link::after {
+        border-color: #000;
+      }
+
+      #MainProduct--{{ section.id }} .product__thumb.is-active:not(.prev-active):not(.single-active) .product__thumb__link::after {
+        border-bottom-color: transparent;
+      }
+
+      #MainProduct--{{ section.id }} .product__thumb.is-active.prev-active .product__thumb__link::after {
+        border-top-color: transparent;
+        border-bottom-color: #000;
+      }
+
+      #MainProduct--{{ section.id }} .product__thumb.is-active.single-active .product__thumb__link::after {
         border-color: #000;
       }
 
@@ -637,17 +902,28 @@
                     return carousels[0];
                   }
 
+                  function escapeAttrValue(value) {
+                    if (typeof CSS !== 'undefined' && CSS.escape) return CSS.escape(String(value));
+                    return String(value).replace(/"/g, '\\"');
+                  }
+
                   function updateProgressByIndex(carousel, index) {
                     if (!carousel || !carousel.progressBar) return;
                     var slideCount = carousel.embla.scrollSnapList().length;
                     if (slideCount <= 1) {
                       carousel.progressBar.style.width = '100%';
-                      carousel.progressBar.style.transform = 'translateX(0)';
+                      carousel.progressBar.style.left = '0%';
                       return;
                     }
-                    var segmentWidth = 100 / slideCount;
-                    carousel.progressBar.style.width = segmentWidth + '%';
-                    carousel.progressBar.style.transform = 'translateX(' + (index * 100) + '%)';
+                    
+                    // Calculate scroll progress
+                    var scrollProgress = carousel.embla.scrollProgress();
+                    var clampedProgress = Math.max(0, Math.min(1, scrollProgress));
+                    
+                    // Update progress bar
+                    carousel.progressBar.style.width = (clampedProgress * 100) + '%';
+                    carousel.progressBar.style.left = '0%';
+                    carousel.progressBar.style.transform = 'translateX(0)';
                   }
 
                   function loadDeferredMediaByIndex(carousel, index) {
@@ -656,7 +932,15 @@
                     var slide = slideEls[index];
                     if (!slide) return;
 
-                    var deferredMedia = slide.querySelector('deferred-media, product-model');
+                    var primaryMediaId = slide.getAttribute('data-primary-media-id');
+                    var primaryMediaEl = null;
+                    if (primaryMediaId) {
+                      primaryMediaEl = slide.querySelector('[data-media-id="' + escapeAttrValue(primaryMediaId) + '"]');
+                    }
+
+                    var deferredMedia = primaryMediaEl
+                      ? primaryMediaEl.querySelector('deferred-media, product-model')
+                      : slide.querySelector('deferred-media, product-model');
                     if (!deferredMedia) return;
 
                     if (deferredMedia.hasAttribute('loaded')) return;
@@ -677,6 +961,13 @@
                     var slideEls = carousel.el.querySelectorAll('[data-embla-slide]');
                     var slide = slideEls[index];
                     if (!slide) return;
+
+                    var primaryMediaId = slide.getAttribute('data-primary-media-id');
+                    if (primaryMediaId) {
+                      productImagesEl.setAttribute('data-active-media', primaryMediaId);
+                      return;
+                    }
+
                     var mediaEl = slide.querySelector('[data-media-id]');
                     if (!mediaEl) return;
                     productImagesEl.setAttribute('data-active-media', mediaEl.getAttribute('data-media-id'));
@@ -684,11 +975,18 @@
 
                   function findIndexByMediaId(carousel, mediaId) {
                     if (!carousel) return -1;
-                    var mediaEl = carousel.el.querySelector('[data-media-id="' + CSS.escape(mediaId) + '"]');
+                    var targetMediaId = String(mediaId);
+                    var slideEls = carousel.el.querySelectorAll('[data-embla-slide]');
+
+                    for (var i = 0; i < slideEls.length; i++) {
+                      if (slideEls[i].getAttribute('data-primary-media-id') === targetMediaId) return i;
+                    }
+
+                    var mediaEl = carousel.el.querySelector('[data-media-id="' + escapeAttrValue(targetMediaId) + '"]');
                     if (!mediaEl) return -1;
                     var slide = mediaEl.closest('[data-embla-slide]');
                     if (!slide) return -1;
-                    return Array.prototype.indexOf.call(carousel.el.querySelectorAll('[data-embla-slide]'), slide);
+                    return Array.prototype.indexOf.call(slideEls, slide);
                   }
 
                   function makeCarousel(carouselEl) {
@@ -696,9 +994,12 @@
                     var viewport = carouselEl.querySelector('[data-embla-viewport]');
                     if (!viewport) return null;
 
-                    var embla = window.EmblaCarousel(viewport, {
+                    var isDesktopCarousel = carouselEl.classList.contains('pdp-embla--desktop');
+
+                    var emblaOptions = {
                       loop: false,
                       containScroll: 'trimSnaps',
+                      slidesToScroll: 1,
                       watchDrag: function (emblaApi, event) {
                         var target = event && event.target;
                         if (!target || !target.closest) return true;
@@ -713,24 +1014,63 @@
                         }
                         return true;
                       }
-                    });
+                    };
+
+                    if (isDesktopCarousel) {
+                      emblaOptions.align = 'start';
+                      emblaOptions.containScroll = 'trimSnaps';
+                      emblaOptions.slidesToScroll = 1;
+                      emblaOptions.dragFree = false;
+                      emblaOptions.loop = false;
+                    }
+
+                    var embla = window.EmblaCarousel(viewport, emblaOptions);
 
                     var prevBtn = carouselEl.querySelector('[data-embla-prev]');
                     var nextBtn = carouselEl.querySelector('[data-embla-next]');
                     var progressBar = carouselEl.querySelector('[data-embla-progress-bar]');
+                    var hasIntroStage = isDesktopCarousel && carouselEl.querySelectorAll('[data-embla-slide]').length > 0;
+                    var carouselStarted = false;
+
+                    function setCarouselStarted(started) {
+                      if (!hasIntroStage) return;
+                      carouselStarted = !!started;
+                      if (carouselStarted) {
+                        carouselEl.classList.add('pdp-embla--started');
+                      } else {
+                        carouselEl.classList.remove('pdp-embla--started');
+                      }
+                    }
+
+                    setCarouselStarted(carouselStarted);
 
                     function updateArrows() {
-                      if (prevBtn) prevBtn.disabled = !embla.canScrollPrev();
-                      if (nextBtn) nextBtn.disabled = !embla.canScrollNext();
+                      var selectedIndex = embla.selectedScrollSnap();
+                      var canPrev = embla.canScrollPrev();
+                      var canNext = embla.canScrollNext();
+
+                      if (prevBtn) prevBtn.disabled = !canPrev;
+                      if (nextBtn) nextBtn.disabled = !canNext;
                     }
 
                     prevBtn && prevBtn.addEventListener('click', function (e) {
                       e.preventDefault();
+                      if (hasIntroStage && carouselStarted && embla.selectedScrollSnap() === 1) {
+                        setCarouselStarted(false);
+                        updateArrows();
+                        embla.scrollPrev();
+                        return;
+                      }
                       embla.scrollPrev();
                     });
 
                     nextBtn && nextBtn.addEventListener('click', function (e) {
                       e.preventDefault();
+                      if (hasIntroStage && !carouselStarted && embla.selectedScrollSnap() === 0) {
+                        setCarouselStarted(true);
+                        updateArrows();
+                        return;
+                      }
                       embla.scrollNext();
                     });
 
@@ -738,19 +1078,199 @@
 
                     embla.on('select', function () {
                       var activeCarousel = getActiveCarousel();
-                      if (!activeCarousel || activeCarousel.el !== carouselEl) return;
                       var index = embla.selectedScrollSnap();
+
+                      var slides = carouselEl.querySelectorAll('[data-embla-slide]');
+                      slides.forEach(function(slide) {
+                        slide.classList.remove('pdp-embla__slide--active');
+                      });
+
+                      if (slides[index]) {
+                        slides[index].classList.add('pdp-embla__slide--active');
+                      }
+
                       setActiveMediaByIndex(activeCarousel, index);
                       loadDeferredMediaByIndex(activeCarousel, index);
                       updateArrows();
                       updateProgressByIndex(activeCarousel, index);
+                      
+                      // Force update thumbnails after select to ensure active states are correct
+                      setTimeout(function() {
+                        if (isDesktopCarousel) {
+                          var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
+                          var slideNodes = embla.slideNodes();
+                          var slidesInView = [];
+                          
+                          // Determine which slides are visible based on scroll position
+                          var scrollProgress = embla.scrollProgress();
+                          var containerSize = embla.containerNode().offsetWidth;
+                          var slideSize = slideNodes.length > 0 ? slideNodes[0].offsetWidth : 0;
+                          var slidesPerView = Math.ceil(containerSize / slideSize);
+                          
+                          // Calculate visible slides based on current index and slides per view
+                          for (var i = 0; i < slidesPerView; i++) {
+                            if (index + i < slideNodes.length) {
+                              slidesInView.push(index + i);
+                            }
+                          }
+                          
+                          // Update thumbnail states
+                          thumbs.forEach(function(thumb) {
+                            thumb.classList.remove('is-active', 'prev-active', 'single-active');
+                          });
+                          
+                          slidesInView.forEach(function(slideIndex, idx) {
+                            if (thumbs[slideIndex]) {
+                              thumbs[slideIndex].classList.add('is-active');
+                              if (idx > 0) {
+                                thumbs[slideIndex].classList.add('prev-active');
+                              }
+                            }
+                          });
+                          
+                          if (slidesInView.length === 1 && thumbs[slidesInView[0]]) {
+                            thumbs[slidesInView[0]].classList.add('single-active');
+                          }
+                        }
+                      }, 50);
+                      
+                      if (!isDesktopCarousel) {
+                        var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--mobile .product__thumb');
+                        thumbs.forEach(function(thumb) {
+                          thumb.classList.remove('is-active');
+                        });
+                        if (thumbs[index]) {
+                          thumbs[index].classList.add('is-active');
+                        }
+                      } else {
+                        var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
+                        thumbs.forEach(function(thumb) {
+                          thumb.classList.remove('is-active', 'prev-active', 'single-active');
+                        });
+                        
+                        var currentIndex = index;
+                        var activeCount = 0;
+                        
+                        if (thumbs[currentIndex]) {
+                          thumbs[currentIndex].classList.add('is-active');
+                          activeCount++;
+                        }
+                        
+                        var slideSize = embla.slideNodes().length > 0 ? embla.slideNodes()[0].offsetWidth : 0;
+                        var containerSize = embla.containerNode().offsetWidth;
+                        var slidesPerView = Math.ceil(containerSize / slideSize);
+                        
+                        for (var i = 1; i < slidesPerView; i++) {
+                          if (thumbs[currentIndex + i]) {
+                            thumbs[currentIndex + i].classList.add('is-active', 'prev-active');
+                            activeCount++;
+                          }
+                        }
+                        
+                        // Add single-active class if only one thumb is active
+                        if (activeCount === 1 && thumbs[currentIndex]) {
+                          thumbs[currentIndex].classList.add('single-active');
+                        }
+                      }
                     });
+
+                    embla.on('scroll', function () {
+                      // Update progress bar during scroll
+                      if (progressBar) {
+                        var scrollProgress = embla.scrollProgress();
+                        var clampedProgress = Math.max(0, Math.min(1, scrollProgress));
+                        progressBar.style.width = (clampedProgress * 100) + '%';
+                        progressBar.style.left = '0%';
+                        progressBar.style.transform = 'translateX(0)';
+                      }
+                    });
+
+                    embla.on('slidesinview', function (emblaApi, event) {
+                      if (isDesktopCarousel) {
+                        var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
+                        thumbs.forEach(function(thumb) {
+                          thumb.classList.remove('is-active', 'prev-active', 'single-active');
+                        });
+                        
+                        var visibleIndexes = event.detail.slidesInView || [];
+                        
+                        visibleIndexes.forEach(function(slideIndex, index) {
+                          if (thumbs[slideIndex]) {
+                            thumbs[slideIndex].classList.add('is-active');
+                            if (index > 0) {
+                              thumbs[slideIndex].classList.add('prev-active');
+                            }
+                          }
+                        });
+                        
+                        // Add single-active class if only one thumb is active
+                        if (visibleIndexes.length === 1 && thumbs[visibleIndexes[0]]) {
+                          thumbs[visibleIndexes[0]].classList.add('single-active');
+                        }
+                      }
+                    });
+
+                    if (isDesktopCarousel) {
+                      var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
+                      thumbs.forEach(function(thumb) {
+                        thumb.classList.remove('is-active', 'prev-active', 'single-active');
+                      });
+                      
+                      var currentIndex = embla.selectedScrollSnap();
+                      var activeCount = 0;
+                      
+                      if (thumbs[currentIndex]) {
+                        thumbs[currentIndex].classList.add('is-active');
+                        activeCount++;
+                      }
+                      
+                      var slideSize = embla.slideNodes().length > 0 ? embla.slideNodes()[0].offsetWidth : 0;
+                      var containerSize = embla.containerNode().offsetWidth;
+                      var slidesPerView = Math.ceil(containerSize / slideSize);
+                      
+                      for (var i = 1; i < slidesPerView; i++) {
+                        if (thumbs[currentIndex + i]) {
+                          thumbs[currentIndex + i].classList.add('is-active', 'prev-active');
+                          activeCount++;
+                        }
+                      }
+                      
+                      // Add single-active class if only one thumb is active
+                      if (activeCount === 1 && thumbs[currentIndex]) {
+                        thumbs[currentIndex].classList.add('single-active');
+                      }
+                    }
 
                     embla.on('reInit', function () {
                       var activeCarousel = getActiveCarousel();
                       if (!activeCarousel || activeCarousel.el !== carouselEl) return;
                       updateArrows();
                       updateProgressByIndex(activeCarousel, embla.selectedScrollSnap());
+                      
+                      // Update thumbnails for desktop based on visible slides
+                      if (isDesktopCarousel) {
+                        var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
+                        thumbs.forEach(function(thumb) {
+                          thumb.classList.remove('is-active');
+                        });
+                        
+                        // Get currently selected slide as fallback
+                        var currentIndex = embla.selectedScrollSnap();
+                        if (thumbs[currentIndex]) {
+                          thumbs[currentIndex].classList.add('is-active');
+                        }
+                        
+                        // Check nearby slides that might be visible
+                        var slideSize = embla.slideNodes().length > 0 ? embla.slideNodes()[0].offsetWidth : 0;
+                        var containerSize = embla.containerNode().offsetWidth;
+                        var slidesPerView = Math.ceil(containerSize / slideSize);
+                        
+                        for (var i = 1; i < slidesPerView; i++) {
+                          if (thumbs[currentIndex + i]) {
+                            thumbs[currentIndex + i].classList.add('is-active');
+                          }
+                        }
+                      }
                     });
 
                     updateArrows();
@@ -768,13 +1288,39 @@
                     if (!e || !e.detail || !e.detail.id) return;
                     var activeCarousel = getActiveCarousel();
                     if (!activeCarousel) return;
-                    var index = findIndexByMediaId(activeCarousel, e.detail.id);
-                    if (index < 0) return;
-                    activeCarousel.embla.scrollTo(index);
-                    setActiveMediaByIndex(activeCarousel, index);
-                    loadDeferredMediaByIndex(activeCarousel, index);
+                    
+                    var isDesktop = activeCarousel.el.classList.contains('pdp-embla--desktop');
+                    var isStarted = activeCarousel.el.classList.contains('pdp-embla--started');
+                    var currentIndex = activeCarousel.embla.selectedScrollSnap();
+                    var targetIndex = findIndexByMediaId(activeCarousel, e.detail.id);
+                    
+                    if (isDesktop && !isStarted && currentIndex === 0) {
+                      if (targetIndex === 1) {
+                        activeCarousel.el.classList.add('pdp-embla--started');
+                        activeCarousel.updateArrows && activeCarousel.updateArrows();
+                        setActiveMediaByIndex(activeCarousel, 1);
+                        loadDeferredMediaByIndex(activeCarousel, 1);
+                        updateProgressByIndex(activeCarousel, 1);
+                        return;
+                      }
+                    }
+                    
+                    if (isDesktop && isStarted && targetIndex === 0) {
+                      activeCarousel.el.classList.remove('pdp-embla--started');
+                      activeCarousel.embla.scrollTo(0, true);
+                      activeCarousel.updateArrows && activeCarousel.updateArrows();
+                      setActiveMediaByIndex(activeCarousel, 0);
+                      loadDeferredMediaByIndex(activeCarousel, 0);
+                      updateProgressByIndex(activeCarousel, 0);
+                      return;
+                    }
+                    
+                    if (targetIndex < 0) return;
+                    activeCarousel.embla.scrollTo(targetIndex);
+                    setActiveMediaByIndex(activeCarousel, targetIndex);
+                    loadDeferredMediaByIndex(activeCarousel, targetIndex);
                     activeCarousel.updateArrows && activeCarousel.updateArrows();
-                    updateProgressByIndex(activeCarousel, index);
+                    updateProgressByIndex(activeCarousel, targetIndex);
                   });
 
                   var active = productImagesEl.getAttribute('data-active-media');
@@ -796,6 +1342,41 @@
                         loadDeferredMediaByIndex(carousel, startIndex);
                         carousel.updateArrows && carousel.updateArrows();
                         updateProgressByIndex(carousel, startIndex);
+                        
+                        // Update thumbnails based on carousel type
+                        if (carousel.el.classList.contains('pdp-embla--desktop')) {
+                          // Desktop: Update thumbnails based on visible slides
+                          var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
+                          thumbs.forEach(function(thumb) {
+                            thumb.classList.remove('is-active');
+                          });
+                          
+                          // Get currently selected slide as fallback
+                          var currentIndex = carousel.embla.selectedScrollSnap();
+                          if (thumbs[currentIndex]) {
+                            thumbs[currentIndex].classList.add('is-active');
+                          }
+                          
+                          // Check nearby slides that might be visible
+                          var slideSize = carousel.embla.slideNodes().length > 0 ? carousel.embla.slideNodes()[0].offsetWidth : 0;
+                          var containerSize = carousel.embla.containerNode().offsetWidth;
+                          var slidesPerView = Math.ceil(containerSize / slideSize);
+                          
+                          for (var i = 1; i < slidesPerView; i++) {
+                            if (thumbs[currentIndex + i]) {
+                              thumbs[currentIndex + i].classList.add('is-active');
+                            }
+                          }
+                        } else {
+                          // Mobile: Update single thumbnail based on selected index
+                          var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--mobile .product__thumb');
+                          thumbs.forEach(function(thumb) {
+                            thumb.classList.remove('is-active');
+                          });
+                          if (thumbs[startIndex]) {
+                            thumbs[startIndex].classList.add('is-active');
+                          }
+                        }
                       }
                     });
                   });
@@ -856,24 +1437,46 @@
               <div class="pdp-embla pdp-embla--desktop" data-embla-carousel>
                 <div class="pdp-embla__viewport" data-embla-viewport>
                   <div class="pdp-embla__container">
-                    {%- assign pending_image = blank -%}
-                    {%- for media in ordered_media -%}
-                      {%- if media.media_type == 'image' -%}
-                        {%- if pending_image == blank -%}
-                          {%- assign pending_image = media -%}
-                        {%- else -%}
-                          <div class="pdp-embla__slide" data-embla-slide>
+                    {%- assign media_count = ordered_media.size -%}
+                    {%- if media_count > 0 -%}
+                      {%- assign intro_media = ordered_media[0] -%}
+                      {%- assign intro_next_media = ordered_media[1] -%}
+                      <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="single" data-primary-media-id="{{ section.id }}-{{ intro_media.id }}">
+                        <div class="pdp-embla__pair">
+                          <div class="pdp-embla__pair__item">
+                            {%- render 'media',
+                              media: intro_media,
+                              featured_media: featured_media,
+                              enable_video_looping: enable_video_looping,
+                              sectionkey: section.id,
+                              image_width: image_width,
+                              cover: true
+                            -%}
+                          </div>
+                        </div>
+                      </div>
+
+                      {%- if intro_next_media != blank -%}
+                        <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="single" data-primary-media-id="{{ section.id }}-{{ intro_next_media.id }}">
+                          <div class="pdp-embla__pair">
+                            <div class="pdp-embla__pair__item">
+                              {%- render 'media',
+                                media: intro_next_media,
+                                featured_media: featured_media,
+                                enable_video_looping: enable_video_looping,
+                                sectionkey: section.id,
+                                image_width: image_width,
+                                cover: true
+                              -%}
+                            </div>
+                          </div>
+                        </div>
+                      {%- endif -%}
+
+                      {%- if media_count > 2 -%}
+                        {%- for media in ordered_media offset: 2 -%}
+                          <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="single" data-primary-media-id="{{ section.id }}-{{ media.id }}">
                             <div class="pdp-embla__pair">
-                              <div class="pdp-embla__pair__item">
-                                {%- render 'media',
-                                  media: pending_image,
-                                  featured_media: featured_media,
-                                  enable_video_looping: enable_video_looping,
-                                  sectionkey: section.id,
-                                  image_width: image_width,
-                                  cover: true
-                                -%}
-                              </div>
                               <div class="pdp-embla__pair__item">
                                 {%- render 'media',
                                   media: media,
@@ -886,46 +1489,8 @@
                               </div>
                             </div>
                           </div>
-                          {%- assign pending_image = blank -%}
-                        {%- endif -%}
-                      {%- else -%}
-                        {%- if pending_image != blank -%}
-                          <div class="pdp-embla__slide" data-embla-slide>
-                            {%- render 'media',
-                              media: pending_image,
-                              featured_media: featured_media,
-                              enable_video_looping: enable_video_looping,
-                              sectionkey: section.id,
-                              image_width: image_width,
-                              cover: true
-                            -%}
-                          </div>
-                          {%- assign pending_image = blank -%}
-                        {%- endif -%}
-
-                        <div class="pdp-embla__slide" data-embla-slide>
-                          {%- render 'media',
-                            media: media,
-                            featured_media: featured_media,
-                            enable_video_looping: enable_video_looping,
-                            sectionkey: section.id,
-                            image_width: image_width,
-                            cover: true
-                          -%}
-                        </div>
+                        {%- endfor -%}
                       {%- endif -%}
-                    {%- endfor -%}
-                    {%- if pending_image != blank -%}
-                      <div class="pdp-embla__slide" data-embla-slide>
-                        {%- render 'media',
-                          media: pending_image,
-                          featured_media: featured_media,
-                          enable_video_looping: enable_video_looping,
-                          sectionkey: section.id,
-                          image_width: image_width,
-                          cover: true
-                        -%}
-                      </div>
                     {%- endif -%}
                   </div>
                 </div>
@@ -975,81 +1540,28 @@
 
                 <product-thumbs class="product__thumbs pdp-thumbs--desktop">
                   <div class="product__thumbs__holder" data-thumbs-slider>
-                    {%- assign pending_image = blank -%}
                     {%- for media in ordered_media -%}
-                      {%- if media.media_type == 'image' -%}
-                        {%- if pending_image == blank -%}
-                          {%- assign pending_image = media -%}
-                        {%- else -%}
-                          <div class="product__thumb{% if pending_image == featured_media or media == featured_media %} is-active{% endif %}" data-thumb-item>
-                            <a
-                              class="product__thumb__link product__thumb__link--pair"
-                              href="{{ pending_image.preview_image.src | image_url }}"
-                              data-media-id="{{ section.id }}-{{ pending_image.id }}"
-                              data-thumb-link
-                            >
-                              {%- liquid
-                                render 'image', image: pending_image.preview_image, width: 90, height: 90, sizes: '45px', widths: '45, 60, 90, 120, 180', aspect_ratio: 1
-                                render 'image', image: media.preview_image, width: 90, height: 90, sizes: '45px', widths: '45, 60, 90, 120, 180', aspect_ratio: 1
-                              -%}
-                            </a>
-                          </div>
-                          {%- assign pending_image = blank -%}
-                        {%- endif -%}
-                      {%- else -%}
-                        {%- if pending_image != blank -%}
-                          <div class="product__thumb{% if pending_image == featured_media %} is-active{% endif %}" data-thumb-item>
-                            <a
-                              class="product__thumb__link"
-                              href="{{ pending_image.preview_image.src | image_url }}"
-                              data-media-id="{{ section.id }}-{{ pending_image.id }}"
-                              data-thumb-link
-                            >
-                              {%- liquid
-                                render 'image', image: pending_image.preview_image, width: 90, height: 90, sizes: '45px', widths: '45, 60, 90, 120, 180', aspect_ratio: 1
-                              -%}
-                            </a>
-                          </div>
-                          {%- assign pending_image = blank -%}
-                        {%- endif -%}
-
-                        <div class="product__thumb{% if media == featured_media %} is-active{% endif %}" data-thumb-item>
-                          <a
-                            class="product__thumb__link"
-                            href="{{ media.preview_image.src | image_url }}"
-                            data-media-id="{{ section.id }}-{{ media.id }}"
-                            data-thumb-link
-                          >
-                            {%- liquid
-                              render 'image', image: media.preview_image, width: 90, height: 90, sizes: '45px', widths: '45, 60, 90, 120, 180', aspect_ratio: 1
-
-                              if media.media_type == 'video' or media.media_type == 'external_video'
-                                render 'icon-media-video'
-                              else
-                                if media.media_type == 'model'
-                                  render 'icon-media-model'
-                                endif
-                              endif
-                            -%}
-                          </a>
-                        </div>
-                      {%- endif -%}
-                    {%- endfor -%}
-
-                    {%- if pending_image != blank -%}
-                      <div class="product__thumb{% if pending_image == featured_media %} is-active{% endif %}" data-thumb-item>
+                      <div class="product__thumb{% if media == featured_media %} is-active{% endif %}" data-thumb-item>
                         <a
                           class="product__thumb__link"
-                          href="{{ pending_image.preview_image.src | image_url }}"
-                          data-media-id="{{ section.id }}-{{ pending_image.id }}"
+                          href="{{ media.preview_image.src | image_url }}"
+                          data-media-id="{{ section.id }}-{{ media.id }}"
                           data-thumb-link
                         >
                           {%- liquid
-                            render 'image', image: pending_image.preview_image, width: 90, height: 90, sizes: '45px', widths: '45, 60, 90, 120, 180', aspect_ratio: 1
+                            render 'image', image: media.preview_image, width: 90, height: 90, sizes: '45px', widths: '45, 60, 90, 120, 180', aspect_ratio: 1
+
+                            if media.media_type == 'video' or media.media_type == 'external_video'
+                              render 'icon-media-video'
+                            else
+                              if media.media_type == 'model'
+                                render 'icon-media-model'
+                              endif
+                            endif
                           -%}
                         </a>
                       </div>
-                    {%- endif -%}
+                    {%- endfor -%}
                   </div>
                 </product-thumbs>
               {%- endif -%}
@@ -1158,6 +1670,75 @@
           {%- endif -%}
 
           {%- endif -%}
+        {%- liquid
+          assign title_block = section.blocks | where: 'type', 'title' | first
+          assign price_block = section.blocks | where: 'type', 'price' | first
+          assign buttons_block = section.blocks | where: 'type', 'buttons' | first
+
+          assign title_block_style = ''
+          if title_block != blank and title_block.settings.padding_bottom
+            assign title_block_style = '--block-padding-bottom: ' | append: title_block.settings.padding_bottom | append: 'px;'
+            assign title_block_style = 'style="' | append: title_block_style | append: '"'
+          endif
+
+          assign price_block_style = ''
+          if price_block != blank and price_block.settings.padding_bottom
+            assign price_block_style = '--block-padding-bottom: ' | append: price_block.settings.padding_bottom | append: 'px;'
+            assign price_block_style = 'style="' | append: price_block_style | append: '"'
+          endif
+
+          assign buttons_block_style = ''
+          if buttons_block != blank
+            assign bg_accent = buttons_block.settings.bg_color
+            assign icon_size = buttons_block.settings.icon_size
+
+            capture buttons_block_style
+              echo '--block-padding-bottom: 0px;'
+
+              if buttons_block.type == 'upsell' or buttons_block.type == 'bundle-save' or buttons_block.type == 'complementary-products'
+                unless bg_accent == 'rgba(0,0,0,0)' or bg_accent == blank
+                  echo '--bg-accent: ' | append: bg_accent | append: ';'
+                endunless
+              endif
+
+              if icon_size
+                echo '--icon-size:' | append: icon_size | append: 'px;'
+              endif
+            endcapture
+
+            if buttons_block_style != blank
+              assign buttons_block_style = 'style="' | append: buttons_block_style | append: '"'
+            endif
+          endif
+        -%}
+
+        {%- if title_block != blank or price_block != blank -%}
+          <div class="product__sticky-bar">
+            <div class="product__sticky-bar__inner">
+              <div class="product__title-price">
+                {%- if title_block != blank -%}
+                  {%- render 'product-title',
+                    product: product,
+                    block: title_block,
+                    block_style: title_block_style,
+                    is_title_linked: is_title_linked,
+                    onboarding_product: onboarding_product
+                  -%}
+                {%- endif -%}
+
+                {%- if price_block != blank -%}
+                  {%- render 'product-price',
+                    product: product,
+                    block: price_block,
+                    block_style: price_block_style,
+                    onboarding_product: onboarding_product
+                  -%}
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+        {%- endif -%}
+
         <div class="product__content">
           <div
             class="form__wrapper{% unless show_buy_buttons %} form__wrapper--no-buttons{% endunless %}{% unless current_variant.available or onboarding_product %} variant--soldout{% endunless %}{% if settings.form_style == 'classic' %} form__wrapper--classic{% else %} form__wrapper--modern{% endif %}{% if settings.show_newsletter %} show-product-notification{% endif %}"
@@ -1185,7 +1766,60 @@
                 >
               {%- endif -%}
 
+              {%- liquid
+                assign title_block = section.blocks | where: 'type', 'title' | first
+                assign price_block = section.blocks | where: 'type', 'price' | first
+                assign description_block = section.blocks | where: 'type', 'description' | first
+                assign icon_blocks = section.blocks | where: 'type', 'icon'
+                assign side_drawer_blocks = section.blocks | where: 'type', 'side_drawer'
+                assign aside_has_content = false
+
+                if buttons_block != blank or icon_blocks.size > 0 or side_drawer_blocks.size > 0
+                  assign aside_has_content = true
+                endif
+
+                assign title_block_style = ''
+                if title_block != blank and title_block.settings.padding_bottom
+                  assign title_block_style = '--block-padding-bottom: ' | append: title_block.settings.padding_bottom | append: 'px;'
+                  assign title_block_style = 'style="' | append: title_block_style | append: '"'
+                endif
+
+                assign price_block_style = ''
+                if price_block != blank and price_block.settings.padding_bottom
+                  assign price_block_style = '--block-padding-bottom: ' | append: price_block.settings.padding_bottom | append: 'px;'
+                  assign price_block_style = 'style="' | append: price_block_style | append: '"'
+                endif
+
+                assign description_block_style = ''
+                if description_block != blank and description_block.settings.padding_bottom
+                  assign description_block_style = '--block-padding-bottom: ' | append: description_block.settings.padding_bottom | append: 'px;'
+                  assign description_block_style = 'style="' | append: description_block_style | append: '"'
+                endif
+              -%}
+
+              <div class="product__content-columns">
+                <div class="product__content-columns__main">
+                  {%- if description_block != blank -%}
+                    {%- render 'product-description',
+                      product: product,
+                      block: description_block,
+                      block_style: description_block_style
+                    -%}
+                  {%- endif -%}
+
               {%- for block in section.blocks -%}
+                {%- if title_block != blank and block.id == title_block.id -%}
+                  {%- continue -%}
+                {%- endif -%}
+                {%- if price_block != blank and block.id == price_block.id -%}
+                  {%- continue -%}
+                {%- endif -%}
+                {%- if description_block != blank and block.id == description_block.id -%}
+                  {%- continue -%}
+                {%- endif -%}
+                {%- if block.type == 'buttons' or block.type == 'icon' -%}
+                  {%- continue -%}
+                {%- endif -%}
                 {%- liquid
                   assign padding_bottom = block.settings.padding_bottom
                   assign bg_accent = block.settings.bg_color
@@ -1710,6 +2344,50 @@
                     </div>
                 {%- endcase -%}
               {%- endfor -%}
+
+                </div>
+
+                {%- if aside_has_content -%}
+                  <div class="product__content-columns__aside">
+                    {%- if buttons_block != blank -%}
+                      {%- render 'product-buttons',
+                        block: buttons_block,
+                        block_style: buttons_block_style,
+                        product: product,
+                        product_form_id: product_form_id,
+                        preorder: preorder,
+                        onboarding_product: onboarding_product
+                      -%}
+                    {%- endif -%}
+
+                    {%- for block in section.blocks -%}
+                      {%- if block.type == 'icon' -%}
+                        {%- render 'icon', block: block, index: forloop.index0, is_product: true -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+
+                    {%- for block in side_drawer_blocks -%}
+                      {%- liquid
+                        assign drawer_id = block.settings.drawer_id | strip | handleize
+                        if drawer_id == blank
+                          assign drawer_id = block.id
+                        endif
+                      -%}
+
+                      <div class="product__block" {{ block.shopify_attributes }}>
+                        {% render 'link-with-icon',
+                          text: block.settings.trigger_text,
+                          drawer_open: drawer_id,
+                          icon: block.settings.trigger_icon,
+                          icon_position: block.settings.trigger_icon_position,
+                          content_alignment: block.settings.trigger_alignment
+                        %}
+                      </div>
+                    {%- endfor -%}
+                  </div>
+
+                {%- endif -%}
+              </div>
             </div>
           </div>
         </div>
@@ -1747,3 +2425,39 @@
     {{ product | structured_data }}
   </script>
 </product-info>
+
+{%- assign side_drawer_blocks = section.blocks | where: 'type', 'side_drawer' -%}
+
+{%- for block in side_drawer_blocks -%}
+  {%- liquid
+    assign drawer_id = block.settings.drawer_id | strip | handleize
+    if drawer_id == blank
+      assign drawer_id = block.id
+    endif
+  -%}
+
+  <side-drawer
+    class="drawer"
+    data-drawer="{{ drawer_id }}"
+    id="side-drawer-{{ block.id }}"
+    data-drawer-size="{{ block.settings.drawer_size }}"
+    data-drawer-direction="{{ block.settings.drawer_direction }}"
+    {{ block.shopify_attributes }}
+  >
+    <div class="drawer__inner" data-drawer-inner>
+      <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+        {% render 'icon-close' %}
+      </button>
+
+      <div class="drawer__body">
+        {%- case block.settings.drawer_snippet -%}
+          {%- when 'drawer-free-shipping' -%}
+            {%- render 'drawer-free-shipping', block: block -%}
+          {%- when 'drawer-gift-packaging' -%}
+            {%- render 'drawer-gift-packaging', block: block -%}
+        {%- endcase -%}
+      </div>
+    </div>
+    <span class="underlay drawer__underlay" data-drawer-underlay></span>
+  </side-drawer>
+{%- endfor -%}

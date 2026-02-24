@@ -3429,12 +3429,15 @@
 
             this.style = this.dataset.style;
             this.desktop = this.querySelector('[data-header-desktop]');
+            this.body = document.body;
+            this.isCollectionTemplate = this.body.classList.contains('template-collection');
             this.deadLinks = document.querySelectorAll('.navlink[href="#"]');
             this.resizeObserver = null;
             this.checkWidth = this.checkWidth.bind(this);
             this.isSticky = this.hasAttribute('data-header-sticky');
+            this.scrollHideEvent = (e) => this.toggleHeaderHideOnScroll(e);
 
-            document.body.classList.toggle('has-header-sticky', this.isSticky);
+            this.body.classList.toggle('has-header-sticky', this.isSticky);
           }
 
           connectedCallback() {
@@ -3442,6 +3445,7 @@
             this.drawerToggleEvent();
             this.cartToggleEvent();
             this.initSticky();
+            this.initHeaderScrollHide();
 
             if (this.style !== 'drawer' && this.desktop) {
               this.minWidth = this.getMinWidth();
@@ -3484,7 +3488,7 @@
           }
 
           checkWidth() {
-            if (document.body.clientWidth < this.minWidth) {
+            if (document.body.clientWidth < 960) {
               this.classList.add('js__show__mobile');
 
               // Update --header-height CSS variable when switching to a mobile nav
@@ -3549,6 +3553,39 @@
 
             this.listen();
             this.stickOnLoad();
+          }
+
+          initHeaderScrollHide() {
+            document.addEventListener('theme:scroll', this.scrollHideEvent);
+            this.toggleHeaderHideOnScroll({
+              detail: {
+                position: window.scrollY,
+                down: false,
+                up: false,
+              },
+            });
+          }
+
+          toggleHeaderHideOnScroll(e) {
+            const position = typeof e?.detail?.position === 'number' ? e.detail.position : window.scrollY;
+            const atTop = position <= 0;
+            const goingDown = Boolean(e?.detail?.down);
+            const goingUp = Boolean(e?.detail?.up);
+
+            if (this.isCollectionTemplate) {
+              if (atTop) {
+                this.body.classList.remove('header-scroll-hide');
+              } else if (goingDown) {
+                this.body.classList.add('header-scroll-hide');
+              }
+              return;
+            }
+
+            if (atTop || goingUp) {
+              this.body.classList.remove('header-scroll-hide');
+            } else if (goingDown) {
+              this.body.classList.add('header-scroll-hide');
+            }
           }
 
           listen() {
@@ -3625,6 +3662,8 @@
             } else {
               document.removeEventListener('theme:resize', this.checkWidth);
             }
+
+            document.removeEventListener('theme:scroll', this.scrollHideEvent);
 
             if (this.isSticky) {
               document.removeEventListener('theme:scroll', this.scrollEvent);
@@ -3797,6 +3836,7 @@
 
             this.a11y = window.theme.a11y;
             this.isAnimating = false;
+            this.openTimeout = null;
             this.drawer = this;
             this.drawerInner = this.querySelector(selectors$h.drawerInner);
             this.underlay = this.querySelector(selectors$h.underlay);
@@ -3856,29 +3896,47 @@
           }
 
           showDrawer() {
-            if (this.isAnimating) return;
+            if (this.isAnimating || this.classList.contains(classes$d.open)) return;
 
             this.isAnimating = true;
 
-            this.triggerButton?.setAttribute('aria-expanded', true);
-            this.classList.add(classes$d.open, classes$d.animated);
-
-            document.dispatchEvent(new CustomEvent('theme:scroll:lock', {bubbles: true}));
-
-            if (this.drawerInner) {
-              this.a11y.removeTrapFocus();
-
-              window.theme.waitForAnimationEnd(this.drawerInner).then(() => {
-                this.isAnimating = false;
-
-                this.a11y.trapFocus(this.drawerInner, {
-                  elementToFocus: this.querySelector(selectors$h.focusable),
-                });
-              });
+            if (this.openTimeout) {
+              clearTimeout(this.openTimeout);
             }
+
+            this.openTimeout = setTimeout(() => {
+              this.openTimeout = null;
+
+              this.triggerButton?.setAttribute('aria-expanded', true);
+              this.classList.add(classes$d.open, classes$d.animated);
+
+              document.dispatchEvent(new CustomEvent('theme:scroll:lock', {bubbles: true}));
+
+              if (this.drawerInner) {
+                this.a11y.removeTrapFocus();
+
+                window.theme.waitForAnimationEnd(this.drawerInner).then(() => {
+                  this.isAnimating = false;
+
+                  this.a11y.trapFocus(this.drawerInner, {
+                    elementToFocus: this.querySelector(selectors$h.focusable),
+                  });
+                });
+              } else {
+                this.isAnimating = false;
+              }
+            }, 500);
           }
 
           hideDrawer() {
+            if (this.openTimeout) {
+              clearTimeout(this.openTimeout);
+              this.openTimeout = null;
+              this.isAnimating = false;
+              this.triggerButton?.setAttribute('aria-expanded', false);
+              return;
+            }
+
             if (this.isAnimating || !this.classList.contains(classes$d.open)) return;
 
             this.isAnimating = true;
@@ -5576,7 +5634,7 @@
           if (this.swatchesStyle == 'text' || this.swatchesStyle == 'text-slider') {
             if (this.swatchesStyle == 'text') return;
 
-            this.swatchCount.addEventListener('mouseenter', () => {
+            this.productItem.addEventListener('mouseenter', () => {
               if (this.hideSwatchesTimer) clearTimeout(this.hideSwatchesTimer);
 
               this.productInfo.classList.add(classes$7.stopEvents);
@@ -5584,7 +5642,7 @@
             });
 
             // Prevent color swatches blinking on mouse move
-            this.productInfo.addEventListener('mouseleave', () => {
+            this.productItem.addEventListener('mouseleave', () => {
               this.hideSwatchesTimer = setTimeout(() => {
                 this.productInfo.classList.remove(classes$7.stopEvents);
                 this.swatchFieldset.classList.remove(classes$7.visible);
@@ -5642,6 +5700,8 @@
 
     const selectors$8 = {
       flickityButton: '.flickity-prev-next-button',
+      hoverScaleSlide: '.product-item__bg__slide--scale',
+      productItem: '[data-grid-item]',
       productLink: '[data-product-link]',
       slide: '[data-hover-slide]',
       slideTouch: '[data-hover-slide-touch]',
@@ -5658,12 +5718,15 @@
 
         this.flkty = null;
         this.slider = this.querySelector(selectors$8.slider);
+        this.productItem = this.closest(selectors$8.productItem);
         this.handleScroll = this.handleScroll.bind(this);
         this.recentlyViewed = this.closest(selectors$8.recentlyViewed);
         this.hovered = false;
 
         this.mouseEnterEvent = () => this.mouseEnterActions();
         this.mouseLeaveEvent = () => this.mouseLeaveActions();
+        this.productItemMouseEnterEvent = () => this.toggleScaledSlides(true);
+        this.productItemMouseLeaveEvent = () => this.toggleScaledSlides(false);
 
         this.addEventListener('mouseenter', this.mouseEnterEvent);
         this.addEventListener('mouseleave', this.mouseLeaveEvent);
@@ -5679,6 +5742,11 @@
         } else {
           this.initBasedOnDevice();
         }
+
+        if (this.productItem) {
+          this.productItem.addEventListener('mouseenter', this.productItemMouseEnterEvent);
+          this.productItem.addEventListener('mouseleave', this.productItemMouseLeaveEvent);
+        }
       }
 
       disconnectedCallback() {
@@ -5690,6 +5758,11 @@
 
         this.removeEventListener('mouseenter', this.mouseEnterEvent);
         this.removeEventListener('mouseleave', this.mouseLeaveEvent);
+
+        if (this.productItem) {
+          this.productItem.removeEventListener('mouseenter', this.productItemMouseEnterEvent);
+          this.productItem.removeEventListener('mouseleave', this.productItemMouseLeaveEvent);
+        }
       }
 
       initBasedOnDevice() {
@@ -5756,6 +5829,12 @@
         this.hovered = false;
 
         this.videoActions();
+      }
+
+      toggleScaledSlides(isScaled) {
+        this.querySelectorAll(selectors$8.hoverScaleSlide).forEach((slide) => {
+          slide.classList.toggle('is-scaled', isScaled);
+        });
       }
 
       videoActions() {
