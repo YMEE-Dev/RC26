@@ -364,7 +364,7 @@
       line-height: 1.85;
       color: rgba(255,255,255,0.78);
     }
-    .history__center {
+        .history__center {
       display: flex;
       justify-content: center;
       align-items: center;
@@ -540,7 +540,7 @@
       position: absolute;
       left: 0;
       right: 0;
-      bottom: -500px;
+      bottom: -160px;
       z-index: 1;
       pointer-events: none;
       mix-blend-mode: multiply;
@@ -548,17 +548,18 @@
     }
     .timeline-era--ruby__map img {
       display: block;
-      width: 100%;
+      width: min(1200px, 100%);
       height: auto;
+      margin: 0 auto;
     }
-    .timeline-transition {
+.timeline-transition {
       position: relative;
-      margin-top: -2px;
+      margin-top: -60px;
       margin-bottom: 1200px;
       height: 0px;
       pointer-events: none;
       overflow: visible;
-      z-index: 4;
+      z-index: 0;
       display: flex;
       justify-content: center;
       background: transparent;
@@ -570,7 +571,7 @@
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      top: -2px;
+      top: 0;
       width: 100vw;
       max-width: none;
       height: auto;
@@ -585,33 +586,51 @@
     .timeline-transition__shape-overlay {
       fill: var(--timeline-ruby-red);
       mix-blend-mode: multiply;
-      opacity: 1;
+      opacity: 0.92;
     }
-    .timeline-transition__flower-svg {
+    .timeline-transition__flower-red-svg {
       position: absolute;
       left: 50%;
-      top: clamp(26px, 4.2vw, 72px);
+      top: calc(clamp(26px, 4.2vw, 72px) - 500px);
       transform: translateX(-50%);
-      width: clamp(560px, 61.5vw, 1064px);
+      width: 100vw;
+      max-width: none;
+      height: auto;
+      z-index: 2;
+      pointer-events: none;
+      mix-blend-mode: multiply;
+      opacity: 0.95;
+    }
+.timeline-transition__flower-svg {
+      position: absolute;
+      left: 50%;
+      top: calc(clamp(26px, 4.2vw, 72px) - 500px);
+      transform: translateX(-50%);
+      width: 100vw;
+      max-width: none;
       height: auto;
       z-index: 3;
       pointer-events: none;
+      mix-blend-mode: normal;
     }
-    .timeline-transition__flower-svg path {
-      fill: #27574D;
+    .timeline-transition__flower-svg .flower-red {
+      mix-blend-mode: multiply;
+    }
+    .timeline-transition__flower-svg .flower-green {
+      mix-blend-mode: normal;
     }
     .rebranding {
       position: relative;
       background: transparent;
-      padding: 200px 0 120px;
-      min-height: 180vh;
+      padding: 80px 0 24px;
+      min-height: auto;
       display: block;
       z-index: 6;
       margin-bottom: 300px;
     }
     .rebranding__logo {
       position: relative;
-      width: min(1200px, 92vw);
+      width: min(850px, 92vw);
       height: auto;
       min-height: 180px;
       display: block;
@@ -876,19 +895,22 @@
       grid-column: 1 / span 3;
       grid-row: 2;
       text-align: center;
-      margin-top: 70px;
+      margin-top: 40px;
       max-width: 440px;
       margin-left: auto;
       margin-right: auto;
       padding: 0;
     }
     .tl-item--today .tl-media { display: none; }
+    .tl-item--today .tl-body {
+      margin-top: 52px;
+    }
 
     /* ═══════════════════════════════════════
        COLLECTIONS
     ═══════════════════════════════════════ */
     .collections {
-      background: var(--dark);
+      background: transparent;
       display: grid;
       grid-template-columns: 1fr 1fr;
       min-height: 480px;
@@ -951,7 +973,7 @@
         background-attachment: scroll, scroll;
       }
       .timeline-transition {
-        margin-top: 20px;
+        margin-top: -20px;
         margin-bottom: 560px;
         height: 420px;
       }
@@ -960,15 +982,16 @@
         top: -2px;
       }
       .timeline-transition__flower-svg {
-        width: min(82vw, 1064px);
-        top: clamp(22px, 5vw, 54px);
+        width: 100vw;
+        max-width: none;
+        top: calc(clamp(22px, 5vw, 54px) - 500px);
       }
       .rebranding {
-        padding: 180px 0 96px;
-        min-height: 150vh;
+        padding: 80px 0 32px;
+        min-height: auto;
       }
       .rebranding__logo {
-        width: min(1200px, 94vw);
+        width: min(850px, 94vw);
         min-height: 140px;
       }
       .creator { overflow: visible; }
@@ -1093,17 +1116,17 @@
              C15.7 11.41,13.26 13.88,10.87 16.2
              C8.5 18.5,6.18 20.67,3.92 22.28
              L1 24.39 Z"
-          fill="#6E8B85" fill-opacity="0.55"/>
+          fill="#5E7D77" fill-opacity="0.55"/>
 
         <!-- THE CREATOR: x=193 → x=407 -->
         <path class="nav-highlight" id="hl-1"
           d="M193 1 H407 V49 H193 Z"
-          fill="#6E8B85" fill-opacity="0.55"/>
+          fill="#5E7D77" fill-opacity="0.55"/>
 
         <!-- THE RUBY: x=407 → x=611 -->
         <path class="nav-highlight" id="hl-2"
           d="M407 1 H611 V49 H407 Z"
-          fill="#6E8B85" fill-opacity="0.55"/>
+          fill="#5E7D77" fill-opacity="0.55"/>
 
         <!-- TIMELINE: x=611 → right pointed tip -->
         <path class="nav-highlight" id="hl-3"
@@ -1117,7 +1140,7 @@
              C800.24 36.12,797.8 38.58,795.23 40.86
              C790.1 45.4,784.72 49,778.86 49
              H611 Z"
-          fill="#6E8B85" fill-opacity="0.55"/>
+          fill="#5E7D77" fill-opacity="0.55"/>
 
         <!-- ── Background pill outline ── -->
         <path d="M34.7305 1H778.762C784.657 1.00012 790.067 4.57408 795.223 9.1416C797.788 11.4147 800.23 13.8755 802.618 16.1982C804.986 18.5016 807.305 20.6729 809.565 22.2842V22.2852L812.5 24.3945V25.6143L809.566 27.7158C807.308 29.3267 804.99 31.4991 802.623 33.8027C800.236 36.1251 797.795 38.5855 795.229 40.8584C790.103 45.3997 784.723 48.9576 778.862 48.998H34.7305C28.8352 48.998 23.4245 45.4239 18.2686 40.8564C15.7027 38.5835 13.2608 36.1233 10.873 33.8008C8.65216 31.6406 6.47441 29.596 4.34766 28.0215L3.92285 27.7129L1 25.6133V24.3916L3.92285 22.2852C6.18196 20.6742 8.50119 18.5016 10.8691 16.1973C13.2555 13.875 15.6961 11.4144 18.2617 9.1416C23.4175 4.57429 28.8308 1 34.7305 1Z"
@@ -1158,13 +1181,13 @@
            C15.7 11.41,13.26 13.88,10.87 16.2
            C8.5 18.5,6.18 20.67,3.92 22.28
            L1 24.39 Z"
-        fill="#6E8B85" fill-opacity="0.55"/>
+        fill="#5E7D77" fill-opacity="0.55"/>
       <path class="nav-highlight" id="hl-1"
         d="M193 1 H407 V49 H193 Z"
-        fill="#6E8B85" fill-opacity="0.55"/>
+        fill="#5E7D77" fill-opacity="0.55"/>
       <path class="nav-highlight" id="hl-2"
         d="M407 1 H611 V49 H407 Z"
-        fill="#6E8B85" fill-opacity="0.55"/>
+        fill="#5E7D77" fill-opacity="0.55"/>
       <path class="nav-highlight" id="hl-3"
         d="M611 1
            H778.76 C784.66 1,790.07 4.57,795.22 9.14
@@ -1176,7 +1199,7 @@
            C800.24 36.12,797.8 38.58,795.23 40.86
            C790.1 45.4,784.72 49,778.86 49
            H611 Z"
-        fill="#6E8B85" fill-opacity="0.55"/>
+        fill="#5E7D77" fill-opacity="0.55"/>
       <path d="M34.7305 1H778.762C784.657 1.00012 790.067 4.57408 795.223 9.1416C797.788 11.4147 800.23 13.8755 802.618 16.1982C804.986 18.5016 807.305 20.6729 809.565 22.2842V22.2852L812.5 24.3945V25.6143L809.566 27.7158C807.308 29.3267 804.99 31.4991 802.623 33.8027C800.236 36.1251 797.795 38.5855 795.229 40.8584C790.103 45.3997 784.723 48.9576 778.862 48.998H34.7305C28.8352 48.998 23.4245 45.4239 18.2686 40.8564C15.7027 38.5835 13.2608 36.1233 10.873 33.8008C8.65216 31.6406 6.47441 29.596 4.34766 28.0215L3.92285 27.7129L1 25.6133V24.3916L3.92285 22.2852C6.18196 20.6742 8.50119 18.5016 10.8691 16.1973C13.2555 13.875 15.6961 11.4144 18.2617 9.1416C23.4175 4.57429 28.8308 1 34.7305 1Z"
             fill="none" stroke="#27574D" stroke-width="2"/>
       <line x1="193" y1="4" x2="193" y2="46" stroke="#27574D" stroke-width="1.5" stroke-opacity="0.8"/>
@@ -1201,7 +1224,7 @@
     <!-- Left: title + first paragraph -->
     <div class="history__left">
       <h2 class="history__title fade">History</h2>
-      <p class="fade d1">In 1996, Roberto Coin introduced Appassionata, the first collection to feature a hidden ruby — a symbol of protection, passion and prosperity. This signature detail became the heart of the Maison.</p>
+      <p class="fade d1">In 1996, Roberto Coin introduced Appassionata, the first collection to feature a hidden ruby, a symbol of protection, passion and prosperity. This signature detail became the heart of the Maison.</p>
     </div>
 
     <!-- Center: ring illustration with multiply blend -->
@@ -1228,8 +1251,8 @@
     <div class="creator__text">
       <h2 class="creator__title fade">The Creator</h2>
       <div class="creator__body">
-        <p class="fade d1">Roberto Coin's journey did not begin in jewelry. After a successful career in luxury hospitality across Europe, he returned to Italy and immersed himself in the goldsmith tradition of Vicenza. In 1984, he began designing under his own name — marking the start of a new creative chapter.</p>
-        <p class="fade d2">At 33, he returned to Italy and immersed himself in the goldsmith tradition of Vicenza — the historic heart of Italian jewelry. In 1984, he began designing under his own name, transforming experience into creativity and vision into craftsmanship. That decision marked the true beginning of the Maison.</p>
+        <p class="fade d1">Roberto Coin’s journey did not begin in jewelry. After a successful career in luxury hospitality across Europe, he returned to Italy and immersed himself in the goldsmith tradition of Vicenza. In 1984, he began designing under his own name, marking the start of a new creative chapter.</p>
+        <p class="fade d2">At 33, he returned to Italy and immersed himself in the goldsmith tradition of Vicenza, the historic heart of Italian jewelry. In 1984, he began designing under his own name, transforming experience into creativity and vision into craftsmanship. That decision marked the true beginning of the Maison.</p>
       </div>
     </div>
   </div>
@@ -1246,8 +1269,11 @@
     <div class="ruby-section__content">
       <h2 class="ruby-section__title fade">The Ruby</h2>
       <div class="ruby-section__body">
-        <p class="fade d1">Roberto Coin chose the ruby as the hidden signature of his creations. Inspired by ancient cultures, where the ruby symbolized protection, vitality and passion, he transformed it into a discreet talisman worn close to the skin.</p>
-        <p class="fade d2">Set inside every jewel, the ruby is not meant to be seen — but to be felt. A quiet symbol of strength, courage and enduring beauty that connects each creation to its wearer.</p>
+        <p class="fade d1">Roberto Coin chose the ruby as the hidden signature of his creations.</p>
+
+        <p class="fade d2">Inspired by ancient cultures, where the ruby symbolized protection, vitality and passion, he transformed it into a discreet talisman worn close to the skin.</p>
+
+        <p class="fade">Set inside every jewel, the ruby is not meant to be seen but to be felt. A quiet symbol of strength, courage and enduring beauty that connects each creation to its wearer.</p>
       </div>
     </div>
     <div class="ruby-section__gem fade d1">
@@ -1355,14 +1381,14 @@
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
       <div class="tl-event">
         <div class="tl-year">2013</div>
-        <p class="tl-body">CNN released its third feature on Roberto Coin, highlighting the Love in Verona collection.</p>
+        <p class="tl-body">He was recognized by the Phillips Collection in Washington for his contribution to American culture and honored at Vicenzaoro for Corporate Social Responsibility.</p>
       </div>
     </div>
 
     <div class="tl-item tl-item--left">
       <div class="tl-event">
         <div class="tl-year">2014</div>
-        <p class="tl-body">The collection Pois Moi is awarded Best Italian Collection in the World.</p>
+        <p class="tl-body">His collection, Pois Moi, was awarded the Best Italian Collection in the World at the Vicenza Fair during the Andrea Palladio International Jewelry Awards.</p>
         <a class="tl-cta" href="#">Discover Pois Moi Collection</a>
       </div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
@@ -1381,22 +1407,32 @@
     <div class="tl-item tl-item--left">
       <div class="tl-event">
         <div class="tl-year">2021</div>
-        <p class="tl-body">He received an award from the Phillips Collection in Washington and was honored at Vicenzaoro as President of the Best Corporate Social Responsibility Brand.</p>
+        <p class="tl-body">CNN released its third feature on Roberto Coin, highlighting the Maison’s creative vision and the Love in Verona collection.</p>
       </div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
       <div class="tl-media"><img src="assets/figma-images/RC_Princessflower.png" alt="2021 RC Princess Flower"></div>
     </div>
 
     <div class="tl-item tl-item--right">
-      <div class="tl-media"><img src="assets/figma-images/Lifetimachievment award.png" alt="2025"></div>
+      <div class="tl-event">
+        <div class="tl-year">2022</div>
+        <p class="tl-body">He created an enchanting collection for the second season of Emily in Paris.</p>
+      </div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+      <div class="tl-media"><img src="assets/figma-images/RC_Emily in Paris.png" alt="2022 Emily in Paris"></div>
+    </div>
+
+    <div class="tl-item tl-item--left">
       <div class="tl-event">
         <div class="tl-year">2025</div>
-        <p class="tl-body">Roberto Coin received the Lifetime Achievement Award in Jewelry at the Fashion Group International Night of Stars Gala in Dallas.</p>
+        <p class="tl-body">Roberto Coin received the Lifetime Achievement Award in Jewelry at the Fashion Group International Night of Stars Gala in Dallas and was invited as a guest speaker at the United Nations Fashion &amp; Lifestyle Network, promoting innovation, responsibility and sustainable growth.</p>
       </div>
+      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
+      <div class="tl-media"><img src="assets/figma-images/Lifetimachievment award.png" alt="2025"></div>
     </div>
 
       <div class="tl-item tl-item--left tl-item--today">
+
         <div class="tl-event">
           <div class="tl-year">Today</div>
           <p class="tl-body">Present in over 60 countries worldwide. The ruby has become an enduring symbol of the Maison.</p>
@@ -1405,18 +1441,18 @@
         <div class="tl-media"><img src="assets/figma-images/timeline-today.jpg" alt="Today"></div>
       </div>
     </div>
-    <div class="timeline-transition" aria-hidden="true">
-      <svg class="timeline-transition__shape-svg" width="1730" height="690" viewBox="0 0 1730 690" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <div class="timeline-transition" aria-hidden="true">
+      <svg class="timeline-transition__flower-red-svg" width="1729" height="1660" viewBox="0 0 1729 1660" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 0V1121.05H352.51L376.91 1103.65C440.96 1058.17 514.35 947.54 606.41 947.54C642.45 947.54 680.9 966.11 761.32 1034.88L792.74 1061.68L800.97 1039.49L774.17 1008.07C705.5 927.76 686.83 945.22 686.83 853.16C686.83 761.1 797.46 687.71 842.94 623.66L860.41 599.16H876.67L894.14 623.66C940.72 688.92 1050.25 761.1 1050.25 853.16C1050.25 889.2 1031.68 927.65 962.91 1008.07L936.11 1039.49H935.68L935.11 1061.68L966.53 1034.88C1046.84 966.21 1029.38 947.54 1121.44 947.54C1213.5 947.54 1286.89 1058.17 1350.94 1103.65L1375.34 1121.05H1728.01V0H0Z" fill="url(#paint0_linear_3833_3435)"/>
         <defs>
-          <pattern id="timeline-transition-shape-texture" patternUnits="userSpaceOnUse" width="1730" height="690">
-            <image href="assets/figma-images/hero-bg.jpg" x="0" y="0" width="1730" height="690" preserveAspectRatio="xMidYMid slice"/>
-          </pattern>
+          <linearGradient id="paint0_linear_3833_3435" x1="864.005" y1="0" x2="864.005" y2="1121.05" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#2E0606" stop-opacity="0"/>
+            <stop offset="0.24" stop-color="#2E0606" stop-opacity="1"/>
+          </linearGradient>
         </defs>
-        <path class="timeline-transition__shape-base" d="M1729.5 0C1729.5 551.615 1729.5 137.891 1729.5 689.506C1531 681.506 1474.5 640.007 1395.5 578.007C1229.5 485.967 1127.95 429.237 1101 447.007C1095.14 450.87 1001.58 506.021 954.5 519C945.5 519 939.5 515.5 933 510C1045.5 306.5 987.318 199.197 848.797 195.359C823.743 194.665 744 292.993 748.5 370C753 447.007 798.561 508.216 797 510C793.5 514 777 519 771 519C761.5 511 694 460 694 460C694 460 518.549 438.164 332 578.007C126.5 660.007 130 689.506 -0.000884631 689.506L-0.000854492 0.000298658L1729.5 0Z"/>
-        <path class="timeline-transition__shape-overlay" d="M1729.5 0C1729.5 551.615 1729.5 137.891 1729.5 689.506C1531 681.506 1474.5 640.007 1395.5 578.007C1229.5 485.967 1127.95 429.237 1101 447.007C1095.14 450.87 1001.58 506.021 954.5 519C945.5 519 939.5 515.5 933 510C1045.5 306.5 987.318 199.197 848.797 195.359C823.743 194.665 744 292.993 748.5 370C753 447.007 798.561 508.216 797 510C793.5 514 777 519 771 519C761.5 511 694 460 694 460C694 460 518.549 438.164 332 578.007C126.5 660.007 130 689.506 -0.000884631 689.506L-0.000854492 0.000298658L1729.5 0Z"/>
       </svg>
-      <svg class="timeline-transition__flower-svg" width="1064" height="1023" viewBox="0 0 1064 1023" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M437.088 574.435C385.654 610.527 357.613 623.346 309.691 623.346C248.91 623.346 184.619 586.072 137.883 516.159C184.619 446.247 248.91 408.973 309.691 408.973C357.613 408.973 385.654 421.792 437.088 457.931L441.785 448.612L410.232 421.792C329.571 353.062 290.996 334.378 254.794 334.378C162.46 334.378 88.8217 445.064 24.5301 490.522L-0.000266461 507.976L-0.000267178 524.295L24.5301 541.797C87.6355 587.254 162.46 697.941 254.794 697.941C291.044 697.941 329.619 679.304 410.232 610.527L441.785 583.754L437.088 574.435ZM557.462 24.4552L539.907 -2.06387e-09L523.537 -7.13866e-07L506.029 24.4552C459.293 89.6846 349.404 161.915 349.404 254.012C349.404 290.15 368.099 328.56 437.04 408.973L463.943 440.429L473.29 435.746C437.04 384.471 424.229 356.515 424.229 309.923C424.229 248.146 462.804 184.099 531.746 138.642C600.735 184.099 639.262 248.194 639.262 309.923C639.262 356.515 626.404 384.471 590.154 435.746L599.501 440.429L626.356 408.973C695.298 328.56 714.04 290.15 714.04 254.012C714.04 161.962 603.012 88.5494 557.415 24.4552M626.404 614.027L599.548 582.571L590.201 587.207C626.451 638.482 639.309 666.438 639.309 713.03C639.309 774.759 600.735 838.853 531.793 884.311C462.852 838.853 424.277 774.759 424.277 713.03C424.277 666.438 437.135 638.482 473.337 587.207L463.99 582.571L437.088 614.027C368.146 694.44 349.452 732.897 349.452 768.988C349.452 861.038 459.34 933.268 506.076 998.545L523.585 1023L539.954 1023L557.51 998.545C603.107 934.451 714.134 861.038 714.134 768.988C714.134 732.85 695.44 694.393 626.451 614.027M1063.54 508.023L1039.01 490.569C974.717 445.112 901.078 334.425 808.745 334.425C772.543 334.425 733.968 353.062 653.307 421.839L621.754 448.659L626.451 457.978C677.884 421.839 705.926 409.02 752.662 409.02C814.581 409.02 878.873 447.477 924.47 516.207C878.873 584.936 814.581 623.393 752.662 623.393C705.926 623.393 677.884 610.574 626.451 574.483L621.754 583.801L653.307 610.574C733.968 679.351 772.543 697.988 808.745 697.988C901.078 697.988 973.531 588.484 1039.01 541.844L1063.54 524.343L1063.54 508.023Z" fill="#27574D"/>
+      <svg class="timeline-transition__flower-svg" width="1729" height="1660" viewBox="0 0 1729 1660" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1121.43 1310.96C1213.49 1310.96 1285.67 1201.43 1350.93 1154.85L1375.43 1137.38V1121.12L1350.93 1103.65C1286.88 1058.17 1213.49 947.54 1121.43 947.54C1029.37 947.54 1046.84 966.21 966.52 1034.88L935.1 1061.68L938.61 1069.81C992.22 1029.05 1024.85 1011.58 1077.25 1011.58C1129.65 1011.58 1211.17 1053.54 1260.17 1129.24C1211.28 1204.94 1142.51 1246.9 1077.25 1246.9C1011.99 1246.9 992.22 1229.43 938.61 1188.67L935.1 1196.8L966.52 1223.6C1046.93 1292.37 1085.38 1310.94 1121.43 1310.94M606.41 1310.96C642.55 1310.96 681 1292.29 761.32 1223.62L792.74 1196.82L789.23 1188.69C735.62 1229.45 702.99 1246.92 650.59 1246.92C598.19 1246.92 516.57 1204.96 467.67 1129.26C516.56 1053.56 585.33 1011.6 650.59 1011.6C715.85 1011.6 735.62 1029.07 789.23 1069.83L792.74 1061.7L761.32 1034.9C680.91 966.13 642.46 947.56 606.41 947.56C514.35 947.56 440.96 1058.19 376.91 1103.67L352.41 1121.14V1137.4L376.91 1154.87C442.17 1201.45 514.35 1310.98 606.41 1310.98M860.4 1659.32H876.66L894.13 1634.82C939.61 1570.77 1050.24 1497.38 1050.24 1405.32C1050.24 1313.26 1031.57 1330.73 962.9 1250.41L936.1 1218.99L927.97 1222.5C968.73 1276.11 986.2 1308.74 986.2 1361.14C986.2 1413.54 943.13 1496.27 868.54 1544.06C793.95 1496.27 750.88 1426.4 750.88 1361.14C750.88 1295.88 768.35 1276.11 809.11 1222.5L800.98 1218.99L774.18 1250.41C705.41 1330.82 686.84 1369.27 686.84 1405.32C686.84 1497.38 797.47 1570.77 842.95 1634.82L860.42 1659.32H860.4ZM800.97 1039.49L809.1 1035.98C768.34 982.37 750.87 949.74 750.87 897.34C750.87 844.94 792.83 763.32 868.53 714.42C944.23 763.31 986.19 832.08 986.19 897.34C986.19 962.6 968.72 982.37 927.96 1035.98L936.09 1039.49L962.89 1008.07C1031.66 927.66 1050.23 889.21 1050.23 853.16C1050.23 761.1 940.7 688.92 894.12 623.66L876.65 599.16H860.39L842.92 623.66C797.44 687.71 686.81 761.1 686.81 853.16C686.81 945.22 705.48 927.75 774.15 1008.07L800.95 1039.49H800.97Z" fill="#27574D"/>
       </svg>
     </div>
   </div>
