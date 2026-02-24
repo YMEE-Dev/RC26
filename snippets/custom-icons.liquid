@@ -1,0 +1,148 @@
+{% doc %}
+  Renders the custom value-props icon list used in text blocks.
+
+  @param {string} [animation_anchor] - Optional anchor used by theme animations.
+  @param {number} [animation_order] - Optional animation sequence order.
+
+  @example
+  {% render 'custom-icons', animation_anchor: animation_anchor, animation_order: animation_order %}
+{% enddoc %}
+
+{%- liquid
+  assign animation_anchor = animation_anchor | default: ''
+  assign animation_order = animation_order | default: 1
+-%}
+
+<div class="custom-icons">
+  <ul
+    class="custom-icons__list"
+    role="list"
+    {% if animation_anchor %}
+      data-aos="hero"
+      data-aos-anchor="{{ animation_anchor }}"
+      data-aos-order="{{ animation_order }}"
+    {% endif %}
+  >
+    <li class="custom-icons__item">
+      <span class="custom-icons__icon custom-icons__icon--shipping" aria-hidden="true">
+        {% comment %} Add shipping SVG here {% endcomment %}
+        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
+          <path d="M19.875 8.90028L16.6505 4.80078H8.35072L5.12622 8.90028V20.2H19.8762L19.875 8.90028ZM18.5996 8.62488H12.9248V5.65038H16.2501L18.5996 8.62488ZM8.75007 5.65038H12.0753V8.62488H6.40057L8.75007 5.65038ZM5.95032 19.3496V9.44913H19.0498V19.3496H5.95032ZM12.5001 11.2754L14.6749 13.4502L14.0753 14.0498L12.9005 12.875V17.3252H12.0753V12.875L10.9005 14.0498L10.3009 13.4502L12.5001 11.2754Z" fill="black"/>
+        </svg>
+      </span>
+      <span class=" navlink">FREE SHIPPING</span>
+    </li>
+
+    <li class="custom-icons__item">
+      <span class="custom-icons__icon custom-icons__icon--returns" aria-hidden="true">
+        {% comment %} Add returns SVG here {% endcomment %}
+        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
+          <path d="M18.5 19.3748C18.5 20.2078 17.25 20.2078 17.25 19.3748C17.25 18.5417 18.5 18.5417 18.5 19.3748Z" fill="black"/>
+          <path d="M9.75 19.3748C9.75 20.2078 8.5 20.2078 8.5 19.3748C8.5 18.5417 9.75 18.5417 9.75 19.3748Z" fill="black"/>
+          <path d="M18.0547 14.8827C19.3272 13.6298 20.0196 11.958 20 10.1777C19.9873 8.97751 18.9776 7.99998 17.75 7.99998H12.207L14.085 6.12206C14.2627 5.94237 14.2998 5.67478 14.1728 5.48241C14.083 5.34764 13.9551 5.26952 13.8008 5.25194C13.6504 5.23729 13.5029 5.28905 13.3955 5.39647L11.498 7.29392C11.1758 7.61619 10.998 8.04684 10.998 8.50094C10.998 8.95602 11.1758 9.38572 11.498 9.70797L13.3926 11.6054C13.498 11.7109 13.6426 11.7626 13.79 11.7499C13.9424 11.7373 14.0703 11.6621 14.1601 11.5322C14.293 11.3417 14.25 11.0468 14.0605 10.8574L12.2051 8.99995H17.7481C18.4356 8.99995 18.9981 9.55758 18.9981 10.2451C18.9981 11.7578 18.3985 13.1698 17.3008 14.2196C16.2061 15.2694 14.7685 15.8124 13.2558 15.745C10.3085 15.617 7.99804 13.1472 7.99804 10.123V7.50098C7.99804 6.15138 6.90039 5.02833 5.55076 5.00098H5.541C5.25877 5.00098 5.00877 5.2207 4.99802 5.48145C4.99314 5.61622 5.04099 5.7461 5.13572 5.84375C5.22849 5.94141 5.35544 5.99902 5.49119 5.99902C6.33592 6.01367 6.99899 6.67187 6.99899 7.4961V10.0986C6.99899 13.6688 9.83099 16.6484 13.3165 16.7461C15.0987 16.791 16.7842 16.1309 18.0567 14.8809L18.0547 14.8827Z" fill="black"/>
+        </svg>
+      </span>
+      <span class=" navlink">14-DAYS FREE RETURNS</span>
+    </li>
+
+    <li class="custom-icons__item">
+      <span class="custom-icons__icon custom-icons__icon--warranty" aria-hidden="true">
+        {% comment %} Add warranty SVG here {% endcomment %}
+        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
+          <path d="M17.328 22.0917H7.67176C7.26356 22.0917 6.80163 21.8251 6.59656 21.4715L1.76856 13.12C1.56445 12.7665 1.56445 12.2323 1.76856 11.8788L6.59656 3.52833C6.80066 3.1748 7.26356 2.9082 7.67176 2.9082H17.329C17.7372 2.9082 18.1991 3.1748 18.4042 3.52833L23.2322 11.8798C23.4363 12.2334 23.4363 12.7675 23.2322 13.121L18.4032 21.4715C18.1991 21.8251 17.7362 22.0917 17.328 22.0917ZM7.67176 3.65815C7.53113 3.65815 7.31628 3.78218 7.24598 3.90327L2.41798 12.2548C2.34767 12.3759 2.34767 12.6239 2.41798 12.745L7.24598 21.0965C7.31629 21.2176 7.53113 21.3416 7.67176 21.3416H17.329C17.4696 21.3416 17.6845 21.2176 17.7548 21.0965L22.5828 12.746C22.6531 12.6249 22.6531 12.3768 22.5828 12.2558L17.7538 3.90327C17.6835 3.78218 17.4686 3.65815 17.328 3.65815H7.67176Z" fill="black"/>
+          <path d="M11.8915 16.5857C11.7626 16.5857 11.6425 16.5281 11.5624 16.4265L8.61717 12.7135C8.47362 12.5319 8.50389 12.2662 8.68553 12.1227C8.86229 11.984 9.13671 12.0162 9.27636 12.19L11.8339 15.4155L15.6874 8.62655C15.7977 8.43221 16.0653 8.358 16.2596 8.46835C16.3583 8.52401 16.4286 8.61385 16.4579 8.72225C16.4872 8.83064 16.4735 8.94393 16.4188 9.04157L12.2576 16.3726C12.1882 16.4946 12.0642 16.5737 11.9246 16.5845C11.9177 16.5845 11.8982 16.5855 11.8914 16.5855L11.8915 16.5857Z" fill="black"/>
+        </svg>
+      </span>
+      <span class=" navlink">2-YEARS WARRANTY</span>
+    </li>
+
+    <li class="custom-icons__item">
+      <span class="custom-icons__icon custom-icons__icon--packaging" aria-hidden="true">
+        {% comment %} Add packaging SVG here {% endcomment %}
+        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
+          <path d="M19 7H16.5742C16.6885 6.7666 16.749 6.50977 16.75 6.25C16.749 5.28417 15.9658 4.50097 15 4.5C14.1269 4.5 13.0976 5.3916 12.5 6.27443C11.9023 5.39163 10.873 4.5 10 4.5C9.03417 4.50098 8.25097 5.28417 8.25 6.25C8.25097 6.50977 8.31152 6.7666 8.42578 7H6C5.17188 7.00098 4.50098 7.67188 4.5 8.5V11.5C4.50195 12.2305 5.0293 12.8535 5.75 12.9746V19.0001C5.75098 19.8282 6.42188 20.4991 7.25 20.5001H17.75C18.5781 20.4991 19.249 19.8282 19.25 19.0001V12.9746C19.9707 12.8535 20.4981 12.2305 20.5 11.5V8.5C20.499 7.67188 19.8281 7.00097 19 7ZM15 5.5C15.4131 5.5 15.749 5.83495 15.75 6.24902C15.75 6.6621 15.416 6.99805 15.0019 7H13.2041C13.5869 6.37305 14.4297 5.5 15 5.5ZM9.24999 6.25C9.24999 5.83595 9.58594 5.5 9.99999 5.5C10.5703 5.5 11.4131 6.37305 11.7959 7H9.99804C9.58497 6.99805 9.25097 6.66307 9.24999 6.25ZM5.49999 11.5V8.5C5.49999 8.22362 5.72362 8 5.99999 8H12V12H5.99999C5.72362 11.999 5.49999 11.7754 5.49999 11.5ZM6.74999 19V13H12V19.5H7.24999C6.97362 19.5 6.74999 19.2764 6.74999 19ZM17.75 19.5H13V13H18.25V19C18.25 19.2764 18.0264 19.5 17.75 19.5ZM19.5 11.5C19.5 11.7754 19.2764 11.999 19 12H13V8H19C19.2764 8 19.5 8.22363 19.5 8.5V11.5Z" fill="black"/>
+        </svg>
+      </span>
+      <span class=" navlink">PREMIUM PACKAGING</span>
+    </li>
+  </ul>
+</div>
+
+{% stylesheet %}
+  .custom-icons {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex-basis: 100%;
+    justify-content: flex-end;
+  }
+
+  .custom-icons__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 15px;
+  }
+
+  .custom-icons__item {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 10px;
+    align-items: center;
+    margin: 0;
+  }
+
+  .custom-icons__item .navlink {
+    padding: 0;
+    margin: 0;
+  }
+
+  .custom-icons__icon {
+    width: 25px;
+    height: 25px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+  }
+
+  .custom-icons__icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .custom-icons__label {
+    margin: 0;
+    color: var(--text);
+    font-size: var(--font-body-large);
+    letter-spacing: 0.14em;
+    line-height: 1.25;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  @media only screen and (max-width: 749px) {
+    .custom-icons__list {
+      gap: 12px;
+    }
+
+    .custom-icons__item {
+      grid-template-columns: 30px minmax(0, 1fr);
+      column-gap: 12px;
+    }
+
+    .custom-icons__icon {
+      width: 26px;
+      height: 26px;
+    }
+
+    .custom-icons__label {
+      font-size: var(--font-body-medium);
+      letter-spacing: 0.11em;
+      white-space: normal;
+    }
+  }
+{% endstylesheet %}
