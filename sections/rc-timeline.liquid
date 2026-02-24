@@ -1,0 +1,1135 @@
+{%- comment -%}
+  Section: RC Heritage Timeline
+  Page: /pages/heritage  or /pages/our-story
+  Usage: Add to templates/page.rc-timeline.json
+{%- endcomment -%}
+
+{%- style -%}
+  /* ─────────────────────────────────────────
+     RC Heritage Timeline — Section Styles
+  ───────────────────────────────────────── */
+  :root {
+    --rc-ruby:      #B3261E;
+    --rc-green:     #26564C;
+    --rc-teal:      #397E70;
+    --rc-gold:      #B29437;
+    --rc-white:     #FFFFFF;
+    --rc-light:     #E5E5E5;
+    --rc-offwhite:  #F9F9F9;
+    --rc-dark:      #1A1A1A;
+    --rc-font-head: 'Portrait LC', Georgia, serif;
+    --rc-font-body: 'Inter', Helvetica, Arial, sans-serif;
+  }
+
+  .rct * { box-sizing: border-box; margin: 0; padding: 0; }
+  .rct img { display: block; max-width: 100%; }
+  .rct a { text-decoration: none; color: inherit; }
+
+  /* ── Section Navigation ── */
+  .rct-nav {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: var(--rc-green);
+    width: 100%;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .rct-nav__inner {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    height: 50px;
+    max-width: 1728px;
+    margin: 0 auto;
+  }
+  .rct-nav__tab {
+    display: flex;
+    align-items: center;
+    padding: 0 32px;
+    color: var(--rc-white);
+    font-family: var(--rc-font-body);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-right: 1px solid rgba(255,255,255,0.15);
+    transition: background 0.25s ease;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .rct-nav__tab:first-child { border-left: 1px solid rgba(255,255,255,0.15); }
+  .rct-nav__tab.is-active,
+  .rct-nav__tab:hover { background: var(--rc-gold); }
+
+  /* ── Hero ── */
+  .rct-hero {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+  }
+  .rct-hero__bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  .rct-hero__vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(255,255,255,0) 0%, rgba(46,46,46,0.75) 100%);
+  }
+  .rct-hero__content {
+    position: relative;
+    z-index: 2;
+    padding: 60px 80px 80px;
+    color: var(--rc-white);
+    max-width: 640px;
+  }
+  .rct-hero__eyebrow {
+    font-family: var(--rc-font-body);
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    opacity: 0.85;
+  }
+  .rct-hero__title {
+    font-family: var(--rc-font-head);
+    font-size: clamp(36px, 5vw, 60px);
+    font-weight: 500;
+    line-height: 1.15;
+    margin-bottom: 48px;
+  }
+  .rct-hero__scroll {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--rc-font-body);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .rct-hero__scroll-line {
+    display: block;
+    width: 32px;
+    height: 1px;
+    background: var(--rc-white);
+    animation: rct-scroll-pulse 2s ease-in-out infinite;
+  }
+  @keyframes rct-scroll-pulse {
+    0%, 100% { width: 32px; opacity: 1; }
+    50% { width: 56px; opacity: 0.6; }
+  }
+
+  /* ── History ── */
+  .rct-history {
+    position: relative;
+    background: var(--rc-dark);
+    padding: 120px 80px;
+    overflow: hidden;
+  }
+  .rct-history__inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .rct-history__text {
+    color: var(--rc-white);
+    align-self: start;
+    margin-top: -18px;
+    margin-left: -20px;
+  }
+  .rct-history__title {
+    font-family: var(--rc-font-head);
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 500;
+    margin-bottom: 32px;
+  }
+  .rct-history__body p {
+    font-family: var(--rc-font-body);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.75;
+    color: rgba(255,255,255,0.85);
+    margin-bottom: 20px;
+  }
+  .rct-history__image {
+    position: relative;
+    width: min(700px, 100%);
+    justify-self: end;
+    align-self: end;
+    margin-top: 34px;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+  .rct-history__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ── The Creator ── */
+  .rct-creator {
+    position: relative;
+    background: var(--rc-offwhite);
+    overflow: hidden;
+  }
+  .rct-creator__inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 700px;
+  }
+  .rct-creator__image {
+    position: relative;
+    overflow: hidden;
+  }
+  .rct-creator__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .rct-creator__text {
+    background: var(--rc-offwhite);
+    padding: 80px 72px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .rct-creator__title {
+    font-family: var(--rc-font-head);
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 500;
+    color: #000;
+    margin-bottom: 28px;
+  }
+  .rct-creator__body p {
+    font-family: var(--rc-font-body);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.75;
+    color: #111;
+    margin-bottom: 20px;
+  }
+
+  /* ── The Ruby ── */
+  .rct-ruby {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+  .rct-ruby__bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+  }
+  .rct-ruby__vignette {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(20,10,10,0.5) 100%);
+  }
+  .rct-ruby__inner {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    padding: 100px 80px;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .rct-ruby__text { color: var(--rc-white); }
+  .rct-ruby__title {
+    font-family: var(--rc-font-head);
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 500;
+    margin-bottom: 28px;
+  }
+  .rct-ruby__body p {
+    font-family: var(--rc-font-body);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.75;
+    color: rgba(255,255,255,0.88);
+    margin-bottom: 20px;
+  }
+  .rct-ruby__gem {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .rct-ruby__gem img {
+    width: min(366px, 80%);
+    height: auto;
+    filter: drop-shadow(0 20px 60px rgba(179,38,30,0.4));
+  }
+
+  /* ── Timeline Section ── */
+  .rct-timeline-section {
+    background: var(--rc-ruby);
+    padding: 100px 0 120px;
+    overflow: hidden;
+  }
+  .rct-timeline-section__header {
+    text-align: center;
+    padding: 0 80px 80px;
+  }
+  .rct-timeline-section__title {
+    font-family: var(--rc-font-head);
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 500;
+    color: var(--rc-white);
+    margin-bottom: 16px;
+  }
+
+  /* Timeline early era (light bg) */
+  .rct-timeline--light {
+    background: var(--rc-light);
+    padding: 80px 0;
+    margin-bottom: 0;
+  }
+  .rct-timeline--light .rct-timeline__year { color: #000; }
+  .rct-timeline--light .rct-timeline__body { color: #111; }
+  .rct-timeline--light .rct-timeline__line { background: #999; }
+  .rct-timeline--light .rct-timeline__dot {
+    background: #000;
+    border-color: var(--rc-light);
+  }
+
+  /* Shared timeline structure */
+  .rct-timeline {
+    position: relative;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+  .rct-timeline__spine {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(255,255,255,0.25);
+    transform: translateX(-50%);
+  }
+  .rct-timeline--light .rct-timeline__spine { background: rgba(0,0,0,0.15); }
+
+  .rct-timeline__item {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 0;
+    align-items: start;
+    margin-bottom: 60px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .rct-timeline__item.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Left-side event */
+  .rct-timeline__item--left .rct-timeline__event {
+    grid-column: 1;
+    text-align: right;
+    padding-right: 40px;
+    padding-top: 4px;
+  }
+  .rct-timeline__item--left .rct-timeline__center { grid-column: 2; }
+  .rct-timeline__item--left .rct-timeline__media { grid-column: 3; padding-left: 40px; }
+
+  /* Right-side event */
+  .rct-timeline__item--right .rct-timeline__media { grid-column: 1; padding-right: 40px; }
+  .rct-timeline__item--right .rct-timeline__center { grid-column: 2; }
+  .rct-timeline__item--right .rct-timeline__event {
+    grid-column: 3;
+    text-align: left;
+    padding-left: 40px;
+    padding-top: 4px;
+  }
+
+  .rct-timeline__center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .rct-timeline__dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--rc-white);
+    border: 3px solid var(--rc-ruby);
+    flex-shrink: 0;
+    margin-top: 8px;
+  }
+  .rct-timeline__connector {
+    flex: 1;
+    width: 1px;
+    min-height: 20px;
+    background: rgba(255,255,255,0.25);
+  }
+
+  .rct-timeline__year {
+    font-family: var(--rc-font-head);
+    font-size: clamp(24px, 3vw, 40px);
+    font-weight: 500;
+    color: var(--rc-white);
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .rct-timeline__body {
+    font-family: var(--rc-font-body);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.85);
+  }
+  .rct-timeline__cta {
+    display: inline-block;
+    margin-top: 14px;
+    font-family: var(--rc-font-body);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--rc-white);
+    border-bottom: 1px solid rgba(255,255,255,0.5);
+    padding-bottom: 2px;
+    transition: border-color 0.2s, opacity 0.2s;
+  }
+  .rct-timeline__cta:hover { border-color: var(--rc-white); opacity: 0.75; }
+  .rct-timeline--light .rct-timeline__cta { color: #000; border-color: rgba(0,0,0,0.4); }
+  .rct-timeline--light .rct-timeline__cta:hover { border-color: #000; }
+
+  .rct-timeline__media img {
+    width: 100%;
+    max-width: 397px;
+    height: 240px;
+    object-fit: cover;
+    display: block;
+  }
+  .rct-timeline__media--empty { min-height: 1px; }
+
+  /* Today special block */
+  .rct-timeline__item--today .rct-timeline__year {
+    font-size: clamp(20px, 2.5vw, 32px);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Collections ── */
+  .rct-collections {
+    background: var(--rc-green);
+    padding: 80px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    align-items: stretch;
+    min-height: 480px;
+  }
+  .rct-collections__text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-right: 60px;
+  }
+  .rct-collections__eyebrow {
+    font-family: var(--rc-font-body);
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--rc-white);
+    margin-bottom: 32px;
+    letter-spacing: 0.05em;
+  }
+  .rct-collections__list {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+  .rct-collections__list li a {
+    font-family: var(--rc-font-head);
+    font-size: clamp(20px, 2.5vw, 32px);
+    font-weight: 500;
+    color: var(--rc-teal);
+    transition: color 0.2s;
+    line-height: 1.4;
+  }
+  .rct-collections__list li a:hover,
+  .rct-collections__list li.is-active a {
+    color: var(--rc-white);
+  }
+  .rct-collections__image {
+    position: relative;
+    overflow: hidden;
+  }
+  .rct-collections__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ── Fade-in utility ── */
+  .rct-fade {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .rct-fade.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .rct-fade--delay-1 { transition-delay: 0.1s; }
+  .rct-fade--delay-2 { transition-delay: 0.2s; }
+  .rct-fade--delay-3 { transition-delay: 0.3s; }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .rct-history__inner,
+    .rct-creator__inner,
+    .rct-ruby__inner,
+    .rct-collections {
+      grid-template-columns: 1fr;
+    }
+    .rct-history,
+    .rct-creator__text,
+    .rct-ruby__inner {
+      padding: 60px 24px;
+    }
+    .rct-history__text {
+      margin-top: 0;
+      margin-left: 0;
+    }
+    .rct-history__image {
+      justify-self: start;
+      align-self: start;
+      margin-top: 20px;
+    }
+    .rct-creator__image { min-height: 400px; }
+    .rct-hero__content { padding: 40px 24px 60px; }
+    .rct-timeline { padding: 0 16px; }
+    .rct-timeline__item {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+    }
+    .rct-timeline__item--left .rct-timeline__event,
+    .rct-timeline__item--right .rct-timeline__event {
+      grid-column: 1;
+      text-align: left;
+      padding: 0 0 16px 24px;
+      border-left: 2px solid rgba(255,255,255,0.3);
+      margin-left: 6px;
+    }
+    .rct-timeline--light .rct-timeline__item--left .rct-timeline__event,
+    .rct-timeline--light .rct-timeline__item--right .rct-timeline__event {
+      border-color: rgba(0,0,0,0.15);
+    }
+    .rct-timeline__center { display: none; }
+    .rct-timeline__item--left .rct-timeline__media,
+    .rct-timeline__item--right .rct-timeline__media {
+      grid-column: 1;
+      padding: 16px 0 0;
+    }
+    .rct-timeline__spine { display: none; }
+    .rct-collections__text { padding-right: 0; padding-bottom: 40px; }
+    .rct-collections__image { min-height: 300px; }
+    .rct-nav__tab { padding: 0 16px; font-size: 10px; }
+  }
+{%- endstyle -%}
+
+<div class="rct">
+
+  {%- comment -%} ── Section Navigation ── {%- endcomment -%}
+  <nav class="rct-nav" aria-label="Heritage sections">
+    <div class="rct-nav__inner">
+      <a class="rct-nav__tab is-active" href="#rct-history" data-section="rct-history">History</a>
+      <a class="rct-nav__tab" href="#rct-creator" data-section="rct-creator">The Creator</a>
+      <a class="rct-nav__tab" href="#rct-ruby" data-section="rct-ruby">The Ruby</a>
+      <a class="rct-nav__tab" href="#rct-timeline" data-section="rct-timeline">Timeline</a>
+    </div>
+  </nav>
+
+  {%- comment -%} ── Hero ── {%- endcomment -%}
+  <section id="rct-history" class="rct-hero" aria-label="Our Heritage">
+    <div class="rct-hero__bg" style="background-image: url('{{ section.settings.hero_image | image_url: width: 2000 }}');"></div>
+    <div class="rct-hero__vignette"></div>
+    <div class="rct-hero__content">
+      <p class="rct-hero__eyebrow rct-fade">{{ section.settings.hero_eyebrow }}</p>
+      <h1 class="rct-hero__title rct-fade rct-fade--delay-1">{{ section.settings.hero_title }}</h1>
+      <span class="rct-hero__scroll rct-fade rct-fade--delay-2">
+        <span class="rct-hero__scroll-line"></span>
+        {{ section.settings.hero_scroll_label }}
+      </span>
+    </div>
+  </section>
+
+  {%- comment -%} ── History ── {%- endcomment -%}
+  <section class="rct-history">
+    <div class="rct-history__inner">
+      <div class="rct-history__text">
+        <h2 class="rct-history__title rct-fade">History</h2>
+        <div class="rct-history__body">
+          <p class="rct-fade rct-fade--delay-1">In 1996, Roberto Coin introduced Appassionata, the first collection to feature a hidden ruby — a symbol of protection, passion and prosperity. This signature detail became the heart of the Maison.</p>
+          <p class="rct-fade rct-fade--delay-2">Guided by Roberto Coin's creative vision and brought to life by master Italian artisans, the brand quickly gained international recognition. In 2000, he became a founding member of the World Diamond Council, supporting the Kimberley Process. Today, the Maison is present in over 60 countries worldwide, and the ruby remains its enduring symbol.</p>
+        </div>
+      </div>
+      <div class="rct-history__image rct-fade rct-fade--delay-1">
+        {%- if section.settings.history_image -%}
+          <img src="{{ section.settings.history_image | image_url: width: 700 }}"
+               alt="Roberto Coin Heritage"
+               width="700" height="700"
+               loading="lazy">
+        {%- endif -%}
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ── The Creator ── {%- endcomment -%}
+  <section id="rct-creator" class="rct-creator" aria-label="The Creator">
+    <div class="rct-creator__inner">
+      <div class="rct-creator__image">
+        {%- if section.settings.creator_image -%}
+          <img src="{{ section.settings.creator_image | image_url: width: 900 }}"
+               alt="Roberto Coin"
+               width="900" height="1229"
+               loading="lazy">
+        {%- endif -%}
+      </div>
+      <div class="rct-creator__text">
+        <h2 class="rct-creator__title rct-fade">The Creator</h2>
+        <div class="rct-creator__body">
+          <p class="rct-fade rct-fade--delay-1">Roberto Coin's journey did not begin in jewelry. After a successful career in luxury hospitality across Europe, he returned to Italy and immersed himself in the goldsmith tradition of Vicenza. In 1984, he began designing under his own name — marking the start of a new creative chapter.</p>
+          <p class="rct-fade rct-fade--delay-2">At 33, he returned to Italy and immersed himself in the goldsmith tradition of Vicenza — the historic heart of Italian jewelry. In 1984, he began designing under his own name, transforming experience into creativity and vision into craftsmanship. That decision marked the true beginning of the Maison.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ── The Ruby ── {%- endcomment -%}
+  <section id="rct-ruby" class="rct-ruby" aria-label="The Ruby">
+    <div class="rct-ruby__bg" style="background-image: url('{{ section.settings.ruby_bg_image | image_url: width: 2000 }}');"></div>
+    <div class="rct-ruby__vignette"></div>
+    <div class="rct-ruby__inner">
+      <div class="rct-ruby__text">
+        <h2 class="rct-ruby__title rct-fade">The Ruby</h2>
+        <div class="rct-ruby__body">
+          <p class="rct-fade rct-fade--delay-1">Roberto Coin chose the ruby as the hidden signature of his creations. Inspired by ancient cultures, where the ruby symbolized protection, vitality and passion, he transformed it into a discreet talisman worn close to the skin.</p>
+          <p class="rct-fade rct-fade--delay-2">Set inside every jewel, the ruby is not meant to be seen — but to be felt. A quiet symbol of strength, courage and enduring beauty that connects each creation to its wearer.</p>
+        </div>
+      </div>
+      <div class="rct-ruby__gem rct-fade rct-fade--delay-1">
+        {%- if section.settings.ruby_gem_image -%}
+          <img src="{{ section.settings.ruby_gem_image | image_url: width: 400 }}"
+               alt="Roberto Coin Hidden Ruby"
+               width="366" height="366"
+               loading="lazy">
+        {%- endif -%}
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ── Timeline — Early Era (light background) ── {%- endcomment -%}
+  <section id="rct-timeline" class="rct-timeline-section" aria-label="The Timeline">
+
+    <div class="rct-timeline-section__header">
+      <h2 class="rct-timeline-section__title rct-fade">The Timeline</h2>
+    </div>
+
+    {%- comment -%} Early years — light background {%- endcomment -%}
+    <div class="rct-timeline--light" style="background: var(--rc-light);">
+      <div class="rct-timeline">
+        <div class="rct-timeline__spine"></div>
+
+        {%- comment -%} 1977 {%- endcomment -%}
+        <div class="rct-timeline__item rct-timeline__item--right">
+          <div class="rct-timeline__media rct-timeline__media--empty"></div>
+          <div class="rct-timeline__center">
+            <div class="rct-timeline__dot"></div>
+            <div class="rct-timeline__connector"></div>
+          </div>
+          <div class="rct-timeline__event">
+            <div class="rct-timeline__year">1977</div>
+            <p class="rct-timeline__body">Roberto Coin returned to his homeland of Italy to study the goldsmithing tradition under the guidance of renowned Italian teachers. He launched his jewelry trade on the British market.</p>
+          </div>
+        </div>
+
+        {%- comment -%} 1984 {%- endcomment -%}
+        <div class="rct-timeline__item rct-timeline__item--left">
+          <div class="rct-timeline__event">
+            <div class="rct-timeline__year">1984</div>
+            <p class="rct-timeline__body">He began designing and creating jewelry for some of the most prestigious international brands.</p>
+          </div>
+          <div class="rct-timeline__center">
+            <div class="rct-timeline__dot"></div>
+            <div class="rct-timeline__connector"></div>
+          </div>
+          <div class="rct-timeline__media">
+            {%- if section.settings.timeline_img_1984 -%}
+              <img src="{{ section.settings.timeline_img_1984 | image_url: width: 400 }}" alt="1984" loading="lazy">
+            {%- endif -%}
+          </div>
+        </div>
+
+        {%- comment -%} 1996 {%- endcomment -%}
+        <div class="rct-timeline__item rct-timeline__item--right">
+          <div class="rct-timeline__media">
+            {%- if section.settings.timeline_img_1996 -%}
+              <img src="{{ section.settings.timeline_img_1996 | image_url: width: 400 }}" alt="1996" loading="lazy">
+            {%- endif -%}
+          </div>
+          <div class="rct-timeline__center">
+            <div class="rct-timeline__dot"></div>
+            <div class="rct-timeline__connector"></div>
+          </div>
+          <div class="rct-timeline__event">
+            <div class="rct-timeline__year">1996</div>
+            <p class="rct-timeline__body">He launched his brand Roberto Coin in the United States with the Appassionata collection and began signing his creations with a small ruby.</p>
+          </div>
+        </div>
+
+      </div>{%- comment -%} /.rct-timeline {%- endcomment -%}
+    </div>{%- comment -%} /.rct-timeline--light {%- endcomment -%}
+
+    {%- comment -%} Later years — dark red background {%- endcomment -%}
+    <div class="rct-timeline">
+      <div class="rct-timeline__spine"></div>
+
+      {%- comment -%} 2000 {%- endcomment -%}
+      <div class="rct-timeline__item rct-timeline__item--left" style="padding-top: 60px;">
+        <div class="rct-timeline__event">
+          <div class="rct-timeline__year">2000</div>
+          <p class="rct-timeline__body">Becomes a founding member of the World Diamond Council, reinforcing a commitment to ethical sourcing.</p>
+        </div>
+        <div class="rct-timeline__center">
+          <div class="rct-timeline__dot"></div>
+          <div class="rct-timeline__connector"></div>
+        </div>
+        <div class="rct-timeline__media rct-timeline__media--empty"></div>
+      </div>
+
+      {%- comment -%} 2003 {%- endcomment -%}
+      <div class="rct-timeline__item rct-timeline__item--right">
+        <div class="rct-timeline__media">
+          {%- if section.settings.timeline_img_2003 -%}
+            <img src="{{ section.settings.timeline_img_2003 | image_url: width: 400 }}" alt="Cento Collection 2003" loading="lazy">
+          {%- endif -%}
+        </div>
+        <div class="rct-timeline__center">
+          <div class="rct-timeline__dot"></div>
+          <div class="rct-timeline__connector"></div>
+        </div>
+        <div class="rct-timeline__event">
+          <div class="rct-timeline__year">2003</div>
+          <p class="rct-timeline__body">He launched the Cento collection, his revolutionary diamond with 100 facets.</p>
+          {%- if section.settings.cento_url != blank -%}
+            <a class="rct-timeline__cta" href="{{ section.settings.cento_url }}">Discover Cento Collection</a>
+          {%- endif -%}
+        </div>
+      </div>
+
+      {%- comment -%} 2006 {%- endcomment -%}
+      <div class="rct-timeline__item rct-timeline__item--left">
+        <div class="rct-timeline__event">
+          <div class="rct-timeline__year">2006</div>
+          <p class="rct-timeline__body">He opened his first single-brand boutique in Atlanta, USA.</p>
+        </div>
+        <div class="rct-timeline__center">
+          <div class="rct-timeline__dot"></div>
+          <div class="rct-timeline__connector"></div>
+        </div>
+        <div class="rct-timeline__media rct-timeline__media--empty"></div>
+      </div>
+
+      {%- comment -%} 2007 {%- endcomment -%}
+      <div class="rct-timeline__item rct-timeline__item--right">
+        <div class="rct-timeline__media rct-timeline__media--empty"></div>
+        <div class="rct-timeline__center">
+          <div class="rct-timeline__dot"></div>
+          <div class="rct-timeline__connector"></div>
+        </div>
+        <div class="rct-timeline__event">
+          <div class="rct-timeline__year">2007</div>
+          <p class="rct-timeline__body">He opened his first European single-brand boutique in Rome.</p>
+        </div>
+      </div>
+
+      {%- comment -%} 2008 {%- endcomment -%}
+      <div class="rct-timeline__item rct-timeline__item--left">
+        <div class="rct-timeline__event">
+          <div class="rct-timeline__year">2008</div>
+          <p class="rct-timeline__body">He opened his first single-brand boutique in Dubai and founded the Middle East LLC, in partnership with local partner, Damas.</p>
+        </div>
+        <div class="rct-timeline__center">
+          <div class="rct-timeline__dot"></div>
+          <div class="rct-timeline__connector"></div>
+        </div>
+        <div class="rct-timeline__media">
+          {%- if section.settings.timeline_img_2008 -%}
+            <img src="{{ section.settings.timeline_img_2008 | image_url: width: 400 }}" alt="Dubai boutique 2008" loading="lazy">
+          {%- endif -%}
+        </div>
+      </div>
+
+      {%- comment -%} 2013 {%- endcomment -%}
+      <div class="rct-timeline__item rct-timeline__item--right">
+        <div class="rct-timeline__media">
+          {%- if section.settings.timeline_img_2013 -%}
+            <img src="{{ section.settings.timeline_img_2013 | image_url: width: 400 }}" alt="CNN 2013" loading="lazy">
+          {%- endif -%}
+        </div>
+        <div class="rct-timeline__center">
+          <div class="rct-timeline__dot"></div>
+          <div class="rct-timeline__connector"></div>
+        </div>
+        <div class="rct-timeline__event">
+          <div class="rct-timeline__year">2013</div>
+          <p class="rct-timeline__body">CNN released its third feature on Roberto Coin, highlighting the Maison's creative vision and the Love in Verona collection.</p>
+        </div>
+      </div>
+
+      {%- comment -%} 2014 {%- endcomment -%}
+      <div class="rct-timeline__item rct-timeline__item--left">
+        <div class="rct-timeline__event">
+          <div class="rct-timeline__year">2014</div>
+          <p class="rct-timeline__body">The collection Pois Moi is awarded Best Italian Collection in the World — affirming the Maison's creative excellence.</p>
+          {%- if section.settings.pois_moi_url != blank -%}
+            <a class="rct-timeline__cta" href="{{ section.settings.pois_moi_url }}">Discover Pois Moi Collection</a>
+          {%- endif -%}
+        </div>
+        <div class="rct-timeline__center">
+          <div class="rct-timeline__dot"></div>
+          <div class="rct-timeline__connector"></div>
+        </div>
+        <div class="rct-timeline__media">
+          {%- if section.settings.timeline_img_2014 -%}
+            <img src="{{ section.settings.timeline_img_2014 | image_url: width: 400 }}" alt="Pois Moi 2014" loading="lazy">
+          {%- endif -%}
+        </div>
+      </div>
+
+      {%- comment -%} 2018 {%- endcomment -%}
+      <div class="rct-timeline__item rct-timeline__item--right">
+        <div class="rct-timeline__media">
+          {%- if section.settings.timeline_img_2018 -%}
+            <img src="{{ section.settings.timeline_img_2018 | image_url: width: 400 }}" alt="2018" loading="lazy">
+          {%- endif -%}
+        </div>
+        <div class="rct-timeline__center">
+          <div class="rct-timeline__dot"></div>
+          <div class="rct-timeline__connector"></div>
+        </div>
+        <div class="rct-timeline__event">
+          <div class="rct-timeline__year">2018</div>
+          <p class="rct-timeline__body">He began personally inspecting each of the brand's diamonds, using a special laser incision on the gem to guarantee its 100% natural origin.</p>
+        </div>
+      </div>
+
+      {%- comment -%} 2021 {%- endcomment -%}
+      <div class="rct-timeline__item rct-timeline__item--left">
+        <div class="rct-timeline__event">
+          <div class="rct-timeline__year">2021</div>
+          <p class="rct-timeline__body">He received an award from the Phillips Collection in Washington for his contribution to American culture and was honored at Vicenzaoro as President of the Best Corporate Social Responsibility Brand.</p>
+        </div>
+        <div class="rct-timeline__center">
+          <div class="rct-timeline__dot"></div>
+          <div class="rct-timeline__connector"></div>
+        </div>
+        <div class="rct-timeline__media">
+          {%- if section.settings.timeline_img_2021 -%}
+            <img src="{{ section.settings.timeline_img_2021 | image_url: width: 400 }}" alt="2021" loading="lazy">
+          {%- endif -%}
+        </div>
+      </div>
+
+      {%- comment -%} 2025 {%- endcomment -%}
+      <div class="rct-timeline__item rct-timeline__item--right">
+        <div class="rct-timeline__media">
+          {%- if section.settings.timeline_img_2025 -%}
+            <img src="{{ section.settings.timeline_img_2025 | image_url: width: 400 }}" alt="2025" loading="lazy">
+          {%- endif -%}
+        </div>
+        <div class="rct-timeline__center">
+          <div class="rct-timeline__dot"></div>
+          <div class="rct-timeline__connector"></div>
+        </div>
+        <div class="rct-timeline__event">
+          <div class="rct-timeline__year">2025</div>
+          <p class="rct-timeline__body">Roberto Coin received the Lifetime Achievement Award in Jewelry at the Fashion Group International Night of Stars Gala in Dallas.</p>
+        </div>
+      </div>
+
+      {%- comment -%} Today {%- endcomment -%}
+      <div class="rct-timeline__item rct-timeline__item--left rct-timeline__item--today">
+        <div class="rct-timeline__event">
+          <div class="rct-timeline__year">Today</div>
+          <p class="rct-timeline__body">Present in over 60 countries worldwide. The ruby has become an enduring symbol of the Maison.</p>
+          <p class="rct-timeline__body" style="margin-top: 12px; font-style: italic; opacity: 0.7;">A renewed identity in Verde Amazzonite reflects harmony, strength and daring grace — while the ruby remains the eternal heart of the Maison.</p>
+        </div>
+        <div class="rct-timeline__center">
+          <div class="rct-timeline__dot" style="background: var(--rc-gold); border-color: var(--rc-ruby); width: 16px; height: 16px;"></div>
+        </div>
+        <div class="rct-timeline__media">
+          {%- if section.settings.timeline_img_today -%}
+            <img src="{{ section.settings.timeline_img_today | image_url: width: 400 }}" alt="Today" loading="lazy">
+          {%- endif -%}
+        </div>
+      </div>
+
+    </div>{%- comment -%} /.rct-timeline {%- endcomment -%}
+  </section>
+
+  {%- comment -%} ── Collections ── {%- endcomment -%}
+  <section class="rct-collections" aria-label="Discover our Collections">
+    <div class="rct-collections__text">
+      <p class="rct-collections__eyebrow rct-fade">Discover our Collections</p>
+      <ul class="rct-collections__list">
+        {%- assign collections_list = "Venetian Medallions,Princess Flower,Love in Verona,Venetian Princess,Art Deco,Tiaré,Sauvage Privé,Animalier,Carousel,Diamond Princess,Domino,Jasmine,Navarra,Princess,Princess Star" | split: "," -%}
+        {%- for coll in collections_list -%}
+          <li>
+            <a href="{{ coll | downcase | replace: ' ', '-' | prepend: '/collections/' }}">{{ coll }}</a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+    <div class="rct-collections__image">
+      {%- if section.settings.collections_image -%}
+        <img src="{{ section.settings.collections_image | image_url: width: 800 }}"
+             alt="Roberto Coin Collections"
+             loading="lazy">
+      {%- endif -%}
+    </div>
+  </section>
+
+</div>{%- comment -%} /.rct {%- endcomment -%}
+
+<script>
+  (function () {
+    /* ── Scroll-spy: highlight active nav tab ── */
+    var tabs = document.querySelectorAll('.rct-nav__tab');
+    var sections = ['rct-history', 'rct-creator', 'rct-ruby', 'rct-timeline'].map(function (id) {
+      return document.getElementById(id);
+    }).filter(Boolean);
+
+    function getActiveSection() {
+      var scrollY = window.scrollY + 80;
+      var active = sections[0];
+      sections.forEach(function (sec) {
+        if (sec.getBoundingClientRect().top + window.scrollY <= scrollY) active = sec;
+      });
+      return active;
+    }
+
+    function updateNav() {
+      var active = getActiveSection();
+      tabs.forEach(function (tab) {
+        var id = tab.getAttribute('data-section');
+        tab.classList.toggle('is-active', active && active.id === id);
+      });
+    }
+
+    window.addEventListener('scroll', updateNav, { passive: true });
+    updateNav();
+
+    /* ── Smooth scroll on tab click ── */
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function (e) {
+        e.preventDefault();
+        var targetId = tab.getAttribute('data-section');
+        var target = document.getElementById(targetId);
+        if (target) {
+          var navH = document.querySelector('.rct-nav').offsetHeight;
+          var top = target.getBoundingClientRect().top + window.scrollY - navH;
+          window.scrollTo({ top: top, behavior: 'smooth' });
+        }
+      });
+    });
+
+    /* ── Intersection Observer: fade-in animations ── */
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12 });
+
+      document.querySelectorAll('.rct-fade, .rct-timeline__item').forEach(function (el) {
+        io.observe(el);
+      });
+    } else {
+      /* Fallback: show everything for old browsers */
+      document.querySelectorAll('.rct-fade, .rct-timeline__item').forEach(function (el) {
+        el.classList.add('is-visible');
+      });
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "RC Heritage Timeline",
+  "tag": "div",
+  "class": "rc-heritage-page",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Hero Section"
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero background image"
+    },
+    {
+      "type": "text",
+      "id": "hero_eyebrow",
+      "label": "Eyebrow text",
+      "default": "SINCE 1996"
+    },
+    {
+      "type": "text",
+      "id": "hero_title",
+      "label": "Hero title",
+      "default": "Our Heritage"
+    },
+    {
+      "type": "text",
+      "id": "hero_scroll_label",
+      "label": "Scroll CTA label",
+      "default": "Scroll to discover OUR story"
+    },
+    {
+      "type": "header",
+      "content": "History Section"
+    },
+    {
+      "type": "image_picker",
+      "id": "history_image",
+      "label": "History section image"
+    },
+    {
+      "type": "header",
+      "content": "The Creator Section"
+    },
+    {
+      "type": "image_picker",
+      "id": "creator_image",
+      "label": "Creator portrait image"
+    },
+    {
+      "type": "header",
+      "content": "The Ruby Section"
+    },
+    {
+      "type": "image_picker",
+      "id": "ruby_bg_image",
+      "label": "Ruby section background image"
+    },
+    {
+      "type": "image_picker",
+      "id": "ruby_gem_image",
+      "label": "Ruby gem image (transparent PNG)"
+    },
+    {
+      "type": "header",
+      "content": "Timeline Images"
+    },
+    {
+      "type": "image_picker",
+      "id": "timeline_img_1984",
+      "label": "1984 — image"
+    },
+    {
+      "type": "image_picker",
+      "id": "timeline_img_1996",
+      "label": "1996 — image"
+    },
+    {
+      "type": "image_picker",
+      "id": "timeline_img_2003",
+      "label": "2003 — Cento image"
+    },
+    {
+      "type": "image_picker",
+      "id": "timeline_img_2008",
+      "label": "2008 — Dubai boutique image"
+    },
+    {
+      "type": "image_picker",
+      "id": "timeline_img_2013",
+      "label": "2013 — image"
+    },
+    {
+      "type": "image_picker",
+      "id": "timeline_img_2014",
+      "label": "2014 — Pois Moi image"
+    },
+    {
+      "type": "image_picker",
+      "id": "timeline_img_2018",
+      "label": "2018 — image"
+    },
+    {
+      "type": "image_picker",
+      "id": "timeline_img_2021",
+      "label": "2021 — image"
+    },
+    {
+      "type": "image_picker",
+      "id": "timeline_img_2025",
+      "label": "2025 — Lifetime Achievement image"
+    },
+    {
+      "type": "image_picker",
+      "id": "timeline_img_today",
+      "label": "Today — image"
+    },
+    {
+      "type": "header",
+      "content": "Timeline CTAs"
+    },
+    {
+      "type": "url",
+      "id": "cento_url",
+      "label": "Cento Collection URL"
+    },
+    {
+      "type": "url",
+      "id": "pois_moi_url",
+      "label": "Pois Moi Collection URL"
+    },
+    {
+      "type": "header",
+      "content": "Collections Section"
+    },
+    {
+      "type": "image_picker",
+      "id": "collections_image",
+      "label": "Collections showcase image"
+    }
+  ],
+  "presets": [
+    {
+      "name": "RC Heritage Timeline"
+    }
+  ]
+}
+{% endschema %}
