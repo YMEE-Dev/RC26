@@ -11,12 +11,8 @@
   {%- endcomment -%}
   {%- assign free_shipping_content = nil -%}
   
-  {%- if product and product.metafields.info_free_shipping_info != blank -%}
-    {%- assign free_shipping_content = product.metafields.info_free_shipping_info.value -%}
-  {%- elsif collection and collection.metafields.info_free_shipping_info != blank -%}
-    {%- assign free_shipping_content = collection.metafields.info_free_shipping_info.value -%}
-  {%- elsif shop.metafields.info_free_shipping_info != blank -%}
-    {%- assign free_shipping_content = shop.metafields.info_free_shipping_info.value -%}
+  {%- if shop.metafields.info.free_shipping_info != blank -%}
+    {%- assign free_shipping_content = shop.metafields.info.free_shipping_info | metaobject -%}
   {%- endif -%}
   
   {%- comment -%}
@@ -34,13 +30,6 @@
             {{ free_shipping_content.description | metafield_tag }}
           </div>
         {%- endif -%}
-      </div>
-      
-      {%- if free_shipping_content.image != blank -%}
-        <div class="free-shipping__image">
-          {{ free_shipping_content.image | image_url: width: 600 | image_tag }}
-        </div>
-      {%- endif -%}
     </div>
   {%- else -%}
     <div class="free-shipping__default">
