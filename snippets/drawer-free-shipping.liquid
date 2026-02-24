@@ -11,8 +11,12 @@
   {%- endcomment -%}
   {%- assign free_shipping_content = nil -%}
   
-  {%- if shop.metafields.info.free_shipping_info != blank -%}
-    {%- assign free_shipping_content = shop.metafields.info.free_shipping_info | metaobject -%}
+  {%- if product and product.metafields.info.free_shipping_info != blank -%}
+    {%- assign free_shipping_content = product.metafields.info.free_shipping_info.value -%}
+  {%- elsif collection and collection.metafields.info.free_shipping_info != blank -%}
+    {%- assign free_shipping_content = collection.metafields.info.free_shipping_info.value -%}
+  {%- elsif shop.metafields.info.free_shipping_info != blank -%}
+    {%- assign free_shipping_content = shop.metafields.info.free_shipping_info.value -%}
   {%- endif -%}
   
   {%- comment -%}
@@ -20,16 +24,21 @@
   {%- endcomment -%}
   {%- if free_shipping_content != blank -%}
     <div class="free-shipping__content">
-      <div class="free-shipping__text-content">
-        {%- if free_shipping_content.title != blank -%}
-          <h2 class="free-shipping__title">{{ free_shipping_content.title }}</h2>
-        {%- endif -%}
-        
-        {%- if free_shipping_content.description != blank -%}
-          <div class="free-shipping__description">
-            {{ free_shipping_content.description | metafield_tag }}
-          </div>
-        {%- endif -%}
+      {%- if free_shipping_content.image != blank -%}
+        <div class="free-shipping__image">
+          {{ free_shipping_content.image | image_url: width: 600 | image_tag }}
+        </div>
+      {%- endif -%}
+      
+      {%- if free_shipping_content.title != blank -%}
+        <h2 class="free-shipping__title">{{ free_shipping_content.title }}</h2>
+      {%- endif -%}
+      
+      {%- if free_shipping_content.description != blank -%}
+        <div class="free-shipping__description">
+          {{ free_shipping_content.description | metafield_tag }}
+        </div>
+      {%- endif -%}
     </div>
   {%- else -%}
     <div class="free-shipping__default">

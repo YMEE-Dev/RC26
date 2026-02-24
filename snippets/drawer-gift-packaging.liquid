@@ -12,11 +12,11 @@
   {%- assign gift_content = nil -%}
   
   {%- if shop.metafields.info.gift_packaging != blank -%}
-    {%- assign gift_content = shop.metafields.info.gift_packaging | metaobject -%}
+    {%- assign gift_content = shop.metafields.info.gift_packaging.value -%}
   {%- elsif product and product.metafields.info.gift_packaging != blank -%}
-    {%- assign gift_content = product.metafields.info.gift_packaging | metaobject -%}
+    {%- assign gift_content = product.metafields.info.gift_packaging.value -%}
   {%- elsif collection and collection.metafields.info.gift_packaging != blank -%}
-    {%- assign gift_content = collection.metafields.info.gift_packaging | metaobject -%}
+    {%- assign gift_content = collection.metafields.info.gift_packaging.value -%}
   {%- endif -%}
   
   {%- comment -%}
