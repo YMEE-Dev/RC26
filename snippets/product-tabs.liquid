@@ -106,7 +106,8 @@
     assign accordion_text = block.settings.text
     assign accordion_open = block.settings.default_open
     assign accordion_content = accordion_text
-    assign accordion_style = block.settings.style
+    assign accordion_style = 'collapsible' %} 
+    {% comment %} assign accordion_style = block.settings.style {% endcomment %}
 
     if show_description
       assign accordion_content = product_description_content | append: accordion_text
