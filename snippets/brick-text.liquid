@@ -14,6 +14,9 @@
 {%- liquid
   assign subheading = block.settings.subheading
   assign title = block.settings.title
+  if title contains ' - '
+    assign title = title | split: ' - ' | first | strip
+  endif
   assign text = block.settings.text
   assign button_text = block.settings.button_text
   assign button_style = block.settings.button_style
@@ -106,7 +109,7 @@
           data-aos-anchor="{{ animation_anchor }}"
           data-aos-order="{{ animation_order }}"
         >
-          {{- title -}}
+          {{- title | downcase -}}
         </{{ heading_tag }}>
       {%- endif -%}
 
@@ -254,12 +257,13 @@
 </div>
 
 {% stylesheet %}
-  .hero__title {
-    text-transform: capitalize;
-  }
   .brick__block__text .hero__content {
     gap: 40px;
-    height: 100%;
+    height: auto;
+  }
+  .brick__block__text .hero__content h2 {
+    text-transform: capitalize;
+    margin: 0 !important;
   }
   .suggested-collections__wrapper {
     display: flex;
