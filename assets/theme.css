@@ -7748,8 +7748,8 @@ body:has([data-header-transparent]) .header__mobile__bottom {
   min-width: auto;
   z-index: 999;
   transition-duration: 0.3s !important;
-  transition-timing-function: ease-in;
-  transition-property: transform;
+  transition-timing-function: ease-in-out;
+  transition-property: all;
 }
 
 body.header-scroll-hide .header__mobile__left,
@@ -8085,7 +8085,7 @@ body:not(.is-loaded) .header__desktop {
 }
 
 @media only screen and (min-width: 960px) {
-  body.header-scroll-hide .js__header__stuck {
+  body.header-scroll-hide-layered .js__header__stuck {
     z-index: -1;
   }
 }
@@ -22218,6 +22218,12 @@ body.has-line-design.grid-compact .collection__products .grid,
 .subcollection__title {
   text-align: center;
   margin-top: 20px !important;
+}
+
+@media only screen and (max-width: 960px) {
+  .subcollection__title {
+    margin-top: -20px !important;
+  }
 }
 
 .subcollection__title,
