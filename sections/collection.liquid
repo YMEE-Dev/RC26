@@ -1,5 +1,7 @@
 <!-- /sections/collections.liquid -->
 
+{{ 'custom-collection.css' | asset_url | stylesheet_tag }}
+
 {%- liquid
   assign enable_infinity_scroll = settings.enable_infinity_scroll
   assign enable_sort = section.settings.enable_sort
@@ -7,6 +9,20 @@
   assign filter_layout = section.settings.filter_layout
   assign show_recently_viewed_indicator = settings.show_recently_viewed_indicator
   assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign sub_collections = linklists[collection.handle].links
+  assign sub_collection_links_limit = 6
+  assign has_active_subcollection_link = false
+  assign view_all_collection_url = collection.url
+
+  if collection.handle contains '-'
+    assign possible_parent_handle = collection.handle | split: '-' | first
+    assign possible_parent_collection = collections[possible_parent_handle]
+
+    if possible_parent_collection != blank
+      assign has_active_subcollection_link = true
+      assign view_all_collection_url = possible_parent_collection.url
+    endif
+  endif
 
   if filter_layout == 'inline-open'
     assign filters_expanded = true
@@ -54,17 +70,27 @@
 
 {%- style -%}
   #Collection--{{ section.id }} {
+    position: relative;
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
+    --COLLECTION-PRODUCTS-BG: var(--bg);
 
     --COLUMNS: {{ columns_desktop }};
     --COLUMNS-MEDIUM: {{ columns_medium }};
     --COLUMNS-SMALL: {{ columns_small }};
     --COLUMNS-MOBILE: {{ columns_mobile }};
 
+    {% unless section.settings.collection_grid_background == 'rgba(0,0,0,0)' or section.settings.collection_grid_background == blank %}
+      --COLLECTION-PRODUCTS-BG: {{ section.settings.collection_grid_background }};
+    {% endunless %}
+
     {% unless border_color == 'rgba(0,0,0,0)' or border_color == blank %}
       --border-hairline: {{ border_color }};
     {% endunless %}
+  }
+
+  #Collection--{{ section.id }} .collection__products {
+    background: var(--COLLECTION-PRODUCTS-BG);
   }
 {%- endstyle -%}
 
@@ -117,6 +143,40 @@
     data-sort="{{ enable_sort }}"
     data-collection="{{ collection.url | default: '/collections/all' }}"
   >
+    {%- capture sub_collection_links_html -%}
+      {%- if sub_collections.size > 0 -%}
+        {%- assign sub_collection_links_counter = 0 -%}
+        {%- for sublink in sub_collections -%}
+          {%- liquid
+            if sublink.type != 'collection_link' or sublink.object.handle == blank
+              continue
+            endif
+
+            assign sub_collection_handle = sublink.object.handle
+            assign sub_collection_title = sublink.title
+            assign sub_collection_handle_separator = sub_collection_handle | append: ',' | prepend: ','
+            assign sub_collection = collections[sub_collection_handle]
+
+            if sublink.object.handle contains sub_collection_handle_separator
+              continue
+            endif
+          -%}
+
+          <a
+            class="subcollection_links-link navlink{% if sub_collection.handle == collection.handle %} is-active{% endif %}"
+            href="{{ sub_collection.url }}"
+          >
+            {{- sub_collection_title -}}
+          </a>
+
+          {%- assign sub_collection_links_counter = sub_collection_links_counter | plus: 1 -%}
+          {%- if sub_collection_links_counter >= sub_collection_links_limit -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endcapture -%}
+
     {%- assign align_classes = '' -%}
     {%- if enable_sort -%}
       {%- assign align_classes = align_classes | append: ' collection__nav--sort ' -%}
@@ -128,56 +188,84 @@
 
     {%- if enable_sort or enable_filters -%}
       <nav class="collection__nav {{ align_classes }}" data-collection-nav>
-        {%- if enable_filters -%}
-          {%- liquid
-            assign filter_active_count = 0
-
-            if enable_filters
-              for filter in collection.filters
-                assign filter_active_count = filter_active_count | plus: filter.active_values.size
-              endfor
-            endif
-          -%}
-          <div class="popout--group">
-            <button
-              type="button"
-              class="popout__toggle{% unless filter_layout == 'slide-out' %} popout__toggle--filters{% endunless %}"
-              aria-expanded="{% if filters_expanded %}true{% else %}false{% endif %}"
-              aria-controls="filter-groups"
-              data-aria-toggle
-            >
-              {%- render 'icon-filter' -%}
-
-              {%- if filter_layout == 'slide-out' -%}
-                {{ 'collections.general.filters' | t }}
-              {%- else -%}
-                <span class="popout__toggleable-text">
-                  <span class="popout__expanded-show">
-                    {{- 'collections.general.show_filters' | t -}}
-                    <span class="filter-count{% if filter_active_count < 1 %} hidden{% endif %}" data-active-filters>
-                      {{- filter_active_count -}}
-                    </span>
-                  </span>
-
-                  <span class="popout__expanded-hide">
-                    {{- 'collections.general.hide_filters' | t -}}
-                    <span class="filter-count{% if filter_active_count < 1 %} hidden{% endif %}" data-active-filters>
-                      {{- filter_active_count -}}
-                    </span>
-                  </span>
-                </span>
-              {%- endif -%}
-
-              {%- unless filter_layout == 'slide-out' -%}
-                {%- render 'icon-nav-arrow-down' -%}
-              {%- endunless -%}
-            </button>
+        <div class="availability_filter-wrapper" data-availability-filter>
+          <a
+            href="{{ view_all_collection_url }}"
+            type="button"
+            class="availability-filter__button navlink{% unless has_active_subcollection_link %} is-active{% endunless %}"
+            data-availability-view-all
+            data-availability-view-all-default-active="{% if has_active_subcollection_link %}false{% else %}true{% endif %}"
+            aria-pressed="{% if has_active_subcollection_link %}false{% else %}true{% endif %}"
+          >
+            View all
+          </a>
+        </div>
+        {%- if sub_collection_links_html != blank -%}
+          <div class="subcollection_links-wrapper">
+            {{- sub_collection_links_html -}}
           </div>
         {%- endif -%}
+        <div class="popout_filters-wrapper">
+          <label class="availability-filter__button navlink" data-availability-filter-control>
+            <input
+              type="checkbox"
+              class="availability-filter__checkbox"
+              data-availability-filter-checkbox
+              aria-label="Available now"
+            >
+            <span>Available now</span>
+          </label>
+          {%- if enable_filters -%}
+            {%- liquid
+              assign filter_active_count = 0
 
-        {%- if enable_sort -%}
-          {% render 'collection-sorting' %}
-        {%- endif -%}
+              if enable_filters
+                for filter in collection.filters
+                  assign filter_active_count = filter_active_count | plus: filter.active_values.size
+                endfor
+              endif
+            -%}
+            <div class="popout--group">
+              <button
+                type="button"
+                class="popout__toggle{% unless filter_layout == 'slide-out' %} popout__toggle--filters{% endunless %}"
+                aria-expanded="{% if filters_expanded %}true{% else %}false{% endif %}"
+                aria-controls="filter-groups"
+                data-aria-toggle
+              >
+                {%- render 'icon-filter' -%}
+
+                {%- if filter_layout == 'slide-out' -%}
+                  {{ 'collections.general.filters' | t }}
+                {%- else -%}
+                  <span class="popout__toggleable-text">
+                    <span class="popout__expanded-show">
+                      {{- 'collections.general.show_filters' | t -}}
+                      <span class="filter-count{% if filter_active_count < 1 %} hidden{% endif %}" data-active-filters>
+                        {{- filter_active_count -}}
+                      </span>
+                    </span>
+
+                    <span class="popout__expanded-hide">
+                      {{- 'collections.general.hide_filters' | t -}}
+                      <span class="filter-count{% if filter_active_count < 1 %} hidden{% endif %}" data-active-filters>
+                        {{- filter_active_count -}}
+                      </span>
+                    </span>
+                  </span>
+                {%- endif -%}
+
+                {%- unless filter_layout == 'slide-out' -%}
+                  {%- render 'icon-nav-arrow-down' -%}
+                {%- endunless -%}
+              </button>
+            </div>
+          {%- endif -%}
+
+          {%- if enable_sort -%}
+            {% render 'collection-sorting' %}
+          {%- endif -%}
+        </div>
       </nav>
     {%- endif -%}
 
@@ -263,23 +351,39 @@
                   assign counter_grid = counter_grid | plus: 1
                   assign items_on_row_remaining = items_on_row_remaining | minus: 1
 
-                  if collection
+                  assign product_storytelling = false
+                  assign product_type = product.type | downcase
+                  if product_type == 'storytelling' or product_type contains 'storytelling'
+                    assign product_storytelling = true
+                  endif
+
+                  if product_storytelling
+                    render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false
+                  else
                     render 'product-grid-item', product: product, index: forloop.index, sizes: image_sizes
                   endif
                 endfor
               -%}
 
             {%- else -%}
-              {%- for product in collection.products -%}
-                {%- assign grid_int = section.settings.grid | times: 1 -%}
-                {%- assign animation_delay = forloop.index0 | modulo: grid_int | times: 1 -%}
-                {%- render 'product-grid-item',
-                  product: product,
-                  animation_delay: animation_delay,
-                  index: forloop.index,
-                  sizes: image_sizes
-                -%}
-              {%- endfor -%}
+              {%- liquid
+                for product in collection.products
+                  assign grid_int = section.settings.grid | times: 1
+                  assign animation_delay = forloop.index0 | modulo: grid_int | times: 1
+
+                  assign product_storytelling = false
+                  assign product_type = product.type | downcase
+                  if product_type == 'storytelling' or product_type contains 'storytelling'
+                    assign product_storytelling = true
+                  endif
+
+                  if product_storytelling
+                    render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false
+                  else
+                    render 'product-grid-item', product: product, animation_delay: animation_delay, index: forloop.index, sizes: image_sizes
+                  endif
+                endfor
+              -%}
             {%- endif -%}
           {%- else -%}
             <div class="no-results">
@@ -329,6 +433,130 @@
     </div>
   </collection-component>
 
+  <script>
+    (() => {
+      if (window.__collectionAvailabilityFilterInit) {
+        return;
+      }
+      window.__collectionAvailabilityFilterInit = true;
+
+      const updateCollectionNavStickyState = (root = document) => {
+        root.querySelectorAll('[data-collection-nav]').forEach((nav) => {
+          const stickyTop = Number.parseFloat(window.getComputedStyle(nav).top) || 0;
+          const navTop = nav.getBoundingClientRect().top;
+          const isStuck = window.scrollY > 0 && navTop <= stickyTop + 1;
+          nav.classList.toggle('is-stuck', isStuck);
+        });
+      };
+
+      const getActiveAvailabilityFilter = (component) => {
+        if (!component) return 'all';
+
+        const availabilityCheckbox = component.querySelector('[data-availability-filter-checkbox]');
+        if (!availabilityCheckbox) return 'all';
+
+        return availabilityCheckbox.checked ? 'available' : 'all';
+      };
+
+      const filterItems = (component, filterValue) => {
+        if (!component) return;
+
+        const activeFilter = filterValue === 'available' ? 'available' : 'all';
+        const items = component.querySelectorAll('[data-products-grid] [data-product-available]');
+        items.forEach((item) => {
+          const isAvailable = item.getAttribute('data-product-available') === 'true';
+          const showItem = activeFilter === 'all' || isAvailable;
+
+          item.hidden = !showItem;
+          item.setAttribute('aria-hidden', showItem ? 'false' : 'true');
+        });
+
+        const availabilityControl = component.querySelector('[data-availability-filter-control]');
+        const availabilityCheckbox = component.querySelector('[data-availability-filter-checkbox]');
+        const viewAllButton = component.querySelector('[data-availability-view-all]');
+        const isActive = activeFilter === 'available';
+        const viewAllDefaultActive = viewAllButton
+          ? viewAllButton.getAttribute('data-availability-view-all-default-active') === 'true'
+          : false;
+        const isViewAllActive = activeFilter === 'all' && viewAllDefaultActive;
+
+        if (availabilityControl) {
+          availabilityControl.classList.toggle('is-active', isActive);
+        }
+
+        if (availabilityCheckbox) {
+          availabilityCheckbox.checked = isActive;
+        }
+
+        if (viewAllButton) {
+          viewAllButton.classList.toggle('is-active', isViewAllActive);
+          viewAllButton.setAttribute('aria-pressed', isViewAllActive ? 'true' : 'false');
+        }
+      };
+
+      const initComponent = (component) => {
+        if (!component || component.dataset.availabilityFilterReady === 'true') {
+          return;
+        }
+
+        component.dataset.availabilityFilterReady = 'true';
+        filterItems(component, getActiveAvailabilityFilter(component));
+        updateCollectionNavStickyState(component);
+
+        const productsGrid = component.querySelector('[data-products-grid]');
+        if (!productsGrid) return;
+
+        const observer = new MutationObserver(() => {
+          filterItems(component, getActiveAvailabilityFilter(component));
+        });
+
+        observer.observe(productsGrid, { childList: true, subtree: true });
+      };
+
+      const initAll = (root) => {
+        const scope = root || document;
+        scope.querySelectorAll('collection-component').forEach((component) => {
+          initComponent(component);
+        });
+
+        updateCollectionNavStickyState(scope);
+      };
+
+      document.addEventListener('change', (event) => {
+        const checkbox = event.target.closest('[data-availability-filter-checkbox]');
+        if (!checkbox) return;
+
+        const component = checkbox.closest('collection-component');
+        if (!component) return;
+
+        filterItems(component, checkbox.checked ? 'available' : 'all');
+      });
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+          initAll(document);
+        });
+      } else {
+        initAll(document);
+      }
+
+      document.addEventListener('theme:scroll', () => {
+        updateCollectionNavStickyState(document);
+      });
+
+      document.addEventListener('theme:resize', () => {
+        updateCollectionNavStickyState(document);
+      });
+
+      document.addEventListener('shopify:section:load', (event) => {
+        initAll(event.target);
+        requestAnimationFrame(() => {
+          updateCollectionNavStickyState(event.target);
+        });
+      });
+    })();
+  </script>
+
   {%- if enable_sort or enable_filters -%}
     <script src="{{ 'collection.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'collection-filters-form.js' | asset_url }}" defer="defer"></script>
@@ -369,9 +597,9 @@
       "label": "Filter layout",
       "default": "inline-open",
       "options": [
-        {"label": "Slide out", "value": "slide-out"},
-        {"label": "Inline (closed)", "value": "inline-closed"},
-        {"label": "Inline (open)", "value": "inline-open"}
+        { "label": "Slide out", "value": "slide-out" },
+        { "label": "Inline (closed)", "value": "inline-closed" },
+        { "label": "Inline (open)", "value": "inline-open" }
       ]
     },
     {
@@ -435,6 +663,12 @@
       "label": "Color scheme"
     },
     {
+      "type": "color",
+      "id": "collection_grid_background",
+      "label": "Grid background",
+      "default": "#F9F9F9"
+    },
+    {
       "type": "header",
       "content": "Padding"
     },
@@ -496,12 +730,12 @@
           "label": "Heading size",
           "default": "heading-large",
           "options": [
-            {"value": "heading-mini", "label": "Mini"},
-            {"value": "heading-x-small", "label": "Extra small"},
-            {"value": "heading-small", "label": "Small"},
-            {"value": "heading-medium", "label": "Medium"},
-            {"value": "heading-large", "label": "Large"},
-            {"value": "heading-x-large", "label": "Extra large"}
+            { "value": "heading-mini", "label": "Mini" },
+            { "value": "heading-x-small", "label": "Extra small" },
+            { "value": "heading-small", "label": "Small" },
+            { "value": "heading-medium", "label": "Medium" },
+            { "value": "heading-large", "label": "Large" },
+            { "value": "heading-x-large", "label": "Extra large" }
           ]
         },
         {
@@ -531,10 +765,10 @@
           "label": "Color",
           "default": "btn--primary",
           "options": [
-            {"value": "btn--black", "label": "Black"},
-            {"value": "btn--white", "label": "White"},
-            {"value": "btn--primary", "label": "Primary"},
-            {"value": "btn--secondary", "label": "Secondary"}
+            { "value": "btn--black", "label": "Black" },
+            { "value": "btn--white", "label": "White" },
+            { "value": "btn--primary", "label": "Primary" },
+            { "value": "btn--secondary", "label": "Secondary" }
           ]
         },
         {
@@ -543,9 +777,9 @@
           "label": "Size",
           "default": "",
           "options": [
-            {"label": "Small", "value": "btn--small"},
-            {"label": "Medium", "value": ""},
-            {"label": "Large", "value": "btn--large"}
+            { "label": "Small", "value": "btn--small" },
+            { "label": "Medium", "value": "" },
+            { "label": "Large", "value": "btn--large" }
           ]
         },
         {
@@ -554,9 +788,9 @@
           "label": "Style",
           "default": "btn--outline",
           "options": [
-            {"label": "Solid", "value": "btn--solid"},
-            {"label": "Outline", "value": "btn--outline"},
-            {"label": "Text", "value": "btn--text"}
+            { "label": "Solid", "value": "btn--solid" },
+            { "label": "Outline", "value": "btn--outline" },
+            { "label": "Text", "value": "btn--text" }
           ]
         },
         {
@@ -586,8 +820,8 @@
           "label": "Overlay type",
           "default": "disabled",
           "options": [
-            {"value": "disabled", "label": "Disabled"},
-            {"value": "opacity", "label": "Opacity overlay"}
+            { "value": "disabled", "label": "Disabled" },
+            { "value": "opacity", "label": "Opacity overlay" }
           ]
         },
         {
@@ -600,13 +834,13 @@
           "label": "Heading SEO tag",
           "default": "automatic",
           "options": [
-            {"value": "automatic", "label": "Automatic"},
-            {"value": "h1", "label": "H1"},
-            {"value": "h2", "label": "H2"},
-            {"value": "h3", "label": "H3"},
-            {"value": "h4", "label": "H4"},
-            {"value": "h5", "label": "H5"},
-            {"value": "h6", "label": "H6"}
+            { "value": "automatic", "label": "Automatic" },
+            { "value": "h1", "label": "H1" },
+            { "value": "h2", "label": "H2" },
+            { "value": "h3", "label": "H3" },
+            { "value": "h4", "label": "H4" },
+            { "value": "h5", "label": "H5" },
+            { "value": "h6", "label": "H6" }
           ]
         }
       ]

@@ -16,11 +16,13 @@
   <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
 {% endif %}
 
-{% comment %} {%- unless settings.type_body_font.system?
-  and settings.type_btn_font.system?
--%}
-  <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
-{%- endunless -%} {% endcomment %}
+{% comment %}
+  {%- unless settings.type_body_font.system?
+    and settings.type_btn_font.system?
+  -%}
+    <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+  {%- endunless -%}
+{% endcomment %}
 
 <!-- Title and description ================================================ -->
 {% capture seo_title %}
@@ -446,14 +448,14 @@
     --FONT-WEIGHT-BODY: {{ base_font.weight }};
     --FONT-WEIGHT-BODY-BOLD: {{ base_font_bold.weight | default: 700 }};
 
-    --LETTER-SPACING-BODY: {{ settings.body_letter_spacing | divided_by: 1000.0 | append: 'em' }};
+    --LETTER-SPACING-BODY: {{ settings.body_letter_spacing | divided_by: 10.0 | append: 'px' }};
 
     --FONT-STACK-HEADING: 'Portrait LS', serif;
     --FONT-WEIGHT-HEADING: 500;
     --FONT-STYLE-HEADING: normal;
 
     --FONT-UPPERCASE-HEADING: {{ heading_font_uppercase }};
-    --LETTER-SPACING-HEADING: {{ settings.heading_letter_spacing | divided_by: 1000.0 | append: 'em' }};
+    --LETTER-SPACING-HEADING: {{ settings.heading_letter_spacing | divided_by: 10.0 | append: 'px' }};
 
     --FONT-STACK-SUBHEADING: {{ subheading_font.family }}, {{ subheading_font.fallback_families }};
     --FONT-WEIGHT-SUBHEADING: {{ subheading_font.weight }};
@@ -468,7 +470,7 @@
     --LINE-HEIGHT-NAV: {{ settings.nav_text_line_height | append: 'px' }};
 
 
-    --LETTER-SPACING-NAV: {{ settings.nav_letter_spacing | divided_by: 1000.0 | append: 'em' }};
+    --LETTER-SPACING-NAV: {{ settings.nav_letter_spacing | divided_by: 10.0 | append: 'px' }};
 
     --FONT-SIZE-BASE: {{ settings.body_text_size | append: 'px' }};
     --LINE-HEIGHT-BODY: {{ settings.body_text_line_height | append: 'px' }};
@@ -502,7 +504,7 @@
     --COLUMNS-MEDIUM: 6;
     --COLUMNS-SMALL: 2;
     --COLUMNS-MOBILE: 2;
-    
+
     {%- if settings.grid_style == 'compact' -%}
       --LAYOUT-OUTER: 32px;
       --LAYOUT-GUTTER: 32px;
@@ -551,7 +553,7 @@
     {%- assign font_size_base_decimal = settings.body_text_size | append: '.0' -%}
     --BTN-FONT-SIZE-BODY: {{ settings.button_text_size | divided_by: font_size_base_decimal }}rem;
 
-    --BTN-LETTER-SPACING: {{ settings.btn_letter_spacing | divided_by: 1000.0 | append: 'em' }};
+    --BTN-LETTER-SPACING: {{ settings.btn_letter_spacing | append: '%' }};
     --BTN-UPPERCASE: {% if settings.btn_caps %}uppercase{% else %}none{% endif %};
     --BTN-TEXT-ARROW-OFFSET: {% if settings.btn_caps %}-1px{% else %}0px{% endif %};
 
@@ -567,7 +569,7 @@
     --COLOR-TEXT-BTN-BORDER-BLACK: #000;
     --COLOR-TEXT-BTN-BLACK: #fff;
     --COLOR-TEXT-BTN-BLACK-A70: {{ '#000' | color_modify: 'alpha', 0.7 }};
-    --COLOR-TEXT-BTN-BG-BLACK-BRIGHTER: {{ '#000' | color_lighten: 5 }};
+    --COLOR-TEXT-BTN-BG-BLACK-BRIGHTER: {{ '##377D71CC' | color_lighten: 5 }};
 
     /* === Swatch Size ===*/
     --swatch-size-filters: {{ swatch_size_filters }}rem;
@@ -753,8 +755,11 @@
 
 <!-- Theme Javascript ============================================================== -->
 <script src="{{ 'vendor.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'theme.dev.js' | asset_url }}" defer="defer"></script>
 
+{%- if template.name == 'product' -%}
+  <script src="{{ 'side-drawer.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
 {%- if request.design_mode -%}
   <script
     src="{{ 'theme-editor.js' | asset_url }}"

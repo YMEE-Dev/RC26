@@ -1,0 +1,103 @@
+{% doc %}
+  Renders free shipping information in a drawer.
+  This snippet uses metaobjects for content management.
+  
+  @param {object} block - The block object containing drawer settings
+{% enddoc %}
+
+<div class="drawer-free-shipping">
+  {%- comment -%}
+    Get free shipping content from dedicated metafields
+  {%- endcomment -%}
+  {%- assign free_shipping_content = nil -%}
+  
+  {%- if product and product.metafields.info.free_shipping_info != blank -%}
+    {%- assign free_shipping_content = product.metafields.info.free_shipping_info.value -%}
+  {%- elsif collection and collection.metafields.info.free_shipping_info != blank -%}
+    {%- assign free_shipping_content = collection.metafields.info.free_shipping_info.value -%}
+  {%- elsif shop.metafields.info.free_shipping_info != blank -%}
+    {%- assign free_shipping_content = shop.metafields.info.free_shipping_info.value -%}
+  {%- endif -%}
+  
+  {%- comment -%}
+    Display metaobject content if available
+  {%- endcomment -%}
+  {%- if free_shipping_content != blank -%}
+    <div class="free-shipping__content">
+      <div class="free-shipping__text-content">
+        {%- if free_shipping_content.title != blank -%}
+          <h2 class="free-shipping__title">{{ free_shipping_content.title }}</h2>
+        {%- endif -%}
+        
+        {%- if free_shipping_content.description != blank -%}
+          <div class="free-shipping__description">
+            {{ free_shipping_content.description | metafield_tag }}
+          </div>
+        {%- endif -%}
+      </div>
+      
+      {%- if free_shipping_content.image != blank -%}
+        <div class="free-shipping__image">
+          {{ free_shipping_content.image | image_url: width: 600 | image_tag }}
+        </div>
+      {%- endif -%}
+    </div>
+  {%- else -%}
+    <div class="free-shipping__default">
+      <h2>Free Shipping</h2>
+      <p>Free shipping information will appear here once configured.</p>
+    </div>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .drawer-free-shipping {
+    padding: 80px 40px 40px 40px;
+    height: 100%;
+  }
+
+  .free-shipping__content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .free-shipping__text-content {
+    flex: 1;
+  }
+
+  .free-shipping__image {
+    margin-top: auto;
+    text-align: center;
+  }
+
+  .free-shipping__image img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .free-shipping__title {
+    margin-bottom: 15px;
+    color: #000;
+    font-family: 'Portrait LS';
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 36px;
+  }
+
+  .free-shipping__description {
+    margin-bottom: 20px;
+    color: #000;
+    font-family: Inter;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px;
+  }
+
+  .free-shipping__default {
+    text-align: center;
+    padding: 40px 20px;
+  }
+{% endstylesheet %}

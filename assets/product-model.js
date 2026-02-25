@@ -20,7 +20,7 @@ function applyModelViewerCameraDefaults(modelViewer) {
     if (!modelViewer.hasAttribute('field-of-view')) modelViewer.setAttribute('field-of-view', '55deg');
     if (!modelViewer.hasAttribute('min-camera-orbit')) modelViewer.setAttribute('min-camera-orbit', 'auto auto 140%');
     if (!modelViewer.hasAttribute('max-camera-orbit')) modelViewer.setAttribute('max-camera-orbit', 'auto auto 300%');
-    if (!modelViewer.hasAttribute('camera-target')) modelViewer.setAttribute('camera-target', '0m 0.2m 0m');
+    if (!modelViewer.hasAttribute('camera-target')) modelViewer.setAttribute('camera-target', '0m 0.3m 0m');
   };
 
   apply();

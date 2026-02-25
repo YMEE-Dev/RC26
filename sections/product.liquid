@@ -642,6 +642,12 @@
           "default": false
         },
         {
+          "type": "checkbox",
+          "id": "show_sku",
+          "label": "Show SKU",
+          "default": false
+        },
+        {
           "type": "text",
           "id": "heading",
           "label": "Heading",
@@ -2069,6 +2075,101 @@
           "unit": "px",
           "label": "Bottom",
           "default": 16
+        }
+      ]
+    },
+    {
+      "type": "side_drawer",
+      "name": "Side drawer",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Trigger"
+        },
+        {
+          "type": "text",
+          "id": "trigger_text",
+          "label": "Trigger text",
+          "default": "Ask our concierge"
+        },
+        {
+          "type": "text",
+          "id": "trigger_icon",
+          "label": "Trigger icon asset",
+          "info": "Example: icon-ask-our-concierge for assets/icon-ask-our-concierge.svg",
+          "default": "icon-ask-our-concierge"
+        },
+        {
+          "type": "select",
+          "id": "trigger_icon_position",
+          "label": "Icon position",
+          "default": "left",
+          "options": [
+            {"value": "left", "label": "Left"},
+            {"value": "right", "label": "Right"}
+          ]
+        },
+        {
+          "type": "select",
+          "id": "trigger_alignment",
+          "label": "Trigger alignment",
+          "default": "left",
+          "options": [
+            {"value": "left", "label": "Left"},
+            {"value": "center", "label": "Centered"},
+            {"value": "right", "label": "Right"},
+            {"value": "between", "label": "Space between"}
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Drawer"
+        },
+        {
+          "type": "select",
+          "id": "drawer_snippet",
+          "label": "Drawer content snippet",
+          "default": "drawer-free-shipping",
+          "options": [
+            {"value": "drawer-free-shipping", "label": "Free shipping info"},
+            {"value": "drawer-gift-packaging", "label": "Gift packaging"},
+            {"value": "drawer-2-years-warranty", "label": "Two years warranty"},
+            {"value": "drawer-14-days-free-returns", "label": "14 days free returns"}
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Drawer settings"
+        },
+        {
+          "type": "text",
+          "id": "drawer_id",
+          "label": "Drawer ID",
+          "info": "Unique value used to connect trigger and side drawer. If blank, block ID is used."
+        },
+        {
+          "type": "select",
+          "id": "drawer_size",
+          "label": "Drawer size",
+          "default": "40%",
+          "options": [
+            {"value": "30%", "label": "30%"},
+            {"value": "40%", "label": "40%"},
+            {"value": "50%", "label": "50%"},
+            {"value": "60%", "label": "60%"},
+            {"value": "fullscreen", "label": "Fullscreen"}
+          ]
+        },
+        {
+          "type": "select",
+          "id": "drawer_direction",
+          "label": "Drawer direction",
+          "default": "left-to-right",
+          "options": [
+            {"value": "left-to-right", "label": "Left to right"},
+            {"value": "right-to-left", "label": "Right to left"},
+            {"value": "bottom-to-top", "label": "Bottom to top"}
+          ]
         }
       ]
     }

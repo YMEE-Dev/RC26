@@ -1,0 +1,154 @@
+{% doc %}
+  Renders a reusable link with an SVG icon and text.
+
+  @param {string} text - Link label text
+  @param {string} [url] - Link destination URL
+  @param {string} [icon] - SVG asset name for the icon (for example: 'icon-nav-arrow-right' or 'icon-nav-arrow-right.svg')
+  @param {string} [icon_position] - Icon position relative to text: 'left' or 'right'
+  @param {string} [content_alignment] - Content alignment: 'left', 'center', 'right', or 'between'
+  @param {string} [drawer_open] - Value for data-drawer-open attribute
+  @param {string} [drawer_close] - Value for data-drawer-close attribute
+  @param {string} [drawer_toggle] - Value for data-drawer-toggle attribute
+  @param {string} [class_name] - Additional classes for the link
+  @param {boolean} [open_new_tab] - Opens link in new tab when true
+  @param {string} [aria_label] - Optional aria-label for accessibility
+  @param {number} [text_margin_bottom] - Margin bottom for text in pixels
+
+  @example
+  {% render 'link-with-icon',
+    text: 'Shop now',
+    drawer_open: 'promo-info',
+    icon: 'icon-nav-arrow-right',
+    icon_position: 'right',
+    content_alignment: 'between',
+    text_margin_bottom: 10
+  %}
+{% enddoc %}
+
+{%- liquid
+  assign has_url = false
+  if url != blank
+    assign has_url = true
+  endif
+
+  assign link_url = '#'
+  if has_url
+    assign link_url = url
+  endif
+
+  assign link_text = text | default: ''
+
+  assign normalized_icon_position = icon_position | default: 'left'
+  if normalized_icon_position != 'right'
+    assign normalized_icon_position = 'left'
+  endif
+
+  assign normalized_alignment = content_alignment | default: 'center'
+  if normalized_alignment != 'left'
+    if normalized_alignment != 'right'
+      if normalized_alignment != 'between'
+        assign normalized_alignment = 'center'
+      endif
+    endif
+  endif
+
+  assign icon_asset = icon | default: ''
+  if icon_asset != blank
+    unless icon_asset contains '.svg'
+      assign icon_asset = icon_asset | append: '.svg'
+    endunless
+  endif
+
+  assign text_margin_bottom_value = text_margin_bottom | default: 15
+-%}
+
+{%- if has_url -%}
+  <a
+    href="{{ link_url }}"
+    class="link-with-icon link-with-icon--icon-{{ normalized_icon_position }} link-with-icon--align-{{ normalized_alignment }} {{ class_name }}"
+    {% if open_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
+    {% if drawer_open != blank %}data-drawer-open="{{ drawer_open | escape }}"{% endif %}
+    {% if drawer_close != blank %}data-drawer-close="{{ drawer_close | escape }}"{% endif %}
+    {% if drawer_toggle != blank %}data-drawer-toggle="{{ drawer_toggle | escape }}"{% endif %}
+    {% if aria_label != blank %}aria-label="{{ aria_label | escape }}"{% endif %}
+    style="--text-margin-bottom: {{ text_margin_bottom_value }}px;"
+  >
+    {%- if icon_asset != blank -%}
+      <span class="link-with-icon__icon" aria-hidden="true">
+        <img src="{{ icon_asset | asset_url }}" alt="" loading="lazy" width="25" height="25">
+      </span>
+    {%- endif -%}
+
+    <span class="link-with-icon__text">{{ link_text | escape }}</span>
+  </a>
+{%- else -%}
+  <button
+    type="button"
+    class="link-with-icon link-with-icon--icon-{{ normalized_icon_position }} link-with-icon--align-{{ normalized_alignment }} {{ class_name }}"
+    {% if drawer_open != blank %}data-drawer-open="{{ drawer_open | escape }}"{% endif %}
+    {% if drawer_close != blank %}data-drawer-close="{{ drawer_close | escape }}"{% endif %}
+    {% if drawer_toggle != blank %}data-drawer-toggle="{{ drawer_toggle | escape }}"{% endif %}
+    {% if aria_label != blank %}aria-label="{{ aria_label | escape }}"{% endif %}
+    style="--text-margin-bottom: {{ text_margin_bottom_value }}px;"
+  >
+    {%- if icon_asset != blank -%}
+      <span class="link-with-icon__icon" aria-hidden="true">
+        <img src="{{ icon_asset | asset_url }}" alt="" loading="lazy" width="25" height="25">
+      </span>
+    {%- endif -%}
+
+    <span class="link-with-icon__text">{{ link_text | escape }}</span>
+  </button>
+{%- endif -%}
+
+{% stylesheet %}
+  .link-with-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .link-with-icon--icon-right {
+    flex-direction: row-reverse;
+  }
+
+  .link-with-icon--align-center {
+    justify-content: center;
+  }
+
+  .link-with-icon--align-left {
+    justify-content: flex-start;
+  }
+
+  .link-with-icon--align-right {
+    justify-content: flex-end;
+  }
+
+  .link-with-icon--align-between {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .link-with-icon__icon {
+    display: inline-flex;
+    line-height: 0;
+  }
+
+  .link-with-icon__text {
+    line-height: 1;
+    font-size: var(--font-body-small);
+    font-family: var(--FONT-STACK-BODY);
+    font-style: var(--FONT-STYLE-BODY);
+    font-weight: var(--FONT-WEIGHT-BODY);
+    letter-spacing: var(--LETTER-SPACING-BODY);
+    text-transform: uppercase;
+    margin-bottom: var(--text-margin-bottom, 0);
+  }
+{% endstylesheet %}
