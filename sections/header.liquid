@@ -807,6 +807,7 @@
     };
 
     const rootSelector = '.tmenu_item.tmenu_item--root.tmenu_item_level_0.tmenu_item_submenu_type_mega';
+    const tmenuActiveSelector = '.tmenu_item--root.tmenu_item_level_0.tmenu_item_active';
     let initialized = false;
     let tmenuIsActive = false;
     let tmenuScrollLocked = false;
@@ -833,13 +834,18 @@
           initialized = true;
           applyMenuOpenStyles();
         }
-        const activeNow = Boolean(document.querySelector('.tmenu_item_active'));
+        const activeNow = Boolean(document.querySelector(tmenuActiveSelector));
         if (activeNow && !tmenuIsActive) {
           applyMenuOpenStyles();
         }
         if (activeNow !== tmenuIsActive) {
           setTmenuScrollLock(activeNow);
           tmenuIsActive = activeNow;
+          document.dispatchEvent(
+            new CustomEvent('theme:tmenu:state', {
+              detail: { isOpen: tmenuIsActive },
+            })
+          );
         }
       };
       new MutationObserver(handleMutations).observe(root, {
@@ -968,9 +974,11 @@
 
       const logoLightUrl = logoLinks[0].dataset.logoLight;
       const logoDarkUrl = logoLinks[0].dataset.logoDark;
-      const drawerLogoMode = 'light';
+      const forcedLightLogoMode = 'light';
 
       const drawerIsOpen = () => drawerWrapper?.classList.contains('is-open');
+      const tmenuIsOpen = () => tmenuIsActive || Boolean(document.querySelector(tmenuActiveSelector));
+      const shouldForceLightLogo = () => drawerIsOpen() || tmenuIsOpen();
 
       const setHeaderColors = (mode) => {
         const colorSet = colors[mode] || colors.light;
@@ -1006,15 +1014,14 @@
         if (resolved === currentMode) return;
         currentMode = resolved;
         setHeaderColors(currentMode);
-        if (!drawerIsOpen()) {
+        if (!shouldForceLightLogo()) {
           setLogoSource(currentMode);
         }
       };
 
-      const syncLogoWithDrawer = () => {
-        if (!drawerWrapper) return;
-        if (drawerIsOpen()) {
-          setLogoSource(drawerLogoMode);
+      const syncLogoWithHeaderState = () => {
+        if (shouldForceLightLogo()) {
+          setLogoSource(forcedLightLogoMode);
           return;
         }
         setLogoSource(currentMode);
@@ -1022,24 +1029,26 @@
 
       setHeaderColors(currentMode);
       setLogoSource(currentMode);
-      syncLogoWithDrawer();
+      syncLogoWithHeaderState();
 
       if (drawerWrapper) {
         document.addEventListener('theme:drawer:open', (event) => {
           if (event.target !== drawerWrapper) return;
-          syncLogoWithDrawer();
+          syncLogoWithHeaderState();
         });
 
         document.addEventListener('theme:drawer:close', (event) => {
           if (event.target !== drawerWrapper) return;
-          syncLogoWithDrawer();
+          syncLogoWithHeaderState();
         });
 
-        new MutationObserver(syncLogoWithDrawer).observe(drawerWrapper, {
+        new MutationObserver(syncLogoWithHeaderState).observe(drawerWrapper, {
           attributes: true,
           attributeFilter: ['class'],
         });
       }
+
+      document.addEventListener('theme:tmenu:state', syncLogoWithHeaderState);
 
       let sectionsToObserve = selectAll(
         'main .shopify-section section, main .shopify-section collection-component, main .shopify-section [data-section-id]'
