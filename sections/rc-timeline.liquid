@@ -203,7 +203,7 @@
     .hero__scroll {
       position: absolute;
       bottom: calc(190px + var(--hero-foreground-shift));
-      left: calc(50% + 10px);
+      left: 50%;
       right: auto;
       z-index: 2;
       text-align: center;
@@ -402,7 +402,7 @@
       align-items: center;
     }
     .history__center img {
-      width: min(860px, 74vw);
+      width: min(980px, 82vw);
       max-width: 100%;
       height: auto;
       mix-blend-mode: screen;
@@ -956,7 +956,6 @@
       width: min(760px, 100%);
     }
     .collections__title {
-      font-size: 34px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: #262626;
@@ -978,13 +977,10 @@
     }
     .collections__link-h3 {
       margin: 0;
-      line-height: 1.08;
     }
     .collections__list li a {
-      font: inherit;
       color: #64656a;
       transition: color 0.2s;
-      line-height: inherit;
       text-decoration: none;
     }
     .collections__list li a.is-active {
@@ -1021,13 +1017,7 @@
         grid-template-columns: 1fr;
         gap: 12px;
       }
-      .collections__title {
-        font-size: 24px;
-        margin-bottom: 22px;
-      }
-      .collections__list li a {
-        font-size: inherit;
-      }
+      .collections__title { margin-bottom: 22px; }
       .collections__img {
         justify-self: start;
         width: min(530px, 100%);
@@ -1720,38 +1710,69 @@
      COLLECTIONS
 ════════════════════════════════════════ -->
 <section class="collections">
+  {%- assign default_collections_image = collections_img_url -%}
+  {%- if collections_cover_image != blank -%}
+    {%- assign default_collections_image = collections_cover_image | image_url: width: 1060, height: 1060 -%}
+  {%- endif -%}
   <div class="collections__content">
-    <h2 class="collections__title title fade">DISCOVER our Collections</h2>
+    <h2 class="collections__title h5 fade">DISCOVER our Collections</h2>
     <div class="collections__columns">
       <ul class="collections__list">
-        <li><h3 class="collections__link-h3 h3"><a class="is-active" href="#">Carousel</a></h3></li>
-        <li><h3 class="collections__link-h3 h3"><a href="#">Princess Flower</a></h3></li>
-        <li><h3 class="collections__link-h3 h3"><a href="#">Love in Verona</a></h3></li>
-        <li><h3 class="collections__link-h3 h3"><a href="#">Venetian Princess</a></h3></li>
-        <li><h3 class="collections__link-h3 h3"><a href="#">Art Deco</a></h3></li>
-        <li><h3 class="collections__link-h3 h3"><a href="#">Tiaré</a></h3></li>
-        <li><h3 class="collections__link-h3 h3"><a href="#">Sauvage Privé</a></h3></li>
-        <li><h3 class="collections__link-h3 h3"><a href="#">Animalier</a></h3></li>
+        {%- if section.settings.collections_left != blank -%}
+          {%- for collection in section.settings.collections_left -%}
+            {%- assign item_image = default_collections_image -%}
+            {%- if collection.featured_image != blank -%}
+              {%- assign item_image = collection.featured_image | image_url: width: 1060, height: 1060 -%}
+            {%- endif -%}
+            <li><h3 class="collections__link-h3 h3"><a class="h3 collections__link{% if forloop.first %} is-active{% endif %}" href="{{ collection.url }}" data-collection-image="{{ item_image }}">{{ collection.title }}</a></h3></li>
+          {%- endfor -%}
+        {%- else -%}
+          {%- assign fallback_left = "Carousel|Princess Flower|Love in Verona|Venetian Princess|Art Deco|Tiaré|Sauvage Privé|Animalier" | split: "|" -%}
+          {%- for item in fallback_left -%}
+            {%- assign item_handle = item | handleize -%}
+            {%- assign item_collection = collections[item_handle] -%}
+            {%- assign item_url = '#' -%}
+            {%- assign item_image = default_collections_image -%}
+            {%- if item_collection != blank -%}
+              {%- assign item_url = item_collection.url -%}
+              {%- if item_collection.featured_image != blank -%}
+                {%- assign item_image = item_collection.featured_image | image_url: width: 1060, height: 1060 -%}
+              {%- endif -%}
+            {%- endif -%}
+            <li><h3 class="collections__link-h3 h3"><a class="h3 collections__link{% if forloop.first %} is-active{% endif %}" href="{{ item_url }}" data-collection-image="{{ item_image }}">{{ item }}</a></h3></li>
+          {%- endfor -%}
+        {%- endif -%}
       </ul>
       <ul class="collections__list">
-        <li><h3 class="collections__link-h3 h3"><a href="#">Venetian Medallions</a></h3></li>
-        <li><h3 class="collections__link-h3 h3"><a href="#">Diamond Princess</a></h3></li>
-        <li><h3 class="collections__link-h3 h3"><a href="#">Domino</a></h3></li>
-        <li><h3 class="collections__link-h3 h3"><a href="#">Jasmine</a></h3></li>
-        <li><h3 class="collections__link-h3 h3"><a href="#">Navarra</a></h3></li>
-        <li><h3 class="collections__link-h3 h3"><a href="#">Princess</a></h3></li>
-        <li><h3 class="collections__link-h3 h3"><a href="#">Princess Star</a></h3></li>
+        {%- if section.settings.collections_right != blank -%}
+          {%- for collection in section.settings.collections_right -%}
+            {%- assign item_image = default_collections_image -%}
+            {%- if collection.featured_image != blank -%}
+              {%- assign item_image = collection.featured_image | image_url: width: 1060, height: 1060 -%}
+            {%- endif -%}
+            <li><h3 class="collections__link-h3 h3"><a class="h3 collections__link" href="{{ collection.url }}" data-collection-image="{{ item_image }}">{{ collection.title }}</a></h3></li>
+          {%- endfor -%}
+        {%- else -%}
+          {%- assign fallback_right = "Venetian Medallions|Diamond Princess|Domino|Jasmine|Navarra|Princess|Princess Star" | split: "|" -%}
+          {%- for item in fallback_right -%}
+            {%- assign item_handle = item | handleize -%}
+            {%- assign item_collection = collections[item_handle] -%}
+            {%- assign item_url = '#' -%}
+            {%- assign item_image = default_collections_image -%}
+            {%- if item_collection != blank -%}
+              {%- assign item_url = item_collection.url -%}
+              {%- if item_collection.featured_image != blank -%}
+                {%- assign item_image = item_collection.featured_image | image_url: width: 1060, height: 1060 -%}
+              {%- endif -%}
+            {%- endif -%}
+            <li><h3 class="collections__link-h3 h3"><a class="h3 collections__link" href="{{ item_url }}" data-collection-image="{{ item_image }}">{{ item }}</a></h3></li>
+          {%- endfor -%}
+        {%- endif -%}
       </ul>
     </div>
   </div>
   <div class="collections__img fade d1">
-    {%- if collections_cover_image != blank -%}
-      {{ collections_cover_image | image_url: width: 1060, height: 1060 | image_tag: alt: section.settings.collections_cover_collection.title, loading: 'lazy', class: 'rc-inline-image' }}
-    {%- elsif section.settings.collections_image != blank -%}
-      {{ section.settings.collections_image | image_url: width: 1060, height: 1060 | image_tag: alt: 'Collections', loading: 'lazy', class: 'rc-inline-image' }}
-    {%- else -%}
-      {{ collections_img_url | image_tag: alt: 'Collections', loading: 'lazy', class: 'rc-inline-image' }}
-    {%- endif -%}
+    <img id="collections-hover-image" src="{{ default_collections_image }}" alt="Collections" loading="lazy" class="rc-inline-image">
   </div>
 </section>
 
@@ -1921,6 +1942,29 @@
       if (breakYear) breakDot.textContent = breakYear.textContent.trim();
       else if (breakDot.dataset.year) breakDot.textContent = breakDot.dataset.year;
     }
+  }
+
+  function initCollectionsHover(){
+    var collectionsSection = document.querySelector('.collections');
+    if (!collectionsSection) return;
+
+    var imageEl = collectionsSection.querySelector('#collections-hover-image');
+    var links = collectionsSection.querySelectorAll('.collections__link');
+    if (!imageEl || !links.length) return;
+
+    function activate(link){
+      links.forEach(function(l){ l.classList.remove('is-active'); });
+      link.classList.add('is-active');
+      var imageUrl = link.getAttribute('data-collection-image');
+      if (imageUrl) {
+        imageEl.setAttribute('src', imageUrl);
+      }
+    }
+
+    links.forEach(function(link){
+      link.addEventListener('mouseenter', function(){ activate(link); });
+      link.addEventListener('focus', function(){ activate(link); });
+    });
   }
 
   function renderNavState() {
@@ -2162,6 +2206,7 @@
     updateTimelineLineDraw();
   });
   hydrateTimelineYearMarkers();
+  initCollectionsHover();
   initHeroLottie();
   initRebrandingLogoLottie();
   updateNav();
@@ -2445,6 +2490,16 @@
       "type": "collection",
       "id": "collections_cover_collection",
       "label": "Collections cover source"
+    },
+    {
+      "type": "collection_list",
+      "id": "collections_left",
+      "label": "Collections left column"
+    },
+    {
+      "type": "collection_list",
+      "id": "collections_right",
+      "label": "Collections right column"
     },
     {
       "type": "header",
