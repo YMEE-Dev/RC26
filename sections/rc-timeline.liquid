@@ -23,13 +23,18 @@
       --body:   var(--font-body-family, 'Inter', sans-serif);
     }
 
+    /* Pull this first section up so it aligns under the top header instead of starting below it. */
+    .rc-heritage-page {
+      margin-top: calc((var(--header-height, 0px) + var(--announcement-height, 0px)) * -1);
+    }
+
     /* ═══════════════════════════════════════
        HERO
     ═══════════════════════════════════════ */
     .hero {
       position: relative;
       width: 100%;
-      min-height: 100vh;
+      min-height: calc(100vh + var(--header-height, 0px) + var(--announcement-height, 0px));
       background: transparent;
       display: flex;
       flex-direction: column;
@@ -314,7 +319,7 @@
     @keyframes nav-shape-expand {
       0% {
         transform: scaleX(0.16);
-        opacity: 0.96;
+        opacity: 0.97;
         filter: saturate(0.94);
       }
       100% {
