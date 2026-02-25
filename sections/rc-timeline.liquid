@@ -1061,6 +1061,8 @@
 {%- if ruby_bg_url == blank -%}{%- assign ruby_bg_url = 'figma-images/ruby-section.jpg' | asset_url -%}{%- endif -%}
 {%- assign ruby_gem_url = section.settings.ruby_gem_image | image_url: width: 1200 -%}
 {%- if ruby_gem_url == blank -%}{%- assign ruby_gem_url = 'figma-images/ruby-gem.png' | asset_url -%}{%- endif -%}
+{%- assign img_1977_url = section.settings.timeline_img_1977 | image_url: width: 1200 -%}
+{%- if img_1977_url == blank -%}{%- assign img_1977_url = 'figma-images/1977.png' | asset_url -%}{%- endif -%}
 {%- assign img_1984_url = section.settings.timeline_img_1984 | image_url: width: 1200 -%}
 {%- if img_1984_url == blank -%}{%- assign img_1984_url = 'figma-images/RC_Drawing image 1.png' | asset_url -%}{%- endif -%}
 {%- assign img_1996_url = section.settings.timeline_img_1996 | image_url: width: 1200 -%}
@@ -1083,7 +1085,8 @@
 {%- if img_today_url == blank -%}{%- assign img_today_url = 'figma-images/timeline-today.jpg' | asset_url -%}{%- endif -%}
 {%- assign collections_img_url = section.settings.collections_image | image_url: width: 1600 -%}
 {%- if collections_img_url == blank -%}{%- assign collections_img_url = 'figma-images/collections-bg.jpg' | asset_url -%}{%- endif -%}
-{%- assign flower_json_url = 'figma-images/RC_Flower.json' | asset_url -%}
+{%- assign flower_json_url = section.settings.hero_lottie_json_url -%}
+{%- if flower_json_url == blank -%}{%- assign flower_json_url = 'figma-images/RC_Flower.json' | asset_url -%}{%- endif -%}
 
 
 <!-- ════════════════════════════════════════
@@ -1329,7 +1332,7 @@
       <div class="timeline__spine"></div>
 
       <div class="tl-item tl-item--left tl-item--1977">
-        <div class="tl-media"><img src="{{ 'figma-images/1977.png' | asset_url }}" alt="1977"></div>
+        <div class="tl-media"><img src="{{ img_1977_url }}" alt="1977"></div>
         <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
         <div class="tl-event">
           <div class="tl-year">1977</div>
@@ -1579,12 +1582,14 @@
         loadFromData();
         return;
       }
+      var lottieSrc = heroFlowerJsonPath;
+      var lottiePath = lottieSrc + (lottieSrc.indexOf('?') === -1 ? '?cb=' : '&cb=') + Date.now();
       var anim = window.lottie.loadAnimation({
         container: heroLottieContainer,
         renderer: 'svg',
         loop: true,
         autoplay: true,
-        path: heroFlowerJsonPath + '?cb=' + Date.now()
+        path: lottiePath
       });
       anim.addEventListener('DOMLoaded', function(){
         anim.loop = true;
@@ -1956,6 +1961,11 @@
       "default": "Scroll to discover OUR story"
     },
     {
+      "type": "text",
+      "id": "hero_lottie_json_url",
+      "label": "Hero flower animation JSON URL (optional)"
+    },
+    {
       "type": "header",
       "content": "History Section"
     },
@@ -1990,6 +2000,11 @@
     {
       "type": "header",
       "content": "Timeline Images"
+    },
+    {
+      "type": "image_picker",
+      "id": "timeline_img_1977",
+      "label": "1977 — image"
     },
     {
       "type": "image_picker",
