@@ -82,6 +82,7 @@
       opacity: 0;
       transition: opacity 0.9s ease, transform 0.9s ease;
       pointer-events: none;
+      z-index: 1;
     }
     .hero.hero--ornament-in .hero__ornament {
       opacity: 0.62;
@@ -92,12 +93,19 @@
       height: min(640px, 78vw);
       display: block;
       position: relative;
-      z-index: 2;
+      z-index: 1;
       transform-origin: center;
       animation: hero-flower-float 8s ease-in-out infinite;
+      background: transparent !important;
     }
     .hero__lottie svg {
       overflow: visible;
+      background: transparent !important;
+    }
+    .hero__lottie svg rect {
+      fill: transparent !important;
+      fill-opacity: 0 !important;
+      opacity: 0 !important;
     }
     .hero__lottie svg path[stroke] {
       filter: drop-shadow(0 0 10px rgba(255,255,255,0.68))
@@ -110,13 +118,20 @@
       100% { opacity: 0.35; }
     }
     .hero__ornament-fallback {
-      display: none !important;
+      display: block;
       width: min(520px, 70vw);
       height: auto;
       position: relative;
       z-index: 1;
       transform-origin: center;
       animation: hero-flower-float 8s ease-in-out infinite;
+      opacity: 0.45;
+    }
+    .hero__ornament.has-lottie .hero__ornament-fallback {
+      display: none;
+    }
+    .hero__ornament:not(.has-lottie) .hero__lottie {
+      display: none;
     }
     @keyframes hero-flower-float {
       0%, 100% { transform: scale(1); opacity: 0.95; }
@@ -126,16 +141,17 @@
     /* Text content */
     .hero__content {
       position: relative;
-      z-index: 2;
+      z-index: 10;
       text-align: center;
       color: var(--white);
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 0;
-      opacity: 0;
-      transform: translateY(-24px);
+      opacity: 1;
+      transform: translateY(0);
       transition: opacity 0.7s ease, transform 0.7s ease;
+      text-shadow: 0 2px 18px rgba(0, 0, 0, 0.45);
     }
     .hero.hero--text-in .hero__content {
       opacity: 1;
@@ -143,8 +159,8 @@
     }
     .hero__eyebrow,
     .hero__title {
-      opacity: 0;
-      transform: translateY(-10px);
+      opacity: 1;
+      transform: translateY(0);
       transition: opacity 0.6s ease, transform 0.6s ease;
     }
     .hero.hero--text-in .hero__eyebrow {
@@ -1068,10 +1084,14 @@
 {%- if ruby_bg_url == blank -%}{%- assign ruby_bg_url = 'figma-images/ruby-section.jpg' | asset_url -%}{%- endif -%}
 {%- assign ruby_gem_url = section.settings.ruby_gem_image | image_url: width: 1200 -%}
 {%- if ruby_gem_url == blank -%}{%- assign ruby_gem_url = 'figma-images/ruby-gem.png' | asset_url -%}{%- endif -%}
+{%- assign timeline_bg_url = section.settings.timeline_bg_image | image_url: width: 2400 -%}
+{%- if timeline_bg_url == blank -%}{%- assign timeline_bg_url = 'figma-images/hero-bg.jpg' | asset_url -%}{%- endif -%}
 {%- assign img_1977_url = section.settings.timeline_img_1977 | image_url: width: 1200 -%}
 {%- if img_1977_url == blank -%}{%- assign img_1977_url = 'figma-images/1977.png' | asset_url -%}{%- endif -%}
 {%- assign img_1984_url = section.settings.timeline_img_1984 | image_url: width: 1200 -%}
 {%- if img_1984_url == blank -%}{%- assign img_1984_url = 'figma-images/RC_Drawing image 1.png' | asset_url -%}{%- endif -%}
+{%- assign img_2007_url = section.settings.timeline_img_2007 | image_url: width: 1200 -%}
+{%- if img_2007_url == blank -%}{%- assign img_2007_url = 'figma-images/Roberto_Coin_Store Dubai.png' | asset_url -%}{%- endif -%}
 {%- assign img_1996_url = section.settings.timeline_img_1996 | image_url: width: 1200 -%}
 {%- if img_1996_url == blank -%}{%- assign img_1996_url = 'figma-images/RUBY Trasnparent  1.png' | asset_url -%}{%- endif -%}
 {%- assign img_2003_url = section.settings.timeline_img_2003 | image_url: width: 1200 -%}
@@ -1094,6 +1114,8 @@
 {%- if collections_img_url == blank -%}{%- assign collections_img_url = 'figma-images/collections-bg.jpg' | asset_url -%}{%- endif -%}
 {%- assign flower_json_url = section.settings.hero_lottie_json_url -%}
 {%- if flower_json_url == blank -%}{%- assign flower_json_url = 'figma-images/RC_Flower.json' | asset_url -%}{%- endif -%}
+{%- assign rebranding_logo_json_url = section.settings.rebranding_logo_lottie_json_url -%}
+{%- if rebranding_logo_json_url == blank -%}{%- assign rebranding_logo_json_url = 'figma-images/RobertoCoin_logo.json' | asset_url -%}{%- endif -%}
 
 
 <!-- ════════════════════════════════════════
@@ -1368,7 +1390,7 @@
   </div>
 
   <!-- Later era — ruby red background -->
-  <div class="timeline-era--ruby">
+  <div class="timeline-era--ruby" style="background-image:url('{{ timeline_bg_url }}');">
     <div class="timeline-era--ruby__map">
       <img src="{{ 'figma-images/world map.png' | asset_url }}" alt="World map">
     </div>
@@ -1404,7 +1426,7 @@
     </div>
 
     <div class="tl-item tl-item--right">
-      <div class="tl-media"><img src="{{ 'figma-images/Roberto_Coin_Store Dubai.png' | asset_url }}" alt="2007 Dubai Store"></div>
+      <div class="tl-media"><img src="{{ img_2007_url }}" alt="2007 Dubai Store"></div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
       <div class="tl-event">
         <div class="tl-year">2007</div>
@@ -1507,7 +1529,7 @@
      REBRANDING
 ════════════════════════════════════════ -->
 <section class="rebranding" id="rct-rebranding">
-  <div class="rebranding__logo" id="rebranding-logo-lottie" aria-hidden="true"></div>
+  <div class="rebranding__logo" id="rebranding-logo-lottie" data-logo-json="{{ rebranding_logo_json_url }}" aria-hidden="true"></div>
 </section>
 
 <!-- ════════════════════════════════════════
@@ -1562,6 +1584,7 @@
   var heroLottieContainer = document.getElementById('hero-lottie');
   var heroFlowerJsonPath = heroLottieContainer ? heroLottieContainer.getAttribute('data-flower-json') : '';
   var rebrandingLogoContainer = document.getElementById('rebranding-logo-lottie');
+  var rebrandingLogoJsonPath = rebrandingLogoContainer ? rebrandingLogoContainer.getAttribute('data-logo-json') : '';
   var navScrollRaf = null;
   var isNavAutoScrolling = false;
 
@@ -1645,7 +1668,29 @@
       });
     }
 
-    logoAnim = loadFromData();
+    function loadFromPath(){
+      if (!rebrandingLogoJsonPath) return null;
+      var logoSrc = rebrandingLogoJsonPath;
+      var logoPath = logoSrc + (logoSrc.indexOf('?') === -1 ? '?cb=' : '&cb=') + Date.now();
+      try {
+        var pathAnim = window.lottie.loadAnimation({
+          container: rebrandingLogoContainer,
+          renderer: 'svg',
+          loop: false,
+          autoplay: false,
+          path: logoPath
+        });
+        pathAnim.addEventListener('data_failed', function(){
+          try { pathAnim.destroy(); } catch (_e) {}
+          if (!logoAnim) logoAnim = loadFromData();
+        });
+        return pathAnim;
+      } catch (_e) {
+        return null;
+      }
+    }
+
+    logoAnim = loadFromPath() || loadFromData();
 
     if (!logoAnim) return;
 
@@ -2010,6 +2055,11 @@
       "label": "Ruby gem image (transparent PNG)"
     },
     {
+      "type": "image_picker",
+      "id": "timeline_bg_image",
+      "label": "Timeline background image"
+    },
+    {
       "type": "header",
       "content": "Timeline Images"
     },
@@ -2037,6 +2087,11 @@
       "type": "image_picker",
       "id": "timeline_img_2008",
       "label": "2008 — Dubai boutique image"
+    },
+    {
+      "type": "image_picker",
+      "id": "timeline_img_2007",
+      "label": "2007 — Dubai store image"
     },
     {
       "type": "image_picker",
@@ -2085,6 +2140,11 @@
     {
       "type": "header",
       "content": "Collections Section"
+    },
+    {
+      "type": "text",
+      "id": "rebranding_logo_lottie_json_url",
+      "label": "Rebranding logo animation JSON URL (optional)"
     },
     {
       "type": "image_picker",
