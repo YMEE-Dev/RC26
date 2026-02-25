@@ -402,8 +402,8 @@
       align-items: center;
     }
     .history__center img {
-      width: 1060px;
-      max-width: none;
+      width: min(860px, 74vw);
+      max-width: 100%;
       height: auto;
       mix-blend-mode: screen;
       display: block;
@@ -942,18 +942,20 @@
        COLLECTIONS
     ═══════════════════════════════════════ */
     .collections {
-      background: #e6e6e6;
+      background: transparent;
       display: grid;
       grid-template-columns: minmax(540px, 1.15fr) minmax(420px, 1fr);
       min-height: 620px;
-      padding: 96px 80px 112px;
+      width: min(1300px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 96px 56px 112px;
       gap: clamp(44px, 6vw, 96px);
       align-items: center;
     }
     .collections__content {
       width: min(760px, 100%);
     }
-    .collections__eyebrow {
+    .collections__title {
       font-size: 34px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -974,13 +976,15 @@
       flex-direction: column;
       gap: 10px;
     }
+    .collections__link-h3 {
+      margin: 0;
+      line-height: 1.08;
+    }
     .collections__list li a {
-      font-family: var(--head);
-      font-size: clamp(32px, 2.3vw, 52px);
-      font-weight: 500;
+      font: inherit;
       color: #64656a;
       transition: color 0.2s;
-      line-height: 1.08;
+      line-height: inherit;
       text-decoration: none;
     }
     .collections__list li a.is-active {
@@ -990,11 +994,12 @@
     .collections__list li a:hover { color: #202020; }
     .collections__img {
       overflow: hidden;
-      width: 100%;
-      max-width: 760px;
+      width: 530px;
+      height: 530px;
+      max-width: 100%;
       justify-self: end;
     }
-    .collections__img img { width:100%; height:100%; object-fit:cover; }
+    .collections__img img { width:530px; height:530px; object-fit:cover; }
 
     /* ═══════════════════════════════════════
        FADE UTILITY
@@ -1016,16 +1021,22 @@
         grid-template-columns: 1fr;
         gap: 12px;
       }
-      .collections__eyebrow {
+      .collections__title {
         font-size: 24px;
         margin-bottom: 22px;
       }
       .collections__list li a {
-        font-size: clamp(28px, 8vw, 40px);
+        font-size: inherit;
       }
       .collections__img {
         justify-self: start;
+        width: min(530px, 100%);
+        height: min(530px, calc(100vw - 48px));
         max-width: none;
+      }
+      .collections__img img {
+        width: 100%;
+        height: 100%;
       }
       .history__left {
         margin-top: 0;
@@ -1176,6 +1187,7 @@
 {%- if img_today_url == blank -%}{%- assign img_today_url = 'figma-images/timeline-today.jpg' | asset_url -%}{%- endif -%}
 {%- assign collections_img_url = section.settings.collections_image | image_url: width: 1600 -%}
 {%- if collections_img_url == blank -%}{%- assign collections_img_url = 'figma-images/collections-bg.jpg' | asset_url -%}{%- endif -%}
+{%- assign collections_cover_image = section.settings.collections_cover_collection.featured_image -%}
 {%- assign flower_json_url = section.settings.hero_lottie_json_url -%}
 {%- if flower_json_url == blank -%}{%- assign flower_json_url = 'figma-images/RC_Flower.json' | asset_url -%}{%- endif -%}
 {%- assign rebranding_logo_json_url = section.settings.rebranding_logo_lottie_json_url -%}
@@ -1396,7 +1408,7 @@
     </div>
   </div>
   {%- if section.settings.creator_vicenza_image != blank -%}
-    {% render 'image', image: section.settings.creator_vicenza_image, alt: 'Vicenza drawing', loading: 'lazy', modifier: 'creator__vicenza rc-inline-image' %}
+    {{ section.settings.creator_vicenza_image | image_url: width: 1600 | image_tag: alt: 'Vicenza drawing', loading: 'lazy', class: 'creator__vicenza rc-inline-image' }}
   {%- else -%}
     <img src="{{ creator_vicenza_url }}" alt="Vicenza drawing" loading="lazy" class="creator__vicenza rc-inline-image">
   {%- endif -%}
@@ -1421,7 +1433,7 @@
     </div>
     <div class="ruby-section__gem fade d1">
       {%- if section.settings.ruby_gem_image != blank -%}
-        {% render 'image', image: section.settings.ruby_gem_image, alt: 'The Hidden Ruby', loading: 'lazy', modifier: 'rc-inline-image' %}
+        {{ section.settings.ruby_gem_image | image_url: width: 1200 | image_tag: alt: 'The Hidden Ruby', loading: 'lazy', class: 'rc-inline-image' }}
       {%- else -%}
         {{ ruby_gem_url | image_tag: alt: 'The Hidden Ruby', loading: 'lazy', class: 'rc-inline-image' }}
       {%- endif -%}
@@ -1478,7 +1490,7 @@
         <p class="timeline-break__body">{{ section.settings.timeline_text_1996 | default: "He launched his brand in the United States with the Appassionata collection and began signing his creations with a small ruby." }}</p>
       </div>
       {%- if section.settings.timeline_img_1996 != blank -%}
-        {% render 'image', image: section.settings.timeline_img_1996, alt: '1996 Ruby', loading: 'lazy', modifier: 'timeline-break__ruby rc-inline-image' %}
+        {{ section.settings.timeline_img_1996 | image_url: width: 1200 | image_tag: alt: '1996 Ruby', loading: 'lazy', class: 'timeline-break__ruby rc-inline-image' }}
       {%- else -%}
         {{ img_1996_url | image_tag: alt: '1996 Ruby', loading: 'lazy', class: 'timeline-break__ruby rc-inline-image' }}
       {%- endif -%}
@@ -1709,32 +1721,34 @@
 ════════════════════════════════════════ -->
 <section class="collections">
   <div class="collections__content">
-    <p class="collections__eyebrow fade">Discover our Collections</p>
+    <h2 class="collections__title title fade">DISCOVER our Collections</h2>
     <div class="collections__columns">
       <ul class="collections__list">
-        <li><a class="is-active" href="#">Carousel</a></li>
-        <li><a href="#">Princess Flower</a></li>
-        <li><a href="#">Love in Verona</a></li>
-        <li><a href="#">Venetian Princess</a></li>
-        <li><a href="#">Art Deco</a></li>
-        <li><a href="#">Tiaré</a></li>
-        <li><a href="#">Sauvage Privé</a></li>
-        <li><a href="#">Animalier</a></li>
+        <li><h3 class="collections__link-h3 h3"><a class="is-active" href="#">Carousel</a></h3></li>
+        <li><h3 class="collections__link-h3 h3"><a href="#">Princess Flower</a></h3></li>
+        <li><h3 class="collections__link-h3 h3"><a href="#">Love in Verona</a></h3></li>
+        <li><h3 class="collections__link-h3 h3"><a href="#">Venetian Princess</a></h3></li>
+        <li><h3 class="collections__link-h3 h3"><a href="#">Art Deco</a></h3></li>
+        <li><h3 class="collections__link-h3 h3"><a href="#">Tiaré</a></h3></li>
+        <li><h3 class="collections__link-h3 h3"><a href="#">Sauvage Privé</a></h3></li>
+        <li><h3 class="collections__link-h3 h3"><a href="#">Animalier</a></h3></li>
       </ul>
       <ul class="collections__list">
-        <li><a href="#">Venetian Medallions</a></li>
-        <li><a href="#">Diamond Princess</a></li>
-        <li><a href="#">Domino</a></li>
-        <li><a href="#">Jasmine</a></li>
-        <li><a href="#">Navarra</a></li>
-        <li><a href="#">Princess</a></li>
-        <li><a href="#">Princess Star</a></li>
+        <li><h3 class="collections__link-h3 h3"><a href="#">Venetian Medallions</a></h3></li>
+        <li><h3 class="collections__link-h3 h3"><a href="#">Diamond Princess</a></h3></li>
+        <li><h3 class="collections__link-h3 h3"><a href="#">Domino</a></h3></li>
+        <li><h3 class="collections__link-h3 h3"><a href="#">Jasmine</a></h3></li>
+        <li><h3 class="collections__link-h3 h3"><a href="#">Navarra</a></h3></li>
+        <li><h3 class="collections__link-h3 h3"><a href="#">Princess</a></h3></li>
+        <li><h3 class="collections__link-h3 h3"><a href="#">Princess Star</a></h3></li>
       </ul>
     </div>
   </div>
   <div class="collections__img fade d1">
-    {%- if section.settings.collections_image != blank -%}
-      {% render 'image', image: section.settings.collections_image, alt: 'Collections', loading: 'lazy', modifier: 'rc-inline-image' %}
+    {%- if collections_cover_image != blank -%}
+      {{ collections_cover_image | image_url: width: 1060, height: 1060 | image_tag: alt: section.settings.collections_cover_collection.title, loading: 'lazy', class: 'rc-inline-image' }}
+    {%- elsif section.settings.collections_image != blank -%}
+      {{ section.settings.collections_image | image_url: width: 1060, height: 1060 | image_tag: alt: 'Collections', loading: 'lazy', class: 'rc-inline-image' }}
     {%- else -%}
       {{ collections_img_url | image_tag: alt: 'Collections', loading: 'lazy', class: 'rc-inline-image' }}
     {%- endif -%}
@@ -2426,6 +2440,11 @@
     {
       "type": "header",
       "content": "Collections Section"
+    },
+    {
+      "type": "collection",
+      "id": "collections_cover_collection",
+      "label": "Collections cover source"
     },
     {
       "type": "header",
