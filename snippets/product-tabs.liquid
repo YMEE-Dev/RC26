@@ -197,7 +197,14 @@
                 style="height: auto;"
               {% endif %}
             >
-              <div class="accordion__content" data-collapsible-content>
+              <div class="accordion__content" data-collapsible-content{% if block.settings.show_sku %} data-variant-content{% endif %}>
+                {%- if block.settings.show_sku -%}
+                  <div class="variant-description" data-variant-description>
+                    {%- if product.selected_or_first_available_variant.description != blank -%}
+                      {{ product.selected_or_first_available_variant.description }}
+                    {%- endif -%}
+                  </div>
+                {%- endif -%}
                 {%- render 'toggle-ellipsis', content: accordion_content, show_read_more: show_read_more -%}
               </div>
             </div>
@@ -248,7 +255,14 @@
               </button>
             </div>
 
-            <div class="drawer__body rte {{ block.settings.text_font_size }}" data-scroll-lock-scrollable>
+            <div class="drawer__body rte {{ block.settings.text_font_size }}" data-scroll-lock-scrollable{% if block.settings.show_sku %} data-variant-content{% endif %}>
+              {%- if block.settings.show_sku -%}
+                <div class="variant-description" data-variant-description>
+                  {%- if product.selected_or_first_available_variant.description != blank -%}
+                    {{ product.selected_or_first_available_variant.description }}
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
               {{ accordion_content }}
             </div>
           </div>
@@ -279,6 +293,18 @@
   .product__block--accordion .accordion__title .accordion__sku {
     color: #A7A7A7;
     padding-left: 1rem;
+  }
+  
+  .variant-description {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e5e5;
+  }
+  
+  .variant-description:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
   }
 
   /* Accordion icon toggle */
@@ -324,6 +350,20 @@
       });
     }
     
+    function updateVariantDescription(variant) {
+      // Only update description elements in accordions that have SKU enabled
+      const descriptionElements = document.querySelectorAll('.product-accordion--has-sku [data-variant-description], .accordion--has-sku [data-variant-description]');
+      
+      descriptionElements.forEach(element => {
+        if (variant && variant.description && variant.description !== '') {
+          element.innerHTML = variant.description;
+          element.style.display = '';
+        } else {
+          element.style.display = 'none';
+        }
+      });
+    }
+    
     function getCurrentVariant() {
       const selectedId = document.querySelector('input[name="id"]:checked')?.value || 
                         document.querySelector('input[name="id"]')?.value;
@@ -346,6 +386,7 @@
     function handleVariantChange() {
       const variant = getCurrentVariant();
       updateVariantSKU(variant);
+      updateVariantDescription(variant);
     }
     
     const variantInputs = document.querySelectorAll('input[name="id"]');
@@ -361,6 +402,7 @@
     
     document.addEventListener('theme:variant:change', function(event) {
       updateVariantSKU(event.detail.variant);
+      updateVariantDescription(event.detail.variant);
     });
     
     const observer = new MutationObserver(function(mutations) {
@@ -381,6 +423,7 @@
     const initialVariant = getCurrentVariant();
     if (initialVariant) {
       updateVariantSKU(initialVariant);
+      updateVariantDescription(initialVariant);
     }
   });
 {% endjavascript %}
