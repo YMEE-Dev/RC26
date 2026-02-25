@@ -121,7 +121,7 @@
 header[data-header-desktop] {
   transition-duration: .3s !important;
   transition-timing-function: ease-in;
-  transition-property: all !important;
+  transition-property: opacity !important;
 }
 
 @media only screen and (min-width: 960px) {
@@ -184,6 +184,12 @@ header[data-header-desktop] {
 
 body:has(header-drawer.drawer--header.is-open) .theme__header {
   --globaltext: #fff;
+}
+
+@media only screen and (min-width: 990px) {
+  .header__desktop:has(.tmenu_item--root.tmenu_item_level_0.tmenu_item_active) {
+    --link: #fff;
+  }
 }
 
 /* Force white menu text while a root item is active */
