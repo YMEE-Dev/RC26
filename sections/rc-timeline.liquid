@@ -8,6 +8,7 @@
     html { scroll-behavior: smooth; }
     body { font-family: var(--body); background: #0b1d17; overflow-x: hidden; }
     img { display: block; max-width: 100%; }
+    .rc-heritage-page figure.image-wrapper { margin: 0; }
     a { text-decoration: none; color: inherit; }
 
     :root {
@@ -941,30 +942,58 @@
        COLLECTIONS
     ═══════════════════════════════════════ */
     .collections {
-      background: transparent;
+      background: #e6e6e6;
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      min-height: 480px;
-      padding: 80px;
-      gap: 60px;
+      grid-template-columns: minmax(540px, 1.15fr) minmax(420px, 1fr);
+      min-height: 620px;
+      padding: 96px 80px 112px;
+      gap: clamp(44px, 6vw, 96px);
       align-items: center;
     }
-    .collections__eyebrow {
-      font-size: 16px;
-      color: var(--white);
-      margin-bottom: 32px;
+    .collections__content {
+      width: min(760px, 100%);
     }
-    .collections__list { list-style:none; display:flex; flex-wrap:wrap; gap:2px 12px; }
+    .collections__eyebrow {
+      font-size: 34px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #262626;
+      margin-bottom: 38px;
+    }
+    .collections__columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(26px, 3vw, 72px);
+      align-items: start;
+    }
+    .collections__list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
     .collections__list li a {
       font-family: var(--head);
-      font-size: clamp(18px,2.2vw,30px);
+      font-size: clamp(32px, 2.3vw, 52px);
       font-weight: 500;
-      color: var(--teal);
+      color: #64656a;
       transition: color 0.2s;
-      line-height: 1.5;
+      line-height: 1.08;
+      text-decoration: none;
     }
-    .collections__list li a:hover { color: var(--white); }
-    .collections__img { overflow:hidden; }
+    .collections__list li a.is-active {
+      color: #101010;
+      font-weight: 600;
+    }
+    .collections__list li a:hover { color: #202020; }
+    .collections__img {
+      overflow: hidden;
+      width: 100%;
+      max-width: 760px;
+      justify-self: end;
+    }
     .collections__img img { width:100%; height:100%; object-fit:cover; }
 
     /* ═══════════════════════════════════════
@@ -979,6 +1008,25 @@
     @media (max-width:860px) {
       .history__inner, .creator__inner, .ruby-section__inner, .collections { grid-template-columns:1fr; }
       .history, .ruby-section__inner, .collections { padding:60px 24px; }
+      .collections {
+        min-height: auto;
+        gap: 28px;
+      }
+      .collections__columns {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .collections__eyebrow {
+        font-size: 24px;
+        margin-bottom: 22px;
+      }
+      .collections__list li a {
+        font-size: clamp(28px, 8vw, 40px);
+      }
+      .collections__img {
+        justify-self: start;
+        max-width: none;
+      }
       .history__left {
         margin-top: 0;
         margin-left: 0;
@@ -1102,8 +1150,6 @@
 {%- if img_1984_url == blank -%}{%- assign img_1984_url = 'figma-images/RC_Drawing image 1.png' | asset_url -%}{%- endif -%}
 {%- assign img_2000_url = section.settings.timeline_img_2000 | image_url: width: 1200 -%}
 {%- if img_2000_url == blank -%}{%- assign img_2000_url = 'figma-images/GroupDiamond.svg' | asset_url -%}{%- endif -%}
-{%- assign img_2002_url = section.settings.timeline_img_2002 | image_url: width: 1200 -%}
-{%- if img_2002_url == blank -%}{%- assign img_2002_url = 'figma-images/timeline-2003.jpg' | asset_url -%}{%- endif -%}
 {%- assign img_2006_url = section.settings.timeline_img_2006 | image_url: width: 1200 -%}
 {%- if img_2006_url == blank -%}{%- assign img_2006_url = 'figma-images/timeline-1996.jpg' | asset_url -%}{%- endif -%}
 {%- assign img_2007_url = section.settings.timeline_img_2007 | image_url: width: 1200 -%}
@@ -1122,6 +1168,8 @@
 {%- if img_2018_url == blank -%}{%- assign img_2018_url = 'figma-images/RC_Diamons.png' | asset_url -%}{%- endif -%}
 {%- assign img_2021_url = section.settings.timeline_img_2021 | image_url: width: 1200 -%}
 {%- if img_2021_url == blank -%}{%- assign img_2021_url = 'figma-images/RC_Princessflower.png' | asset_url -%}{%- endif -%}
+{%- assign img_2022_url = section.settings.timeline_img_2022 | image_url: width: 1200 -%}
+{%- if img_2022_url == blank -%}{%- assign img_2022_url = 'figma-images/RC_Emily in Paris.png' | asset_url -%}{%- endif -%}
 {%- assign img_2025_url = section.settings.timeline_img_2025 | image_url: width: 1200 -%}
 {%- if img_2025_url == blank -%}{%- assign img_2025_url = 'figma-images/Lifetimachievment award.png' | asset_url -%}{%- endif -%}
 {%- assign img_today_url = section.settings.timeline_img_today | image_url: width: 1200 -%}
@@ -1312,7 +1360,11 @@
 
     <!-- Center: ring illustration with multiply blend -->
     <div class="history__center fade">
-      <img src="{{ history_img_url }}" alt="Roberto Coin ring illustration">
+      {%- if section.settings.history_image != blank -%}
+        {% render 'image', image: section.settings.history_image, alt: 'Roberto Coin ring illustration', loading: 'lazy', modifier: 'rc-inline-image' %}
+      {%- else -%}
+        {{ history_img_url | image_tag: alt: 'Roberto Coin ring illustration', loading: 'lazy', class: 'rc-inline-image' }}
+      {%- endif -%}
     </div>
 
     <!-- Right: second paragraph -->
@@ -1329,7 +1381,11 @@
 <section id="rct-creator" class="creator">
   <div class="creator__inner">
     <div class="creator__image">
-      <img src="{{ creator_img_url }}" alt="Roberto Coin">
+      {%- if section.settings.creator_image != blank -%}
+        {% render 'image', image: section.settings.creator_image, alt: 'Roberto Coin', loading: 'lazy', modifier: 'rc-inline-image' %}
+      {%- else -%}
+        <img src="{{ creator_img_url }}" alt="Roberto Coin" loading="lazy" class="rc-inline-image">
+      {%- endif -%}
     </div>
     <div class="creator__text">
       <h2 class="creator__title fade">The Creator</h2>
@@ -1339,7 +1395,11 @@
       </div>
     </div>
   </div>
-  <img class="creator__vicenza" src="{{ creator_vicenza_url }}" alt="Vicenza drawing">
+  {%- if section.settings.creator_vicenza_image != blank -%}
+    {% render 'image', image: section.settings.creator_vicenza_image, alt: 'Vicenza drawing', loading: 'lazy', modifier: 'creator__vicenza rc-inline-image' %}
+  {%- else -%}
+    <img src="{{ creator_vicenza_url }}" alt="Vicenza drawing" loading="lazy" class="creator__vicenza rc-inline-image">
+  {%- endif -%}
 </section>
 
 <!-- ════════════════════════════════════════
@@ -1360,7 +1420,11 @@
       </div>
     </div>
     <div class="ruby-section__gem fade d1">
-      <img src="{{ ruby_gem_url }}" alt="The Hidden Ruby">
+      {%- if section.settings.ruby_gem_image != blank -%}
+        {% render 'image', image: section.settings.ruby_gem_image, alt: 'The Hidden Ruby', loading: 'lazy', modifier: 'rc-inline-image' %}
+      {%- else -%}
+        {{ ruby_gem_url | image_tag: alt: 'The Hidden Ruby', loading: 'lazy', class: 'rc-inline-image' }}
+      {%- endif -%}
     </div>
   </div>
 </section>
@@ -1377,21 +1441,33 @@
       <div class="timeline__spine"></div>
 
       <div class="tl-item tl-item--left tl-item--1977">
-        <div class="tl-media"><img src="{{ img_1977_url }}" alt="1977"></div>
+        <div class="tl-media">
+          {%- if section.settings.timeline_img_1977 != blank -%}
+            {% render 'image', image: section.settings.timeline_img_1977, alt: '1977', loading: 'lazy', modifier: 'rc-inline-image' %}
+          {%- else -%}
+            {{ img_1977_url | image_tag: alt: '1977', loading: 'lazy', class: 'rc-inline-image' }}
+          {%- endif -%}
+        </div>
         <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
         <div class="tl-event">
           <div class="tl-year">1977</div>
-          <p class="tl-body">Roberto Coin returned to his homeland of Italy to study the goldsmithing tradition. He launched his jewelry trade on the British market.</p>
+          <p class="tl-body">{{ section.settings.timeline_text_1977 | default: "Roberto Coin returned to his homeland of Italy to study the goldsmithing tradition. He launched his jewelry trade on the British market." }}</p>
         </div>
       </div>
 
       <div class="tl-item tl-item--right tl-item--1984">
         <div class="tl-event">
           <div class="tl-year">1984</div>
-          <p class="tl-body">He began designing and creating jewelry for some of the most prestigious international brands.</p>
+          <p class="tl-body">{{ section.settings.timeline_text_1984 | default: "He began designing and creating jewelry for some of the most prestigious international brands." }}</p>
         </div>
         <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-        <div class="tl-media"><img src="{{ img_1984_url }}" alt="1984"></div>
+        <div class="tl-media">
+          {%- if section.settings.timeline_img_1984 != blank -%}
+            {% render 'image', image: section.settings.timeline_img_1984, alt: '1984', loading: 'lazy', modifier: 'rc-inline-image' %}
+          {%- else -%}
+            {{ img_1984_url | image_tag: alt: '1984', loading: 'lazy', class: 'rc-inline-image' }}
+          {%- endif -%}
+        </div>
       </div>
     </div>
 
@@ -1399,16 +1475,24 @@
       <div class="timeline-break__line"></div>
       <div class="timeline-break__dot" data-year="1996"></div>
       <div class="timeline-break__event">
-        <p class="timeline-break__body">He launched his brand in the United States with the Appassionata collection and began signing his creations with a small ruby.</p>
+        <p class="timeline-break__body">{{ section.settings.timeline_text_1996 | default: "He launched his brand in the United States with the Appassionata collection and began signing his creations with a small ruby." }}</p>
       </div>
-      <img class="timeline-break__ruby" src="{{ img_1996_url }}" alt="1996 Ruby">
+      {%- if section.settings.timeline_img_1996 != blank -%}
+        {% render 'image', image: section.settings.timeline_img_1996, alt: '1996 Ruby', loading: 'lazy', modifier: 'timeline-break__ruby rc-inline-image' %}
+      {%- else -%}
+        {{ img_1996_url | image_tag: alt: '1996 Ruby', loading: 'lazy', class: 'timeline-break__ruby rc-inline-image' }}
+      {%- endif -%}
     </div>
   </div>
 
   <!-- Later era — ruby red background -->
   <div class="timeline-era--ruby" style="background-image:url('{{ timeline_bg_url }}');">
     <div class="timeline-era--ruby__map">
-      <img src="{{ timeline_world_map_url }}" alt="World map">
+      {%- if section.settings.timeline_world_map_image != blank -%}
+        {% render 'image', image: section.settings.timeline_world_map_image, alt: 'World map', loading: 'lazy', modifier: 'rc-inline-image' %}
+      {%- else -%}
+        {{ timeline_world_map_url | image_tag: alt: 'World map', loading: 'lazy', class: 'rc-inline-image' }}
+      {%- endif -%}
     </div>
     <div class="timeline">
       <div class="timeline__spine"></div>
@@ -1416,18 +1500,30 @@
       <div class="tl-item tl-item--left tl-item--2000" style="padding-top:0">
         <div class="tl-event">
           <div class="tl-year">2000</div>
-          <p class="tl-body">He became one of the founders and a member of the Board of Directors of the World Diamond Council, the organization that established the Kimberley Process in collaboration with the United Nations.</p>
+          <p class="tl-body">{{ section.settings.timeline_text_2000 | default: "He became one of the founders and a member of the Board of Directors of the World Diamond Council, the organization that established the Kimberley Process in collaboration with the United Nations." }}</p>
         </div>
         <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-        <div class="tl-media"><img src="{{ img_2000_url }}" alt="2000 Group Diamond"></div>
+        <div class="tl-media">
+          {%- if section.settings.timeline_img_2000 != blank -%}
+            {% render 'image', image: section.settings.timeline_img_2000, alt: '2000 Group Diamond', loading: 'lazy', modifier: 'rc-inline-image' %}
+          {%- else -%}
+            {{ img_2000_url | image_tag: alt: '2000 Group Diamond', loading: 'lazy', class: 'rc-inline-image' }}
+          {%- endif -%}
+        </div>
       </div>
 
     <div class="tl-item tl-item--right">
-      <div class="tl-media"><img src="{{ img_2002_url }}" alt="Cento 2003"></div>
+      <div class="tl-media">
+        {%- if section.settings.timeline_img_2003 != blank -%}
+          {% render 'image', image: section.settings.timeline_img_2003, alt: 'Cento 2003', loading: 'lazy', modifier: 'rc-inline-image' %}
+        {%- else -%}
+          {{ img_2003_url | image_tag: alt: 'Cento 2003', loading: 'lazy', class: 'rc-inline-image' }}
+        {%- endif -%}
+      </div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
       <div class="tl-event">
         <div class="tl-year">2003</div>
-        <p class="tl-body">He launched the Cento collection, his revolutionary diamond with 100 facets.</p>
+        <p class="tl-body">{{ section.settings.timeline_text_2003 | default: "He launched the Cento collection, his revolutionary diamond with 100 facets." }}</p>
         <a class="tl-cta" href="{{ section.settings.cento_url | default: '#' }}">Discover Cento Collection</a>
       </div>
     </div>
@@ -1435,93 +1531,153 @@
     <div class="tl-item tl-item--left tl-item--2014">
       <div class="tl-event">
         <div class="tl-year">2006</div>
-        <p class="tl-body">He opened his first single-brand boutique in Atlanta, USA.</p>
+        <p class="tl-body">{{ section.settings.timeline_text_2006 | default: "He opened his first single-brand boutique in Atlanta, USA." }}</p>
       </div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-      <div class="tl-media"><img src="{{ img_2006_url }}" alt="2006 Atlanta Boutique"></div>
+      <div class="tl-media">
+        {%- if section.settings.timeline_img_2006 != blank -%}
+          {% render 'image', image: section.settings.timeline_img_2006, alt: '2006 Atlanta Boutique', loading: 'lazy', modifier: 'rc-inline-image' %}
+        {%- else -%}
+          {{ img_2006_url | image_tag: alt: '2006 Atlanta Boutique', loading: 'lazy', class: 'rc-inline-image' }}
+        {%- endif -%}
+      </div>
     </div>
 
     <div class="tl-item tl-item--right">
-      <div class="tl-media"><img src="{{ img_2007_url }}" alt="2007 Dubai Store"></div>
+      <div class="tl-media">
+        {%- if section.settings.timeline_img_2007 != blank -%}
+          {% render 'image', image: section.settings.timeline_img_2007, alt: '2007 Dubai Store', loading: 'lazy', modifier: 'rc-inline-image' %}
+        {%- else -%}
+          {{ img_2007_url | image_tag: alt: '2007 Dubai Store', loading: 'lazy', class: 'rc-inline-image' }}
+        {%- endif -%}
+      </div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
       <div class="tl-event">
         <div class="tl-year">2007</div>
-        <p class="tl-body">He opened his first single-brand boutique in Dubai and founded the Middle East LLC, in partnership with local partner, Damas.</p>
+        <p class="tl-body">{{ section.settings.timeline_text_2007 | default: "He opened his first single-brand boutique in Dubai and founded the Middle East LLC, in partnership with local partner, Damas." }}</p>
       </div>
     </div>
 
     <div class="tl-item tl-item--left">
       <div class="tl-event">
         <div class="tl-year">2008</div>
-        <p class="tl-body">He opened his first European single-brand boutique in Rome.</p>
+        <p class="tl-body">{{ section.settings.timeline_text_2008 | default: "He opened his first European single-brand boutique in Rome." }}</p>
       </div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-      <div class="tl-media"><img src="{{ img_2008_url }}" alt="2008 Rome Store"></div>
+      <div class="tl-media">
+        {%- if section.settings.timeline_img_2008 != blank -%}
+          {% render 'image', image: section.settings.timeline_img_2008, alt: '2008 Rome Store', loading: 'lazy', modifier: 'rc-inline-image' %}
+        {%- else -%}
+          {{ img_2008_url | image_tag: alt: '2008 Rome Store', loading: 'lazy', class: 'rc-inline-image' }}
+        {%- endif -%}
+      </div>
     </div>
 
     <div class="tl-item tl-item--right">
-      <div class="tl-media"><img src="{{ img_2013_url }}" alt="2013 Roberto Coin Award"></div>
+      <div class="tl-media">
+        {%- if section.settings.timeline_img_2013 != blank -%}
+          {% render 'image', image: section.settings.timeline_img_2013, alt: '2013 Roberto Coin Award', loading: 'lazy', modifier: 'rc-inline-image' %}
+        {%- else -%}
+          {{ img_2013_url | image_tag: alt: '2013 Roberto Coin Award', loading: 'lazy', class: 'rc-inline-image' }}
+        {%- endif -%}
+      </div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
       <div class="tl-event">
         <div class="tl-year">2013</div>
-        <p class="tl-body">He was recognized by the Phillips Collection in Washington for his contribution to American culture and honored at Vicenzaoro for Corporate Social Responsibility.</p>
+        <p class="tl-body">{{ section.settings.timeline_text_2013 | default: "He was recognized by the Phillips Collection in Washington for his contribution to American culture and honored at Vicenzaoro for Corporate Social Responsibility." }}</p>
       </div>
     </div>
 
     <div class="tl-item tl-item--left">
       <div class="tl-event">
         <div class="tl-year">2014</div>
-        <p class="tl-body">His collection, Pois Moi, was awarded the Best Italian Collection in the World at the Vicenza Fair during the Andrea Palladio International Jewelry Awards.</p>
+        <p class="tl-body">{{ section.settings.timeline_text_2014 | default: "His collection, Pois Moi, was awarded the Best Italian Collection in the World at the Vicenza Fair during the Andrea Palladio International Jewelry Awards." }}</p>
         <a class="tl-cta" href="{{ section.settings.pois_moi_url | default: '#' }}">Discover Pois Moi Collection</a>
       </div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-      <div class="tl-media"><img src="{{ img_2014_url }}" alt="2014 RC Pois Moi"></div>
+      <div class="tl-media">
+        {%- if section.settings.timeline_img_2014 != blank -%}
+          {% render 'image', image: section.settings.timeline_img_2014, alt: '2014 RC Pois Moi', loading: 'lazy', modifier: 'rc-inline-image' %}
+        {%- else -%}
+          {{ img_2014_url | image_tag: alt: '2014 RC Pois Moi', loading: 'lazy', class: 'rc-inline-image' }}
+        {%- endif -%}
+      </div>
     </div>
 
     <div class="tl-item tl-item--right">
-      <div class="tl-media"><img src="{{ img_2018_url }}" alt="2018"></div>
+      <div class="tl-media">
+        {%- if section.settings.timeline_img_2018 != blank -%}
+          {% render 'image', image: section.settings.timeline_img_2018, alt: '2018', loading: 'lazy', modifier: 'rc-inline-image' %}
+        {%- else -%}
+          {{ img_2018_url | image_tag: alt: '2018', loading: 'lazy', class: 'rc-inline-image' }}
+        {%- endif -%}
+      </div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
       <div class="tl-event">
         <div class="tl-year">2018</div>
-        <p class="tl-body">He began personally inspecting each of the brand's diamonds, using a special laser incision to guarantee 100% natural origin.</p>
+        <p class="tl-body">{{ section.settings.timeline_text_2018 | default: "He began personally inspecting each of the brand's diamonds, using a special laser incision to guarantee 100% natural origin." }}</p>
       </div>
     </div>
 
     <div class="tl-item tl-item--left">
       <div class="tl-event">
         <div class="tl-year">2021</div>
-        <p class="tl-body">CNN released its third feature on Roberto Coin, highlighting the Maison’s creative vision and the Love in Verona collection.</p>
+        <p class="tl-body">{{ section.settings.timeline_text_2021 | default: "CNN released its third feature on Roberto Coin, highlighting the Maison’s creative vision and the Love in Verona collection." }}</p>
       </div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-      <div class="tl-media"><img src="{{ img_2021_url }}" alt="2021 RC Princess Flower"></div>
+      <div class="tl-media">
+        {%- if section.settings.timeline_img_2021 != blank -%}
+          {% render 'image', image: section.settings.timeline_img_2021, alt: '2021 RC Princess Flower', loading: 'lazy', modifier: 'rc-inline-image' %}
+        {%- else -%}
+          {{ img_2021_url | image_tag: alt: '2021 RC Princess Flower', loading: 'lazy', class: 'rc-inline-image' }}
+        {%- endif -%}
+      </div>
     </div>
 
     <div class="tl-item tl-item--right">
       <div class="tl-event">
         <div class="tl-year">2022</div>
-        <p class="tl-body">He created an enchanting collection for the second season of Emily in Paris.</p>
+        <p class="tl-body">{{ section.settings.timeline_text_2022 | default: "He created an enchanting collection for the second season of Emily in Paris." }}</p>
       </div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-      <div class="tl-media"><img src="{{ 'figma-images/RC_Emily in Paris.png' | asset_url }}" alt="2022 Emily in Paris"></div>
+      <div class="tl-media">
+        {%- if section.settings.timeline_img_2022 != blank -%}
+          {% render 'image', image: section.settings.timeline_img_2022, alt: '2022 Emily in Paris', loading: 'lazy', modifier: 'rc-inline-image' %}
+        {%- else -%}
+          {{ img_2022_url | image_tag: alt: '2022 Emily in Paris', loading: 'lazy', class: 'rc-inline-image' }}
+        {%- endif -%}
+      </div>
     </div>
 
     <div class="tl-item tl-item--left">
       <div class="tl-event">
         <div class="tl-year">2025</div>
-        <p class="tl-body">Roberto Coin received the Lifetime Achievement Award in Jewelry at the Fashion Group International Night of Stars Gala in Dallas and was invited as a guest speaker at the United Nations Fashion &amp; Lifestyle Network, promoting innovation, responsibility and sustainable growth.</p>
+        <p class="tl-body">{{ section.settings.timeline_text_2025 | default: "Roberto Coin received the Lifetime Achievement Award in Jewelry at the Fashion Group International Night of Stars Gala in Dallas and was invited as a guest speaker at the United Nations Fashion & Lifestyle Network, promoting innovation, responsibility and sustainable growth." }}</p>
       </div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-      <div class="tl-media"><img src="{{ img_2025_url }}" alt="2025"></div>
+      <div class="tl-media">
+        {%- if section.settings.timeline_img_2025 != blank -%}
+          {% render 'image', image: section.settings.timeline_img_2025, alt: '2025', loading: 'lazy', modifier: 'rc-inline-image' %}
+        {%- else -%}
+          {{ img_2025_url | image_tag: alt: '2025', loading: 'lazy', class: 'rc-inline-image' }}
+        {%- endif -%}
+      </div>
     </div>
 
       <div class="tl-item tl-item--left tl-item--today">
 
         <div class="tl-event">
           <div class="tl-year">Today</div>
-          <p class="tl-body">Present in over 60 countries worldwide. The ruby has become an enduring symbol of the Maison.</p>
+          <p class="tl-body">{{ section.settings.timeline_text_today | default: "Present in over 60 countries worldwide. The ruby has become an enduring symbol of the Maison." }}</p>
         </div>
         <div class="tl-center"><div class="tl-dot"></div></div>
-        <div class="tl-media"><img src="{{ img_today_url }}" alt="Today"></div>
+        <div class="tl-media">
+          {%- if section.settings.timeline_img_today != blank -%}
+            {% render 'image', image: section.settings.timeline_img_today, alt: 'Today', loading: 'lazy', modifier: 'rc-inline-image' %}
+          {%- else -%}
+            {{ img_today_url | image_tag: alt: 'Today', loading: 'lazy', class: 'rc-inline-image' }}
+          {%- endif -%}
+        </div>
       </div>
     </div>
         <div class="timeline-transition" aria-hidden="true">
@@ -1566,7 +1722,11 @@
     </ul>
   </div>
   <div class="collections__img fade d1">
-    <img src="{{ collections_img_url }}" alt="Collections">
+    {%- if section.settings.collections_image != blank -%}
+      {% render 'image', image: section.settings.collections_image, alt: 'Collections', loading: 'lazy', modifier: 'rc-inline-image' %}
+    {%- else -%}
+      {{ collections_img_url | image_tag: alt: 'Collections', loading: 'lazy', class: 'rc-inline-image' }}
+    {%- endif -%}
   </div>
 </section>
 
@@ -2106,11 +2266,6 @@
     },
     {
       "type": "image_picker",
-      "id": "timeline_img_2002",
-      "label": "2002 — image"
-    },
-    {
-      "type": "image_picker",
       "id": "timeline_img_2003",
       "label": "2003 — Cento image"
     },
@@ -2121,13 +2276,13 @@
     },
     {
       "type": "image_picker",
-      "id": "timeline_img_2008",
-      "label": "2008 — Dubai boutique image"
+      "id": "timeline_img_2007",
+      "label": "2007 — Dubai store image"
     },
     {
       "type": "image_picker",
-      "id": "timeline_img_2007",
-      "label": "2007 — Dubai store image"
+      "id": "timeline_img_2008",
+      "label": "2008 — Rome boutique image"
     },
     {
       "type": "image_picker",
@@ -2151,6 +2306,11 @@
     },
     {
       "type": "image_picker",
+      "id": "timeline_img_2022",
+      "label": "2022 — Emily in Paris image"
+    },
+    {
+      "type": "image_picker",
       "id": "timeline_img_2025",
       "label": "2025 — Lifetime Achievement image"
     },
@@ -2158,6 +2318,85 @@
       "type": "image_picker",
       "id": "timeline_img_today",
       "label": "Today — image"
+    },
+    {
+      "type": "header",
+      "content": "Timeline Text"
+    },
+    {
+      "type": "textarea",
+      "id": "timeline_text_1977",
+      "label": "1977 — text"
+    },
+    {
+      "type": "textarea",
+      "id": "timeline_text_1984",
+      "label": "1984 — text"
+    },
+    {
+      "type": "textarea",
+      "id": "timeline_text_1996",
+      "label": "1996 — text"
+    },
+    {
+      "type": "textarea",
+      "id": "timeline_text_2000",
+      "label": "2000 — text"
+    },
+    {
+      "type": "textarea",
+      "id": "timeline_text_2003",
+      "label": "2003 — text"
+    },
+    {
+      "type": "textarea",
+      "id": "timeline_text_2006",
+      "label": "2006 — text"
+    },
+    {
+      "type": "textarea",
+      "id": "timeline_text_2007",
+      "label": "2007 — text"
+    },
+    {
+      "type": "textarea",
+      "id": "timeline_text_2008",
+      "label": "2008 — text"
+    },
+    {
+      "type": "textarea",
+      "id": "timeline_text_2013",
+      "label": "2013 — text"
+    },
+    {
+      "type": "textarea",
+      "id": "timeline_text_2014",
+      "label": "2014 — text"
+    },
+    {
+      "type": "textarea",
+      "id": "timeline_text_2018",
+      "label": "2018 — text"
+    },
+    {
+      "type": "textarea",
+      "id": "timeline_text_2021",
+      "label": "2021 — text"
+    },
+    {
+      "type": "textarea",
+      "id": "timeline_text_2022",
+      "label": "2022 — text"
+    },
+    {
+      "type": "textarea",
+      "id": "timeline_text_2025",
+      "label": "2025 — text"
+    },
+    {
+      "type": "textarea",
+      "id": "timeline_text_today",
+      "label": "Today — text"
     },
     {
       "type": "header",
