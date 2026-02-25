@@ -1051,17 +1051,51 @@
     }
 {%- endstyle -%}
 
+{%- assign hero_bg_url = section.settings.hero_image | image_url: width: 2400 -%}
+{%- if hero_bg_url == blank -%}{%- assign hero_bg_url = 'figma-images/hero-bg.jpg' | asset_url -%}{%- endif -%}
+{%- assign history_img_url = section.settings.history_image | image_url: width: 1600 -%}
+{%- if history_img_url == blank -%}{%- assign history_img_url = 'figma-images/History-Ring drawing.png' | asset_url -%}{%- endif -%}
+{%- assign creator_img_url = section.settings.creator_image | image_url: width: 1400 -%}
+{%- if creator_img_url == blank -%}{%- assign creator_img_url = 'figma-images/creator-portrait.jpg' | asset_url -%}{%- endif -%}
+{%- assign ruby_bg_url = section.settings.ruby_bg_image | image_url: width: 2000 -%}
+{%- if ruby_bg_url == blank -%}{%- assign ruby_bg_url = 'figma-images/ruby-section.jpg' | asset_url -%}{%- endif -%}
+{%- assign ruby_gem_url = section.settings.ruby_gem_image | image_url: width: 1200 -%}
+{%- if ruby_gem_url == blank -%}{%- assign ruby_gem_url = 'figma-images/ruby-gem.png' | asset_url -%}{%- endif -%}
+{%- assign img_1984_url = section.settings.timeline_img_1984 | image_url: width: 1200 -%}
+{%- if img_1984_url == blank -%}{%- assign img_1984_url = 'figma-images/RC_Drawing image 1.png' | asset_url -%}{%- endif -%}
+{%- assign img_1996_url = section.settings.timeline_img_1996 | image_url: width: 1200 -%}
+{%- if img_1996_url == blank -%}{%- assign img_1996_url = 'figma-images/RUBY Trasnparent  1.png' | asset_url -%}{%- endif -%}
+{%- assign img_2003_url = section.settings.timeline_img_2003 | image_url: width: 1200 -%}
+{%- if img_2003_url == blank -%}{%- assign img_2003_url = 'figma-images/timeline-2003.jpg' | asset_url -%}{%- endif -%}
+{%- assign img_2008_url = section.settings.timeline_img_2008 | image_url: width: 1200 -%}
+{%- if img_2008_url == blank -%}{%- assign img_2008_url = 'figma-images/Roberto Coin Store Rome.png' | asset_url -%}{%- endif -%}
+{%- assign img_2013_url = section.settings.timeline_img_2013 | image_url: width: 1200 -%}
+{%- if img_2013_url == blank -%}{%- assign img_2013_url = 'figma-images/Roberto Coin Award.png' | asset_url -%}{%- endif -%}
+{%- assign img_2014_url = section.settings.timeline_img_2014 | image_url: width: 1200 -%}
+{%- if img_2014_url == blank -%}{%- assign img_2014_url = 'figma-images/RC_Poismois.png' | asset_url -%}{%- endif -%}
+{%- assign img_2018_url = section.settings.timeline_img_2018 | image_url: width: 1200 -%}
+{%- if img_2018_url == blank -%}{%- assign img_2018_url = 'figma-images/RC_Diamons.png' | asset_url -%}{%- endif -%}
+{%- assign img_2021_url = section.settings.timeline_img_2021 | image_url: width: 1200 -%}
+{%- if img_2021_url == blank -%}{%- assign img_2021_url = 'figma-images/RC_Princessflower.png' | asset_url -%}{%- endif -%}
+{%- assign img_2025_url = section.settings.timeline_img_2025 | image_url: width: 1200 -%}
+{%- if img_2025_url == blank -%}{%- assign img_2025_url = 'figma-images/Lifetimachievment award.png' | asset_url -%}{%- endif -%}
+{%- assign img_today_url = section.settings.timeline_img_today | image_url: width: 1200 -%}
+{%- if img_today_url == blank -%}{%- assign img_today_url = 'figma-images/timeline-today.jpg' | asset_url -%}{%- endif -%}
+{%- assign collections_img_url = section.settings.collections_image | image_url: width: 1600 -%}
+{%- if collections_img_url == blank -%}{%- assign collections_img_url = 'figma-images/collections-bg.jpg' | asset_url -%}{%- endif -%}
+{%- assign flower_json_url = 'figma-images/RC_Flower.json' | asset_url -%}
+
 
 <!-- ════════════════════════════════════════
      HERO
 ════════════════════════════════════════ -->
 <section class="hero" id="hero">
-  <div class="hero__bg"></div>
+  <div class="hero__bg" style="background-image:url('{{ hero_bg_url }}');"></div>
   <div class="hero__vignette"></div>
 
   <!-- Decorative 4-petal ornament -->
   <div class="hero__ornament">
-    <div class="hero__lottie" id="hero-lottie" aria-hidden="true"></div>
+    <div class="hero__lottie" id="hero-lottie" data-flower-json="{{ flower_json_url }}" aria-hidden="true"></div>
     <svg class="hero__ornament-fallback" width="460" height="474" viewBox="0 0 460 474" fill="none" xmlns="http://www.w3.org/2000/svg">
       <g filter="url(#filter0_d_3465_714)">
         <mask id="path-1-inside-1_3465_714" fill="white">
@@ -1086,13 +1120,13 @@
 
   <!-- Centered text -->
   <div class="hero__content fade">
-    <p class="hero__eyebrow">SINCE 1996</p>
-    <h1 class="hero__title">Our Heritage</h1>
+    <p class="hero__eyebrow">{{ section.settings.hero_eyebrow | default: 'SINCE 1996' }}</p>
+    <h1 class="hero__title">{{ section.settings.hero_title | default: 'Our Heritage' }}</h1>
   </div>
 
   <!-- Scroll CTA -->
   <div class="hero__scroll">
-    <span class="hero__scroll-label">SCROLL TO DISCOVER OUR STORY</span>
+    <span class="hero__scroll-label">{{ section.settings.hero_scroll_label | default: 'SCROLL TO DISCOVER OUR STORY' }}</span>
     <span class="hero__scroll-line"></span>
   </div>
 
@@ -1230,7 +1264,7 @@
 
     <!-- Center: ring illustration with multiply blend -->
     <div class="history__center fade">
-      <img src="{{ 'figma-images/History-Ring drawing.png' | asset_url }}" alt="Roberto Coin ring illustration">
+      <img src="{{ history_img_url }}" alt="Roberto Coin ring illustration">
     </div>
 
     <!-- Right: second paragraph -->
@@ -1247,7 +1281,7 @@
 <section id="rct-creator" class="creator">
   <div class="creator__inner">
     <div class="creator__image">
-      <img src="{{ 'figma-images/creator-portrait.jpg' | asset_url }}" alt="Roberto Coin">
+      <img src="{{ creator_img_url }}" alt="Roberto Coin">
     </div>
     <div class="creator__text">
       <h2 class="creator__title fade">The Creator</h2>
@@ -1266,7 +1300,7 @@
 <section id="rct-ruby" class="ruby-section">
   <div class="ruby-section__bg"></div>
   <div class="ruby-section__overlay"></div>
-  <div class="ruby-section__inner">
+  <div class="ruby-section__inner" style="background-image:url('{{ ruby_bg_url }}');">
     <div class="ruby-section__content">
       <h2 class="ruby-section__title fade">The Ruby</h2>
       <div class="ruby-section__body">
@@ -1278,7 +1312,7 @@
       </div>
     </div>
     <div class="ruby-section__gem fade d1">
-      <img src="{{ 'figma-images/ruby-gem.png' | asset_url }}" alt="The Hidden Ruby">
+      <img src="{{ ruby_gem_url }}" alt="The Hidden Ruby">
     </div>
   </div>
 </section>
@@ -1309,7 +1343,7 @@
           <p class="tl-body">He began designing and creating jewelry for some of the most prestigious international brands.</p>
         </div>
         <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-        <div class="tl-media"><img src="{{ 'figma-images/RC_Drawing image 1.png' | asset_url }}" alt="1984"></div>
+        <div class="tl-media"><img src="{{ img_1984_url }}" alt="1984"></div>
       </div>
     </div>
 
@@ -1319,7 +1353,7 @@
       <div class="timeline-break__event">
         <p class="timeline-break__body">He launched his brand in the United States with the Appassionata collection and began signing his creations with a small ruby.</p>
       </div>
-      <img class="timeline-break__ruby" src="{{ 'figma-images/RUBY Trasnparent  1.png' | asset_url }}" alt="1996 Ruby">
+      <img class="timeline-break__ruby" src="{{ img_1996_url }}" alt="1996 Ruby">
     </div>
   </div>
 
@@ -1341,12 +1375,12 @@
       </div>
 
     <div class="tl-item tl-item--right">
-      <div class="tl-media"><img src="{{ 'figma-images/timeline-2003.jpg' | asset_url }}" alt="Cento 2003"></div>
+      <div class="tl-media"><img src="{{ img_2003_url }}" alt="Cento 2003"></div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
       <div class="tl-event">
         <div class="tl-year">2003</div>
         <p class="tl-body">He launched the Cento collection, his revolutionary diamond with 100 facets.</p>
-        <a class="tl-cta" href="#">Discover Cento Collection</a>
+        <a class="tl-cta" href="{{ section.settings.cento_url | default: '#' }}">Discover Cento Collection</a>
       </div>
     </div>
 
@@ -1374,11 +1408,11 @@
         <p class="tl-body">He opened his first European single-brand boutique in Rome.</p>
       </div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-      <div class="tl-media"><img src="{{ 'figma-images/Roberto Coin Store Rome.png' | asset_url }}" alt="2008 Rome Store"></div>
+      <div class="tl-media"><img src="{{ img_2008_url }}" alt="2008 Rome Store"></div>
     </div>
 
     <div class="tl-item tl-item--right">
-      <div class="tl-media"><img src="{{ 'figma-images/Roberto Coin Award.png' | asset_url }}" alt="2013 Roberto Coin Award"></div>
+      <div class="tl-media"><img src="{{ img_2013_url }}" alt="2013 Roberto Coin Award"></div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
       <div class="tl-event">
         <div class="tl-year">2013</div>
@@ -1390,14 +1424,14 @@
       <div class="tl-event">
         <div class="tl-year">2014</div>
         <p class="tl-body">His collection, Pois Moi, was awarded the Best Italian Collection in the World at the Vicenza Fair during the Andrea Palladio International Jewelry Awards.</p>
-        <a class="tl-cta" href="#">Discover Pois Moi Collection</a>
+        <a class="tl-cta" href="{{ section.settings.pois_moi_url | default: '#' }}">Discover Pois Moi Collection</a>
       </div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-      <div class="tl-media"><img src="{{ 'figma-images/RC_Poismois.png' | asset_url }}" alt="2014 RC Pois Moi"></div>
+      <div class="tl-media"><img src="{{ img_2014_url }}" alt="2014 RC Pois Moi"></div>
     </div>
 
     <div class="tl-item tl-item--right">
-      <div class="tl-media"><img src="{{ 'figma-images/RC_Diamons.png' | asset_url }}" alt="2018"></div>
+      <div class="tl-media"><img src="{{ img_2018_url }}" alt="2018"></div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
       <div class="tl-event">
         <div class="tl-year">2018</div>
@@ -1411,7 +1445,7 @@
         <p class="tl-body">CNN released its third feature on Roberto Coin, highlighting the Maison’s creative vision and the Love in Verona collection.</p>
       </div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-      <div class="tl-media"><img src="{{ 'figma-images/RC_Princessflower.png' | asset_url }}" alt="2021 RC Princess Flower"></div>
+      <div class="tl-media"><img src="{{ img_2021_url }}" alt="2021 RC Princess Flower"></div>
     </div>
 
     <div class="tl-item tl-item--right">
@@ -1429,7 +1463,7 @@
         <p class="tl-body">Roberto Coin received the Lifetime Achievement Award in Jewelry at the Fashion Group International Night of Stars Gala in Dallas and was invited as a guest speaker at the United Nations Fashion &amp; Lifestyle Network, promoting innovation, responsibility and sustainable growth.</p>
       </div>
       <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-      <div class="tl-media"><img src="{{ 'figma-images/Lifetimachievment award.png' | asset_url }}" alt="2025"></div>
+      <div class="tl-media"><img src="{{ img_2025_url }}" alt="2025"></div>
     </div>
 
       <div class="tl-item tl-item--left tl-item--today">
@@ -1439,7 +1473,7 @@
           <p class="tl-body">Present in over 60 countries worldwide. The ruby has become an enduring symbol of the Maison.</p>
         </div>
         <div class="tl-center"><div class="tl-dot"></div></div>
-        <div class="tl-media"><img src="{{ 'figma-images/timeline-today.jpg' | asset_url }}" alt="Today"></div>
+        <div class="tl-media"><img src="{{ img_today_url }}" alt="Today"></div>
       </div>
     </div>
         <div class="timeline-transition" aria-hidden="true">
@@ -1484,7 +1518,7 @@
     </ul>
   </div>
   <div class="collections__img fade d1">
-    <img src="{{ 'figma-images/collections-bg.jpg' | asset_url }}" alt="Collections">
+    <img src="{{ collections_img_url }}" alt="Collections">
   </div>
 </section>
 
@@ -1516,6 +1550,7 @@
   var timelineBreak = document.querySelector('.timeline-break');
   var heroOrnament = document.querySelector('.hero__ornament');
   var heroLottieContainer = document.getElementById('hero-lottie');
+  var heroFlowerJsonPath = heroLottieContainer ? heroLottieContainer.getAttribute('data-flower-json') : '';
   var rebrandingLogoContainer = document.getElementById('rebranding-logo-lottie');
   var navScrollRaf = null;
   var isNavAutoScrolling = false;
@@ -1540,12 +1575,16 @@
     }
 
     try {
+      if (!heroFlowerJsonPath) {
+        loadFromData();
+        return;
+      }
       var anim = window.lottie.loadAnimation({
         container: heroLottieContainer,
         renderer: 'svg',
         loop: true,
         autoplay: true,
-        path: '{{ 'figma-images/RC_Flower.json' | asset_url }}?cb=' + Date.now()
+        path: heroFlowerJsonPath + '?cb=' + Date.now()
       });
       anim.addEventListener('DOMLoaded', function(){
         anim.loop = true;
