@@ -7540,6 +7540,7 @@ body:has([data-header-transparent]) .header__mobile__bottom {
 .header__logo__meta {
   display: flex;
   flex-direction: row;
+  color: var(--globaltext);
 }
 
 .header__logo__meta__separator {
@@ -8007,7 +8008,7 @@ body:not(.is-loaded) .header__desktop {
 
 .header__mobile__hamburger,
 .header__logo__link {
-  color: var(--link);
+  color: var(--globaltext);
   transition: color 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 
@@ -8055,10 +8056,6 @@ body:not(.is-loaded) .header__desktop {
   z-index: 6000;
 }
 
-body.header-scroll-hide .js__header__stuck {
-  z-index: -1;
-}
-
 .js__header__stuck .theme__header::after,
 .js__header__stuck .header__mobile__nav::after,
 .js__header__stuck .header__mobile__nav::before {
@@ -8085,6 +8082,12 @@ body.header-scroll-hide .js__header__stuck {
   opacity: 1;
   visibility: visible;
   transition-delay: 0s;
+}
+
+@media only screen and (min-width: 960px) {
+  body.header-scroll-hide .js__header__stuck {
+    z-index: -1;
+  }
 }
 
 @media only screen and (max-width: 749px) {
@@ -13562,6 +13565,10 @@ main-search .input-holder {
   padding: 5px 0;
   margin: 0 5px;
   cursor: pointer;
+}
+
+.radio__fieldset--pgi .swatch__button:hover {
+  border-bottom: 1px solid var(--text);
 }
 
 .radio__fieldset--pgi .swatch__button input:checked~label {
