@@ -3433,7 +3433,10 @@
             this.isCollectionTemplate = this.body.classList.contains('template-collection');
             this.deadLinks = document.querySelectorAll('.navlink[href="#"]');
             this.resizeObserver = null;
+            this.headerHideLayerTimeout = null;
             this.checkWidth = this.checkWidth.bind(this);
+            this.scheduleHeaderLayerHide = this.scheduleHeaderLayerHide.bind(this);
+            this.resetHeaderLayerHide = this.resetHeaderLayerHide.bind(this);
             this.isSticky = this.hasAttribute('data-header-sticky');
             this.scrollHideEvent = (e) => this.toggleHeaderHideOnScroll(e);
 
@@ -3490,6 +3493,7 @@
           checkWidth() {
             if (document.body.clientWidth < 960) {
               this.classList.add('js__show__mobile');
+              this.resetHeaderLayerHide();
 
               // Update --header-height CSS variable when switching to a mobile nav
               const {headerHeight} = window.theme.readHeights();
@@ -3575,17 +3579,44 @@
             if (this.isCollectionTemplate) {
               if (atTop) {
                 this.body.classList.remove('header-scroll-hide');
+                this.resetHeaderLayerHide();
               } else if (goingDown) {
                 this.body.classList.add('header-scroll-hide');
+                this.scheduleHeaderLayerHide();
               }
               return;
             }
 
             if (atTop || goingUp) {
               this.body.classList.remove('header-scroll-hide');
+              this.resetHeaderLayerHide();
             } else if (goingDown) {
               this.body.classList.add('header-scroll-hide');
+              this.scheduleHeaderLayerHide();
             }
+          }
+
+          scheduleHeaderLayerHide() {
+            if (window.innerWidth < 960) {
+              this.resetHeaderLayerHide();
+              return;
+            }
+
+            if (this.headerHideLayerTimeout) return;
+
+            this.headerHideLayerTimeout = setTimeout(() => {
+              this.body.classList.add('header-scroll-hide-layered');
+              this.headerHideLayerTimeout = null;
+            }, 300);
+          }
+
+          resetHeaderLayerHide() {
+            if (this.headerHideLayerTimeout) {
+              clearTimeout(this.headerHideLayerTimeout);
+              this.headerHideLayerTimeout = null;
+            }
+
+            this.body.classList.remove('header-scroll-hide-layered');
           }
 
           listen() {
@@ -3663,6 +3694,7 @@
               document.removeEventListener('theme:resize', this.checkWidth);
             }
 
+            this.resetHeaderLayerHide();
             document.removeEventListener('theme:scroll', this.scrollHideEvent);
 
             if (this.isSticky) {
