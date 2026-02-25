@@ -14,10 +14,20 @@
 {%- liquid
   assign subheading = block.settings.subheading
   assign title = block.settings.title
+  if title contains ' - '
+    assign title = title | split: ' - ' | first | strip
+  endif
   assign text = block.settings.text
   assign button_text = block.settings.button_text
   assign button_style = block.settings.button_style
   assign show_social_links = block.settings.show_social_links
+  assign show_suggested_collections = block.settings.show_suggested_collections
+  assign show_in_occasion_collections = block.settings.show_in_occasion_collections
+  assign show_custom_icons = block.settings.show_custom_icons
+  assign enable_mobile_read_more_accordion = block.settings.enable_mobile_read_more_accordion
+  assign suggested_collections_metafield = blank
+  assign suggested_collections_list = blank
+  assign has_suggested_collections = false
 
   assign selected_color_scheme = section.settings.color_scheme | strip
   assign scheme_bg_color = settings.color_schemes[selected_color_scheme].settings.section_bg
@@ -30,6 +40,19 @@
 
   if button_style == 'btn--text' and block.settings.show_arrow
     assign button_style = button_style | append: ' btn--text-no-underline'
+  endif
+
+  if show_suggested_collections
+    if template contains 'collection'
+      if collection.metafields.custom.suggested_collections != blank
+        assign suggested_collections_metafield = collection.metafields.custom.suggested_collections
+        assign suggested_collections_list = suggested_collections_metafield.value
+
+        if suggested_collections_list != blank
+          assign has_suggested_collections = true
+        endif
+      endif
+    endif
   endif
 -%}
 
@@ -54,6 +77,10 @@
 >
   <div class="brick__block__text{{ padding_class }}">
     <div class="hero__content hero__content--compact {{ block.settings.align_text }}">
+      {%- if enable_mobile_read_more_accordion -%}
+        <toggle-ellipsis class="brick-text__mobile-accordion" data-height="240">
+          <div class="brick-text__mobile-accordion-content" data-content>
+      {%- endif -%}
       {%- if subheading != blank -%}
         {%- assign animation_order = animation_order | plus: 1 -%}
         <p
@@ -82,7 +109,7 @@
           data-aos-anchor="{{ animation_anchor }}"
           data-aos-order="{{ animation_order }}"
         >
-          {{- title -}}
+          {{- title | downcase -}}
         </{{ heading_tag }}>
       {%- endif -%}
 
@@ -90,7 +117,7 @@
         {%- assign text_columns_class = block.settings.text_columns | prepend: 'columns--' -%}
         {%- assign animation_order = animation_order | plus: 1 -%}
         <div
-          class="hero__rte {{ block.settings.text_font_size }} {{ text_columns_class }}"
+          class="hero__rte caption {{ text_columns_class }}"
           data-aos="hero"
           data-aos-anchor="{{ animation_anchor }}"
           data-aos-order="{{ animation_order }}"
@@ -98,6 +125,93 @@
           {{ text }}
         </div>
       {%- endif -%}
+
+      {%- assign animation_order = animation_order | plus: 1 -%}
+      <div
+        class="suggested-collections__wrapper"
+
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-order="{{ animation_order }}"
+      >
+        {%- if show_suggested_collections -%}
+          {%- if has_suggested_collections -%}
+            <div>
+              <span
+                data-aos="hero"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-order="{{ animation_order }}"
+                class="label"
+                >SHOP NOW</span
+              >
+              {%- assign animation_order = animation_order | plus: 1 -%}
+              <ul
+                class="brick-text__suggested-collections"
+                data-aos="hero"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-order="{{ animation_order }}"
+              >
+                {%- for suggested_collection in suggested_collections_list -%}
+                  {%- liquid
+                    assign suggested_collection_url = suggested_collection.url
+                    assign suggested_collection_label = suggested_collection.title | default: suggested_collection.text
+
+                    if suggested_collection_url == blank
+                      continue
+                    endif
+
+                    if suggested_collection_label == blank
+                      assign suggested_collection_path = suggested_collection_url | split: '?' | first | split: '#' | first
+                      assign suggested_collection_label = suggested_collection_path | split: '/' | last | replace: '-', ' ' | upcase
+                    endif
+                  -%}
+
+                  <li class="brick-text__suggested-collections-item">
+                    <a class="navlink brick-text__suggested-collections-link" href="{{ suggested_collection_url }}">
+                      {{- suggested_collection_label -}}
+                    </a>
+                  </li>
+                {%- endfor -%}
+              </ul>
+            </div>
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- if show_in_occasion_collections -%}
+          <div>
+            <span
+              data-aos="hero"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-order="{{ animation_order }}"
+              class="label"
+              >IN OCCASION</span
+            >
+            {%- assign animation_order = animation_order | plus: 1 -%}
+            <ul
+              class="brick-text__suggested-collections"
+              data-aos="hero"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-order="{{ animation_order }}"
+            >
+              <li class="brick-text__suggested-collections-item">
+                <a
+                  class="navlink brick-text__suggested-collections-link"
+                  href="{{ routes.collections_url }}/gift-ideas"
+                >
+                  GIFT IDEAS
+                </a>
+              </li>
+              <li class="brick-text__suggested-collections-item">
+                <a
+                  class="navlink brick-text__suggested-collections-link"
+                  href="{{ routes.collections_url }}/1500-and-under"
+                >
+                  1,500 & UNDER
+                </a>
+              </li>
+            </ul>
+          </div>
+        {% endif %}
+      </div>
 
       {%- if button_text != blank -%}
         {%- assign animation_order = animation_order | plus: 1 -%}
@@ -124,6 +238,108 @@
         {%- assign animation_order = animation_order | plus: 1 -%}
         {%- render 'social-icons', animation_anchor: animation_anchor, animation_order: animation_order -%}
       {%- endif -%}
+      {%- if show_custom_icons -%}
+        {%- assign animation_order = animation_order | plus: 1 -%}
+        {%- render 'custom-icons', animation_anchor: animation_anchor, animation_order: animation_order -%}
+      {%- endif -%}
+      {%- if enable_mobile_read_more_accordion -%}
+        </div>
+
+        <div class="toggle-ellipsis__actions brick-text__mobile-accordion-actions" data-actions>
+          <button type="button" class="caps--link brick-text__mobile-accordion-trigger" data-button>
+            <span>{{ 'products.general.read_more' | t }}</span>
+          </button>
+        </div>
+        </toggle-ellipsis>
+      {%- endif -%}
     </div>
   </div>
 </div>
+
+{% stylesheet %}
+  .brick__block__text .hero__content {
+    gap: 40px;
+    height: auto;
+  }
+  .brick__block__text .hero__content h2 {
+    text-transform: capitalize;
+    margin: 0 !important;
+  }
+  .suggested-collections__wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    flex-wrap: nowrap;
+  }
+  .suggested-collections__wrapper > div {
+    width: 100%;
+  }
+  .suggested-collections__wrapper .label {
+    display: block;
+    margin-bottom: 20px;
+    color: #a7a7a7;
+  }
+
+  ul.brick-text__suggested-collections {
+    margin: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 3px;
+  }
+
+  li.brick-text__suggested-collections-item {
+    padding: 0;
+    margin: 0;
+    /* width: calc(50% - 10px); */
+  }
+
+  .brick-text__suggested-collections-link {
+    color: var(--text);
+    text-decoration: none;
+    padding: 0;
+    transition: opacity 0.3s ease-in-out, color 0.3s ease-in-out;
+  }
+
+  .brick-text__suggested-collections-link:hover {
+    opacity: 0.6;
+  }
+
+  .brick-text__mobile-accordion {
+    width: 100%;
+  }
+
+  /* .brick-text__mobile-accordion .toggle-ellipsis__actions {
+    --bg: var(--bg);
+  } */
+
+  @media only screen and (min-width: 750px) {
+    .brick-text__mobile-accordion {
+      max-height: none !important;
+      overflow: visible;
+    }
+
+    .brick-text__mobile-accordion .toggle-ellipsis__actions {
+      display: none !important;
+    }
+  }
+
+  @media only screen and (max-width: 749px) {
+    .brick-text__mobile-accordion {
+      --height: 240px;
+    }
+
+    .brick-text__mobile-accordion-actions {
+      text-align: left;
+      padding-top: 12px;
+    }
+
+    .brick-text__mobile-accordion-trigger {
+      color: var(--text);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+  }
+{% endstylesheet %}

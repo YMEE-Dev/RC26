@@ -12,6 +12,7 @@
   @param {string} [class_name] - Additional classes for the link
   @param {boolean} [open_new_tab] - Opens link in new tab when true
   @param {string} [aria_label] - Optional aria-label for accessibility
+  @param {number} [text_margin_bottom] - Margin bottom for text in pixels
 
   @example
   {% render 'link-with-icon',
@@ -19,7 +20,8 @@
     drawer_open: 'promo-info',
     icon: 'icon-nav-arrow-right',
     icon_position: 'right',
-    content_alignment: 'between'
+    content_alignment: 'between',
+    text_margin_bottom: 10
   %}
 {% enddoc %}
 
@@ -56,6 +58,8 @@
       assign icon_asset = icon_asset | append: '.svg'
     endunless
   endif
+
+  assign text_margin_bottom_value = text_margin_bottom | default: 15
 -%}
 
 {%- if has_url -%}
@@ -67,6 +71,7 @@
     {% if drawer_close != blank %}data-drawer-close="{{ drawer_close | escape }}"{% endif %}
     {% if drawer_toggle != blank %}data-drawer-toggle="{{ drawer_toggle | escape }}"{% endif %}
     {% if aria_label != blank %}aria-label="{{ aria_label | escape }}"{% endif %}
+    style="--text-margin-bottom: {{ text_margin_bottom_value }}px;"
   >
     {%- if icon_asset != blank -%}
       <span class="link-with-icon__icon" aria-hidden="true">
@@ -84,6 +89,7 @@
     {% if drawer_close != blank %}data-drawer-close="{{ drawer_close | escape }}"{% endif %}
     {% if drawer_toggle != blank %}data-drawer-toggle="{{ drawer_toggle | escape }}"{% endif %}
     {% if aria_label != blank %}aria-label="{{ aria_label | escape }}"{% endif %}
+    style="--text-margin-bottom: {{ text_margin_bottom_value }}px;"
   >
     {%- if icon_asset != blank -%}
       <span class="link-with-icon__icon" aria-hidden="true">
@@ -137,5 +143,12 @@
 
   .link-with-icon__text {
     line-height: 1;
+    font-size: var(--font-body-small);
+    font-family: var(--FONT-STACK-BODY);
+    font-style: var(--FONT-STYLE-BODY);
+    font-weight: var(--FONT-WEIGHT-BODY);
+    letter-spacing: var(--LETTER-SPACING-BODY);
+    text-transform: uppercase;
+    margin-bottom: var(--text-margin-bottom, 0);
   }
 {% endstylesheet %}
