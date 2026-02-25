@@ -16,7 +16,7 @@
   assign product_description_title = 'products.general.description' | t
   assign product_description_content = product.description | strip
 -%}
-
+  
 {%- if block.type == 'tab_richtext' -%}
   {%- liquid
     assign tab_links_html = ''
@@ -169,7 +169,7 @@
   {%- if accordion_heading != blank and accordion_content != blank -%}
     {%- if accordion_style == 'collapsible' -%}
       <collapsible-elements single="true">
-        <div class="product-accordion">
+        <div class="product-accordion{% if block.settings.show_sku %} product-accordion--has-sku{% endif %}">
           <details
             class="accordion"
             data-collapsible
@@ -181,7 +181,13 @@
             <summary class="accordion__title {{ block.settings.heading_font_size }}" data-collapsible-trigger>
               {{ accordion_icon }}
               {{ accordion_heading }}
-              {%- render 'icon-nav-arrow-down' -%}
+              {%- if block.settings.show_sku and product.selected_or_first_available_variant.sku != blank -%}
+                <span class="accordion__sku" data-variant-sku>SKU | {{ product.selected_or_first_available_variant.sku }}</span>
+              {%- endif -%}
+              <span class="accordion-icon-wrapper">
+                {%- render 'icon-plus' -%}
+                {%- render 'icon-minus' -%}
+              </span>
             </summary>
 
             <div
@@ -200,7 +206,7 @@
       </collapsible-elements>
     {%- elsif accordion_style == 'drawer' -%}
       <popup-component {{ block.shopify_attributes }}>
-        <div class="accordion">
+        <div class="accordion{% if block.settings.show_sku %} accordion--has-sku{% endif %}">
           <button
             type="button"
             class="accordion__title {{ block.settings.heading_font_size }}"
@@ -209,6 +215,9 @@
           >
             {{ accordion_icon }}
             {{ accordion_heading }}
+            {%- if block.settings.show_sku and product.selected_or_first_available_variant.sku != blank -%}
+              <span class="accordion__sku" data-variant-sku>SKU | {{ product.selected_or_first_available_variant.sku }}</span>
+            {%- endif -%}
             {%- render 'icon-nav-arrow-right' -%}
           </button>
         </div>
@@ -250,3 +259,128 @@
     <span {{ block.shopify_attributes }}></span>
   {%- endif -%}
 {%- endif -%}
+
+{% stylesheet %}
+  .product__block--accordion .accordion__title,
+  .accordion__content {
+    font-size: var(--font-body-small);
+    font-family: var(--FONT-STACK-BODY);
+    font-style: var(--FONT-STYLE-BODY);
+    font-weight: var(--FONT-WEIGHT-BODY);
+    letter-spacing: var(--LETTER-SPACING-BODY);
+    text-transform: uppercase;
+  }
+  .product__block--accordion .accordion__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding-right: 1rem;
+  }
+  .product__block--accordion .accordion__title .accordion__sku {
+    color: #A7A7A7;
+    padding-left: 1rem;
+  }
+
+  /* Accordion icon toggle */
+  .accordion-icon-wrapper {
+    position: relative;
+    margin-left: auto;
+  }
+  
+  .accordion-icon-wrapper svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.2s ease;
+  }
+  
+  .accordion-icon-wrapper svg:last-child {
+    opacity: 0;
+  }
+  
+  details[open] .accordion-icon-wrapper svg:first-child {
+    opacity: 0;
+  }
+  
+  details[open] .accordion-icon-wrapper svg:last-child {
+    opacity: 1;
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  document.addEventListener('DOMContentLoaded', function() {
+    function updateVariantSKU(variant) {
+      // Only update SKU elements in accordions that have SKU enabled
+      const skuElements = document.querySelectorAll('.product-accordion--has-sku [data-variant-sku], .accordion--has-sku [data-variant-sku]');
+      
+      skuElements.forEach(element => {
+        if (variant && variant.sku) {
+          element.textContent = 'SKU | ' + variant.sku;
+          element.style.display = '';
+        } else {
+          element.style.display = 'none';
+        }
+      });
+    }
+    
+    function getCurrentVariant() {
+      const selectedId = document.querySelector('input[name="id"]:checked')?.value || 
+                        document.querySelector('input[name="id"]')?.value;
+      
+      if (!selectedId) return null;
+      
+      const productDataElement = document.querySelector('#ProductData-' + document.querySelector('[data-product-id]')?.getAttribute('data-product-id'));
+      if (productDataElement) {
+        try {
+          const product = JSON.parse(productDataElement.textContent);
+          return product.variants.find(v => v.id.toString() === selectedId.toString());
+        } catch (e) {
+          console.error('Error parsing product data:', e);
+        }
+      }
+      
+      return null;
+    }
+    
+    function handleVariantChange() {
+      const variant = getCurrentVariant();
+      updateVariantSKU(variant);
+    }
+    
+    const variantInputs = document.querySelectorAll('input[name="id"]');
+    const variantSelects = document.querySelectorAll('select[name="id"]');
+    
+    variantInputs.forEach(input => {
+      input.addEventListener('change', handleVariantChange);
+    });
+    
+    variantSelects.forEach(select => {
+      select.addEventListener('change', handleVariantChange);
+    });
+    
+    document.addEventListener('theme:variant:change', function(event) {
+      updateVariantSKU(event.detail.variant);
+    });
+    
+    const observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+          const target = mutation.target;
+          if (target.name === 'id') {
+            handleVariantChange();
+          }
+        }
+      });
+    });
+    
+    variantInputs.forEach(input => {
+      observer.observe(input, { attributes: true });
+    });
+    
+    const initialVariant = getCurrentVariant();
+    if (initialVariant) {
+      updateVariantSKU(initialVariant);
+    }
+  });
+{% endjavascript %}
