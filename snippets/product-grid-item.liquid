@@ -620,12 +620,22 @@
                 assign preload = true
               endif
 
+              assign product_type_padding_class = ''
+              if product.type != blank
+                assign product_type_downcase = product.type | downcase
+                if product_type_downcase contains 'bracelet'
+                  assign product_type_padding_class = ' product-item__bg__slide--bracelets'
+                endif
+              endif
+
               capture featured_image
                 render 'image', image: product.featured_media.preview_image, aspect_ratio: aspect_ratio, sizes: sizes, widths: widths, loading: loading, fetchpriority: fetchpriority, preload: preload, attributes: image_animations, cover: true
               endcapture
             -%}
 
-            {{ featured_image }}
+            <div class="product-item__bg__featured{{ product_type_padding_class }}">
+              {{ featured_image }}
+            </div>
 
             {%- if settings.enable_swatches and current_variant -%}
               {%- assign image_inner_empty = true -%}
