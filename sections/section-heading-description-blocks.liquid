@@ -20,6 +20,7 @@
   data-section-type="heading-desc-blocks"
 >
   <div class="heading-description-blocks__wrapper">
+    <div class="heading-description-blocks__content">
     {%- for block in section.blocks -%}
       {%- case block.type -%}
         {%- when 'heading' -%}
@@ -50,13 +51,19 @@
           {%- endif -%}
       {%- endcase -%}
     {%- endfor -%}
+    </div>
   </div>
 </section>
 
 {% stylesheet %}
-  .heading-desc-blocks__wrapper {
+  .heading-description-blocks__wrapper {
     width: 100%;
     max-width: 1232px;
+    margin: 0 auto;
+    text-align: left;
+  }
+  .heading-description-blocks__content {
+    max-width: 814px;
     margin: 0 auto;
     text-align: left;
   }
