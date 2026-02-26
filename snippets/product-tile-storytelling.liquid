@@ -35,6 +35,7 @@
     assign modal_id = modal_id | append: '-' | append: product.handle
   endif
 -%}
+
 {%- for storytelling_product in storytelling_products -%}
   {%- capture look_slider -%}
   {{ look_slider }}
@@ -144,8 +145,6 @@
           <div class="underlay mobile look__underlay" data-popup-close></div>
 
           <div class="look__content" data-popup-content data-scroll-lock-scrollable>
-            <p class="look__title text-center subheading">Shop the look</p>
-
             <grid-slider data-arrow-position-middle>
               <div
                 class="grid--slider look__slider look__slider--grid"
