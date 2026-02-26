@@ -5043,7 +5043,28 @@ hr.hr--color,
   width: 10px !important;
   height:10px !important;
 }
+.icon-minus,
+.icon-plus{
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
 
+/* default */
+.icon-minus{
+  opacity:0;
+  transform: rotate(0deg);
+  position:absolute;
+}
+
+/* open */
+.accordion[open="true"] .icon-plus{
+  opacity:0;
+  transform: rotate(90deg);
+}
+
+.accordion[open="true"] .icon-minus{
+  opacity:1;
+  transform: rotate(180deg);
+}
 .icon path {
   stroke-width: inherit;
 }
