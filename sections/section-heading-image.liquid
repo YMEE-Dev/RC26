@@ -42,12 +42,10 @@
               {%- if block.settings.image != blank -%}
                 {%- liquid
                   assign image = block.settings.image
-                  assign image_width_percent = block.settings.image_width
-                  assign image_width_ratio = image_width_percent | times: 0.01
                   assign image_container_max = 1232
 
                   capture sizes
-                    assign image_size_mobile = 'calc((100vw - 32px) * ' | append: image_width_ratio | append: ')'
+                    assign image_size_mobile = 'calc(100vw - 32px)'
                     assign image_size_desktop = image_container_max | append: 'px'
                     echo '(min-width: 750px) ' | append: image_size_desktop | append: ', ' | append: image_size_mobile
                   endcapture
@@ -103,6 +101,8 @@
     max-width: 1232px;
     margin: 0 auto;
   }
+
+  .heading-image__media img {
     width: 100%;
     height: auto;
     display: block;
@@ -216,16 +216,6 @@
           "type": "image_picker",
           "id": "image",
           "label": "Image"
-        },
-        {
-          "type": "range",
-          "id": "image_width",
-          "min": 20,
-          "max": 100,
-          "step": 5,
-          "unit": "%",
-          "label": "Width",
-          "default": 100
         }
       ]
     }
