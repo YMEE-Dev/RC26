@@ -29,12 +29,13 @@
                     assign heading_tag = block.settings.heading_tag
                   endunless
                 -%}
-                <{{ heading_tag }}
-                  class="heading-image__heading {{ block.settings.heading_font_size }}"
-                  {{ block.shopify_attributes }}
-                >
-                  {{ block.settings.title }}
-                </{{ heading_tag }}>
+                <div class="heading-image__heading-wrap" {{ block.shopify_attributes }}>
+                  <{{ heading_tag }}
+                    class="heading-image__heading {{ block.settings.heading_font_size }}"
+                  >
+                    {{ block.settings.title }}
+                  </{{ heading_tag }}>
+                </div>
               {%- endif -%}
 
             {%- when 'image' -%}
@@ -43,29 +44,16 @@
                   assign image = block.settings.image
                   assign image_width_percent = block.settings.image_width
                   assign image_width_ratio = image_width_percent | times: 0.01
+                  assign image_container_max = 1232
 
                   capture sizes
                     assign image_size_mobile = 'calc((100vw - 32px) * ' | append: image_width_ratio | append: ')'
-
-                    case section.settings.width
-                      when 'wrapper--full-padded'
-                        assign image_size_desktop = 'calc(100vw - 100px * ' | append: image_width_ratio | append: ')'
-                      when 'wrapper'
-                        assign image_size_desktop = 'calc(80vw * ' | append: image_width_ratio | append: ')'
-                      when 'wrapper--narrow'
-                        assign image_size_desktop = 'calc(670px * ' | append: image_width_ratio | append: ')'
-                      when 'wrapper--wide'
-                        assign image_size_desktop = 'calc(1231px * ' | append: image_width_ratio | append: ')'
-                      else
-                        assign image_size_desktop = 'calc(80vw * ' | append: image_width_ratio | append: ')'
-                    endcase
-
+                    assign image_size_desktop = image_container_max | append: 'px'
                     echo '(min-width: 750px) ' | append: image_size_desktop | append: ', ' | append: image_size_mobile
                   endcapture
                 -%}
                 <div
                   class="heading-image__media"
-                  style="width: {{ image_width_percent }}%"
                   {{ block.shopify_attributes }}
                 >
                   {%- render 'image', image: image, sizes: sizes -%}
@@ -95,22 +83,26 @@
     width: 100%;
   }
 
-  .heading-image__heading {
+  .heading-image__heading-wrap {
+    width: 100%;
     margin: 0 0 1.5rem;
+  }
+
+  .heading-image__heading-wrap:last-child {
+    margin-bottom: 0;
+  }
+
+  .heading-image__heading {
+    margin: 0;
     line-height: 1.3;
     max-width: 100%;
   }
 
-  .heading-image__heading:last-child {
-    margin-bottom: 0;
-  }
-
   .heading-image__media {
+    width: 100%;
+    max-width: 1232px;
     margin: 0 auto;
-    max-width: 100%;
   }
-
-  .heading-image__media img {
     width: 100%;
     height: auto;
     display: block;
