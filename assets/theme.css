@@ -4418,6 +4418,14 @@ body * {
   padding-right: var(--outer);
 }
 
+.wrapper--wide {
+  max-width: 1231px; /* based on the figma design */
+  margin: 0 auto;
+  padding-left: var(--outer);
+  padding-right: var(--outer);
+}
+
+
 .wrapper--full {
   max-width: none;
   margin: 0 auto;
@@ -4517,7 +4525,7 @@ dd {
 [data-collapsible-trigger] .icon {
   position: absolute;
   top: 50%;
-  right: 10px;
+  right: 0px;
   transform: translateY(-50%);
   transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
 }
@@ -5031,6 +5039,33 @@ hr.hr--color,
   stroke-width: var(--ICON-STROKE-WIDTH);
 }
 
+.icon-minus, .icon-plus {
+  fill: #000 !important;
+  width: 10px !important;
+  height:10px !important;
+}
+.icon-minus,
+.icon-plus{
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* default */
+.icon-minus{
+  opacity:0;
+  transform: rotate(0deg);
+  position:absolute;
+}
+
+/* open */
+.accordion[open="true"] .icon-plus{
+  opacity:0;
+  transform: rotate(90deg);
+}
+
+.accordion[open="true"] .icon-minus{
+  opacity:1;
+  transform: rotate(180deg);
+}
 .icon path {
   stroke-width: inherit;
 }
@@ -20396,6 +20431,17 @@ body:has([data-header-transparent]) .main-content>.shopify-section:first-of-type
   overflow-wrap: break-word;
   line-height: inherit;
   font-weight: inherit;
+  line-height: 100%;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: 10%;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+ul.widget__links li {
+  margin:0 0 10px;
 }
 
 .widget__link:hover {
@@ -22899,8 +22945,8 @@ native-scrollbar {
 .product__block--accordion .accordion__title {
   --icon-size: 16px;
   width: 100%;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
+  padding-top: 13px;
+  padding-bottom: 13px;
 }
 
 .product__block--accordion .accordion__title .icon {
@@ -24452,6 +24498,15 @@ map-component {
   padding: 1.5rem 0;
   margin: 0;
   line-height: 1.2;
+}
+
+.section-sidebar__title {
+  font-family: 'Portrait LS';
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 32px !important;
+  line-height: 36px;
+  letter-spacing: 0%;
 }
 
 .accordion+.section-sidebar__title {
@@ -26171,7 +26226,7 @@ dialog.is-loading .loader {
 .accordion {
   display: block;
   border-bottom: 1px solid var(--border);
-  border-top: 1px solid var(--border);
+  /* border-top: 1px solid var(--border); */
   margin-top: -1px;
   text-align: left;
   overflow-wrap: anywhere;
@@ -26180,8 +26235,15 @@ dialog.is-loading .loader {
 .accordion__title {
   display: flex;
   align-items: center;
-  padding: 1.5rem 30px 1.5rem 0;
+  padding: 13px 30px 13px 0;
   margin: 0;
+
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 170%;
+  letter-spacing: 10%;
+  text-transform: uppercase;
 }
 
 .accordion__title .icon__animated {

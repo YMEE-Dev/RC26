@@ -1,0 +1,229 @@
+<!-- /sections/section-image-title-description.liquid -->
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign item_blocks = section.blocks | where: 'type', 'item'
+-%}
+
+{%- style -%}
+  #ImageTitleDesc--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+<section
+  id="ImageTitleDesc--{{ section.id }}"
+  class="image-title-desc section-padding {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="image-title-desc"
+>
+  {%- if item_blocks.size > 0 -%}
+    <div class="image-title-desc__wrapper">
+      <div class="image-title-desc__grid">
+        {%- for block in item_blocks -%}
+          <div class="image-title-desc__block" {{ block.shopify_attributes }}>
+            {%- if block.settings.image != blank -%}
+              <div class="image-title-desc__media">
+                {%- liquid
+                  assign image = block.settings.image
+                  capture sizes
+                    echo '(min-width: 750px) 50vw, 100vw'
+                  endcapture
+                -%}
+                {%- render 'image', image: image, sizes: sizes -%}
+              </div>
+            {%- endif -%}
+            {%- if block.settings.title != blank -%}
+              <h3 class="image-title-desc__title">{{ block.settings.title }}</h3>
+            {%- endif -%}
+            {%- if block.settings.description != blank -%}
+              <div class="image-title-desc__description rte">
+                {{ block.settings.description }}
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  {%- else -%}
+    {%- render 'no-blocks' -%}
+  {%- endif -%}
+</section>
+
+{% stylesheet %}
+  .image-title-desc__wrapper {
+    max-width: var(--max-width, 1232px);
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .image-title-desc__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 77px;
+  }
+
+  @media (min-width: 750px) {
+    .image-title-desc__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .image-title-desc__block {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+
+  .image-title-desc__media {
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 40px;
+  }
+
+  .image-title-desc__media img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+
+  .image-title-desc__title {
+    margin: 0;
+    color: #000;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 36px; /* 112.5% */
+    margin-bottom: 20px;
+  }
+
+  .image-title-desc__description {
+    margin: 0;
+    color: #000;
+    font-family: Inter;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px; /* 157.143% */
+  }
+
+  .image-title-desc__description p {
+    margin: 0 0 0.5em;
+  }
+
+  .image-title-desc__description p:last-child {
+    margin-bottom: 0;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Image, title & text",
+  "tag": "section",
+  "class": "section-image-title-desc",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Layout width",
+      "default": "wrapper",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Normal" },
+        { "value": "wrapper--wide", "label": "Wide" },
+        { "value": "wrapper--narrow", "label": "Narrow" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 60
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Block",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Theft (Burglary And Robbery)"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description",
+          "default": "<p>Contact the Roberto Coin Prestige service team. You can choose a digital voucher or the replacement of your jewel.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image, title & text",
+      "category": "Text",
+      "blocks": [
+        {
+          "type": "item",
+          "settings": {
+            "title": "Theft (Burglary And Robbery)",
+            "description": "<p>Contact the Roberto Coin Prestige service team. You can choose a digital voucher or the replacement of your jewel.</p>"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "title": "Accidental Damage",
+            "description": "<p>For functional accidental damage, contact the Roberto Coin Prestige service team for repair costs or a digital voucher or replacement.</p>"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "aside", "footer"]
+  }
+}
+{% endschema %}

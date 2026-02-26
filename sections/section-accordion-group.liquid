@@ -13,6 +13,31 @@
 
     --accordion-columns: {{ columns }};
   }
+  .wrapper--custom {
+    max-width: 1232px;
+    margin: 0 auto;
+    width: 100%;
+  
+  }
+  .accordion:last-child{
+    border-bottom:none
+  }
+
+  summary.accordion__title p{
+    margin:0 !important; 
+  }
+  summary.accordion__title p a{
+      color: #000;
+      font-family: Inter;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 100%;
+  }
+
+  .accordion__content p{
+    margin:0 !important; 
+  }
 {%- endstyle -%}
 
 <div id="AccordionGroup--{{ section.id }}" class="accordion-group section-padding {{ color_scheme }}">
@@ -60,6 +85,7 @@
                   {{ block.shopify_attributes }}
                 >
                   <summary
+                    style="text-transform: {{ block.settings.text_case }};"
                     class="accordion__title font-heading {{ section.settings.question_font_size }}"
                     data-collapsible-trigger
                   >
@@ -99,7 +125,9 @@
 
                     {{ title }}
 
-                    {%- render 'icon-nav-arrow-down' -%}
+                    {% comment %} {%- render 'icon-nav-arrow-down' -%} {% endcomment %}
+                    {% render 'icon-plus-svg' %}
+                    {% render 'icon-minus-svg' %}
                   </summary>
 
                   <div
@@ -170,7 +198,11 @@
       "default": "wrapper",
       "options": [
         {"value": "wrapper", "label": "Normal"},
-        {"value": "wrapper--narrow", "label": "Narrow"}
+        {"value": "wrapper--narrow", "label": "Narrow"},
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper--full", "label": "Full width"},
+        {"value": "wrapper--wide", "label": "Wide"},
+        {"value": "wrapper--custom", "label": "Custom (max-width: 1232px)"}
       ]
     },
     {
@@ -251,6 +283,18 @@
           "label": "Question",
           "info": "Block will not be visible if left empty.",
           "default": "Frequently asked question"
+        },
+        {
+          "type": "select",
+          "id": "text_case",
+          "label": "Question case",
+          "default": "uppercase",
+          "options": [
+            {"value": "uppercase", "label": "Uppercase"},
+            {"value": "lowercase", "label": "Lowercase"},
+            {"value": "capitalize", "label": "Capitalize"},
+            {"value": "math-auto", "label": "Sentence case"}
+          ]
         },
         {
           "type": "richtext",

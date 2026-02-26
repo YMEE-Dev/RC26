@@ -61,10 +61,11 @@
 
       {%- if block.type == 'accordion' and title != blank and content != blank -%}
         <details class="accordion" data-collapsible {{ block.shopify_attributes }}>
-          <summary class="accordion__title subheading" data-collapsible-trigger>
+          <summary class="accordion__title" data-collapsible-trigger>
             <span>{{ title }}</span>
 
-            {%- render 'icon-nav-arrow-down' -%}
+             {% render 'icon-plus-svg' %}
+             {% render 'icon-minus-svg' %}
           </summary>
 
           <div class="accordion__body rte" data-collapsible-body>
@@ -158,7 +159,8 @@
       "default": "wrapper--full-padded",
       "options": [
         {"value": "wrapper--full-padded", "label": "Full width padded"},
-        {"value": "wrapper", "label": "Normal"}
+        {"value": "wrapper", "label": "Normal"},
+        {"value": "wrapper--wide", "label": "Wide"},
       ]
     },
     {
