@@ -69,13 +69,13 @@
 
                   {%- render 'image' image: image, sizes: sizes, cover: true, show_backfill: false -%}
                 </div>
-                <div class="subcollection__text">
-                  <p class="subcollection__title navlink">{{ sub_collection_title }}</p>
-                  {%- if sub_collection.description != '' and section.settings.subcollection_description -%}
-                    <div class="subcollection__description">{{ sub_collection.description }}</div>
-                  {%- endif -%}
-                </div>
               </a>
+            </div>
+            <div class="subcollection__text">
+              <p class="subcollection__title navlink">{{ sub_collection_title }}</p>
+              {%- if sub_collection.description != '' and section.settings.subcollection_description -%}
+                <div class="subcollection__description">{{ sub_collection.description }}</div>
+              {%- endif -%}
             </div>
           </div>
         {%- endcapture -%}
@@ -108,7 +108,7 @@
           </div>
         {%- endcapture -%}
 
-        <div style="mix-blend-mode: multiply;">
+        <div>
           {%- if layout_slider -%}
             <grid-slider>
               {{ sub_collection_html }}

@@ -11,6 +11,16 @@
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign sub_collections = linklists[collection.handle].links
   assign sub_collection_links_limit = 6
+  assign has_active_subcollection_link = false
+
+  if collection.handle contains '-'
+    assign possible_parent_handle = collection.handle | split: '-' | first
+    assign possible_parent_collection = collections[possible_parent_handle]
+
+    if possible_parent_collection != blank
+      assign has_active_subcollection_link = true
+    endif
+  endif
 
   if filter_layout == 'inline-open'
     assign filters_expanded = true
@@ -180,9 +190,10 @@
           <a
             href="{{ collection.url | split: '-' | first }}"
             type="button"
-            class="availability-filter__button navlink is-active"
-
-            aria-pressed="true"
+            class="availability-filter__button navlink{% unless has_active_subcollection_link %} is-active{% endunless %}"
+            data-availability-view-all
+            data-availability-view-all-default-active="{% if has_active_subcollection_link %}false{% else %}true{% endif %}"
+            aria-pressed="{% if has_active_subcollection_link %}false{% else %}true{% endif %}"
           >
             View all
           </a>
@@ -193,15 +204,15 @@
           </div>
         {%- endif -%}
         <div class="popout_filters-wrapper">
-          <button
-            type="button"
-            class="availability-filter__button navlink"
-            data-availability-filter-button
-            data-availability-filter-value="available"
-            aria-pressed="false"
-          >
-            Available now
-          </button>
+          <label class="availability-filter__button navlink" data-availability-filter-control>
+            <input
+              type="checkbox"
+              class="availability-filter__checkbox"
+              data-availability-filter-checkbox
+              aria-label="In Stock"
+            >
+            <span>In Stock</span>
+          </label>
           {%- if enable_filters -%}
             {%- liquid
               assign filter_active_count = 0
@@ -436,6 +447,15 @@
         });
       };
 
+      const getActiveAvailabilityFilter = (component) => {
+        if (!component) return 'all';
+
+        const availabilityCheckbox = component.querySelector('[data-availability-filter-checkbox]');
+        if (!availabilityCheckbox) return 'all';
+
+        return availabilityCheckbox.checked ? 'available' : 'all';
+      };
+
       const filterItems = (component, filterValue) => {
         if (!component) return;
 
@@ -449,12 +469,27 @@
           item.setAttribute('aria-hidden', showItem ? 'false' : 'true');
         });
 
-        const buttons = component.querySelectorAll('[data-availability-filter-button]');
-        buttons.forEach((button) => {
-          const isActive = button.getAttribute('data-availability-filter-value') === activeFilter;
-          button.classList.toggle('is-active', isActive);
-          button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-        });
+        const availabilityControl = component.querySelector('[data-availability-filter-control]');
+        const availabilityCheckbox = component.querySelector('[data-availability-filter-checkbox]');
+        const viewAllButton = component.querySelector('[data-availability-view-all]');
+        const isActive = activeFilter === 'available';
+        const viewAllDefaultActive = viewAllButton
+          ? viewAllButton.getAttribute('data-availability-view-all-default-active') === 'true'
+          : false;
+        const isViewAllActive = activeFilter === 'all' && viewAllDefaultActive;
+
+        if (availabilityControl) {
+          availabilityControl.classList.toggle('is-active', isActive);
+        }
+
+        if (availabilityCheckbox) {
+          availabilityCheckbox.checked = isActive;
+        }
+
+        if (viewAllButton) {
+          viewAllButton.classList.toggle('is-active', isViewAllActive);
+          viewAllButton.setAttribute('aria-pressed', isViewAllActive ? 'true' : 'false');
+        }
       };
 
       const initComponent = (component) => {
@@ -463,16 +498,14 @@
         }
 
         component.dataset.availabilityFilterReady = 'true';
-        filterItems(component, 'all');
+        filterItems(component, getActiveAvailabilityFilter(component));
         updateCollectionNavStickyState(component);
 
         const productsGrid = component.querySelector('[data-products-grid]');
         if (!productsGrid) return;
 
         const observer = new MutationObserver(() => {
-          const activeButton = component.querySelector('[data-availability-filter-button][aria-pressed="true"]');
-          const activeFilter = activeButton ? activeButton.getAttribute('data-availability-filter-value') : 'all';
-          filterItems(component, activeFilter);
+          filterItems(component, getActiveAvailabilityFilter(component));
         });
 
         observer.observe(productsGrid, { childList: true, subtree: true });
@@ -487,15 +520,14 @@
         updateCollectionNavStickyState(scope);
       };
 
-      document.addEventListener('click', (event) => {
-        const button = event.target.closest('[data-availability-filter-button]');
-        if (!button) return;
+      document.addEventListener('change', (event) => {
+        const checkbox = event.target.closest('[data-availability-filter-checkbox]');
+        if (!checkbox) return;
 
-        const component = button.closest('collection-component');
+        const component = checkbox.closest('collection-component');
         if (!component) return;
 
-        const filterValue = button.getAttribute('data-availability-filter-value');
-        filterItems(component, filterValue);
+        filterItems(component, checkbox.checked ? 'available' : 'all');
       });
 
       if (document.readyState === 'loading') {
