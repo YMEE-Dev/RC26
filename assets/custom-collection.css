@@ -38,7 +38,7 @@
 .product-storytelling .grid-media__media-wrapper .btn {
     position: absolute;
     bottom: 20px;
-    right: 20px;
+    right: 15px;
     width: auto;
     border: none;
 }
@@ -46,5 +46,246 @@
 @media only screen and (max-width: 990px) {
     .product-storytelling.full_bleed {
         padding: 0;
+    }
+
+    .product-storytelling:not(.full_bleed) .grid-media__media-wrapper .btn {
+        bottom: 5px;
+        right: 5px;
+    }
+}
+
+@media only screen and (max-width: 749px) {
+    .product-storytelling {
+        grid-column: 1 / -1 !important;
+    }
+}
+
+.storytelling-modal {
+    position: fixed;
+    inset: 0;
+    width: 100dvw;
+    max-width: 100dvw;
+    height: 100dvh;
+    max-height: 100dvh;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background: #fff;
+    overflow: hidden;
+    z-index: 20000;
+}
+
+.storytelling-modal::backdrop {
+    background: transparent;
+}
+
+.storytelling-modal__inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.storytelling-modal__layout {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+    height: 100%;
+}
+
+.storytelling-modal__media-pane,
+.storytelling-modal__products-pane {
+    flex: 0 0 50%;
+    width: 50%;
+    max-width: 50%;
+    height: 100%;
+    min-width: 0;
+}
+
+.storytelling-modal__media-pane {
+    overflow: hidden;
+}
+
+.storytelling-modal__media-element {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.storytelling-modal__products-pane {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    padding: 40px;
+}
+
+.storytelling-modal__products-slider {
+    width: 100%;
+    min-width: 0;
+}
+
+.storytelling-modal__products-track {
+    width: 100%;
+    min-width: 0;
+    --item-width: calc((100% - var(--gap)) / 2);
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: 0;
+    margin-right: 0;
+    scroll-padding: 0;
+}
+
+.storytelling-modal__product-slide {
+    min-width: 0;
+}
+
+.storytelling-modal__close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 999px;
+    padding: 0;
+    background: transparent;
+    color: #000;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.storytelling-modal__close .icon {
+    width: 24px;
+    height: 24px;
+    display: block;
+}
+
+.storytelling-modal__inner look-component {
+    height: 100%;
+    align-items: center;
+}
+
+.storytelling-modal__inner look-component>div {
+    max-width: 50%;
+    overflow: hidden;
+    height: 100%;
+    align-items: center;
+    display: flex;
+}
+
+.storytelling-modal__inner look-component>.look__aside {
+    display: initial;
+}
+
+.storytelling-modal__inner look-component>.look__aside .look__content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.storytelling-modal__inner look-component>.look__aside grid-slider .grid--slider,
+.storytelling-modal__inner look-component>.look__aside grid-slider {
+    height: 100%;
+}
+
+.storytelling-modal__inner look-component>.look__aside grid-slider .grid--slider .grid-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.storytelling-modal__inner look-component>.look__aside grid-slider .grid--slider .product-information {
+    bottom: -90px;
+}
+
+.storytelling-modal__inner .storytelling-look__image img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    object-position: center;
+}
+
+
+@media only screen and (max-width: 990px) {
+    .storytelling-modal__inner look-component {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .storytelling-modal__inner look-component>div {
+        max-width: 100%;
+        width: 100%;
+        height: auto;
+    }
+
+    .storytelling-modal__inner .storytelling-look__image {
+        flex: 0 0 50%;
+        height: 50%;
+    }
+
+    .storytelling-modal__inner .storytelling-look__image video,
+    .storytelling-modal__inner .storytelling-look__image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .storytelling-modal__inner look-component>.look__aside {
+        position: relative;
+        top: auto;
+        left: auto;
+        z-index: auto;
+        width: 100%;
+        height: 50%;
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        overflow: hidden;
+        padding: 0;
+    }
+
+    .storytelling-modal__inner look-component>.look__aside .look__underlay {
+        display: none;
+    }
+
+    .storytelling-modal__inner look-component>.look__aside .look__content {
+        height: 100%;
+        justify-content: flex-start;
+        padding-top: 0;
+    }
+
+    .storytelling-modal__inner look-component>.look__aside grid-slider,
+    .storytelling-modal__inner look-component>.look__aside grid-slider .grid--slider {
+        height: 100%;
+        --item-width: 100%;
+    }
+
+    .storytelling-modal__inner look-component>.look__aside grid-slider .grid--slider .grid-item {
+        justify-content: start;
+        min-height: auto;
+    }
+
+    .storytelling-modal__inner .look__content .look__slider {
+        margin: 0;
+    }
+
+    .storytelling-modal__inner .look__slider {
+        padding-left: 0;
+        scroll-padding: 0;
+    }
+
+    .storytelling-modal__inner .look__slider::after {
+        padding-right: 0;
+    }
+
+    .storytelling-modal__inner .look__slide {
+        width: 100%;
+        max-width: 100%;
+        margin-right: 0;
     }
 }
