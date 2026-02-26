@@ -1,0 +1,270 @@
+{% doc %}
+  Renders a drawer content for "Send a hint" functionality.
+  
+  @param {block} block - The block object containing settings
+{% enddoc %}
+
+<div class="drawer-hint">
+  <h3 class="drawer__title">{{ 'products.product.send_hint_title' | t }}</h3>
+  
+  <div class="drawer__content">
+    <div class="hint-product-preview">
+      {% if product.featured_image %}
+        <div class="hint-product-image">
+          {{ product.featured_image | image_url: width: 200, height: 200 | image_tag: alt: product.title }}
+        </div>
+      {% endif %}
+      <div class="hint-product-info">
+        <h4 class="hint-product-title">{{ product.title }}</h4>
+        <p class="hint-product-price">{{ product.price | money }}</p>
+      </div>
+    </div>
+    
+    {% form 'contact', class: 'hint-form', id: 'hint-form' %}
+      {% if form.posted_successfully? %}
+        <p class="hint-form__status hint-form__status--success">{{ 'contact.form.post_success' | t }}</p>
+      {% endif %}
+      {% if form.errors %}
+        <div class="hint-form__status hint-form__status--error">{{ form.errors | default_errors }}</div>
+      {% endif %}
+
+      <input type="hidden" name="contact[subject]" value="{{ 'products.product.hint_subject' | t: product: product.title }}">
+      <input type="hidden" name="contact[product_title]" value="{{ product.title }}">
+      <input type="hidden" name="contact[product_url]" value="{{ shop.url }}{{ product.url }}">
+      {% if product.selected_or_first_available_variant %}
+        <input type="hidden" name="contact[product_variant]" value="{{ product.selected_or_first_available_variant.title }}">
+        <input type="hidden" name="contact[product_price]" value="{{ product.selected_or_first_available_variant.price | money }}">
+        {% if product.selected_or_first_available_variant.featured_image %}
+          <input type="hidden" name="contact[product_image]" value="{{ product.selected_or_first_available_variant.featured_image | image_url: width: 600 }}">
+        {% endif %}
+      {% endif %}
+      <input type="hidden" id="hint-message-content" name="contact[body]" value="">
+      <input class="hint-form__honeypot" type="text" name="contact[company]" value="" tabindex="-1" autocomplete="off" aria-hidden="true">
+      
+      <div class="form-section">
+        <h4 class="form-section__title">Recipient</h4>
+        <div class="form-field">
+          <label for="hint-recipient-name" class="form-field__label">
+            {{ 'products.product.recipient_name' | t }}
+          </label>
+          <input 
+            type="text" 
+            id="hint-recipient-name" 
+            name="contact[recipient_name]" 
+            class="form-field__input"
+            placeholder=""
+            required
+          >
+        </div>
+        
+        <div class="form-field">
+          <label for="hint-recipient-email" class="form-field__label">
+            {{ 'products.product.recipient_email' | t }}
+          </label>
+          <input 
+            type="email" 
+            id="hint-recipient-email" 
+            name="contact[recipient_email]" 
+            class="form-field__input"
+            placeholder=""
+            required
+          >
+        </div>
+
+        <div class="form-field">
+          <label for="hint-your-email" class="form-field__label">
+            {{ 'contact.form.email' | t }}
+          </label>
+          <input
+            type="email"
+            id="hint-your-email"
+            name="contact[email]"
+            class="form-field__input"
+            value="{{ customer.email }}"
+            required
+          >
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h4 class="form-section__title">{{ 'products.product.your_name' | t }}</h4>
+        <div class="form-field">
+          <label for="hint-your-name" class="form-field__label">
+            {{ 'contact.form.name' | t }}
+          </label>
+          <input 
+            type="text" 
+            id="hint-your-name" 
+            name="contact[sender_name]" 
+            class="form-field__input"
+            placeholder=""
+            required
+          >
+        </div>
+      </div>
+      
+      <div class="hint-message-preview">
+        <p>DEAR <span id="recipient-name-display">Name1</span>, LOOKS LIKE <span id="sender-name-display">Name2</span> REALLY LOVES THIS PIECE AND WE THOUGHT YOU'D WANT TO KNOW.</p>
+      </div>
+      
+      <button type="submit" class="btn btn--primary btn--full">
+        <img src="{{ 'icon-send-hint.svg' | asset_url }}" alt="" class="btn__icon" width="20" height="20">
+        {{ 'products.product.send_hint' | t }}
+      </button>
+    {% endform %}
+  </div>
+</div>
+
+<script>
+  function initHintForm() {
+    const form = document.getElementById('hint-form');
+    if (!form || form.dataset.hintBound === 'true') {
+      return;
+    }
+
+    const recipientInput = form.querySelector('#hint-recipient-name');
+    const senderInput = form.querySelector('#hint-your-name');
+    const recipientDisplay = form.querySelector('#recipient-name-display');
+    const senderDisplay = form.querySelector('#sender-name-display');
+    const messageInput = form.querySelector('#hint-message-content');
+    const variantInput = form.querySelector('input[name="contact[product_variant]"]');
+
+    if (!recipientInput || !senderInput || !recipientDisplay || !senderDisplay || !messageInput) {
+      return;
+    }
+
+    form.dataset.hintBound = 'true';
+
+    const messageTemplate = {{ 'products.product.hint_message_template' | t | json }};
+    const productTitle = {{ product.title | json }};
+    const productPrice = {{ product.selected_or_first_available_variant.price | default: product.price | money | json }};
+    const productUrl = {{ shop.url | append: product.url | json }};
+
+    function buildMessage(recipientName, senderName) {
+      const safeRecipient = (recipientName || 'Name1').toUpperCase();
+      const safeSender = (senderName || 'Name2').toUpperCase();
+
+      let message = messageTemplate
+        .replace(/\{\{\s*recipient\s*\}\}/g, safeRecipient)
+        .replace(/\{\{\s*sender\s*\}\}/g, safeSender);
+
+      message += '\n\nPRODUCT: ' + productTitle;
+      message += '\nPRICE: ' + productPrice;
+
+      if (variantInput && variantInput.value) {
+        message += '\nVARIANT: ' + variantInput.value;
+      }
+
+      message += '\nURL: ' + productUrl;
+
+      return message;
+    }
+
+    function updatePreview() {
+      const recipientName = recipientInput.value.trim();
+      const senderName = senderInput.value.trim();
+
+      recipientDisplay.textContent = recipientName ? recipientName.toUpperCase() : 'Name1';
+      senderDisplay.textContent = senderName ? senderName.toUpperCase() : 'Name2';
+      messageInput.value = buildMessage(recipientName, senderName);
+    }
+
+    recipientInput.addEventListener('input', updatePreview);
+    senderInput.addEventListener('input', updatePreview);
+    form.addEventListener('submit', updatePreview);
+
+    updatePreview();
+  }
+
+  document.addEventListener('DOMContentLoaded', initHintForm);
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('[data-drawer-open="send-hint"]')) {
+      setTimeout(initHintForm, 150);
+    }
+  });
+</script>
+
+{% stylesheet %}
+  .drawer-hint {
+    padding: 20px;
+  }
+  
+  .hint-product-preview {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    background-color: var(--background-color-secondary);
+    border-radius: 8px;
+    margin-bottom: 30px;
+  }
+  
+  .hint-product-image {
+    flex-shrink: 0;
+    width: 100px;
+    height: 100px;
+  }
+  
+  .hint-product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  
+  .hint-product-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .hint-product-title {
+    margin: 0 0 8px;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  
+  .hint-product-price {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--accent-color);
+  }
+  
+  .hint-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .hint-message-preview {
+    padding: 20px;
+    background-color: var(--background-color-secondary);
+    border-radius: 8px;
+    margin: 10px 0;
+  }
+  
+  .hint-message-preview p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+  
+  .hint-message-preview span {
+    font-weight: 700;
+    color: var(--accent-color, #000000);
+  }
+  
+  @media (max-width: 768px) {
+    .hint-product-preview {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .hint-product-image {
+      align-self: center;
+    }
+  }
+{% endstylesheet %}
