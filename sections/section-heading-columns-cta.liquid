@@ -1,0 +1,325 @@
+<!-- /sections/section-heading-columns-cta.liquid -->
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign column_blocks = section.blocks | where: 'type', 'column'
+-%}
+
+{%- style -%}
+  #HeadingColumnsCta--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+<section
+  id="HeadingColumnsCta--{{ section.id }}"
+  class="heading-columns-cta section-padding {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="heading-columns-cta"
+>
+  <div class="heading-columns-cta__wrapper {{ section.settings.width }}">
+    {%- if section.settings.heading != blank -%}
+      {%- liquid
+        assign heading_tag = 'h2'
+        unless section.settings.heading_tag == 'automatic' or section.settings.heading_tag == blank
+          assign heading_tag = section.settings.heading_tag
+        endunless
+      -%}
+      <{{ heading_tag }} class="heading-columns-cta__heading {{ section.settings.heading_font_size }}">
+        {{ section.settings.heading }}
+      </{{ heading_tag }}>
+    {%- endif -%}
+
+    {%- if column_blocks.size > 0 -%}
+      <div class="heading-columns-cta__grid">
+        {%- for block in column_blocks -%}
+          <div class="heading-columns-cta__column" {{ block.shopify_attributes }}>
+            {%- if block.settings.title != blank -%}
+              <h3 class="heading-columns-cta__column-title">{{ block.settings.title }}</h3>
+            {%- endif -%}
+            {%- if block.settings.description != blank -%}
+              <div class="heading-columns-cta__column-description rte">
+                {{ block.settings.description }}
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.button_text != blank -%}
+      <div class="heading-columns-cta__button-wrap">
+        <a
+          href="{{ section.settings.button_url | default: '#' }}"
+          class="btn {{ section.settings.button_style }} {{ section.settings.button_size }} {{ section.settings.button_type }}"
+        >
+          {{ section.settings.button_text }}
+        </a>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .heading-columns-cta__wrapper {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .heading-columns-cta__heading {
+    margin: 0 0 2rem;
+    line-height: 1.3;
+    text-align: left;
+  }
+
+  .heading-columns-cta__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem 2.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  @media (min-width: 750px) {
+    .heading-columns-cta__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .heading-columns-cta__column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .heading-columns-cta__column-title {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1.3;
+  }
+
+  .heading-columns-cta__column-description {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+
+  .heading-columns-cta__column-description p {
+    margin: 0 0 0.75em;
+  }
+
+  .heading-columns-cta__column-description p:last-child {
+    margin-bottom: 0;
+  }
+
+  .heading-columns-cta__button-wrap {
+    text-align: center;
+  }
+
+  .heading-columns-cta__button-wrap .btn {
+    min-width: 10rem;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Heading columns CTA",
+  "tag": "section",
+  "class": "section-heading-columns-cta",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The Art of Protecting Beauty"
+    },
+    {
+      "type": "select",
+      "id": "heading_font_size",
+      "label": "Heading size",
+      "default": "heading-large",
+      "options": [
+        { "value": "heading-mini", "label": "Mini" },
+        { "value": "heading-x-small", "label": "Extra small" },
+        { "value": "heading-small", "label": "Small" },
+        { "value": "heading-medium", "label": "Medium" },
+        { "value": "heading-large", "label": "Large" },
+        { "value": "heading-x-large", "label": "Extra large" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading SEO tag",
+      "default": "automatic",
+      "options": [
+        { "value": "automatic", "label": "Automatic" },
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" },
+        { "value": "h4", "label": "H4" },
+        { "value": "h5", "label": "H5" },
+        { "value": "h6", "label": "H6" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Sign up"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "default": "btn--outline",
+      "options": [
+        { "value": "btn--solid", "label": "Solid" },
+        { "value": "btn--outline", "label": "Outline" },
+        { "value": "btn--text", "label": "Text" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_type",
+      "label": "Button color",
+      "default": "btn--black",
+      "options": [
+        { "value": "btn--black", "label": "Black" },
+        { "value": "btn--white", "label": "White" },
+        { "value": "btn--primary", "label": "Primary" },
+        { "value": "btn--secondary", "label": "Secondary" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button size",
+      "default": "",
+      "options": [
+        { "value": "btn--small", "label": "Small" },
+        { "value": "", "label": "Medium" },
+        { "value": "btn--large", "label": "Large" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Layout width",
+      "default": "wrapper",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Normal" },
+        { "value": "wrapper--wide", "label": "Wide" },
+        { "value": "wrapper--narrow", "label": "Narrow" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 60
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "column",
+      "name": "Column",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Scope"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description",
+          "default": "<p>Describe the scope of your service or offering here.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Heading columns CTA",
+      "category": "Text",
+      "blocks": [
+        {
+          "type": "column",
+          "settings": {
+            "title": "Scope",
+            "description": "<p>Roberto Coin Prestige is a service dedicated to preserving the beauty and value of your jewel. It protects against theft, robbery and irreparable accidental damage, with a commitment to excellence.</p>"
+          }
+        },
+        {
+          "type": "column",
+          "settings": {
+            "title": "Duration",
+            "description": "<p>The service lasts two years. Coverage applies to jewels with a value between €1,000 and €100,000. Replacement jewel is offered where applicable. Available at Rome and Venice boutiques from December 22, 2025.</p>"
+          }
+        },
+        {
+          "type": "column",
+          "settings": {
+            "title": "Activation",
+            "description": "<p>Activation is not automatic. Registration on the digital platform is required. Registered jewelry appears in the client's account, supported by AION for a secure experience.</p>"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "aside", "footer"]
+  }
+}
+{% endschema %}
