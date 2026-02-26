@@ -29,7 +29,11 @@
                     assign heading_tag = block.settings.heading_tag
                   endunless
                 -%}
-                <div class="heading-image__heading-wrap {{ section.settings.width }}"  {{ block.shopify_attributes }}>
+                <div
+                  class="heading-image__heading-wrap {{ section.settings.width }}"
+                  style="--heading-wrap-margin-bottom: {{ block.settings.margin_bottom }}px"
+                  {{ block.shopify_attributes }}
+                >
                   <{{ heading_tag }}
                     class="heading-image__heading {{ block.settings.heading_font_size }}"
                   >
@@ -83,7 +87,7 @@
 
   .heading-image__heading-wrap {
     width: 100%;
-    margin: 0 0 1.5rem;
+    margin: 0 0 var(--heading-wrap-margin-bottom, 1.5rem);
   }
 
   .heading-image__heading-wrap:last-child {
@@ -205,6 +209,16 @@
             { "value": "h5", "label": "H5" },
             { "value": "h6", "label": "H6" }
           ]
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "min": 0,
+          "max": 80,
+          "step": 2,
+          "unit": "px",
+          "label": "Margin bottom",
+          "default": 24
         }
       ]
     },
