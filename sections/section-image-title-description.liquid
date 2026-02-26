@@ -18,7 +18,7 @@
   data-section-type="image-title-desc"
 >
   {%- if item_blocks.size > 0 -%}
-    <div class="image-title-desc__wrapper {{ section.settings.width }}">
+    <div class="image-title-desc__wrapper">
       <div class="image-title-desc__grid">
         {%- for block in item_blocks -%}
           <div class="image-title-desc__block" {{ block.shopify_attributes }}>
@@ -52,6 +52,7 @@
 
 {% stylesheet %}
   .image-title-desc__wrapper {
+    max-width: var(--max-width, 1232px);
     width: 100%;
     margin-left: auto;
     margin-right: auto;
@@ -60,7 +61,7 @@
   .image-title-desc__grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 2.5rem 3rem;
+    gap: 77px;
   }
 
   @media (min-width: 750px) {
