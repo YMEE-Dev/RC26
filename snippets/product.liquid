@@ -733,6 +733,11 @@
       @media (min-width: 990px) {
         #MainProduct--{{ section.id }} .product__thumbs.pdp-thumbs--desktop {
           display: block !important;
+          position: fixed;
+          left: var(--outer);
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 5;
         }
 
         #MainProduct--{{ section.id }} .product__thumbs.pdp-thumbs--mobile {
@@ -1413,6 +1418,15 @@
                   poll();
                 });
               })();
+            </script>
+
+            <script>
+              document.addEventListener('click', function(e) {
+                var thumb = e.target.closest('.pdp-thumbs--desktop [data-thumb-link]');
+                if (thumb) {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              });
             </script>
 
             {%- if product.media.size > 0 -%}
@@ -2479,6 +2493,51 @@
 
   {%- if thumbnails_enabled -%}
     <script src="{{ 'product-thumbs.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+
+  {%- if thumbnails_enabled -%}
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const desktopThumbs = document.querySelector('#MainProduct--{{ section.id }} .product__thumbs.pdp-thumbs--desktop');
+        
+        if (desktopThumbs) {
+          let lastScrollY = window.scrollY;
+          let ticking = false;
+          
+          function updateThumbsVisibility() {
+            const scrollY = window.scrollY;
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+            const scrollThreshold = documentHeight - windowHeight - 200; // 200px from bottom
+            const isScrollingDown = scrollY > lastScrollY;
+            const isScrollingUp = scrollY < lastScrollY;
+            
+            // Hide when scrolling down near bottom, show when scrolling up or not near bottom
+            if (isScrollingDown && scrollY > scrollThreshold) {
+              desktopThumbs.style.opacity = '0';
+              desktopThumbs.style.pointerEvents = 'none';
+              desktopThumbs.style.transition = 'opacity 0.3s ease-in-out';
+            } else {
+              desktopThumbs.style.opacity = '1';
+              desktopThumbs.style.pointerEvents = 'auto';
+              desktopThumbs.style.transition = 'opacity 0.3s ease-in-out';
+            }
+            
+            lastScrollY = scrollY;
+            ticking = false;
+          }
+          
+          function requestTick() {
+            if (!ticking) {
+              window.requestAnimationFrame(updateThumbsVisibility);
+              ticking = true;
+            }
+          }
+          
+          window.addEventListener('scroll', requestTick, { passive: true });
+        }
+      });
+    </script>
   {%- endif -%}
 
   {%- if first_3d_model -%}
