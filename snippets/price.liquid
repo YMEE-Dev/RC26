@@ -38,6 +38,8 @@
     assign money_price = target.price | money
   endif
 
+  assign compare_at_money = compare_at_price | money
+
   assign money_price_min = price_min | money
   assign money_price_max = price_max | money
 
@@ -60,6 +62,31 @@
 
     assign money_price_min = price_min | money_with_currency
     assign money_price_max = price_max | money_with_currency
+    assign compare_at_money = compare_at_price | money_with_currency
+  endif
+
+  if pdp_sticky_price or sticky_bar_price
+    if target.price > 0
+      assign sticky_money_price = target.price | money_without_trailing_zeros
+      assign sticky_money_price = sticky_money_price | replace: 'EUR', '' | replace: '€', '' | strip
+
+      if settings.currency_code_enable
+        assign money_price = 'EUR ' | append: sticky_money_price
+      else
+        assign money_price = '€' | append: sticky_money_price
+      endif
+    endif
+
+    if compare_at_price > 0
+      assign sticky_compare_at_money = compare_at_price | money_without_trailing_zeros
+      assign sticky_compare_at_money = sticky_compare_at_money | replace: 'EUR', '' | replace: '€', '' | strip
+
+      if settings.currency_code_enable
+        assign compare_at_money = 'EUR ' | append: sticky_compare_at_money
+      else
+        assign compare_at_money = '€' | append: sticky_compare_at_money
+      endif
+    endif
   endif
 
   if target == product and product.price_varies
@@ -109,11 +136,7 @@
           <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
           <span>
             <s class="price-item price-item--regular">
-              {% if settings.currency_code_enable %}
-                {{ compare_at_price | money_with_currency }}
-              {% else %}
-                {{ compare_at_price | money }}
-              {% endif %}
+              {{ compare_at_money }}
             </s>
           </span>
         </div>
