@@ -43,7 +43,6 @@
 
   if featured_product
     assign product_sticky_enable = false
-    assign variant_image_scroll = false
     assign enable_history_state = false
   endif
 
@@ -862,7 +861,7 @@
           data-active-media="{{ section.id }}-{{ featured_media.id }}"
         >
           {%- if template.name == 'product' and featured_product == false -%}
-            <script src="https://unpkg.com/embla-carousel@8.5.1/embla-carousel.umd.js" defer="defer"></script>
+            <script src="{{ 'embla-carousel.umd.js' | asset_url }}" defer="defer"></script>
 
             <script>
               (function () {
@@ -2235,7 +2234,7 @@
                       </div>
                     </div>
 
-                    {%- if forloop.index == section.blocks.size or next_block.type != 'features' -%}
+                    {%- if forloop.last or next_block.type != 'features' -%}
                       </slider-component>
                     {%- endif -%}
 
@@ -2610,7 +2609,7 @@
     </button>
 
     <div class="drawer__body">
-      {% render 'drawer-ask-concierge' %}
+      {% render 'drawer-ask-concierge', block: block %}
     </div>
   </div>
   <span class="underlay drawer__underlay" data-drawer-underlay></span>
