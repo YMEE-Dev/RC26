@@ -736,7 +736,7 @@
           left: var(--outer);
           top: 50%;
           transform: translateY(-50%);
-          z-index: 5;
+          z-index: 9;
         }
 
         #MainProduct--{{ section.id }} .product__thumbs.pdp-thumbs--mobile {
@@ -1294,6 +1294,7 @@
                     updateArrows();
 
                     if (carouselEl && carouselEl.dataset) carouselEl.dataset.emblaInitialized = 'true';
+                    carouselEl._emblaInstance = embla;
                     return carousel;
                   }
 
@@ -2479,6 +2480,11 @@
   {%- if show_cart_bar -%}
     {%- render 'cart-bar', product: product -%}
   {%- endif -%}
+
+  {%- unless product.has_only_default_variant -%}
+    <link type="text/css" href="{{ 'ymee-variant-dropdown.css' | asset_url }}" rel="stylesheet">
+    <script src="{{ 'ymee-variant-dropdown.js' | asset_url }}" defer="defer"></script>
+  {%- endunless -%}
 
   <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
   {%- if product_sticky_enable -%}

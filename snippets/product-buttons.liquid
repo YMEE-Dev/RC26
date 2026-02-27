@@ -27,8 +27,6 @@
   assign qty_sum = form_qty | plus: cart_qty
 
   assign max_inventory = ''
-  assign max_inventory_reached = false
-  assign error_message_position = 'cart'
 
   if current_variant.inventory_management and current_variant.inventory_policy == 'deny'
     assign max_inventory = current_variant.inventory_quantity
@@ -36,11 +34,9 @@
 
   if max_inventory != ''
     if qty_sum > max_inventory
-      assign max_inventory_reached = true
     endif
 
     if cart_qty == max_inventory
-      assign error_message_position = 'form'
     endif
   endif
 
@@ -336,6 +332,33 @@
   {{ block.shopify_attributes }}
 >
   {%- if product != blank -%}
+    {%- liquid
+      assign ymee_has_size = false
+      assign ymee_size_t = 'general.size_chart.size' | t
+      assign ymee_size_list = ymee_size_t | remove: ' ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
+      for opt in product.options_with_values
+        assign opt_h = opt.name | handle
+        if ymee_size_list contains opt_h
+          assign ymee_has_size = true
+          break
+        endif
+      endfor
+    -%}
+
+    {%- render 'ymee-color-picker',
+      product: product,
+      current_variant: current_variant,
+      section_id: section_id
+    -%}
+
+    {%- if ymee_has_size -%}
+      {%- render 'ymee-variant-dropdown',
+        product: product,
+        current_variant: current_variant,
+        section_id: section_id
+      -%}
+    {%- endif -%}
+
     <product-form
       class="product-form"
       data-hide-errors="{{ gift_card_recipient_feature_active }}"
@@ -502,5 +525,6 @@
           </div>
         </div>
       </div>
+    </div>
   {%- endif -%}
 </div>
