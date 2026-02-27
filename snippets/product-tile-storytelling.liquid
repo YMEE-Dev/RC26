@@ -145,20 +145,26 @@
           <div class="underlay mobile look__underlay" data-popup-close></div>
 
           <div class="look__content" data-popup-content data-scroll-lock-scrollable>
-            <grid-slider data-arrow-position-middle>
-              <div
-                class="grid--slider look__slider look__slider--grid"
-                data-grid-slider
-                data-slider-mobile="{{ product.id }}"
-                data-arrow-position-middle
-                data-scroll-lock-scrollable
-                {% if request.design_mode %}
-                  data-block-scroll
-                {% endif %}
-              >
-                {{ look_slider }}
+            <div class="storytelling-modal__slider-shell">
+              <grid-slider data-arrow-position-middle>
+                <div
+                  class="grid--slider look__slider look__slider--grid"
+                  data-grid-slider
+                  data-slider-mobile="{{ product.id }}"
+                  data-arrow-position-middle
+                  data-scroll-lock-scrollable
+                  {% if request.design_mode %}
+                    data-block-scroll
+                  {% endif %}
+                >
+                  {{ look_slider }}
+                </div>
+              </grid-slider>
+
+              <div class="storytelling-modal__slider-progress" data-storytelling-slider-progress aria-hidden="true">
+                <span class="storytelling-modal__slider-progress-thumb" data-storytelling-slider-progress-thumb></span>
               </div>
-            </grid-slider>
+            </div>
           </div>
         </div>
       </look-component>
@@ -179,11 +185,97 @@
   (() => {
     if (window.__storytellingModalInitialized) return;
     window.__storytellingModalInitialized = true;
+    const sliderProgressBindings = new WeakMap();
 
     const getModalByTrigger = (trigger) => {
       const modalId = trigger.getAttribute('data-storytelling-modal-target');
       if (!modalId) return null;
       return document.getElementById(modalId);
+    };
+
+    const refreshModalSliders = (modal) => {
+      if (!modal) return;
+
+      const gridSliders = modal.querySelectorAll('grid-slider');
+      if (!gridSliders.length) return;
+
+      gridSliders.forEach((gridSlider) => {
+        if (typeof gridSlider.toggleSlider === 'function') {
+          gridSlider.toggleSlider();
+        }
+
+        if (typeof gridSlider.positionArrows === 'function') {
+          gridSlider.positionArrows();
+        }
+      });
+    };
+
+    const updateSliderProgress = (slider, progressTrack, progressThumb) => {
+      if (!slider || !progressTrack || !progressThumb) return;
+
+      const maxScroll = Math.max(slider.scrollWidth - slider.clientWidth, 0);
+      if (maxScroll <= 0) {
+        progressTrack.classList.add('is-hidden');
+        progressThumb.style.width = '100%';
+        progressThumb.style.transform = 'translateX(0)';
+        return;
+      }
+
+      const trackWidth = progressTrack.clientWidth;
+      if (!trackWidth) return;
+
+      progressTrack.classList.remove('is-hidden');
+
+      const thumbWidth = Math.max((slider.clientWidth / slider.scrollWidth) * trackWidth, 18);
+      const maxOffset = Math.max(trackWidth - thumbWidth, 0);
+      const scrollProgress = slider.scrollLeft / maxScroll;
+      const offset = maxOffset * scrollProgress;
+
+      progressThumb.style.width = `${thumbWidth}px`;
+      progressThumb.style.transform = `translateX(${offset}px)`;
+    };
+
+    const bindSliderProgress = (slider, progressTrack, progressThumb) => {
+      if (!slider || !progressTrack || !progressThumb) return;
+
+      const existingBinding = sliderProgressBindings.get(slider);
+      if (existingBinding) {
+        existingBinding.update();
+        return;
+      }
+
+      const update = () => updateSliderProgress(slider, progressTrack, progressThumb);
+      const onScroll = () => update();
+      slider.addEventListener('scroll', onScroll, { passive: true });
+      let resizeObserver = null;
+      let onResize = null;
+
+      if ('ResizeObserver' in window) {
+        resizeObserver = new ResizeObserver(() => update());
+        resizeObserver.observe(slider);
+        resizeObserver.observe(progressTrack);
+      } else {
+        onResize = () => requestAnimationFrame(update);
+        window.addEventListener('resize', onResize);
+        document.addEventListener('theme:resize:width', onResize);
+      }
+
+      sliderProgressBindings.set(slider, { update, resizeObserver, onResize });
+      update();
+    };
+
+    const initModalSliderProgress = (modal) => {
+      if (!modal) return;
+
+      const sliderShells = modal.querySelectorAll('.storytelling-modal__slider-shell');
+      if (!sliderShells.length) return;
+
+      sliderShells.forEach((sliderShell) => {
+        const slider = sliderShell.querySelector('[data-grid-slider]');
+        const progressTrack = sliderShell.querySelector('[data-storytelling-slider-progress]');
+        const progressThumb = sliderShell.querySelector('[data-storytelling-slider-progress-thumb]');
+        bindSliderProgress(slider, progressTrack, progressThumb);
+      });
     };
 
     const onModalClosed = (modal) => {
@@ -246,6 +338,13 @@
 
       document.dispatchEvent(new CustomEvent('theme:scroll:lock', { bubbles: true }));
       trigger.setAttribute('aria-expanded', 'true');
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          refreshModalSliders(modal);
+          initModalSliderProgress(modal);
+        });
+      });
 
       const closeButton = modal.querySelector('[data-storytelling-modal-close]');
       if (closeButton) {

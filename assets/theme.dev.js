@@ -3247,8 +3247,10 @@
             const sliderWidth = this.slider.clientWidth;
             const slidesWidth = this.getSlidesWidth();
             const isEnabled = sliderWidth < slidesWidth;
+            const isStorytellingModalSlider = Boolean(this.closest('.storytelling-modal'));
+            const allowSliderInit = isStorytellingModalSlider || !window.theme.isMobile() || !window.theme.touch;
 
-            if (isEnabled && (!window.theme.isMobile() || !window.theme.touch)) {
+            if (isEnabled && allowSliderInit) {
               if (this.isInitialized) return;
 
               this.slidesObserver = new IsInView(this.slider, '[data-grid-item]');
@@ -3257,7 +3259,9 @@
               this.isInitialized = true;
 
               // Create an instance of DraggableSlider
-              this.draggableSlider = new DraggableSlider(this.slider);
+              if (!window.theme.isMobile() || !window.theme.touch) {
+                this.draggableSlider = new DraggableSlider(this.slider);
+              }
             } else {
               this.destroy();
             }
