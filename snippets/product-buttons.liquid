@@ -326,24 +326,29 @@
   {%- endif -%}
 {%- endcapture -%}
 
+{%- if product != blank -%}
+  {%- liquid
+    assign ymee_has_size = false
+    assign ymee_has_color_picker = false
+    assign ymee_size_t = 'general.size_chart.size' | t
+    assign ymee_size_list = ymee_size_t | remove: ' ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
+    for opt in product.options_with_values
+      assign opt_h = opt.name | handle
+      if ymee_size_list contains opt_h
+        assign ymee_has_size = true
+      else
+        assign ymee_has_color_picker = true
+      endif
+    endfor
+  -%}
+{%- endif -%}
+
 <div
-  class="product__block product__block--buttons block-padding {{ color_scheme }}"
+  class="product__block product__block--buttons block-padding {{ color_scheme }}{% if ymee_has_color_picker %} has-ymee-color-picker{% endif %}"
   {{ block_style }}
   {{ block.shopify_attributes }}
 >
   {%- if product != blank -%}
-    {%- liquid
-      assign ymee_has_size = false
-      assign ymee_size_t = 'general.size_chart.size' | t
-      assign ymee_size_list = ymee_size_t | remove: ' ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
-      for opt in product.options_with_values
-        assign opt_h = opt.name | handle
-        if ymee_size_list contains opt_h
-          assign ymee_has_size = true
-          break
-        endif
-      endfor
-    -%}
 
     {%- render 'ymee-color-picker',
       product: product,

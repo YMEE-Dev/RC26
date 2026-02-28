@@ -12,8 +12,6 @@
 {% endcomment %}
 
 {%- liquid
-  assign product_form_id = 'product-form-' | append: section_id
-
   assign size_translation = 'general.size_chart.size' | t
   assign translation_string_size = size_translation | remove: ' ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
 -%}
@@ -79,7 +77,6 @@
               id="{{ input_id }}"
               name="{{ input_name | escape }}"
               value="{{ value | escape }}"
-              form="{{ product_form_id }}"
               {% if value.selected %}checked{% endif %}
               data-option-value-id="{{ value.id }}"
               data-product-url="{{ value.product_url }}"
