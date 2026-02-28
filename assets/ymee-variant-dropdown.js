@@ -839,6 +839,25 @@
         var hasDropdown = sectionRoot.querySelector('[data-ymee-variant-dropdown]');
         if (hasDropdown) return;
 
+        // Set initial selected state for color picker items
+        var checkedInput = picker.querySelector('[data-ymee-color-input]:checked');
+        if (checkedInput) {
+          picker.querySelectorAll('.ymee-color-picker__item').forEach(function (item) {
+            var itemInput = item.querySelector('[data-ymee-color-input]');
+            item.classList.toggle('is-selected', itemInput === checkedInput);
+          });
+
+          // Show/hide values based on selected value
+          var selectedValue = checkedInput.value;
+          picker.querySelectorAll('.ymee-color-picker__value').forEach(function (valueEl) {
+            if (valueEl.textContent === selectedValue) {
+              valueEl.removeAttribute('hidden');
+            } else {
+              valueEl.setAttribute('hidden', '');
+            }
+          });
+        }
+
         var variantSelects = sectionRoot.querySelector('variant-selects[data-section="' + cssEscape(sectionId) + '"]');
 
         if (variantSelects) {
@@ -876,13 +895,21 @@
       picker.closest('[data-section-id="' + cssEscape(sectionId) + '"]') ||
       document;
 
+    // Update selected state
     picker.querySelectorAll('.ymee-color-picker__item').forEach(function (item) {
       var itemInput = item.querySelector('[data-ymee-color-input]');
       item.classList.toggle('is-selected', itemInput === input);
     });
 
-    var valueLbl = picker.querySelector('[data-ymee-color-value]');
-    if (valueLbl) valueLbl.textContent = input.value;
+    // Show/hide values based on selected value
+    var selectedValue = input.value;
+    picker.querySelectorAll('.ymee-color-picker__value').forEach(function (valueEl) {
+      if (valueEl.textContent === selectedValue) {
+        valueEl.removeAttribute('hidden');
+      } else {
+        valueEl.setAttribute('hidden', '');
+      }
+    });
 
     var variantSelects =
       sectionRoot.querySelector('variant-selects[data-section="' + cssEscape(sectionId) + '"]') ||

@@ -31,10 +31,12 @@
       data-ymee-color-picker
       data-option-position="{{ option.position }}"
       data-section-id="{{ section_id }}"
+      style="--color-count: {{ option.values.size }};"
     >
       <div class="ymee-color-picker__legend">
-        <span class="ymee-color-picker__label">{{ option.name }}</span>
-        <span class="ymee-color-picker__value" data-ymee-color-value>{{ option.selected_value }}</span>
+        {%- for value in option.values -%}
+          <span class="ymee-color-picker__value" data-ymee-color-value{% unless value.selected %} hidden{% endunless %}>{{ value | escape }}</span>
+        {%- endfor -%}
       </div>
 
       <div class="ymee-color-picker__options">
@@ -71,6 +73,7 @@
             class="ymee-color-picker__item{% if value.selected %} is-selected{% endif %}{% if option_disabled %} is-unavailable{% endif %}"
             for="{{ input_id }}"
             title="{{ value | escape }}"
+            data-value="{{ value | escape }}"
           >
             <input
               type="radio"
