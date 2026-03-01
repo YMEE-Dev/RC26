@@ -37,7 +37,7 @@
       </div>
       
       {%- if free_shipping_content.image != blank -%}
-        <div class="free-shipping__image">
+        <div class="free-shipping__image drawer-content__image">
           {{ free_shipping_content.image | image_url: width: 600 | image_tag }}
         </div>
       {%- endif -%}
@@ -52,13 +52,4 @@
 
 {% stylesheet %}
 
-  .free-shipping__image {
-    margin-top: auto;
-    text-align: center;
-  }
-
-  .free-shipping__image img {
-    max-width: 100%;
-    height: auto;
-  }
 {% endstylesheet %}
