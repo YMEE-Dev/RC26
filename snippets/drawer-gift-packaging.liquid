@@ -5,7 +5,7 @@
   @param {object} block - The block object containing drawer settings
 {% enddoc %}
 
-<div class="drawer-gift-packaging">
+<div class="drawer-gift-packaging drawer__content-wrapper">
   {%- comment -%}
     Get gift packaging content from dedicated metafields
   {%- endcomment -%}
@@ -23,14 +23,14 @@
     Display metaobject content if available
   {%- endcomment -%}
   {%- if gift_content != blank -%}
-    <div class="gift-packaging__content">
+    <div class="gift-packaging__content drawer-content__main">
       <div class="gift-packaging__text-content">
         {%- if gift_content.title != blank -%}
-          <h2 class="gift-packaging__title">{{ gift_content.title }}</h2>
+          <h2 class="gift-packaging__title drawer-content__title">{{ gift_content.title }}</h2>
         {%- endif -%}
         
         {%- if gift_content.description != blank -%}
-          <div class="gift-packaging__description">
+          <div class="gift-packaging__description drawer-content__description">
             {{ gift_content.description | metafield_tag }}
           </div>
         {%- endif -%}
@@ -56,11 +56,6 @@
     height: 100%;
   }
 
-  .gift-packaging__content {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
 
   .gift-packaging__text-content {
     flex: 1;
@@ -74,26 +69,6 @@
   .gift-packaging__image img {
     max-width: 100%;
     height: auto;
-  }
-
-  .gift-packaging__title {
-    margin-bottom: 15px;
-    color: #000;
-    font-family: 'Portrait LS';
-    font-size: 32px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 36px;
-  }
-
-  .gift-packaging__description {
-    margin-bottom: 20px;
-    color: #000;
-    font-family: Inter;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 22px;
   }
 
   .gift-packaging__default {

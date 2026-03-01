@@ -5,7 +5,7 @@
   @param {object} block - The block object containing drawer settings
 {% enddoc %}
 
-<div class="drawer-2-years-warranty">
+<div class="drawer-2-years-warranty drawer__content-wrapper">
   {%- comment -%}
     Get warranty content from dedicated metafields
   {%- endcomment -%}
@@ -23,14 +23,14 @@
     Display metaobject content if available
   {%- endcomment -%}
   {%- if warranty_content != blank -%}
-    <div class="warranty__content">
+    <div class="warranty__content drawer-content__main">
       <div class="warranty__text-content">
         {%- if warranty_content.title != blank -%}
-          <h2 class="warranty__title">{{ warranty_content.title }}</h2>
+          <h2 class="warranty__title drawer-content__title">{{ warranty_content.title }}</h2>
         {%- endif -%}
         
         {%- if warranty_content.description != blank -%}
-          <div class="warranty__description">
+          <div class="warranty__description drawer-content__description">
             {{ warranty_content.description | metafield_tag }}
           </div>
         {%- endif -%}
@@ -78,11 +78,6 @@
     padding: 20px;
   }
   
-  .warranty__content {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
   
   .warranty__text-content {
     flex: 1;
@@ -98,25 +93,7 @@
     height: auto;
   }
   
-  .warranty__title {
-    margin-bottom: 15px;
-    color: #000;
-    font-family: 'Portrait LS';
-    font-size: 32px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 36px;
-  }
   
-  .warranty__description {
-    margin-bottom: 20px;
-    color: #000;
-    font-family: Inter;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 22px;
-  }
   
   .warranty__link {
     margin-bottom: 20px;

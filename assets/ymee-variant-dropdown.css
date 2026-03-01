@@ -31,14 +31,15 @@
 }
 
 .ymee-color-picker__value {
-  font-size: var(--FONT-SIZE-BASE, 12px);
+  font-size: 12px;
   font-weight: 400;
   line-height: initial;
   color: var(--COLOR-TEXT, #000);
   text-align: center;
+  visibility: hidden;
   opacity: 0;
-  transition: opacity 300ms ease;
-  will-change: opacity;
+  transition: opacity 300ms ease, visibility 300ms ease;
+  will-change: opacity, visibility;
   flex: 0 0 calc((100% - (var(--color-count) - 1) * 10px) / var(--color-count));
   max-width: calc((100% - (var(--color-count) - 1) * 10px) / var(--color-count));
   position: relative;
@@ -49,13 +50,13 @@
 .ymee-color-picker__value::after {
   content: "";
   position: absolute;
-  bottom: 2px;
+  bottom: -1px;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
   height: 1px;
   background: var(--COLOR-TEXT, #000);
-  opacity: 0;
+  opacity: inherit;
   transition: opacity 300ms ease;
 }
 
@@ -63,21 +64,18 @@
   opacity: 0;
 }
 
-.ymee-color-picker__legend .ymee-color-picker__value:not([hidden])::after {
-  opacity: 1;
-}
-
 .ymee-color-picker__legend .ymee-color-picker__value:not([hidden]) {
+  visibility: visible;
   opacity: 1;
 }
 
 .ymee-color-picker__options {
   display: flex;
   flex-wrap: wrap;
-    gap: 10px;
-    align-items: flex-start;
+  gap: 10px;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 0;
+  padding: 5px 0 0;
 }
 
 .ymee-color-picker__item {

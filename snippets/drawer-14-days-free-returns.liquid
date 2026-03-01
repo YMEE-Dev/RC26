@@ -5,7 +5,7 @@
   @param {object} block - The block object containing drawer settings
 {% enddoc %}
 
-<div class="drawer-14-days-free-returns">
+<div class="drawer-14-days-free-returns drawer__content-wrapper">
   {%- comment -%}
     Get returns content from dedicated metafields
   {%- endcomment -%}
@@ -23,14 +23,14 @@
     Display metaobject content if available
   {%- endcomment -%}
   {%- if returns_content != blank -%}
-    <div class="returns__content">
+    <div class="returns__content drawer-content__main">
       <div class="returns__text-content">
         {%- if returns_content.title != blank -%}
-          <h2 class="returns__title">{{ returns_content.title }}</h2>
+          <h2 class="returns__title drawer-content__title">{{ returns_content.title }}</h2>
         {%- endif -%}
         
         {%- if returns_content.description != blank -%}
-          <div class="returns__description">
+          <div class="returns__description drawer-content__description">
             {{ returns_content.description | metafield_tag }}
           </div>
         {%- endif -%}
@@ -78,11 +78,6 @@
     padding: 20px;
   }
   
-  .returns__content {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
   
   .returns__text-content {
     flex: 1;
@@ -98,25 +93,7 @@
     height: auto;
   }
   
-  .returns__title {
-    margin-bottom: 15px;
-    color: #000;
-    font-family: 'Portrait LS';
-    font-size: 32px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 36px;
-  }
   
-  .returns__description {
-    margin-bottom: 20px;
-    color: #000;
-    font-family: Inter;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 22px;
-  }
   
   .returns__link {
     margin-bottom: 20px;
