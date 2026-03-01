@@ -365,7 +365,7 @@
                     if spotlight_image_position <= counter_grid
                       assign spotlight_render_index = spotlight_image_index | plus: 1
                       for spotlight_image in spotlight_images limit: 1 offset: spotlight_image_index
-                        render 'collection-spotlight-image', media: spotlight_image, index: spotlight_render_index, image_sizes: image_sizes
+                        render 'collection-spotlight-image', media: spotlight_image, index: spotlight_render_index, stack_index: counter_grid, image_sizes: image_sizes
                       endfor
                       assign spotlight_image_index = spotlight_image_index | plus: 1
                       assign counter_grid = counter_grid | plus: 1
@@ -383,7 +383,10 @@
                   if product_storytelling
                     render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false
                   else
-                    render 'product-grid-item', product: product, index: forloop.index, sizes: image_sizes
+                    capture spotlight_product_attributes
+                      echo 'style="--spotlight-stack-index: ' | append: counter_grid | append: ';"'
+                    endcapture
+                    render 'product-grid-item', product: product, index: forloop.index, sizes: image_sizes, attributes: spotlight_product_attributes
                   endif
 
                   assign counter_grid = counter_grid | plus: 1

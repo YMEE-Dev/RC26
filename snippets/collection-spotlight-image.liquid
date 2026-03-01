@@ -3,6 +3,7 @@
 
   @param {untyped} media - Media object from custom.spotlight_collection_images list
   @param {number} [index] - Fallback index for unique id
+  @param {number} [stack_index] - Stack order index used by sticky overlay behavior
   @param {string} [image_sizes] - Responsive sizes value for the image snippet
 {% enddoc %}
 
@@ -34,7 +35,7 @@
 <div
   class="grid-item product-item product-item--featured-image spotlight-collection-image"
   id="Spotlight-image--{{ spotlight_media.id | default: index }}"
-  style="--spotlight-stack-index: {{ index | default: 1 }};"
+  style="--spotlight-stack-index: {{ stack_index | default: index | default: 1 }};"
 >
   <div class="product-item__image">
     {%- if spotlight_image_src != blank -%}
