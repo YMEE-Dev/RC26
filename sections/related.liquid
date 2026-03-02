@@ -16,7 +16,25 @@
   assign columns_medium = 3
   assign columns_small = 2
   assign column_count = limit | at_most: 4
-  assign current_collection = collection | default: product.collections.first
+  assign current_collection = blank
+
+  if product.collections != blank
+    for assigned_collection in product.collections
+      if assigned_collection.handle != 'all'
+        assign current_collection = assigned_collection
+        break
+      endif
+    endfor
+  endif
+
+  if current_collection == blank
+    assign current_collection = product.collections.first
+  endif
+
+  if current_collection == blank
+    assign current_collection = collection
+  endif
+
   assign current_collection_display_title = current_collection.title
   assign current_category_collection = blank
   assign current_category_display_title = blank
@@ -49,30 +67,67 @@
     assign current_collection_display_title = 'Current Collection'
   endif
 
-  if current_collection != blank
-    if current_collection.title contains ' - '
-      assign parent_collection_title = current_collection.title | split: ' - ' | first | strip
-      if parent_collection_title != blank
-        assign parent_collection_handle = parent_collection_title | handleize
-        assign parent_collection_obj = collections[parent_collection_handle]
+  assign product_category_label = blank
+  assign product_category_handle = blank
+  assign product_category_collection = blank
 
-        if parent_collection_obj != blank
-          if parent_collection_obj.handle != current_collection.handle
-            assign current_category_collection = parent_collection_obj
-            assign current_category_display_title = parent_collection_obj.title
-          endif
+  if product.category != blank
+    if product.category.name != blank
+      assign product_category_label = product.category.name
+    endif
+  endif
+
+  if product_category_label == blank
+    if product.type != blank
+      assign product_category_label = product.type
+    endif
+  endif
+
+  if product_category_label != blank
+    assign product_category_handle = product_category_label | handleize
+    assign product_category_collection = collections[product_category_handle]
+
+    if product_category_collection != blank
+      if current_collection == blank
+        assign current_category_collection = product_category_collection
+        assign current_category_display_title = product_category_label
+      endif
+
+      if current_collection != blank
+        if product_category_collection.handle != current_collection.handle
+          assign current_category_collection = product_category_collection
+          assign current_category_display_title = product_category_label
         endif
       endif
     endif
+  endif
 
-    if current_category_collection == blank
-      for sibling_collection in product.collections
-        if sibling_collection.handle != current_collection.handle
-          assign current_category_collection = sibling_collection
-          assign current_category_display_title = sibling_collection.title
-          break
+  if current_category_collection == blank
+    if current_collection != blank
+      if current_collection.title contains ' - '
+        assign parent_collection_title = current_collection.title | split: ' - ' | first | strip
+        if parent_collection_title != blank
+          assign parent_collection_handle = parent_collection_title | handleize
+          assign parent_collection_obj = collections[parent_collection_handle]
+
+          if parent_collection_obj != blank
+            if parent_collection_obj.handle != current_collection.handle
+              assign current_category_collection = parent_collection_obj
+              assign current_category_display_title = parent_collection_obj.title
+            endif
+          endif
         endif
-      endfor
+      endif
+
+      if current_category_collection == blank
+        for sibling_collection in product.collections
+          if sibling_collection.handle != current_collection.handle
+            assign current_category_collection = sibling_collection
+            assign current_category_display_title = sibling_collection.title
+            break
+          endif
+        endfor
+      endif
     endif
   endif
 
@@ -82,34 +137,37 @@
 -%}
 
 {%- for block in section.blocks -%}
-  {%- if block.type == 'related' and current_collection != blank -%}
-    {%- liquid
-      assign related_count = 0
-      capture related_products
-        for related_product in current_collection.products
-          assign hidden_product = false
-          if related_product.tags contains 'hide'
-            assign hidden_product = true
-          endif
+  {%- if block.type == 'related' -%}
+    {%- if current_collection != blank or current_category_collection != blank -%}
+    {%- if current_collection != blank -%}
+      {%- liquid
+        assign related_count = 0
+        capture related_products
+          for related_product in current_collection.products
+            assign hidden_product = false
+            if related_product.tags contains 'hide'
+              assign hidden_product = true
+            endif
 
-          if related_product.id != product.id and hidden_product == false and related_count < related_category_limit
-            assign related_count = related_count | plus: 1
-            render 'product-grid-item', product: related_product, animation_delay: forloop.index0 | times: 1, animation_anchor: '#RelatedProductsCollection--' | append: section.id, index: forloop.index
-          endif
-        endfor
-      endcapture
-    -%}
+            if related_product.id != product.id and hidden_product == false and related_count < related_category_limit
+              assign related_count = related_count | plus: 1
+              render 'product-grid-item', product: related_product, animation_delay: forloop.index0 | times: 1, animation_anchor: '#RelatedProductsCollection--' | append: section.id, index: forloop.index
+            endif
+          endfor
+        endcapture
+      -%}
 
-    {%- if related_count > 0 -%}
-      {%- capture related -%}
-        <div class="grid-outer" style="--column-count: {{ column_count }}; --COLUMNS: {{ columns_desktop }}; --COLUMNS-MEDIUM: {{ columns_medium }}; --COLUMNS-SMALL: {{ columns_small }}; --COLUMNS-MOBILE: {{ columns_mobile }};" {{ block.shopify_attributes }}>
-          <grid-slider align-arrows>
-            <div class="grid{% if layout_desktop == 'slider' %} grid--slider{% if related_count <= 4 %} grid--slider-disabled{% endif %}{% endif %}{% if layout_mobile == 'slider' or layout_mobile == nil %} grid--mobile-slider{% else %} grid--mobile-vertical{% endif %}" data-grid-slider id="RelatedProductsCollection--{{ section.id }}">
-              {{ related_products }}
-            </div>
-          </grid-slider>
-        </div>
-      {%- endcapture -%}
+      {%- if related_count > 0 -%}
+        {%- capture related -%}
+          <div class="grid-outer" style="--column-count: {{ column_count }}; --COLUMNS: {{ columns_desktop }}; --COLUMNS-MEDIUM: {{ columns_medium }}; --COLUMNS-SMALL: {{ columns_small }}; --COLUMNS-MOBILE: {{ columns_mobile }};" {{ block.shopify_attributes }}>
+            <grid-slider align-arrows>
+              <div class="grid{% if layout_desktop == 'slider' %} grid--slider{% if related_count <= 4 %} grid--slider-disabled{% endif %}{% endif %}{% if layout_mobile == 'slider' or layout_mobile == nil %} grid--mobile-slider{% else %} grid--mobile-vertical{% endif %}" data-grid-slider id="RelatedProductsCollection--{{ section.id }}">
+                {{ related_products }}
+              </div>
+            </grid-slider>
+          </div>
+        {%- endcapture -%}
+      {%- endif -%}
     {%- endif -%}
 
     {%- if current_category_collection != blank -%}
@@ -141,6 +199,7 @@
           </div>
         {%- endcapture -%}
       {%- endif -%}
+    {%- endif -%}
     {%- endif -%}
   {%- endif -%}
 
