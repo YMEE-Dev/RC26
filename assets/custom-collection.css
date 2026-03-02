@@ -19,6 +19,30 @@
     }
 }
 
+@media only screen and (max-width: 989px) {
+    .collection--spotlight .collection__products .grid {
+        --columns: 2;
+        grid-auto-flow: row dense;
+    }
+
+    .collection--spotlight .collection__products .grid .product-item {
+        mix-blend-mode: normal;
+    }
+
+    .collection--spotlight .spotlight-collection-image {
+        grid-column: 1 / -1;
+    }
+
+    .collection--spotlight .collection__products .grid>.grid-item {
+        position: sticky;
+        top: 0;
+        align-self: start;
+        z-index: var(--spotlight-stack-index, 1);
+        background: var(--bg);
+        height: 100%;
+    }
+}
+
 .product-storytelling .grid-media__media-wrapper {
     overflow: hidden;
     height: 100%;
