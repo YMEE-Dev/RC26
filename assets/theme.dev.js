@@ -5631,14 +5631,14 @@
 
           toggleSubmitButton(disable = true, text = window.theme.strings.addToCart) {
             this.submitButton.toggleAttribute('disabled', disable);
-            // Preserve existing price markup inside the add-to-cart text
-            const existingPriceElement = this.submitButtonText.querySelector('[data-product-price]');
-            if (existingPriceElement) {
-              const priceHTML = existingPriceElement.outerHTML;
-              this.submitButtonText.textContent = text;
-              this.submitButtonText.insertAdjacentHTML('beforeend', ` ${priceHTML}`);
-            } else {
-              this.submitButtonText.textContent = text;
+            // Preserve existing icon markup inside the add-to-cart text
+            const existingIconElement = this.submitButtonText.querySelector('.btn__icon');
+            const iconHTML = existingIconElement ? existingIconElement.outerHTML : '';
+            
+            this.submitButtonText.textContent = text;
+
+            if (iconHTML) {
+              this.submitButtonText.insertAdjacentHTML('afterbegin', `${iconHTML} `);
             }
           }
 

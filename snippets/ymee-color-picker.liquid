@@ -1,0 +1,133 @@
+{% comment %}
+  YMEE Color Picker — standalone Metal color swatches
+  Renders the non-size option(s) as swatches/buttons, syncing with the hidden variant-selects.
+
+  Accepts:
+  - product: {Object} product object
+  - current_variant: {Object} the selected or first available variant
+  - section_id: {String} section ID for scoping
+
+  Usage:
+  {% render 'ymee-color-picker', product: product, current_variant: current_variant, section_id: section.id %}
+{% endcomment %}
+
+{%- liquid
+  assign size_translation = 'general.size_chart.size' | t
+  assign translation_string_size = size_translation | remove: ' ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
+-%}
+
+{%- for option in product.options_with_values -%}
+  {%- liquid
+    assign opt_handle = option.name | handle
+    assign is_size_option = false
+    if translation_string_size contains opt_handle
+      assign is_size_option = true
+    endif
+  -%}
+
+  {%- unless is_size_option -%}
+    {%- liquid
+      assign has_real_images = false
+      for value in option.values
+        assign value_name = value | append: ''
+        for variant in product.variants
+          assign variant_option_index = option.position | minus: 1
+          assign variant_option_value = variant.options[variant_option_index]
+          if variant_option_value == value_name
+            if variant.featured_media
+              assign has_real_images = true
+              break
+            endif
+          endif
+        endfor
+        if has_real_images
+          break
+        endif
+      endfor
+    -%}
+    
+    {%- if has_real_images -%}
+      <div
+        class="ymee-color-picker"
+        data-ymee-color-picker
+        data-option-position="{{ option.position }}"
+        data-section-id="{{ section_id }}"
+        style="--color-count: {{ option.values.size }};"
+      >
+      <div class="ymee-color-picker__legend">
+        {%- for value in option.values -%}
+          <span class="ymee-color-picker__value" data-ymee-color-value{% unless value.selected %} hidden{% endunless %}>{{ value | escape }}</span>
+        {%- endfor -%}
+      </div>
+
+      <div class="ymee-color-picker__options">
+        {%- for value in option.values -%}
+          {%- liquid
+            assign option_disabled = true
+            assign variant_thumb = false
+            assign value_name = value | append: ''
+            if value.available
+              assign option_disabled = false
+            endif
+
+            for variant in product.variants
+              assign variant_option_index = option.position | minus: 1
+              assign variant_option_value = variant.options[variant_option_index]
+              if variant_option_value == value_name
+                if variant.featured_media
+                  assign variant_thumb = variant.featured_media.preview_image
+                  break
+                endif
+              endif
+            endfor
+          -%}
+
+          {%- capture input_id -%}
+            ymee-color-{{ section_id }}-{{ option.position }}-{{ forloop.index0 }}-{{ product.id }}
+          {%- endcapture -%}
+
+          {%- capture input_name -%}
+            {{ option.name }}-{{ option.position }}
+          {%- endcapture -%}
+
+          <label
+            class="ymee-color-picker__item{% if value.selected %} is-selected{% endif %}{% if option_disabled %} is-unavailable{% endif %}"
+            for="{{ input_id }}"
+            title="{{ value | escape }}"
+            data-value="{{ value | escape }}"
+          >
+            <input
+              type="radio"
+              id="{{ input_id }}"
+              name="{{ input_name | escape }}"
+              value="{{ value | escape }}"
+              {% if value.selected %}checked{% endif %}
+              data-option-value-id="{{ value.id }}"
+              data-product-url="{{ value.product_url }}"
+              data-ymee-color-input
+              class="visually-hidden"
+            >
+
+            <span class="ymee-color-picker__thumb">
+              {%- if variant_thumb -%}
+                {%- capture srcset -%}
+                  {%- render 'image-srcset', image: variant_thumb, widths: '60, 90, 120, 150, 180' -%}
+                {%- endcapture -%}
+                {{ variant_thumb | image_url: height: 80 | image_tag: sizes: '60px', srcset: srcset, loading: 'lazy' }}
+              {%- else -%}
+                {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+              {%- endif -%}
+            </span>
+
+            <span class="visually-hidden">{{ value | escape }}</span>
+          </label>
+        {%- endfor -%}
+      </div>
+    </div>
+    {%- endif -%}
+  {%- endunless -%}
+{%- endfor -%}
+
+<script type="application/json" data-product-json>
+  {{ product | json }}
+</script>

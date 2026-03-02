@@ -1,11 +1,9 @@
 {% doc %}
   Renders 2 years warranty information in a drawer.
   This snippet uses metaobjects for content management.
-  
-  @param {object} block - The block object containing drawer settings
 {% enddoc %}
 
-<div class="drawer-2-years-warranty">
+<div class="drawer-2-years-warranty drawer__content-wrapper">
   {%- comment -%}
     Get warranty content from dedicated metafields
   {%- endcomment -%}
@@ -23,34 +21,38 @@
     Display metaobject content if available
   {%- endcomment -%}
   {%- if warranty_content != blank -%}
-    <div class="warranty__content">
+    <div class="warranty__content drawer-content__main">
       <div class="warranty__text-content">
         {%- if warranty_content.title != blank -%}
-          <h2 class="warranty__title">{{ warranty_content.title }}</h2>
+          <h2 class="warranty__title drawer-content__title">{{ warranty_content.title }}</h2>
         {%- endif -%}
         
         {%- if warranty_content.description != blank -%}
-          <div class="warranty__description">
+          <div class="warranty__description drawer-content__description">
             {{ warranty_content.description | metafield_tag }}
           </div>
         {%- endif -%}
         
         {%- if warranty_content.link_text != blank and warranty_content.link_url != blank -%}
-          <div class="warranty__link">
+          <div class="warranty__link drawer-content__link">
             <a href="{{ warranty_content.link_url }}" class="link">{{ warranty_content.link_text }}</a>
           </div>
         {%- endif -%}
         
         {%- if warranty_content.accordions != blank -%}
-          <div class="warranty__accordions">
-            {%- for accordion in warranty_content.accordions -%}
-              <div class="warranty__accordion">
+          <div class="warranty__accordions drawer-content__accordions">
+            {%- for accordion in warranty_content.accordions.value -%}
+              <div class="warranty__accordion drawer-content__accordion">
                 <details class="accordion" data-collapsible>
                   <summary class="accordion__title" data-collapsible-trigger>
                     {{ accordion.title }}
+                    <div class="accordion-icon-wrapper">
+                      {% render 'icon-plus' %}
+                      {% render 'icon-minus' %}
+                    </div>
                   </summary>
                   <div class="accordion__content" data-collapsible-content>
-                    {{ accordion.content | metafield_tag }}
+                    {{ accordion.content }}
                   </div>
                 </details>
               </div>
@@ -60,7 +62,7 @@
       </div>
       
       {%- if warranty_content.image != blank -%}
-        <div class="warranty__image">
+        <div class="warranty__image drawer-content__image">
           {{ warranty_content.image | image_url: width: 600 | image_tag }}
         </div>
       {%- endif -%}
@@ -74,72 +76,14 @@
 </div>
 
 {% stylesheet %}
-  .drawer-2-years-warranty {
-    padding: 20px;
-  }
-  
-  .warranty__content {
+  .drawer-2-years-warranty .warranty__text-content {
     display: flex;
     flex-direction: column;
-    height: 100%;
-  }
-  
-  .warranty__text-content {
     flex: 1;
   }
-  
-  .warranty__image {
+  .drawer-2-years-warranty .drawer-content__accordions,
+  .drawer-2-years-warranty .drawer-content__image {
+    margin-bottom: 0px;
     margin-top: auto;
-    text-align: center;
-  }
-  
-  .warranty__image img {
-    max-width: 100%;
-    height: auto;
-  }
-  
-  .warranty__title {
-    margin-bottom: 15px;
-    color: #000;
-    font-family: 'Portrait LS';
-    font-size: 32px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 36px;
-  }
-  
-  .warranty__description {
-    margin-bottom: 20px;
-    color: #000;
-    font-family: Inter;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 22px;
-  }
-  
-  .warranty__link {
-    margin-bottom: 20px;
-  }
-  
-  .warranty__link a {
-    color: #000;
-    text-decoration: underline;
-    font-family: Inter;
-    font-size: 14px;
-    font-weight: 400;
-  }
-  
-  .warranty__link a:hover {
-    text-decoration: none;
-  }
-  
-  .warranty__accordions {
-    margin-bottom: 20px;
-  }
-  
-  .warranty__default {
-    text-align: center;
-    padding: 40px 20px;
   }
 {% endstylesheet %}

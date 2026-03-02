@@ -2,10 +2,10 @@
   Renders a drawer content for "Send a hint" functionality.
 {% enddoc %}
 
-<div class="drawer-hint">
-  <h3 class="drawer__title">{{ 'products.product.send_hint_title' | t }}</h3>
+<div class="drawer-hint drawer__content-wrapper">
+  <h3 class="drawer__title drawer-content__title">{{ 'products.product.send_hint_title' | t }}</h3>
   
-  <div class="drawer__content">
+  <div class="drawer__content drawer-content__main">
     {% form 'contact', class: 'hint-form', id: 'hint-form' %}
       {% if form.posted_successfully? %}
         <p class="hint-form__status hint-form__status--success">{{ 'contact.form.post_success' | t }}</p>

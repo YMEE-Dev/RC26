@@ -115,17 +115,9 @@
 
   {%- liquid
     if accordion_style == 'collapsible' or accordion_style == 'drawer'
-      assign show_icon = block.settings.show_icon
-      assign icon_size = block.settings.icon_size | default: 24
-      assign icon_color = block.settings.icon_color | default: 'rgba(0,0,0,0)'
-      assign icon_name = block.settings.icon_name | default: 'icon-chevron-down'
-      assign image = block.settings.image
-
       if accordion_heading == blank and accordion_content == blank
         assign accordion_heading = 'products.general.accordion_heading' | t
       endif
-    else
-      assign show_icon = false
     endif
   -%}
 
@@ -134,7 +126,6 @@
       {%- liquid
         assign icon_size = block.settings.icon_size
         assign icon_color = block.settings.icon_color
-        assign icon_name = block.settings.icon_name
         assign image = block.settings.image
 
         capture icon_style
@@ -281,26 +272,35 @@
     font-family: var(--FONT-STACK-BODY);
     font-style: var(--FONT-STYLE-BODY);
     font-weight: var(--FONT-WEIGHT-BODY);
-    letter-spacing: var(--LETTER-SPACING-BODY);
+    letter-spacing: var(--LETTER-SPACING-NAV);
+  }
+
+  .product__block--accordion .accordion__title {
     text-transform: uppercase;
   }
+
+  .accordion__content {
+    letter-spacing: var(--LETTER-SPACING-BODY);
+  }
+
   .product__block--accordion .accordion__title {
     display: inline-flex;
     align-items: center;
     gap: 1.5rem;
     padding-right: 1rem;
   }
+
   .product__block--accordion .accordion__title .accordion__sku {
     color: #A7A7A7;
     padding-left: 1rem;
   }
-  
+
   .variant-description {
     margin-bottom: 1rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid #e5e5e5;
   }
-  
+
   .variant-description:last-child {
     margin-bottom: 0;
     padding-bottom: 0;
