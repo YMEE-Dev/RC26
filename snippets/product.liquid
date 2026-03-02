@@ -300,6 +300,7 @@
           font-weight: var(--FONT-WEIGHT-BODY);
           font-size: var(--FONT-TITLE);
           line-height: var(--LINE-HEIGHT-TITLE);
+          letter-spacing: var(--LETTER-SPACING-NAV);
           text-transform: uppercase;
           max-width: 40ch;
           color: var(--COLOR-TEXT-DARK);
@@ -359,8 +360,12 @@
         font-family: var(--FONT-STACK-BODY);
         font-style: var(--FONT-STYLE-BODY);
         font-weight: var(--FONT-WEIGHT-BODY);
-        letter-spacing: var(--LETTER-SPACING-BODY);
+        letter-spacing: var(--LETTER-SPACING-NAV);
         text-transform: uppercase;
+      }
+
+      #MainProduct--{{ section.id }} .product__content-columns__aside .link-with-icon__text {
+        letter-spacing: var(--LETTER-SPACING-NAV);
       }
 
       #MainProduct--{{ section.id }} .product__content-columns__aside .product__submit__buttons button[type="submit"] {
@@ -840,6 +845,25 @@
 
       #MainProduct--{{ section.id }} .product__thumb.is-active.single-active .product__thumb__link::after {
         border-color: #000;
+      }
+
+      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart]:hover {
+        border-color: var(--btn-border);
+        background-color: #27574D;
+        color: #fff;
+      }
+
+      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn [data-add-to-cart-text] {
+        transition: color 0.3s ease;
+      }
+
+      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn [data-add-to-cart-text] .btn__icon {
+        margin-right: 12px;
+        transition: fill 0.3s ease;
+      }
+
+      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart]:hover .btn__icon path {
+        fill: #fff;
       }
 
       @media only screen and (max-width: 749px) {
