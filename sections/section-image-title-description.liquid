@@ -62,7 +62,7 @@
             {%- endif -%}
             {%- if block.settings.logo != blank -%}
               <div class="image-title-desc__logo">
-                {%- render 'image', image: block.settings.logo, sizes: sizes -%} 
+               <img src="{{ block.settings.logo | image_url: width: 100 }}" alt="{{ block.settings.logo.alt }}" width="100" height="100">
                 <span class="image-title-desc__logo-text">{{ block.settings.logo_text }}</span>
               </div>
             {%- endif -%}
