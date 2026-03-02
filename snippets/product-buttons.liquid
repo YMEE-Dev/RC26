@@ -439,26 +439,6 @@
               >
                 <span class="btn__text" data-add-to-cart-text>
                   {{- button_text -}}
-                  {%- if settings.atc_show_product_price -%}
-                    <span
-                      class="btn__price"
-                      data-product-price
-                      {% if current_variant.compare_at_price > current_variant.price %}
-                        class="product__price--sale"
-                      {% endif %}
-                    >
-                      {%- if current_variant.price == 0 -%}
-                        {{ 'general.money.free' | t }}
-                      {%- else -%}
-                        {%- if current_variant.compare_at_price > current_variant.price -%}
-                          {{ current_variant.price | money }}
-                          <s>{{ current_variant.compare_at_price | money }}</s>
-                        {%- else -%}
-                          {{ current_variant.price | money }}
-                        {%- endif -%}
-                      {%- endif -%}
-                    </span>
-                  {%- endif -%}
                 </span>
                 <span class="btn__added">&nbsp;</span>
 
