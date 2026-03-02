@@ -1,0 +1,140 @@
+{% doc %}
+  Renders a drawer content for "Ask your concierge" functionality.
+  
+  @param {block} block - The block object containing settings
+{% enddoc %}
+
+<div class="drawer-concierge">
+  {% comment %} <h3 class="drawer__title">{{ 'products.product.ask_concierge_title' | t }}</h3> {% endcomment %}
+  
+  <div class="drawer__content">
+    <div class="drawer__image">
+      <img src="https://cdn.shopify.com/s/files/1/0969/2990/7075/files/roberto-concierge_header_V2.jpg?v=1771364672" alt="Roberto Coin Concierge" loading="lazy">
+    </div>
+    
+    <div class="drawer__section">
+      <p class="drawer__heading">OPENING HOURS</p>
+      <p>Mon-Fri from 10am to 5pm CET (Central European Time)</p>
+    </div>
+
+    <div class="drawer__section">
+      <a href="tel:+390444202202" class="drawer__link">
+        <span class="drawer__link-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+          </svg>
+        </span>
+        <div class="drawer__link-content">
+          <span class="drawer__link-text">CALL NOW</span>
+          <span class="drawer__link-value">+39 0444 202 202</span>
+        </div>
+      </a>
+      
+      <a href="#" class="drawer__link" data-drawer-open="video-appointment">
+        <span class="drawer__link-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 7l-7 5 7 5V7z"/>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+          </svg>
+        </span>
+        <div class="drawer__link-content">
+          <span class="drawer__link-text">BOOK A VIDEO APPOINTMENT</span>
+        </div>
+      </a>
+      
+      <a href="mailto:CONCIERGE@ROBERTOCOIN.COM" class="drawer__link">
+        <span class="drawer__link-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </span>
+        <div class="drawer__link-content">
+          <span class="drawer__link-text">SEND AN EMAIL</span>
+          <span class="drawer__link-value">CONCIERGE@ROBERTOCOIN.COM</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .drawer-concierge {
+    padding: 20px;
+  }
+  
+  .drawer__image {
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  
+  .drawer__image img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .drawer__section {
+    margin-bottom: 30px;
+  }
+  
+  .drawer__section:last-child {
+    margin-bottom: 0;
+  }
+  
+  .drawer__section > p:not(.drawer__heading) {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-color-primary);
+  }
+  
+  .drawer__link {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid var(--border-color);
+    transition: opacity 0.2s ease;
+  }
+  
+  .drawer__link:last-child {
+    border-bottom: none;
+  }
+  
+  .drawer__link:hover {
+    opacity: 0.7;
+  }
+  
+  .drawer__link-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--background-color-secondary);
+    border-radius: 50%;
+  }
+  
+  .drawer__link-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .drawer__link-text {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-color-secondary);
+  }
+  
+  .drawer__link-value {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-color-primary);
+  }
+{% endstylesheet %}
