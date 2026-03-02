@@ -60,6 +60,12 @@
                 {{ block.settings.description }}
               </div>
             {%- endif -%}
+            {%- if block.settings.logo != blank -%}
+              <div class="image-title-desc__logo">
+                {%- render 'image', image: block.settings.logo, sizes: sizes -%} 
+                <span class="image-title-desc__logo-text">{{ block.settings.logo_text }}</span>
+              </div>
+            {%- endif -%}
           </div>
         {%- endfor -%}
       </div>
