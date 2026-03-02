@@ -50,6 +50,8 @@
         mix-blend-mode: normal;
         align-self: auto;
         z-index: var(--spotlight-stack-index, 1);
+        margin-left: calc(0px - var(--outer));
+        margin-top: calc(0px - var(--gutter));
     }
 }
 
@@ -57,6 +59,14 @@
     .collection--spotlight .collection__products .grid {
         --columns: 2;
         grid-auto-flow: row dense;
+    }
+
+    .collection--spotlight .collection__products .grid-outer {
+        padding: 0;
+    }
+
+    .collection--spotlight .collection__products .grid-outer>.grid {
+        gap: 0;
     }
 
     .collection--spotlight .collection__products .grid .product-item {
@@ -73,6 +83,7 @@
         align-self: start;
         z-index: var(--spotlight-stack-index, 1);
         background: var(--bg);
+        height: 100%;
     }
 }
 
