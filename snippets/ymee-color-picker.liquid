@@ -26,13 +26,34 @@
   -%}
 
   {%- unless is_size_option -%}
-    <div
-      class="ymee-color-picker"
-      data-ymee-color-picker
-      data-option-position="{{ option.position }}"
-      data-section-id="{{ section_id }}"
-      style="--color-count: {{ option.values.size }};"
-    >
+    {%- liquid
+      assign has_real_images = false
+      for value in option.values
+        assign value_name = value | append: ''
+        for variant in product.variants
+          assign variant_option_index = option.position | minus: 1
+          assign variant_option_value = variant.options[variant_option_index]
+          if variant_option_value == value_name
+            if variant.featured_media
+              assign has_real_images = true
+              break
+            endif
+          endif
+        endfor
+        if has_real_images
+          break
+        endif
+      endfor
+    -%}
+    
+    {%- if has_real_images -%}
+      <div
+        class="ymee-color-picker"
+        data-ymee-color-picker
+        data-option-position="{{ option.position }}"
+        data-section-id="{{ section_id }}"
+        style="--color-count: {{ option.values.size }};"
+      >
       <div class="ymee-color-picker__legend">
         {%- for value in option.values -%}
           <span class="ymee-color-picker__value" data-ymee-color-value{% unless value.selected %} hidden{% endunless %}>{{ value | escape }}</span>
@@ -103,6 +124,7 @@
         {%- endfor -%}
       </div>
     </div>
+    {%- endif -%}
   {%- endunless -%}
 {%- endfor -%}
 

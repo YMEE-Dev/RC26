@@ -337,7 +337,26 @@
       if ymee_size_list contains opt_h
         assign ymee_has_size = true
       else
-        assign ymee_has_color_picker = true
+        assign has_real_images = false
+        for value in opt.values
+          assign value_name = value | append: ''
+          for variant in product.variants
+            assign variant_option_index = opt.position | minus: 1
+            assign variant_option_value = variant.options[variant_option_index]
+            if variant_option_value == value_name
+              if variant.featured_media
+                assign has_real_images = true
+                break
+              endif
+            endif
+          endfor
+          if has_real_images
+            break
+          endif
+        endfor
+        if has_real_images
+          assign ymee_has_color_picker = true
+        endif
       endif
     endfor
   -%}
