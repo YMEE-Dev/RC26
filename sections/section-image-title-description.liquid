@@ -19,6 +19,11 @@
 >
   {%- if item_blocks.size > 0 -%}
     <div class="image-title-desc__wrapper">
+      {%- if section.settings.description != blank -%}
+        <div class="image-title-desc__top-description rte">
+          {{ section.settings.description }}
+        </div>
+      {%- endif -%}
       <div class="image-title-desc__grid">
         {%- for block in item_blocks -%}
           <div class="image-title-desc__block" {{ block.shopify_attributes }}>
@@ -56,6 +61,21 @@
     width: 100%;
     margin-left: auto;
     margin-right: auto;
+  }
+
+  .image-title-desc__top-description {
+    margin: 0 0 2.5rem;
+    text-align: left;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+
+  .image-title-desc__top-description p {
+    margin: 0 0 0.75em;
+  }
+
+  .image-title-desc__top-description p:last-child {
+    margin-bottom: 0;
   }
 
   .image-title-desc__grid {
@@ -124,6 +144,16 @@
   "tag": "section",
   "class": "section-image-title-desc",
   "settings": [
+    {
+      "type": "header",
+      "content": "Description"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description (top)",
+      "info": "Optional text shown above the blocks."
+    },
     {
       "type": "header",
       "content": "Layout"
