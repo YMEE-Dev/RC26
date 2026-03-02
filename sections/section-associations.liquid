@@ -4,7 +4,7 @@
   assign list_blocks = section.blocks | where: 'type', 'item'
 -%}
 
-{%- style -%}
+  {%- style -%}
   #Associations--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
@@ -12,11 +12,9 @@
   #Associations--{{ section.id }} .associations__dark {
     background-color: {{ section.settings.background_color | default: '#1a1a1a' }};
   }
-  {%- if section.settings.image_background_color != blank -%}
   #Associations--{{ section.id }} .associations__media {
-    background-color: {{ section.settings.image_background_color }};
+    background-color: {{ section.settings.image_background_color | default: '#252525' }};
   }
-  {%- endif -%}
 {%- endstyle -%}
 
 <section
@@ -253,7 +251,8 @@
         { "value": "wrapper--full-padded", "label": "Full width padded" },
         { "value": "wrapper", "label": "Normal" },
         { "value": "wrapper--wide", "label": "Wide" },
-        { "value": "wrapper--narrow", "label": "Narrow" }
+        { "value": "wrapper--narrow", "label": "Narrow" },
+        { "value": "wrapper--custom", "label": "Custom (max-width: 1232px)" }
       ]
     },
     {
