@@ -3138,10 +3138,31 @@
         cancelAnimationFrame(this.scrollAnimation);
       }
 
+      getClosestSlide() {
+        const visibleSlide = this.slider.querySelector(`${selectors$j.slide}.${classes$f.visible}`);
+        if (visibleSlide) return visibleSlide;
+
+        const slides = this.slider.querySelectorAll(selectors$j.slide);
+        if (!slides.length) return null;
+
+        let closestSlide = slides[0];
+        let minDistance = Math.abs(this.slider.scrollLeft - closestSlide.offsetLeft);
+
+        slides.forEach((candidateSlide) => {
+          const distance = Math.abs(this.slider.scrollLeft - candidateSlide.offsetLeft);
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestSlide = candidateSlide;
+          }
+        });
+
+        return closestSlide;
+      }
+
       scrollToSlide() {
         if (!this.velX && !this.isScrolling) return;
 
-        const slide = this.slider.querySelector(`${selectors$j.slide}.${classes$f.visible}`);
+        const slide = this.getClosestSlide();
         if (!slide) return;
 
         const gap = parseInt(window.getComputedStyle(slide).marginRight) || 0;
@@ -3296,18 +3317,51 @@
           buttonArrowClickEvent(e) {
             e.preventDefault();
 
-            const firstVisibleSlide = this.slider.querySelector(`[data-grid-item].is-visible`);
+            const button = e.currentTarget;
+            const activeSlide = this.getActiveSlide();
             let slide = null;
 
-            if (e.target.hasAttribute('data-button-prev')) {
-              slide = firstVisibleSlide?.previousElementSibling;
+            if (!button || !activeSlide) return;
+
+            if (button.hasAttribute('data-button-prev')) {
+              slide = activeSlide.previousElementSibling;
             }
 
-            if (e.target.hasAttribute('data-button-next')) {
-              slide = firstVisibleSlide?.nextElementSibling;
+            if (button.hasAttribute('data-button-next')) {
+              slide = activeSlide.nextElementSibling;
             }
 
+            this.stopDragMomentum();
             this.goToSlide(slide);
+          }
+
+          getActiveSlide() {
+            const visibleSlide = this.slider.querySelector(`${selectors$j.slide}.${classes$f.visible}`);
+            if (visibleSlide) return visibleSlide;
+
+            if (!this.slides.length) return null;
+
+            let nearestSlide = this.slides[0];
+            let minDistance = Math.abs(this.slider.scrollLeft - nearestSlide.offsetLeft);
+
+            this.slides.forEach((candidateSlide) => {
+              const distance = Math.abs(this.slider.scrollLeft - candidateSlide.offsetLeft);
+              if (distance < minDistance) {
+                minDistance = distance;
+                nearestSlide = candidateSlide;
+              }
+            });
+
+            return nearestSlide;
+          }
+
+          stopDragMomentum() {
+            if (!this.draggableSlider) return;
+
+            this.draggableSlider.cancelMomentumTracking();
+            this.draggableSlider.isScrolling = false;
+            this.draggableSlider.velX = 0;
+            this.slider.classList.remove(classes$f.scrolling);
           }
 
           removeArrows() {
@@ -5835,8 +5889,10 @@
 
         this.flkty = new window.theme.Flickity(this.slider, {
           cellSelector: selectors$8.slide,
+          cellAlign: 'left',
           contain: true,
           wrapAround: true,
+          percentPosition: false,
           watchCSS: true,
           autoPlay: false,
           draggable: false,
@@ -5844,9 +5900,17 @@
           prevNextButtons: true,
         });
 
+        const refreshFlickityLayout = () => {
+          if (!this.flkty) return;
+          this.flkty.resize();
+          this.flkty.reposition();
+        };
+
+        requestAnimationFrame(refreshFlickityLayout);
         this.flkty.pausePlayer();
 
         this.addEventListener('mouseenter', () => {
+          refreshFlickityLayout();
           this.flkty.unpausePlayer();
         });
 

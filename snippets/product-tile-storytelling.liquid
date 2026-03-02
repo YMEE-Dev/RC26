@@ -8,6 +8,8 @@
 {%- liquid
   assign first_image = product.media | where: 'media_type', 'image' | first
   assign first_media = product.media.first
+  assign modal_media = product.media[1]
+  assign modal_image = blank
   assign look_slider = ''
 
   assign has_video = false
@@ -16,6 +18,18 @@
       assign has_video = true
     endif
   endfor
+
+  if modal_media == blank
+    assign modal_media = first_media
+  endif
+
+  if modal_media != blank
+    if modal_media.media_type == 'image'
+      assign modal_image = modal_media
+    elsif modal_media.preview_image != blank
+      assign modal_image = modal_media.preview_image
+    endif
+  endif
 
   assign cta_text = product.metafields.custom.ste_cta | default: 'Shop the look'
   assign storytelling_products = product.metafields.custom.ste_products.value
@@ -106,25 +120,25 @@
     <div class="storytelling-modal__inner">
       <look-component class="look">
         <div class="storytelling-look__image">
-          {%- if has_video and first_media.media_type == 'video' -%}
+          {%- if modal_media != blank and modal_media.media_type == 'video' -%}
             <video
               class="storytelling custom-autoplay-video"
               autoplay="1"
               muted
               loop
               playsinline
-              poster="{{ first_media.preview_image | image_url: width: 2048 }}"
+              poster="{{ modal_media.preview_image | image_url: width: 2048 }}"
             >
-              {% for source in first_media.sources %}
+              {% for source in modal_media.sources %}
                 <source src="{{ source.url }}" type="{{ source.mime_type }}">
               {% endfor %}
               Your browser does not support the video tag.
             </video>
           {%- else -%}
-            {%- if first_image -%}
+            {%- if modal_image -%}
               {% comment %}
                 {%- render 'image',
-                  image: first_image,
+                  image: modal_image,
                   sizes: '(min-width: 750px) 50vw, 100vw',
                   aspect_ratio: 1,
                   modifier: 'storytelling-look__image-bg',
@@ -133,7 +147,8 @@
               {% endcomment %}
               <img
                 class=""
-                src="{{ first_image | image_url: width: 2048 }}"
+                src="{{ modal_image | image_url: width: 2048 }}"
+                alt="{{ product.title | strip_html | escape }}"
                 width="auto"
                 height="auto"
               >

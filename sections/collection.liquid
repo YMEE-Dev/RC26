@@ -226,12 +226,15 @@
           <a
             href="{{ collection.url | split: '-' | first }}"
             type="button"
-            class="availability-filter__button navlink{% unless has_active_subcollection_link %} is-active{% endunless %}"
+            class="availability-filter__button navlink"
             data-availability-view-all
-            data-availability-view-all-default-active="{% if has_active_subcollection_link %}false{% else %}true{% endif %}"
-            aria-pressed="{% if has_active_subcollection_link %}false{% else %}true{% endif %}"
+            data-availability-view-all-default-active="false"
+            aria-pressed="false"
           >
-            View all
+            <span class="availability-filter__label availability-filter__label--count">
+              {{ collection.products_count }} Pieces
+            </span>
+            <span class="availability-filter__label availability-filter__label--view-all"> View all </span>
           </a>
         </div>
         {%- if sub_collection_links_html != blank -%}
