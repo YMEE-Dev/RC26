@@ -12,6 +12,11 @@
   #Associations--{{ section.id }} .associations__dark {
     background-color: {{ section.settings.background_color | default: '#1a1a1a' }};
   }
+  {%- if section.settings.image_background_color != blank -%}
+  #Associations--{{ section.id }} .associations__media {
+    background-color: {{ section.settings.image_background_color }};
+  }
+  {%- endif -%}
 {%- endstyle -%}
 
 <section
@@ -222,6 +227,12 @@
       "type": "image_picker",
       "id": "image",
       "label": "Image"
+    },
+    {
+      "type": "color",
+      "id": "image_background_color",
+      "label": "Image background",
+      "info": "Background behind the image. Leave blank to use the left column color."
     },
     {
       "type": "color",
