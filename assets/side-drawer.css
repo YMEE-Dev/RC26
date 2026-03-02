@@ -1,7 +1,6 @@
 /* Side Drawer Common Styles */
 :root {
   --side-drawer-width: 480px;
-  --side-drawer-text: var(--text);
 }
 
 side-drawer {
@@ -238,7 +237,7 @@ side-drawer .drawer-content__link {
 }
 
 side-drawer .drawer-content__link a {
-  color: #000;
+  color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-BODY);
   font-size: var(--FONT-SIZE-BASE);
   font-style: var(--FONT-STYLE-BODY);
@@ -258,7 +257,7 @@ side-drawer .drawer-content__link a:hover {
 
 side-drawer .drawer-content__title {
   margin-bottom: 15px;
-  color: var(--text);
+  color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-HEADING);
   font-size: var(--font-display-s);
   font-style: var(--FONT-STYLE-HEADING);
@@ -270,7 +269,7 @@ side-drawer .drawer-content__title {
 
 side-drawer .drawer-content__title--nav {
   margin-bottom: 10px;
-  color: #000;
+  color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-BODY);
   font-size: var(--font-body-x-small);
   font-style: var(--FONT-STYLE-BODY);
@@ -282,7 +281,7 @@ side-drawer .drawer-content__title--nav {
 
 side-drawer .drawer-content__description {
   margin-bottom: 20px;
-  color: var(--text);
+  color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-BODY);
   font-size: var(--font-body-medium);
   font-style: var(--FONT-STYLE-BODY);
@@ -301,7 +300,7 @@ side-drawer .drawer__heading {
   font-weight: var(--FONT-WEIGHT-HEADING);
   font-style: var(--FONT-STYLE-HEADING);
   line-height: var(--LINE-HEIGHT-DISPLAY-S);
-  color: var(--side-drawer-text);
+  color: var(--COLOR-TEXT);
   margin-bottom: 15px;
   letter-spacing: var(--LETTER-SPACING-HEADING);
   text-transform: var(--FONT-UPPERCASE-HEADING);
@@ -322,7 +321,8 @@ side-drawer .drawer__image img {
 }
 
 side-drawer .drawer-content__image {
-  margin-top: auto;
+  display: flex;
+  justify-content: center;
   text-align: center;
 }
 
@@ -340,7 +340,7 @@ side-drawer .drawer__link {
   gap: 16px;
   padding: 12px 0;
   text-decoration: none;
-  color: var(--text);
+  color: var(--COLOR-TEXT);
   border-bottom: 1px solid var(--border);
   transition: opacity 0.2s ease;
   font-family: var(--FONT-STACK-BODY);
@@ -364,7 +364,7 @@ side-drawer .drawer__link-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text);
+  color: var(--COLOR-TEXT);
 }
 
 side-drawer .drawer__link-icon svg {
@@ -379,7 +379,7 @@ side-drawer .drawer__link-content {
 }
 
 side-drawer .drawer__link-text {
-  color: #000;
+  color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-BODY);
   font-size: var(--FONT-SIZE-LABEL);
   font-style: var(--FONT-STYLE-BODY);
@@ -402,7 +402,7 @@ side-drawer .drawer__link-value {
 
 
 side-drawer .drawer__button {
-  color: #000;
+  color: var(--COLOR-TEXT);
   text-align: center;
   font-family: var(--FONT-STACK-BODY);
   font-size: var(--FONT-SIZE-LABEL);
@@ -452,7 +452,7 @@ side-drawer .form-field__input {
   font-size: var(--FONT-SIZE-INPUT-TEXT);
   line-height: var(--LINE-HEIGHT-INPUT-TEXT);
   font-weight: var(--FONT-WEIGHT-BODY);
-  color: var(--side-drawer-text);
+  color: var(--COLOR-TEXT);
   transition: border-color 0.2s ease;
   background-color: transparent;
 }
@@ -470,7 +470,7 @@ side-drawer .form-field__textarea {
   font-size: var(--FONT-SIZE-INPUT-TEXT);
   line-height: var(--LINE-HEIGHT-INPUT-TEXT);
   font-weight: var(--FONT-WEIGHT-BODY);
-  color: var(--side-drawer-text);
+  color: var(--COLOR-TEXT);
   transition: border-color 0.2s ease;
   background-color: transparent;
   resize: vertical;
@@ -489,7 +489,7 @@ side-drawer .form__status {
   font-size: var(--FONT-SIZE-LEGAL);
   line-height: var(--LINE-HEIGHT-LEGAL);
   font-weight: var(--FONT-WEIGHT-BODY);
-  color: var(--side-drawer-text);
+  color: var(--COLOR-TEXT);
   border-radius: var(--RADIUS);
 }
 
@@ -513,7 +513,7 @@ side-drawer .hint-form__status {
   font-size: var(--FONT-SIZE-LEGAL);
   line-height: var(--LINE-HEIGHT-LEGAL);
   font-weight: var(--FONT-WEIGHT-BODY);
-  color: var(--side-drawer-text);
+  color: var(--COLOR-TEXT);
   border-radius: var(--RADIUS);
 }
 
@@ -565,7 +565,7 @@ side-drawer .btn {
 }
 
 side-drawer .btn--primary {
-  background-color: #000000;
+  background-color: var(--COLOR-TEXT);
   color: white;
 }
 
@@ -576,7 +576,7 @@ side-drawer .btn--primary:hover {
 
 side-drawer .btn--secondary {
   background-color: transparent;
-  color: var(--text-color);
+  color: var(--COLOR-TEXT);
   border: 1px solid var(--border);
 }
 
@@ -593,39 +593,71 @@ side-drawer .btn__icon {
   align-items: center;
 }
 
+side-drawer .drawer-content__accordions {
+  margin-bottom: 20px;
+}
+
 side-drawer .accordion {
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
+  border-bottom: 1px solid #D6D6D6;
+  border-top: none;
 }
 
 side-drawer .accordion__title {
-  padding: 15px;
+  padding: 13px 0px;
   cursor: pointer;
-  font-family: Inter;
-  font-size: 14px;
-  font-weight: 500;
-  color: #000;
+  font-size: var(--font-body-small);
+  font-family: var(--FONT-STACK-BODY);
+  font-style: var(--FONT-STYLE-BODY);
+  font-weight: var(--FONT-WEIGHT-BODY);
+  letter-spacing: var(--LETTER-SPACING-BODY);
+  text-transform: uppercase;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 side-drawer .accordion__title::after {
-  content: '+';
-  font-size: 20px;
+  display: none;
+}
+
+side-drawer .accordion__title .accordion-icon-wrapper {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+side-drawer .accordion__title .accordion-icon-wrapper .icon {
+  width: 18px;
+  height: 18px;
+  left: auto;
+  right: 0;
   transition: transform 0.3s ease;
 }
 
-side-drawer .accordion[open] > .accordion__title::after {
-  transform: rotate(45deg);
+side-drawer .accordion[open] .accordion-icon-wrapper .icon-plus {
+  display: none;
+}
+
+side-drawer .accordion[open] .accordion-icon-wrapper .icon-minus {
+  display: block;
+}
+
+side-drawer .accordion:not([open]) .accordion-icon-wrapper .icon-plus {
+  display: block;
+}
+
+side-drawer .accordion:not([open]) .accordion-icon-wrapper .icon-minus {
+  display: none;
 }
 
 side-drawer .accordion__content {
-  padding: 0 15px 15px;
-  font-family: Inter;
-  font-size: 14px;
-  line-height: 1.6;
-  color: #333;
+  color: var(--COLOR-TEXT);
+  font-size: var(--font-body-small);
+  font-family: var(--FONT-STACK-BODY);
+  font-style: var(--FONT-STYLE-BODY);
+  font-weight: var(--FONT-WEIGHT-BODY);
+  letter-spacing: var(--LETTER-SPACING-BODY);
+  text-transform: uppercase;
 }
 
 @media (max-width: 768px) {

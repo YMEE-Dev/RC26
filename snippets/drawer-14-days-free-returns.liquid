@@ -1,8 +1,6 @@
 {% doc %}
   Renders 14 days free returns information in a drawer.
   This snippet uses metaobjects for content management.
-  
-  @param {object} block - The block object containing drawer settings
 {% enddoc %}
 
 <div class="drawer-14-days-free-returns drawer__content-wrapper">
@@ -42,15 +40,19 @@
         {%- endif -%}
         
         {%- if returns_content.accordions != blank -%}
-          <div class="returns__accordions">
-            {%- for accordion in returns_content.accordions -%}
-              <div class="returns__accordion">
+          <div class="returns__accordions drawer-content__accordions">
+            {%- for accordion in returns_content.accordions.value -%}
+              <div class="returns__accordion drawer-content__accordion">
                 <details class="accordion" data-collapsible>
                   <summary class="accordion__title" data-collapsible-trigger>
                     {{ accordion.title }}
+                    <div class="accordion-icon-wrapper">
+                      {% render 'icon-plus' %}
+                      {% render 'icon-minus' %}
+                    </div>
                   </summary>
                   <div class="accordion__content" data-collapsible-content>
-                    {{ accordion.content | metafield_tag }}
+                    {{ accordion.content }}
                   </div>
                 </details>
               </div>
@@ -74,24 +76,14 @@
 </div>
 
 {% stylesheet %}
-  .drawer-14-days-free-returns {
-    padding: 20px;
-  }
-  
-  
-  .returns__text-content {
+  .drawer-14-days-free-returns .returns__text-content {
+    display: flex;
+    flex-direction: column;
     flex: 1;
   }
-  
-  
-  
-  
-  .returns__accordions {
-    margin-bottom: 20px;
-  }
-  
-  .returns__default {
-    text-align: center;
-    padding: 40px 20px;
+  .drawer-14-days-free-returns .drawer-content__accordions,
+  .drawer-14-days-free-returns .returns__image {
+    margin-bottom: 0px;
+    margin-top: auto;
   }
 {% endstylesheet %}

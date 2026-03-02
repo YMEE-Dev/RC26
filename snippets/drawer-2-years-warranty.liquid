@@ -1,8 +1,6 @@
 {% doc %}
   Renders 2 years warranty information in a drawer.
   This snippet uses metaobjects for content management.
-  
-  @param {object} block - The block object containing drawer settings
 {% enddoc %}
 
 <div class="drawer-2-years-warranty drawer__content-wrapper">
@@ -42,15 +40,19 @@
         {%- endif -%}
         
         {%- if warranty_content.accordions != blank -%}
-          <div class="warranty__accordions">
-            {%- for accordion in warranty_content.accordions -%}
-              <div class="warranty__accordion">
+          <div class="warranty__accordions drawer-content__accordions">
+            {%- for accordion in warranty_content.accordions.value -%}
+              <div class="warranty__accordion drawer-content__accordion">
                 <details class="accordion" data-collapsible>
                   <summary class="accordion__title" data-collapsible-trigger>
                     {{ accordion.title }}
+                    <div class="accordion-icon-wrapper">
+                      {% render 'icon-plus' %}
+                      {% render 'icon-minus' %}
+                    </div>
                   </summary>
                   <div class="accordion__content" data-collapsible-content>
-                    {{ accordion.content | metafield_tag }}
+                    {{ accordion.content }}
                   </div>
                 </details>
               </div>
@@ -74,24 +76,14 @@
 </div>
 
 {% stylesheet %}
-  .drawer-2-years-warranty {
-    padding: 20px;
-  }
-  
-  
-  .warranty__text-content {
+  .drawer-2-years-warranty .warranty__text-content {
+    display: flex;
+    flex-direction: column;
     flex: 1;
   }
-  
-  
-  
-  
-  .warranty__accordions {
-    margin-bottom: 20px;
-  }
-  
-  .warranty__default {
-    text-align: center;
-    padding: 40px 20px;
+  .drawer-2-years-warranty .drawer-content__accordions,
+  .drawer-2-years-warranty .drawer-content__image {
+    margin-bottom: 0px;
+    margin-top: auto;
   }
 {% endstylesheet %}

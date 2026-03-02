@@ -115,17 +115,9 @@
 
   {%- liquid
     if accordion_style == 'collapsible' or accordion_style == 'drawer'
-      assign show_icon = block.settings.show_icon
-      assign icon_size = block.settings.icon_size | default: 24
-      assign icon_color = block.settings.icon_color | default: 'rgba(0,0,0,0)'
-      assign icon_name = block.settings.icon_name | default: 'icon-chevron-down'
-      assign image = block.settings.image
-
       if accordion_heading == blank and accordion_content == blank
         assign accordion_heading = 'products.general.accordion_heading' | t
       endif
-    else
-      assign show_icon = false
     endif
   -%}
 
@@ -134,7 +126,6 @@
       {%- liquid
         assign icon_size = block.settings.icon_size
         assign icon_color = block.settings.icon_color
-        assign icon_name = block.settings.icon_name
         assign image = block.settings.image
 
         capture icon_style
