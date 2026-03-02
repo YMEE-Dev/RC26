@@ -44,14 +44,44 @@
 }
 
 @media only screen and (min-width: 990px) {
+    body.template-collection:has(.collection--spotlight.collection--spotlight-position-left) .header__desktop__bar__c {
+        --link: var(--spotlight-collection-menu-link, #fff);
+    }
+
+    body.template-collection:has(.collection--spotlight.collection--spotlight-position-right) .header__desktop__bar__r {
+        --link: var(--spotlight-collection-menu-link, #fff);
+    }
+
     .collection--spotlight .spotlight-collection-image {
         position: sticky;
         top: 0;
         mix-blend-mode: normal;
         align-self: auto;
         z-index: var(--spotlight-stack-index, 1);
-        margin-left: calc(0px - var(--outer));
+        margin-left: 0;
+        margin-right: 0;
+        margin-top: 0;
+    }
+
+    .collection--spotlight .collection__products .grid>.spotlight-collection-image:first-child {
         margin-top: calc(0px - var(--gutter));
+    }
+
+    .collection--spotlight .collection__products .grid>.spotlight-collection-image:not(:has(~ .spotlight-collection-image)) {
+        margin-bottom: calc(0px - var(--gutter));
+    }
+
+    .collection--spotlight.collection--spotlight-position-left .spotlight-collection-image {
+        margin-left: calc(0px - var(--outer));
+    }
+
+    .collection--spotlight.collection--spotlight-position-right .spotlight-collection-image {
+        margin-right: calc(0px - var(--outer));
+    }
+
+    .collection--spotlight.collection--spotlight-position-center .spotlight-collection-image {
+        margin-left: 0;
+        margin-right: 0;
     }
 }
 

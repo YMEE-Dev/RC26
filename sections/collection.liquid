@@ -35,6 +35,7 @@
   assign is_spotlight_collection_template = false
   assign should_use_spotlight_images = false
   assign spotlight_images = collection.metafields.custom.spotlight_collection_images.value
+  assign spotlight_menu_color = collection.metafields.custom.spotlight_collection_menu_color.value
   assign spotlight_images_position = 'left'
 
   if collection_template_suffix == 'spotlight'
@@ -122,6 +123,12 @@
   #Collection--{{ section.id }} .collection__products {
     background: var(--COLLECTION-PRODUCTS-BG);
   }
+
+  {% if is_spotlight_collection_template and spotlight_menu_color != blank %}
+    body.template-collection:has(#Collection--{{ section.id }}.collection--spotlight) {
+      --spotlight-collection-menu-link: {{ spotlight_menu_color }};
+    }
+  {% endif %}
 {%- endstyle -%}
 
 {%- capture collection_sidebar_class -%}
@@ -170,7 +177,7 @@
   {%- endif -%}
 
   <collection-component
-    class="collection collection-products collection-{{ collection.handle }} section-padding {{ color_scheme }}{% if is_spotlight_collection_template %} collection--spotlight{% endif %}"
+    class="collection collection-products collection-{{ collection.handle }} section-padding {{ color_scheme }}{% if is_spotlight_collection_template %} collection--spotlight collection--spotlight-position-{{ spotlight_images_position }}{% endif %}"
     id="Collection--{{ section.id }}"
     data-section-id="{{ section.id }}"
     data-section-type="collection"
