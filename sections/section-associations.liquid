@@ -5,9 +5,14 @@
 -%}
 
   {%- style -%}
+
+  #shopify-section-{{ section.id }} {
+    background-color: {{ section.settings.section_background_color }};
+  }
   #Associations--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
+    padding: var(--gutter) var(--outer);
   }
   #Associations--{{ section.id }} .associations__dark {
     background-image: url('{{ section.settings.image | img_url: 'master'}}');
