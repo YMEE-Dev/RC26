@@ -12,6 +12,7 @@
   #Associations--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
+    padding: var(--gutter) var(--outer);
   }
   #Associations--{{ section.id }} .associations__dark {
     background-image: url('{{ section.settings.image | img_url: 'master'}}');
@@ -103,7 +104,10 @@ line-height: 48px; /* 120% */
 
 .associations__left-inner {
     width:345px;
-}
+} 
+
+
+
   .associations__dark {
     padding: 70px 80px;
     display: flex;
@@ -115,6 +119,7 @@ line-height: 48px; /* 120% */
       padding: 70px 80px;
     }
   }
+ 
 
   .associations__left-inner {
     display: flex;
@@ -179,7 +184,16 @@ line-height: 48px; /* 120% */
       /* padding: 3rem; */
     }
   }
-
+  @media (max-width: 1024px) {
+  .associations__left-inner {
+    width: 100%;
+  }
+  }
+  @media (max-width: 749px) {
+    .associations__dark {
+      padding: 35px !important;
+    }
+  }
   .associations__list {
     display: flex;
     flex-direction: column;
@@ -220,6 +234,13 @@ line-height: 48px; /* 120% */
   }
   .associations__list-item a:after{
     display: none !important;
+  }
+
+  @media (max-width: 1024px) {
+    .associations__dark {
+      width: 100% !important;
+      height: 100%;
+    }
   }
 {% endstylesheet %}
 

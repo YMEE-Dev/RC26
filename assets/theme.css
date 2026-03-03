@@ -5041,8 +5041,12 @@ hr.hr--color,
 
 .icon-minus, .icon-plus {
   fill: #000 !important;
-  width: 10px !important;
-  height:10px !important;
+}
+
+.plus_icon, .minus_icon {
+  display: inline-block;
+  right: 0;
+  position: absolute;
 }
 .icon-minus,
 .icon-plus{
@@ -5050,19 +5054,19 @@ hr.hr--color,
 }
 
 /* default */
-.icon-minus{
+.icon-minus ,.minus_icon{
   opacity:0;
   transform: rotate(0deg);
   position:absolute;
 }
 
 /* open */
-.accordion[open="true"] .icon-plus{
+.accordion[open="true"] .icon-plus, .accordion[open="true"] .plus_icon{
   opacity:0;
   transform: rotate(90deg);
 }
 
-.accordion[open="true"] .icon-minus{
+.accordion[open="true"] .icon-minus, .accordion[open="true"] .minus_icon{
   opacity:1;
   transform: rotate(180deg);
 }
@@ -26264,6 +26268,15 @@ dialog.is-loading .loader {
 
 .accordion__content {
   padding-bottom: 1rem;
+
+  color: #000;
+
+  /* RC26/Body */
+  font-family: Inter;
+  font-size: 13px !important;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 21px !important; /* 157.143% */
 }
 
 /*====== FAQ List ======*/

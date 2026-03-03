@@ -8,6 +8,9 @@
   #HeadingColumnsCta--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
+
+
+    padding: var(--gutter) var(--outer);
   }
 {%- endstyle -%}
 
@@ -86,13 +89,21 @@
       grid-template-columns: repeat(3, 1fr);
     }
   }
-
+  @media (max-width: 1024px) {
+    .heading-columns-cta__grid {
+      gap: 40px;
+    }
+  }
   .heading-columns-cta__column {
     display: flex;
     flex-direction: column;
     max-width: 357px;
   }
-
+  @media (max-width: 749px) {
+    .heading-columns-cta__column {
+      max-width: 100%;
+    }
+  }
   .heading-columns-cta__column-title {
     color: #000;
     font-family: Inter;
