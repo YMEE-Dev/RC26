@@ -83,7 +83,7 @@
             {%- endif -%}
             {%- if block.type == 'link' and link != blank -%}
               {%- assign animation_order = animation_order | plus: 1 -%}
-              <div class="accordion aos-animate">
+              <div class="accordion aos-animate" data-aos="hero" data-aos-anchor="{{ animation_anchor }}" data-aos-order="{{ animation_order }}" {{ block.shopify_attributes }}>
                 {{ link }}
               </div>
             {%- endif -%}
