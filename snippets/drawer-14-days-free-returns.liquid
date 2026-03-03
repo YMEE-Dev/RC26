@@ -1,11 +1,9 @@
 {% doc %}
   Renders 14 days free returns information in a drawer.
   This snippet uses metaobjects for content management.
-  
-  @param {object} block - The block object containing drawer settings
 {% enddoc %}
 
-<div class="drawer-14-days-free-returns">
+<div class="drawer-14-days-free-returns drawer__content-wrapper">
   {%- comment -%}
     Get returns content from dedicated metafields
   {%- endcomment -%}
@@ -23,34 +21,38 @@
     Display metaobject content if available
   {%- endcomment -%}
   {%- if returns_content != blank -%}
-    <div class="returns__content">
+    <div class="returns__content drawer-content__main">
       <div class="returns__text-content">
         {%- if returns_content.title != blank -%}
-          <h2 class="returns__title">{{ returns_content.title }}</h2>
+          <h2 class="returns__title drawer-content__title">{{ returns_content.title }}</h2>
         {%- endif -%}
         
         {%- if returns_content.description != blank -%}
-          <div class="returns__description">
+          <div class="returns__description drawer-content__description">
             {{ returns_content.description | metafield_tag }}
           </div>
         {%- endif -%}
         
         {%- if returns_content.link_text != blank and returns_content.link_url != blank -%}
-          <div class="returns__link">
+          <div class="returns__link drawer-content__link">
             <a href="{{ returns_content.link_url }}" class="link">{{ returns_content.link_text }}</a>
           </div>
         {%- endif -%}
         
         {%- if returns_content.accordions != blank -%}
-          <div class="returns__accordions">
-            {%- for accordion in returns_content.accordions -%}
-              <div class="returns__accordion">
+          <div class="returns__accordions drawer-content__accordions">
+            {%- for accordion in returns_content.accordions.value -%}
+              <div class="returns__accordion drawer-content__accordion">
                 <details class="accordion" data-collapsible>
                   <summary class="accordion__title" data-collapsible-trigger>
                     {{ accordion.title }}
+                    <div class="accordion-icon-wrapper">
+                      {% render 'icon-plus' %}
+                      {% render 'icon-minus' %}
+                    </div>
                   </summary>
                   <div class="accordion__content" data-collapsible-content>
-                    {{ accordion.content | metafield_tag }}
+                    {{ accordion.content }}
                   </div>
                 </details>
               </div>
@@ -60,7 +62,7 @@
       </div>
       
       {%- if returns_content.image != blank -%}
-        <div class="returns__image">
+        <div class="returns__image drawer-content__image">
           {{ returns_content.image | image_url: width: 600 | image_tag }}
         </div>
       {%- endif -%}
@@ -74,115 +76,14 @@
 </div>
 
 {% stylesheet %}
-  .drawer-14-days-free-returns {
-    padding: 20px;
-  }
-  
-  .returns__content {
+  .drawer-14-days-free-returns .returns__text-content {
     display: flex;
     flex-direction: column;
-    height: 100%;
-  }
-  
-  .returns__text-content {
     flex: 1;
   }
-  
-  .returns__image {
+  .drawer-14-days-free-returns .drawer-content__accordions,
+  .drawer-14-days-free-returns .returns__image {
+    margin-bottom: 0px;
     margin-top: auto;
-    text-align: center;
-  }
-  
-  .returns__image img {
-    max-width: 100%;
-    height: auto;
-  }
-  
-  .returns__title {
-    margin-bottom: 15px;
-    color: #000;
-    font-family: 'Portrait LS';
-    font-size: 32px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 36px;
-  }
-  
-  .returns__description {
-    margin-bottom: 20px;
-    color: #000;
-    font-family: Inter;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 22px;
-  }
-  
-  .returns__link {
-    margin-bottom: 20px;
-  }
-  
-  .returns__link a {
-    color: #000;
-    text-decoration: underline;
-    font-family: Inter;
-    font-size: 14px;
-    font-weight: 400;
-  }
-  
-  .returns__link a:hover {
-    text-decoration: none;
-  }
-  
-  .returns__accordions {
-    margin-bottom: 20px;
-  }
-  
-  .returns__accordion {
-    margin-bottom: 10px;
-  }
-  
-  .returns__accordion:last-child {
-    margin-bottom: 0;
-  }
-  
-  .returns__accordion .accordion {
-    border: 1px solid #e5e5e5;
-    border-radius: 8px;
-  }
-  
-  .returns__accordion .accordion__title {
-    padding: 15px;
-    cursor: pointer;
-    font-family: Inter;
-    font-size: 14px;
-    font-weight: 500;
-    color: #000;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .returns__accordion .accordion__title::after {
-    content: '+';
-    font-size: 20px;
-    transition: transform 0.3s ease;
-  }
-  
-  .returns__accordion .accordion[open] > .accordion__title::after {
-    transform: rotate(45deg);
-  }
-  
-  .returns__accordion .accordion__content {
-    padding: 0 15px 15px;
-    font-family: Inter;
-    font-size: 14px;
-    line-height: 1.6;
-    color: #333;
-  }
-  
-  .returns__default {
-    text-align: center;
-    padding: 40px 20px;
   }
 {% endstylesheet %}
