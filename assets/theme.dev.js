@@ -3489,6 +3489,9 @@
             this.desktop = this.querySelector('[data-header-desktop]');
             this.body = document.body;
             this.isCollectionTemplate = this.body.classList.contains('template-collection');
+            this.isSpotlightCollectionTemplate =
+              this.isCollectionTemplate &&
+              Boolean(document.querySelector('.main-content--collection-spotlight, .collection--spotlight'));
             this.deadLinks = document.querySelectorAll('.navlink[href="#"]');
             this.resizeObserver = null;
             this.headerHideLayerTimeout = null;
@@ -3634,7 +3637,7 @@
             const goingDown = Boolean(e?.detail?.down);
             const goingUp = Boolean(e?.detail?.up);
 
-            if (this.isCollectionTemplate) {
+            if (this.isCollectionTemplate && !this.isSpotlightCollectionTemplate) {
               if (atTop) {
                 this.body.classList.remove('header-scroll-hide');
                 this.resetHeaderLayerHide();

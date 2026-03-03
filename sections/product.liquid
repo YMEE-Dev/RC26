@@ -1,6 +1,16 @@
 <!-- /sections/product.liquid -->
+{%- liquid
+  assign product_title_downcase = product.handle | downcase | strip
+  assign product_title_prefix = product_title_downcase | slice: 0, 3
+-%}
 
-{%- render 'product' -%}
+{%- if product_title_prefix == 'st-' -%}
+  <script>
+    window.location.replace('{{ routes.root_url }}');
+  </script>
+{%- else -%}
+  {%- render 'product' -%}
+{%- endif -%}
 
 {% schema %}
 {
