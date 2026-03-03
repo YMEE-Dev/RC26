@@ -1128,12 +1128,21 @@
                       var canPrev = embla.canScrollPrev();
                       var canNext = embla.canScrollNext();
 
+                      if (hasIntroStage && carouselStarted && selectedIndex === 0) {
+                        canPrev = true;
+                      }
+
                       if (prevBtn) prevBtn.disabled = !canPrev;
                       if (nextBtn) nextBtn.disabled = !canNext;
                     }
 
                     prevBtn && prevBtn.addEventListener('click', function (e) {
                       e.preventDefault();
+                      if (hasIntroStage && carouselStarted && embla.selectedScrollSnap() === 0) {
+                        setCarouselStarted(false);
+                        updateArrows();
+                        return;
+                      }
                       if (hasIntroStage && carouselStarted && embla.selectedScrollSnap() === 1) {
                         setCarouselStarted(false);
                         updateArrows();
