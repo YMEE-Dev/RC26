@@ -17,8 +17,29 @@
   assign columns_small = 2
   assign column_count = limit | at_most: 4
   assign current_collection = blank
+  assign assigned_related_collection = blank
+  assign assigned_related_collection_value = blank
 
-  if product.collections != blank
+  if product.metafields.custom.collection != blank
+    assign assigned_related_collection_value = product.metafields.custom.collection.value
+
+    if assigned_related_collection_value != blank
+      if assigned_related_collection_value.products != blank
+        assign assigned_related_collection = assigned_related_collection_value
+      endif
+
+      if assigned_related_collection == blank
+        assign assigned_related_collection_handle = assigned_related_collection_value | handleize
+        assign assigned_related_collection = collections[assigned_related_collection_handle]
+      endif
+    endif
+  endif
+
+  if assigned_related_collection != blank
+    assign current_collection = assigned_related_collection
+  endif
+
+  if current_collection == blank and product.collections != blank
     for assigned_collection in product.collections
       if assigned_collection.handle != 'all'
         assign current_collection = assigned_collection
@@ -241,10 +262,17 @@
     gap: 30px;
     padding: 0;
     margin: 0;
+    overflow: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  #RelatedProducts--{{ section.id }} .tabs::-webkit-scrollbar {
+    display: none;
   }
   #RelatedProducts--{{ section.id }} .tabs .tab-link {
     padding: 0;
     margin: 0;
+    flex-shrink: 0;
   }
   #RelatedProducts--{{ section.id }} .tabs .tab-link span {
     padding-bottom: 10px;
@@ -330,7 +358,7 @@
         >
           <div class="grid__heading-holder{% if heading_alignment == 'text-left' %} grid__heading-holder--left{% endif %}">
             <native-scrollbar class="grid__heading-actions">
-              <ul class="tabs {{ heading_alignment }}" data-scrollbar data-scrollbar-slider>
+              <ul class="tabs {{ heading_alignment }}">
                 {%- if related -%}
                   <li class="tab-link tab-link-0{% if related %} current{% endif %}" data-tab="0" tabindex="0">
                     <span>More {{ current_collection_display_title | escape }}</span>
