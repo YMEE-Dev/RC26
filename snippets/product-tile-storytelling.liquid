@@ -70,7 +70,11 @@
   data-product-available="{{ product.available }}"
   style="{{ grid_item_styles }} grid-row: span 1;"
 >
-  <div class="grid-media__media-wrapper">
+  <div
+    class="grid-media__media-wrapper"
+    data-storytelling-modal-trigger
+    data-storytelling-modal-target="{{ modal_id }}"
+  >
     {%- if has_video and first_media.media_type == 'video' -%}
       <video
         class="custom-autoplay-video"
@@ -208,6 +212,11 @@
       return document.getElementById(modalId);
     };
 
+    const getTriggersByModalId = (modalId) => {
+      if (!modalId) return [];
+      return Array.from(document.querySelectorAll(`[data-storytelling-modal-target="${modalId}"]`));
+    };
+
     const refreshModalSliders = (modal) => {
       if (!modal) return;
 
@@ -307,12 +316,19 @@
         document.dispatchEvent(new CustomEvent('theme:scroll:unlock', { bubbles: true }));
       }
 
-      const trigger = document.querySelector(`[data-storytelling-modal-target="${modal.id}"]`);
-      if (!trigger) return;
+      const triggers = getTriggersByModalId(modal.id);
+      if (!triggers.length) return;
 
-      trigger.setAttribute('aria-expanded', 'false');
+      triggers.forEach((trigger) => {
+        trigger.setAttribute('aria-expanded', 'false');
+      });
+
       if (shouldRestoreFocus) {
-        trigger.focus();
+        const focusableTrigger = triggers.find((trigger) =>
+          trigger.matches('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+        );
+
+        (focusableTrigger || triggers[0]).focus();
       }
     };
 
@@ -352,7 +368,9 @@
       }
 
       document.dispatchEvent(new CustomEvent('theme:scroll:lock', { bubbles: true }));
-      trigger.setAttribute('aria-expanded', 'true');
+      getTriggersByModalId(modal.id).forEach((modalTrigger) => {
+        modalTrigger.setAttribute('aria-expanded', 'true');
+      });
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
