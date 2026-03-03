@@ -872,14 +872,18 @@
         border-color: #000;
       }
       
-      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart] {
+      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart],
+      #MainProduct--{{ section.id }} .product__submit__buttons .btn[data-popup-open],
+      #MainProduct--{{ section.id }} .product__collection-link {
         font-size: var(--BTN-FONT-SIZE);
         font-weight: var(--BTN-FONT-WEIGHT);
         line-height: var(--BTN-LINE-HEIGHT);
         letter-spacing: var(--BTN-LETTER-SPACING);
         text-transform: uppercase;
       }
-      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart]:hover {
+      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart]:hover,
+      #MainProduct--{{ section.id }} .product__submit__buttons .btn[data-popup-open]:hover,
+      #MainProduct--{{ section.id }} .product__collection-link:hover {
         border-color: var(--btn-border);
         background-color: #27574D;
         color: #fff;
@@ -894,7 +898,8 @@
         transition: fill 0.3s ease;
       }
 
-      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart]:hover .btn__icon path {
+      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart]:hover .btn__icon path,
+      #MainProduct--{{ section.id }} .product__submit__buttons .btn[data-popup-open]:hover .btn__icon path {
         fill: #fff;
       }
 
