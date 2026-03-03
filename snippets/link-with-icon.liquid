@@ -21,7 +21,7 @@
     icon: 'icon-nav-arrow-right',
     icon_position: 'right',
     content_alignment: 'between',
-    text_margin_bottom: 15
+    text_margin_bottom: 10
   %}
 {% enddoc %}
 
@@ -59,7 +59,7 @@
     endunless
   endif
 
-  assign text_margin_bottom_value = text_margin_bottom | default: 10
+  assign text_margin_bottom_value = text_margin_bottom | default: 15
 -%}
 
 {%- if has_url -%}
@@ -113,7 +113,6 @@
     color: inherit;
     font: inherit;
     cursor: pointer;
-    margin-bottom: var(--text-margin-bottom, 0);
   }
 
   .link-with-icon--icon-right {
@@ -150,5 +149,6 @@
     font-weight: var(--FONT-WEIGHT-BODY);
     letter-spacing: var(--LETTER-SPACING-BODY);
     text-transform: uppercase;
+    margin-bottom: var(--text-margin-bottom, 0);
   }
 {% endstylesheet %}

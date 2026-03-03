@@ -12,6 +12,7 @@
   assign sub_collections = linklists[collection.handle].links
   assign sub_collection_links_limit = 6
   assign has_active_subcollection_link = false
+  assign view_all_collection_url = collection.url
 
   if collection.handle contains '-'
     assign possible_parent_handle = collection.handle | split: '-' | first
@@ -19,6 +20,7 @@
 
     if possible_parent_collection != blank
       assign has_active_subcollection_link = true
+      assign view_all_collection_url = possible_parent_collection.url
     endif
   endif
 
@@ -188,7 +190,7 @@
       <nav class="collection__nav {{ align_classes }}" data-collection-nav>
         <div class="availability_filter-wrapper" data-availability-filter>
           <a
-            href="{{ collection.url | split: '-' | first }}"
+            href="{{ view_all_collection_url }}"
             type="button"
             class="availability-filter__button navlink{% unless has_active_subcollection_link %} is-active{% endunless %}"
             data-availability-view-all
@@ -209,9 +211,9 @@
               type="checkbox"
               class="availability-filter__checkbox"
               data-availability-filter-checkbox
-              aria-label="In Stock"
+              aria-label="Available now"
             >
-            <span>In Stock</span>
+            <span>Available now</span>
           </label>
           {%- if enable_filters -%}
             {%- liquid

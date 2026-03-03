@@ -1,8 +1,4 @@
 {%- assign section_id = unique | default: section.id -%}
-{%- assign pdp_sticky_price_enabled = false -%}
-{%- if pdp_sticky_price and template.name == 'product' -%}
-  {%- assign pdp_sticky_price_enabled = true -%}
-{%- endif -%}
 
 <div
   class="product__block block-padding"
@@ -21,8 +17,7 @@
         use_variant: true,
         show_badges: true,
         price_font_size: block.settings.text_font_size,
-        price_class: 'price--large',
-        pdp_sticky_price: pdp_sticky_price_enabled
+        price_class: 'price--large'
       -%}
     </div>
 

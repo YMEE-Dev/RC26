@@ -270,7 +270,7 @@
         #MainProduct--{{ section.id }} .product__content-columns {
           display: grid;
           grid-template-columns: 7fr 3fr;
-          gap: 50px;
+          gap: var(--inner);
           align-items: start;
         }
 
@@ -315,10 +315,9 @@
           line-height: var(--LINE-HEIGHT-BODY);
           color: var(--COLOR-TEXT-DARK);
         }
-        
+
         #MainProduct--{{ section.id }} .product__description {
-          max-width: 80%;
-          margin-bottom: 65px;
+          max-width: 60ch;
         }
 
         #MainProduct--{{ section.id }} .product__content-columns__aside {
@@ -330,7 +329,7 @@
 
         #MainProduct--{{ section.id }} .product__content-columns__aside .product__block--buttons {
           margin-top: calc(var(--pdp-sticky-bar-height, 100px) * -1 / 1.4);
-          margin-bottom: 10px;
+          margin-bottom: 30px;
         }
       }
 
@@ -348,19 +347,6 @@
           padding-left: var(--inner);
           padding-right: var(--inner);
         }
-      }
-
-      #MainProduct--{{ section.id }} .product__content-columns__aside .product__text .product__heading {
-        font-size: var(--font-body-small);
-        font-family: var(--FONT-STACK-BODY);
-        font-style: var(--FONT-STYLE-BODY);
-        font-weight: var(--FONT-WEIGHT-BODY);
-        letter-spacing: var(--LETTER-SPACING-BODY);
-        text-transform: uppercase;
-      }
-
-      #MainProduct--{{ section.id }} .product__content-columns__aside .product__submit__buttons button[type="submit"] {
-        margin-top: 0px;
       }
 
       #MainProduct--{{ section.id }} .product__page {
@@ -1745,8 +1731,7 @@
                     product: product,
                     block: price_block,
                     block_style: price_block_style,
-                    onboarding_product: onboarding_product,
-                    pdp_sticky_price: true
+                    onboarding_product: onboarding_product
                   -%}
                 {%- endif -%}
               </div>
@@ -2381,58 +2366,6 @@
                       {%- endif -%}
                     {%- endfor -%}
 
-                    {%- comment -%} Custom drawer blocks {%- endcomment -%}
-                    <div class="product__block product__custom-drawers-row">
-                      <div class="product__custom-drawer">
-                        {% render 'link-with-icon',
-                          text: 'Ask your concierge',
-                          drawer_open: 'ask-concierge',
-                          icon: 'icon-ask-our-concierge',
-                          icon_position: 'left',
-                          content_alignment: 'right'
-                        %}
-                      </div>
-                      
-                      <div class="product__custom-drawer">
-                        {% render 'link-with-icon',
-                          text: 'Send a hint',
-                          drawer_open: 'send-hint',
-                          icon: 'icon-send-hint',
-                          icon_position: 'left',
-                          content_alignment: 'right'
-                        %}
-                      </div>
-                    </div>
-
-                    <style>
-                      .product__custom-drawers-row {
-                        display: flex;
-                        gap: 25px;
-                        width: 100%;
-                        margin-bottom: 50px;
-                        margin-top: 30px;
-                      }
-                      
-                      .product__custom-drawer {
-                        flex: 0 0 auto;
-                      }
-                      
-                      .product__custom-drawer .link-with-icon {
-                        width: 100%;
-                        justify-content: flex-start;
-                      }
-                    </style>
-
-                    <div class="product__block product__text text-left">
-                      <p class="product__heading">
-                        {{ 'products.product.ecommerce_experience' | t }}
-                      </p>
-                    </div>
-
-                    <div class="divider-holder block-padding">
-                      <hr class="divider">
-                    </div>
-
                     {%- for block in side_drawer_blocks -%}
                       {%- liquid
                         assign drawer_id = block.settings.drawer_id | strip | handleize
@@ -2536,42 +2469,3 @@
     <span class="underlay drawer__underlay" data-drawer-underlay></span>
   </side-drawer>
 {%- endfor -%}
-
-{%- comment -%} Custom drawers {%- endcomment -%}
-<side-drawer
-  class="drawer"
-  data-drawer="ask-concierge"
-  id="side-drawer-ask-concierge"
-  data-drawer-size="30%"
-  data-drawer-direction="right-to-left"
->
-  <div class="drawer__inner" data-drawer-inner>
-    <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
-      {% render 'icon-close' %}
-    </button>
-
-    <div class="drawer__body">
-      {% render 'drawer-ask-concierge' %}
-    </div>
-  </div>
-  <span class="underlay drawer__underlay" data-drawer-underlay></span>
-</side-drawer>
-
-<side-drawer
-  class="drawer"
-  data-drawer="send-hint"
-  id="side-drawer-send-hint"
-  data-drawer-size="30%"
-  data-drawer-direction="right-to-left"
->
-  <div class="drawer__inner" data-drawer-inner>
-    <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
-      {% render 'icon-close' %}
-    </button>
-
-    <div class="drawer__body">
-      {% render 'drawer-send-hint' %}
-    </div>
-  </div>
-  <span class="underlay drawer__underlay" data-drawer-underlay></span>
-</side-drawer>

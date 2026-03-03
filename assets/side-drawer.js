@@ -61,6 +61,7 @@
       this.showDrawer = this.showDrawer.bind(this);
       this.hideDrawer = this.hideDrawer.bind(this);
 
+      SideDrawer.ensureStyles();
       this.applyLayoutOptions();
 
       this.connectDrawer();
@@ -128,22 +129,175 @@
     }
 
     static ensureStyles() {
-      return;
-    }
+      if (document.getElementById(STYLE_ID)) return;
 
-    static closeOtherDrawers(activeDrawer) {
-      const drawers = document.querySelectorAll(selectors.drawers);
+      const style = document.createElement('style');
+      style.id = STYLE_ID;
+      style.textContent = `
+        side-drawer .drawer__inner {
+          left: auto;
+          right: 100%;
+          top: 0;
+          z-index: 6001;
+          pointer-events: auto;
+          transform: translateZ(0);
+          will-change: transform, opacity;
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+          contain: paint;
+          width: var(--side-drawer-width, var(--DRAWER-WIDTH));
+          max-width: var(--side-drawer-width, var(--DRAWER-WIDTH));
+          height: 100%;
+        }
 
-      drawers.forEach((drawer) => {
-        if (drawer === activeDrawer) return;
-        if (!drawer.classList.contains(classes.open) && !drawer.classList.contains(classes.closing)) return;
+        side-drawer .drawer__close {
+          position: absolute;
+          top: 40px;
+          right: 40px;
+          z-index: 6002;
+        }
 
-        drawer.dispatchEvent(
-          new CustomEvent('theme:drawer:close', {
-            bubbles: true,
-          })
-        );
-      });
+        side-drawer.side-drawer--from-right.is-open .drawer__inner {
+          animation: sideDrawerInFromRight var(--side-drawer-duration, 0.45s) cubic-bezier(0.22, 1, 0.36, 1);
+          animation-fill-mode: forwards;
+        }
+
+        side-drawer.side-drawer--from-right.is-closing .drawer__inner {
+          animation: sideDrawerOutToRight var(--side-drawer-close-duration, 0.52s) cubic-bezier(0.4, 0, 0.2, 1);
+          animation-fill-mode: forwards;
+        }
+
+        side-drawer.side-drawer--from-left .drawer__inner {
+          left: 100%;
+          right: auto;
+          border-left: 0;
+          border-right: 1px solid var(--border);
+        }
+
+        side-drawer.side-drawer--from-left.is-open .drawer__inner {
+          animation: sideDrawerInFromLeft var(--side-drawer-duration, 0.45s) cubic-bezier(0.22, 1, 0.36, 1);
+          animation-fill-mode: forwards;
+        }
+
+        side-drawer.side-drawer--from-left.is-closing .drawer__inner {
+          animation: sideDrawerOutToLeft var(--side-drawer-close-duration, 0.52s) cubic-bezier(0.4, 0, 0.2, 1);
+          animation-fill-mode: forwards;
+        }
+
+        side-drawer.side-drawer--from-bottom .drawer__inner {
+          right: 0;
+          left: 0;
+          top: 100%;
+          width: 100%;
+          max-width: 100%;
+          height: var(--side-drawer-height, 60vh);
+          border-left: 0;
+          border-top: 1px solid var(--border);
+        }
+
+        side-drawer.side-drawer--from-bottom.is-open .drawer__inner {
+          animation: sideDrawerInFromBottom var(--side-drawer-duration, 0.45s) cubic-bezier(0.22, 1, 0.36, 1);
+          animation-fill-mode: forwards;
+        }
+
+        side-drawer.side-drawer--from-bottom.is-closing .drawer__inner {
+          animation: sideDrawerOutToBottom var(--side-drawer-close-duration, 0.52s) cubic-bezier(0.4, 0, 0.2, 1);
+          animation-fill-mode: forwards;
+        }
+
+        @keyframes sideDrawerInFromRight {
+          from {
+            opacity: 0;
+            transform: translate3d(0, 0, 0);
+            visibility: hidden;
+          }
+
+          to {
+            opacity: 1;
+            transform: translate3d(100%, 0, 0);
+            visibility: unset;
+          }
+        }
+
+        @keyframes sideDrawerOutToRight {
+          from {
+            opacity: 1;
+            transform: translate3d(100%, 0, 0);
+            visibility: unset;
+          }
+
+          to {
+            opacity: 0;
+            transform: translate3d(0, 0, 0);
+            visibility: hidden;
+          }
+        }
+
+        @keyframes sideDrawerInFromLeft {
+          from {
+            opacity: 0;
+            transform: translate3d(0, 0, 0);
+            visibility: hidden;
+          }
+
+          to {
+            opacity: 1;
+            transform: translate3d(-100%, 0, 0);
+            visibility: unset;
+          }
+        }
+
+        @keyframes sideDrawerOutToLeft {
+          from {
+            opacity: 1;
+            transform: translate3d(-100%, 0, 0);
+            visibility: unset;
+          }
+
+          to {
+            opacity: 0;
+            transform: translate3d(0, 0, 0);
+            visibility: hidden;
+          }
+        }
+
+        @keyframes sideDrawerInFromBottom {
+          from {
+            opacity: 0;
+            transform: translate3d(0, 0, 0);
+            visibility: hidden;
+          }
+
+          to {
+            opacity: 1;
+            transform: translate3d(0, -100%, 0);
+            visibility: unset;
+          }
+        }
+
+        @keyframes sideDrawerOutToBottom {
+          from {
+            opacity: 1;
+            transform: translate3d(0, -100%, 0);
+            visibility: unset;
+          }
+
+          to {
+            opacity: 0;
+            transform: translate3d(0, 0, 0);
+            visibility: hidden;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          side-drawer.is-open .drawer__inner,
+          side-drawer.is-closing .drawer__inner {
+            animation-duration: 0.01ms;
+          }
+        }
+      `;
+
+      document.head.appendChild(style);
     }
 
     normalizeSizeValue(sizeValue) {
@@ -163,7 +317,7 @@
     }
 
     applyLayoutOptions() {
-      const direction = (this.dataset.drawerDirection || 'right-to-left').trim().toLowerCase();
+      const direction = (this.dataset.drawerDirection || 'left-to-right').trim().toLowerCase();
       const normalizedSize = this.normalizeSizeValue(this.dataset.drawerSize);
 
       this.classList.remove('side-drawer--from-right', 'side-drawer--from-left', 'side-drawer--from-bottom');
@@ -268,8 +422,6 @@
       if (this.isAnimating) return;
 
       this.isAnimating = true;
-
-      SideDrawer.closeOtherDrawers(this);
 
       this.triggerButton?.setAttribute('aria-expanded', true);
       this.classList.add(classes.open, classes.animated);

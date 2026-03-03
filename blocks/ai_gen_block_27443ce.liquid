@@ -1,0 +1,908 @@
+{% doc %}
+  @prompt
+    Create a luxury editorial-style section titled “Our Commitments” with a clean, minimal, high-end jewelry aesthetic.
+    
+    Layout Structure:
+    
+    Add a centered introductory paragraph at the top.
+    
+    Maximum width: 800px
+    
+    Text aligned center
+    
+    Elegant spacing above and below (large vertical spacing)
+    
+    Refined, minimal typography (thin or medium weight serif for headings, clean body font)
+    
+    Below the intro, create a 2 × 2 grid layout (two columns, two rows):
+    
+    Grid Row 1:
+    
+    Left column: Image (Kimberley Process related visual)
+    
+    Right column: Text block
+    
+    Heading: “The Kimberley Process”
+    
+    Paragraph below heading
+    
+    Grid Row 2:
+    
+    Left column: Text block
+    
+    Heading: “Responsible Jewellery Council”
+    
+    Paragraph below heading
+    
+    Right column: Image (Responsible Jewellery Council related visual)
+    
+    Grid requirements:
+    
+    Two equal-width columns (1fr 1fr)
+    
+    Large horizontal gap (around 60–80px)
+    
+    Large vertical spacing between rows
+    
+    Vertically center text with images
+    
+    Keep everything balanced and symmetrical
+    
+    Images should be responsive and scale proportionally
+    
+    No borders, no shadows — clean editorial style
+    
+    Below this section, create a full-width light grey background section:
+    
+    Left side: Large image
+    
+    Right side: Text block with heading “Associations & Organizations”
+    
+    Under heading: vertical list of association names
+    
+    Simple clean list styling (no bullets)
+    
+    Generous spacing between items
+    
+    At the bottom of the grey section:
+    
+    Add a centered outlined button
+    
+    Text: “View More Ethical Initiatives”
+    
+    Thin black border
+    
+    Uppercase letters
+    
+    Letter spacing for luxury feel
+    
+    Hover state: black background, white text
+    
+    Styling Guidelines:
+    
+    Luxury jewelry brand aesthetic
+    
+    Editorial, minimalist design
+    
+    Large vertical padding (100px top and bottom per section)
+    
+    No heavy colors
+    
+    Black, white, light grey palette
+    
+    Elegant spacing hierarchy
+    
+    Fully responsive (stack columns vertically on mobile)
+    
+    On mobile: maintain correct order (image above text in first row, text above image in second row)
+    
+    Do not use sliders, animations, or decorative effects.
+    Focus on structure, spacing, and typography refinement.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-commitments-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+  }
+
+  .ai-commitments-intro-{{ ai_gen_id }} {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: {{ block.settings.intro_padding_top }}px 20px {{ block.settings.intro_padding_bottom }}px;
+    text-align: center;
+  }
+
+  .ai-commitments-intro-{{ ai_gen_id }} p {
+    font-size: {{ block.settings.intro_text_size }}px;
+    line-height: 1.6;
+    color: {{ block.settings.intro_text_color }};
+    margin: 0;
+  }
+
+  .ai-commitments-grid-section-{{ ai_gen_id }} {
+    padding: {{ block.settings.grid_padding_top }}px 20px {{ block.settings.grid_padding_bottom }}px;
+    max-width: {{ block.settings.grid_max_width }}px;
+    margin: 0 auto;
+  }
+
+  .ai-commitments-grid-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: {{ block.settings.row_gap }}px {{ block.settings.column_gap }}px;
+  }
+
+  .ai-commitments-grid-item-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+  }
+
+  .ai-commitments-image-wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    position: relative;
+  }
+
+  .ai-commitments-image-wrapper-{{ ai_gen_id }} img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .ai-commitments-image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    aspect-ratio: {{ block.settings.image_aspect_ratio }};
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-commitments-image-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 300px;
+    max-height: 300px;
+  }
+
+  .ai-commitments-text-block-{{ ai_gen_id }} {
+    padding: 0 {{ block.settings.text_padding }}px;
+  }
+
+  .ai-commitments-text-block-{{ ai_gen_id }} h3 {
+    font-size: {{ block.settings.heading_size }}px;
+    line-height: 1.3;
+    color: {{ block.settings.heading_color }};
+    margin: 0 0 {{ block.settings.heading_margin_bottom }}px;
+    font-weight: {{ block.settings.heading_weight }};
+    letter-spacing: {{ block.settings.heading_letter_spacing }}px;
+  }
+
+  .ai-commitments-text-block-{{ ai_gen_id }} p {
+    font-size: {{ block.settings.body_text_size }}px;
+    line-height: 1.7;
+    color: {{ block.settings.body_text_color }};
+    margin: 0;
+  }
+
+  .ai-commitments-associations-section-{{ ai_gen_id }} {
+    background-color: {{ block.settings.associations_bg_color }};
+    padding: {{ block.settings.associations_padding_top }}px 20px {{ block.settings.associations_padding_bottom }}px;
+    margin-top: {{ block.settings.associations_margin_top }}px;
+  }
+
+  .ai-commitments-associations-container-{{ ai_gen_id }} {
+    max-width: {{ block.settings.grid_max_width }}px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: {{ block.settings.column_gap }}px;
+    align-items: center;
+  }
+
+  .ai-commitments-associations-image-{{ ai_gen_id }} {
+    width: 100%;
+  }
+
+  .ai-commitments-associations-image-{{ ai_gen_id }} img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .ai-commitments-associations-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    aspect-ratio: {{ block.settings.image_aspect_ratio }};
+    background-color: #e8e8e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-commitments-associations-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 300px;
+    max-height: 300px;
+  }
+
+  .ai-commitments-associations-content-{{ ai_gen_id }} {
+    padding: 0 {{ block.settings.text_padding }}px;
+  }
+
+  .ai-commitments-associations-content-{{ ai_gen_id }} h3 {
+    font-size: {{ block.settings.heading_size }}px;
+    line-height: 1.3;
+    color: {{ block.settings.heading_color }};
+    margin: 0 0 {{ block.settings.associations_list_spacing }}px;
+    font-weight: {{ block.settings.heading_weight }};
+    letter-spacing: {{ block.settings.heading_letter_spacing }}px;
+  }
+
+  .ai-commitments-associations-list-{{ ai_gen_id }} {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .ai-commitments-associations-list-{{ ai_gen_id }} li {
+    font-size: {{ block.settings.body_text_size }}px;
+    line-height: 1.7;
+    color: {{ block.settings.body_text_color }};
+    margin-bottom: {{ block.settings.associations_list_spacing }}px;
+  }
+
+  .ai-commitments-associations-list-{{ ai_gen_id }} li:last-child {
+    margin-bottom: 0;
+  }
+
+  .ai-commitments-button-wrapper-{{ ai_gen_id }} {
+    text-align: center;
+    margin-top: {{ block.settings.button_margin_top }}px;
+  }
+
+  .ai-commitments-button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: {{ block.settings.button_padding_vertical }}px {{ block.settings.button_padding_horizontal }}px;
+    background-color: transparent;
+    color: {{ block.settings.button_text_color }};
+    border: {{ block.settings.button_border_width }}px solid {{ block.settings.button_border_color }};
+    text-decoration: none;
+    font-size: {{ block.settings.button_text_size }}px;
+    text-transform: uppercase;
+    letter-spacing: {{ block.settings.button_letter_spacing }}px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .ai-commitments-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_bg }};
+    color: {{ block.settings.button_hover_text }};
+    border-color: {{ block.settings.button_hover_bg }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-commitments-intro-{{ ai_gen_id }} {
+      padding: {{ block.settings.intro_padding_top | times: 0.6 }}px 20px {{ block.settings.intro_padding_bottom | times: 0.6 }}px;
+    }
+
+    .ai-commitments-intro-{{ ai_gen_id }} p {
+      font-size: {{ block.settings.intro_text_size | times: 0.9 }}px;
+    }
+
+    .ai-commitments-grid-section-{{ ai_gen_id }} {
+      padding: {{ block.settings.grid_padding_top | times: 0.6 }}px 20px {{ block.settings.grid_padding_bottom | times: 0.6 }}px;
+    }
+
+    .ai-commitments-grid-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+      gap: {{ block.settings.row_gap | times: 0.7 }}px;
+    }
+
+    .ai-commitments-grid-item-{{ ai_gen_id }} {
+      flex-direction: column;
+    }
+
+    .ai-commitments-text-block-{{ ai_gen_id }} {
+      padding: {{ block.settings.text_padding | times: 0.7 }}px 0;
+    }
+
+    .ai-commitments-text-block-{{ ai_gen_id }} h3 {
+      font-size: {{ block.settings.heading_size | times: 0.85 }}px;
+    }
+
+    .ai-commitments-text-block-{{ ai_gen_id }} p {
+      font-size: {{ block.settings.body_text_size | times: 0.9 }}px;
+    }
+
+    .ai-commitments-associations-section-{{ ai_gen_id }} {
+      padding: {{ block.settings.associations_padding_top | times: 0.6 }}px 20px {{ block.settings.associations_padding_bottom | times: 0.6 }}px;
+    }
+
+    .ai-commitments-associations-container-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+      gap: {{ block.settings.row_gap | times: 0.7 }}px;
+    }
+
+    .ai-commitments-associations-content-{{ ai_gen_id }} {
+      padding: {{ block.settings.text_padding | times: 0.7 }}px 0;
+      order: 2;
+    }
+
+    .ai-commitments-associations-image-{{ ai_gen_id }} {
+      order: 1;
+    }
+
+    .ai-commitments-associations-content-{{ ai_gen_id }} h3 {
+      font-size: {{ block.settings.heading_size | times: 0.85 }}px;
+    }
+
+    .ai-commitments-associations-list-{{ ai_gen_id }} li {
+      font-size: {{ block.settings.body_text_size | times: 0.9 }}px;
+    }
+
+    .ai-commitments-button-{{ ai_gen_id }} {
+      font-size: {{ block.settings.button_text_size | times: 0.9 }}px;
+      padding: {{ block.settings.button_padding_vertical | times: 0.85 }}px {{ block.settings.button_padding_horizontal | times: 0.85 }}px;
+    }
+  }
+{% endstyle %}
+
+<div class="ai-commitments-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  {% if block.settings.intro_text != blank %}
+    <div class="ai-commitments-intro-{{ ai_gen_id }}">
+      {{ block.settings.intro_text }}
+    </div>
+  {% endif %}
+
+  <div class="ai-commitments-grid-section-{{ ai_gen_id }}">
+    <div class="ai-commitments-grid-{{ ai_gen_id }}">
+      <div class="ai-commitments-grid-item-{{ ai_gen_id }}">
+        <div class="ai-commitments-image-wrapper-{{ ai_gen_id }}">
+          {% if block.settings.kimberley_image %}
+            <img
+              src="{{ block.settings.kimberley_image | image_url: width: 1200 }}"
+              alt="{{ block.settings.kimberley_image.alt | escape }}"
+              loading="lazy"
+              width="{{ block.settings.kimberley_image.width }}"
+              height="{{ block.settings.kimberley_image.height }}"
+            >
+          {% else %}
+            <div class="ai-commitments-image-placeholder-{{ ai_gen_id }}">
+              {{ 'image' | placeholder_svg_tag }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="ai-commitments-grid-item-{{ ai_gen_id }}">
+        <div class="ai-commitments-text-block-{{ ai_gen_id }}">
+          {% if block.settings.kimberley_heading != blank %}
+            <h3>{{ block.settings.kimberley_heading }}</h3>
+          {% endif %}
+          {% if block.settings.kimberley_text != blank %}
+            {{ block.settings.kimberley_text }}
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="ai-commitments-grid-item-{{ ai_gen_id }}">
+        <div class="ai-commitments-text-block-{{ ai_gen_id }}">
+          {% if block.settings.rjc_heading != blank %}
+            <h3>{{ block.settings.rjc_heading }}</h3>
+          {% endif %}
+          {% if block.settings.rjc_text != blank %}
+            {{ block.settings.rjc_text }}
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="ai-commitments-grid-item-{{ ai_gen_id }}">
+        <div class="ai-commitments-image-wrapper-{{ ai_gen_id }}">
+          {% if block.settings.rjc_image %}
+            <img
+              src="{{ block.settings.rjc_image | image_url: width: 1200 }}"
+              alt="{{ block.settings.rjc_image.alt | escape }}"
+              loading="lazy"
+              width="{{ block.settings.rjc_image.width }}"
+              height="{{ block.settings.rjc_image.height }}"
+            >
+          {% else %}
+            <div class="ai-commitments-image-placeholder-{{ ai_gen_id }}">
+              {{ 'image' | placeholder_svg_tag }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ai-commitments-associations-section-{{ ai_gen_id }}">
+    <div class="ai-commitments-associations-container-{{ ai_gen_id }}">
+      <div class="ai-commitments-associations-image-{{ ai_gen_id }}">
+        {% if block.settings.associations_image %}
+          <img
+            src="{{ block.settings.associations_image | image_url: width: 1200 }}"
+            alt="{{ block.settings.associations_image.alt | escape }}"
+            loading="lazy"
+            width="{{ block.settings.associations_image.width }}"
+            height="{{ block.settings.associations_image.height }}"
+          >
+        {% else %}
+          <div class="ai-commitments-associations-placeholder-{{ ai_gen_id }}">
+            {{ 'image' | placeholder_svg_tag }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="ai-commitments-associations-content-{{ ai_gen_id }}">
+        {% if block.settings.associations_heading != blank %}
+          <h3>{{ block.settings.associations_heading }}</h3>
+        {% endif %}
+        {% if block.settings.association_1 != blank or block.settings.association_2 != blank or block.settings.association_3 != blank or block.settings.association_4 != blank or block.settings.association_5 != blank %}
+          <ul class="ai-commitments-associations-list-{{ ai_gen_id }}">
+            {% if block.settings.association_1 != blank %}
+              <li>{{ block.settings.association_1 }}</li>
+            {% endif %}
+            {% if block.settings.association_2 != blank %}
+              <li>{{ block.settings.association_2 }}</li>
+            {% endif %}
+            {% if block.settings.association_3 != blank %}
+              <li>{{ block.settings.association_3 }}</li>
+            {% endif %}
+            {% if block.settings.association_4 != blank %}
+              <li>{{ block.settings.association_4 }}</li>
+            {% endif %}
+            {% if block.settings.association_5 != blank %}
+              <li>{{ block.settings.association_5 }}</li>
+            {% endif %}
+          </ul>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if block.settings.button_text != blank %}
+      <div class="ai-commitments-button-wrapper-{{ ai_gen_id }}">
+        <a href="{{ block.settings.button_link }}" class="ai-commitments-button-{{ ai_gen_id }}">
+          {{ block.settings.button_text }}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Our commitments",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Introduction"
+    },
+    {
+      "type": "richtext",
+      "id": "intro_text",
+      "label": "Intro paragraph",
+      "default": "<p>We are committed to ethical sourcing and responsible practices in every aspect of our jewelry creation.</p>"
+    },
+    {
+      "type": "range",
+      "id": "intro_text_size",
+      "label": "Text size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "intro_text_color",
+      "label": "Text color",
+      "default": "#212121"
+    },
+    {
+      "type": "range",
+      "id": "intro_padding_top",
+      "label": "Top padding",
+      "min": 40,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "intro_padding_bottom",
+      "label": "Bottom padding",
+      "min": 40,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Grid section"
+    },
+    {
+      "type": "image_picker",
+      "id": "kimberley_image",
+      "label": "Kimberley Process image"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "kimberley_heading",
+      "label": "Kimberley Process heading",
+      "default": "The Kimberley Process"
+    },
+    {
+      "type": "richtext",
+      "id": "kimberley_text",
+      "label": "Kimberley Process text",
+      "default": "<p>We source only conflict-free diamonds certified under the Kimberley Process, ensuring ethical and responsible sourcing from mine to market.</p>"
+    },
+    {
+      "type": "image_picker",
+      "id": "rjc_image",
+      "label": "RJC image"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "rjc_heading",
+      "label": "RJC heading",
+      "default": "Responsible Jewellery Council"
+    },
+    {
+      "type": "richtext",
+      "id": "rjc_text",
+      "label": "RJC text",
+      "default": "<p>As members of the Responsible Jewellery Council, we uphold the highest standards of ethical, social, and environmental practices throughout our supply chain.</p>"
+    },
+    {
+      "type": "range",
+      "id": "grid_max_width",
+      "label": "Grid max width",
+      "min": 800,
+      "max": 1600,
+      "step": 50,
+      "unit": "px",
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Column gap",
+      "min": 30,
+      "max": 120,
+      "step": 10,
+      "unit": "px",
+      "default": 70
+    },
+    {
+      "type": "range",
+      "id": "row_gap",
+      "label": "Row gap",
+      "min": 40,
+      "max": 160,
+      "step": 10,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "grid_padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "grid_padding_bottom",
+      "label": "Bottom padding",
+      "min": 40,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "image_aspect_ratio",
+      "label": "Image aspect ratio",
+      "min": 0.5,
+      "max": 1.5,
+      "step": 0.1,
+      "default": 1
+    },
+    {
+      "type": "header",
+      "content": "Associations section"
+    },
+    {
+      "type": "image_picker",
+      "id": "associations_image",
+      "label": "Image"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "associations_heading",
+      "label": "Heading",
+      "default": "Associations & Organizations"
+    },
+    {
+      "type": "text",
+      "id": "association_1",
+      "label": "Association 1",
+      "default": "World Diamond Council"
+    },
+    {
+      "type": "text",
+      "id": "association_2",
+      "label": "Association 2",
+      "default": "Gemological Institute of America"
+    },
+    {
+      "type": "text",
+      "id": "association_3",
+      "label": "Association 3",
+      "default": "International Colored Gemstone Association"
+    },
+    {
+      "type": "text",
+      "id": "association_4",
+      "label": "Association 4",
+      "default": "Fairmined Gold Certification"
+    },
+    {
+      "type": "text",
+      "id": "association_5",
+      "label": "Association 5",
+      "default": "Alliance for Responsible Mining"
+    },
+    {
+      "type": "range",
+      "id": "associations_list_spacing",
+      "label": "List item spacing",
+      "min": 10,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "associations_bg_color",
+      "label": "Background color",
+      "default": "#f4f4f4"
+    },
+    {
+      "type": "range",
+      "id": "associations_padding_top",
+      "label": "Top padding",
+      "min": 40,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "associations_padding_bottom",
+      "label": "Bottom padding",
+      "min": 40,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "associations_margin_top",
+      "label": "Top margin",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "View More Ethical Initiatives"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "range",
+      "id": "button_text_size",
+      "label": "Text size",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "button_letter_spacing",
+      "label": "Letter spacing",
+      "min": 0,
+      "max": 4,
+      "step": 0.5,
+      "unit": "px",
+      "default": 1.5
+    },
+    {
+      "type": "range",
+      "id": "button_padding_vertical",
+      "label": "Vertical padding",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "button_padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 20,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "button_border_width",
+      "label": "Border width",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Border color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_bg",
+      "label": "Hover background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text",
+      "label": "Hover text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "button_margin_top",
+      "label": "Top margin",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "min": 18,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "heading_letter_spacing",
+      "label": "Heading letter spacing",
+      "min": 0,
+      "max": 4,
+      "step": 0.5,
+      "unit": "px",
+      "default": 0.5
+    },
+    {
+      "type": "range",
+      "id": "heading_margin_bottom",
+      "label": "Heading bottom margin",
+      "min": 10,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Heading weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "Light"
+        },
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semibold"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#212121"
+    },
+    {
+      "type": "range",
+      "id": "body_text_size",
+      "label": "Body text size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 15
+    },
+    {
+      "type": "color",
+      "id": "body_text_color",
+      "label": "Body text color",
+      "default": "#212121"
+    },
+    {
+      "type": "range",
+      "id": "text_padding",
+      "label": "Text block padding",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    }
+  ],
+  "presets": [
+    {
+      "name": "Our commitments"
+    }
+  ]
+}
+{% endschema %}
