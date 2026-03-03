@@ -80,6 +80,12 @@
                 {{ title }}
               </h3>
             {%- endif -%}
+            {%- if block.type == 'link' and link != blank -%}
+              {%- assign animation_order = animation_order | plus: 1 -%}
+              <div class="accordion__link">
+                {{ link }}
+              </div>
+            {%- endif -%}
 
             {%- if block.type == 'question' and title != blank and content != blank -%}
               {%- if title != blank -%}
