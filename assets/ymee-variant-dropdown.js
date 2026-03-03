@@ -477,7 +477,7 @@
           if (!placeholderEl || !optionEl) return;
           if (!userSelected) return;
           var sizeVal = optionEl.getAttribute('data-size-value') || '';
-          if (sizeVal) placeholderEl.textContent = (window.ymeeSizePrefixText || 'Size: ') + sizeVal;
+          if (sizeVal) placeholderEl.textContent = (window.ymeeSizePrefixText || 'Size: ') + ' ' + sizeVal;
         }
 
         function updateSheetFooterState() {
@@ -548,7 +548,12 @@
           if (sheetState) {
             closeSheet();
           } else {
-            menu.hidden = true;
+            root.classList.remove('is-open');
+            setTimeout(function() {
+              if (!root.classList.contains('is-open')) {
+                menu.hidden = true;
+              }
+            }, 300);
           }
           toggle.setAttribute('aria-expanded', 'false');
         }
@@ -634,6 +639,11 @@
             openSheet();
           } else {
             menu.hidden = false;
+            requestAnimationFrame(function() {
+              requestAnimationFrame(function() {
+                root.classList.add('is-open');
+              });
+            });
           }
           toggle.setAttribute('aria-expanded', 'true');
         }

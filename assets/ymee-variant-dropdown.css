@@ -54,6 +54,7 @@
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
+  max-width: 120px;
   height: 1px;
   background: var(--COLOR-TEXT, #000);
   opacity: inherit;
@@ -79,7 +80,8 @@
 }
 
 .ymee-color-picker__item {
-  display: block;
+  display: flex;
+  justify-content: center;
   cursor: pointer;
   border: none;
   padding: 0px;
@@ -99,6 +101,7 @@
 
 .ymee-color-picker__item.is-unavailable .ymee-color-picker__thumb {
   position: relative;
+  display: inline-block;
 }
 
 .ymee-color-picker__thumb {
@@ -134,6 +137,8 @@
   --btn-text-hover: #FFF; */
 
 .ymee-variant-dropdown__toggle {
+  position: relative;
+  z-index: 6;
   width: 100%;
   background: var(--btn-bg, #000);
   color: var(--btn-text, #fff);
@@ -141,10 +146,10 @@
   padding: 12px 20px;
   text-align: center;
   font: inherit;
-  font-size: var(--FONT-SIZE-LABEL, 12px);
-  font-weight: var(--FONT-WEIGHT-BODY, 400);
-    line-height: var(--LINE-HEIGHT-BODY, 18px);
-    letter-spacing: var(--LETTER-SPACING-BODY, 0.04em);
+  font-size: var(--BTN-FONT-SIZE);
+  font-weight: var(--BTN-FONT-WEIGHT);
+  line-height: var(--BTN-LINE-HEIGHT);
+  letter-spacing: var(--BTN-LETTER-SPACING);
   text-transform: uppercase;
   cursor: pointer;
   display: flex;
@@ -152,12 +157,14 @@
   justify-content: center;
   gap: 8px;
   transition:
-      background 180ms ease,
-      color 180ms ease;
+  background 180ms ease,
+  color 180ms ease;
 }
 
 .ymee-variant-dropdown__toggle:hover {
-  opacity: 0.85;
+  border-color: var(--btn-border, #000);
+  background-color: #27574D;
+  color: #fff;
 }
 
 .ymee-variant-dropdown__value[data-ymee-variant-dropdown-value] {
@@ -182,6 +189,11 @@
   border-top: 1px solid var(--border, #b0abab);
   padding: 0;
   margin: 0;
+  opacity: 0;
+  transform: translateY(100%);
+  transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1), transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  visibility: hidden;
 }
 
 @media only screen and (min-width: 1025px) {
@@ -199,6 +211,13 @@
     overflow: auto;
     scrollbar-width: thin;
     scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+  }
+
+  .ymee-variant-dropdown.is-open .ymee-variant-dropdown__menu {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    visibility: visible;
   }
 
   .ymee-variant-dropdown__menu::-webkit-scrollbar {
@@ -280,6 +299,14 @@
 
   .ymee-variant-dropdown__toggle {
     justify-content: center;
+  }
+
+  .ymee-variant-dropdown__menu {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    pointer-events: auto;
+    visibility: visible;
   }
 
   .ymee-variant-dropdown__option {
