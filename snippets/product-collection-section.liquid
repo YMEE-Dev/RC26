@@ -1,0 +1,177 @@
+{% comment %}
+  Renders collection information on product page
+  
+  @param {product} product - The current product
+{% endcomment %}
+
+{%- liquid
+  assign most_recent_stl_collection = blank
+  assign product_collection = blank
+  assign ste_products_metafield = product.metafields.custom.ste_products.value
+  assign context_collection = collection
+  
+  # First, check if there are products in custom.ste_products metafield
+  if ste_products_metafield != blank and ste_products_metafield.size > 0
+      assign most_recent_ste_product = ste_products_metafield.last
+
+      # Get the collections of this most recent product
+      if most_recent_ste_product.collections != blank
+        for ste_collection in most_recent_ste_product.collections
+          assign collection_title = ste_collection.title | strip | downcase
+          assign collection_prefix = collection_title | slice: 0, 4
+
+          if collection_prefix == 'st -'
+            assign most_recent_stl_collection = ste_collection
+          endif
+
+          if fallback_collection == blank and ste_collection.handle != 'all'
+            assign fallback_collection = ste_collection
+          endif
+        endfor
+      endif
+  endif
+  
+  # Get the product's main collection for title and description
+  if product.collections != blank
+    assign product_collection = product.collections.first
+  endif
+
+  if product_collection == blank and context_collection != blank
+    assign product_collection = context_collection
+  endif
+-%}
+
+{%- liquid
+  # Use product collection for title and description
+  assign display_title = product_collection.title | default: product.title
+  assign display_description = product_collection.description
+  
+  # Use most recent STL collection for image if available, otherwise product collection image
+  if most_recent_stl_collection != blank
+    assign display_image = most_recent_stl_collection.image
+    assign display_url = most_recent_stl_collection.url
+  else
+    assign display_image = product_collection.image
+    assign display_url = product_collection.url
+  endif
+
+  assign cta_text = product.metafields.custom.ste_cta | default: 'Shop the look'
+  if most_recent_stl_collection == blank
+    assign cta_text = 'Shop collection'
+  endif
+-%}
+
+<div class="product__collection-section block-padding" style="--block-padding-bottom: 65px;">
+  {%- if display_image != blank -%}
+      <div class="product__collection-image">
+        {%- render 'image',
+          image: display_image,
+          widths: '720, 960, 1200, 1500, 1800',
+          sizes: '(min-width: 990px) calc((100vw - var(--outer) * 2) * 0.7), 100vw',
+          class: 'collection-image'
+        -%}
+
+        <a
+          href="{{ display_url }}"
+          class="product__collection-link btn btn--solid btn--black btn--ar product-shop-the-look"
+          aria-label="{{ cta_text | strip_html | escape }}"
+        >
+          <span class="product-shop-the-look-text">{{ cta_text }}</span>
+        </a>
+      </div>
+  {%- endif -%}
+
+  <div class="product__collection-info">
+    <h2 class="product__collection-title">{{ display_title }}</h2>
+    {%- if display_description != blank -%}
+        <div class="product__collection-description rte">
+          {{ display_description }}
+        </div>
+    {%- endif -%}
+  </div>
+ </div>
+  
+  <style>
+    .product__collection-section {
+      margin-top: 80px;
+      --aspect-ratio: 1; /* 1:1 for square */
+    }
+
+    .product__collection-image {
+      position: relative;
+      overflow: clip;
+      background: #e8e8e8;
+    }
+
+    .product__collection-image .image-wrapper {
+
+      width: 100%;
+      height: 0;
+      padding-top: calc(1 / var(--aspect-ratio) * 100%);
+    }
+
+    .product__collection-image .image-wrapper img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      image-rendering: auto;
+    }
+
+    .product__collection-title {
+      font-family: var(--FONT-STACK-HEADING);
+      font-style: var(--FONT-STYLE-HEADING);
+      font-weight: var(--FONT-WEIGHT-HEADING);
+      font-size: var(--LINE-HEIGHT-DISPLAY-S);
+      line-height: var(--LINE-HEIGHT-DISPLAY-M);
+      letter-spacing: 0;
+      text-transform: capitalize;
+      color: var(--COLOR-TEXT-DARK);
+      margin: 40px 0 20px;
+    }
+
+    .product__collection-description {
+      font-family: var(--FONT-STACK-BODY);
+      font-style: var(--FONT-STYLE-BODY);
+      font-weight: var(--FONT-WEIGHT-BODY);
+      font-size: var(--FONT-SIZE-BASE);
+      line-height: var(--LINE-HEIGHT-BODY);
+      color: var(--COLOR-TEXT-DARK);
+      max-width: 78ch;
+      margin-bottom: 0;
+    }
+
+    .product__collection-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: auto;
+      border: 0;
+      text-decoration: none;
+      position: absolute;
+      right: 15px;
+      bottom: 20px;
+    }
+
+    @media (max-width: 767px) {
+      .product__collection-section {
+        margin-top: 40px;
+        padding-left: var(--inner);
+        padding-right: var(--inner);
+      }
+
+      .product__collection-title {
+        margin-top: 22px;
+        font-size: clamp(2rem, 9vw, 2.75rem);
+      }
+
+      .product__collection-link {
+        right: 50%;
+        bottom: 20px;
+        transform: translateX(50%);
+      }
+    }
+  </style>
