@@ -322,9 +322,12 @@
         }
 
         #MainProduct--{{ section.id }} .product__content-columns__aside {
+          position: -webkit-sticky;
           position: sticky;
-          top: calc(var(--header-height, 0px) + var(--announcement-height, 0px));
+          top: var(--sticky-top, calc(var(--header-height, 0px) + var(--announcement-height, 0px)));
           align-self: start;
+          height: max-content;
+          overflow: visible;
           z-index: 9;
         }
 
