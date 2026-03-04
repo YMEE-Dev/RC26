@@ -47,7 +47,7 @@
     }
 
     /* Background image — fixed so it persists through history section on scroll */
-    .hero__bg {
+    .rc-heritage-page .hero__bg {
       position: fixed;
       inset: 0;
       background: url('{{ 'figma-images/hero-bg.jpg' | asset_url }}') center / cover no-repeat;
@@ -56,7 +56,7 @@
     }
 
     /* Vignette — also fixed, sits on top of bg layer */
-    .hero__vignette {
+    .rc-heritage-page .hero__vignette {
       position: fixed;
       inset: 0;
       z-index: -1;
@@ -155,6 +155,11 @@
     @keyframes hero-star-fade {
       0%, 100% { opacity: 0; }
       50% { opacity: 0.03; }
+    }
+    @keyframes hero-star-diagonal-wave {
+      0%, 100% { opacity: 0; }
+      40% { opacity: 0.05; }
+      65% { opacity: 0.02; }
     }
     @keyframes hero-flower-float {
       0%, 100% { transform: scale(1); opacity: 0.95; }
@@ -592,6 +597,7 @@
       width: min(1232px, calc(100% - 48px));
       min-height: 700px;
       background: url('{{ 'figma-images/ruby-section.jpg' | asset_url }}') center / cover no-repeat;
+      background-position: center calc(50% + 30px);
     }
     .ruby-section__content {
       width: min(380px, 38%);
@@ -613,9 +619,12 @@
     }
     .ruby-section__gem {
       display: none;
+      position: relative;
+      z-index: 2;
     }
     .ruby-section__gem img {
       width: min(366px, 80%);
+      height: auto;
       filter: drop-shadow(0 20px 60px rgba(179,38,30,0.5));
     }
 
@@ -640,7 +649,8 @@
       position: absolute;
       left: 0;
       right: 0;
-      bottom: -160px;
+      bottom: -310px;
+      transform: translateX(200px);
       z-index: 1;
       pointer-events: none;
       mix-blend-mode: multiply;
@@ -666,6 +676,23 @@
       width: 100vw;
       margin-left: calc(50% - 50vw);
       margin-right: calc(50% - 50vw);
+      isolation: isolate;
+    }
+    .timeline-transition::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: -220px;
+      height: 260px;
+      pointer-events: none;
+      z-index: -1;
+      background: linear-gradient(
+        to bottom,
+        rgba(67, 31, 24, 0.98) 0%,
+        rgba(67, 31, 24, 0.78) 42%,
+        rgba(67, 31, 24, 0) 100%
+      );
     }
     .timeline-transition__shape-svg {
       position: absolute;
@@ -675,50 +702,41 @@
       width: 100vw;
       max-width: none;
       height: auto;
-      z-index: 2;
+      z-index: 0;
       pointer-events: none;
       opacity: 0.98;
-      mix-blend-mode: normal;
     }
     .timeline-transition__shape-base {
       fill: url(#timeline-transition-shape-texture);
     }
     .timeline-transition__shape-overlay {
       fill: var(--timeline-ruby-red);
-      mix-blend-mode: multiply;
       opacity: 0.92;
     }
     .timeline-transition__flower-red-svg {
       position: absolute;
       left: 50%;
-      top: calc(clamp(26px, 4.2vw, 72px) - 500px);
+      top: calc(clamp(26px, 4.2vw, 72px) - 550px);
       transform: translateX(-50%);
       width: 100vw;
       max-width: none;
       height: auto;
-      z-index: 2;
+      z-index: 0;
       pointer-events: none;
-      mix-blend-mode: multiply;
       opacity: 0.95;
     }
     .timeline-transition__flower-svg {
       position: absolute;
       left: 50%;
-      top: calc(clamp(26px, 4.2vw, 72px) - 500px);
+      top: calc(clamp(26px, 4.2vw, 72px) - 550px);
       transform: translateX(-50%);
       width: 100vw;
       max-width: none;
       height: auto;
-      z-index: 3;
+      z-index: 0;
       pointer-events: none;
-      mix-blend-mode: normal;
     }
-    .timeline-transition__flower-svg .flower-red {
-      mix-blend-mode: multiply;
-    }
-    .timeline-transition__flower-svg .flower-green {
-      mix-blend-mode: normal;
-    }
+    .timeline-transition__flower-svg { mix-blend-mode: normal !important; }
     .rebranding {
       position: relative;
       background: transparent;
@@ -759,7 +777,7 @@
       position: relative;
       max-width: 1120px;
       margin: 0 auto;
-      padding: 0 56px;
+      padding: 0 20px;
       overflow: visible;
     }
     .timeline__spine {
@@ -788,7 +806,7 @@
       grid-template-columns: 1fr 70px 1fr;
       align-items: start;
       row-gap: 0px;
-      margin-bottom: 125px;
+      margin-bottom: 175px;
       opacity: 0;
       transition: opacity 0.6s ease;
     }
@@ -875,7 +893,102 @@
       border-bottom:1px solid rgba(0,0,0,0.35); padding-bottom:2px;
     }
     .tl-media img { width:100%; max-width:368px; height:auto; object-fit:cover; }
+    @media (min-width:768px) {
+      .hero__star-pattern {
+        --pattern-step-x: 78px;
+        --pattern-step-y: 68px;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        display: grid;
+        grid-template-columns: repeat(30, var(--pattern-step-x));
+        grid-auto-rows: var(--pattern-step-y);
+        justify-content: center;
+        align-content: start;
+        justify-items: center;
+        align-items: center;
+        column-gap: 0;
+        row-gap: 0;
+        padding: 0;
+        pointer-events: none;
+        overflow: hidden;
+        -webkit-mask-image:
+          radial-gradient(ellipse calc(42% - 150px) 42% at 50% 40%, transparent 0%, transparent 66%, #000 80%, #000 100%),
+          linear-gradient(to bottom, #000 0%, #000 68%, rgba(0,0,0,0.75) 80%, rgba(0,0,0,0.38) 90%, transparent 100%);
+        -webkit-mask-composite: source-in;
+        mask-image:
+          radial-gradient(ellipse calc(42% - 150px) 42% at 50% 40%, transparent 0%, transparent 66%, #000 80%, #000 100%),
+          linear-gradient(to bottom, #000 0%, #000 68%, rgba(0,0,0,0.75) 80%, rgba(0,0,0,0.38) 90%, transparent 100%);
+        mask-composite: intersect;
+      }
+      .hero__star {
+        width: 64px;
+        height: 66px;
+        opacity: 0;
+        animation: hero-star-diagonal-wave 9s ease-in-out infinite;
+      }
+      .hero__star:nth-child(9n + 1) { animation-delay: -0.1s; }
+      .hero__star:nth-child(9n + 2) { animation-delay: -0.5s; }
+      .hero__star:nth-child(9n + 3) { animation-delay: -0.9s; }
+      .hero__star:nth-child(9n + 4) { animation-delay: -1.3s; }
+      .hero__star:nth-child(9n + 5) { animation-delay: -1.7s; }
+      .hero__star:nth-child(9n + 6) { animation-delay: -2.1s; }
+      .hero__star:nth-child(9n + 7) { animation-delay: -2.5s; }
+      .hero__star:nth-child(9n + 8) { animation-delay: -2.9s; }
+      .hero__star:nth-child(9n + 9) { animation-delay: -3.3s; }
+      .hero__star:nth-child(n + 301) { animation-delay: -4.0s; }
+      .hero__star:nth-child(n + 451) { animation-delay: -4.8s; }
+      .hero__star:nth-child(n + 571) { animation-delay: -5.4s; }
+      .hero__star:nth-child(60n + 31),
+      .hero__star:nth-child(60n + 32),
+      .hero__star:nth-child(60n + 33),
+      .hero__star:nth-child(60n + 34),
+      .hero__star:nth-child(60n + 35),
+      .hero__star:nth-child(60n + 36),
+      .hero__star:nth-child(60n + 37),
+      .hero__star:nth-child(60n + 38),
+      .hero__star:nth-child(60n + 39),
+      .hero__star:nth-child(60n + 40),
+      .hero__star:nth-child(60n + 41),
+      .hero__star:nth-child(60n + 42),
+      .hero__star:nth-child(60n + 43),
+      .hero__star:nth-child(60n + 44),
+      .hero__star:nth-child(60n + 45),
+      .hero__star:nth-child(60n + 46),
+      .hero__star:nth-child(60n + 47),
+      .hero__star:nth-child(60n + 48),
+      .hero__star:nth-child(60n + 49),
+      .hero__star:nth-child(60n + 50),
+      .hero__star:nth-child(60n + 51),
+      .hero__star:nth-child(60n + 52),
+      .hero__star:nth-child(60n + 53),
+      .hero__star:nth-child(60n + 54),
+      .hero__star:nth-child(60n + 55),
+      .hero__star:nth-child(60n + 56),
+      .hero__star:nth-child(60n + 57),
+      .hero__star:nth-child(60n + 58),
+      .hero__star:nth-child(60n + 59),
+      .hero__star:nth-child(60n + 60) {
+        transform: translateX(calc(var(--pattern-step-x) / 2));
+      }
+    }
     @media (min-width:861px) {
+      .timeline-era--ruby {
+        background-color: #431F18 !important;
+        background-image: none !important;
+      }
+      .ruby-section__inner {
+        width: min(1230px, calc(100% - 48px)) !important;
+        background-size: 100% auto !important;
+        background-repeat: no-repeat !important;
+        background-position: center calc(50% + 100px) !important;
+      }
+      .timeline-era--ruby__map {
+        bottom: -160px;
+        transform: translateX(500px);
+        display: block !important;
+        clip-path: none !important;
+      }
       .timeline {
         max-width: 1280px;
       }
@@ -905,6 +1018,11 @@
       .tl-item--2000 .tl-media img {
         width: min(300px, 100%) !important;
         max-width: 300px !important;
+        height: auto !important;
+      }
+      .tl-item--2022 .tl-media img {
+        width: min(500px, 100%) !important;
+        max-width: 500px !important;
         height: auto !important;
       }
     }
@@ -994,24 +1112,22 @@
       padding: 180px 0 0px;
       overflow: visible;
       z-index: 1;
-      isolation: isolate;
-      background: url('{{ 'figma-images/hero-bg.jpg' | asset_url }}') center center / cover no-repeat fixed;
-      transform: translateZ(0);
-      backface-visibility: hidden;
+      background-color: #431F18;
+      background-image: none;
     }
     .timeline-era--ruby::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: var(--timeline-ruby-red);
-      mix-blend-mode: multiply;
-      opacity: 0.92;
-      pointer-events: none;
-      z-index: 0;
+      display: none;
     }
     .timeline-era--ruby .timeline {
       position: relative;
-      z-index: 2;
+      z-index: 4;
+    }
+    .timeline-era--ruby .tl-item,
+    .timeline-era--ruby .tl-event,
+    .timeline-era--ruby .tl-media,
+    .timeline-era--ruby .tl-center {
+      position: relative;
+      z-index: 4;
     }
     .timeline-era--ruby .timeline__spine {
       background: repeating-linear-gradient(
@@ -1162,21 +1278,24 @@
       .history__center img { width: min(680px, 92vw); }
       .timeline-break {
         padding: 8px 24px 120px;
+        margin-top: 40px;
       }
       .timeline-break__line {
-        display: block;
+        display: block !important;
         position: absolute;
-        left: 20px;
+        left: 50%;
         top: 0;
         bottom: 0;
-        width: 2px;
+        width: 1px;
         z-index: 1;
-        transform: none;
+        transform: translateX(-50%);
         background: repeating-linear-gradient(
           to bottom,
           rgba(179, 38, 30, 0.5) 0 5px,
           transparent 5px 10px
         );
+        clip-path: inset(0 0 100% 0);
+        will-change: clip-path;
       }
       .tl-dot,
       .timeline-break__dot { font-size: 30px; }
@@ -1200,10 +1319,11 @@
       }
       .timeline-era--ruby {
         padding: 240px 0 180px;
-        background-attachment: scroll, scroll;
+        background-color: #431F18;
+        background-image: none;
       }
       .timeline-era--ruby__map {
-        bottom: 1240px;
+        bottom: 1090px;
         opacity: 0.72;
         z-index: 0;
       }
@@ -1213,17 +1333,17 @@
       }
       .timeline-transition {
         margin-top: -80px;
-        margin-bottom: 560px;
-        height: 420px;
+        margin-bottom: 100px;
       }
       .timeline-transition__shape-svg {
         width: 100vw;
         top: -2px;
       }
+      .timeline-transition__flower-red-svg,
       .timeline-transition__flower-svg {
         width: 100vw;
         max-width: none;
-        top: calc(clamp(22px, 5vw, 54px) - 500px);
+        top: calc(clamp(22px, 5vw, 54px) - 550px);
       }
       .rebranding {
         padding: 80px 0 32px;
@@ -1269,27 +1389,45 @@
         padding: 48px 28px;
         justify-content: center;
         width: min(1232px, calc(100% - 32px));
-        background-position: calc(50% + 200px) center;
+        background-size: auto 100%;
+        background-position: calc(50% - 0px) calc(50% - 0px);
       }
       .ruby-section__content {
         width: min(420px, 100%);
+        position: relative;
+        z-index: 2;
+      }
+      .ruby-section__inner::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+        background: linear-gradient(
+          to bottom,
+          rgba(8, 12, 10, 0.28) 0%,
+          rgba(8, 12, 10, 0.58) 48%,
+          rgba(8, 12, 10, 0.82) 100%
+        );
       }
       .timeline {
         position: relative;
       }
       .timeline__spine {
-        display: block;
+        display: block !important;
         position: absolute;
-        left: 20px;
+        left: 50%;
         top: 0;
         bottom: 0;
-        width: 2px;
+        width: 1px;
         z-index: 1;
-        transform: none;
+        transform: translateX(-50%);
+        clip-path: inset(0 0 100% 0);
+        will-change: clip-path;
       }
       .tl-item {
         grid-template-columns: 1fr;
-        margin-bottom: 100px;
+        margin-bottom: 150px;
         row-gap: 12px;
       }
       .tl-item + .tl-item {
@@ -1344,20 +1482,16 @@
         padding: 12px 0 0;
         width: 100%;
         max-width: min(92vw, 660px);
-        margin: 0 auto;
+        margin: 0 auto !important;
+        justify-self: center;
+        text-align: center;
         position: relative;
         z-index: 3;
       }
-      .tl-item--1984 .tl-media {
-        max-width: min(92vw, 910px);
-        margin-top: -30px;
-        transform: translateX(-40px);
-        padding-bottom: 60px;
-      }
-      .tl-item--1984 .tl-media img {
-        width: min(calc(92vw + 100px), 1010px) !important;
-        max-width: 1010px !important;
-        height: auto !important;
+      .tl-item .tl-media img {
+        display: block;
+        margin-left: auto !important;
+        margin-right: auto !important;
       }
       .tl-item--left .tl-event::before,
       .tl-item--right .tl-event::before,
@@ -1391,8 +1525,8 @@
       .section-nav { bottom: 24px; }
       .hero__scroll { bottom: 160px; }
       .hero__lottie {
-        width: min(1420px, calc(76vw + 800px)) !important;
-        height: min(1440px, calc(78vw + 800px)) !important;
+        width: min(1470px, calc(76vw + 850px)) !important;
+        height: min(1490px, calc(78vw + 850px)) !important;
       }
       .hero__ornament-fallback {
         width: min(1220px, calc(70vw + 700px)) !important;
@@ -1426,8 +1560,14 @@
         column-gap: 10px;
         row-gap: 0;
         padding: 10px 8px;
-        -webkit-mask-image: radial-gradient(ellipse 44% 34% at 50% 44%, transparent 0%, transparent 62%, #000 76%, #000 100%);
-        mask-image: radial-gradient(ellipse 44% 34% at 50% 44%, transparent 0%, transparent 62%, #000 76%, #000 100%);
+        -webkit-mask-image:
+          radial-gradient(ellipse 44% 34% at 50% 44%, transparent 0%, transparent 62%, #000 76%, #000 100%),
+          linear-gradient(to bottom, #000 0%, #000 68%, rgba(0,0,0,0.75) 80%, rgba(0,0,0,0.38) 90%, transparent 100%);
+        -webkit-mask-composite: source-in;
+        mask-image:
+          radial-gradient(ellipse 44% 34% at 50% 44%, transparent 0%, transparent 62%, #000 76%, #000 100%),
+          linear-gradient(to bottom, #000 0%, #000 68%, rgba(0,0,0,0.75) 80%, rgba(0,0,0,0.38) 90%, transparent 100%);
+        mask-composite: intersect;
         pointer-events: none;
       }
       .hero__star {
@@ -1474,17 +1614,22 @@
         margin-top: 100px;
       }
       .timeline-era--ruby {
-        padding-bottom: 80px;
-        margin-bottom: 0;
-        background-repeat: no-repeat;
-        background-position: top center;
-        background-size: 100% calc(100% - 700px);
+        padding-bottom: 0;
+        margin-bottom: -300px;
+        background-color: #431F18 !important;
+        background-image: none !important;
       }
       .timeline-era--ruby::before {
-        inset: 0 0 750px 0;
+        display: none !important;
       }
       .timeline-era--ruby__map {
-        clip-path: inset(0 0 1650px 0);
+        bottom: 220px !important;
+        transform: translateX(-300px) !important;
+        clip-path: none !important;
+        display: block !important;
+        mix-blend-mode: multiply !important;
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.75) 18%, #000 34%, #000 100%);
+        mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.75) 18%, #000 34%, #000 100%);
       }
       .creator__vicenza {
         right: -26px;
@@ -1511,26 +1656,15 @@
         overflow-x: clip !important;
       }
       .hero__ornament {
-        left: 0;
+        left: -10px;
       }
       .timeline-transition {
         width: 100%;
         margin-left: 0;
         margin-right: 0;
         margin-top: 0;
-        margin-bottom: 0;
-        background: var(--deep-green);
-      }
-      .timeline-transition::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: -300px;
-        height: 900px;
-        background: var(--deep-green);
-        z-index: 0;
-        pointer-events: none;
+        margin-bottom: 600px;
+        background: transparent;
       }
       .timeline-transition__shape-svg,
       .timeline-transition__flower-red-svg,
@@ -1544,11 +1678,29 @@
         left: 50%;
         width: calc(100% + 200px);
         transform: translateX(-50%);
-        top: calc(clamp(22px, 5vw, 54px) - 380px);
+        top: calc(clamp(22px, 5vw, 54px) - 170px);
       }
       .rebranding {
-        background: var(--deep-green);
-        margin-top: -301px;
+        background: transparent;
+        margin-top: 749px;
+        margin-bottom: 300;
+
+      }
+      .collections {
+        background: transparent;
+        margin-top: 0;
+      }
+      .tl-item--left .tl-media,
+      .tl-item--right .tl-media {
+        max-width: min(92vw, 660px);
+      }
+      .tl-item--2022 .tl-media {
+        max-width: min(calc(92vw + 50px), 710px);
+      }
+      .tl-media img {
+        width: min(92vw, 540px) !important;
+        max-width: 92vw !important;
+        height: auto !important;
       }
       .ruby-section__content {
         margin-top: 200px !important;
@@ -1678,6 +1830,27 @@
       .section-nav__mobile-flower path {
         fill: #27574D;
       }
+      /* Final mobile centering override for milestone media/images */
+      .timeline .tl-item .tl-media {
+        max-width: min(92vw, 590px) !important;
+        width: 100% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        justify-self: center !important;
+        text-align: center !important;
+        transform: none !important;
+        left: auto !important;
+        right: auto !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+      }
+      .timeline .tl-item .tl-media img {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
     }
 {%- endstyle -%}
 
@@ -1689,12 +1862,8 @@
 {%- if creator_img_url == blank -%}{%- assign creator_img_url = 'figma-images/creator-portrait.jpg' | asset_url -%}{%- endif -%}
 {%- assign creator_vicenza_url = section.settings.creator_vicenza_image | image_url: width: 1600 -%}
 {%- if creator_vicenza_url == blank -%}{%- assign creator_vicenza_url = 'figma-images/Vicenza_drawing_image.png' | asset_url -%}{%- endif -%}
-{%- assign ruby_bg_url = section.settings.ruby_bg_image | image_url: width: 2000 -%}
-{%- if ruby_bg_url == blank -%}{%- assign ruby_bg_url = 'figma-images/ruby-section.jpg' | asset_url -%}{%- endif -%}
-{%- assign ruby_gem_url = section.settings.ruby_gem_image | image_url: width: 1200 -%}
-{%- if ruby_gem_url == blank -%}{%- assign ruby_gem_url = 'figma-images/ruby-gem.png' | asset_url -%}{%- endif -%}
-{%- assign timeline_bg_url = section.settings.timeline_bg_image | image_url: width: 2400 -%}
-{%- if timeline_bg_url == blank -%}{%- assign timeline_bg_url = 'figma-images/hero-bg.jpg' | asset_url -%}{%- endif -%}
+{%- assign ruby_bg_url = 'figma-images/Roberto Coin_Ruby Image.jpg' | asset_url -%}
+{%- assign timeline_bg_url = 'figma-images/hero-bg-ruby.jpg' | asset_url -%}
 {%- assign timeline_world_map_url = section.settings.timeline_world_map_image | image_url: width: 2200 -%}
 {%- if timeline_world_map_url == blank -%}{%- assign timeline_world_map_url = 'figma-images/world map.png' | asset_url -%}{%- endif -%}
 {%- assign img_1977_url = section.settings.timeline_img_1977 | image_url: width: 1200 -%}
@@ -1721,8 +1890,11 @@
 {%- if img_2018_url == blank -%}{%- assign img_2018_url = 'figma-images/RC_Diamons.png' | asset_url -%}{%- endif -%}
 {%- assign img_2021_url = section.settings.timeline_img_2021 | image_url: width: 1200 -%}
 {%- if img_2021_url == blank -%}{%- assign img_2021_url = 'figma-images/RC_Princessflower.png' | asset_url -%}{%- endif -%}
-{%- assign img_2022_url = section.settings.timeline_img_2022 | image_url: width: 1200 -%}
-{%- if img_2022_url == blank -%}{%- assign img_2022_url = 'figma-images/RC_Emily in Paris.png' | asset_url -%}{%- endif -%}
+{%- if section.settings.timeline_img_2022 != blank -%}
+  {%- assign img_2022_url = section.settings.timeline_img_2022 | image_url: width: 1200 -%}
+{%- else -%}
+  {%- assign img_2022_url = 'figma-images/Emily in paris.png' | asset_url -%}
+{%- endif -%}
 {%- assign img_2025_url = section.settings.timeline_img_2025 | image_url: width: 1200 -%}
 {%- if img_2025_url == blank -%}{%- assign img_2025_url = 'figma-images/Lifetimachievment award.png' | asset_url -%}{%- endif -%}
 {%- assign img_today_url = section.settings.timeline_img_today | image_url: width: 1200 -%}
@@ -1740,10 +1912,10 @@
      HERO
 ════════════════════════════════════════ -->
 <section class="hero" id="hero">
-  <div class="hero__bg" style="background-image:url('{{ hero_bg_url }}');"></div>
-  <div class="hero__vignette"></div>
+  <div class="hero__bg" style="position:fixed;inset:0;background-image:url('{{ hero_bg_url }}');"></div>
+  <div class="hero__vignette" style="position:fixed;inset:0;"></div>
   <div class="hero__star-pattern" aria-hidden="true">
-    {%- for i in (1..112) -%}
+    {%- for i in (1..600) -%}
       <span class="hero__star">
         <svg viewBox="0 0 181 187" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M135.61 125.55C151.84 125.55 164.58 106.23 176.09 98.01L180.41 94.93V92.05L176.09 88.97C164.79 80.96 151.84 61.43 135.61 61.43C129.24 61.43 122.46 64.72 108.28 76.84L102.73 81.57L103.55 83.21C112.59 76.84 117.52 74.58 125.74 74.58C136.63 74.58 147.93 81.36 155.95 93.49C147.94 105.61 136.63 112.39 125.74 112.39C117.52 112.39 112.59 110.13 103.55 103.76L102.73 105.4L108.28 110.13C122.46 122.25 129.24 125.54 135.61 125.54M44.79 125.55C51.16 125.55 57.94 122.26 72.12 110.14L77.67 105.41L76.85 103.77C67.81 110.14 62.88 112.4 54.66 112.4C43.77 112.4 32.47 105.62 24.45 93.5C32.46 81.38 43.77 74.59 54.66 74.59C62.88 74.59 67.81 76.85 76.85 83.22L77.67 81.58L72.12 76.85C57.94 64.73 51.16 61.44 44.79 61.44C28.56 61.44 15.61 80.96 4.31 88.98L0 92.06V94.94L4.31 98.02C15.82 106.24 28.56 125.56 44.79 125.56M89.58 187H92.46L95.54 182.69C103.55 171.59 123.08 158.44 123.08 142.21C123.08 135.84 119.79 129.06 107.67 114.88L102.94 109.33L101.3 110.15C107.67 119.19 109.93 124.12 109.93 132.55C109.93 143.24 103.35 154.54 91.03 162.76C78.7 154.54 72.12 143.24 72.12 132.55C72.12 124.13 74.38 119.19 80.75 110.15L79.11 109.33L74.38 114.88C62.26 129.06 58.97 135.84 58.97 142.21C58.97 158.44 78.49 171.39 86.51 182.69L89.59 187H89.58ZM79.1 77.68L80.74 76.86C74.37 67.82 72.11 62.89 72.11 54.67C72.11 43.78 78.89 32.48 91.02 24.46C103.14 32.47 109.92 43.78 109.92 54.67C109.92 62.89 107.66 67.82 101.29 76.86L102.93 77.68L107.66 72.13C119.78 57.95 123.07 51.17 123.07 44.8C123.07 28.57 103.75 15.83 95.53 4.32L92.45 0H89.57L86.49 4.32C78.48 15.62 58.95 28.57 58.95 44.8C58.95 51.17 62.24 57.95 74.36 72.13L79.09 77.68H79.1Z" fill="currentColor"/>
@@ -1923,7 +2095,7 @@
             <rect class="section-nav__mobile-progress-rect" width="286" height="50" fill="url(#mobile-nav-progress-{{ section.id }})"/>
             <rect x="286" width="76" height="50" fill="white"/>
           </g>
-          <path d="M326.761 49.25C333.005 49.25 338.486 45.4647 343.626 41.25C348.695 37.0943 353.334 32.6264 357.713 29.5039L360.75 27.327V22.6827L357.714 20.4978C353.336 17.3745 348.697 12.9058 343.627 8.75096C338.488 4.53658 333.007 0.75 326.761 0.75L34.7301 0.75C28.4868 0.75 23.0055 4.53595 17.8655 8.74995C12.7969 12.9046 8.15835 17.3715 3.77822 20.4948L0.75 22.6778V27.3222L3.77845 29.4969C8.15718 32.6208 12.7949 37.0894 17.8629 41.2441C23.0018 45.4575 28.4828 49.2434 34.7301 49.2479H326.761V49.25Z" stroke="#27574D" stroke-width="1.5"/>
+          <path d="M326.761 49.25C333.005 49.25 338.486 45.4647 343.626 41.25C348.695 37.0943 353.334 32.6264 357.713 29.5039L360.75 27.327V22.6827L357.714 20.4978C353.336 17.3745 348.697 12.9058 343.627 8.75096C338.488 4.53658 333.007 0.75 326.761 0.75L34.7301 0.75C28.4868 0.75 23.0055 4.53595 17.8655 8.74995C12.7969 12.9046 8.15835 17.3715 3.77822 20.4948L0.75 22.6778V27.3222L3.77845 29.4969C8.15718 32.6208 12.7949 37.0894 17.8629 41.2441C23.0018 45.4575 28.4828 49.2434 34.7301 49.2479H326.761V49.25Z" stroke="#27574d" stroke-width="2.5"/>
           <defs>
             <linearGradient id="mobile-nav-progress-{{ section.id }}" x1="0" y1="25" x2="286" y2="25" gradientUnits="userSpaceOnUse">
               <stop stop-color="#50716A" stop-opacity="0.82"/>
@@ -2017,13 +2189,7 @@
         <p class="fade">Set inside every jewel, the ruby is not meant to be seen but to be felt. A quiet symbol of strength, courage and enduring beauty that connects each creation to its wearer.</p>
       </div>
     </div>
-    <div class="ruby-section__gem fade d1">
-      {%- if section.settings.ruby_gem_image != blank -%}
-        {{ section.settings.ruby_gem_image | image_url: width: 1200 | image_tag: alt: 'The Hidden Ruby', loading: 'lazy', class: 'rc-inline-image' }}
-      {%- else -%}
-        {{ ruby_gem_url | image_tag: alt: 'The Hidden Ruby', loading: 'lazy', class: 'rc-inline-image' }}
-      {%- endif -%}
-    </div>
+    <div class="ruby-section__gem fade d1"></div>
   </div>
 </section>
 
@@ -2084,7 +2250,7 @@
   </div>
 
   <!-- Later era — ruby red background -->
-  <div class="timeline-era--ruby" style="background-image:url('{{ timeline_bg_url }}');">
+  <div class="timeline-era--ruby">
     <div class="timeline-era--ruby__map">
       {%- if section.settings.timeline_world_map_image != blank -%}
         {% render 'image', image: section.settings.timeline_world_map_image, alt: 'World map', loading: 'lazy', modifier: 'rc-inline-image' %}
@@ -2232,7 +2398,7 @@
       </div>
     </div>
 
-    <div class="tl-item tl-item--right">
+    <div class="tl-item tl-item--right tl-item--2022">
       <div class="tl-event">
         <div class="tl-year">2022</div>
         <p class="tl-body">{{ section.settings.timeline_text_2022 | default: "He created an enchanting collection for the second season of Emily in Paris." }}</p>
@@ -2242,7 +2408,7 @@
         {%- if section.settings.timeline_img_2022 != blank -%}
           {% render 'image', image: section.settings.timeline_img_2022, alt: '2022 Emily in Paris', loading: 'lazy', modifier: 'rc-inline-image' %}
         {%- else -%}
-          {{ img_2022_url | image_tag: alt: '2022 Emily in Paris', loading: 'lazy', class: 'rc-inline-image' }}
+          <img src="{{ img_2022_url }}" alt="2022 Emily in Paris" loading="lazy" class="rc-inline-image">
         {%- endif -%}
       </div>
     </div>
@@ -2278,18 +2444,16 @@
         </div>
       </div>
     </div>
-        <div class="timeline-transition" aria-hidden="true">
-      <svg class="timeline-transition__flower-red-svg" width="1729" height="1660" viewBox="0 0 1729 1660" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0 0V1258.96C0 1258.96 105.3 1244.89 184.15 1211.16C261.15 1178.22 352.51 1121.05 352.51 1121.05L376.91 1103.65C440.96 1058.17 514.35 947.54 606.41 947.54C642.45 947.54 680.9 966.11 761.32 1034.88L792.74 1061.68L800.97 1039.49L774.17 1008.07C705.5 927.76 686.83 945.22 686.83 853.16C686.83 761.1 797.46 687.71 842.94 623.66L860.41 599.16H876.67L894.14 623.66C940.72 688.92 1050.25 761.1 1050.25 853.16C1050.25 889.2 1031.68 927.65 962.91 1008.07L936.11 1039.49H935.68L935.11 1061.68L966.53 1034.88C1046.84 966.21 1029.38 947.54 1121.44 947.54C1213.5 947.54 1286.89 1058.17 1350.94 1103.65L1375.34 1121.05C1374.6 1120.36 1492.25 1199.3 1537.01 1219C1607.18 1249.88 1733.23 1261.59 1728.02 1258.96V0H0Z" fill="url(#paint0_linear_3994_4019)"/>
+    <div class="timeline-transition" aria-hidden="true">
+      <svg class="timeline-transition__flower-svg timeline-transition__flower-red-svg" width="1729" height="1660" viewBox="0 0 1729 1660" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 0V1258.96C0 1258.96 105.3 1244.89 184.15 1211.16C261.15 1178.22 352.51 1121.05 352.51 1121.05L376.91 1103.65C440.96 1058.17 514.35 947.54 606.41 947.54C642.45 947.54 680.9 966.11 761.32 1034.88L792.74 1061.68L800.97 1039.49L774.17 1008.07C705.5 927.76 686.83 945.22 686.83 853.16C686.83 761.1 797.46 687.71 842.94 623.66L860.41 599.16H876.67L894.14 623.66C940.72 688.92 1050.25 761.1 1050.25 853.16C1050.25 889.2 1031.68 927.65 962.91 1008.07L936.11 1039.49H935.68L935.11 1061.68L966.53 1034.88C1046.84 966.21 1029.38 947.54 1121.44 947.54C1213.5 947.54 1286.89 1058.17 1350.94 1103.65L1375.34 1121.05C1374.6 1120.36 1492.25 1199.3 1537.01 1219C1607.18 1249.88 1733.23 1261.59 1728.02 1258.96V0H0Z" fill="url(#paint0_radial_3994_4019)"/>
+        <path d="M1121.43 1310.96C1213.49 1310.96 1285.67 1201.43 1350.93 1154.85L1375.43 1137.38V1121.12L1350.93 1103.65C1286.88 1058.17 1213.49 947.54 1121.43 947.54C1029.37 947.54 1046.84 966.21 966.52 1034.88L935.1 1061.68L938.61 1069.81C992.22 1029.05 1024.85 1011.58 1077.25 1011.58C1129.65 1011.58 1211.17 1053.54 1260.17 1129.24C1211.28 1204.94 1142.51 1246.9 1077.25 1246.9C1011.99 1246.9 992.22 1229.43 938.61 1188.67L935.1 1196.8L966.52 1223.6C1046.93 1292.37 1085.38 1310.94 1121.43 1310.94M606.41 1310.96C642.55 1310.96 681 1292.29 761.32 1223.62L792.74 1196.82L789.23 1188.69C735.62 1229.45 702.99 1246.92 650.59 1246.92C598.19 1246.92 516.57 1204.96 467.67 1129.26C516.56 1053.56 585.33 1011.6 650.59 1011.6C715.85 1011.6 735.62 1029.07 789.23 1069.83L792.74 1061.7L761.32 1034.9C680.91 966.13 642.46 947.56 606.41 947.56C514.35 947.56 440.96 1058.19 376.91 1103.67L352.41 1121.14V1137.4L376.91 1154.87C442.17 1201.45 514.35 1310.98 606.41 1310.98M860.4 1659.32H876.66L894.13 1634.82C939.61 1570.77 1050.24 1497.38 1050.24 1405.32C1050.24 1313.26 1031.57 1330.73 962.9 1250.41L936.1 1218.99L927.97 1222.5C968.73 1276.11 986.2 1308.74 986.2 1361.14C986.2 1413.54 943.13 1496.27 868.54 1544.06C793.95 1496.27 750.88 1426.4 750.88 1361.14C750.88 1295.88 768.35 1276.11 809.11 1222.5L800.98 1218.99L774.18 1250.41C705.41 1330.82 686.84 1369.27 686.84 1405.32C686.84 1497.38 797.47 1570.77 842.95 1634.82L860.42 1659.32H860.4ZM800.97 1039.49L809.1 1035.98C768.34 982.37 750.87 949.74 750.87 897.34C750.87 844.94 792.83 763.32 868.53 714.42C944.23 763.31 986.19 832.08 986.19 897.34C986.19 962.6 968.72 982.37 927.96 1035.98L936.09 1039.49L962.89 1008.07C1031.66 927.66 1050.23 889.21 1050.23 853.16C1050.23 761.1 940.7 688.92 894.12 623.66L876.65 599.16H860.39L842.92 623.66C797.44 687.71 686.81 761.1 686.81 853.16C686.81 945.22 705.48 927.75 774.15 1008.07L800.95 1039.49H800.97Z" fill="#27574D"/>
         <defs>
-          <linearGradient id="paint0_linear_3994_4019" x1="864.088" y1="0" x2="864.088" y2="1121.05" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#2E0606" stop-opacity="0"/>
-            <stop offset="0.24" stop-color="#2E0606" stop-opacity="1"/>
-          </linearGradient>
+          <radialGradient id="paint0_radial_3994_4019" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(878 1054) rotate(-88.0494) scale(1219.21 1673.13)">
+            <stop offset="0.00480769" stop-color="#431F18" stop-opacity="0"/>
+            <stop offset="0.447115" stop-color="#431F18"/>
+          </radialGradient>
         </defs>
-      </svg>
-      <svg class="timeline-transition__flower-svg" width="1729" height="1660" viewBox="0 0 1729 1660" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path class="flower-green" d="M1121.43 1310.96C1213.49 1310.96 1285.67 1201.43 1350.93 1154.85L1375.43 1137.38V1121.12L1350.93 1103.65C1286.88 1058.17 1213.49 947.54 1121.43 947.54C1029.37 947.54 1046.84 966.21 966.52 1034.88L935.1 1061.68L938.61 1069.81C992.22 1029.05 1024.85 1011.58 1077.25 1011.58C1129.65 1011.58 1211.17 1053.54 1260.17 1129.24C1211.28 1204.94 1142.51 1246.9 1077.25 1246.9C1011.99 1246.9 992.22 1229.43 938.61 1188.67L935.1 1196.8L966.52 1223.6C1046.93 1292.37 1085.38 1310.94 1121.43 1310.94M606.41 1310.96C642.55 1310.96 681 1292.29 761.32 1223.62L792.74 1196.82L789.23 1188.69C735.62 1229.45 702.99 1246.92 650.59 1246.92C598.19 1246.92 516.57 1204.96 467.67 1129.26C516.56 1053.56 585.33 1011.6 650.59 1011.6C715.85 1011.6 735.62 1029.07 789.23 1069.83L792.74 1061.7L761.32 1034.9C680.91 966.13 642.46 947.56 606.41 947.56C514.35 947.56 440.96 1058.19 376.91 1103.67L352.41 1121.14V1137.4L376.91 1154.87C442.17 1201.45 514.35 1310.98 606.41 1310.98M860.4 1659.32H876.66L894.13 1634.82C939.61 1570.77 1050.24 1497.38 1050.24 1405.32C1050.24 1313.26 1031.57 1330.73 962.9 1250.41L936.1 1218.99L927.97 1222.5C968.73 1276.11 986.2 1308.74 986.2 1361.14C986.2 1413.54 943.13 1496.27 868.54 1544.06C793.95 1496.27 750.88 1426.4 750.88 1361.14C750.88 1295.88 768.35 1276.11 809.11 1222.5L800.98 1218.99L774.18 1250.41C705.41 1330.82 686.84 1369.27 686.84 1405.32C686.84 1497.38 797.47 1570.77 842.95 1634.82L860.42 1659.32H860.4ZM800.97 1039.49L809.1 1035.98C768.34 982.37 750.87 949.74 750.87 897.34C750.87 844.94 792.83 763.32 868.53 714.42C944.23 763.31 986.19 832.08 986.19 897.34C986.19 962.6 968.72 982.37 927.96 1035.98L936.09 1039.49L962.89 1008.07C1031.66 927.66 1050.23 889.21 1050.23 853.16C1050.23 761.1 940.7 688.92 894.12 623.66L876.65 599.16H860.39L842.92 623.66C797.44 687.71 686.81 761.1 686.81 853.16C686.81 945.22 705.48 927.75 774.15 1008.07L800.95 1039.49H800.97Z" fill="#27574D"/>
       </svg>
     </div>
   </div>
@@ -2394,6 +2558,11 @@
   var historyRing = document.querySelector('.history__center img');
   var historyRotateStart = -18;
   var historyRotateEnd = 40;
+  var historyCurrentAngle = historyRotateStart;
+  var historyTargetAngle = historyRotateStart;
+  var historyCurrentOpacity = 0;
+  var historyTargetOpacity = 0;
+  var historyRingRaf = null;
   var scrollTicking = false;
   var timelineLines = document.querySelectorAll('.timeline__spine, .timeline-break__line');
   var timelineItems = document.querySelectorAll('.tl-item');
@@ -2757,7 +2926,7 @@
     mobileMain.addEventListener('click', function(e){
       e.preventDefault();
       e.stopPropagation();
-      setMobileMenuOpen(true);
+      setMobileMenuOpen(!mobileMenuOpen);
     });
   }
   if (mobileLinks && mobileLinks.length) {
@@ -2799,6 +2968,23 @@
     if (heroScrollCta) heroScrollCta.classList.toggle('is-hidden', window.scrollY > 0);
   }
 
+  function animateHistoryRing(){
+    if (!historyRing) return;
+    var angleDelta = historyTargetAngle - historyCurrentAngle;
+    var opacityDelta = historyTargetOpacity - historyCurrentOpacity;
+    historyCurrentAngle += angleDelta * 0.18;
+    historyCurrentOpacity += opacityDelta * 0.2;
+
+    historyRing.style.transform = 'rotate(' + historyCurrentAngle.toFixed(3) + 'deg)';
+    historyRing.style.opacity = historyCurrentOpacity.toFixed(3);
+
+    if (Math.abs(angleDelta) > 0.01 || Math.abs(opacityDelta) > 0.002) {
+      historyRingRaf = window.requestAnimationFrame(animateHistoryRing);
+    } else {
+      historyRingRaf = null;
+    }
+  }
+
   function updateHistoryRingRotation(){
     if (!historySection || !historyRing) return;
     var rect = historySection.getBoundingClientRect();
@@ -2813,8 +2999,11 @@
     var angle = historyRotateStart + (historyRotateEnd - historyRotateStart) * progress;
     var fadeProgress = (progress - 0.05) / 0.3;
     fadeProgress = Math.max(0, Math.min(1, fadeProgress));
-    historyRing.style.transform = 'rotate(' + angle.toFixed(2) + 'deg)';
-    historyRing.style.opacity = fadeProgress.toFixed(3);
+    historyTargetAngle = angle;
+    historyTargetOpacity = fadeProgress;
+    if (!historyRingRaf) {
+      historyRingRaf = window.requestAnimationFrame(animateHistoryRing);
+    }
   }
 
   function updateTimelineLineDraw(){
@@ -2836,61 +3025,19 @@
 
     timelineItems.forEach(function(item){
       if (item.classList.contains('visible')) return;
-
-      var timeline = item.closest('.timeline');
-      var spine = timeline ? timeline.querySelector('.timeline__spine') : null;
-      var dot = item.querySelector('.tl-dot');
-      if (!timeline || !spine || !dot) return;
-
-      var spineRect = spine.getBoundingClientRect();
-      var dotRect = dot.getBoundingClientRect();
-
-      var start = vh * 0.9;
-      var end = vh * 0.16;
-      var progress = (start - spineRect.top) / (spineRect.height + start - end);
-      progress = Math.max(0, Math.min(1, progress));
-
-      // Line tip in viewport coordinates.
-      var lineTipY = spineRect.top + (progress * spineRect.height);
-      var dotCenterY = dotRect.top + (dotRect.height * 0.5);
-
-      // Show "Today" once it reaches mid-viewport instead of waiting for late line progression.
-      if (item.classList.contains('tl-item--today')) {
-        if (dotCenterY <= vh * 0.7) item.classList.add('visible');
-        return;
-      }
-
-      var revealThreshold = item.closest('.timeline-era--ruby') ? 24 : 16;
-
-      if (lineTipY >= dotCenterY - revealThreshold) item.classList.add('visible');
+      var rect = item.getBoundingClientRect();
+      if (rect.top <= vh * 0.9) item.classList.add('visible');
     });
   }
 
   function updateTimelineBreakRevealByLine(){
     if (!timelineBreak) return;
-    var lightTimeline = document.querySelector('.era-light .timeline');
-    var spine = lightTimeline ? lightTimeline.querySelector('.timeline__spine') : null;
     var breakDot = timelineBreak.querySelector('.timeline-break__dot');
-    if (!spine || !breakDot) return;
+    if (!breakDot) return;
 
     var vh = window.innerHeight || document.documentElement.clientHeight;
-    var spineRect = spine.getBoundingClientRect();
-    var breakDotRect = breakDot.getBoundingClientRect();
-    var breakCenterY = breakDotRect.top + (breakDotRect.height * 0.5);
-
-    var start = vh * 0.88;
-    var end = vh * 0.16;
-    var progress = (start - spineRect.top) / (spineRect.height + start - end);
-    progress = Math.max(0, Math.min(1, progress));
-    var lineTipY = spineRect.top + (progress * spineRect.height);
-    var lineToBreakDistance = breakCenterY - spineRect.bottom;
-
-    // Reveal 1996 when the drawn line is near the breakpoint zone.
-    var isLineNearBreak =
-      (progress >= 0.88 && lineToBreakDistance <= vh * 0.22) ||
-      (lineTipY >= breakCenterY - 20);
-
-    if (isLineNearBreak) {
+    var breakRect = timelineBreak.getBoundingClientRect();
+    if (breakRect.top <= vh * 0.9) {
       var eventEl = timelineBreak.querySelector('.timeline-break__event');
       var rubyEl = timelineBreak.querySelector('.timeline-break__ruby');
       if (eventEl) eventEl.classList.add('visible');
@@ -2937,7 +3084,7 @@
     entries.forEach(function(e){
       if (e.isIntersecting){ e.target.classList.add('visible'); io.unobserve(e.target); }
     });
-  }, { threshold: 0.1 });
+  }, { threshold: 0, rootMargin: '0px 0px -1px 0px' });
   document.querySelectorAll('.fade:not(.hero__content)').forEach(function(el){ io.observe(el); });
 })();
 {% endjavascript %}
