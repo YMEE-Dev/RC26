@@ -53,6 +53,7 @@
     {%- if section.settings.button_text != blank -%}
       <div class="heading-columns-cta__button-wrap">
         <a
+          target="{{ section.settings.button_target }}"
           href="{{ section.settings.button_url | default: '#' }}"
           class="btn {{ section.settings.button_style }} {{ section.settings.button_size }} {{ section.settings.button_type }}"
         >
@@ -199,6 +200,18 @@
       "type": "url",
       "id": "button_url",
       "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_target",
+      "label": "Button target",
+      "default": "_blank",
+      "options": [
+        { "value": "_blank", "label": "Blank" },
+        { "value": "_self", "label": "Self" },
+        { "value": "_parent", "label": "Parent" },
+        { "value": "_top", "label": "Top" }
+      ]
     },
     {
       "type": "select",
