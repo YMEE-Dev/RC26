@@ -43,7 +43,6 @@
 
   if featured_product
     assign product_sticky_enable = false
-    assign variant_image_scroll = false
     assign enable_history_state = false
   endif
 
@@ -301,6 +300,7 @@
           font-weight: var(--FONT-WEIGHT-BODY);
           font-size: var(--FONT-TITLE);
           line-height: var(--LINE-HEIGHT-TITLE);
+          letter-spacing: var(--LETTER-SPACING-NAV);
           text-transform: uppercase;
           max-width: 40ch;
           color: var(--COLOR-TEXT-DARK);
@@ -329,7 +329,12 @@
 
         #MainProduct--{{ section.id }} .product__content-columns__aside .product__block--buttons {
           margin-top: calc(var(--pdp-sticky-bar-height, 100px) * -1 / 1.4);
-          margin-bottom: 30px;
+          margin-bottom: 10px;
+        }
+
+        #MainProduct--{{ section.id }} .product__content-columns__aside .product__block--buttons.has-ymee-color-picker {
+          margin-top: calc(var(--pdp-sticky-bar-height, 100px) * -1 - 26px);
+          background: transparent;
         }
       }
 
@@ -347,6 +352,23 @@
           padding-left: var(--inner);
           padding-right: var(--inner);
         }
+      }
+
+      #MainProduct--{{ section.id }} .product__content-columns__aside .product__text .product__heading {
+        font-size: var(--font-body-small);
+        font-family: var(--FONT-STACK-BODY);
+        font-style: var(--FONT-STYLE-BODY);
+        font-weight: var(--FONT-WEIGHT-BODY);
+        letter-spacing: var(--LETTER-SPACING-NAV);
+        text-transform: uppercase;
+      }
+
+      #MainProduct--{{ section.id }} .product__content-columns__aside .link-with-icon__text {
+        letter-spacing: var(--LETTER-SPACING-NAV);
+      }
+
+      #MainProduct--{{ section.id }} .product__content-columns__aside .product__submit__buttons button[type="submit"] {
+        margin-top: 0px;
       }
 
       #MainProduct--{{ section.id }} .product__page {
@@ -364,8 +386,14 @@
         background-color: var(--bg-color);
       } */
 
+      #MainProduct--{{ section.id }} .product__images .image-wrapper--cover {
+        background-color: #F9F9F9;
+        mix-blend-mode: multiply;
+      }
+
       #MainProduct--{{ section.id }} .product__images .image-wrapper--cover img {
         object-fit: contain;
+        mix-blend-mode: multiply;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item:not([data-pair-role='secondary']) .image-wrapper--cover {
@@ -382,6 +410,7 @@
         object-fit: contain;
         object-position: center;
         margin: var(--header-height) 0 0;
+        mix-blend-mode: multiply;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla img {
@@ -605,6 +634,13 @@
         align-items: flex-end;
         justify-content: center;
         position: relative;
+        /* mix-blend-mode: multiply; */
+        background-color: #F9F9F9;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla__slide .shopify-model-viewer-ui {
+        mix-blend-mode: multiply;
+        background-color: #F9F9F9;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .shopify-model-viewer-ui__controls-overlay,
@@ -660,9 +696,16 @@
         opacity: 1;
       }
 
+      #MainProduct--{{ section.id }} .pdp-embla--mobile .image-wrapper--cover {
+        background-color: #F9F9F9;
+        mix-blend-mode: multiply;
+      }
+
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__photo {
         height: 100%;
         padding-top: 0;
+        background-color: #F9F9F9;
+        mix-blend-mode: multiply;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla .media--hidden,
@@ -676,11 +719,15 @@
       #MainProduct--{{ section.id }} .pdp-embla__arrows {
         position: absolute;
         left: 50%;
-        bottom: var(--inner);
         transform: translateX(-50%);
-        display: flex;
-        gap: 0px;
+        right: 0;
+        bottom: 25px;
         z-index: 6;
+        max-width: min(var(--content-max), 1200px);
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0px;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__arrow {
@@ -719,6 +766,11 @@
       @media (min-width: 990px) {
         #MainProduct--{{ section.id }} .product__thumbs.pdp-thumbs--desktop {
           display: block !important;
+          position: fixed;
+          left: var(--outer);
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 9;
         }
 
         #MainProduct--{{ section.id }} .product__thumbs.pdp-thumbs--mobile {
@@ -806,7 +858,7 @@
         border-color: #000;
       }
 
-      #MainProduct--{{ section.id }} .product__thumb.is-active:not(.prev-active):not(.single-active) .product__thumb__link::after {
+      #MainProduct--{{ section.id }} .product__thumb.is-active:not(.prev-active):not(.single-active):not(:last-child) .product__thumb__link::after {
         border-bottom-color: transparent;
       }
 
@@ -817,6 +869,32 @@
 
       #MainProduct--{{ section.id }} .product__thumb.is-active.single-active .product__thumb__link::after {
         border-color: #000;
+      }
+      
+      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart] {
+        font-size: var(--BTN-FONT-SIZE);
+        font-weight: var(--BTN-FONT-WEIGHT);
+        line-height: var(--BTN-LINE-HEIGHT);
+        letter-spacing: var(--BTN-LETTER-SPACING);
+        text-transform: uppercase;
+      }
+      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart]:hover {
+        border-color: var(--btn-border);
+        background-color: #27574D;
+        color: #fff;
+      }
+
+      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn [data-add-to-cart-text] {
+        transition: color 0.3s ease;
+      }
+
+      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn [data-add-to-cart-text] .btn__icon {
+        margin-right: 12px;
+        transition: fill 0.3s ease;
+      }
+
+      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart]:hover .btn__icon path {
+        fill: #fff;
       }
 
       @media only screen and (max-width: 749px) {
@@ -843,7 +921,7 @@
           data-active-media="{{ section.id }}-{{ featured_media.id }}"
         >
           {%- if template.name == 'product' and featured_product == false -%}
-            <script src="https://unpkg.com/embla-carousel@8.5.1/embla-carousel.umd.js" defer="defer"></script>
+            <script src="{{ 'embla-carousel.umd.js' | asset_url }}" defer="defer"></script>
 
             <script>
               (function () {
@@ -1276,6 +1354,7 @@
                     updateArrows();
 
                     if (carouselEl && carouselEl.dataset) carouselEl.dataset.emblaInitialized = 'true';
+                    carouselEl._emblaInstance = embla;
                     return carousel;
                   }
 
@@ -1399,6 +1478,15 @@
                   poll();
                 });
               })();
+            </script>
+
+            <script>
+              document.addEventListener('click', function(e) {
+                var thumb = e.target.closest('.pdp-thumbs--desktop [data-thumb-link]');
+                if (thumb) {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              });
             </script>
 
             {%- if product.media.size > 0 -%}
@@ -2206,7 +2294,7 @@
                       </div>
                     </div>
 
-                    {%- if forloop.index == section.blocks.size or next_block.type != 'features' -%}
+                    {%- if forloop.last or next_block.type != 'features' -%}
                       </slider-component>
                     {%- endif -%}
 
@@ -2400,6 +2488,11 @@
     {%- render 'cart-bar', product: product -%}
   {%- endif -%}
 
+  {%- unless product.has_only_default_variant -%}
+    <link type="text/css" href="{{ 'ymee-variant-dropdown.css' | asset_url }}" rel="stylesheet">
+    <script src="{{ 'ymee-variant-dropdown.js' | asset_url }}" defer="defer"></script>
+  {%- endunless -%}
+
   <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
   {%- if product_sticky_enable -%}
     <script src="{{ 'product-sticky.js' | asset_url }}" defer="defer"></script>
@@ -2412,6 +2505,51 @@
 
   {%- if thumbnails_enabled -%}
     <script src="{{ 'product-thumbs.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+
+  {%- if thumbnails_enabled -%}
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const desktopThumbs = document.querySelector('#MainProduct--{{ section.id }} .product__thumbs.pdp-thumbs--desktop');
+        
+        if (desktopThumbs) {
+          let lastScrollY = window.scrollY;
+          let ticking = false;
+          
+          function updateThumbsVisibility() {
+            const scrollY = window.scrollY;
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+            const scrollThreshold = documentHeight - windowHeight - 200; // 200px from bottom
+            const isScrollingDown = scrollY > lastScrollY;
+            const isScrollingUp = scrollY < lastScrollY;
+            
+            // Hide when scrolling down near bottom, show when scrolling up or not near bottom
+            if (isScrollingDown && scrollY > scrollThreshold) {
+              desktopThumbs.style.opacity = '0';
+              desktopThumbs.style.pointerEvents = 'none';
+              desktopThumbs.style.transition = 'opacity 0.3s ease-in-out';
+            } else {
+              desktopThumbs.style.opacity = '1';
+              desktopThumbs.style.pointerEvents = 'auto';
+              desktopThumbs.style.transition = 'opacity 0.3s ease-in-out';
+            }
+            
+            lastScrollY = scrollY;
+            ticking = false;
+          }
+          
+          function requestTick() {
+            if (!ticking) {
+              window.requestAnimationFrame(updateThumbsVisibility);
+              ticking = true;
+            }
+          }
+          
+          window.addEventListener('scroll', requestTick, { passive: true });
+        }
+      });
+    </script>
   {%- endif -%}
 
   {%- if first_3d_model -%}
@@ -2469,3 +2607,42 @@
     <span class="underlay drawer__underlay" data-drawer-underlay></span>
   </side-drawer>
 {%- endfor -%}
+
+{%- comment -%} Custom drawers {%- endcomment -%}
+<side-drawer
+  class="drawer"
+  data-drawer="ask-concierge"
+  id="side-drawer-ask-concierge"
+  data-drawer-size="30%"
+  data-drawer-direction="right-to-left"
+>
+  <div class="drawer__inner" data-drawer-inner>
+    <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+      {% render 'icon-close' %}
+    </button>
+
+    <div class="drawer__body">
+      {% render 'drawer-ask-concierge', block: block %}
+    </div>
+  </div>
+  <span class="underlay drawer__underlay" data-drawer-underlay></span>
+</side-drawer>
+
+<side-drawer
+  class="drawer"
+  data-drawer="send-hint"
+  id="side-drawer-send-hint"
+  data-drawer-size="30%"
+  data-drawer-direction="right-to-left"
+>
+  <div class="drawer__inner" data-drawer-inner>
+    <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+      {% render 'icon-close' %}
+    </button>
+
+    <div class="drawer__body">
+      {% render 'drawer-send-hint' %}
+    </div>
+  </div>
+  <span class="underlay drawer__underlay" data-drawer-underlay></span>
+</side-drawer>

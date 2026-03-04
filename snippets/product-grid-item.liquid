@@ -260,6 +260,11 @@
   if product.media[1].preview_image and settings.image_hover_enable and disable_image_hover == false
     assign double_img = true
   endif
+  assign single_image_hover_scale = false
+  assign product_images_count = product.media | where: 'media_type', 'image' | size
+  if product_images_count == 1 and double_img == false
+    assign single_image_hover_scale = true
+  endif
 
   capture item_unique
     echo 'product-item--' | append: section.id | append: '-' | append: product.id
@@ -633,7 +638,7 @@
               endcapture
             -%}
 
-            <div class="product-item__bg__featured{{ product_type_padding_class }}">
+            <div class="product-item__bg__featured{{ product_type_padding_class }}{% if single_image_hover_scale %} product-item__bg__featured--scale{% endif %}">
               {{ featured_image }}
             </div>
 
@@ -694,9 +699,6 @@
                 assign second_media_name = second_media_source | split: '/' | last | split: '?' | first | downcase | strip
               endif
             -%}
-            <script>
-              console.log('{{ second_media_name }}');
-            </script>
 
             <hover-images class="product-item__bg__under">
               <div class="product-item__bg__slider" data-hover-slider>

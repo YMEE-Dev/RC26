@@ -33,6 +33,35 @@
 
   assign product_limit = section.settings.products_per_page
   assign blocks_featured_image = section.blocks | where: 'type', 'featured_image'
+  assign collection_template_suffix = collection.template_suffix | default: template.suffix | downcase | strip
+  assign is_spotlight_collection_template = false
+  assign should_use_spotlight_images = false
+  assign spotlight_images = collection.metafields.custom.spotlight_collection_images.value
+  assign spotlight_menu_color = collection.metafields.custom.spotlight_collection_menu_color.value
+  assign spotlight_images_position = 'left'
+
+  if collection_template_suffix == 'spotlight'
+    assign is_spotlight_collection_template = true
+  endif
+
+  assign spotlight_images_position = collection.metafields.custom.spotlight_collection_images_position.value | default: 'left' | downcase | strip
+
+  assign spotlight_column_offset = 1
+  if spotlight_images_position == 'center'
+    assign spotlight_column_offset = 2
+  endif
+  if spotlight_images_position == 'right'
+    assign spotlight_column_offset = 3
+  endif
+
+  if is_spotlight_collection_template and spotlight_images != blank
+    assign should_use_spotlight_images = true
+  endif
+
+  assign spotlight_images_count = 0
+  if should_use_spotlight_images
+    assign spotlight_images_count = spotlight_images.count | default: spotlight_images.size
+  endif
 
   assign columns_desktop = section.settings.grid | plus: 0
   assign columns_medium = 3
@@ -43,6 +72,11 @@
     assign columns_medium = 2
   endif
 
+  if is_spotlight_collection_template
+    assign columns_desktop = 3
+    assign columns_medium = 3
+  endif
+
   assign animation_anchor = '.collection-' | append: collection.handle
   assign animation_duration = 800
 
@@ -51,7 +85,6 @@
     assign items_container_tag = 'ajaxinate-items'
   endif
 -%}
-
 {%- capture image_sizes -%}
   {%- if filter_layout == 'inline-open' and enable_filters -%}
     {%- if settings.grid_style == 'compact' -%}
@@ -92,6 +125,12 @@
   #Collection--{{ section.id }} .collection__products {
     background: var(--COLLECTION-PRODUCTS-BG);
   }
+
+  {% if is_spotlight_collection_template and spotlight_menu_color != blank %}
+    body.template-collection:has(#Collection--{{ section.id }}.collection--spotlight) {
+      --spotlight-collection-menu-link: {{ spotlight_menu_color }};
+    }
+  {% endif %}
 {%- endstyle -%}
 
 {%- capture collection_sidebar_class -%}
@@ -106,37 +145,41 @@
   {%- assign featured_images_array = '' -%}
 
   {%- if paginate.current_page == 1 -%}
-    {%- for block in section.blocks -%}
-      {%- capture current_featured_image -%}
-        {%- liquid
-          assign featured_image = block.settings.featured_image
-          assign featured_image_position = block.settings.position
-          assign featured_image_order = featured_image_position | append: '-' | append: forloop.index
+    {%- unless should_use_spotlight_images -%}
+      {%- for block in section.blocks -%}
+        {%- capture current_featured_image -%}
+          {%- liquid
+            assign featured_image = block.settings.featured_image
+            assign featured_image_position = block.settings.position
+            assign featured_image_order = featured_image_position | append: '-' | append: forloop.index
 
-          if featured_image_position < 10
-            assign featured_image_order = featured_image_order | prepend: '0'
-          endif
+            if featured_image_position < 10
+              assign featured_image_order = featured_image_order | prepend: '0'
+            endif
+          -%}
+          {%- render 'collection-featured-image' block: block -%}
+        {%- endcapture -%}
+
+        {%- assign featured_images_array = featured_images_array
+          | append: featured_image_order
+          | append: '#featured_image_position#'
+          | append: featured_image_position
+          | append: '#featured_image_html#'
+          | append: current_featured_image
+          | append: '#featured_image#'
+          | append: featured_image
+          | append: '@@'
         -%}
-        {%- render 'collection-featured-image' block: block -%}
-      {%- endcapture -%}
+      {%- endfor -%}
+    {%- endunless -%}
 
-      {%- assign featured_images_array = featured_images_array
-        | append: featured_image_order
-        | append: '#featured_image_position#'
-        | append: featured_image_position
-        | append: '#featured_image_html#'
-        | append: current_featured_image
-        | append: '#featured_image#'
-        | append: featured_image
-        | append: '@@'
-      -%}
-    {%- endfor -%}
-
-    {%- assign featured_images_array = featured_images_array | split: '@@' | sort -%}
+    {%- unless should_use_spotlight_images -%}
+      {%- assign featured_images_array = featured_images_array | split: '@@' | sort | reject: '' -%}
+    {%- endunless -%}
   {%- endif -%}
 
   <collection-component
-    class="collection collection-products collection-{{ collection.handle }} section-padding {{ color_scheme }}"
+    class="collection collection-products collection-{{ collection.handle }} section-padding {{ color_scheme }}{% if is_spotlight_collection_template %} collection--spotlight collection--spotlight-position-{{ spotlight_images_position }}{% endif %}"
     id="Collection--{{ section.id }}"
     data-section-id="{{ section.id }}"
     data-section-type="collection"
@@ -192,12 +235,15 @@
           <a
             href="{{ view_all_collection_url }}"
             type="button"
-            class="availability-filter__button navlink{% unless has_active_subcollection_link %} is-active{% endunless %}"
+            class="availability-filter__button navlink"
             data-availability-view-all
-            data-availability-view-all-default-active="{% if has_active_subcollection_link %}false{% else %}true{% endif %}"
-            aria-pressed="{% if has_active_subcollection_link %}false{% else %}true{% endif %}"
+            data-availability-view-all-default-active="false"
+            aria-pressed="false"
           >
-            View all
+            <span class="availability-filter__label availability-filter__label--count">
+              {{ collection.products_count }} Pieces
+            </span>
+            <span class="availability-filter__label availability-filter__label--view-all"> View all </span>
           </a>
         </div>
         {%- if sub_collection_links_html != blank -%}
@@ -319,7 +365,46 @@
           {% endif %}
         >
           {%- if collection.products_count > 0 -%}
-            {%- if featured_images_array.size > 0 -%}
+            {%- if should_use_spotlight_images -%}
+              {%- liquid
+                assign counter_grid = 1
+                assign spotlight_image_index = 0
+
+                for product in collection.products
+                  if spotlight_image_index < spotlight_images_count
+                    assign spotlight_image_position = spotlight_image_index | times: 3 | plus: spotlight_column_offset
+
+                    if spotlight_image_position <= counter_grid
+                      assign spotlight_render_index = spotlight_image_index | plus: 1
+                      for spotlight_image in spotlight_images limit: 1 offset: spotlight_image_index
+                        render 'collection-spotlight-image', media: spotlight_image, index: spotlight_render_index, stack_index: counter_grid, image_sizes: image_sizes
+                      endfor
+                      assign spotlight_image_index = spotlight_image_index | plus: 1
+                      assign counter_grid = counter_grid | plus: 1
+                    endif
+                  endif
+
+                  assign product_storytelling = false
+                  unless is_spotlight_collection_template
+                    assign product_type = product.type | downcase
+                    if product_type == 'storytelling' or product_type contains 'storytelling'
+                      assign product_storytelling = true
+                    endif
+                  endunless
+
+                  if product_storytelling
+                    render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false
+                  else
+                    capture spotlight_product_attributes
+                      echo 'style="--spotlight-stack-index: ' | append: counter_grid | append: ';"'
+                    endcapture
+                    render 'product-grid-item', product: product, index: forloop.index, sizes: image_sizes, attributes: spotlight_product_attributes
+                  endif
+
+                  assign counter_grid = counter_grid | plus: 1
+                endfor
+              -%}
+            {%- elsif featured_images_array.size > 0 -%}
               {%- liquid
                 assign counter_grid = 1
                 assign counter_delay = 0
@@ -352,10 +437,12 @@
                   assign items_on_row_remaining = items_on_row_remaining | minus: 1
 
                   assign product_storytelling = false
-                  assign product_type = product.type | downcase
-                  if product_type == 'storytelling' or product_type contains 'storytelling'
-                    assign product_storytelling = true
-                  endif
+                  unless is_spotlight_collection_template
+                    assign product_type = product.type | downcase
+                    if product_type == 'storytelling' or product_type contains 'storytelling'
+                      assign product_storytelling = true
+                    endif
+                  endunless
 
                   if product_storytelling
                     render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false
@@ -372,10 +459,12 @@
                   assign animation_delay = forloop.index0 | modulo: grid_int | times: 1
 
                   assign product_storytelling = false
-                  assign product_type = product.type | downcase
-                  if product_type == 'storytelling' or product_type contains 'storytelling'
-                    assign product_storytelling = true
-                  endif
+                  unless is_spotlight_collection_template
+                    assign product_type = product.type | downcase
+                    if product_type == 'storytelling' or product_type contains 'storytelling'
+                      assign product_storytelling = true
+                    endif
+                  endunless
 
                   if product_storytelling
                     render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false
@@ -696,7 +785,7 @@
   "blocks": [
     {
       "type": "featured_image",
-      "limit": 3,
+      "limit": 8,
       "name": "Featured image",
       "settings": [
         {
