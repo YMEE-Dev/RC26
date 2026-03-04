@@ -10,7 +10,7 @@
     --PB: {{ section.settings.padding_bottom }}px;
 
 
-    padding: var(--gutter) var(--outer);
+    padding-inline:  var(--outer);
   }
 {%- endstyle -%}
 
@@ -53,6 +53,7 @@
     {%- if section.settings.button_text != blank -%}
       <div class="heading-columns-cta__button-wrap">
         <a
+          target="{{ section.settings.button_target }}"
           href="{{ section.settings.button_url | default: '#' }}"
           class="btn {{ section.settings.button_style }} {{ section.settings.button_size }} {{ section.settings.button_type }}"
         >
@@ -199,6 +200,16 @@
       "type": "url",
       "id": "button_url",
       "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_target",
+      "label": "Button target",
+      "default": "_blank",
+      "options": [
+        { "value": "_blank", "label": "New tab" },
+        { "value": "_self", "label": "Same tab" }
+      ]
     },
     {
       "type": "select",

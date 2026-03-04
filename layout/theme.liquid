@@ -4,6 +4,13 @@
     {%- render 'head' -%}
 
     {{ content_for_header }}
+    {%- if page.template == 'page.store-locator' -%}
+      <style>
+        .header-sections {
+          height: 0;
+        }
+      </style>
+    {%- endif -%}
   </head>
 
   <body
