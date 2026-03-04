@@ -13,6 +13,7 @@
   @param {boolean} [open_new_tab] - Opens link in new tab when true
   @param {string} [aria_label] - Optional aria-label for accessibility
   @param {number} [text_margin_bottom] - Margin bottom for text in pixels
+  @param {image} [hero_image] - Optional hero image displayed above the icon+text row
 
   @example
   {% render 'link-with-icon',
@@ -60,12 +61,17 @@
   endif
 
   assign text_margin_bottom_value = text_margin_bottom | default: 10
+
+  assign has_hero_image = false
+  if hero_image != blank
+    assign has_hero_image = true
+  endif
 -%}
 
 {%- if has_url -%}
   <a
     href="{{ link_url }}"
-    class="link-with-icon link-with-icon--icon-{{ normalized_icon_position }} link-with-icon--align-{{ normalized_alignment }} {{ class_name }}"
+    class="link-with-icon link-with-icon--icon-{{ normalized_icon_position }} link-with-icon--align-{{ normalized_alignment }}{% if has_hero_image %} link-with-icon--has-hero{% endif %} {{ class_name }}"
     {% if open_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
     {% if drawer_open != blank %}data-drawer-open="{{ drawer_open | escape }}"{% endif %}
     {% if drawer_close != blank %}data-drawer-close="{{ drawer_close | escape }}"{% endif %}
@@ -73,31 +79,65 @@
     {% if aria_label != blank %}aria-label="{{ aria_label | escape }}"{% endif %}
     style="--text-margin-bottom: {{ text_margin_bottom_value }}px;"
   >
-    {%- if icon_asset != blank -%}
-      <span class="link-with-icon__icon" aria-hidden="true">
-        <img src="{{ icon_asset | asset_url }}" alt="" loading="lazy" width="25" height="25">
+    {%- if has_hero_image -%}
+      <span class="link-with-icon__hero" aria-hidden="true">
+        {%- if hero_image contains 'http://' or hero_image contains 'https://' -%}
+          <img src="{{ hero_image }}" alt="" loading="lazy" width="800" height="600" style="width: 100%; height: auto; display: block; object-fit: cover;">
+        {%- else -%}
+          {%- assign hero_asset_url = hero_image | asset_url -%}
+          {%- if hero_asset_url contains '?' -%}
+            <div class="link-with-icon__hero-placeholder"></div>
+          {%- else -%}
+            <img src="{{ hero_asset_url }}" alt="" loading="lazy" width="800" height="600" style="width: 100%; height: auto; display: block; object-fit: cover;">
+          {%- endif -%}
+        {%- endif -%}
       </span>
     {%- endif -%}
 
-    <span class="link-with-icon__text">{{ link_text | escape }}</span>
+    <span class="link-with-icon__row">
+      {%- if icon_asset != blank -%}
+        <span class="link-with-icon__icon" aria-hidden="true">
+          <img src="{{ icon_asset | asset_url }}" alt="" loading="lazy" width="25" height="25">
+        </span>
+      {%- endif -%}
+
+      <span class="link-with-icon__text">{{ link_text | escape }}</span>
+    </span>
   </a>
 {%- else -%}
   <button
     type="button"
-    class="link-with-icon link-with-icon--icon-{{ normalized_icon_position }} link-with-icon--align-{{ normalized_alignment }} {{ class_name }}"
+    class="link-with-icon link-with-icon--icon-{{ normalized_icon_position }} link-with-icon--align-{{ normalized_alignment }}{% if has_hero_image %} link-with-icon--has-hero{% endif %} {{ class_name }}"
     {% if drawer_open != blank %}data-drawer-open="{{ drawer_open | escape }}"{% endif %}
     {% if drawer_close != blank %}data-drawer-close="{{ drawer_close | escape }}"{% endif %}
     {% if drawer_toggle != blank %}data-drawer-toggle="{{ drawer_toggle | escape }}"{% endif %}
     {% if aria_label != blank %}aria-label="{{ aria_label | escape }}"{% endif %}
     style="--text-margin-bottom: {{ text_margin_bottom_value }}px;"
   >
-    {%- if icon_asset != blank -%}
-      <span class="link-with-icon__icon" aria-hidden="true">
-        <img src="{{ icon_asset | asset_url }}" alt="" loading="lazy" width="25" height="25">
+    {%- if has_hero_image -%}
+      <span class="link-with-icon__hero" aria-hidden="true">
+        {%- if hero_image contains 'http://' or hero_image contains 'https://' -%}
+          <img src="{{ hero_image }}" alt="" loading="lazy" width="800" height="600" style="width: 100%; height: auto; display: block; object-fit: cover;">
+        {%- else -%}
+          {%- assign hero_asset_url = hero_image | asset_url -%}
+          {%- if hero_asset_url contains '?' -%}
+            <div class="link-with-icon__hero-placeholder"></div>
+          {%- else -%}
+            <img src="{{ hero_asset_url }}" alt="" loading="lazy" width="800" height="600" style="width: 100%; height: auto; display: block; object-fit: cover;">
+          {%- endif -%}
+        {%- endif -%}
       </span>
     {%- endif -%}
 
-    <span class="link-with-icon__text">{{ link_text | escape }}</span>
+    <span class="link-with-icon__row">
+      {%- if icon_asset != blank -%}
+        <span class="link-with-icon__icon" aria-hidden="true">
+          <img src="{{ icon_asset | asset_url }}" alt="" loading="lazy" width="25" height="25">
+        </span>
+      {%- endif -%}
+
+      <span class="link-with-icon__text">{{ link_text | escape }}</span>
+    </span>
   </button>
 {%- endif -%}
 
@@ -116,8 +156,9 @@
     margin-bottom: var(--text-margin-bottom, 0);
   }
 
-  .link-with-icon--icon-right {
+  .link-with-icon--icon-right .link-with-icon__row {
     flex-direction: row-reverse;
+    justify-content: space-between;
   }
 
   .link-with-icon--align-center {
@@ -150,5 +191,48 @@
     font-weight: var(--FONT-WEIGHT-BODY);
     letter-spacing: var(--LETTER-SPACING-BODY);
     text-transform: uppercase;
+  }
+
+  .link-with-icon__row {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+  }
+
+  .link-with-icon--has-hero {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .link-with-icon--has-hero .link-with-icon__hero {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+  }
+
+  .link-with-icon--has-hero .link-with-icon__hero img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+
+  .link-with-icon--has-hero .link-with-icon__row {
+    padding: 10px 0 0;
+  }
+
+  .link-with-icon__hero-placeholder {
+    width: 100%;
+    height: 200px;
+    background-color: var(--bg-accent, #f5f5f5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--COLOR-TEXT, #666);
+    font-size: 14px;
+    text-align: center;
   }
 {% endstylesheet %}

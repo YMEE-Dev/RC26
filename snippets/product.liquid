@@ -2486,7 +2486,7 @@
                           content_alignment: 'right'
                         %}
                       </div>
-                      
+
                       <div class="product__custom-drawer">
                         {% render 'link-with-icon',
                           text: 'Send a hint',
@@ -2506,14 +2506,19 @@
                         margin-bottom: 50px;
                         margin-top: 30px;
                       }
-                      
+
                       .product__custom-drawer {
                         flex: 0 0 auto;
                       }
-                      
+
                       .product__custom-drawer .link-with-icon {
                         width: 100%;
                         justify-content: flex-start;
+                      }
+
+                      .product__ruby-signature {
+                        margin-top: 50px;
+                        margin-bottom: 20px;
                       }
                     </style>
 
@@ -2545,6 +2550,17 @@
                         %}
                       </div>
                     {%- endfor -%}
+
+                    <div class="product__block product__custom-drawer product__ruby-signature">
+                      {% render 'link-with-icon',
+                        text: 'The Ruby — Roberto Coin''s Signature',
+                        drawer_open: 'ruby-signature',
+                        icon: 'icon-ruby-signature',
+                        icon_position: 'left',
+                        content_alignment: 'left',
+                        hero_image: 'https://cdn.shopify.com/s/files/1/0969/2990/7075/files/ComfyUI_00038__1.jpg?v=1772627635'
+                      %}
+                    </div>
                   </div>
 
                 {%- endif -%}
@@ -2715,6 +2731,25 @@
 
     <div class="drawer__body">
       {% render 'drawer-send-hint' %}
+    </div>
+  </div>
+  <span class="underlay drawer__underlay" data-drawer-underlay></span>
+</side-drawer>
+
+<side-drawer
+  class="drawer"
+  data-drawer="ruby-signature"
+  id="side-drawer-ruby-signature"
+  data-drawer-size="fullscreen"
+  data-drawer-direction="right-to-left"
+>
+  <div class="drawer__inner" data-drawer-inner>
+    <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+      {% render 'icon-close' %}
+    </button>
+
+    <div class="drawer__body">
+      {% render 'drawer-ruby-signature' %}
     </div>
   </div>
   <span class="underlay drawer__underlay" data-drawer-underlay></span>
