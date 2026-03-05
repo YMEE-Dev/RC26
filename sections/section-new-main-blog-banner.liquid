@@ -29,10 +29,11 @@
 >
   {%- if blog != blank and article != blank -%}
     <div class="new-main-blog-banner__wrapper {{ section.settings.width }}">
+      {%- assign banner_image = section.settings.image | default: article.featured_image -%}
       <div class="new-main-blog-banner__media">
-        {%- if article.featured_image != blank -%}
+        {%- if banner_image != blank -%}
           <a href="{{ article.url }}" class="new-main-blog-banner__media-link">
-            {%- render 'image', image: article.featured_image, sizes: '100vw' -%}
+            {%- render 'image', image: banner_image, sizes: '100vw', alt: section.settings.image_alt | default: article.title -%}
           </a>
         {%- endif -%}
       </div>
