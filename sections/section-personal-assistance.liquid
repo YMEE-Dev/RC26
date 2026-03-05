@@ -51,9 +51,7 @@
               >
                 <div class="personal-assistance__item-icon">
                   {%- if block.settings.icon_image != blank -%}
-                    {%- assign icon_size = block.settings.icon_size | default: 24 -%}
-                    {%- assign icon_w = icon_size | times: 2 -%}
-                    {{ block.settings.icon_image | image_url: width: icon_w | image_tag: loading: 'lazy', width: icon_size, height: icon_size, sizes: icon_size | append: 'px' -}}
+                    <img src="{{ block.settings.icon_image | img_url: 'master' }}" alt="{{ block.settings.icon_image.alt }}" width="25" height="25">
                   {%- elsif block.settings.icon_name != blank -%}
                     <span class="personal-assistance__icon-svg" style="--icon-size: {{ block.settings.icon_size | default: 24 }}px">
                       {%- render 'animated-icon', filename: block.settings.icon_name -%}
