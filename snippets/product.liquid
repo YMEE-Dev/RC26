@@ -221,6 +221,27 @@
         gap: var(--inner);
       }
 
+      #MainProduct--{{ section.id }} .product__title-price .product__title {
+        font-family: var(--FONT-STACK-BODY);
+        font-style: var(--FONT-STYLE-BODY);
+        font-weight: var(--FONT-WEIGHT-BODY);
+        font-size: var(--FONT-TITLE);
+        line-height: var(--LINE-HEIGHT-TITLE);
+        letter-spacing: var(--LETTER-SPACING-NAV);
+        text-transform: uppercase;
+        color: var(--COLOR-TEXT-DARK);
+      }
+
+      #MainProduct--{{ section.id }} .product__title-price .price-item,
+      #MainProduct--{{ section.id }} .product__description {
+        font-family: var(--FONT-STACK-BODY);
+        font-style: var(--FONT-STYLE-BODY);
+        font-weight: var(--FONT-WEIGHT-BODY);
+        font-size: var(--FONT-SIZE-BASE);
+        line-height: var(--LINE-HEIGHT-BODY);
+        color: var(--COLOR-TEXT-DARK);
+      }
+
       @media (min-width: 990px) {
 
         #MainProduct--{{ section.id }} .product__images {
@@ -283,27 +304,9 @@
 
         #MainProduct--{{ section.id }} .product__title-price .product__title {
           margin: 0;
-          font-family: var(--FONT-STACK-BODY);
-          font-style: var(--FONT-STYLE-BODY);
-          font-weight: var(--FONT-WEIGHT-BODY);
-          font-size: var(--FONT-TITLE);
-          line-height: var(--LINE-HEIGHT-TITLE);
-          letter-spacing: var(--LETTER-SPACING-NAV);
-          text-transform: uppercase;
           max-width: 40ch;
-          color: var(--COLOR-TEXT-DARK);
         }
 
-        #MainProduct--{{ section.id }} .product__title-price .price-item,
-        #MainProduct--{{ section.id }} .product__description {
-          font-family: var(--FONT-STACK-BODY);
-          font-style: var(--FONT-STYLE-BODY);
-          font-weight: var(--FONT-WEIGHT-BODY);
-          font-size: var(--FONT-SIZE-BASE);
-          line-height: var(--LINE-HEIGHT-BODY);
-          color: var(--COLOR-TEXT-DARK);
-        }
-        
         #MainProduct--{{ section.id }} .product__description {
           max-width: 80%;
           margin-bottom: 65px;
@@ -341,6 +344,7 @@
 
       #MainProduct--{{ section.id }} .product__content-columns__aside .link-with-icon__text {
         letter-spacing: var(--LETTER-SPACING-NAV);
+        text-align: left;
       }
 
       #MainProduct--{{ section.id }} .product__content-columns__aside .product__submit__buttons button[type="submit"] {
@@ -442,6 +446,20 @@
           margin-top: 0;
           height: calc(100vh - var(--pdp-sticky-bar-height, 100px));
           min-height: 0;
+        }
+      }
+
+      @media only screen and (min-width: 750px) and (max-width: 989px) {
+
+        #MainProduct--{{ section.id }} .pdp-embla__viewport {
+          height: calc(100vh - var(--pdp-sticky-bar-height, 100px) + 20px);
+        }
+      }
+
+      @media only screen and (max-width: 749px) {
+
+        #MainProduct--{{ section.id }} .pdp-embla__viewport {
+          height: calc(100vh - var(--pdp-sticky-bar-height, 100px) - 20px);
         }
       }
 
@@ -908,10 +926,6 @@
 
         #MainProduct--{{ section.id }} .pdp-embla__arrows {
           display: none;
-        }
-
-        #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: 80vh;
         }
 
         #MainProduct--{{ section.id }} .pdp-embla__progress {
@@ -2539,6 +2553,16 @@
                         margin-top: 50px;
                         margin-bottom: 20px;
                       }
+
+                      @media only screen and (max-width: 749px) {
+                        .product__custom-drawers-row {
+                          overflow: hidden;
+                          scrollbar-width: none;
+                          overflow-x: auto;
+                          margin: 20px 0;
+                        }
+                      }
+ 
                     </style>
 
                     <div class="product__block product__text text-left">

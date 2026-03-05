@@ -324,18 +324,25 @@
     width: 15px;
     height: 15px;
   }
-  
+
   .accordion-icon-wrapper svg:last-child {
     opacity: 0;
   }
-  
+
   details[open] .accordion-icon-wrapper svg:first-child {
     opacity: 0;
   }
-  
+
   details[open] .accordion-icon-wrapper svg:last-child {
     opacity: 1;
   }
+
+  @media only screen and (max-width: 749px) {
+    .product__block--accordion .accordion__title .accordion__sku {
+      display: none;
+    }
+  }
+
 {% endstylesheet %}
 
 {% javascript %}
@@ -343,7 +350,7 @@
     function updateVariantSKU(variant) {
       // Only update SKU elements in accordions that have SKU enabled
       const skuElements = document.querySelectorAll('.product-accordion--has-sku [data-variant-sku], .accordion--has-sku [data-variant-sku]');
-      
+
       skuElements.forEach(element => {
         if (variant && variant.sku) {
           element.textContent = 'SKU | ' + variant.sku;
