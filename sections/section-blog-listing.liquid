@@ -57,6 +57,11 @@
                   <div class="blog-listing__card-media">
                    <img src="{{ article.image | img_url: 'master' }}" alt="{{ article.title }}" width="1000" height="1000">
                   </div>
+                  {% else %}
+                    <div class="blog-listing__card-media">
+                      {{ 'collection-1' | placeholder_svg_tag }}
+                    </div>
+          
                 {%- endif -%}
                 <div class="blog-listing__card-body">
                   {%- if section.settings.show_tag and article.tags.size > 0 -%}
