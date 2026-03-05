@@ -1,0 +1,432 @@
+<!-- /sections/section-personal-assistance.liquid -->
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign contact_blocks = section.blocks | where: 'type', 'contact_item'
+-%}
+
+{%- style -%}
+  #PersonalAssistance--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    padding-inline: var(--outer);
+  }
+{%- endstyle -%}
+
+<section
+  id="PersonalAssistance--{{ section.id }}"
+  class="personal-assistance section-padding {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="personal-assistance"
+>
+  <div class="personal-assistance__wrapper {{ section.settings.width }}">
+    <div class="personal-assistance__grid">
+      <div class="personal-assistance__media">
+        {%- if section.settings.image != blank -%}
+          <div class="personal-assistance__image">
+            {%- render 'image',
+              image: section.settings.image,
+              sizes: '(min-width: 990px) 50vw, 100vw',
+              loading: 'eager'
+            -%}
+          </div>
+        {%- else -%}
+          <div class="personal-assistance__placeholder">
+            {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div class="personal-assistance__content">
+        {%- if section.settings.subheading != blank -%}
+          <p class="personal-assistance__subheading">{{ section.settings.subheading | upcase }}</p>
+        {%- endif -%}
+        {%- if section.settings.heading != blank -%}
+          <h2 class="personal-assistance__heading {{ section.settings.heading_font_size }}">
+            {{ section.settings.heading }}
+          </h2>
+        {%- endif -%}
+
+        {%- if contact_blocks.size > 0 -%}
+          <div class="personal-assistance__items">
+            {%- for block in contact_blocks -%}
+              <div
+                class="personal-assistance__item"
+                {{ block.shopify_attributes }}
+              >
+                <div class="personal-assistance__item-icon">
+                  {%- if block.settings.icon_image != blank -%}
+                    {%- assign icon_size = block.settings.icon_size | default: 24 -%}
+                    {{ block.settings.icon_image | image_url: width: icon_size | times: 2 | image_tag: loading: 'lazy', widths: '48,64,96', sizes: icon_size | append: 'px' -}}
+                  {%- elsif block.settings.icon_name != blank -%}
+                    <span class="personal-assistance__icon-svg" style="--icon-size: {{ block.settings.icon_size | default: 24 }}px">
+                      {%- render 'animated-icon', filename: block.settings.icon_name -%}
+                    </span>
+                  {%- endif -%}
+                </div>
+                <div class="personal-assistance__item-body">
+                  {%- if block.settings.title != blank -%}
+                    <span class="personal-assistance__item-title">{{ block.settings.title | upcase }}</span>
+                  {%- endif -%}
+                  {%- if block.settings.value != blank or block.settings.link != blank -%}
+                    {%- if block.settings.link != blank -%}
+                      <a href="{{ block.settings.link }}" class="personal-assistance__item-value personal-assistance__item-value--link">
+                        {{ block.settings.value | default: block.settings.link_title }}
+                      </a>
+                    {%- else -%}
+                      <span class="personal-assistance__item-value">{{ block.settings.value }}</span>
+                    {%- endif -%}
+                  {%- endif -%}
+                </div>
+              </div>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .personal-assistance__wrapper {
+    width: 100%;
+    max-width: var(--max-width, 1232px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .personal-assistance__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    align-items: stretch;
+  }
+
+  @media (min-width: 990px) {
+    .personal-assistance__grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+    }
+  }
+
+  .personal-assistance__media {
+    position: relative;
+    min-height: 280px;
+  }
+
+  .personal-assistance__image {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .personal-assistance__image img,
+  .personal-assistance__placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .personal-assistance__placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .personal-assistance__placeholder .placeholder-svg {
+    width: 60%;
+    height: auto;
+    opacity: 0.3;
+  }
+
+  .personal-assistance__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 0.5rem;
+  }
+
+  .personal-assistance__subheading {
+    margin: 0 0 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    line-height: 1.4;
+    opacity: 0.85;
+  }
+
+  .personal-assistance__heading {
+    margin: 0 0 2rem;
+    font-weight: 500;
+    line-height: 1.2;
+  }
+
+  .personal-assistance__items {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .personal-assistance__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  .personal-assistance__item:last-child {
+    border-bottom: none;
+  }
+
+  .personal-assistance__item-icon {
+    flex-shrink: 0;
+    width: var(--icon-size, 24px);
+    height: var(--icon-size, 24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .personal-assistance__item-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .personal-assistance__icon-svg {
+    display: block;
+    width: var(--icon-size);
+    height: var(--icon-size);
+  }
+
+  .personal-assistance__icon-svg svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+  }
+
+  .personal-assistance__item-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .personal-assistance__item-title {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+  }
+
+  .personal-assistance__item-value {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    opacity: 0.9;
+  }
+
+  .personal-assistance__item-value--link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .personal-assistance__item-value--link:hover {
+    opacity: 1;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Personal assistance",
+  "tag": "section",
+  "class": "section-personal-assistance",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "The art of personal assistance"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "A dedicated experience, designed around you."
+    },
+    {
+      "type": "select",
+      "id": "heading_font_size",
+      "label": "Heading size",
+      "default": "heading-large",
+      "options": [
+        { "value": "heading-mini", "label": "Mini" },
+        { "value": "heading-x-small", "label": "Extra small" },
+        { "value": "heading-small", "label": "Small" },
+        { "value": "heading-medium", "label": "Medium" },
+        { "value": "heading-large", "label": "Large" },
+        { "value": "heading-x-large", "label": "Extra large" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Normal" },
+        { "value": "wrapper--wide", "label": "Wide" },
+        { "value": "wrapper--narrow", "label": "Narrow" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 60
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "contact_item",
+      "name": "Contact item",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Icon"
+        },
+        {
+          "type": "select",
+          "id": "icon_name",
+          "label": "Icon",
+          "default": "icon-phone",
+          "options": [
+            { "label": "Phone", "value": "icon-phone" },
+            { "label": "Email", "value": "icon-email" },
+            { "label": "Mail", "value": "icon-mail" },
+            { "label": "Chat / video", "value": "icon-chat" },
+            { "label": "Location", "value": "icon-location" }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "Custom icon (overrides icon above)",
+          "info": "Optional. SVG or small image. Overrides the selected icon."
+        },
+        {
+          "type": "range",
+          "id": "icon_size",
+          "label": "Icon size",
+          "unit": "px",
+          "min": 16,
+          "max": 48,
+          "step": 2,
+          "default": 24
+        },
+        {
+          "type": "header",
+          "content": "Text"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Call now"
+        },
+        {
+          "type": "text",
+          "id": "value",
+          "label": "Value",
+          "info": "Phone number, email, or short text. Leave blank if using a link."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link",
+          "info": "Optional. Makes the value clickable (e.g. for “Book a video appointment”)."
+        },
+        {
+          "type": "text",
+          "id": "link_title",
+          "label": "Link label",
+          "info": "Shown when link is set and value is blank (e.g. “Book now”)."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Personal assistance",
+      "category": "Text",
+      "blocks": [
+        {
+          "type": "contact_item",
+          "settings": {
+            "icon_name": "icon-phone",
+            "title": "Call now",
+            "value": "+38 0444 202 202"
+          }
+        },
+        {
+          "type": "contact_item",
+          "settings": {
+            "icon_name": "icon-chat",
+            "title": "Book a video appointment",
+            "link_title": "Book now"
+          }
+        },
+        {
+          "type": "contact_item",
+          "settings": {
+            "icon_name": "icon-email",
+            "title": "Send an email",
+            "value": "concierge@example.com"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "aside", "footer"]
+  }
+}
+{% endschema %}
