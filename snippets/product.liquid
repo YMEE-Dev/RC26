@@ -214,16 +214,11 @@
         margin: 0;
       }
 
-      @media (max-width: 767px) {
-        #MainProduct--{{ section.id }} .product__content {
-          margin: 20px 0 0;
-        }
-
-        product-info.index-product .product__content {
-          margin-top: 16px;
-          padding-left: var(--inner);
-          padding-right: var(--inner);
-        }
+      #MainProduct--{{ section.id }} .product__title-price {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--inner);
       }
 
       @media (min-width: 990px) {
@@ -271,13 +266,6 @@
           grid-template-columns: 7fr 3fr;
           gap: 50px;
           align-items: start;
-        }
-
-        #MainProduct--{{ section.id }} .product__title-price {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: var(--inner);
         }
 
         #MainProduct--{{ section.id }} .product__title-price .block-padding {
@@ -342,22 +330,6 @@
         }
       }
 
-      @media (max-width: 767px) {
-         #MainProduct--{{ section.id }} .product__sticky-bar {
-          padding-top: 20px;
-          padding-left: var(--inner);
-          padding-right: var(--inner);
-        }
-      }
-
-      @media (max-width: 767px) {
-         #MainProduct--{{ section.id }} .product__sticky-bar {
-          padding-top: 20px;
-          padding-left: var(--inner);
-          padding-right: var(--inner);
-        }
-      }
-
       #MainProduct--{{ section.id }} .product__content-columns__aside .product__text .product__heading {
         font-size: var(--font-body-small);
         font-family: var(--FONT-STACK-BODY);
@@ -385,10 +357,6 @@
       #MainProduct--{{ section.id }} .product__images {
         position: relative;
       }
-
-      /* #MainProduct--{{ section.id }} .product__images .image-wrapper--cover {
-        background-color: var(--bg-color);
-      } */
 
       #MainProduct--{{ section.id }} .product__images .image-wrapper--cover {
         background-color: #F9F9F9;
@@ -638,7 +606,6 @@
         align-items: flex-end;
         justify-content: center;
         position: relative;
-        /* mix-blend-mode: multiply; */
         background-color: #F9F9F9;
       }
 
@@ -874,7 +841,7 @@
       #MainProduct--{{ section.id }} .product__thumb.is-active.single-active .product__thumb__link::after {
         border-color: #000;
       }
-      
+
       #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart],
       #MainProduct--{{ section.id }} .product__submit__buttons .btn[data-popup-open],
       #MainProduct--{{ section.id }} .product__collection-link {
@@ -906,7 +873,39 @@
         fill: #fff;
       }
 
+      @media only screen and (max-width: 989px) {
+        #MainProduct--{{ section.id }} .product__sticky-bar {
+          padding-top: 20px;
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+
+        #MainProduct--{{ section.id }} .product__content-columns {
+          display: flex;
+          flex-direction: column-reverse;
+          gap: 0;
+        }
+
+        #MainProduct--{{ section.id }} .product__content {
+          margin: 20px 0 0;
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+
+        product-info.index-product .product__content {
+          margin-top: 16px;
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+        
+      }
+
+      @media only screen and (min-width: 750px) and (max-width: 989px) {
+       
+      }
+
       @media only screen and (max-width: 749px) {
+
         #MainProduct--{{ section.id }} .pdp-embla__arrows {
           display: none;
         }
@@ -918,8 +917,28 @@
         #MainProduct--{{ section.id }} .pdp-embla__progress {
           display: block;
         }
+
+        #MainProduct--{{ section.id }} .product__sticky-bar .product__title__wrapper {
+          padding-right: 0;
+          text-align: center;
+        }
+
+        #MainProduct--{{ section.id }} .product__sticky-bar .product__price__wrap {
+          justify-content: center;
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price > .product__block,
+        #MainProduct--{{ section.id }} .product__title-price .shop-pay-terms {
+          margin: 0;
+        }
       }
-    {%- endif -%}
+
+      {%- endif -%}
   {%- endstyle -%}
 
   <{{ wrapper_tag }} class="product__wrapper {{ product_wrapper_modifier }}" data-product>

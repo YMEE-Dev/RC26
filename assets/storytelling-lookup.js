@@ -7,21 +7,21 @@
  * ste_products metafield and render the tile.
  */
 (function () {
-  console.log('[storytelling-lookup] Script loaded');
+  // console.log('[storytelling-lookup] Script loaded');
 
   var container = document.querySelector('[data-storytelling-lookup]');
   if (!container) {
-    console.log('[storytelling-lookup] No container — Liquid already found storytelling');
+    // console.log('[storytelling-lookup] No container — Liquid already found storytelling');
     return;
   }
 
   var currentProductId = Number(container.dataset.productId);
   var currentProductHandle = container.dataset.productHandle;
 
-  console.log('[storytelling-lookup] Product:', currentProductId, currentProductHandle);
+  // console.log('[storytelling-lookup] Product:', currentProductId, currentProductHandle);
 
   if (!currentProductId || !currentProductHandle) {
-    console.log('[storytelling-lookup] Missing product ID or handle — aborting');
+    // console.log('[storytelling-lookup] Missing product ID or handle — aborting');
     return;
   }
 
@@ -44,7 +44,7 @@
           '/collections/all/products.json?limit=250&page=' + page
         );
         if (!resp.ok) {
-          console.log('[storytelling-lookup] /collections/all page', page, 'returned', resp.status);
+          // console.log('[storytelling-lookup] /collections/all page', page, 'returned', resp.status);
           break;
         }
 
@@ -52,11 +52,11 @@
         var products = data.products || [];
 
         if (products.length === 0) {
-          console.log('[storytelling-lookup] /collections/all page', page, ': empty — done');
+          // console.log('[storytelling-lookup] /collections/all page', page, ': empty — done');
           break;
         }
 
-        console.log('[storytelling-lookup] /collections/all page', page, ':', products.length, 'products');
+        // console.log('[storytelling-lookup] /collections/all page', page, ':', products.length, 'products');
 
         for (var i = 0; i < products.length; i++) {
           var p = products[i];
@@ -71,14 +71,14 @@
               title: p.title,
               created_at: p.created_at || p.published_at || ''
             });
-            console.log('[storytelling-lookup]   storytelling:', p.handle, '—', p.title);
+            // console.log('[storytelling-lookup]   storytelling:', p.handle, '—', p.title);
           }
         }
 
         if (products.length < 250) break;
         page++;
       } catch (e) {
-        console.warn('[storytelling-lookup] Fetch error on page', page, e);
+        // console.warn('[storytelling-lookup] Fetch error on page', page, e);
         break;
       }
     }
@@ -97,10 +97,10 @@
         '/products/' + encodeURIComponent(storytellingHandle) +
         '?section_id=' + SECTION_ID;
 
-      console.log('[storytelling-lookup] Verifying:', storytellingHandle);
+      // console.log('[storytelling-lookup] Verifying:', storytellingHandle);
       var resp = await fetch(url);
       if (!resp.ok) {
-        console.log('[storytelling-lookup]   Section API returned', resp.status);
+        // console.log('[storytelling-lookup]   Section API returned', resp.status);
         return null;
       }
 
@@ -109,19 +109,19 @@
       // Extract debug comment
       var debugMatch = html.match(/<!-- \[api-storytelling-tile DEBUG\]([\s\S]*?)-->/);
       if (debugMatch) {
-        console.log('[storytelling-lookup]   Section debug:', debugMatch[1].trim());
+        // console.log('[storytelling-lookup]   Section debug:', debugMatch[1].trim());
       }
 
       // Check if it rendered (has ste_products)
       if (html.indexOf('data-storytelling-match="true"') === -1) {
-        console.log('[storytelling-lookup]   No ste_products for:', storytellingHandle);
+        // console.log('[storytelling-lookup]   No ste_products for:', storytellingHandle);
         return null;
       }
 
       // Extract ste_ids and check if current product ID is in the list
       var idsMatch = html.match(/data-storytelling-ste-ids="([^"]*)"/);
       if (!idsMatch) {
-        console.log('[storytelling-lookup]   Could not extract ste_ids');
+        // console.log('[storytelling-lookup]   Could not extract ste_ids');
         return null;
       }
 
@@ -129,17 +129,17 @@
       var ids = idsStr.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
       var currentIdStr = String(currentProductId);
 
-      console.log('[storytelling-lookup]   ste_ids:', ids, 'looking for:', currentIdStr);
+      // console.log('[storytelling-lookup]   ste_ids:', ids, 'looking for:', currentIdStr);
 
       if (ids.indexOf(currentIdStr) === -1) {
-        console.log('[storytelling-lookup]   Current product NOT in ste_products');
+        // console.log('[storytelling-lookup]   Current product NOT in ste_products');
         return null;
       }
 
-      console.log('[storytelling-lookup]   MATCH FOUND!');
+      // console.log('[storytelling-lookup]   MATCH FOUND!');
       return html;
     } catch (e) {
-      console.warn('[storytelling-lookup]   Verify error:', e);
+      // console.warn('[storytelling-lookup]   Verify error:', e);
       return null;
     }
   }
@@ -148,9 +148,9 @@
     // Step 1: Find ALL storytelling products in the store
     var allCandidates = await findAllStorytellingProducts();
 
-    console.log('[storytelling-lookup] Total storytelling candidates:', allCandidates.length);
+    // console.log('[storytelling-lookup] Total storytelling candidates:', allCandidates.length);
     if (allCandidates.length === 0) {
-      console.log('[storytelling-lookup] No storytelling products found in store');
+      // console.log('[storytelling-lookup] No storytelling products found in store');
       return;
     }
 
@@ -163,7 +163,7 @@
     for (var k = 0; k < allCandidates.length; k++) {
       var tileHtml = await verifyAndRenderTile(allCandidates[k].handle);
       if (tileHtml) {
-        console.log('[storytelling-lookup] SUCCESS — injecting tile for:', allCandidates[k].handle);
+        // console.log('[storytelling-lookup] SUCCESS — injecting tile for:', allCandidates[k].handle);
         if (imageContainer) {
           imageContainer.innerHTML = tileHtml;
           imageContainer.classList.add('product__collection-image--storytelling');
@@ -174,7 +174,7 @@
         return;
       }
     }
-    console.log('[storytelling-lookup] No matching storytelling parent found after checking all candidates');
+    // console.log('[storytelling-lookup] No matching storytelling parent found after checking all candidates');
   }
 
   run();
