@@ -30,6 +30,7 @@
   {%- if blog != blank and article != blank -%}
     <div class="new-main-blog-banner__wrapper {{ section.settings.width }}">
       {%- assign banner_image = section.settings.image | default: article.featured_image -%}
+      {{ banner_image | json }}
       <div class="new-main-blog-banner__media">
         {%- if banner_image != blank -%}
           <a href="{{ article.url }}" class="new-main-blog-banner__media-link">
@@ -162,6 +163,22 @@
   "tag": "section",
   "class": "section-new-main-blog-banner",
   "settings": [
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Banner image",
+      "info": "Overrides the latest article's featured image when set. Leave blank to use the article image."
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text",
+      "info": "Optional. Leave blank to use the article title."
+    },
     {
       "type": "header",
       "content": "Subheading"
