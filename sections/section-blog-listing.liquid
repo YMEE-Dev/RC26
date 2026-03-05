@@ -15,7 +15,31 @@
     --grid-cols: {{ section.settings.columns }};
   }
 {%- endstyle -%}
-
+<section class="blog-listing-section-wrapper">
+  <div class="blog-listing__bar">
+    <a href="{{ section.settings.view_all_url | default: blog.url }}" class="blog-listing__view-all">
+      {{ section.settings.view_all_text | default: 'View all' | upcase }}
+    </a>
+    {%- if blog_links.size > 0 -%}
+      <nav class="blog-listing__nav" aria-label="Blog categories">
+        {%- for block in blog_links -%}
+          {%- if block.settings.blog != blank -%}
+            {%- assign link_blog = blogs[block.settings.blog] -%}
+            {%- if link_blog != blank -%}
+              <a
+                href="{{ link_blog.url }}"
+                class="blog-listing__nav-link{% if blog != blank and link_blog.id == blog.id %} blog-listing__nav-link--active{% endif %}"
+                {{ block.shopify_attributes }}
+              >
+                {{ block.settings.label | default: link_blog.title | upcase }}
+              </a>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </nav>
+    {%- endif -%}
+  </div>
+</section>
 <section
   id="BlogListing--{{ section.id }}"
   class="blog-listing-section section-padding {{ color_scheme }}"
@@ -23,29 +47,7 @@
   data-section-type="blog-listing"
 >
   <div class="blog-listing__wrapper {{ section.settings.width }}">
-    <div class="blog-listing__bar">
-      <a href="{{ section.settings.view_all_url | default: blog.url }}" class="blog-listing__view-all">
-        {{ section.settings.view_all_text | default: 'View all' | upcase }}
-      </a>
-      {%- if blog_links.size > 0 -%}
-        <nav class="blog-listing__nav" aria-label="Blog categories">
-          {%- for block in blog_links -%}
-            {%- if block.settings.blog != blank -%}
-              {%- assign link_blog = blogs[block.settings.blog] -%}
-              {%- if link_blog != blank -%}
-                <a
-                  href="{{ link_blog.url }}"
-                  class="blog-listing__nav-link{% if blog != blank and link_blog.id == blog.id %} blog-listing__nav-link--active{% endif %}"
-                  {{ block.shopify_attributes }}
-                >
-                  {{ block.settings.label | default: link_blog.title | upcase }}
-                </a>
-              {%- endif -%}
-            {%- endif -%}
-          {%- endfor -%}
-        </nav>
-      {%- endif -%}
-    </div>
+ 
 
     {%- if blog != blank -%}
       {%- paginate blog.articles by articles_per_page -%}
