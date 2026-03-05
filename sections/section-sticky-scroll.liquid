@@ -42,23 +42,9 @@
             {{ section.settings.heading }}
           </h2>
         {%- endif -%}
-
-        <div class="sticky-scroll__text-container">
-          {%- for block in section.blocks -%}
-            <div 
-              class="sticky-scroll__text-item {% if forloop.first %}active{% endif %}"
-              data-index="{{ forloop.index0 }}"
-            >
-              {%- if block.settings.title != blank -%}
-                <h3 class="sticky-scroll__title">{{ block.settings.title }}</h3>
-              {%- endif -%}
-              
-              {%- if block.settings.description != blank -%}
-                <p class="sticky-scroll__description">{{ block.settings.description }}</p>
-              {%- endif -%}
-            </div>
-          {%- endfor -%}
-        </div>
+        {%- if section.settings.description != blank -%}
+          <p class="sticky-scroll__description">{{ section.settings.description }}</p>
+        {%- endif -%}
       </div>
     </div>
   </div>
@@ -302,18 +288,6 @@
           "type": "image_picker",
           "id": "image",
           "label": "Image"
-        },
-        {
-          "type": "text",
-          "id": "title",
-          "label": "Title",
-          "default": "Item title"
-        },
-        {
-          "type": "textarea",
-          "id": "description",
-          "label": "Description",
-          "default": "Item description goes here"
         }
       ]
     }
@@ -340,6 +314,12 @@
         { "value": "heading-large", "label": "Large" },
         { "value": "heading-x-large", "label": "Extra large" }
       ]
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Item description goes here"
     },
     {
       "type": "header",
@@ -388,29 +368,7 @@
     {
       "name": "Sticky scroll",
       "category": "Image",
-      "blocks": [
-        {
-          "type": "item",
-          "settings": {
-            "title": "Our Exclusive Gift Box",
-            "description": "Every Roberto Coin creation is meticulously wrapped and presented in a luxurious gift box, making it the perfect gift for someone special or a treasured keepsake for yourself."
-          }
-        },
-        {
-          "type": "item",
-          "settings": {
-            "title": "Exquisite Craftsmanship",
-            "description": "Each piece showcases the finest Italian craftsmanship and attention to detail."
-          }
-        },
-        {
-          "type": "item",
-          "settings": {
-            "title": "Signature Packaging",
-            "description": "Our distinctive packaging reflects the elegance and luxury of the jewelry within."
-          }
-        }
-      ]
+     
     }
   ],
   "disabled_on": {
