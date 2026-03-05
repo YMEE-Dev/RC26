@@ -5,9 +5,7 @@
 -%}
 
   {%- style -%}
-  #shopify-section-{{ section.id }} .associations__wrapper {
-    max-width: var(--max-width, 1232px);
-  }
+
   #shopify-section-{{ section.id }} {
     background-color: {{ section.settings.section_background_color }};
   }
@@ -24,12 +22,6 @@
 
     width: 814px;
     height: 651px;
-  }
-
-  @media (max-width: 425px) {
-    #Associations--{{ section.id }} .associations__dark {
-      height: auto;
-    }
   }
 {%- endstyle -%}
 
@@ -77,8 +69,10 @@
   </div>
 </section>
 
-{% style %}
-
+{% stylesheet %}
+#shopify-section-{{ section.id }} .associations__wrapper {
+  max-width: var(--max-width, 1232px);
+}
   .associations__wrapper {
     width: 100%;
     margin-left: auto;
@@ -248,7 +242,7 @@ line-height: 48px; /* 120% */
       height: 100%;
     }
   }
-{% endstyle %}
+{% endstylesheet %}
 
 {% schema %}
 {
