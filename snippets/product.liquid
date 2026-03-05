@@ -908,29 +908,50 @@
             "custom-drawers-ecom"
             "ruby-signature"
             "collection";
-          gap: 20px;
+          gap: 0px;
         }
-      
+
         /* flatten wrappers so children participate in same grid */
         #MainProduct--{{ section.id }} .product__content-columns__main,
         #MainProduct--{{ section.id }} .product__content-columns__aside {
           display: contents;
         }
-      
+
         /* IMPORTANT: aside sticky must be disabled on mobile */
         #MainProduct--{{ section.id }} .product__content-columns__aside {
           position: static;
           top: auto;
           z-index: auto;
         }
-      
+
         /* map real blocks to areas */
-        #MainProduct--{{ section.id }} .product__block--buttons { grid-area: buttons; }
-        #MainProduct--{{ section.id }} .product__custom-drawers-row { grid-area: custom-drawers; }
-        #MainProduct--{{ section.id }} .product-accordions-container { grid-area: accordions; }
-        #MainProduct--{{ section.id }} .product__custom-drawers-row-ee { grid-area: custom-drawers-ecom; }
-        #MainProduct--{{ section.id }} .product__ruby-signature { grid-area: ruby-signature; }
-        #MainProduct--{{ section.id }} .product__collection-section { grid-area: collection; }
+        #MainProduct--{{ section.id }} .product__block--buttons {
+          grid-area: buttons;
+        }
+        #MainProduct--{{ section.id }} .product__custom-drawers-row {
+          grid-area: custom-drawers;
+          justify-content: space-between;
+          margin-bottom: 0;
+        }
+        #MainProduct--{{ section.id }} .product-accordions-container {
+          grid-area: accordions;
+          margin: 80px 0;
+        }
+        #MainProduct--{{ section.id }} .product__custom-drawers-row-ee {
+          grid-area: custom-drawers-ecom;
+        }
+        #MainProduct--{{ section.id }} .product__ruby-signature {
+          grid-area: ruby-signature;
+          margin: 40px 0 80px 0;
+        }
+        #MainProduct--{{ section.id }} .product__collection-section {
+          grid-area: collection;
+          margin-top: 0;
+          margin-bottom: 40px;
+        }
+        #MainProduct--{{ section.id }} .product__collection-section .product__collection-image {
+          margin-bottom: 80px;
+        }
 
         #MainProduct--{{ section.id }} .product__content {
           margin: 20px 0 0;
