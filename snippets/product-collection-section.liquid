@@ -105,8 +105,14 @@
     <div class="product__collection-info">
       <h2 class="product__collection-title">{{ display_title }}</h2>
       {%- if display_description != blank -%}
-        <div class="product__collection-description rte">
-          {{ display_description }}
+        <div class="product__collection-description rte" data-collection-description>
+          <div class="collection-description__content" data-description-content>
+            {{ display_description }}
+          </div>
+          <button class="collection-description__read-more" data-read-more-btn>
+            <span data-read-more-text>Read more</span>
+            <span data-read-less-text style="display: none;">Read less</span>
+          </button>
         </div>
       {%- endif -%}
     </div>
@@ -139,8 +145,14 @@
     <div class="product__collection-info">
       <h2 class="product__collection-title">{{ display_title }}</h2>
       {%- if display_description != blank -%}
-        <div class="product__collection-description rte">
-          {{ display_description }}
+        <div class="product__collection-description rte" data-collection-description>
+          <div class="collection-description__content" data-description-content>
+            {{ display_description }}
+          </div>
+          <button class="collection-description__read-more" data-read-more-btn>
+            <span data-read-more-text>Read more</span>
+            <span data-read-less-text style="display: none;">Read less</span>
+          </button>
         </div>
       {%- endif -%}
     </div>
@@ -201,6 +213,55 @@
       margin-bottom: 0;
     }
 
+    /* Read more functionality - mobile only */
+    @media only screen and (max-width: 749px) {
+      .product__collection-description[data-collection-description] {
+        position: relative;
+      }
+
+      .collection-description__content[data-description-content] {
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        transition: all 0.3s ease;
+      }
+
+      .product__collection-description[data-collection-description].expanded 
+        .collection-description__content[data-description-content] {
+        -webkit-line-clamp: unset;
+        display: block;
+      }
+
+      .collection-description__read-more {
+        background: none;
+        border: none;
+        color: var(--COLOR-PRIMARY);
+        font-family: var(--FONT-STACK-BODY);
+        font-size: var(--FONT-SIZE-BASE);
+        cursor: pointer;
+        padding: 8px 0 0 0;
+        text-decoration: underline;
+        margin-top: 8px;
+      }
+
+      .collection-description__read-more:hover {
+        color: var(--COLOR-PRIMARY-HOVER);
+      }
+    }
+
+    /* Hide read more on desktop */
+    @media only screen and (min-width: 750px) {
+      .collection-description__read-more {
+        display: none;
+      }
+      
+      .collection-description__content[data-description-content] {
+        -webkit-line-clamp: unset !important;
+        display: block !important;
+      }
+    }
+
     /* Storytelling tile within product collection section */
     .product__collection-image--storytelling .product-storytelling {
       display: block;
@@ -246,3 +307,30 @@
       }
     }
   </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Read more functionality for collection descriptions
+      const readMoreButtons = document.querySelectorAll('[data-read-more-btn]');
+      
+      readMoreButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const description = this.closest('[data-collection-description]');
+          const readMoreText = this.querySelector('[data-read-more-text]');
+          const readLessText = this.querySelector('[data-read-less-text]');
+          
+          if (description.classList.contains('expanded')) {
+            // Collapse
+            description.classList.remove('expanded');
+            readMoreText.style.display = 'inline';
+            readLessText.style.display = 'none';
+          } else {
+            // Expand
+            description.classList.add('expanded');
+            readMoreText.style.display = 'none';
+            readLessText.style.display = 'inline';
+          }
+        });
+      });
+    });
+  </script>
