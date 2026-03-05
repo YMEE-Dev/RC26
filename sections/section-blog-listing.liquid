@@ -1,0 +1,387 @@
+<!-- /sections/section-blog-listing.liquid -->
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign selected_blog = blogs[section.settings.blog]
+  assign blog_links = section.blocks | where: 'type', 'blog_link'
+  assign articles_per_page = section.settings.articles_per_page | default: 9
+-%}
+
+{%- style -%}
+  #BlogListing--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    --grid-cols: {{ section.settings.columns }};
+  }
+{%- endstyle -%}
+
+<section
+  id="BlogListing--{{ section.id }}"
+  class="blog-listing-section section-padding {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="blog-listing"
+>
+  <div class="blog-listing__wrapper {{ section.settings.width }}">
+    <div class="blog-listing__bar">
+      <a href="{{ section.settings.view_all_url | default: selected_blog.url }}" class="blog-listing__view-all">
+        {{ section.settings.view_all_text | default: 'View all' | upcase }}
+      </a>
+      {%- if blog_links.size > 0 -%}
+        <nav class="blog-listing__nav" aria-label="Blog categories">
+          {%- for block in blog_links -%}
+            {%- if block.settings.blog != blank -%}
+              {%- assign link_blog = blogs[block.settings.blog] -%}
+              {%- if link_blog != blank -%}
+                <a
+                  href="{{ link_blog.url }}"
+                  class="blog-listing__nav-link{% if link_blog.id == selected_blog.id %} blog-listing__nav-link--active{% endif %}"
+                  {{ block.shopify_attributes }}
+                >
+                  {{ block.settings.label | default: link_blog.title | upcase }}
+                </a>
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </nav>
+      {%- endif -%}
+    </div>
+
+    {%- if selected_blog != blank -%}
+      {%- paginate selected_blog.articles by articles_per_page -%}
+        <div class="blog-listing__grid">
+          {%- for article in selected_blog.articles -%}
+            <article class="blog-listing__card">
+              <a href="{{ article.url }}" class="blog-listing__card-link">
+                {%- if article.featured_image != blank -%}
+                  <div class="blog-listing__card-media">
+                    {%- render 'image', image: article.featured_image, sizes: '(min-width: 990px) 33vw, (min-width: 750px) 50vw, 100vw' -%}
+                  </div>
+                {%- endif -%}
+                <div class="blog-listing__card-body">
+                  {%- if section.settings.show_tag and article.tags.size > 0 -%}
+                    <p class="blog-listing__card-tag">#{{ article.tags.first | upcase }}</p>
+                  {%- endif -%}
+                  <h2 class="blog-listing__card-title {{ section.settings.title_font_size }}">
+                    {{ article.title }}
+                  </h2>
+                  {%- if section.settings.show_excerpt and article.excerpt_or_content != blank -%}
+                    <p class="blog-listing__card-excerpt">
+                      {{ article.excerpt_or_content | strip_html | truncatewords: section.settings.excerpt_words | default: 20 }}
+                    </p>
+                  {%- endif -%}
+                </div>
+              </a>
+            </article>
+          {%- endfor -%}
+        </div>
+
+        {%- if paginate.pages > 1 -%}
+          <div class="blog-listing__pagination">
+            {{ paginate | default_pagination }}
+          </div>
+        {%- endif -%}
+      {%- endpaginate -%}
+    {%- else -%}
+      <p class="blog-listing__empty">{{ section.settings.empty_message | default: 'Select a blog in the section settings.' }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .blog-listing__wrapper {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .blog-listing__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .blog-listing__view-all {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .blog-listing__view-all:hover {
+    text-decoration: underline;
+  }
+
+  .blog-listing__nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .blog-listing__nav-link {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .blog-listing__nav-link:hover,
+  .blog-listing__nav-link--active {
+    text-decoration: underline;
+  }
+
+  .blog-listing__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  @media (min-width: 750px) {
+    .blog-listing__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 990px) {
+    .blog-listing__grid {
+      grid-template-columns: repeat(var(--grid-cols, 3), 1fr);
+    }
+  }
+
+  .blog-listing__card {
+    margin: 0;
+  }
+
+  .blog-listing__card-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .blog-listing__card-link:hover .blog-listing__card-title {
+    text-decoration: underline;
+  }
+
+  .blog-listing__card-media {
+    width: 100%;
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+
+  .blog-listing__card-media img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+
+  .blog-listing__card-tag {
+    margin: 0 0 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    opacity: 0.8;
+  }
+
+  .blog-listing__card-title {
+    margin: 0 0 0.5rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .blog-listing__card-excerpt {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    opacity: 0.9;
+  }
+
+  .blog-listing__pagination {
+    margin-top: 2.5rem;
+    text-align: center;
+  }
+
+  .blog-listing__empty {
+    margin: 0;
+    padding: 2rem;
+    text-align: center;
+    opacity: 0.8;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Blog listing",
+  "tag": "section",
+  "class": "section-blog-listing",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Filter bar"
+    },
+    {
+      "type": "text",
+      "id": "view_all_text",
+      "label": "View all label",
+      "default": "View all"
+    },
+    {
+      "type": "url",
+      "id": "view_all_url",
+      "label": "View all link",
+      "info": "Leave blank to link to the selected blog below."
+    },
+    {
+      "type": "header",
+      "content": "Blog grid"
+    },
+    {
+      "type": "blog",
+      "id": "blog",
+      "label": "Blog",
+      "info": "Articles from this blog are shown in the grid."
+    },
+    {
+      "type": "range",
+      "id": "articles_per_page",
+      "min": 6,
+      "max": 24,
+      "step": 3,
+      "label": "Articles per page",
+      "default": 9
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "label": "Columns (desktop)",
+      "default": 3
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tag",
+      "label": "Show category tag",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_excerpt",
+      "label": "Show excerpt",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "excerpt_words",
+      "min": 10,
+      "max": 40,
+      "step": 2,
+      "label": "Excerpt length",
+      "default": 20
+    },
+    {
+      "type": "select",
+      "id": "title_font_size",
+      "label": "Title size",
+      "default": "heading-small",
+      "options": [
+        { "value": "heading-mini", "label": "Mini" },
+        { "value": "heading-x-small", "label": "Extra small" },
+        { "value": "heading-small", "label": "Small" },
+        { "value": "heading-medium", "label": "Medium" },
+        { "value": "heading-large", "label": "Large" },
+        { "value": "heading-x-large", "label": "Extra large" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Normal" },
+        { "value": "wrapper--wide", "label": "Wide" },
+        { "value": "wrapper--narrow", "label": "Narrow" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 40
+    },
+    {
+      "type": "text",
+      "id": "empty_message",
+      "label": "Empty message",
+      "default": "Select a blog in the section settings."
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "blog_link",
+      "name": "Blog link",
+      "settings": [
+        {
+          "type": "blog",
+          "id": "blog",
+          "label": "Blog"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "info": "Leave blank to use the blog title (e.g. Celebrity, Culture)."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blog listing",
+      "category": "Blog",
+      "blocks": [
+        { "type": "blog_link", "settings": { "label": "Celebrity" } },
+        { "type": "blog_link", "settings": { "label": "Culture" } },
+        { "type": "blog_link", "settings": { "label": "Style" } },
+        { "type": "blog_link", "settings": { "label": "Travel" } }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "aside", "footer"]
+  }
+}
+{% endschema %}
