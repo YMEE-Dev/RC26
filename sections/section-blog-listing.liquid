@@ -1,7 +1,9 @@
 <!-- /sections/section-blog-listing.liquid -->
 {%- liquid
   assign color_scheme = 'color-' | append: section.settings.color_scheme
-  assign selected_blog = blogs[section.settings.blog]
+  comment
+    Blog is from the URL (e.g. /blogs/celebrity). On a blog template, Shopify exposes the global `blog` object.
+  endcomment
   assign blog_links = section.blocks | where: 'type', 'blog_link'
   assign articles_per_page = section.settings.articles_per_page | default: 9
 -%}
@@ -22,7 +24,7 @@
 >
   <div class="blog-listing__wrapper {{ section.settings.width }}">
     <div class="blog-listing__bar">
-      <a href="{{ section.settings.view_all_url | default: selected_blog.url }}" class="blog-listing__view-all">
+      <a href="{{ section.settings.view_all_url | default: blog.url }}" class="blog-listing__view-all">
         {{ section.settings.view_all_text | default: 'View all' | upcase }}
       </a>
       {%- if blog_links.size > 0 -%}
@@ -33,7 +35,7 @@
               {%- if link_blog != blank -%}
                 <a
                   href="{{ link_blog.url }}"
-                  class="blog-listing__nav-link{% if link_blog.id == selected_blog.id %} blog-listing__nav-link--active{% endif %}"
+                  class="blog-listing__nav-link{% if blog != blank and link_blog.id == blog.id %} blog-listing__nav-link--active{% endif %}"
                   {{ block.shopify_attributes }}
                 >
                   {{ block.settings.label | default: link_blog.title | upcase }}
@@ -45,10 +47,10 @@
       {%- endif -%}
     </div>
 
-    {%- if selected_blog != blank -%}
-      {%- paginate selected_blog.articles by articles_per_page -%}
+    {%- if blog != blank -%}
+      {%- paginate blog.articles by articles_per_page -%}
         <div class="blog-listing__grid">
-          {%- for article in selected_blog.articles -%}
+          {%- for article in blog.articles -%}
             <article class="blog-listing__card">
               <a href="{{ article.url }}" class="blog-listing__card-link">
                 {%- if article.featured_image != blank -%}
@@ -81,7 +83,7 @@
         {%- endif -%}
       {%- endpaginate -%}
     {%- else -%}
-      <p class="blog-listing__empty">{{ section.settings.empty_message | default: 'Select a blog in the section settings.' }}</p>
+      <p class="blog-listing__empty">{{ section.settings.empty_message | default: 'Add this section to a blog template to show articles (e.g. from /blogs/celebrity).' }}</p>
     {%- endif -%}
   </div>
 </section>
