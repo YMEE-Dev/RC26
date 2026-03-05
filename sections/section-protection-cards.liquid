@@ -1,0 +1,312 @@
+<!-- /sections/section-protection-cards.liquid -->
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+-%}
+
+{%- style -%}
+  #ProtectionCards--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    {% if section.settings.width == 'wrapper--custom' %}
+      --custom-width: {{ section.settings.custom_width }}px;
+    {% endif %}
+  }
+{%- endstyle -%}
+
+<section
+  id="ProtectionCards--{{ section.id }}"
+  class="protection-cards section-padding {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="protection-cards"
+>
+  <div class="protection-cards__wrapper {{ section.settings.width }}">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="protection-cards__heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="protection-cards__grid">
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+            {%- when 'card' -%}
+              <div class="protection-card" {{ block.shopify_attributes }}>
+                {%- if block.settings.image != blank -%}
+                  <div class="protection-card__image">
+                    {{ block.settings.image | image_url: width: 600 | image_tag: loading: 'lazy' }}
+                  </div>
+                {%- else -%}
+                  <div class="protection-card__placeholder">
+                    {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                  </div>
+                {%- endif -%}
+
+                <div class="protection-card__content">
+                  {%- if block.settings.title != blank -%}
+                    <h3 class="protection-card__title">{{ block.settings.title }}</h3>
+                  {%- endif -%}
+
+                  {%- if block.settings.description != blank -%}
+                    <p class="protection-card__description">{{ block.settings.description }}</p>
+                  {%- endif -%}
+                </div>
+              </div>
+          {%- endcase -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .protection-cards {
+    position: relative;
+    width: 100%;
+  }
+
+  .protection-cards__wrapper {
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .protection-cards__wrapper.wrapper {
+    max-width: 1440px;
+    padding: 0 20px;
+  }
+
+  .protection-cards__wrapper.wrapper--full-padded {
+    width: 100%;
+    padding: 0 40px;
+  }
+
+  .protection-cards__wrapper.wrapper--narrow {
+    max-width: 1200px;
+    padding: 0 20px;
+  }
+
+  .protection-cards__wrapper.wrapper--custom {
+    max-width: var(--custom-width, 1232px);
+    padding: 0 20px;
+  }
+
+  .protection-cards__heading {
+    text-align: center;
+    margin: 0 0 60px;
+    color: var(--000000, #000);
+    font-family: "Portrait LC", serif;
+    font-size: 40px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 48px;
+  }
+
+  .protection-cards__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+    width: 100%;
+  }
+
+  @media (min-width: 768px) {
+    .protection-cards__grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 30px;
+    }
+  }
+
+  @media (min-width: 990px) {
+    .protection-cards__grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+    }
+  }
+
+  .protection-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 24px;
+  }
+
+  .protection-card__image {
+    width: 100%;
+    max-width: 280px;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #F5F5F5;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .protection-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .protection-card__placeholder {
+    width: 100%;
+    max-width: 280px;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #F5F5F5;
+    border-radius: 8px;
+  }
+
+  .protection-card__placeholder .placeholder-svg {
+    width: 50%;
+    height: auto;
+    opacity: 0.3;
+  }
+
+  .protection-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 280px;
+  }
+
+  .protection-card__title {
+    margin: 0;
+    color: var(--000000, #000);
+    font-family: "Portrait LC", serif;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 28px;
+  }
+
+  .protection-card__description {
+    margin: 0;
+    color: var(--000000, #000);
+    font-family: Inter, sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Protection cards",
+  "tag": "section",
+  "class": "section-protection-cards",
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Card title"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "Card description text goes here"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The Art of Protecting Beauty"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Normal" },
+        { "value": "wrapper--narrow", "label": "Narrow" },
+        { "value": "wrapper--custom", "label": "Custom (max-width: 1232px)" }
+
+      ]
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 60
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Protection cards",
+      "category": "Image",
+      "blocks": [
+        {
+          "type": "card",
+          "settings": {
+            "title": "Size Guide",
+            "description": "The style of Roberto Coin combines new visions to the definition. Please text us for measurement."
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "title": "Product Care",
+            "description": "Discover how to care and preserve the beauty of your jewellery taking extreme."
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "title": "Ask Our Concierge",
+            "description": "We thank our walk with you through. Links to discover and be satisfied of your creativity."
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "aside", "footer"]
+  }
+}
+{% endschema %}
