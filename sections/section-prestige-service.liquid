@@ -28,7 +28,51 @@
     </div>
 
     <div class="prestige-service__content">
-      {% content_for 'blocks' %}
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+          {%- when 'subheading' -%}
+            <div
+              class="prestige-subheading"
+              style="
+                --text-color: {{ block.settings.text_color }};
+                --font-size: {{ block.settings.font_size }}px;
+                --letter-spacing: {{ block.settings.letter_spacing }}px;
+              "
+              {{ block.shopify_attributes }}
+            >
+              {{ block.settings.text | upcase }}
+            </div>
+          {%- when 'heading' -%}
+            <h2
+              class="prestige-heading"
+              style="
+                --text-color: {{ block.settings.text_color }};
+                --font-size: {{ block.settings.font_size }}px;
+                --line-height: {{ block.settings.line_height }};
+                --max-width: {{ block.settings.max_width }}px;
+              "
+              {{ block.shopify_attributes }}
+            >
+              {{ block.settings.text }}
+            </h2>
+          {%- when 'button' -%}
+            <a
+              class="prestige-button"
+              href="{{ block.settings.link | default: '#' }}"
+              style="
+                --text-color: {{ block.settings.text_color }};
+                --bg-color: {{ block.settings.background_color }};
+                --hover-text-color: {{ block.settings.hover_text_color }};
+                --hover-bg-color: {{ block.settings.hover_background_color }};
+                --border-color: {{ block.settings.border_color }};
+                --border-width: {{ block.settings.border_width }}px;
+              "
+              {{ block.shopify_attributes }}
+            >
+              {{ block.settings.text | upcase }}
+            </a>
+        {%- endcase -%}
+      {%- endfor -%}
     </div>
   </div>
 </section>
@@ -111,6 +155,66 @@
     .prestige-service__content {
       padding: 100px 60px;
     }
+  }
+
+  .prestige-subheading {
+    color: var(--text-color, #FFFFFF);
+    font-family: Inter, sans-serif;
+    font-size: var(--font-size, 16px);
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px;
+    letter-spacing: var(--letter-spacing, 1.6px);
+    text-transform: uppercase;
+    margin: 0;
+  }
+
+  .prestige-heading {
+    color: var(--text-color, #FFFFFF);
+    font-family: "Portrait LC", serif;
+    font-size: var(--font-size, 48px);
+    font-style: normal;
+    font-weight: 500;
+    line-height: var(--line-height, 1.2);
+    max-width: var(--max-width, 600px);
+    margin: 0;
+  }
+
+  @media (max-width: 767px) {
+    .prestige-heading {
+      font-size: calc(var(--font-size, 48px) * 0.65);
+    }
+  }
+
+  .prestige-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 32px;
+    color: var(--text-color, #000000);
+    background-color: var(--bg-color, #FFFFFF);
+    border: var(--border-width, 1px) solid var(--border-color, #FFFFFF);
+    font-family: Inter, sans-serif;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .prestige-button:hover {
+    color: var(--hover-text-color, #FFFFFF);
+    background-color: var(--hover-bg-color, #000000);
+    border-color: var(--hover-bg-color, #000000);
+  }
+
+  .prestige-button:focus {
+    outline: 2px solid var(--hover-bg-color, #000000);
+    outline-offset: 2px;
   }
 {% endstylesheet %}
 
