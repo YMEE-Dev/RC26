@@ -1,0 +1,336 @@
+<!-- /sections/section-new-main-blog-banner.liquid -->
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign article = nil
+  assign subheading_text = ''
+  if blog != blank
+    assign article = blog.articles | first
+    if section.settings.subheading != blank
+      assign subheading_text = section.settings.subheading
+    else
+      assign subheading_text = section.settings.subheading_prefix | append: blog.title
+    endif
+  endif
+-%}
+
+{%- style -%}
+  #NewMainBlogBanner--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    padding-inline:  var(--outer);
+  }
+{%- endstyle -%}
+
+<section
+  id="NewMainBlogBanner--{{ section.id }}"
+  class="new-main-blog-banner section-padding {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="new-main-blog-banner"
+>
+  {%- if blog != blank and article != blank -%}
+    <div class="new-main-blog-banner__wrapper {{ section.settings.width }}">
+      <div class="new-main-blog-banner__media">
+        {%- if article.featured_image != blank -%}
+          <a href="{{ article.url }}" class="new-main-blog-banner__media-link">
+            {%- render 'image', image: article.featured_image, sizes: '100vw' -%}
+          </a>
+        {%- endif -%}
+      </div>
+
+      <div class="new-main-blog-banner__content">
+        <div class="new-main-blog-banner__text">
+          {%- if section.settings.show_subheading and subheading_text != blank -%}
+            <p class="new-main-blog-banner__subheading">{{ subheading_text | upcase }}</p>
+          {%- endif -%}
+          <h1 class="new-main-blog-banner__heading {{ section.settings.heading_font_size }}">
+            <a href="{{ article.url }}">{{ article.title }}</a>
+          </h1>
+          {%- if section.settings.show_description and article.excerpt_or_content != blank -%}
+            <div class="new-main-blog-banner__description rte">
+              {{ article.excerpt_or_content | strip_html | truncate: section.settings.description_length }}
+            </div>
+          {%- endif -%}
+        </div>
+        <div class="new-main-blog-banner__button-wrap">
+          <a
+            href="{{ article.url }}"
+            class="btn {{ section.settings.button_style }} {{ section.settings.button_size }} {{ section.settings.button_type }}"
+          >
+            {{ section.settings.button_text | default: 'Read story' }}
+          </a>
+        </div>
+      </div>
+    </div>
+  {%- else -%}
+    {%- if blog != blank and blog.articles.size == 0 -%}
+      <div class="new-main-blog-banner__wrapper {{ section.settings.width }}">
+        <p class="new-main-blog-banner__empty">{{ section.settings.empty_message | default: 'No posts yet.' }}</p>
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+</section>
+
+{% stylesheet %}
+  .new-main-blog-banner__wrapper {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .new-main-blog-banner__media {
+    width: 100%;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+
+  .new-main-blog-banner__media-link {
+    display: block;
+  }
+
+  .new-main-blog-banner__media img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+
+  .new-main-blog-banner__content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+
+  .new-main-blog-banner__text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .new-main-blog-banner__subheading {
+    margin: 0 0 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    line-height: 1.3;
+  }
+
+  .new-main-blog-banner__heading {
+    margin: 0 0 0.75rem;
+    line-height: 1.2;
+  }
+
+  .new-main-blog-banner__heading a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .new-main-blog-banner__heading a:hover {
+    text-decoration: underline;
+  }
+
+  .new-main-blog-banner__description {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+
+  .new-main-blog-banner__description p {
+    margin: 0 0 0.5em;
+  }
+
+  .new-main-blog-banner__description p:last-child {
+    margin-bottom: 0;
+  }
+
+  .new-main-blog-banner__button-wrap {
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  .new-main-blog-banner__empty {
+    margin: 0;
+    text-align: center;
+    padding: 2rem;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Blog banner",
+  "tag": "section",
+  "class": "section-new-main-blog-banner",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Subheading"
+    },
+    {
+      "type": "checkbox", 
+      "id": "show_subheading",
+      "label": "Show subheading",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "subheading_prefix",
+      "label": "Subheading prefix",
+      "default": "Latest in #",
+      "info": "Shown before the blog title. Leave blank to show only blog title."
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading override",
+      "info": "Leave blank to use blog title (e.g. Celebrity). Set to override (e.g. FASHION)."
+    },
+    {
+      "type": "header",
+      "content": "Description"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show description",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "description_length",
+      "min": 80,
+      "max": 300,
+      "step": 20,
+      "unit": "chr",
+      "label": "Description length",
+      "default": 120
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Read story"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "default": "btn--outline",
+      "options": [
+        { "value": "btn--solid", "label": "Solid" },
+        { "value": "btn--outline", "label": "Outline" },
+        { "value": "btn--text", "label": "Text" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_type",
+      "label": "Button color",
+      "default": "btn--black",
+      "options": [
+        { "value": "btn--black", "label": "Black" },
+        { "value": "btn--white", "label": "White" },
+        { "value": "btn--primary", "label": "Primary" },
+        { "value": "btn--secondary", "label": "Secondary" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button size",
+      "default": "",
+      "options": [
+        { "value": "btn--small", "label": "Small" },
+        { "value": "", "label": "Medium" },
+        { "value": "btn--large", "label": "Large" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "select",
+      "id": "heading_font_size",
+      "label": "Heading size",
+      "default": "heading-large",
+      "options": [
+        { "value": "heading-mini", "label": "Mini" },
+        { "value": "heading-x-small", "label": "Extra small" },
+        { "value": "heading-small", "label": "Small" },
+        { "value": "heading-medium", "label": "Medium" },
+        { "value": "heading-large", "label": "Large" },
+        { "value": "heading-x-large", "label": "Extra large" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Layout width",
+      "default": "wrapper",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Normal" },
+        { "value": "wrapper--wide", "label": "Wide" },
+        { "value": "wrapper--narrow", "label": "Narrow" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Empty state"
+    },
+    {
+      "type": "text",
+      "id": "empty_message",
+      "label": "Message when no posts",
+      "default": "No posts yet."
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blog banner",
+      "category": "Blog"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "aside", "footer"]
+  }
+}
+{% endschema %}
