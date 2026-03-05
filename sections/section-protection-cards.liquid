@@ -91,13 +91,52 @@
   .protection-cards__heading {
     color: #000;
     text-align: center;
-
-    /* RC26/Display/L */
-    font-family: "Portrait LC";
-    font-size: 40px;
+    margin: 0 0 60px;
+    font-family: "Portrait LC", serif;
     font-style: normal;
-    font-weight: 500 !important;
-    line-height: 48px; /* 120% */
+    font-weight: 500;
+  }
+
+  .protection-cards__heading.heading-small {
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .protection-cards__heading.heading-medium {
+    font-size: 32px;
+    line-height: 40px;
+  }
+
+  .protection-cards__heading.heading-large {
+    font-size: 40px;
+    line-height: 48px;
+  }
+
+  .protection-cards__heading.heading-x-large {
+    font-size: 48px;
+    line-height: 56px;
+  }
+
+  @media (max-width: 767px) {
+    .protection-cards__heading.heading-small {
+      font-size: 20px;
+      line-height: 28px;
+    }
+
+    .protection-cards__heading.heading-medium {
+      font-size: 24px;
+      line-height: 32px;
+    }
+
+    .protection-cards__heading.heading-large {
+      font-size: 28px;
+      line-height: 36px;
+    }
+
+    .protection-cards__heading.heading-x-large {
+      font-size: 32px;
+      line-height: 40px;
+    }
   }
 
   .protection-cards__grid {
@@ -232,6 +271,18 @@
       "id": "heading",
       "label": "Heading",
       "default": "The Art of Protecting Beauty"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "default": "heading-large",
+      "options": [
+        { "value": "heading-small", "label": "Small" },
+        { "value": "heading-medium", "label": "Medium" },
+        { "value": "heading-large", "label": "Large" },
+        { "value": "heading-x-large", "label": "Extra large" }
+      ]
     },
     {
       "type": "header",
