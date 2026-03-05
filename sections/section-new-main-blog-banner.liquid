@@ -34,7 +34,7 @@
       <div class="new-main-blog-banner__media">
         {%- if banner_image != blank -%}
           <a href="{{ article.url }}" class="new-main-blog-banner__media-link">
-            {%- render 'image', image: banner_image, sizes: '100vw', alt: section.settings.image_alt | default: article.title -%}
+            <img src="{{ banner_image | img_url: 'master' }}" alt="{{ section.settings.image_alt | default: article.title }}" width="1000" height="1000">
           </a>
         {%- endif -%}
       </div>
