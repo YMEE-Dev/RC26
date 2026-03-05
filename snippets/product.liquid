@@ -452,14 +452,14 @@
       @media only screen and (min-width: 750px) and (max-width: 989px) {
 
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: calc(100vh - var(--pdp-sticky-bar-height, 100px) + 20px);
+          height: var(--full-screen, var(--full-height, 100vh));
         }
       }
 
       @media only screen and (max-width: 749px) {
 
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: calc(100vh - var(--pdp-sticky-bar-height, 100px) - 20px);
+          height: var(--full-screen, var(--full-height, 100vh));
         }
       }
 
@@ -2554,6 +2554,11 @@
                         margin-bottom: 20px;
                       }
 
+                      .product__custom-drawers-row-ecommerce_experience {
+                        display: flex;
+                        flex-direction: column;
+                      }
+
                       @media only screen and (max-width: 749px) {
                         .product__custom-drawers-row {
                           overflow: hidden;
@@ -2561,6 +2566,30 @@
                           overflow-x: auto;
                           margin: 20px 0;
                         }
+
+                        .product__custom-drawers-row-ecommerce_experience {
+                          display: grid;
+                          grid-template-columns: 1fr 1fr;
+                          grid-template-areas:
+                            "block1 block3"
+                            "block2 block4";
+                          gap: 10px;
+                        }
+
+                        .product__custom-drawers-row-ecommerce_experience > .product__block:nth-child(1) { grid-area: block1; }
+                        .product__custom-drawers-row-ecommerce_experience > .product__block:nth-child(2) { grid-area: block2; }
+                        .product__custom-drawers-row-ecommerce_experience > .product__block:nth-child(3) { grid-area: block3; }
+                        .product__custom-drawers-row-ecommerce_experience > .product__block:nth-child(4) { grid-area: block4; }
+
+                        .product__custom-drawers-row-ecommerce_experience .link-with-icon--icon-right {
+                          margin-bottom: 0;
+                        }
+
+                        .product__custom-drawers-row-ecommerce_experience .link-with-icon--icon-right .link-with-icon__row {
+                          flex-direction: row;
+                          justify-content: flex-start;
+                        }
+
                       }
  
                     </style>
@@ -2575,6 +2604,7 @@
                       <hr class="divider">
                     </div>
 
+                    <div class="product__custom-drawers-row-ecommerce_experience">
                     {%- for block in side_drawer_blocks -%}
                       {%- liquid
                         assign drawer_id = block.settings.drawer_id | strip | handleize
@@ -2593,6 +2623,7 @@
                         %}
                       </div>
                     {%- endfor -%}
+                    </div>
 
                     <div class="product__block product__custom-drawer product__ruby-signature">
                       {% render 'link-with-icon',
