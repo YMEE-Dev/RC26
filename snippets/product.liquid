@@ -899,10 +899,38 @@
         }
 
         #MainProduct--{{ section.id }} .product__content-columns {
-          display: flex;
-          flex-direction: column-reverse;
-          gap: 0;
+          display: grid;
+          grid-template-columns: 1fr;
+          grid-template-areas:
+            "buttons"
+            "custom-drawers"
+            "accordions"
+            "custom-drawers-ecom"
+            "ruby-signature"
+            "collection";
+          gap: 20px;
         }
+      
+        /* flatten wrappers so children participate in same grid */
+        #MainProduct--{{ section.id }} .product__content-columns__main,
+        #MainProduct--{{ section.id }} .product__content-columns__aside {
+          display: contents;
+        }
+      
+        /* IMPORTANT: aside sticky must be disabled on mobile */
+        #MainProduct--{{ section.id }} .product__content-columns__aside {
+          position: static;
+          top: auto;
+          z-index: auto;
+        }
+      
+        /* map real blocks to areas */
+        #MainProduct--{{ section.id }} .product__block--buttons { grid-area: buttons; }
+        #MainProduct--{{ section.id }} .product__custom-drawers-row { grid-area: custom-drawers; }
+        #MainProduct--{{ section.id }} .product-accordions-container { grid-area: accordions; }
+        #MainProduct--{{ section.id }} .product__custom-drawers-row-ee { grid-area: custom-drawers-ecom; }
+        #MainProduct--{{ section.id }} .product__ruby-signature { grid-area: ruby-signature; }
+        #MainProduct--{{ section.id }} .product__collection-section { grid-area: collection; }
 
         #MainProduct--{{ section.id }} .product__content {
           margin: 20px 0 0;
@@ -915,7 +943,7 @@
           padding-left: 20px;
           padding-right: 20px;
         }
-        
+
       }
 
       @media only screen and (min-width: 750px) and (max-width: 989px) {
@@ -949,6 +977,10 @@
         #MainProduct--{{ section.id }} .product__title-price > .product__block,
         #MainProduct--{{ section.id }} .product__title-price .shop-pay-terms {
           margin: 0;
+        }
+
+        #MainProduct--{{ section.id }} .product__description {
+          display: none;
         }
       }
 
@@ -1947,6 +1979,7 @@
                     -%}
                   {%- endif -%}
 
+              <div class="product-accordions-container">
               {%- for block in section.blocks -%}
                 {%- if title_block != blank and block.id == title_block.id -%}
                   {%- continue -%}
@@ -2484,6 +2517,7 @@
                     </div>
                 {%- endcase -%}
               {%- endfor -%}
+              </div>
 
               {%- render 'product-collection-section', product: product -%}
 
@@ -2554,7 +2588,7 @@
                         margin-bottom: 20px;
                       }
 
-                      .product__custom-drawers-row-ecommerce_experience {
+                      .product__custom-drawers-row-ee {
                         display: flex;
                         flex-direction: column;
                       }
@@ -2567,7 +2601,7 @@
                           margin: 20px 0;
                         }
 
-                        .product__custom-drawers-row-ecommerce_experience {
+                        .product__custom-drawers-row-ee {
                           display: grid;
                           grid-template-columns: 1fr 1fr;
                           grid-template-areas:
@@ -2576,16 +2610,16 @@
                           gap: 10px;
                         }
 
-                        .product__custom-drawers-row-ecommerce_experience > .product__block:nth-child(1) { grid-area: block1; }
-                        .product__custom-drawers-row-ecommerce_experience > .product__block:nth-child(2) { grid-area: block2; }
-                        .product__custom-drawers-row-ecommerce_experience > .product__block:nth-child(3) { grid-area: block3; }
-                        .product__custom-drawers-row-ecommerce_experience > .product__block:nth-child(4) { grid-area: block4; }
+                        .product__custom-drawers-row-ee > .product__block:nth-child(1) { grid-area: block1; }
+                        .product__custom-drawers-row-ee > .product__block:nth-child(2) { grid-area: block2; }
+                        .product__custom-drawers-row-ee > .product__block:nth-child(3) { grid-area: block3; }
+                        .product__custom-drawers-row-ee > .product__block:nth-child(4) { grid-area: block4; }
 
-                        .product__custom-drawers-row-ecommerce_experience .link-with-icon--icon-right {
+                        .product__custom-drawers-row-ee .link-with-icon--icon-right {
                           margin-bottom: 0;
                         }
 
-                        .product__custom-drawers-row-ecommerce_experience .link-with-icon--icon-right .link-with-icon__row {
+                        .product__custom-drawers-row-ee .link-with-icon--icon-right .link-with-icon__row {
                           flex-direction: row;
                           justify-content: flex-start;
                         }
@@ -2594,46 +2628,48 @@
  
                     </style>
 
-                    <div class="product__block product__text text-left">
-                      <p class="product__heading">
-                        {{ 'products.product.ecommerce_experience' | t }}
-                      </p>
-                    </div>
+                    <div class="product__custom-drawers-ee">
+                      <div class="product__block product__text text-left">
+                        <p class="product__heading">
+                          {{ 'products.product.ecommerce_experience' | t }}
+                        </p>
+                      </div>
 
-                    <div class="divider-holder block-padding">
-                      <hr class="divider">
-                    </div>
+                      <div class="divider-holder block-padding">
+                        <hr class="divider">
+                      </div>
 
-                    <div class="product__custom-drawers-row-ecommerce_experience">
-                    {%- for block in side_drawer_blocks -%}
-                      {%- liquid
-                        assign drawer_id = block.settings.drawer_id | strip | handleize
-                        if drawer_id == blank
-                          assign drawer_id = block.id
-                        endif
-                      -%}
+                      <div class="product__custom-drawers-row-ee">
+                      {%- for block in side_drawer_blocks -%}
+                        {%- liquid
+                          assign drawer_id = block.settings.drawer_id | strip | handleize
+                          if drawer_id == blank
+                            assign drawer_id = block.id
+                          endif
+                        -%}
 
-                      <div class="product__block" {{ block.shopify_attributes }}>
+                        <div class="product__block" {{ block.shopify_attributes }}>
+                          {% render 'link-with-icon',
+                            text: block.settings.trigger_text,
+                            drawer_open: drawer_id,
+                            icon: block.settings.trigger_icon,
+                            icon_position: block.settings.trigger_icon_position,
+                            content_alignment: block.settings.trigger_alignment
+                          %}
+                        </div>
+                      {%- endfor -%}
+                      </div>
+
+                      <div class="product__block product__custom-drawer product__ruby-signature">
                         {% render 'link-with-icon',
-                          text: block.settings.trigger_text,
-                          drawer_open: drawer_id,
-                          icon: block.settings.trigger_icon,
-                          icon_position: block.settings.trigger_icon_position,
-                          content_alignment: block.settings.trigger_alignment
+                          text: 'The Ruby — Roberto Coin''s Signature',
+                          drawer_open: 'ruby-signature',
+                          icon: 'icon-ruby-signature',
+                          icon_position: 'left',
+                          content_alignment: 'left',
+                          hero_image: 'https://cdn.shopify.com/s/files/1/0969/2990/7075/files/ruby-section.jpg?v=1772007648'
                         %}
                       </div>
-                    {%- endfor -%}
-                    </div>
-
-                    <div class="product__block product__custom-drawer product__ruby-signature">
-                      {% render 'link-with-icon',
-                        text: 'The Ruby — Roberto Coin''s Signature',
-                        drawer_open: 'ruby-signature',
-                        icon: 'icon-ruby-signature',
-                        icon_position: 'left',
-                        content_alignment: 'left',
-                        hero_image: 'https://cdn.shopify.com/s/files/1/0969/2990/7075/files/ruby-section.jpg?v=1772007648'
-                      %}
                     </div>
                   </div>
 
