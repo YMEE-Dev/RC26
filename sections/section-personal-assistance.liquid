@@ -23,11 +23,7 @@
       <div class="personal-assistance__media">
         {%- if section.settings.image != blank -%}
           <div class="personal-assistance__image">
-            {%- render 'image',
-              image: section.settings.image,
-              sizes: '(min-width: 990px) 50vw, 100vw',
-              loading: 'eager'
-            -%}
+            <img src="{{ section.settings.image | img_url: 'master' }}" alt="{{ section.settings.image.alt }}" width="1000" height="1000">
           </div>
         {%- else -%}
           <div class="personal-assistance__placeholder">
