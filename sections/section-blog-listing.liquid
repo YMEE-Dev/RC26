@@ -287,9 +287,9 @@ a.blog-listing__view-all {
       const nav = document.getElementById("blogNav");
     
       blogs.forEach(blog => {
-        {% comment %} if (blog.handle === "all" || blog.articles.nodes.length === 0) {
+        if (blog.handle === "all") {
           return;
-        } {% endcomment %}
+        }
         const link = document.createElement("a");
     
         link.href = `/blogs/${blog.handle}`;
