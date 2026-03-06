@@ -41,14 +41,11 @@
     const STOREFRONT_TOKEN = "{{ shop.metaobjects.storefront_access_token.value }}";
     const SHOP_DOMAIN = "{{ shop.domain }}";
     
-    // Get current URL info
+    // Get current blog handle from URL
     const currentPath = window.location.pathname;
     const blogMatch = currentPath.match(/\/blogs\/([^\/]+)/);
-    const currentBlogHandle = blogMatch ? blogMatch[1] : null;
-    
-    // Check if there's a tag filter
-    const tagMatch = currentPath.match(/\/tagged\/([^\/]+)/);
-    const currentTag = tagMatch ? decodeURIComponent(tagMatch[1]) : null;
+    const currentBlogHandle = blogMatch ? blogMatch[1] : 'all';
+    const isAllBlogs = currentBlogHandle === 'all';
     const articleQuery = isAllBlogs 
     ? `{
         articles(first: 1, sortKey: PUBLISHED_AT, reverse: true) {
