@@ -156,9 +156,7 @@
     const grid = document.querySelector(".blog-listing__grid");
 
     articles.forEach(article => {
-      if (article.blog.handle === "{{ blog.handle }}") {
-        return;
-      }
+      if (index === 0) return;
       const image = article.image?.url || "";
       const tag = article.tags[0] || "";
       const url = `/blogs/${article.blog.handle}/${article.handle}`;
