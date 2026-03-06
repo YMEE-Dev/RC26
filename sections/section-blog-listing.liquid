@@ -125,24 +125,51 @@
       /* -----------------------------
   ARTICLES (All Blogs)
   ----------------------------- */
-  const articleQuery = `
-  {
-    articles(first: 250, sortKey: PUBLISHED_AT, reverse: true) {
-      nodes {
-        title
-        handle
-        excerpt
-        tags
-        image {
-          url
-          altText
+  
+  // Get current blog handle from URL
+  const currentPath = window.location.pathname;
+  const blogMatch = currentPath.match(/\/blogs\/([^\/]+)/);
+  const currentBlogHandle = blogMatch ? blogMatch[1] : 'all';
+  const isAllBlogs = currentBlogHandle === 'all';
+
+  // Build GraphQL query based on blog
+  const articleQuery = isAllBlogs 
+    ? `{
+        articles(first: 250, sortKey: PUBLISHED_AT, reverse: true) {
+          nodes {
+            title
+            handle
+            excerpt
+            tags
+            image {
+              url
+              altText
+            }
+            blog {
+              handle
+            }
+          }
         }
-        blog {
-          handle
+      }`
+    : `{
+        blog(handle: "${currentBlogHandle}") {
+          articles(first: 250, sortKey: PUBLISHED_AT, reverse: true) {
+            nodes {
+              title
+              handle
+              excerpt
+              tags
+              image {
+                url
+                altText
+              }
+              blog {
+                handle
+              }
+            }
+          }
         }
-      }
-    }
-  }`;
+      }`;
 
   let allArticles = [];
   let currentPage = 1;
@@ -199,7 +226,13 @@
   })
   .then(res => res.json())
   .then(data => {
-    allArticles = data.data.articles.nodes;
+    // Get articles based on query type
+    if (isAllBlogs) {
+      allArticles = data.data.articles.nodes;
+    } else {
+      allArticles = data.data.blog?.articles?.nodes || [];
+    }
+    
     const grid = document.querySelector(".blog-listing__grid");
     const loader = document.getElementById("blogLoading");
     loader.remove();
