@@ -457,7 +457,7 @@
   color: var(--text, #000);
   font-size: var(--FONT-SIZE-LABEL, 12px);
   font-weight: var(--FONT-WEIGHT-BODY, 400);
-    line-height: var(--LINE-HEIGHT-BODY, 18px);
+  line-height: var(--LINE-HEIGHT-BODY, 18px);
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
@@ -465,6 +465,12 @@
 
 .ymee-variant-dropdown__sizing-link:hover {
   opacity: 0.7;
+}
+
+@media only screen and (max-width: 749px) {
+  .ymee-variant-dropdown__sizing-link {
+    color: #fff;
+  }
 }
 
 .ymee-variant-dropdown__tape-icon {
@@ -516,14 +522,15 @@
 .ymee-variant-sheet__title {
   color: #fff;
   font: inherit;
-  font-size: var(--FONT-SIZE-LABEL, 12px);
-  font-style: normal;
-  font-weight: var(--FONT-WEIGHT-BODY, 400);
-  line-height: var(--LINE-HEIGHT-BODY, 18px);
+  font-size: var(--BTN-FONT-SIZE);
+  font-weight: var(--BTN-FONT-WEIGHT);
+  line-height: var(--BTN-LINE-HEIGHT);
+  letter-spacing: var(--BTN-LETTER-SPACING);
   text-transform: uppercase;
 }
 
 .ymee-variant-sheet__close {
+  display: flex;
   border: 0;
   background: transparent;
   font: inherit;
@@ -532,6 +539,7 @@
 
 .ymee-variant-sheet__close svg path {
   stroke: #fff;
+  stroke-width: 1px;
 }
 
 .ymee-variant-sheet__body {
