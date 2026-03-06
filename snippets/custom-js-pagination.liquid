@@ -1,0 +1,207 @@
+<!-- Custom JavaScript Pagination Component -->
+<div class="custom-js-pagination" data-total-pages="0" data-current-page="1"></div>
+
+{% stylesheet %}
+  .custom-js-pagination {
+    width: 100%;
+    margin-top: 60px;
+    padding: 40px 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .custom-js-pagination__container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+  }
+
+  .custom-js-pagination__numbers {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .custom-js-pagination__number,
+  .custom-js-pagination__link {
+    color: var(--000000, #000);
+    font-family: Inter, sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    text-decoration: none;
+    position: relative;
+    padding-bottom: 4px;
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+    background: none;
+    border: none;
+  }
+
+  .custom-js-pagination__number:hover,
+  .custom-js-pagination__link:hover {
+    opacity: 0.7;
+  }
+
+  .custom-js-pagination__number--current {
+    font-weight: 600;
+  }
+
+  .custom-js-pagination__number--current::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: currentColor;
+  }
+
+  .custom-js-pagination__link[disabled] {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 767px) {
+    .custom-js-pagination__container {
+      gap: 16px;
+    }
+
+    .custom-js-pagination__numbers {
+      gap: 16px;
+    }
+
+    .custom-js-pagination__number,
+    .custom-js-pagination__link {
+      font-size: 12px;
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  class CustomPagination {
+    constructor(container, options = {}) {
+      this.container = container;
+      this.currentPage = parseInt(container.dataset.currentPage) || 1;
+      this.totalPages = parseInt(container.dataset.totalPages) || 1;
+      this.onPageChange = options.onPageChange || (() => {});
+      
+      this.render();
+    }
+
+    setPage(page) {
+      if (page < 1 || page > this.totalPages) return;
+      this.currentPage = page;
+      this.container.dataset.currentPage = page;
+      this.render();
+      this.onPageChange(page);
+    }
+
+    setTotalPages(total) {
+      this.totalPages = total;
+      this.container.dataset.totalPages = total;
+      this.render();
+    }
+
+    render() {
+      if (this.totalPages <= 1) {
+        this.container.innerHTML = '';
+        return;
+      }
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'custom-js-pagination__container';
+
+      // Previous button
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'custom-js-pagination__link custom-js-pagination__prev';
+      prevBtn.innerHTML = '<span>PREV</span>';
+      prevBtn.disabled = this.currentPage === 1;
+      prevBtn.addEventListener('click', () => this.setPage(this.currentPage - 1));
+      wrapper.appendChild(prevBtn);
+
+      // Numbers
+      const numbers = document.createElement('div');
+      numbers.className = 'custom-js-pagination__numbers';
+      
+      const pageNumbers = this.getPageNumbers();
+      pageNumbers.forEach((num, index) => {
+        if (num === '...') {
+          const ellipsis = document.createElement('span');
+          ellipsis.className = 'custom-js-pagination__ellipsis';
+          ellipsis.textContent = '...';
+          numbers.appendChild(ellipsis);
+        } else {
+          const btn = document.createElement('button');
+          btn.className = 'custom-js-pagination__number';
+          if (num === this.currentPage) {
+            btn.classList.add('custom-js-pagination__number--current');
+          }
+          btn.textContent = num;
+          btn.addEventListener('click', () => this.setPage(num));
+          numbers.appendChild(btn);
+        }
+      });
+      
+      wrapper.appendChild(numbers);
+
+      // Next button
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'custom-js-pagination__link custom-js-pagination__next';
+      nextBtn.innerHTML = '<span>NEXT</span>';
+      nextBtn.disabled = this.currentPage === this.totalPages;
+      nextBtn.addEventListener('click', () => this.setPage(this.currentPage + 1));
+      wrapper.appendChild(nextBtn);
+
+      this.container.innerHTML = '';
+      this.container.appendChild(wrapper);
+    }
+
+    getPageNumbers() {
+      const pages = [];
+      const showMax = 5; // Maximum number of page buttons to show
+
+      if (this.totalPages <= showMax) {
+        for (let i = 1; i <= this.totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        if (this.currentPage <= 3) {
+          for (let i = 1; i <= 4; i++) pages.push(i);
+          pages.push('...');
+          pages.push(this.totalPages);
+        } else if (this.currentPage >= this.totalPages - 2) {
+          pages.push(1);
+          pages.push('...');
+          for (let i = this.totalPages - 3; i <= this.totalPages; i++) pages.push(i);
+        } else {
+          pages.push(1);
+          pages.push('...');
+          pages.push(this.currentPage - 1);
+          pages.push(this.currentPage);
+          pages.push(this.currentPage + 1);
+          pages.push('...');
+          pages.push(this.totalPages);
+        }
+      }
+
+      return pages;
+    }
+  }
+
+  // Usage example:
+  // const paginationEl = document.querySelector('.custom-js-pagination');
+  // const pagination = new CustomPagination(paginationEl, {
+  //   onPageChange: (page) => {
+  //     console.log('Page changed to:', page);
+  //     // Load content for this page
+  //   }
+  // });
+  // pagination.setTotalPages(10); // Set total pages
+  // pagination.setPage(1); // Set current page
+
+  window.CustomPagination = CustomPagination;
+{% endjavascript %}
