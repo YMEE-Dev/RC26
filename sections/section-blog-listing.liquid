@@ -112,7 +112,9 @@
   document.addEventListener('DOMContentLoaded', function() {
     const STOREFRONT_TOKEN = "{{ shop.metaobjects.storefront_access_token.value }}";
     const SHOP_DOMAIN = "{{ shop.domain }}";
-    
+      /* -----------------------------
+  NAVIGATION (Blogs)
+  ----------------------------- */
     const query = `
     {
       blogs(first: 50) {
@@ -150,6 +152,75 @@
         nav.appendChild(link);
       });
     });
+
+      /* -----------------------------
+  ARTICLES (All Blogs)
+  ----------------------------- */
+  const articleQuery = `
+  {
+    articles(first: 20, sortKey: PUBLISHED_AT, reverse: true) {
+      nodes {
+        title
+        handle
+        excerpt
+        tags
+        image {
+          url
+          altText
+        }
+        blog {
+          handle
+        }
+      }
+    }
+  }`;
+
+  fetch(`https://${SHOP_DOMAIN}/api/2026-01/graphql.json`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Shopify-Storefront-Access-Token": STOREFRONT_TOKEN
+    },
+    body: JSON.stringify({ query: articleQuery })
+  })
+  .then(res => res.json())
+  .then(data => {
+
+    const articles = data.data.articles.nodes;
+    const grid = document.querySelector(".blog-listing__grid");
+
+    articles.forEach(article => {
+
+      const image = article.image?.url || "";
+      const tag = article.tags[0] || "";
+      const url = `/blogs/${article.blog.handle}/${article.handle}`;
+
+      const html = `
+        <article class="blog-listing__card">
+          <a href="${url}" class="blog-listing__card-link">
+
+            <div class="blog-listing__card-media">
+              ${image 
+                ? `<img src="${image}" alt="${article.title}" width="1000" height="1000">`
+                : `<div class="placeholder">No Image</div>`
+              }
+            </div>
+
+            <div class="blog-listing__card-body">
+              ${tag ? `<p class="blog-listing__card-tag">#${tag.toUpperCase()}</p>` : ""}
+              <h2 class="blog-listing__card-title">${article.title}</h2>
+              <p class="blog-listing__card-excerpt">${article.excerpt || ""}</p>
+            </div>
+
+          </a>
+        </article>
+      `;
+
+      grid.insertAdjacentHTML("beforeend", html);
+
+    });
+
+  });
   });
 </script>
 
