@@ -964,6 +964,19 @@
           padding-right: 20px;
         }
 
+        /* Hide variant-selects on mobile only when YMEE dropdown is active */
+        #MainProduct--{{ section.id }}[data-ymee-variant-dropdown-enabled="true"] .product__content-columns__main .product__form__holder {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border: 0;
+        }
+
         product-info.index-product .product__content {
           margin-top: 16px;
           padding-left: 20px;
