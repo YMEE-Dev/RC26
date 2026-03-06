@@ -63,44 +63,10 @@
     {%- if blog != blank -%}
       {%- paginate blog.articles by articles_per_page -%}
         <div class="blog-listing__grid">
-          {%- for article in blog.articles -%}
-            {%- unless forloop.first -%}
-            <article class="blog-listing__card">
-              <a href="{{ article.url }}" class="blog-listing__card-link">
-                {%- if article.image != blank -%}
-                  <div class="blog-listing__card-media">
-                   <img src="{{ article.image | img_url: 'master' }}" alt="{{ article.title }}" width="1000" height="1000">
-                  </div>
-                  {% else %}
-                    <div class="blog-listing__card-media">
-                      {{ 'lifestyle-1' | placeholder_svg_tag: 'custom-class' }}
-                    </div>
-          
-                {%- endif -%}
-                <div class="blog-listing__card-body">
-                  {%- if section.settings.show_tag and article.tags.size > 0 -%}
-                    <p class="blog-listing__card-tag">#{{ article.tags.first | upcase }}</p>
-                  {%- endif -%}
-                  <h2 class="blog-listing__card-title {{ section.settings.title_font_size }}">
-                    {{ article.title }}
-                  </h2>
-                  {%- if section.settings.show_excerpt and article.excerpt_or_content != blank -%}
-                    <p class="blog-listing__card-excerpt">
-                      {{ article.excerpt_or_content | strip_html | truncatewords: section.settings.excerpt_words | default: 20 }}
-                    </p>
-                  {%- endif -%}
-                </div>
-              </a>
-            </article>
-            {%- endunless -%}
-          {%- endfor -%}
+    
         </div>
 
-        {%- if paginate.pages > 1 -%}
-          <div class="blog-listing__pagination">
-            {{ paginate | default_pagination }}
-          </div>
-        {%- endif -%}
+       
       {%- endpaginate -%}
     {%- else -%}
       <p class="blog-listing__empty">{{ section.settings.empty_message | default: 'Add this section to a blog template to show articles (e.g. from /blogs/celebrity).' }}</p>
