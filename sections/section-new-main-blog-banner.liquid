@@ -1,10 +1,8 @@
 <!-- /sections/section-new-main-blog-banner.liquid -->
 {%- liquid
   assign color_scheme = 'color-' | append: section.settings.color_scheme
-  assign article = nil
   assign subheading_text = ''
   if blog != blank
-    assign article = blog.articles | first
     if section.settings.subheading != blank
       assign subheading_text = section.settings.subheading
     else
@@ -27,53 +25,193 @@
   class="new-main-blog-banner section-padding {{ color_scheme }}"
   data-section-id="{{ section.id }}"
   data-section-type="new-main-blog-banner"
+  data-blog-handle="{{ blog.handle | default: 'all' }}"
 >
-  {%- if blog != blank and article != blank -%}
-    <div class="new-main-blog-banner__wrapper {{ section.settings.width }}">
-      {%- assign banner_image = section.settings.image | default: article.image -%}
-
-      <div class="new-main-blog-banner__media">
-        {%- if banner_image != blank -%}
-          <a href="{{ article.url }}" class="new-main-blog-banner__media-link">
-            <img src="{{ banner_image | img_url: 'master' }}" alt="{{ section.settings.image_alt | default: article.title }}" width="1000" height="1000">
-          </a>
-        {%- endif -%}
-      </div>
-
-      <div class="new-main-blog-banner__content">
-        <div class="new-main-blog-banner__text">
-          {%- if section.settings.show_subheading and subheading_text != blank -%}
-            <p class="new-main-blog-banner__subheading">{{ subheading_text | upcase }}</p>
-          {%- endif -%}
-          <h1 class="new-main-blog-banner__heading {{ section.settings.heading_font_size }}">
-            <a href="{{ article.url }}">{{ article.title }}</a>
-          </h1>
-          {%- if section.settings.show_description and article.excerpt_or_content != blank -%}
-            <div class="new-main-blog-banner__description rte">
-              {{ article.excerpt_or_content | strip_html | truncate: section.settings.description_length }}
-            </div>
-          {%- endif -%}
-        </div>
-        <div class="new-main-blog-banner__button-wrap">
-          <a
-            href="{{ article.url }}"
-            class="btn {{ section.settings.button_style }} {{ section.settings.button_size }} {{ section.settings.button_type }} new-main-blog-banner__button"
-          >
-            {{ section.settings.button_text | default: 'Read story' }}
-          </a>
-        </div>
-      </div>
+  <div class="new-main-blog-banner__wrapper {{ section.settings.width }}" id="blogBannerContent">
+    <div class="blog-banner-loading">
+      <div class="spinner"></div>
     </div>
-  {%- else -%}
-    {%- if blog != blank and blog.articles.size == 0 -%}
-      <div class="new-main-blog-banner__wrapper {{ section.settings.width }}">
-        <p class="new-main-blog-banner__empty">{{ section.settings.empty_message | default: 'No posts yet.' }}</p>
-      </div>
-    {%- endif -%}
-  {%- endif -%}
+  </div>
 </section>
 
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const section = document.querySelector('[data-section-type="new-main-blog-banner"]');
+    const container = document.getElementById('blogBannerContent');
+    const STOREFRONT_TOKEN = "{{ shop.metaobjects.storefront_access_token.value }}";
+    const SHOP_DOMAIN = "{{ shop.domain }}";
+    
+    // Get current URL info
+    const currentPath = window.location.pathname;
+    const blogMatch = currentPath.match(/\/blogs\/([^\/]+)/);
+    const currentBlogHandle = blogMatch ? blogMatch[1] : null;
+    
+    // Check if there's a tag filter
+    const tagMatch = currentPath.match(/\/tagged\/([^\/]+)/);
+    const currentTag = tagMatch ? decodeURIComponent(tagMatch[1]) : null;
+    
+    const isAllBlogs = currentBlogHandle === 'all' || !currentBlogHandle;
+    
+    // Build GraphQL query
+    let articleQuery;
+    
+    if (isAllBlogs) {
+      articleQuery = `{
+        articles(first: 1, sortKey: PUBLISHED_AT, reverse: true) {
+          nodes {
+            title
+            handle
+            excerpt
+            image {
+              url
+              altText
+            }
+            blog {
+              handle
+            }
+          }
+        }
+      }`;
+    } else if (currentTag) {
+      articleQuery = `{
+        blog(handle: "${currentBlogHandle}") {
+          articles(first: 1, sortKey: PUBLISHED_AT, reverse: true, query: "tag:${currentTag}") {
+            nodes {
+              title
+              handle
+              excerpt
+              image {
+                url
+                altText
+              }
+              blog {
+                handle
+              }
+            }
+          }
+        }
+      }`;
+    } else {
+      articleQuery = `{
+        blog(handle: "${currentBlogHandle}") {
+          articles(first: 1, sortKey: PUBLISHED_AT, reverse: true) {
+            nodes {
+              title
+              handle
+              excerpt
+              image {
+                url
+                altText
+              }
+              blog {
+                handle
+              }
+            }
+          }
+        }
+      }`;
+    }
+    
+    fetch(`https://${SHOP_DOMAIN}/api/2026-01/graphql.json`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": STOREFRONT_TOKEN
+      },
+      body: JSON.stringify({ query: articleQuery })
+    })
+    .then(res => res.json())
+    .then(data => {
+      let article;
+      
+      if (isAllBlogs) {
+        article = data.data.articles.nodes[0];
+      } else {
+        article = data.data.blog?.articles?.nodes[0];
+      }
+      
+      if (!article) {
+        container.innerHTML = '<p class="new-main-blog-banner__empty">{{ section.settings.empty_message | default: "No posts yet." }}</p>';
+        return;
+      }
+      
+      const articleUrl = `/blogs/${article.blog.handle}/${article.handle}`;
+      const imageUrl = '{{ section.settings.image | img_url: "master" }}' || article.image?.url || '';
+      const imageAlt = '{{ section.settings.image_alt }}' || article.title;
+      const subheading = '{{ subheading_text }}';
+      const showSubheading = {{ section.settings.show_subheading }};
+      const showDescription = {{ section.settings.show_description }};
+      const descriptionLength = {{ section.settings.description_length }};
+      const buttonText = '{{ section.settings.button_text | default: "Read story" }}';
+      const buttonStyle = '{{ section.settings.button_style }}';
+      const buttonSize = '{{ section.settings.button_size }}';
+      const buttonType = '{{ section.settings.button_type }}';
+      
+      const excerpt = article.excerpt ? article.excerpt.substring(0, descriptionLength) + '...' : '';
+      
+      container.innerHTML = `
+        <div class="new-main-blog-banner__media">
+          ${imageUrl ? `
+            <a href="${articleUrl}" class="new-main-blog-banner__media-link">
+              <img src="${imageUrl}" alt="${imageAlt}" width="1000" height="1000">
+            </a>
+          ` : ''}
+        </div>
+        
+        <div class="new-main-blog-banner__content">
+          <div class="new-main-blog-banner__text">
+            ${showSubheading && subheading ? `
+              <p class="new-main-blog-banner__subheading">${subheading.toUpperCase()}</p>
+            ` : ''}
+            <h1 class="new-main-blog-banner__heading {{ section.settings.heading_font_size }}">
+              <a href="${articleUrl}">${article.title}</a>
+            </h1>
+            ${showDescription && excerpt ? `
+              <div class="new-main-blog-banner__description rte">
+                ${excerpt}
+              </div>
+            ` : ''}
+          </div>
+          <div class="new-main-blog-banner__button-wrap">
+            <a
+              href="${articleUrl}"
+              class="btn ${buttonStyle} ${buttonSize} ${buttonType} new-main-blog-banner__button"
+            >
+              ${buttonText}
+            </a>
+          </div>
+        </div>
+      `;
+    })
+    .catch(err => {
+      console.error('Error loading blog banner:', err);
+      container.innerHTML = '<p class="new-main-blog-banner__empty">Error loading content.</p>';
+    });
+  });
+</script>
+
 {% stylesheet %}
+  .blog-banner-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px;
+    min-height: 300px;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #ddd;
+    border-top-color: #333;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
   .new-main-blog-banner__wrapper {
     width: 100%;
     margin-left: auto;
