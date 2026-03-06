@@ -89,29 +89,8 @@ a.blog-listing__view-all {
       <a href="/blogs/all" class="blog-listing__view-all main-blog__filter-tag">
         {{ section.settings.view_all_text | default: 'View all' | upcase }}
       </a>
-      {%- if blog_links.size > 0 -%}
-        {% comment %} <nav class="blog-listing__nav" aria-label="Blog categories">
-          {% comment %} {%- for block in blog_links -%}
-            {%- if block.settings.blog != blank -%}
-              {%- assign link_blog = blogs[block.settings.blog] -%}
-              {%- if link_blog != blank -%}
-               
-              {%- endif -%}
-            {%- endif -%}
-          {%- endfor -%} {% endcomment %}
-
-          {%- for tag in blog.all_tags -%}
-            <a
-              href="{{ blog.url }}/tagged/{{ tag | handleize }}"
-              class="main-blog__filter-tag {% if current_tags contains tag %}main-blog__filter-tag--active{% endif %}"
-            >
-              {{ tag | upcase }}
-            </a>
-          {%- endfor -%}
-        </nav> {% endcomment %}
-
-        <nav class="blog-listing__nav" id="blogNav" aria-label="Blog categories"></nav>
-      {%- endif -%}
+      
+      <nav class="blog-listing__nav" id="blogNav" aria-label="Blog categories"></nav>
     </div>
   </div>
   
