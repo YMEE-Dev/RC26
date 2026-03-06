@@ -86,7 +86,7 @@ a.blog-listing__view-all {
 <section class="blog-listing-section-wrapper">
   <div class="blog-listing-section-wrapper__inner">
     <div class="blog-listing__bar {{ section.settings.width }}" >
-      <a href="/blogs/all" class="blog-listing__view-all main-blog__filter-tag {% if current_tags contains 'all' %}main-blog__filter-tag--active{% endif %}">
+      <a href="/blogs/all" class="blog-listing__view-all main-blog__filter-tag {% if blog.handle == 'all' %}main-blog__filter-tag--active{% endif %}">
         {{ section.settings.view_all_text | default: 'View all' | upcase }}
       </a>
       {%- if blog_links.size > 0 -%}
