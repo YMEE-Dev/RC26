@@ -299,9 +299,9 @@ a.blog-listing__view-all {
         }
         
         // Skip "all" blog or current blog
-        if (blog.handle === "all" || blog.handle === "{{ blog.handle }}") {
+        {% comment %} if (blog.handle === "all" || blog.handle === "{{ blog.handle }}") {
           return;
-        }
+        } {% endcomment %}
         
         const link = document.createElement("a");
     
