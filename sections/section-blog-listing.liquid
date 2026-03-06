@@ -89,8 +89,29 @@ a.blog-listing__view-all {
       <a href="/blogs/all" class="blog-listing__view-all main-blog__filter-tag">
         {{ section.settings.view_all_text | default: 'View all' | upcase }}
       </a>
-      
-      <nav class="blog-listing__nav" id="blogNav" aria-label="Blog categories"></nav>
+      {%- if blog_links.size > 0 -%}
+        {% comment %} <nav class="blog-listing__nav" aria-label="Blog categories">
+          {% comment %} {%- for block in blog_links -%}
+            {%- if block.settings.blog != blank -%}
+              {%- assign link_blog = blogs[block.settings.blog] -%}
+              {%- if link_blog != blank -%}
+               
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%} {% endcomment %}
+
+          {%- for tag in blog.all_tags -%}
+            <a
+              href="{{ blog.url }}/tagged/{{ tag | handleize }}"
+              class="main-blog__filter-tag {% if current_tags contains tag %}main-blog__filter-tag--active{% endif %}"
+            >
+              {{ tag | upcase }}
+            </a>
+          {%- endfor -%}
+        </nav> {% endcomment %}
+
+        <nav class="blog-listing__nav" id="blogNav" aria-label="Blog categories"></nav>
+      {%- endif -%}
     </div>
   </div>
   
@@ -247,7 +268,6 @@ a.blog-listing__view-all {
         nodes {
           handle
           title
-          articlesCount
         }
       }
     }
@@ -265,33 +285,15 @@ a.blog-listing__view-all {
     .then(data => {
       const blogs = data.data.blogs.nodes;
       const nav = document.getElementById("blogNav");
-      
-      // Get current blog handle from URL
-      const currentPath = window.location.pathname;
-      const blogMatch = currentPath.match(/\/blogs\/([^\/]+)/);
-      const currentBlogHandle = blogMatch ? blogMatch[1] : null;
     
       blogs.forEach(blog => {
-        // Skip if blog has no articles
-        if (!blog.articlesCount || blog.articlesCount === 0) {
-          return;
-        }
-        
-        // Skip "all" blog (we don't want it in the navigation)
-        {% comment %} if (blog.handle === "all") {
+        {% comment %} if (blog.handle === "all" || blog.articles.nodes.length === 0) {
           return;
         } {% endcomment %}
-        
         const link = document.createElement("a");
     
         link.href = `/blogs/${blog.handle}`;
         link.className = "main-blog__filter-tag";
-        
-        // Add active class if this blog matches current URL
-        if (blog.handle === currentBlogHandle) {
-          link.classList.add("main-blog__filter-tag--active");
-        }
-        
         link.textContent = blog.title.toUpperCase();
     
         nav.appendChild(link);
