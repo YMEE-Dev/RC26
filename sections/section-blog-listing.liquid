@@ -155,7 +155,7 @@
     const articles = data.data.articles.nodes;
     const grid = document.querySelector(".blog-listing__grid");
 
-    articles.forEach(article => {
+    articles.forEach((article, index) => {
       if (index === 0) return;
       const image = article.image?.url || "";
       const tag = article.tags[0] || "";
