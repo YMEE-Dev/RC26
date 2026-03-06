@@ -49,82 +49,9 @@
     // Check if there's a tag filter
     const tagMatch = currentPath.match(/\/tagged\/([^\/]+)/);
     const currentTag = tagMatch ? decodeURIComponent(tagMatch[1]) : null;
-    
     const articleQuery = isAllBlogs 
     ? `{
-        articles(first: 250, sortKey: PUBLISHED_AT, reverse: true) {
-          nodes {
-            title
-            handle
-            excerpt
-            tags
-            image {
-              url
-              altText
-            }
-            blog {
-              handle
-            }
-          }
-        }
-      }`
-    : `{
-        blog(handle: "${currentBlogHandle}") {
-          articles(first: 250, sortKey: PUBLISHED_AT, reverse: true) {
-            nodes {
-              title
-              handle
-              excerpt
-              tags
-              image {
-                url
-                altText
-              }
-              blog {
-                handle
-              }
-            }
-          }
-        }
-      }`;const articleQuery = isAllBlogs 
-    ? `{
-        articles(first: 250, sortKey: PUBLISHED_AT, reverse: true) {
-          nodes {
-            title
-            handle
-            excerpt
-            tags
-            image {
-              url
-              altText
-            }
-            blog {
-              handle
-            }
-          }
-        }
-      }`
-    : `{
-        blog(handle: "${currentBlogHandle}") {
-          articles(first: 250, sortKey: PUBLISHED_AT, reverse: true) {
-            nodes {
-              title
-              handle
-              excerpt
-              tags
-              image {
-                url
-                altText
-              }
-              blog {
-                handle
-              }
-            }
-          }
-        }
-      }`;const articleQuery = isAllBlogs 
-    ? `{
-        articles(first: 250, sortKey: PUBLISHED_AT, reverse: true) {
+        articles(first: 1, sortKey: PUBLISHED_AT, reverse: true) {
           nodes {
             title
             handle
