@@ -153,10 +153,10 @@
   })
   .then(res => res.json())
   .then(data => {
-
+    loader.remove();
     const articles = data.data.articles.nodes;
     const grid = document.querySelector(".blog-listing__grid");
-
+    const loader = document.getElementById("blogLoading");
     articles.forEach((article, index) => {
       if (index === 0) return;
       const image = article.image?.url || "";
