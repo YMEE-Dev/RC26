@@ -138,6 +138,9 @@
       const nav = document.getElementById("blogNav");
     
       blogs.forEach(blog => {
+        if (blog.handle === "{{ blog.handle }}") {
+          return;
+        }
         const link = document.createElement("a");
     
         link.href = `/blogs/${blog.handle}`;
