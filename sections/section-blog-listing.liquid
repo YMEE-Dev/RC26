@@ -268,6 +268,7 @@ a.blog-listing__view-all {
         nodes {
           handle
           title
+          articlesCount
         }
       }
     }
@@ -285,15 +286,33 @@ a.blog-listing__view-all {
     .then(data => {
       const blogs = data.data.blogs.nodes;
       const nav = document.getElementById("blogNav");
+      
+      // Get current blog handle from URL
+      const currentPath = window.location.pathname;
+      const blogMatch = currentPath.match(/\/blogs\/([^\/]+)/);
+      const currentBlogHandle = blogMatch ? blogMatch[1] : null;
     
       blogs.forEach(blog => {
-        if (blog.handle === "all" || blog.articles.nodes.length === 0) {
+        // Skip if blog has no articles
+        if (!blog.articlesCount || blog.articlesCount === 0) {
           return;
         }
+        
+        // Skip "all" blog or current blog
+        if (blog.handle === "all" || blog.handle === "{{ blog.handle }}") {
+          return;
+        }
+        
         const link = document.createElement("a");
     
         link.href = `/blogs/${blog.handle}`;
         link.className = "main-blog__filter-tag";
+        
+        // Add active class if this blog matches current URL
+        if (blog.handle === currentBlogHandle) {
+          link.classList.add("main-blog__filter-tag--active");
+        }
+        
         link.textContent = blog.title.toUpperCase();
     
         nav.appendChild(link);
