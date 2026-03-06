@@ -294,14 +294,14 @@ a.blog-listing__view-all {
     
       blogs.forEach(blog => {
         // Skip if blog has no articles
-        if (!blog.articlesCount || blog.articlesCount === 0 || blog.handle !== "all") {
+        if (!blog.articlesCount || blog.articlesCount === 0) {
           return;
         }
         
-        // Skip "all" blog or current blog
-        {% comment %} if (blog.handle === "all" || blog.handle === "{{ blog.handle }}") {
+        // Skip "all" blog (we don't want it in the navigation)
+        if (blog.handle === "all") {
           return;
-        } {% endcomment %}
+        }
         
         const link = document.createElement("a");
     
