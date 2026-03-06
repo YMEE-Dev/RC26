@@ -35,15 +35,14 @@
             {%- endif -%}
           {%- endfor -%} {% endcomment %}
 
-
-          {% for tag in collection.all_tags %}
+          {%- for tag in blog.all_tags -%}
             <a
-              href="{{ blog.url }}/{{ tag | handle }}"
-              class="blog-listing__nav-link{% if blog != blank and blog.all_tags contains tag %} blog-listing__nav-link--active{% endif %}"
+              href="{{ blog.url }}/tagged/{{ tag | handleize }}"
+              class="main-blog__filter-tag {% if current_tags contains tag %}main-blog__filter-tag--active{% endif %}"
             >
               {{ tag | upcase }}
             </a>
-          {% endfor %}
+          {%- endfor -%}
         </nav>
       {%- endif -%}
     </div>
