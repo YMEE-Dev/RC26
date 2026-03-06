@@ -285,26 +285,15 @@ a.blog-listing__view-all {
     .then(data => {
       const blogs = data.data.blogs.nodes;
       const nav = document.getElementById("blogNav");
-      
-      // Get current blog handle from URL
-      const currentPath = window.location.pathname;
-      const blogMatch = currentPath.match(/\/blogs\/([^\/]+)/);
-      const currentBlogHandle = blogMatch ? blogMatch[1] : null;
     
       blogs.forEach(blog => {
-        if (blog.handle === "{{ blog.handle }}") {
+        if (blog.handle === "all" && blog.articles.nodes.length === 0) {
           return;
         }
         const link = document.createElement("a");
     
         link.href = `/blogs/${blog.handle}`;
         link.className = "main-blog__filter-tag";
-        
-        // Add active class if this blog matches current URL
-        if (blog.handle === currentBlogHandle) {
-          link.classList.add("main-blog__filter-tag--active");
-        }
-        
         link.textContent = blog.title.toUpperCase();
     
         nav.appendChild(link);
