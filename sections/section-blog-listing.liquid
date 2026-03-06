@@ -38,11 +38,10 @@
 
           {% for tag in collection.all_tags %}
             <a
-              href="{{ link_blog.url }}"
-              class="blog-listing__nav-link{% if blog != blank and link_blog.id == blog.id %} blog-listing__nav-link--active{% endif %}"
-              {{ block.shopify_attributes }}
+              href="{{ blog.url }}/{{ tag | handle }}"
+              class="blog-listing__nav-link{% if blog != blank and blog.all_tags contains tag %} blog-listing__nav-link--active{% endif %}"
             >
-              {{ block.settings.label | default: link_blog.title | upcase }}
+              {{ tag | upcase }}
             </a>
           {% endfor %}
         </nav>
