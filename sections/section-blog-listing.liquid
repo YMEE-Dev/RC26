@@ -126,7 +126,7 @@
   ----------------------------- */
   const articleQuery = `
   {
-    articles(first: 20, sortKey: PUBLISHED_AT, reverse: true) {
+    articles(first: 250, sortKey: PUBLISHED_AT, reverse: true) {
       nodes {
         title
         handle
@@ -143,23 +143,19 @@
     }
   }`;
 
-  fetch(`https://${SHOP_DOMAIN}/api/2026-01/graphql.json`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Shopify-Storefront-Access-Token": STOREFRONT_TOKEN
-    },
-    body: JSON.stringify({ query: articleQuery })
-  })
-  .then(res => res.json())
-  .then(data => {
+  let allArticles = [];
+  let currentPage = 1;
+  const articlesPerPage = 9;
 
-    const articles = data.data.articles.nodes;
+  function renderArticles(page) {
     const grid = document.querySelector(".blog-listing__grid");
-    const loader = document.getElementById("blogLoading");
-    loader.remove();
-    articles.forEach((article, index) => {
-      if (index === 0) return;
+    grid.innerHTML = '';
+    
+    const startIndex = (page - 1) * articlesPerPage + 1; // +1 to skip first article
+    const endIndex = startIndex + articlesPerPage;
+    const articlesToShow = allArticles.slice(startIndex, endIndex);
+
+    articlesToShow.forEach((article) => {
       const image = article.image?.url || "";
       const tag = article.tags[0] || "";
       const url = `/blogs/${article.blog.handle}/${article.handle}`;
@@ -186,9 +182,46 @@
       `;
 
       grid.insertAdjacentHTML("beforeend", html);
-
     });
 
+    // Scroll to top of grid
+    grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  fetch(`https://${SHOP_DOMAIN}/api/2026-01/graphql.json`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Shopify-Storefront-Access-Token": STOREFRONT_TOKEN
+    },
+    body: JSON.stringify({ query: articleQuery })
+  })
+  .then(res => res.json())
+  .then(data => {
+    allArticles = data.data.articles.nodes;
+    const grid = document.querySelector(".blog-listing__grid");
+    const loader = document.getElementById("blogLoading");
+    loader.remove();
+
+    // Calculate total pages (excluding first article)
+    const totalArticles = allArticles.length - 1; // -1 to exclude first article
+    const totalPages = Math.ceil(totalArticles / articlesPerPage);
+
+    // Render first page
+    renderArticles(1);
+
+    // Initialize pagination
+    const paginationEl = document.querySelector(".custom-js-pagination");
+    if (paginationEl && totalPages > 1) {
+      const pagination = new CustomPagination(paginationEl, {
+        onPageChange: (page) => {
+          currentPage = page;
+          renderArticles(page);
+        }
+      });
+      pagination.setTotalPages(totalPages);
+      pagination.setPage(1);
+    }
   });
   });
 </script>
