@@ -902,6 +902,7 @@
           display: grid;
           grid-template-columns: 1fr;
           grid-template-areas:
+            "description"
             "buttons"
             "custom-drawers"
             "accordions"
@@ -925,6 +926,10 @@
         }
 
         /* map real blocks to areas */
+        #MainProduct--{{ section.id }} .product__description {
+          grid-area: description;
+          margin-bottom: 40px;
+        }
         #MainProduct--{{ section.id }} .product__block--buttons {
           grid-area: buttons;
         }
@@ -998,10 +1003,6 @@
         #MainProduct--{{ section.id }} .product__title-price > .product__block,
         #MainProduct--{{ section.id }} .product__title-price .shop-pay-terms {
           margin: 0;
-        }
-
-        #MainProduct--{{ section.id }} .product__description {
-          display: none;
         }
       }
 

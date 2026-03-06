@@ -105,7 +105,6 @@
   @media only screen and (max-width: 1023px) {
     .drawer-ruby-signature {
       grid-template-columns: 1fr;
-      margin: -30px;
     }
 
     .drawer-ruby-signature__media {
@@ -114,12 +113,27 @@
 
     .drawer-ruby-signature__content {
       max-width: none;
-      padding: 32px 24px 40px;
+      padding: 20px;
+      text-align: center;
     }
 
     .drawer-ruby-signature__title {
-      font-size: clamp(30px, 7vw, 40px);
       margin-bottom: 20px;
+      text-align: center;
+    }
+
+    /* Move close button to bottom center for ruby signature drawer */
+    #side-drawer-ruby-signature .drawer__close {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      top: auto;
+      right: auto;
+      background-color: transparent;
+    }
+    #side-drawer-ruby-signature .drawer__close:hover {
+      background-color: transparent;
     }
   }
 {% endstylesheet %}
