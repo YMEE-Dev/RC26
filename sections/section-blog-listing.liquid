@@ -287,7 +287,7 @@ a.blog-listing__view-all {
       const nav = document.getElementById("blogNav");
     
       blogs.forEach(blog => {
-        if (blog.handle === "all" || blog.handle === "uncategorized" || blog.handle === "default-blog") {
+        if ({{ section.settings.tag_to_exclude }}.includes(blog.handle)) {
           return;
         }
         const link = document.createElement("a");
@@ -681,6 +681,13 @@ a.blog-listing__view-all {
     {
       "type": "header",
       "content": "Filter bar"
+    },
+    {
+      "type": "text",
+      "id": "tag_to_exclude",
+      "label": "Tag to exclude",
+      "default": "all, uncategorized, default-blog",
+      "info": "Enter tags to exclude from the navigation, separated by commas."
     },
     {
       "type": "text",
