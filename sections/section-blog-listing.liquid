@@ -25,7 +25,7 @@
         {{ section.settings.view_all_text | default: 'View all' | upcase }}
       </a>
       {%- if blog_links.size > 0 -%}
-        <nav class="blog-listing__nav" aria-label="Blog categories">
+        {% comment %} <nav class="blog-listing__nav" aria-label="Blog categories">
           {% comment %} {%- for block in blog_links -%}
             {%- if block.settings.blog != blank -%}
               {%- assign link_blog = blogs[block.settings.blog] -%}
@@ -43,7 +43,9 @@
               {{ tag | upcase }}
             </a>
           {%- endfor -%}
-        </nav>
+        </nav> {% endcomment %}
+
+        <nav class="blog-listing__nav" id="blogNav" aria-label="Blog categories"></nav>
       {%- endif -%}
     </div>
   </div>
@@ -105,6 +107,49 @@
     {%- endif -%}
   </div>
 </section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const STOREFRONT_TOKEN = "{{ shop.metaobjects.storefront_access_token.value }}";
+    const SHOP_DOMAIN = "{{ shop.domain }}";
+    
+    const query = `
+    {
+      blogs(first: 50) {
+        nodes {
+          handle
+          title
+        }
+      }
+    }
+    `;
+    
+    fetch(`https://${SHOP_DOMAIN}/api/2024-01/graphql.json`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": STOREFRONT_TOKEN
+      },
+      body: JSON.stringify({ query })
+    })
+    .then(res => res.json())
+    .then(data => {
+      const blogs = data.data.blogs.nodes;
+      const nav = document.getElementById("blogNav");
+    
+      blogs.forEach(blog => {
+        const link = document.createElement("a");
+    
+        link.href = `/blogs/${blog.handle}`;
+        link.className = "main-blog__filter-tag";
+        link.textContent = blog.title.toUpperCase();
+    
+        nav.appendChild(link);
+      });
+    });
+  });
+</script>
+
 
 {% stylesheet %}
   .blog-listing__wrapper {
