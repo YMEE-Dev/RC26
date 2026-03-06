@@ -78,6 +78,119 @@
 </section>
 
 <script>
+  /* -----------------------------
+  CUSTOM PAGINATION CLASS
+  ----------------------------- */
+  class CustomPagination {
+    constructor(container, options = {}) {
+      this.container = container;
+      this.currentPage = parseInt(container.dataset.currentPage) || 1;
+      this.totalPages = parseInt(container.dataset.totalPages) || 1;
+      this.onPageChange = options.onPageChange || (() => {});
+      
+      this.render();
+    }
+
+    setPage(page) {
+      if (page < 1 || page > this.totalPages) return;
+      this.currentPage = page;
+      this.container.dataset.currentPage = page;
+      this.render();
+      this.onPageChange(page);
+    }
+
+    setTotalPages(total) {
+      this.totalPages = total;
+      this.container.dataset.totalPages = total;
+      this.render();
+    }
+
+    render() {
+      if (this.totalPages <= 1) {
+        this.container.innerHTML = '';
+        return;
+      }
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'custom-js-pagination__container';
+
+      // Previous button
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'custom-js-pagination__link custom-js-pagination__prev';
+      prevBtn.innerHTML = '<span>PREV</span>';
+      prevBtn.disabled = this.currentPage === 1;
+      prevBtn.addEventListener('click', () => this.setPage(this.currentPage - 1));
+      wrapper.appendChild(prevBtn);
+
+      // Numbers
+      const numbers = document.createElement('div');
+      numbers.className = 'custom-js-pagination__numbers';
+      
+      const pageNumbers = this.getPageNumbers();
+      pageNumbers.forEach((num) => {
+        if (num === '...') {
+          const ellipsis = document.createElement('span');
+          ellipsis.className = 'custom-js-pagination__ellipsis';
+          ellipsis.textContent = '...';
+          numbers.appendChild(ellipsis);
+        } else {
+          const btn = document.createElement('button');
+          btn.className = 'custom-js-pagination__number';
+          if (num === this.currentPage) {
+            btn.classList.add('custom-js-pagination__number--current');
+          }
+          btn.textContent = num;
+          btn.addEventListener('click', () => this.setPage(num));
+          numbers.appendChild(btn);
+        }
+      });
+      
+      wrapper.appendChild(numbers);
+
+      // Next button
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'custom-js-pagination__link custom-js-pagination__next';
+      nextBtn.innerHTML = '<span>NEXT</span>';
+      nextBtn.disabled = this.currentPage === this.totalPages;
+      nextBtn.addEventListener('click', () => this.setPage(this.currentPage + 1));
+      wrapper.appendChild(nextBtn);
+
+      this.container.innerHTML = '';
+      this.container.appendChild(wrapper);
+    }
+
+    getPageNumbers() {
+      const pages = [];
+      const showMax = 5;
+
+      if (this.totalPages <= showMax) {
+        for (let i = 1; i <= this.totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        if (this.currentPage <= 3) {
+          for (let i = 1; i <= 4; i++) pages.push(i);
+          pages.push('...');
+          pages.push(this.totalPages);
+        } else if (this.currentPage >= this.totalPages - 2) {
+          pages.push(1);
+          pages.push('...');
+          for (let i = this.totalPages - 3; i <= this.totalPages; i++) pages.push(i);
+        } else {
+          pages.push(1);
+          pages.push('...');
+          pages.push(this.currentPage - 1);
+          pages.push(this.currentPage);
+          pages.push(this.currentPage + 1);
+          pages.push('...');
+          pages.push(this.totalPages);
+        }
+      }
+
+      return pages;
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
     const STOREFRONT_TOKEN = "{{ shop.metaobjects.storefront_access_token.value }}";
     const SHOP_DOMAIN = "{{ shop.domain }}";
