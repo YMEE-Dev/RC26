@@ -62,6 +62,7 @@
       {%- paginate blog.articles by articles_per_page -%}
         <div class="blog-listing__grid">
           {%- for article in blog.articles -%}
+            {%- unless forloop.first -%}
             <article class="blog-listing__card">
               <a href="{{ article.url }}" class="blog-listing__card-link">
                 {%- if article.image != blank -%}
@@ -89,6 +90,7 @@
                 </div>
               </a>
             </article>
+            {%- endunless -%}
           {%- endfor -%}
         </div>
 
