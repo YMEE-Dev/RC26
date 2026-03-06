@@ -261,6 +261,27 @@
         var productFormId = 'product-form-' + sectionId;
         var formEl = document.getElementById(productFormId);
 
+        function getLiveFormEl() {
+          return document.getElementById(productFormId);
+        }
+
+        function submitProductForm() {
+          var liveFormEl = getLiveFormEl();
+          if (!liveFormEl) return;
+
+          try {
+            if (typeof liveFormEl.requestSubmit === 'function') {
+              liveFormEl.requestSubmit();
+              return;
+            }
+          } catch (err) { /* no-op */ }
+
+          try {
+            var realSubmit = liveFormEl.querySelector('button[type="submit"], input[type="submit"]');
+            if (realSubmit && typeof realSubmit.click === 'function') realSubmit.click();
+          } catch (err2) { /* no-op */ }
+        }
+
         function getLiveVariantIdInput() {
           return sectionRoot.querySelector('input[name="id"][form="' + cssEscape(productFormId) + '"]');
         }
@@ -560,7 +581,7 @@
 
         function openSheet() {
           filterRowsByColor();
-          sheetState = createSheet(sectionId, formEl || sectionRoot);
+          sheetState = createSheet(sectionId, sectionRoot);
           if (!sheetState || !sheetState.body) return;
 
           if (sheetState.backdrop) sheetState.backdrop.hidden = false;
@@ -605,18 +626,7 @@
               closeMenu();
 
               setTimeout(function () {
-                try {
-                  if (formEl && typeof formEl.requestSubmit === 'function') {
-                    formEl.requestSubmit();
-                    return;
-                  }
-                } catch (err) { /* no-op */ }
-                try {
-                  var realSubmit = formEl
-                    ? formEl.querySelector('button[type="submit"], input[type="submit"]')
-                    : null;
-                  if (realSubmit && typeof realSubmit.click === 'function') realSubmit.click();
-                } catch (err2) { /* no-op */ }
+                submitProductForm();
               }, 0);
             });
           }
@@ -726,18 +736,7 @@
               closeMenu();
 
               setTimeout(function () {
-                try {
-                  if (formEl && typeof formEl.requestSubmit === 'function') {
-                    formEl.requestSubmit();
-                    return;
-                  }
-                } catch (err) { /* no-op */ }
-                try {
-                  var realSubmit = formEl
-                    ? formEl.querySelector('button[type="submit"], input[type="submit"]')
-                    : null;
-                  if (realSubmit && typeof realSubmit.click === 'function') realSubmit.click();
-                } catch (err2) { /* no-op */ }
+                submitProductForm();
               }, 0);
               return;
             }
@@ -756,9 +755,7 @@
 
             if (action === 'buy') {
               closeMenu();
-              if (formEl && typeof formEl.requestSubmit === 'function') {
-                formEl.requestSubmit();
-              }
+              submitProductForm();
               return;
             }
 

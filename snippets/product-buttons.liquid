@@ -383,9 +383,8 @@
       -%}
     {%- endif -%}
 
-    {%- unless ymee_has_size -%}
     <product-form
-      class="product-form"
+      class="product-form{% if ymee_has_size %} ymee-hidden-form{% endif %}"
       data-hide-errors="{{ gift_card_recipient_feature_active }}"
       data-section-id="{{ section_id }}"
     >
@@ -501,7 +500,6 @@
         {%- endform -%}
       </div>
     </product-form>
-    {%- endunless -%}
   {%- else -%}
     <div class="product-form">
       <div
