@@ -107,8 +107,13 @@
       }
       
       const articleUrl = `/blogs/${article.blog.handle}/${article.handle}`;
-      const imageUrl = '{{ section.settings.image | img_url: "master" }}' || article.image?.url || '';
-      const imageAlt = '{{ section.settings.image_alt }}' || article.title;
+      
+      // Check if custom image exists, otherwise use article image
+      const settingsImageUrl = '{{ section.settings.image | img_url: "master" }}';
+      const hasSettingsImage = '{{ section.settings.image }}' !== '';
+      const imageUrl = hasSettingsImage ? settingsImageUrl : (article.image?.url || '');
+      const imageAlt = '{{ section.settings.image_alt }}' || article.image?.altText || article.title;
+      
       const subheading = '{{ subheading_text }}';
       const showSubheading = {{ section.settings.show_subheading }};
       const showDescription = {{ section.settings.show_description }};
