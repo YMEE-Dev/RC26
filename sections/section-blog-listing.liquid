@@ -17,6 +17,36 @@
   #shopify-section-{{ section.id }} .blog-listing-section-wrapper__inner {
     border-bottom: 1px solid rgba(0, 0, 0, 0.1); 
   }
+
+  .blog-listing__nav {
+  display: flex;           /* make items in a row */
+  flex-wrap: nowrap;       /* prevent wrapping */
+  overflow-x: auto;        /* horizontal scroll if needed */
+  -webkit-overflow-scrolling: touch; /* smooth scroll on mobile */
+  gap: 10px;               /* optional spacing between links */
+       /* optional vertical padding */
+  scrollbar-width: thin;   /* optional: thinner scrollbar for Firefox */
+}
+
+.blog-listing__nav::-webkit-scrollbar {
+  height: 6px;             /* height of horizontal scrollbar */
+}
+
+
+
+.main-blog__filter-tag {
+  white-space: nowrap;     /* prevent text from breaking */
+  flex-shrink: 0;          /* prevent shrinking */
+}
+
+a.blog-listing__view-all {
+  display: flex;
+  padding: 5px 10px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  width:fit-content;
+}
 {%- endstyle -%}
 <section class="blog-listing-section-wrapper">
   <div class="blog-listing-section-wrapper__inner">
