@@ -1309,11 +1309,6 @@
                       var activeCarousel = getActiveCarousel();
                       var index = embla.selectedScrollSnap();
 
-                      // Drag/scroll back to index 0 while started → return to intro (full-bleed)
-                      if (hasIntroStage && carouselStarted && !introTransitioning && index === 0) {
-                        setCarouselStarted(false, 0);
-                      }
-
                       var slides = carouselEl.querySelectorAll('[data-embla-slide]');
                       slides.forEach(function(slide) {
                         slide.classList.remove('pdp-embla__slide--active');
