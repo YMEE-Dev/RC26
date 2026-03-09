@@ -43,6 +43,33 @@
 .blog-listing__nav::-webkit-scrollbar {
   height: 6px;             /* height of horizontal scrollbar */
 }
+
+/* Mobile dropdown styles */
+.blog-listing__dropdown {
+  display: none;
+  width: 100%;
+  padding: 10px 15px;
+  font-family: Inter;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  color: #000;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .blog-listing__nav {
+    display: none !important;
+  }
+  
+  .blog-listing__dropdown {
+    display: block;
+  }
+}
 a.main-blog__filter-tag {
     display: flex;
   padding: 5px 10px;
@@ -125,6 +152,9 @@ a.blog-listing__view-all {
         </nav> {% endcomment %}
 
         <nav class="blog-listing__nav" id="blogNav" aria-label="Blog categories"></nav>
+        <select class="blog-listing__dropdown" id="blogDropdown" aria-label="Blog categories">
+          <option value="">Select Category</option>
+        </select>
       {%- endif -%}
     </div>
   </div>
