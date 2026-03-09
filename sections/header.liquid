@@ -284,7 +284,7 @@
         {%- endif -%}
       </h1>
     </a>
-    {%- if template.name == 'product' or template contains 'collection' -%}
+    {%- if template.name == 'product' or template contains 'collection' or template contains 'page'  -%}
       <div class="header__logo__meta">
         {%- if template.name == 'product' -%}
           {%- assign current_collection = collection | default: product.collections.first -%}
@@ -360,6 +360,10 @@
             {%- else -%}
               <span>{{ collection.title }}</span>
             {%- endif -%}
+          </h6>
+        {%  elsif template contains 'page' %}
+          <h6 class="header__logo__meta__page">
+            <span>{{ page.title }}</span>
           </h6>
         {%- endif -%}
       </div>
