@@ -214,16 +214,32 @@
         margin: 0;
       }
 
-      @media (max-width: 767px) {
-        #MainProduct--{{ section.id }} .product__content {
-          margin: 20px 0 0;
-        }
+      #MainProduct--{{ section.id }} .product__title-price {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--inner);
+      }
 
-        product-info.index-product .product__content {
-          margin-top: 16px;
-          padding-left: var(--inner);
-          padding-right: var(--inner);
-        }
+      #MainProduct--{{ section.id }} .product__title-price .product__title {
+        font-family: var(--FONT-STACK-BODY);
+        font-style: var(--FONT-STYLE-BODY);
+        font-weight: var(--FONT-WEIGHT-BODY);
+        font-size: var(--FONT-TITLE);
+        line-height: var(--LINE-HEIGHT-TITLE);
+        letter-spacing: var(--LETTER-SPACING-NAV);
+        text-transform: uppercase;
+        color: var(--COLOR-TEXT-DARK);
+      }
+
+      #MainProduct--{{ section.id }} .product__title-price .price-item,
+      #MainProduct--{{ section.id }} .product__description {
+        font-family: var(--FONT-STACK-BODY);
+        font-style: var(--FONT-STYLE-BODY);
+        font-weight: var(--FONT-WEIGHT-BODY);
+        font-size: var(--FONT-SIZE-BASE);
+        line-height: var(--LINE-HEIGHT-BODY);
+        color: var(--COLOR-TEXT-DARK);
       }
 
       @media (min-width: 990px) {
@@ -273,13 +289,6 @@
           align-items: start;
         }
 
-        #MainProduct--{{ section.id }} .product__title-price {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: var(--inner);
-        }
-
         #MainProduct--{{ section.id }} .product__title-price .block-padding {
           margin: 0;
         }
@@ -295,35 +304,21 @@
 
         #MainProduct--{{ section.id }} .product__title-price .product__title {
           margin: 0;
-          font-family: var(--FONT-STACK-BODY);
-          font-style: var(--FONT-STYLE-BODY);
-          font-weight: var(--FONT-WEIGHT-BODY);
-          font-size: var(--FONT-TITLE);
-          line-height: var(--LINE-HEIGHT-TITLE);
-          letter-spacing: var(--LETTER-SPACING-NAV);
-          text-transform: uppercase;
           max-width: 40ch;
-          color: var(--COLOR-TEXT-DARK);
-        }
-
-        #MainProduct--{{ section.id }} .product__title-price .price-item,
-        #MainProduct--{{ section.id }} .product__description {
-          font-family: var(--FONT-STACK-BODY);
-          font-style: var(--FONT-STYLE-BODY);
-          font-weight: var(--FONT-WEIGHT-BODY);
-          font-size: var(--FONT-SIZE-BASE);
-          line-height: var(--LINE-HEIGHT-BODY);
-          color: var(--COLOR-TEXT-DARK);
         }
 
         #MainProduct--{{ section.id }} .product__description {
-          max-width: 60ch;
+          max-width: 80%;
+          margin-bottom: 65px;
         }
 
         #MainProduct--{{ section.id }} .product__content-columns__aside {
+          position: -webkit-sticky;
           position: sticky;
-          top: calc(var(--header-height, 0px) + var(--announcement-height, 0px));
+          top: var(--sticky-top, calc(var(--header-height, 0px) + var(--announcement-height, 0px)));
           align-self: start;
+          height: max-content;
+          overflow: visible;
           z-index: 9;
         }
 
@@ -338,22 +333,6 @@
         }
       }
 
-      @media (max-width: 767px) {
-         #MainProduct--{{ section.id }} .product__sticky-bar {
-          padding-top: 20px;
-          padding-left: var(--inner);
-          padding-right: var(--inner);
-        }
-      }
-
-      @media (max-width: 767px) {
-         #MainProduct--{{ section.id }} .product__sticky-bar {
-          padding-top: 20px;
-          padding-left: var(--inner);
-          padding-right: var(--inner);
-        }
-      }
-
       #MainProduct--{{ section.id }} .product__content-columns__aside .product__text .product__heading {
         font-size: var(--font-body-small);
         font-family: var(--FONT-STACK-BODY);
@@ -365,6 +344,7 @@
 
       #MainProduct--{{ section.id }} .product__content-columns__aside .link-with-icon__text {
         letter-spacing: var(--LETTER-SPACING-NAV);
+        text-align: left;
       }
 
       #MainProduct--{{ section.id }} .product__content-columns__aside .product__submit__buttons button[type="submit"] {
@@ -381,10 +361,6 @@
       #MainProduct--{{ section.id }} .product__images {
         position: relative;
       }
-
-      /* #MainProduct--{{ section.id }} .product__images .image-wrapper--cover {
-        background-color: var(--bg-color);
-      } */
 
       #MainProduct--{{ section.id }} .product__images .image-wrapper--cover {
         background-color: #F9F9F9;
@@ -470,6 +446,20 @@
           margin-top: 0;
           height: calc(100vh - var(--pdp-sticky-bar-height, 100px));
           min-height: 0;
+        }
+      }
+
+      @media only screen and (min-width: 750px) and (max-width: 989px) {
+
+        #MainProduct--{{ section.id }} .pdp-embla__viewport {
+          height: var(--full-screen, var(--full-height, 100vh));
+        }
+      }
+
+      @media only screen and (max-width: 749px) {
+
+        #MainProduct--{{ section.id }} .pdp-embla__viewport {
+          height: var(--full-screen, var(--full-height, 100vh));
         }
       }
 
@@ -634,7 +624,6 @@
         align-items: flex-end;
         justify-content: center;
         position: relative;
-        /* mix-blend-mode: multiply; */
         background-color: #F9F9F9;
       }
 
@@ -870,15 +859,19 @@
       #MainProduct--{{ section.id }} .product__thumb.is-active.single-active .product__thumb__link::after {
         border-color: #000;
       }
-      
-      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart] {
+
+      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart],
+      #MainProduct--{{ section.id }} .product__submit__buttons .btn[data-popup-open],
+      #MainProduct--{{ section.id }} .product__collection-link {
         font-size: var(--BTN-FONT-SIZE);
         font-weight: var(--BTN-FONT-WEIGHT);
         line-height: var(--BTN-LINE-HEIGHT);
         letter-spacing: var(--BTN-LETTER-SPACING);
         text-transform: uppercase;
       }
-      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart]:hover {
+      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart]:hover,
+      #MainProduct--{{ section.id }} .product__submit__buttons .btn[data-popup-open]:hover,
+      #MainProduct--{{ section.id }} .product__collection-link:hover {
         border-color: var(--btn-border);
         background-color: #27574D;
         color: #fff;
@@ -893,24 +886,140 @@
         transition: fill 0.3s ease;
       }
 
-      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart]:hover .btn__icon path {
+      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart]:hover .btn__icon path,
+      #MainProduct--{{ section.id }} .product__submit__buttons .btn[data-popup-open]:hover .btn__icon path {
         fill: #fff;
       }
 
-      @media only screen and (max-width: 749px) {
-        #MainProduct--{{ section.id }} .pdp-embla__arrows {
-          display: none;
+      @media only screen and (max-width: 989px) {
+        #MainProduct--{{ section.id }} .product__sticky-bar {
+          padding-top: 20px;
+          padding-left: 20px;
+          padding-right: 20px;
         }
 
-        #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: 80vh;
+        #MainProduct--{{ section.id }} .product__content-columns {
+          display: grid;
+          grid-template-columns: 1fr;
+          grid-template-areas:
+            "description"
+            "buttons"
+            "custom-drawers"
+            "accordions"
+            "custom-drawers-ecom"
+            "ruby-signature"
+            "collection";
+          gap: 0px;
+        }
+
+        /* flatten wrappers so children participate in same grid */
+        #MainProduct--{{ section.id }} .product__content-columns__main,
+        #MainProduct--{{ section.id }} .product__content-columns__aside {
+          display: contents;
+        }
+
+        /* IMPORTANT: aside sticky must be disabled on mobile */
+        #MainProduct--{{ section.id }} .product__content-columns__aside {
+          position: static;
+          top: auto;
+          z-index: auto;
+        }
+
+        /* map real blocks to areas */
+        #MainProduct--{{ section.id }} .product__description {
+          grid-area: description;
+          margin-bottom: 40px;
+        }
+        #MainProduct--{{ section.id }} .product__block--buttons {
+          grid-area: buttons;
+        }
+        #MainProduct--{{ section.id }} .product__custom-drawers-row {
+          grid-area: custom-drawers;
+          justify-content: space-between;
+          margin-bottom: 0;
+        }
+        #MainProduct--{{ section.id }} .product-accordions-container {
+          grid-area: accordions;
+          margin: 80px 0;
+        }
+        #MainProduct--{{ section.id }} .product__custom-drawers-row-ee {
+          grid-area: custom-drawers-ecom;
+        }
+        #MainProduct--{{ section.id }} .product__ruby-signature {
+          grid-area: ruby-signature;
+          margin: 40px 0 80px 0;
+        }
+        #MainProduct--{{ section.id }} .product__collection-section {
+          grid-area: collection;
+          margin-top: 0;
+          margin-bottom: 40px;
+        }
+        #MainProduct--{{ section.id }} .product__collection-section .product__collection-image {
+          margin-bottom: 80px;
+        }
+
+        #MainProduct--{{ section.id }} .product__content {
+          margin: 20px 0 0;
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+
+        /* Hide variant-selects on mobile only when YMEE dropdown is active */
+        #MainProduct--{{ section.id }}[data-ymee-variant-dropdown-enabled="true"] .product__content-columns__main .product__form__holder {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border: 0;
+        }
+
+        product-info.index-product .product__content {
+          margin-top: 16px;
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+
+      }
+
+      @media only screen and (min-width: 750px) and (max-width: 989px) {
+       
+      }
+
+      @media only screen and (max-width: 749px) {
+
+        #MainProduct--{{ section.id }} .pdp-embla__arrows {
+          display: none;
         }
 
         #MainProduct--{{ section.id }} .pdp-embla__progress {
           display: block;
         }
+
+        #MainProduct--{{ section.id }} .product__sticky-bar .product__title__wrapper {
+          padding-right: 0;
+          text-align: center;
+        }
+
+        #MainProduct--{{ section.id }} .product__sticky-bar .product__price__wrap {
+          justify-content: center;
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price > .product__block,
+        #MainProduct--{{ section.id }} .product__title-price .shop-pay-terms {
+          margin: 0;
+        }
       }
-    {%- endif -%}
+
+      {%- endif -%}
   {%- endstyle -%}
 
   <{{ wrapper_tag }} class="product__wrapper {{ product_wrapper_modifier }}" data-product>
@@ -1127,12 +1236,21 @@
                       var canPrev = embla.canScrollPrev();
                       var canNext = embla.canScrollNext();
 
+                      if (hasIntroStage && carouselStarted && selectedIndex === 0) {
+                        canPrev = true;
+                      }
+
                       if (prevBtn) prevBtn.disabled = !canPrev;
                       if (nextBtn) nextBtn.disabled = !canNext;
                     }
 
                     prevBtn && prevBtn.addEventListener('click', function (e) {
                       e.preventDefault();
+                      if (hasIntroStage && carouselStarted && embla.selectedScrollSnap() === 0) {
+                        setCarouselStarted(false);
+                        updateArrows();
+                        return;
+                      }
                       if (hasIntroStage && carouselStarted && embla.selectedScrollSnap() === 1) {
                         setCarouselStarted(false);
                         updateArrows();
@@ -1895,6 +2013,7 @@
                     -%}
                   {%- endif -%}
 
+              <div class="product-accordions-container">
               {%- for block in section.blocks -%}
                 {%- if title_block != blank and block.id == title_block.id -%}
                   {%- continue -%}
@@ -2432,6 +2551,9 @@
                     </div>
                 {%- endcase -%}
               {%- endfor -%}
+              </div>
+
+              {%- render 'product-collection-section', product: product -%}
 
                 </div>
 
@@ -2454,24 +2576,135 @@
                       {%- endif -%}
                     {%- endfor -%}
 
-                    {%- for block in side_drawer_blocks -%}
-                      {%- liquid
-                        assign drawer_id = block.settings.drawer_id | strip | handleize
-                        if drawer_id == blank
-                          assign drawer_id = block.id
-                        endif
-                      -%}
-
-                      <div class="product__block" {{ block.shopify_attributes }}>
+                    {%- comment -%} Custom drawer blocks {%- endcomment -%}
+                    <div class="product__block product__custom-drawers-row">
+                      <div class="product__custom-drawer">
                         {% render 'link-with-icon',
-                          text: block.settings.trigger_text,
-                          drawer_open: drawer_id,
-                          icon: block.settings.trigger_icon,
-                          icon_position: block.settings.trigger_icon_position,
-                          content_alignment: block.settings.trigger_alignment
+                          text: 'Ask your concierge',
+                          drawer_open: 'ask-concierge',
+                          icon: 'icon-ask-our-concierge',
+                          icon_position: 'left',
+                          content_alignment: 'right'
                         %}
                       </div>
-                    {%- endfor -%}
+
+                      <div class="product__custom-drawer">
+                        {% render 'link-with-icon',
+                          text: 'Send a hint',
+                          drawer_open: 'send-hint',
+                          icon: 'icon-send-hint',
+                          icon_position: 'left',
+                          content_alignment: 'right'
+                        %}
+                      </div>
+                    </div>
+
+                    <style>
+                      .product__custom-drawers-row {
+                        display: flex;
+                        gap: 25px;
+                        width: 100%;
+                        margin-bottom: 50px;
+                        margin-top: 30px;
+                      }
+
+                      .product__custom-drawer {
+                        flex: 0 0 auto;
+                      }
+
+                      .product__custom-drawer .link-with-icon {
+                        width: 100%;
+                        justify-content: flex-start;
+                      }
+
+                      .product__ruby-signature {
+                        margin-top: 50px;
+                        margin-bottom: 20px;
+                      }
+
+                      .product__custom-drawers-row-ee {
+                        display: flex;
+                        flex-direction: column;
+                      }
+
+                      @media only screen and (max-width: 749px) {
+                        .product__custom-drawers-row {
+                          overflow: hidden;
+                          scrollbar-width: none;
+                          overflow-x: auto;
+                          margin: 20px 0;
+                        }
+
+                        .product__custom-drawers-row-ee {
+                          display: grid;
+                          grid-template-columns: 1fr 1fr;
+                          grid-template-areas:
+                            "block1 block3"
+                            "block2 block4";
+                          gap: 10px;
+                        }
+
+                        .product__custom-drawers-row-ee > .product__block:nth-child(1) { grid-area: block1; }
+                        .product__custom-drawers-row-ee > .product__block:nth-child(2) { grid-area: block2; }
+                        .product__custom-drawers-row-ee > .product__block:nth-child(3) { grid-area: block3; }
+                        .product__custom-drawers-row-ee > .product__block:nth-child(4) { grid-area: block4; }
+
+                        .product__custom-drawers-row-ee .link-with-icon--icon-right {
+                          margin-bottom: 0;
+                        }
+
+                        .product__custom-drawers-row-ee .link-with-icon--icon-right .link-with-icon__row {
+                          flex-direction: row;
+                          justify-content: flex-start;
+                        }
+
+                      }
+ 
+                    </style>
+
+                    <div class="product__custom-drawers-ee">
+                      <div class="product__block product__text text-left">
+                        <p class="product__heading">
+                          {{ 'products.product.ecommerce_experience' | t }}
+                        </p>
+                      </div>
+
+                      <div class="divider-holder block-padding">
+                        <hr class="divider">
+                      </div>
+
+                      <div class="product__custom-drawers-row-ee">
+                      {%- for block in side_drawer_blocks -%}
+                        {%- liquid
+                          assign drawer_id = block.settings.drawer_id | strip | handleize
+                          if drawer_id == blank
+                            assign drawer_id = block.id
+                          endif
+                        -%}
+
+                        <div class="product__block" {{ block.shopify_attributes }}>
+                          {% render 'link-with-icon',
+                            text: block.settings.trigger_text,
+                            drawer_open: drawer_id,
+                            icon: block.settings.trigger_icon,
+                            icon_position: block.settings.trigger_icon_position,
+                            content_alignment: block.settings.trigger_alignment
+                          %}
+                        </div>
+                      {%- endfor -%}
+                      </div>
+
+                      <div class="product__block product__custom-drawer product__ruby-signature">
+                        {% render 'link-with-icon',
+                          text: 'The Ruby — Roberto Coin''s Signature',
+                          drawer_open: 'ruby-signature',
+                          icon: 'icon-ruby-signature',
+                          icon_position: 'left',
+                          content_alignment: 'left',
+                          hero_image: 'https://cdn.shopify.com/s/files/1/0969/2990/7075/files/ruby-section.jpg?v=1772007648'
+                        %}
+                      </div>
+                    </div>
                   </div>
 
                 {%- endif -%}
@@ -2642,6 +2875,25 @@
 
     <div class="drawer__body">
       {% render 'drawer-send-hint' %}
+    </div>
+  </div>
+  <span class="underlay drawer__underlay" data-drawer-underlay></span>
+</side-drawer>
+
+<side-drawer
+  class="drawer"
+  data-drawer="ruby-signature"
+  id="side-drawer-ruby-signature"
+  data-drawer-size="fullscreen"
+  data-drawer-direction="right-to-left"
+>
+  <div class="drawer__inner" data-drawer-inner>
+    <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+      {% render 'icon-close' %}
+    </button>
+
+    <div class="drawer__body">
+      {% render 'drawer-ruby-signature' %}
     </div>
   </div>
   <span class="underlay drawer__underlay" data-drawer-underlay></span>
