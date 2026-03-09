@@ -439,6 +439,15 @@ a.blog-listing__view-all {
   let currentPage = 1;
   const articlesPerPage = 9;
 
+  // Function to capitalize first letter of each word
+  function capitalizeTitle(str) {
+    return str
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
   function renderArticles(page) {
     const grid = document.querySelector(".blog-listing__grid");
     grid.innerHTML = '';
@@ -451,7 +460,7 @@ a.blog-listing__view-all {
       const image = article.image?.url || "";
       const tag = article.tags[0] || "";
       const url = `/blogs/${article.blog.handle}/${article.handle}`;
-
+      const title = capitalizeTitle(article.title);
       const html = `
         <article class="blog-listing__card">
           <a href="${url}" class="blog-listing__card-link">
@@ -465,7 +474,7 @@ a.blog-listing__view-all {
 
             <div class="blog-listing__card-body">
               ${article.blog.handle ? `<p class="blog-listing__card-tag">#${article.blog.handle.toUpperCase()}</p>` : ""}
-              <h2 class="blog-listing__card-title">${article.title}</h2>
+              <h2 class="blog-listing__card-title">${title}</h2>
               <p class="blog-listing__card-excerpt">${article.excerpt || ""}</p>
             </div>
 
