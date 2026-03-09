@@ -20,29 +20,37 @@
   style="background-color: var(--bg-color);"
 >
   <div class="store-locator__wrapper {{ section.settings.width }}">
-    {%- for block in section.blocks -%}
-      {%- case block.type -%}
-        {%- when 'subheading' -%}
-          <p class="store-locator__subheading" {{ block.shopify_attributes }}>
-            {{ block.settings.text | upcase }}
-          </p>
-        
-        {%- when 'heading' -%}
-          <h2 class="store-locator__heading {{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
-            {{ block.settings.text }}
-          </h2>
-        
-        {%- when 'button' -%}
-          <div class="store-locator__button-wrap" {{ block.shopify_attributes }}>
+    <div class="store-locator__header">
+      <div class="store-locator__header-content">
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+            {%- when 'subheading' -%}
+              <p class="store-locator__subheading" {{ block.shopify_attributes }}>
+                {{ block.settings.text | upcase }}
+              </p>
+            
+            {%- when 'heading' -%}
+              <h2 class="store-locator__heading {{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
+                {{ block.settings.text }}
+              </h2>
+          {%- endcase -%}
+        {%- endfor -%}
+      </div>
+      
+      <div class="store-locator__header-button">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'button' -%}
             <a
               href="{{ block.settings.link | default: '#' }}"
               class="store-locator__button"
+              {{ block.shopify_attributes }}
             >
               {{ block.settings.text | upcase }}
             </a>
-          </div>
-      {%- endcase -%}
-    {%- endfor -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
 
     {%- assign location_blocks = section.blocks | where: 'type', 'location_card' -%}
     {%- if location_blocks.size > 0 -%}
