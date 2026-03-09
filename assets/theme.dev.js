@@ -3498,6 +3498,8 @@
             this.checkWidth = this.checkWidth.bind(this);
             this.scheduleHeaderLayerHide = this.scheduleHeaderLayerHide.bind(this);
             this.resetHeaderLayerHide = this.resetHeaderLayerHide.bind(this);
+            this.header = this.querySelector('[data-header-height]');
+            this.isScrollRevealBlurVisible = false;
             this.isSticky = this.hasAttribute('data-header-sticky');
             this.scrollHideEvent = (e) => this.toggleHeaderHideOnScroll(e);
 
@@ -3636,6 +3638,8 @@
             const atTop = position <= 0;
             const goingDown = Boolean(e?.detail?.down);
             const goingUp = Boolean(e?.detail?.up);
+            const stickyThreshold = typeof this.headerOffset === 'number' ? this.headerOffset : 0;
+            const shouldShowRevealBlur = this.isSticky && goingUp && !atTop && position > stickyThreshold;
 
             if (this.isCollectionTemplate && !this.isSpotlightCollectionTemplate) {
               if (atTop) {
@@ -3645,6 +3649,7 @@
                 this.body.classList.add('header-scroll-hide');
                 this.scheduleHeaderLayerHide();
               }
+              this.setScrollRevealBlur(false);
               return;
             }
 
@@ -3655,6 +3660,16 @@
               this.body.classList.add('header-scroll-hide');
               this.scheduleHeaderLayerHide();
             }
+
+            this.setScrollRevealBlur(shouldShowRevealBlur);
+          }
+
+          setScrollRevealBlur(shouldShow) {
+            if (!this.header || this.isScrollRevealBlurVisible === shouldShow) return;
+
+            this.isScrollRevealBlurVisible = shouldShow;
+            this.header.style.setProperty('--header-scroll-reveal-opacity', shouldShow ? '1' : '0');
+            this.header.style.setProperty('--header-scroll-reveal-blur', shouldShow ? '12px' : '0px');
           }
 
           scheduleHeaderLayerHide() {
