@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!-- /sections/related.liquid -->
 {%- liquid
   assign animation_anchor = '#RelatedProducts--' | append: section.id
@@ -834,3 +835,841 @@
   ]
 }
 {% endschema %}
+=======
+<!-- /sections/related.liquid -->
+{%- liquid
+  assign animation_anchor = '#RelatedProducts--' | append: section.id
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign enable_tabs = section.settings.enable_tabs
+  assign heading_alignment = section.settings.heading_alignment
+  assign heading_size_class = section.settings.heading_font_size
+  assign limit = section.settings.limit
+  assign related_category_limit = limit
+  assign layout_desktop = section.settings.layout_desktop
+  assign layout_mobile = section.settings.layout_mobile
+  assign grid_columns = section.settings.grid
+  assign has_recently_products = false
+  assign columns_mobile = section.settings.layout_mobile | plus: 0
+  assign columns_desktop = grid_columns | plus: 0
+  assign columns_medium = 3
+  assign columns_small = 2
+  assign column_count = limit | at_most: 4
+  assign current_collection = blank
+  assign assigned_related_collection = blank
+  assign assigned_related_collection_value = blank
+
+  if product.metafields.custom.collection != blank
+    assign assigned_related_collection_value = product.metafields.custom.collection.value
+
+    if assigned_related_collection_value != blank
+      if assigned_related_collection_value.products != blank
+        assign assigned_related_collection = assigned_related_collection_value
+      endif
+
+      if assigned_related_collection == blank
+        assign assigned_related_collection_handle = assigned_related_collection_value | handleize
+        assign assigned_related_collection = collections[assigned_related_collection_handle]
+      endif
+    endif
+  endif
+
+  if assigned_related_collection != blank
+    assign current_collection = assigned_related_collection
+  endif
+
+  if current_collection == blank and product.collections != blank
+    for assigned_collection in product.collections
+      if assigned_collection.handle != 'all'
+        assign current_collection = assigned_collection
+        break
+      endif
+    endfor
+  endif
+
+  if current_collection == blank
+    assign current_collection = product.collections.first
+  endif
+
+  if current_collection == blank
+    assign current_collection = collection
+  endif
+
+  assign current_collection_display_title = current_collection.title
+  assign current_category_collection = blank
+  assign current_category_display_title = blank
+
+  assign wrapper_tag = 'div'
+  if enable_tabs
+    assign wrapper_tag = 'tabs-component'
+  endif
+
+  if columns_desktop == 2 or columns_desktop == 4
+    assign columns_medium = 2
+  endif
+
+  if layout_desktop == 'grid'
+    assign limit = grid_columns | times: section.settings.rows
+    assign column_count = columns_desktop
+
+    if grid_columns == 2 or grid_columns == 4
+      assign columns_medium = 2
+    endif
+  endif
+
+  if layout_desktop == 'slider'
+    if related_category_limit <= 4
+      assign related_category_limit = 10
+    endif
+  endif
+
+  if current_collection_display_title == blank
+    assign current_collection_display_title = 'Current Collection'
+  endif
+
+  assign product_category_label = blank
+  assign product_category_handle = blank
+  assign product_category_collection = blank
+
+  if product.category != blank
+    if product.category.name != blank
+      assign product_category_label = product.category.name
+    endif
+  endif
+
+  if product_category_label == blank
+    if product.type != blank
+      assign product_category_label = product.type
+    endif
+  endif
+
+  if product_category_label != blank
+    assign product_category_handle = product_category_label | handleize
+    assign product_category_collection = collections[product_category_handle]
+
+    if product_category_collection != blank
+      if current_collection == blank
+        assign current_category_collection = product_category_collection
+        assign current_category_display_title = product_category_label
+      endif
+
+      if current_collection != blank
+        if product_category_collection.handle != current_collection.handle
+          assign current_category_collection = product_category_collection
+          assign current_category_display_title = product_category_label
+        endif
+      endif
+    endif
+  endif
+
+  if current_category_collection == blank
+    if current_collection != blank
+      if current_collection.title contains ' - '
+        assign parent_collection_title = current_collection.title | split: ' - ' | first | strip
+        if parent_collection_title != blank
+          assign parent_collection_handle = parent_collection_title | handleize
+          assign parent_collection_obj = collections[parent_collection_handle]
+
+          if parent_collection_obj != blank
+            if parent_collection_obj.handle != current_collection.handle
+              assign current_category_collection = parent_collection_obj
+              assign current_category_display_title = parent_collection_obj.title
+            endif
+          endif
+        endif
+      endif
+
+      if current_category_collection == blank
+        for sibling_collection in product.collections
+          if sibling_collection.handle != current_collection.handle
+            assign current_category_collection = sibling_collection
+            assign current_category_display_title = sibling_collection.title
+            break
+          endif
+        endfor
+      endif
+    endif
+  endif
+
+  if current_category_display_title == blank
+    assign current_category_display_title = 'Current Category'
+  endif
+-%}
+
+{%- for block in section.blocks -%}
+  {%- if block.type == 'related' -%}
+    {%- if current_collection != blank or current_category_collection != blank -%}
+    {%- if current_collection != blank -%}
+      {%- liquid
+        assign related_count = 0
+        capture related_products
+          for related_product in current_collection.products
+            assign hidden_product = false
+            if related_product.tags contains 'hide'
+              assign hidden_product = true
+            endif
+
+            if related_product.id != product.id and hidden_product == false and related_count < related_category_limit
+              assign related_count = related_count | plus: 1
+              render 'product-grid-item', product: related_product, animation_delay: forloop.index0 | times: 1, animation_anchor: '#RelatedProductsCollection--' | append: section.id, index: forloop.index
+            endif
+          endfor
+        endcapture
+      -%}
+
+      {%- if related_count > 0 -%}
+        {%- capture related -%}
+          <div class="grid-outer" style="--column-count: {{ column_count }}; --COLUMNS: {{ columns_desktop }}; --COLUMNS-MEDIUM: {{ columns_medium }}; --COLUMNS-SMALL: {{ columns_small }}; --COLUMNS-MOBILE: {{ columns_mobile }};" {{ block.shopify_attributes }}>
+            <grid-slider align-arrows>
+              <div class="grid{% if layout_desktop == 'slider' %} grid--slider{% if related_count <= 4 %} grid--slider-disabled{% endif %}{% endif %}{% if layout_mobile == 'slider' or layout_mobile == nil %} grid--mobile-slider{% else %} grid--mobile-vertical{% endif %}" data-grid-slider id="RelatedProductsCollection--{{ section.id }}">
+                {{ related_products }}
+              </div>
+            </grid-slider>
+          </div>
+        {%- endcapture -%}
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if current_category_collection != blank -%}
+      {%- liquid
+        assign category_count = 0
+        capture category_products
+          for category_product in current_category_collection.products
+            assign hidden_product = false
+            if category_product.tags contains 'hide'
+              assign hidden_product = true
+            endif
+
+            if category_product.id != product.id and hidden_product == false and category_count < related_category_limit
+              assign category_count = category_count | plus: 1
+              render 'product-grid-item', product: category_product, animation_delay: forloop.index0 | times: 1, animation_anchor: '#RelatedProductsCategory--' | append: section.id, index: forloop.index
+            endif
+          endfor
+        endcapture
+      -%}
+
+      {%- if category_count > 0 -%}
+        {%- capture category -%}
+          <div class="grid-outer" style="--column-count: {{ column_count }}; --COLUMNS: {{ columns_desktop }}; --COLUMNS-MEDIUM: {{ columns_medium }}; --COLUMNS-SMALL: {{ columns_small }}; --COLUMNS-MOBILE: {{ columns_mobile }};">
+            <grid-slider align-arrows>
+              <div class="grid{% if layout_desktop == 'slider' %} grid--slider{% if category_count <= 4 %} grid--slider-disabled{% endif %}{% endif %}{% if layout_mobile == 'slider' or layout_mobile == nil %} grid--mobile-slider{% else %} grid--mobile-vertical{% endif %}" data-grid-slider id="RelatedProductsCategory--{{ section.id }}">
+                {{ category_products }}
+              </div>
+            </grid-slider>
+          </div>
+        {%- endcapture -%}
+      {%- endif -%}
+    {%- endif -%}
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- if block.type == 'recent' -%}
+    {%- assign has_recently_products = true -%}
+
+    {%- capture recent -%}
+      {%- render 'products-recently-viewed', product: product, limit: limit, block: block, columns_desktop: columns_desktop, columns_medium: columns_medium, columns_small: columns_small, columns_mobile: columns_mobile, column_count: column_count, layout_desktop: layout_desktop, layout_mobile: layout_mobile -%}
+    {%- endcapture -%}
+
+  {%- endif -%}
+{%- endfor -%}
+
+{%- capture style -%}
+  --PT: {{ section.settings.padding_top }}px;
+  --PB: {{ section.settings.padding_bottom }}px;
+{%- endcapture -%}
+
+{%- style -%}
+  #RelatedProducts--{{ section.id }} {
+  --bg-color: #f9f9f9;
+  }
+  #RelatedProducts--{{ section.id }} .tabs-wrapper {
+    margin: 100px 0 0;
+  }
+  #RelatedProducts--{{ section.id }} .tab-content {
+    border-top: 1px solid #E5E5E5;
+    background: var(--bg-color);
+  }
+  #RelatedProducts--{{ section.id }} .grid__heading-holder {
+    padding: 0;
+    margin: 0 auto;
+    max-width: min(var(--content-max), 1200px);
+  }
+  #RelatedProducts--{{ section.id }} .tabs {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 30px;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  #RelatedProducts--{{ section.id }} .tabs::-webkit-scrollbar {
+    display: none;
+  }
+  #RelatedProducts--{{ section.id }} .tabs .tab-link {
+    padding: 0;
+    margin: 0;
+    flex-shrink: 0;
+  }
+  #RelatedProducts--{{ section.id }} .tabs .tab-link span {
+    padding-bottom: 10px;
+    display: inline-block;
+  }
+  #RelatedProducts--{{ section.id }} .tabs .tab-link.current span:first-of-type::after {
+    bottom: 0;
+  }
+  #RelatedProducts--{{ section.id }} grid-slider {
+    padding-bottom: 28px;
+  }
+  #RelatedProducts--{{ section.id }} .related-slider-progress {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 1px;
+    background: rgba(17, 17, 17, 0.2);
+    z-index: 2;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  #RelatedProducts--{{ section.id }} .slider__arrows {
+    opacity: 0;
+    visibility: hidden;
+  }
+  #RelatedProducts--{{ section.id }} .slider__button {
+    pointer-events: none;
+  }
+  #RelatedProducts--{{ section.id }} .related-slider-progress.hidden {
+    display: none;
+  }
+  #RelatedProducts--{{ section.id }} .related-slider-progress__line {
+    display: block;
+    width: var(--related-slider-progress, 0%);
+    height: 100%;
+    background: #111111;
+    transition: width 0.2s ease;
+  }
+
+  @media only screen and (min-width: 990px) {
+    #RelatedProducts--{{ section.id }} .grid--slider {
+      --item-width: calc((100% - (var(--gap) * 3)) / 4);
+    }
+  }
+
+  @media only screen and (max-width: 989px) {
+
+    #RelatedProducts--{{ section.id }} .tabs__head {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+  }
+
+  @media only screen and (min-width: 750px) and (max-width: 989px) {
+
+    #RelatedProducts--{{ section.id }} .tabs-wrapper {
+      margin: 50px 0 0;
+    }
+
+  }
+
+  @media only screen and (max-width: 749px) {
+
+    #RelatedProducts--{{ section.id }} .tabs-wrapper {
+      margin: 30px 0 0;
+    }
+
+     #RelatedProducts--{{ section.id }} .tabs {
+      gap: 25px;
+      overflow-x: auto;
+     }
+
+    #RelatedProducts--{{ section.id }} grid-slider {
+      padding-bottom: 20px;
+    }
+
+    #RelatedProducts--{{ section.id }} .related-slider-progress__line {
+      width: var(--related-slider-progress, 0%);
+    }
+  }
+
+{%- endstyle -%}
+
+<script src="{{ 'related-products.js' | asset_url }}" defer="defer"></script>
+
+<related-products
+  class="related__wrapper {{ color_scheme }}"
+  id="RelatedProducts--{{ section.id }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="related"
+  style="{{ style }}"
+>
+  {%- if related or category or has_recently_products -%}
+    <{{ wrapper_tag }}
+      class="tabs-wrapper related__products"
+    >
+      {%- if enable_tabs -%}
+        <div
+          class="tabs__head"
+          data-aos="hero"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-order="1"
+        >
+          <div class="grid__heading-holder{% if heading_alignment == 'text-left' %} grid__heading-holder--left{% endif %}">
+            <native-scrollbar class="grid__heading-actions">
+              <ul class="tabs {{ heading_alignment }}">
+                {%- if related -%}
+                  <li class="tab-link tab-link-0{% if related %} current{% endif %}" data-tab="0" tabindex="0">
+                    <span>More {{ current_collection_display_title | escape }}</span>
+                  </li>
+                {%- endif -%}
+
+                {%- if category -%}
+                  <li class="tab-link tab-link-1{% if related == nil %} current{% endif %}" data-tab="1" tabindex="0">
+                    <span>More {{ current_category_display_title | escape }}</span>
+                  </li>
+                {%- endif -%}
+
+                {%- if recent -%}
+                  <li
+                    class="tab-link tab-link-2 tab-link__recent{% if related == nil and category == nil %} current{% endif %} hidden"
+                    data-recently-viewed-wrapper
+                    data-tab="2"
+                    tabindex="0"
+                  >
+                    <span>recently viewed</span>
+                  </li>
+                {%- endif -%}
+              </ul>
+
+              <button type="button" class="tabs__arrow tabs__arrow--prev is-hidden" data-scrollbar-arrow-prev>
+                {%- render 'icon-nav-arrow-left' -%}
+                <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
+              </button>
+
+              <button type="button" class="tabs__arrow tabs__arrow--next is-hidden" data-scrollbar-arrow-next>
+                {%- render 'icon-nav-arrow-right' -%}
+                <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
+              </button>
+            </native-scrollbar>
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- if related -%}
+        <div class="tab-content tab-content-0{% if related %} current{% endif %} tabs__recommendation" data-tab-index="0">
+          {%- if enable_tabs != true -%}
+            <h6
+              class="tab__title {{ heading_alignment }} {{ heading_size_class }}"
+              data-aos="hero"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-order="1"
+            >
+              More {{ current_collection_display_title | escape }}
+            </h6>
+          {%- endif -%}
+
+          {{ related }}
+        </div>
+      {%- endif -%}
+
+      {%- if category -%}
+        <div
+          class="tab-content tab-content-1 tabs__recommendation{% if related == nil %} current{% endif %}"
+          data-tab-index="1"
+          style="--column-count: {{ related_category_limit }}"
+        >
+          {%- if enable_tabs == false -%}
+            <h6
+              class="tab__title {{ heading_alignment }} {{ heading_size_class }}"
+              data-aos="hero"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-order="1"
+            >
+              More {{ current_category_display_title | escape }}
+            </h6>
+          {%- endif -%}
+
+          {{ category }}
+        </div>
+      {%- endif -%}
+
+      {%- if recent -%}
+        <div
+          class="tab-content tab-content-2 tabs__recently-viewed{% if enable_tabs == false or related == nil and category == nil %} current{% endif %}{% if enable_tabs %} hidden{% endif %}"
+          data-tab-index="2"
+          style="--column-count: {{ limit }}"
+        >
+          {%- if enable_tabs == false -%}
+            <h6
+              class="tab__title {{ heading_alignment }} {{ heading_size_class }}"
+              data-aos="hero"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-order="1"
+            >
+              recently viewed
+            </h6>
+          {%- endif -%}
+
+          {{ recent }}
+        </div>
+      {%- endif -%}
+    </{{ wrapper_tag }}>
+  {%- else -%}
+    <div class="section-padding">
+      <p class="center">{{ 'home_page.onboarding.no_content' | t }}</p>
+    </div>
+  {%- endif -%}
+</related-products>
+
+<script>
+  (() => {
+    const section = document.getElementById('RelatedProducts--{{ section.id }}');
+
+    if (!section) {
+      return;
+    }
+
+    const relatedSliderSelector = '[data-grid-slider]';
+    const gridItemSelector = '[data-grid-item]';
+
+    const getClosestSlideIndex = (items, slider) => {
+      let closestIndex = 0;
+      let minDistance = Number.POSITIVE_INFINITY;
+
+      items.forEach((item, index) => {
+        const distance = Math.abs(item.offsetLeft - slider.scrollLeft);
+
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestIndex = index;
+        }
+      });
+
+      return closestIndex;
+    };
+
+    const setupProgress = (gridSlider) => {
+      const slider = gridSlider.querySelector(relatedSliderSelector);
+
+      if (!slider) {
+        return;
+      }
+
+      let progress = gridSlider.querySelector('[data-related-slider-progress]');
+
+      if (!progress) {
+        progress = document.createElement('div');
+        progress.className = 'related-slider-progress';
+        progress.setAttribute('data-related-slider-progress', '');
+        progress.innerHTML = '<span class="related-slider-progress__line"></span>';
+        gridSlider.append(progress);
+      }
+
+      const syncSliderState = (items) => {
+        if (!slider.classList.contains('grid--slider')) {
+          return;
+        }
+
+        const shouldDisableSlider = items.length <= 4;
+        const isSliderDisabled = slider.classList.contains('grid--slider-disabled');
+
+        if (shouldDisableSlider != isSliderDisabled) {
+          slider.classList.toggle('grid--slider-disabled', shouldDisableSlider);
+          gridSlider.dispatchEvent(new CustomEvent('theme:grid-slider:init'));
+        }
+      };
+
+      const updateActive = () => {
+        const items = Array.from(slider.querySelectorAll(gridItemSelector));
+        syncSliderState(items);
+
+        if (items.length < 2) {
+          progress.classList.add('hidden');
+          progress.style.setProperty('--related-slider-progress', '0%');
+          return;
+        }
+
+        const isScrollable = slider.scrollWidth > slider.clientWidth + 1;
+        progress.classList.toggle('hidden', !isScrollable);
+
+        if (!isScrollable) {
+          progress.style.setProperty('--related-slider-progress', '0%');
+          return;
+        }
+
+        const progressPercent = ((slider.scrollLeft + slider.clientWidth) / slider.scrollWidth) * 100;
+        const safeProgress = Math.max(0, Math.min(100, progressPercent));
+
+        progress.style.setProperty('--related-slider-progress', `${safeProgress}%`);
+      };
+
+      if (!slider.hasAttribute('data-related-progress-bound')) {
+        slider.addEventListener(
+          'scroll',
+          () => {
+            requestAnimationFrame(updateActive);
+          },
+          {passive: true}
+        );
+        slider.setAttribute('data-related-progress-bound', 'true');
+      }
+
+      if (!slider.hasAttribute('data-related-progress-observer-bound')) {
+        const observer = new MutationObserver(() => {
+          requestAnimationFrame(updateActive);
+        });
+
+        observer.observe(slider, {childList: true, subtree: true});
+        slider.setAttribute('data-related-progress-observer-bound', 'true');
+      }
+
+      if (!slider.hasAttribute('data-related-progress-resize-bound') && window.ResizeObserver) {
+        const resizeObserver = new ResizeObserver(() => {
+          requestAnimationFrame(updateActive);
+        });
+
+        resizeObserver.observe(slider);
+        slider.setAttribute('data-related-progress-resize-bound', 'true');
+      }
+
+      if (!gridSlider.hasAttribute('data-related-arrow-bound')) {
+        gridSlider.addEventListener('click', (event) => {
+          const arrow = event.target.closest('[data-button-arrow]');
+          if (!arrow || !gridSlider.contains(arrow)) {
+            return;
+          }
+
+          const items = Array.from(slider.querySelectorAll(gridItemSelector));
+          if (items.length < 2) {
+            return;
+          }
+
+          const firstVisibleSlide = slider.querySelector(`${gridItemSelector}.is-visible`);
+          let currentIndex = firstVisibleSlide ? items.indexOf(firstVisibleSlide) : getClosestSlideIndex(items, slider);
+
+          if (currentIndex < 0) {
+            currentIndex = 0;
+          }
+
+          let targetIndex = currentIndex;
+          if (arrow.hasAttribute('data-button-prev')) {
+            targetIndex = Math.max(0, currentIndex - 1);
+          }
+
+          if (arrow.hasAttribute('data-button-next')) {
+            targetIndex = Math.min(items.length - 1, currentIndex + 1);
+          }
+
+          if (targetIndex == currentIndex) {
+            return;
+          }
+
+          event.preventDefault();
+          slider.scrollTo({
+            top: 0,
+            left: items[targetIndex].offsetLeft,
+            behavior: 'smooth',
+          });
+        });
+
+        gridSlider.setAttribute('data-related-arrow-bound', 'true');
+      }
+
+      updateActive();
+    };
+
+    const initProgress = () => {
+      section.querySelectorAll('grid-slider').forEach((gridSlider) => {
+        setupProgress(gridSlider);
+      });
+    };
+
+    initProgress();
+
+    section.addEventListener('theme:tab:change', initProgress);
+    section.addEventListener('theme:grid-slider:init', initProgress);
+    document.addEventListener('theme:resize:width', initProgress);
+    window.addEventListener('resize', initProgress, {passive: true});
+    section.querySelector('recently-viewed')?.addEventListener('theme:recently-viewed:loaded', initProgress);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Product recommendations",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_tabs",
+      "label": "Enable tabs",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Alignment",
+      "default": "text-center",
+      "options": [
+        {"value": "text-left", "label": "Left"},
+        {"value": "text-center", "label": "Centered"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "heading_font_size",
+      "visible_if": "{{ section.settings.enable_tabs == false }}",
+      "label": "Heading size",
+      "default": "heading-small",
+      "options": [
+        {"value": "heading-mini", "label": "Mini"},
+        {"value": "heading-x-small", "label": "Extra small"},
+        {"value": "heading-small", "label": "Small"},
+        {"value": "heading-medium", "label": "Medium"},
+        {"value": "heading-large", "label": "Large"},
+        {"value": "heading-x-large", "label": "Extra large"}
+      ]
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "label": "Product limit",
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Desktop"
+    },
+    {
+      "type": "select",
+      "id": "layout_desktop",
+      "label": "Product grid layout",
+      "options": [
+        {
+          "value": "grid",
+          "label": "Grid"
+        },
+        {
+          "value": "slider",
+          "label": "Slider"
+        }
+      ],
+      "default": "slider"
+    },
+    {
+      "type": "header",
+      "content": "Grid",
+      "info": "Applies only when product grid layout is set to Grid"
+    },
+    {
+      "type": "range",
+      "id": "grid",
+      "label": "Products per row",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "rows",
+      "label": "Number of rows",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "header",
+      "content": "Mobile"
+    },
+    {
+      "type": "select",
+      "id": "layout_mobile",
+      "label": "Mobile layout",
+      "options": [
+        {
+          "value": "1",
+          "label": "1 item per row"
+        },
+        {
+          "value": "2",
+          "label": "2 items per row"
+        },
+        {
+          "value": "slider",
+          "label": "Slider"
+        }
+      ],
+      "default": "slider"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Top",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 30
+    }
+  ],
+  "blocks": [
+    {
+      "type": "related",
+      "name": "Related products",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "product_recommendations_heading",
+          "label": "Heading",
+          "default": "Related products"
+        }
+      ]
+    },
+    {
+      "type": "recent",
+      "name": "Recently viewed products",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "product_recently_heading",
+          "label": "Heading",
+          "default": "Recently viewed"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+>>>>>>> 8bc2f45827732d3d444ef394419d71c7762aef38

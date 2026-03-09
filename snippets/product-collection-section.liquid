@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% comment %}
   Renders collection information on product page.
   Detects if the current product is referenced by any storytelling product
@@ -334,3 +335,341 @@
       });
     });
   </script>
+=======
+{% comment %}
+  Renders collection information on product page.
+  Detects if the current product is referenced by any storytelling product
+  (via ste_products metafield). If so, renders that storytelling tile with
+  "Shop the look" modal. Otherwise shows the plain collection image.
+  
+  @param {product} product - The current product
+{% endcomment %}
+
+{%- liquid
+  assign found_storytelling = blank
+  assign found_storytelling_date = 0
+  assign context_collection = collection
+
+  # Iterate through ALL collections the current product belongs to
+  # and scan sibling products for storytelling type products whose
+  # ste_products metafield references the current product.
+  if product.collections != blank
+    for prod_collection in product.collections
+      for coll_product in prod_collection.products
+        if coll_product.id == product.id
+          continue
+        endif
+
+        assign coll_product_type = coll_product.type | downcase
+        if coll_product_type == 'storytelling' or coll_product_type contains 'storytelling'
+          assign ste_prods = coll_product.metafields.custom.ste_products.value
+          if ste_prods != blank
+            assign ste_ids = ste_prods | map: 'id'
+            if ste_ids contains product.id
+              assign coll_product_date = coll_product.created_at | date: '%s' | plus: 0
+              if coll_product_date > found_storytelling_date
+                assign found_storytelling = coll_product
+                assign found_storytelling_date = coll_product_date
+              endif
+            endif
+          endif
+        endif
+      endfor
+    endfor
+  endif
+
+  # If nothing found yet, also scan context collection siblings (if provided)
+  if found_storytelling == blank and context_collection != blank
+    for coll_product in context_collection.products
+      if coll_product.id == product.id
+        continue
+      endif
+
+      assign coll_product_type = coll_product.type | downcase
+      if coll_product_type == 'storytelling' or coll_product_type contains 'storytelling'
+        assign ste_prods = coll_product.metafields.custom.ste_products.value
+        if ste_prods != blank
+          assign ste_ids = ste_prods | map: 'id'
+          if ste_ids contains product.id
+            assign coll_product_date = coll_product.created_at | date: '%s' | plus: 0
+            if coll_product_date > found_storytelling_date
+              assign found_storytelling = coll_product
+              assign found_storytelling_date = coll_product_date
+            endif
+          endif
+        endif
+      endif
+    endfor
+  endif
+
+  # Use product category for display title and image
+  # (collection-based fallback can be re-enabled later when collections have data)
+  assign category_label = blank
+  assign category_collection = blank
+
+  if product.category != blank and product.category.name != blank
+    assign category_label = product.category.name
+  endif
+
+  if category_label == blank and product.type != blank
+    assign category_label = product.type
+  endif
+
+  if category_label != blank
+    assign category_handle = category_label | handleize
+    assign category_collection = collections[category_handle]
+  endif
+
+  assign display_title = category_label | default: product.title
+  assign display_description = blank
+  assign display_image = blank
+
+  if category_collection != blank
+    assign display_image = category_collection.image
+    if category_collection.description != blank
+      assign display_description = category_collection.description
+    endif
+  endif
+-%}
+
+{%- if found_storytelling != blank -%}
+  {{ 'custom-collection.css' | asset_url | stylesheet_tag }}
+
+  <div class="product__collection-section block-padding" style="--block-padding-bottom: 65px;">
+    <div class="product__collection-image product__collection-image--storytelling">
+      {%- render 'product-tile-storytelling', product: found_storytelling, index: product.id -%}
+    </div>
+
+    <div class="product__collection-info">
+      <h2 class="product__collection-title">{{ display_title }}</h2>
+      {%- if display_description != blank -%}
+        <div class="product__collection-description rte" data-collection-description>
+          <div class="collection-description__content" data-description-content>
+            {{ display_description }}
+          </div>
+          <button class="collection-description__read-more" data-read-more-btn>
+            <span data-read-more-text>Read more</span>
+            <span data-read-less-text style="display: none;">Read less</span>
+          </button>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+{%- else -%}
+  <div
+    class="product__collection-section block-padding"
+    style="--block-padding-bottom: 65px;"
+    data-storytelling-lookup
+    data-product-id="{{ product.id }}"
+    data-product-handle="{{ product.handle }}"
+  >
+    <div class="product__collection-image" data-storytelling-tile-target>
+      <div data-storytelling-fallback>
+        {%- if display_image != blank -%}
+          {%- render 'image',
+            image: display_image,
+            widths: '720, 960, 1200, 1500, 1800',
+            sizes: '(min-width: 990px) calc((100vw - var(--outer) * 2) * 0.7), 100vw',
+            class: 'collection-image'
+          -%}
+        {%- else -%}
+          <div class="image-wrapper">
+            {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg' }}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <div class="product__collection-info">
+      <h2 class="product__collection-title">{{ display_title }}</h2>
+      {%- if display_description != blank -%}
+        <div class="product__collection-description rte" data-collection-description>
+          <div class="collection-description__content" data-description-content>
+            {{ display_description }}
+          </div>
+          <button class="collection-description__read-more" data-read-more-btn>
+            <span data-read-more-text>Read more</span>
+            <span data-read-less-text style="display: none;">Read less</span>
+          </button>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <script src="{{ 'storytelling-lookup.js' | asset_url }}" defer></script>
+{%- endif -%}
+
+  <style>
+    .product__collection-section {
+      margin: var(--block-padding-bottom, 50px) 0;
+      --aspect-ratio: 1;
+    }
+
+    .product__collection-image {
+      position: relative;
+      overflow: clip;
+      background: #e8e8e8;
+    }
+
+    .product__collection-image .image-wrapper {
+      width: 100%;
+      height: 0;
+      padding-top: calc(1 / var(--aspect-ratio) * 100%);
+    }
+
+    .product__collection-image .image-wrapper img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      image-rendering: auto;
+    }
+
+    .product__collection-title {
+      font-family: var(--FONT-STACK-HEADING);
+      font-style: var(--FONT-STYLE-HEADING);
+      font-weight: var(--FONT-WEIGHT-HEADING);
+      font-size: var(--LINE-HEIGHT-DISPLAY-S);
+      line-height: var(--LINE-HEIGHT-DISPLAY-M);
+      letter-spacing: 0;
+      text-transform: capitalize;
+      color: var(--COLOR-TEXT-DARK);
+      margin: 40px 0 20px;
+    }
+
+    .product__collection-description {
+      font-family: var(--FONT-STACK-BODY);
+      font-style: var(--FONT-STYLE-BODY);
+      font-weight: var(--FONT-WEIGHT-BODY);
+      font-size: var(--FONT-SIZE-BASE);
+      line-height: var(--LINE-HEIGHT-BODY);
+      color: var(--COLOR-TEXT-DARK);
+      max-width: 78ch;
+      margin-bottom: 0;
+    }
+
+    /* Read more functionality - mobile only */
+    @media only screen and (max-width: 749px) {
+      .product__collection-description[data-collection-description] {
+        position: relative;
+      }
+
+      .collection-description__content[data-description-content] {
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        transition: all 0.3s ease;
+      }
+
+      .product__collection-description[data-collection-description].expanded 
+        .collection-description__content[data-description-content] {
+        -webkit-line-clamp: unset;
+        display: block;
+      }
+
+      .collection-description__read-more {
+        background: none;
+        border: none;
+        color: var(--COLOR-PRIMARY);
+        font-family: var(--FONT-STACK-BODY);
+        font-size: var(--FONT-SIZE-BASE);
+        cursor: pointer;
+        padding: 8px 0 0 0;
+        text-decoration: underline;
+        margin-top: 8px;
+      }
+
+      .collection-description__read-more:hover {
+        color: var(--COLOR-PRIMARY-HOVER);
+      }
+    }
+
+    /* Hide read more on desktop */
+    @media only screen and (min-width: 750px) {
+      .collection-description__read-more {
+        display: none;
+      }
+      
+      .collection-description__content[data-description-content] {
+        -webkit-line-clamp: unset !important;
+        display: block !important;
+      }
+    }
+
+    /* Storytelling tile within product collection section */
+    .product__collection-image--storytelling .product-storytelling {
+      display: block;
+      width: 100%;
+    }
+
+    .product__collection-image--storytelling .grid-media__media-wrapper {
+      width: 100%;
+      height: 0;
+      padding-top: calc(1 / var(--aspect-ratio) * 100%);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .product__collection-image--storytelling .grid-media__media-wrapper img,
+    .product__collection-image--storytelling .grid-media__media-wrapper video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      max-width: none;
+    }
+
+    @media (max-width: 767px) {
+      .product__collection-section {
+        margin-top: 40px;
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      .product__collection-title {
+        margin-top: 22px;
+      }
+
+      .product__collection-image--storytelling .grid-media__media-wrapper .btn {
+        right: 50%;
+        bottom: 20px;
+        transform: translateX(50%);
+      }
+    }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Read more functionality for collection descriptions
+      const readMoreButtons = document.querySelectorAll('[data-read-more-btn]');
+      
+      readMoreButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const description = this.closest('[data-collection-description]');
+          const readMoreText = this.querySelector('[data-read-more-text]');
+          const readLessText = this.querySelector('[data-read-less-text]');
+          
+          if (description.classList.contains('expanded')) {
+            // Collapse
+            description.classList.remove('expanded');
+            readMoreText.style.display = 'inline';
+            readLessText.style.display = 'none';
+          } else {
+            // Expand
+            description.classList.add('expanded');
+            readMoreText.style.display = 'none';
+            readLessText.style.display = 'inline';
+          }
+        });
+      });
+    });
+  </script>
+>>>>>>> 8bc2f45827732d3d444ef394419d71c7762aef38

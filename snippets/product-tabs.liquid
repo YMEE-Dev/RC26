@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!-- /snippets/product-tabs.liquid -->
 {% comment %}
   Renders product tabs
@@ -435,3 +436,442 @@
     }
   });
 {% endjavascript %}
+=======
+<!-- /snippets/product-tabs.liquid -->
+{% comment %}
+  Renders product tabs
+
+  Accepts:
+  - block: {Object} Current block (required)
+  - product: {Object} Current product (optional)
+
+  Usage:
+  {% render 'product-tabs', product: product, block: block  %}
+{% endcomment %}
+
+{%- liquid
+  assign show_description = block.settings.show_description
+  assign show_read_more = block.settings.show_read_more
+  assign product_description_title = 'products.general.description' | t
+  assign product_description_content = product.description | strip
+-%}
+  
+{%- if block.type == 'tab_richtext' -%}
+  {%- liquid
+    assign tab_links_html = ''
+    assign tab_contents_html = ''
+    assign count = 0
+  -%}
+
+  {%- if show_description and product_description_content != blank -%}
+    {%- capture tab_links_html -%}
+      <li class="tab-link tab-link-0 current" data-tab="0" tabindex="0" data-attributes-placeholder>
+        <span>{{ product_description_title }}</span>
+      </li>
+    {%- endcapture -%}
+
+    {%- capture tab_contents_html -%}
+      <div class="tab-content tab-content-0 current rte">
+        {%- render 'toggle-ellipsis', content: product_description_content, show_read_more: show_read_more -%}
+      </div>
+    {%- endcapture -%}
+
+    {%- assign count = 1 -%}
+  {%- endif -%}
+
+  {%- for i in (1..5) -%}
+    {%- liquid
+      assign title = 'title_' | append: forloop.index
+      assign title = block.settings[title]
+      assign content = 'raw_content_' | append: forloop.index
+      assign content = block.settings[content]
+    -%}
+
+    {%- if title != '' and content != '' -%}
+      {%- capture tab_links_html -%}
+        {{ tab_links_html }}
+
+        <li class="tab-link tab-link-{{ count }}{% if count == 0 %} current{% endif %}" data-tab="{{ count }}" tabindex="0">
+          <span>{{ title }}</span>
+        </li>
+      {%- endcapture -%}
+
+      {%- capture tab_contents_html -%}
+        {{ tab_contents_html }}
+
+        <div class="tab-content tab-content-{{ count }}{% if count == 0 %} current{% endif %} rte">
+          {%- render 'toggle-ellipsis', content: content, show_read_more: show_read_more -%}
+        </div>
+      {%- endcapture -%}
+
+      {%- assign count = count | plus: 1 -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- if tab_contents_html -%}
+    <tabs-component class="product-tabs" {{ block.shopify_attributes }}>
+      <native-scrollbar class="tabs__head product-tabs__head">
+        <ul class="tabs product-tabs-title" data-scrollbar data-scrollbar-slider>
+          {{ tab_links_html }}
+        </ul>
+
+        <button
+          type="button"
+          class="tabs__arrow tabs__arrow--prev product-tabs__arrow product-tabs__arrow--prev is-hidden"
+          data-scrollbar-arrow-prev
+        >
+          {%- render 'icon-nav-arrow-left' -%}
+          <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
+        </button>
+
+        <button
+          type="button"
+          class="tabs__arrow tabs__arrow--next product-tabs__arrow product-tabs__arrow--next is-hidden"
+          data-scrollbar-arrow-next
+        >
+          {%- render 'icon-nav-arrow-right' -%}
+          <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
+        </button>
+      </native-scrollbar>
+
+      {{ tab_contents_html }}
+    </tabs-component>
+  {%- elsif request.design_mode -%}
+    <span {{ block.shopify_attributes }}></span>
+  {%- endif -%}
+{%- elsif block.type == 'accordion' -%}
+  {%- liquid
+    assign accordion_heading = block.settings.heading
+    assign accordion_text = block.settings.text
+    assign accordion_open = block.settings.default_open
+    assign accordion_content = accordion_text
+    assign accordion_style = block.settings.style
+
+    if show_description
+      assign accordion_content = product_description_content | append: accordion_text
+    endif
+  -%}
+
+  {%- liquid
+    if accordion_style == 'collapsible' or accordion_style == 'drawer'
+      if accordion_heading == blank and accordion_content == blank
+        assign accordion_heading = 'products.general.accordion_heading' | t
+      endif
+    endif
+  -%}
+
+  {%- capture accordion_icon -%}
+    {%- if block.settings.show_icon -%}
+      {%- liquid
+        assign icon_size = block.settings.icon_size
+        assign icon_color = block.settings.icon_color
+        assign image = block.settings.image
+
+        capture icon_style
+          echo 'style="'
+          echo '--icon-size: ' | append: icon_size | append: 'px;'
+          if icon_color != blank and icon_color != 'rgba(0,0,0,0)'
+            echo '--icons: ' | append: icon_color | append: ';'
+          endif
+          echo '"'
+        endcapture
+      -%}
+
+      <div
+        class="icon__animated{% if image != blank %} icon__animated--image{% endif %}"
+        {{ icon_style }}
+      >
+        {%- liquid
+          if image
+            assign icon_width = icon_size
+            assign icon_width_retina = icon_width | times: 2
+            assign icon_sizes = icon_width | append: 'px'
+            assign icon_widths = icon_width | append: ', ' | append: icon_width_retina
+            render 'image', image: image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths, show_backfill: false
+          else
+            render 'animated-icon', filename: block.settings.icon_name
+          endif
+        -%}
+      </div>
+    {%- endif -%}
+  {%- endcapture -%}
+
+  {%- if accordion_heading != blank and accordion_content != blank -%}
+    {%- if accordion_style == 'collapsible' -%}
+      <collapsible-elements single="true">
+        <div class="product-accordion{% if block.settings.show_sku %} product-accordion--has-sku{% endif %}">
+          <details
+            class="accordion"
+            data-collapsible
+            {% if accordion_open %}
+              open="true"
+            {% endif %}
+            {{ block.shopify_attributes }}
+          >
+            <summary class="accordion__title {{ block.settings.heading_font_size }}" data-collapsible-trigger>
+              {{ accordion_icon }}
+              {{ accordion_heading }}
+              {%- if block.settings.show_sku and product.selected_or_first_available_variant.sku != blank -%}
+                <span class="accordion__sku" data-variant-sku>SKU | {{ product.selected_or_first_available_variant.sku }}</span>
+              {%- endif -%}
+              <span class="accordion-icon-wrapper">
+                {%- render 'icon-plus' -%}
+                {%- render 'icon-minus' -%}
+              </span>
+            </summary>
+
+            <div
+              class="accordion__body rte {{ block.settings.text_font_size }}"
+              data-collapsible-body
+              {% if accordion_open %}
+                style="height: auto;"
+              {% endif %}
+            >
+              <div class="accordion__content" data-collapsible-content{% if block.settings.show_sku %} data-variant-content{% endif %}>
+                {%- if block.settings.show_sku -%}
+                  <div class="variant-description" data-variant-description>
+                    {%- if product.selected_or_first_available_variant.description != blank -%}
+                      {{ product.selected_or_first_available_variant.description }}
+                    {%- endif -%}
+                  </div>
+                {%- endif -%}
+                {%- render 'toggle-ellipsis', content: accordion_content, show_read_more: show_read_more -%}
+              </div>
+            </div>
+          </details>
+        </div>
+      </collapsible-elements>
+    {%- elsif accordion_style == 'drawer' -%}
+      <popup-component {{ block.shopify_attributes }}>
+        <div class="accordion{% if block.settings.show_sku %} accordion--has-sku{% endif %}">
+          <button
+            type="button"
+            class="accordion__title {{ block.settings.heading_font_size }}"
+            data-popup-open
+            aria-haspopup="dialog"
+          >
+            {{ accordion_icon }}
+            {{ accordion_heading }}
+            {%- if block.settings.show_sku and product.selected_or_first_available_variant.sku != blank -%}
+              <span class="accordion__sku" data-variant-sku>SKU | {{ product.selected_or_first_available_variant.sku }}</span>
+            {%- endif -%}
+            {%- render 'icon-nav-arrow-right' -%}
+          </button>
+        </div>
+
+        <dialog
+          class="drawer"
+          aria-modal="true"
+          aria-labelledby="DrawerAccordionHeading-{{ block.id }}"
+          data-scroll-lock-required
+        >
+          <form method="dialog">
+            <button class="visually-hidden" aria-label="{{ 'general.accessibility.close' | t }}"></button>
+          </form>
+
+          <div class="drawer__inner" data-scroll-lock-scrollable>
+            <div class="drawer__head {{ block.settings.heading_font_size }}">
+              <h3 class="drawer__heading" id="DrawerAccordionHeading-{{ block.id }}">
+                {{ accordion_heading }}
+              </h3>
+
+              <button
+                type="button"
+                class="drawer__close"
+                data-popup-close
+                aria-label="{{ 'general.accessibility.close' | t }}"
+              >
+                {%- render 'icon-cancel' -%}
+              </button>
+            </div>
+
+            <div class="drawer__body rte {{ block.settings.text_font_size }}" data-scroll-lock-scrollable{% if block.settings.show_sku %} data-variant-content{% endif %}>
+              {%- if block.settings.show_sku -%}
+                <div class="variant-description" data-variant-description>
+                  {%- if product.selected_or_first_available_variant.description != blank -%}
+                    {{ product.selected_or_first_available_variant.description }}
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+              {{ accordion_content }}
+            </div>
+          </div>
+        </dialog>
+      </popup-component>
+    {%- endif -%}
+  {%- elsif request.design_mode -%}
+    <span {{ block.shopify_attributes }}></span>
+  {%- endif -%}
+{%- endif -%}
+
+{% stylesheet %}
+  .product__block--accordion .accordion__title,
+  .accordion__content {
+    font-size: var(--font-body-small);
+    font-family: var(--FONT-STACK-BODY);
+    font-style: var(--FONT-STYLE-BODY);
+    font-weight: var(--FONT-WEIGHT-BODY);
+    letter-spacing: var(--LETTER-SPACING-NAV);
+  }
+
+  .product__block--accordion .accordion__title {
+    text-transform: uppercase;
+  }
+
+  .accordion__content {
+    font-size: var(--FONT-SIZE-BASE);
+    letter-spacing: var(--LETTER-SPACING-BODY);
+  }
+
+  .product__block--accordion .accordion__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding-right: 1rem;
+  }
+
+  .product__block--accordion .accordion__title .accordion__sku {
+    color: #A7A7A7;
+    padding-left: 1rem;
+  }
+
+  .variant-description {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e5e5;
+  }
+
+  .variant-description:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  /* Accordion icon toggle */
+  .accordion-icon-wrapper {
+    position: relative;
+    margin-left: auto;
+  }
+  
+  .accordion-icon-wrapper svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.2s ease;
+  }
+
+  .accordion-icon-wrapper svg:last-child {
+    opacity: 0;
+  }
+
+  details[open] .accordion-icon-wrapper svg:first-child {
+    opacity: 0;
+  }
+
+  details[open] .accordion-icon-wrapper svg:last-child {
+    opacity: 1;
+  }
+
+  @media only screen and (max-width: 749px) {
+    .product__block--accordion .accordion__title .accordion__sku {
+      display: none;
+    }
+  }
+
+{% endstylesheet %}
+
+{% javascript %}
+  document.addEventListener('DOMContentLoaded', function() {
+    function updateVariantSKU(variant) {
+      // Only update SKU elements in accordions that have SKU enabled
+      const skuElements = document.querySelectorAll('.product-accordion--has-sku [data-variant-sku], .accordion--has-sku [data-variant-sku]');
+
+      skuElements.forEach(element => {
+        if (variant && variant.sku) {
+          element.textContent = 'SKU | ' + variant.sku;
+          element.style.display = '';
+        } else {
+          element.style.display = 'none';
+        }
+      });
+    }
+    
+    function updateVariantDescription(variant) {
+      // Only update description elements in accordions that have SKU enabled
+      const descriptionElements = document.querySelectorAll('.product-accordion--has-sku [data-variant-description], .accordion--has-sku [data-variant-description]');
+      
+      descriptionElements.forEach(element => {
+        if (variant && variant.description && variant.description !== '') {
+          element.innerHTML = variant.description;
+          element.style.display = '';
+        } else {
+          element.style.display = 'none';
+        }
+      });
+    }
+    
+    function getCurrentVariant() {
+      const selectedId = document.querySelector('input[name="id"]:checked')?.value || 
+                        document.querySelector('input[name="id"]')?.value;
+      
+      if (!selectedId) return null;
+      
+      const productDataElement = document.querySelector('#ProductData-' + document.querySelector('[data-product-id]')?.getAttribute('data-product-id'));
+      if (productDataElement) {
+        try {
+          const product = JSON.parse(productDataElement.textContent);
+          return product.variants.find(v => v.id.toString() === selectedId.toString());
+        } catch (e) {
+          console.error('Error parsing product data:', e);
+        }
+      }
+      
+      return null;
+    }
+    
+    function handleVariantChange() {
+      const variant = getCurrentVariant();
+      updateVariantSKU(variant);
+      updateVariantDescription(variant);
+    }
+    
+    const variantInputs = document.querySelectorAll('input[name="id"]');
+    const variantSelects = document.querySelectorAll('select[name="id"]');
+    
+    variantInputs.forEach(input => {
+      input.addEventListener('change', handleVariantChange);
+    });
+    
+    variantSelects.forEach(select => {
+      select.addEventListener('change', handleVariantChange);
+    });
+    
+    document.addEventListener('theme:variant:change', function(event) {
+      updateVariantSKU(event.detail.variant);
+      updateVariantDescription(event.detail.variant);
+    });
+    
+    const observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+          const target = mutation.target;
+          if (target.name === 'id') {
+            handleVariantChange();
+          }
+        }
+      });
+    });
+    
+    variantInputs.forEach(input => {
+      observer.observe(input, { attributes: true });
+    });
+    
+    const initialVariant = getCurrentVariant();
+    if (initialVariant) {
+      updateVariantSKU(initialVariant);
+      updateVariantDescription(initialVariant);
+    }
+  });
+{% endjavascript %}
+>>>>>>> 8bc2f45827732d3d444ef394419d71c7762aef38
