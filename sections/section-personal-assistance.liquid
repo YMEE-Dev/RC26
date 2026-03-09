@@ -45,6 +45,7 @@
         {%- if contact_blocks.size > 0 -%}
           <div class="personal-assistance__items">
             {%- for block in contact_blocks -%}
+              <a href="{{ block.settings.link }}" class="personal-assistance__item-value personal-assistance__item-value--link">
               <div
                 class="personal-assistance__item"
                 {{ block.shopify_attributes }}
@@ -64,15 +65,16 @@
                   {%- endif -%}
                   {%- if block.settings.value != blank or block.settings.link != blank -%}
                     {%- if block.settings.link != blank -%}
-                      <a href="{{ block.settings.link }}" class="personal-assistance__item-value personal-assistance__item-value--link">
+                     
                         {{ block.settings.value | default: block.settings.link_title }}
-                      </a>
+                    
                     {%- else -%}
                       <span class="personal-assistance__item-value">{{ block.settings.value }}</span>
-                    {%- endif -%}
+                    {%- endif -%} 
                   {%- endif -%}
                 </div>
-              </div>
+              </div> 
+            </a>
             {%- endfor -%}
           </div>
         {%- endif -%}
@@ -291,8 +293,19 @@ span.personal-assistance__item-value {
 
   .personal-assistance__item-value--link {
     color: inherit;
-    text-decoration: underline;
-    text-underline-offset: 2px;
+    /* text-decoration: underline; */
+    /* text-underline-offset: 2px; */
+
+    color: #A7A7A7;
+
+/* RC26/Nav (ALL CAPS) */
+font-family: Inter;
+font-size: 12px;
+font-style: normal;
+font-weight: 400;
+line-height: 20px; /* 166.667% */
+letter-spacing: 1.2px;
+text-transform: uppercase;
   }
 
   .personal-assistance__item-value--link:hover {
