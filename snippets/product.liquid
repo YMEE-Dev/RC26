@@ -1278,6 +1278,16 @@
                         canPrev = true;
                       }
 
+                      // Disable next if at the last unique snap position (trimSnaps merges end snaps)
+                      if (isDesktopCarousel && canNext) {
+                        var snaps = embla.scrollSnapList();
+                        var currentSnap = snaps[selectedIndex];
+                        var lastSnap = snaps[snaps.length - 1];
+                        if (Math.abs(currentSnap - lastSnap) < 0.001) {
+                          canNext = false;
+                        }
+                      }
+
                       if (prevBtn) prevBtn.disabled = !canPrev;
                       if (nextBtn) nextBtn.disabled = !canNext;
                     }
@@ -1288,6 +1298,17 @@
                       var idx = embla.selectedScrollSnap();
                       if (hasIntroStage && carouselStarted && idx === 0) {
                         setCarouselStarted(false, 0);
+                        return;
+                      }
+                      // Skip merged snaps (trimSnaps can merge last few snaps to same position)
+                      if (isDesktopCarousel && idx > 0) {
+                        var snaps = embla.scrollSnapList();
+                        var currentPos = snaps[idx];
+                        var target = idx - 1;
+                        while (target > 0 && Math.abs(snaps[target] - currentPos) < 0.001) {
+                          target--;
+                        }
+                        embla.scrollTo(target);
                         return;
                       }
                       embla.scrollPrev();
