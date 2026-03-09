@@ -1,0 +1,382 @@
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign show_text_background = section.settings.show_text_background
+  assign animation_anchor = '#Hero--' | append: section.id
+  assign desktop_height = section.settings.height
+  assign mobile_height = section.settings.mobile_height
+  assign image_1 = section.settings.image_1
+  assign image_2 = section.settings.image_2
+  assign video = section.settings.video
+  assign aspect_ratio = 1 | divided_by: section.settings.aspect_ratio
+  assign video_width = section.settings.video_width | default: 100
+  assign show_placeholder = section.settings.show_placeholder
+  assign mobile_image = section.settings.mobile_image
+  assign banner_link = section.settings.link
+  assign product = all_products[section.settings.product]
+  assign has_product = has_product | default: false
+  assign has_video = has_video | default: false
+  assign color_product_bg = section.settings.color_product_bg
+  assign color_product_text = section.settings.color_product_text
+  assign bg_color = color_product_bg | default: settings.section_bg
+
+  assign overlay_type = section.settings.overlay_type
+  assign opacity_overlay = false
+  assign text_underlay = false
+  if overlay_type == 'opacity'
+    assign opacity_overlay = true
+  elsif overlay_type == 'text'
+    assign text_underlay = true
+  endif
+
+  capture sizes
+    if section.settings.width == 'wrapper--full'
+      if image_1 and image_2
+        echo '(min-width: 750px) 50vw, 100vw'
+      else
+        echo '100vw'
+      endif
+    else
+      if image_1 and image_2
+        echo '(min-width: 990px) calc((100vw - 100px) / 2), (min-width: 750px) calc((100vw - 60px) / 2), calc(100vw - 32px)'
+      else
+        echo '(min-width: 990px) calc(100vw - 100px), (min-width: 750px) calc(100vw - 60px), calc(100vw - 32px)'
+      endif
+    endif
+  endcapture
+
+  capture sizes_mobile
+    if section.settings.width == 'wrapper--full'
+      echo '100vw'
+    else
+      echo 'calc(100vw - 32px)'
+    endif
+  endcapture
+
+  assign selected_color_scheme = section.settings.color_scheme | strip
+  assign scheme_bg_color = settings.color_schemes[selected_color_scheme].settings.section_bg
+
+  assign hero_transparent = true
+  if show_text_background and scheme_bg_color.alpha != 0.0 or scheme_bg_color != blank
+    assign hero_transparent = false
+  endif
+
+  assign show_header_backdrop = false
+  if hero_transparent and text_underlay
+    assign show_header_backdrop = true
+  endif
+
+  assign animation_order = 1
+-%}
+
+{%- if video != blank -%}
+  <script src="{{ 'video-background.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+{%- style -%}
+  #Hero--{{ section.id }} {
+    --PT: {{ section.settings.padding_top | default: 0 }}px;
+    --PB: {{ section.settings.padding_bottom | default: 0 }}px;
+
+    {% if section.settings.content_width %}
+      --hero-content-width: {{ section.settings.content_width }}%;
+    {% endif %}
+
+    {% if has_video %}
+      --aspect-ratio: {{ aspect_ratio }};
+      --video-width: {{ video_width }}%;
+    {% endif %}
+  }
+
+  {% if color_product_text.alpha != 0.0 and color_product_text != blank or color_product_bg.alpha != 0.0 and color_product_bg != blank %}
+    #Hero--{{ section.id }} .product-upsell {
+      {% if color_product_text.alpha != 0.0 and color_product_text != blank %}
+        --text: {{ color_product_text }};
+        --text-light: {{ color_product_text | color_mix: bg_color, 70 }};
+      {% endif %}
+
+      {% if color_product_bg.alpha != 0.0 and color_product_bg != blank %}
+        --bg: {{ color_product_bg }};
+      {% endif %}
+    }
+  {% endif %}
+{%- endstyle -%}
+
+<div
+  class="index-hero section-padding {{ color_scheme }}"
+  id="Hero--{{ section.id }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="hero"
+  data-overlay-header
+>
+  {%- if image_1 != blank or image_2 != blank or mobile_image != blank or show_placeholder or request.design_mode -%}
+    <div class="hero__wrapper frame {{ section.settings.width }}">
+      {%- if banner_link != blank -%}
+        <a class="hero__images frame__item" href="{{ banner_link }}">
+      {%- else -%}
+        <div class="hero__images frame__item">
+      {%- endif -%}
+
+      {%- if image_1 != blank -%}
+        <div class="hero__split-image">
+          {%- render 'image-hero',
+            image_desktop: image_1,
+            image_mobile: mobile_image,
+            sizes: sizes,
+            desktop_height: desktop_height,
+            mobile_height: mobile_height
+          -%}
+        </div>
+      {%- endif -%}
+
+      {%- if image_2 != blank or image_1 == blank and show_placeholder == true -%}
+        <div class="hero__split-image{% if image_1 %} desktop{% endif %}">
+          {%- render 'image-hero',
+            image_desktop: image_2,
+            image_mobile: mobile_image,
+            sizes: sizes,
+            desktop_height: desktop_height,
+            mobile_height: mobile_height,
+            show_placeholder: show_placeholder
+          -%}
+        </div>
+      {%- endif -%}
+
+      {%- if image_1 == blank and image_2 == blank and show_placeholder == false -%}
+        <div class="image__hero__missing-metafield-image">{{ 'products.general.missing_metafield_image' | t }}</div>
+      {%- endif -%}
+
+      {%- if opacity_overlay -%}
+        <div class="image-overlay"></div>
+      {%- endif -%}
+
+      {%- if banner_link != blank -%}
+        </a>
+      {%- else -%}
+        </div>
+      {%- endif -%}
+
+      {%- if image_1 != blank or image_2 != blank or has_video or show_placeholder == true -%}
+        <div
+          class="hero__content__wrapper frame__item {{ section.settings.flex_align_desktop | default: 'align--bottom-left-desktop' }} {{ section.settings.flex_align_mobile }}{% if show_header_backdrop %} backdrop--linear{% endif %}"
+        >
+          {%- if has_video -%}
+            <div class="hero__video frame__item">
+              <div class="video-background">
+                {%- if video != null -%}
+                  <video-background
+                    class="video__player"
+                    data-video-player
+                    data-video-id="{{ section.id }}-video-background"
+                  >
+                    <template data-video-template>
+                      {{
+                        video
+                        | video_tag: image_size: '500x', autoplay: true, loop: true, muted: true, controls: false
+                      }}
+                    </template>
+                  </video-background>
+                {%- else -%}
+                  {%- render 'image', placeholder: 'lifestyle-1', aspect_ratio: aspect_ratio -%}
+                {%- endif -%}
+              </div>
+            </div>
+          {%- endif -%}
+          <div class="hero__content{% if hero_transparent %} hero__content--transparent{% endif %}{% if text_underlay %} backdrop--radial{% endif %}">
+            {%- for block in section.blocks -%}
+              {%- case block.type -%}
+                {%- when 'heading' -%}
+                  {%- if block.settings.title != '' -%}
+                    {%- liquid
+                      assign animation_order = animation_order | plus: 1
+                      assign heading_tag = 'h2'
+
+                      unless block.settings.heading_tag == 'automatic' or block.settings.heading_tag == blank
+                        assign heading_tag = block.settings.heading_tag
+                      endunless
+                    -%}
+
+                    <{{ heading_tag }}
+                      class="hero__title {{ block.settings.heading_font_size }}"
+                      data-aos="hero"
+                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-order="{{ animation_order }}"
+                      {{ block.shopify_attributes }}
+                      style="--block-padding-bottom: {{ block.settings.padding_bottom }}px;"
+                    >
+                      {{ block.settings.title | escape -}}
+                    </{{ heading_tag }}>
+                  {%- endif -%}
+
+                {%- when 'text' -%}
+                  {%- if block.settings.text != blank -%}
+                    {%- assign animation_order = animation_order | plus: 1 -%}
+                    <div
+                      class="hero__description {{ block.settings.text_font_size }}"
+                      data-aos="hero"
+                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-order="{{ animation_order }}"
+                      {{ block.shopify_attributes }}
+                      style="--block-padding-bottom: {{ block.settings.padding_bottom }}px;"
+                    >
+                      {{ block.settings.text }}
+                    </div>
+                  {%- endif -%}
+
+                {%- when 'button' -%}
+                  {%- liquid
+                    assign animation_order = animation_order | plus: 1
+
+                    assign button_style = block.settings.button_style
+                    if button_style == 'btn--text' and block.settings.show_arrow
+                      assign button_style = button_style | append: ' btn--text-no-underline'
+                    endif
+                  -%}
+
+                  {%- if block.settings.link_text != '' -%}
+                    <div
+                      class="hero__button"
+                      data-aos="hero"
+                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-order="{{ animation_order }}"
+                      {{ block.shopify_attributes }}
+                      style="--block-padding-bottom: {{ block.settings.padding_bottom }}px;"
+                    >
+                      <a
+                        class="btn {{ button_style }} {{ block.settings.button_size }} {{ block.settings.button_type }}{% if block.settings.full_width %} btn--full{% endif %}"
+                        href="{{ block.settings.link | default: '#!' }}"
+                      >
+                        <span>{{ block.settings.link_text | escape }}</span>
+
+                        {%- if block.settings.show_arrow -%}
+                          {% render 'icon-nav-arrow-right' %}
+                        {%- endif -%}
+                      </a>
+                    </div>
+                  {%- endif -%}
+
+                {%- when 'group-buttons' -%}
+                  {%- liquid
+                    assign animation_order = animation_order | plus: 1
+
+                    assign button_style = block.settings.button_style
+                    if button_style == 'btn--text' and block.settings.show_arrow
+                      assign button_style = button_style | append: ' btn--text-no-underline'
+                    endif
+
+                    if block.settings.button_secondary_text
+                      assign button_secondary_style = block.settings.button_secondary_style
+                      if button_secondary_style == 'btn--text' and block.settings.show_secondary_arrow
+                        assign button_secondary_style = button_secondary_style | append: ' btn--text-no-underline'
+                      endif
+                    endif
+                  -%}
+
+                  <div
+                    class="hero__button-group"
+                    style="--block-padding-bottom: {{ block.settings.padding_bottom }}px;"
+                  >
+                    {%- if block.settings.button_text != blank -%}
+                      <div
+                        class="hero__button"
+                        data-aos="hero"
+                        data-aos-anchor="{{ animation_anchor }}"
+                        data-aos-order="{{ animation_order }}"
+                        {{ block.shopify_attributes }}
+                      >
+                        <a
+                          class="btn {{ button_style }} {{ block.settings.button_size }} {{ block.settings.button_type }}"
+                          href="{{ block.settings.button_url | default: '#!' }}"
+                        >
+                          <span>{{ block.settings.button_text | escape }}</span>
+
+                          {%- if block.settings.show_arrow -%}
+                            {% render 'icon-nav-arrow-right' %}
+                          {%- endif -%}
+                        </a>
+                      </div>
+                    {%- endif -%}
+
+                    {%- if block.settings.button_secondary_text != blank -%}
+                      <div
+                        class="hero__button"
+                        data-aos="hero"
+                        data-aos-anchor="{{ animation_anchor }}"
+                        data-aos-order="{{ animation_order }}"
+                        {{ block.shopify_attributes }}
+                      >
+                        <a
+                          class="btn {{ button_secondary_style }} {{ block.settings.button_secondary_size }} {{ block.settings.button_secondary_type }}"
+                          href="{{ block.settings.button_secondary_url | default: '#!' }}"
+                        >
+                          <span>{{ block.settings.button_secondary_text | escape }}</span>
+
+                          {%- if block.settings.show_secondary_arrow -%}
+                            {% render 'icon-nav-arrow-right' %}
+                          {%- endif -%}
+                        </a>
+                      </div>
+                    {%- endif -%}
+                  </div>
+
+                {%- when 'code' -%}
+                  {%- assign animation_order = animation_order | plus: 1 -%}
+
+                  <div
+                    class="hero__custom-code"
+                    data-aos="hero"
+                    data-aos-anchor="{{ animation_anchor }}"
+                    data-aos-order="{{ animation_order }}"
+                    {{ block.shopify_attributes }}
+                    style="--block-padding-bottom: {{ block.settings.padding_bottom }}px;"
+                  >
+                    {{ block.settings.code }}
+                  </div>
+              {%- endcase -%}
+            {%- endfor -%}
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- if has_product and image_1 != blank or image_2 != blank or show_placeholder == true -%}
+        {%- assign animation_order = animation_order | plus: 1 -%}
+
+        <div class="hero__aside__wrapper frame__item {{ section.settings.flex_align_desktop | default: 'align--bottom-left-desktop' }}">
+          <div
+            class="hero__aside"
+            data-aos="hero"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-order="{{ animation_order }}"
+          >
+            {%- liquid
+              assign upsell_quick_add_hide = false
+              assign upsell_description = ''
+              assign onboarding = false
+              if product == blank
+                assign onboarding = true
+              endif
+
+              unless section.settings.enable_quick_add
+                assign upsell_quick_add_hide = true
+              endunless
+
+              if section.settings.description != blank
+                capture upsell_description
+                  echo '<p>' | append: section.settings.description | append: '</p>'
+                endcapture
+              endif
+            -%}
+
+            {%- render 'upsell-product',
+              upsell_product: product,
+              upsell_modifier: 'product-upsell--block',
+              upsell_quick_add_hide: upsell_quick_add_hide,
+              upsell_description: upsell_description,
+              upsell_description_font_size: section.settings.text_font_size,
+              onboarding: onboarding
+            -%}
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+</div>
