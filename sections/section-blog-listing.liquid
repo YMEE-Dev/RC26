@@ -43,6 +43,54 @@
 .blog-listing__nav::-webkit-scrollbar {
   height: 6px;             /* height of horizontal scrollbar */
 }
+
+/* Mobile dropdown styles */
+.blog-listing__dropdown {
+  display: none;
+  width: 100%;
+  padding: 10px 15px;
+  font-family: Inter;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  color: #000;
+  cursor: pointer;
+}
+
+@media (max-width: 1024px) {
+  .blog-listing__nav {
+    display: none !important;
+  }
+  
+  .blog-listing__dropdown {
+    display: block;
+  }
+  .blog-listing__dropdown {
+    width: 38%;
+  }
+}
+
+@media (max-width: 768px) {
+  .blog-listing__bar  {
+    flex-direction: row !important;
+    flex-wrap: nowrap;
+  }
+}
+@media (max-width: 425px) {
+  .blog-listing__bar  {
+    flex-direction: column !important;
+    flex-wrap: wrap;
+  }
+  .blog-listing__dropdown {
+    width: 100%;
+  }
+}
+
+
 a.main-blog__filter-tag {
     display: flex;
   padding: 5px 10px;
@@ -125,6 +173,9 @@ a.blog-listing__view-all {
         </nav> {% endcomment %}
 
         <nav class="blog-listing__nav" id="blogNav" aria-label="Blog categories"></nav>
+        <select class="blog-listing__dropdown" id="blogDropdown" aria-label="Blog categories">
+          <option value="">Select Category</option>
+        </select>
       {%- endif -%}
     </div>
   </div>
@@ -299,23 +350,39 @@ a.blog-listing__view-all {
     .then(data => {
       const blogs = data.data.blogs.nodes;
       const nav = document.getElementById("blogNav");
+      const dropdown = document.getElementById("blogDropdown");
     
       blogs.forEach(blog => {
         // Skip if tag_to_exclude contains this blog handle
         if ('{{ section.settings.tag_to_exclude }}'.includes(blog.handle)) {
           return;
         }
+        
+        // Create nav link
         const link = document.createElement("a");
-    
         link.href = `/blogs/${blog.handle}`;
-
         link.className = "main-blog__filter-tag";
         if (blog.handle === "{{ blog.handle }}") {
           link.classList.add('main-blog__filter-tag--active');
         }
         link.textContent = blog.title.toUpperCase();
-    
         nav.appendChild(link);
+        
+        // Create dropdown option
+        const option = document.createElement("option");
+        option.value = `/blogs/${blog.handle}`;
+        option.textContent = blog.title.toUpperCase();
+        if (blog.handle === "{{ blog.handle }}") {
+          option.selected = true;
+        }
+        dropdown.appendChild(option);
+      });
+      
+      // Add dropdown change event
+      dropdown.addEventListener('change', function() {
+        if (this.value) {
+          window.location.href = this.value;
+        }
       });
     });
 
@@ -372,6 +439,15 @@ a.blog-listing__view-all {
   let currentPage = 1;
   const articlesPerPage = 9;
 
+  // Function to capitalize first letter of each word
+  function capitalizeTitle(str) {
+    return str
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
   function renderArticles(page) {
     const grid = document.querySelector(".blog-listing__grid");
     grid.innerHTML = '';
@@ -384,7 +460,7 @@ a.blog-listing__view-all {
       const image = article.image?.url || "";
       const tag = article.tags[0] || "";
       const url = `/blogs/${article.blog.handle}/${article.handle}`;
-
+      const title = capitalizeTitle(article.title);
       const html = `
         <article class="blog-listing__card">
           <a href="${url}" class="blog-listing__card-link">
@@ -398,7 +474,7 @@ a.blog-listing__view-all {
 
             <div class="blog-listing__card-body">
               ${article.blog.handle ? `<p class="blog-listing__card-tag">#${article.blog.handle.toUpperCase()}</p>` : ""}
-              <h2 class="blog-listing__card-title">${article.title}</h2>
+              <h2 class="blog-listing__card-title">${title}</h2>
               <p class="blog-listing__card-excerpt">${article.excerpt || ""}</p>
             </div>
 
@@ -409,8 +485,7 @@ a.blog-listing__view-all {
       grid.insertAdjacentHTML("beforeend", html);
     });
 
-    // Scroll to top of grid
-    grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Removed auto-scroll to prevent unwanted scrolling when changing categories
   }
 
   fetch(`https://${SHOP_DOMAIN}/api/2026-01/graphql.json`, {
@@ -491,6 +566,13 @@ a.blog-listing__view-all {
     gap: 1rem;
   
     /* border-bottom: 1px solid rgba(0, 0, 0, 0.1); */
+  }
+  
+  @media (max-width: 768px) {
+    .blog-listing__bar {
+      flex-direction: column;
+      align-items: stretch;
+    }
   }
 
   .blog-listing__view-all {
@@ -588,10 +670,13 @@ a.blog-listing__view-all {
 
     /* RC26/Display/S */
     font-family: var(--FONT-STACK-HEADING);
+    font-style: normal;
+    font-weight: 500;
     font-size: 32px;
     font-style: normal;
     font-weight: 500;
-    line-height: 36px; /* 112.5% */
+    line-height: 36px;
+    text-transform: capitalize;
   }
 
   .blog-listing__card-excerpt {
@@ -643,7 +728,7 @@ a.blog-listing__view-all {
   .custom-js-pagination__link {
     color: var(--000000, #000);
     font-family: Inter, sans-serif;
-    font-size: 14px;
+    font-size: 12px;
     font-style: normal;
     font-weight: 400;
     line-height: 20px;
@@ -664,7 +749,7 @@ a.blog-listing__view-all {
   }
 
   .custom-js-pagination__number--current {
-    font-weight: 600;
+    /* font-weight: 600; */
   }
 
   .custom-js-pagination__number--current::after {

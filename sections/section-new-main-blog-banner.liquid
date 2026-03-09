@@ -41,6 +41,14 @@
     const STOREFRONT_TOKEN = "{{ shop.metaobjects.storefront_access_token.value }}";
     const SHOP_DOMAIN = "{{ shop.domain }}";
     
+    // Function to capitalize first letter of each word
+    function capitalizeTitle(str) {
+      return str
+        .toLowerCase()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    }
     // Get current blog handle from URL
     const currentPath = window.location.pathname;
     const blogMatch = currentPath.match(/\/blogs\/([^\/]+)/);
@@ -124,7 +132,7 @@
       const buttonType = '{{ section.settings.button_type }}';
       
       const excerpt = article.excerpt ;
-      
+      const title = capitalizeTitle(article.title);
       container.innerHTML = `
         <div class="new-main-blog-banner__media">
           ${imageUrl ? `
@@ -140,7 +148,7 @@
               <p class="new-main-blog-banner__subheading">${subheading.toUpperCase()}</p>
             ` : ''}
             <h1 class="new-main-blog-banner__heading {{ section.settings.heading_font_size }}">
-              <a href="${articleUrl}">${article.title}</a>
+              <a href="${articleUrl}">${title}</a>
             </h1>
             ${showDescription && excerpt ? `
               <div class="new-main-blog-banner__description rte">
@@ -266,6 +274,7 @@
   .new-main-blog-banner__heading a {
     text-decoration: none;
     color: inherit;
+    text-transform: capitalize;
   }
 
   /* .new-main-blog-banner__heading a:hover {

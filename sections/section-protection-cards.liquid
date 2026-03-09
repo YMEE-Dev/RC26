@@ -7,9 +7,8 @@
   #ProtectionCards--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
-    {% if section.settings.width == 'wrapper--custom' %}
-      --custom-width: {{ section.settings.custom_width }}px;
-    {% endif %}
+    padding-inline:  var(--outer);
+
   }
 {%- endstyle -%}
 
@@ -138,21 +137,27 @@
 
   .protection-cards__grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);     
     gap: 80px;
     width: 100%;
   }
 
-  @media (min-width: 768px) {
+  @media (max-width: 1024px) {
     .protection-cards__grid {
       grid-template-columns: repeat(2, 1fr);
       gap: 80px;
     }
   }
 
-  @media (min-width: 990px) {
+
+  @media (max-width: 768px) {
     .protection-cards__grid {
-      grid-template-columns: repeat(3, 1fr);
+      gap: 40px !important;
+    }
+  }
+  @media (max-width: 425px) {
+    .protection-cards__grid {
+      grid-template-columns: repeat(1, 1fr);
       gap: 80px;
     }
   }
@@ -182,7 +187,12 @@
     height: 100%;
     object-fit: cover;
   }
-
+  @media (max-width: 768px) {
+    .protection-card__image {
+      height: 318px !important;
+      aspect-ratio: auto !important;
+    }
+  }
   .protection-card__placeholder {
     width: 100%;
     max-width: 280px;
