@@ -45,6 +45,7 @@
         {%- if contact_blocks.size > 0 -%}
           <div class="personal-assistance__items">
             {%- for block in contact_blocks -%}
+              <a href="{{ block.settings.link }}" class="personal-assistance__item-value personal-assistance__item-value--link">
               <div
                 class="personal-assistance__item"
                 {{ block.shopify_attributes }}
@@ -64,15 +65,16 @@
                   {%- endif -%}
                   {%- if block.settings.value != blank or block.settings.link != blank -%}
                     {%- if block.settings.link != blank -%}
-                      <a href="{{ block.settings.link }}" class="personal-assistance__item-value personal-assistance__item-value--link">
+                     
                         {{ block.settings.value | default: block.settings.link_title }}
-                      </a>
+                    
                     {%- else -%}
                       <span class="personal-assistance__item-value">{{ block.settings.value }}</span>
                     {%- endif -%}
                   {%- endif -%}
                 </div>
               </div>
+            </a>
             {%- endfor -%}
           </div>
         {%- endif -%}
