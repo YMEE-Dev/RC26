@@ -509,7 +509,7 @@
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide {
         flex: 0 0 50%;
         box-sizing: border-box;
-        transition: flex-basis 500ms ease;
+        transition: flex-basis 500ms cubic-bezier(.4,0,.2,1);
       }
 
       #MainProduct--{{ section.id }} .pdp-embla--desktop:not(.pdp-embla--started) .pdp-embla__slide:first-child {
@@ -1183,11 +1183,19 @@
 
                     var isDesktopCarousel = carouselEl.classList.contains('pdp-embla--desktop');
 
+                    var hasIntroStage = isDesktopCarousel && carouselEl.querySelectorAll('[data-embla-slide]').length > 1;
+                    var carouselStarted = false;
+                    var introTransitioning = false;
+
                     var emblaOptions = {
                       loop: false,
                       containScroll: 'trimSnaps',
                       slidesToScroll: 1,
                       watchDrag: function (emblaApi, event) {
+                        // Disable drag in intro state — slide 1 is 100% and Embla snap points are wrong
+                        if (hasIntroStage && !carouselStarted) return false;
+                        if (introTransitioning) return false;
+
                         var target = event && event.target;
                         if (!target || !target.closest) return true;
                         var isTouch = false;
@@ -1216,17 +1224,47 @@
                     var prevBtn = carouselEl.querySelector('[data-embla-prev]');
                     var nextBtn = carouselEl.querySelector('[data-embla-next]');
                     var progressBar = carouselEl.querySelector('[data-embla-progress-bar]');
-                    var hasIntroStage = isDesktopCarousel && carouselEl.querySelectorAll('[data-embla-slide]').length > 0;
-                    var carouselStarted = false;
 
-                    function setCarouselStarted(started) {
+                    function setCarouselStarted(started, targetIndex) {
                       if (!hasIntroStage) return;
+                      var wasStarted = carouselStarted;
                       carouselStarted = !!started;
+                      if (carouselStarted === wasStarted) return;
+                      introTransitioning = true;
                       if (carouselStarted) {
                         carouselEl.classList.add('pdp-embla--started');
                       } else {
                         carouselEl.classList.remove('pdp-embla--started');
                       }
+                      if (typeof targetIndex === 'number') {
+                        embla.scrollTo(targetIndex, true);
+                      }
+                      updateArrows();
+                      // Wait for CSS flex-basis transition to finish, then reInit
+                      setTimeout(function () {
+                        embla.reInit();
+                        if (typeof targetIndex === 'number') {
+                          embla.scrollTo(targetIndex, true);
+                        }
+                        introTransitioning = false;
+                        updateArrows();
+                      }, 550);
+                    }
+
+                    // Detect swipe/drag on the viewport in intro state
+                    if (hasIntroStage) {
+                      var introSwipeStartX = 0;
+                      viewport.addEventListener('pointerdown', function (e) {
+                        introSwipeStartX = e.clientX;
+                      });
+                      viewport.addEventListener('pointerup', function (e) {
+                        if (introTransitioning) return;
+                        if (carouselStarted) return;
+                        var diff = introSwipeStartX - e.clientX;
+                        if (diff > 30) {
+                          setCarouselStarted(true, 0);
+                        }
+                      });
                     }
 
                     setCarouselStarted(carouselStarted);
@@ -1246,15 +1284,10 @@
 
                     prevBtn && prevBtn.addEventListener('click', function (e) {
                       e.preventDefault();
-                      if (hasIntroStage && carouselStarted && embla.selectedScrollSnap() === 0) {
-                        setCarouselStarted(false);
-                        updateArrows();
-                        return;
-                      }
-                      if (hasIntroStage && carouselStarted && embla.selectedScrollSnap() === 1) {
-                        setCarouselStarted(false);
-                        updateArrows();
-                        embla.scrollPrev();
+                      if (introTransitioning) return;
+                      var idx = embla.selectedScrollSnap();
+                      if (hasIntroStage && carouselStarted && idx === 0) {
+                        setCarouselStarted(false, 0);
                         return;
                       }
                       embla.scrollPrev();
@@ -1262,19 +1295,24 @@
 
                     nextBtn && nextBtn.addEventListener('click', function (e) {
                       e.preventDefault();
+                      if (introTransitioning) return;
                       if (hasIntroStage && !carouselStarted && embla.selectedScrollSnap() === 0) {
-                        setCarouselStarted(true);
-                        updateArrows();
+                        setCarouselStarted(true, 0);
                         return;
                       }
                       embla.scrollNext();
                     });
 
-                    var carousel = { el: carouselEl, embla: embla, prevBtn: prevBtn, nextBtn: nextBtn, progressBar: progressBar, updateArrows: updateArrows };
+                    var carousel = { el: carouselEl, embla: embla, prevBtn: prevBtn, nextBtn: nextBtn, progressBar: progressBar, updateArrows: updateArrows, setCarouselStarted: setCarouselStarted };
 
                     embla.on('select', function () {
                       var activeCarousel = getActiveCarousel();
                       var index = embla.selectedScrollSnap();
+
+                      // Drag/scroll back to index 0 while started → return to intro (full-bleed)
+                      if (hasIntroStage && carouselStarted && !introTransitioning && index === 0) {
+                        setCarouselStarted(false, 0);
+                      }
 
                       var slides = carouselEl.querySelectorAll('[data-embla-slide]');
                       slides.forEach(function(slide) {
@@ -1289,46 +1327,6 @@
                       loadDeferredMediaByIndex(activeCarousel, index);
                       updateArrows();
                       updateProgressByIndex(activeCarousel, index);
-                      
-                      // Force update thumbnails after select to ensure active states are correct
-                      setTimeout(function() {
-                        if (isDesktopCarousel) {
-                          var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
-                          var slideNodes = embla.slideNodes();
-                          var slidesInView = [];
-                          
-                          // Determine which slides are visible based on scroll position
-                          var scrollProgress = embla.scrollProgress();
-                          var containerSize = embla.containerNode().offsetWidth;
-                          var slideSize = slideNodes.length > 0 ? slideNodes[0].offsetWidth : 0;
-                          var slidesPerView = Math.ceil(containerSize / slideSize);
-                          
-                          // Calculate visible slides based on current index and slides per view
-                          for (var i = 0; i < slidesPerView; i++) {
-                            if (index + i < slideNodes.length) {
-                              slidesInView.push(index + i);
-                            }
-                          }
-                          
-                          // Update thumbnail states
-                          thumbs.forEach(function(thumb) {
-                            thumb.classList.remove('is-active', 'prev-active', 'single-active');
-                          });
-                          
-                          slidesInView.forEach(function(slideIndex, idx) {
-                            if (thumbs[slideIndex]) {
-                              thumbs[slideIndex].classList.add('is-active');
-                              if (idx > 0) {
-                                thumbs[slideIndex].classList.add('prev-active');
-                              }
-                            }
-                          });
-                          
-                          if (slidesInView.length === 1 && thumbs[slidesInView[0]]) {
-                            thumbs[slidesInView[0]].classList.add('single-active');
-                          }
-                        }
-                      }, 50);
                       
                       if (!isDesktopCarousel) {
                         var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--mobile .product__thumb');
@@ -1347,23 +1345,21 @@
                         var currentIndex = index;
                         var activeCount = 0;
                         
+                        // In intro state (not started), only slide 0 is visually shown
+                        var effectiveSlidesPerView = (hasIntroStage && !carouselStarted) ? 1 : 2;
+                        
                         if (thumbs[currentIndex]) {
                           thumbs[currentIndex].classList.add('is-active');
                           activeCount++;
                         }
                         
-                        var slideSize = embla.slideNodes().length > 0 ? embla.slideNodes()[0].offsetWidth : 0;
-                        var containerSize = embla.containerNode().offsetWidth;
-                        var slidesPerView = Math.ceil(containerSize / slideSize);
-                        
-                        for (var i = 1; i < slidesPerView; i++) {
+                        for (var i = 1; i < effectiveSlidesPerView; i++) {
                           if (thumbs[currentIndex + i]) {
                             thumbs[currentIndex + i].classList.add('is-active', 'prev-active');
                             activeCount++;
                           }
                         }
                         
-                        // Add single-active class if only one thumb is active
                         if (activeCount === 1 && thumbs[currentIndex]) {
                           thumbs[currentIndex].classList.add('single-active');
                         }
@@ -1414,24 +1410,20 @@
                       
                       var currentIndex = embla.selectedScrollSnap();
                       var activeCount = 0;
+                      var effectiveSlidesPerView = (hasIntroStage && !carouselStarted) ? 1 : 2;
                       
                       if (thumbs[currentIndex]) {
                         thumbs[currentIndex].classList.add('is-active');
                         activeCount++;
                       }
                       
-                      var slideSize = embla.slideNodes().length > 0 ? embla.slideNodes()[0].offsetWidth : 0;
-                      var containerSize = embla.containerNode().offsetWidth;
-                      var slidesPerView = Math.ceil(containerSize / slideSize);
-                      
-                      for (var i = 1; i < slidesPerView; i++) {
+                      for (var i = 1; i < effectiveSlidesPerView; i++) {
                         if (thumbs[currentIndex + i]) {
                           thumbs[currentIndex + i].classList.add('is-active', 'prev-active');
                           activeCount++;
                         }
                       }
                       
-                      // Add single-active class if only one thumb is active
                       if (activeCount === 1 && thumbs[currentIndex]) {
                         thumbs[currentIndex].classList.add('single-active');
                       }
@@ -1443,28 +1435,30 @@
                       updateArrows();
                       updateProgressByIndex(activeCarousel, embla.selectedScrollSnap());
                       
-                      // Update thumbnails for desktop based on visible slides
                       if (isDesktopCarousel) {
                         var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
                         thumbs.forEach(function(thumb) {
-                          thumb.classList.remove('is-active');
+                          thumb.classList.remove('is-active', 'prev-active', 'single-active');
                         });
                         
-                        // Get currently selected slide as fallback
                         var currentIndex = embla.selectedScrollSnap();
+                        var activeCount = 0;
+                        var effectiveSlidesPerView = (hasIntroStage && !carouselStarted) ? 1 : 2;
+                        
                         if (thumbs[currentIndex]) {
                           thumbs[currentIndex].classList.add('is-active');
+                          activeCount++;
                         }
                         
-                        // Check nearby slides that might be visible
-                        var slideSize = embla.slideNodes().length > 0 ? embla.slideNodes()[0].offsetWidth : 0;
-                        var containerSize = embla.containerNode().offsetWidth;
-                        var slidesPerView = Math.ceil(containerSize / slideSize);
-                        
-                        for (var i = 1; i < slidesPerView; i++) {
+                        for (var i = 1; i < effectiveSlidesPerView; i++) {
                           if (thumbs[currentIndex + i]) {
-                            thumbs[currentIndex + i].classList.add('is-active');
+                            thumbs[currentIndex + i].classList.add('is-active', 'prev-active');
+                            activeCount++;
                           }
+                        }
+                        
+                        if (activeCount === 1 && thumbs[currentIndex]) {
+                          thumbs[currentIndex].classList.add('single-active');
                         }
                       }
                     });
@@ -1491,21 +1485,16 @@
                     var currentIndex = activeCarousel.embla.selectedScrollSnap();
                     var targetIndex = findIndexByMediaId(activeCarousel, e.detail.id);
                     
-                    if (isDesktop && !isStarted && currentIndex === 0) {
-                      if (targetIndex === 1) {
-                        activeCarousel.el.classList.add('pdp-embla--started');
-                        activeCarousel.updateArrows && activeCarousel.updateArrows();
-                        setActiveMediaByIndex(activeCarousel, 1);
-                        loadDeferredMediaByIndex(activeCarousel, 1);
-                        updateProgressByIndex(activeCarousel, 1);
-                        return;
-                      }
+                    if (isDesktop && !isStarted && currentIndex === 0 && targetIndex >= 1) {
+                      activeCarousel.setCarouselStarted(true, targetIndex);
+                      setActiveMediaByIndex(activeCarousel, targetIndex);
+                      loadDeferredMediaByIndex(activeCarousel, targetIndex);
+                      updateProgressByIndex(activeCarousel, targetIndex);
+                      return;
                     }
                     
                     if (isDesktop && isStarted && targetIndex === 0) {
-                      activeCarousel.el.classList.remove('pdp-embla--started');
-                      activeCarousel.embla.scrollTo(0, true);
-                      activeCarousel.updateArrows && activeCarousel.updateArrows();
+                      activeCarousel.setCarouselStarted(false, 0);
                       setActiveMediaByIndex(activeCarousel, 0);
                       loadDeferredMediaByIndex(activeCarousel, 0);
                       updateProgressByIndex(activeCarousel, 0);
@@ -1542,27 +1531,32 @@
                         
                         // Update thumbnails based on carousel type
                         if (carousel.el.classList.contains('pdp-embla--desktop')) {
-                          // Desktop: Update thumbnails based on visible slides
                           var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
                           thumbs.forEach(function(thumb) {
-                            thumb.classList.remove('is-active');
+                            thumb.classList.remove('is-active', 'prev-active', 'single-active');
                           });
                           
-                          // Get currently selected slide as fallback
                           var currentIndex = carousel.embla.selectedScrollSnap();
+                          // On load, intro state is active (slide 1 at 100%) so only 1 slide is visually shown
+                          var hasIntro = carousel.el.querySelectorAll('[data-embla-slide]').length > 1;
+                          var isStarted = carousel.el.classList.contains('pdp-embla--started');
+                          var effectiveSlidesPerView = (hasIntro && !isStarted) ? 1 : 2;
+                          var activeCount = 0;
+                          
                           if (thumbs[currentIndex]) {
                             thumbs[currentIndex].classList.add('is-active');
+                            activeCount++;
                           }
                           
-                          // Check nearby slides that might be visible
-                          var slideSize = carousel.embla.slideNodes().length > 0 ? carousel.embla.slideNodes()[0].offsetWidth : 0;
-                          var containerSize = carousel.embla.containerNode().offsetWidth;
-                          var slidesPerView = Math.ceil(containerSize / slideSize);
-                          
-                          for (var i = 1; i < slidesPerView; i++) {
+                          for (var i = 1; i < effectiveSlidesPerView; i++) {
                             if (thumbs[currentIndex + i]) {
-                              thumbs[currentIndex + i].classList.add('is-active');
+                              thumbs[currentIndex + i].classList.add('is-active', 'prev-active');
+                              activeCount++;
                             }
+                          }
+                          
+                          if (activeCount === 1 && thumbs[currentIndex]) {
+                            thumbs[currentIndex].classList.add('single-active');
                           }
                         } else {
                           // Mobile: Update single thumbnail based on selected index
