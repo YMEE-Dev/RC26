@@ -3563,6 +3563,11 @@
           this.checkWidth = this.checkWidth.bind(this);
           this.scheduleHeaderLayerHide = this.scheduleHeaderLayerHide.bind(this);
           this.resetHeaderLayerHide = this.resetHeaderLayerHide.bind(this);
+          this.handleTmenuState = this.handleTmenuState.bind(this);
+          this.header = this.querySelector("[data-header-height]");
+          this.isScrollRevealBlurVisible = false;
+          this.shouldShowScrollRevealBlur = false;
+          this.isTmenuOpen = false;
           this.isSticky = this.hasAttribute("data-header-sticky");
           this.scrollHideEvent = (e) => this.toggleHeaderHideOnScroll(e);
 
@@ -3575,6 +3580,7 @@
           this.cartToggleEvent();
           this.initSticky();
           this.initHeaderScrollHide();
+          document.addEventListener("theme:tmenu:state", this.handleTmenuState);
 
           if (this.style !== "drawer" && this.desktop) {
             this.minWidth = this.getMinWidth();
@@ -3701,6 +3707,8 @@
           const atTop = position <= 0;
           const goingDown = Boolean(e?.detail?.down);
           const goingUp = Boolean(e?.detail?.up);
+          const stickyThreshold = typeof this.headerOffset === "number" ? this.headerOffset : 0;
+          const shouldShowRevealBlur = this.isSticky && goingUp && !atTop && position > stickyThreshold;
 
           if ((this.isCollectionTemplate && !this.isSpotlightCollectionTemplate) || this.isSearchTemplate) {
             if (atTop) {
@@ -3710,6 +3718,8 @@
               this.body.classList.add("header-scroll-hide");
               this.scheduleHeaderLayerHide();
             }
+            this.shouldShowScrollRevealBlur = false;
+            this.syncScrollRevealBlur();
             return;
           }
 
@@ -3720,6 +3730,26 @@
             this.body.classList.add("header-scroll-hide");
             this.scheduleHeaderLayerHide();
           }
+
+          this.shouldShowScrollRevealBlur = shouldShowRevealBlur;
+          this.syncScrollRevealBlur();
+        }
+
+        handleTmenuState(event) {
+          this.isTmenuOpen = Boolean(event?.detail?.isOpen);
+          this.syncScrollRevealBlur();
+        }
+
+        syncScrollRevealBlur() {
+          this.setScrollRevealBlur(this.shouldShowScrollRevealBlur && !this.isTmenuOpen);
+        }
+
+        setScrollRevealBlur(shouldShow) {
+          if (!this.header || this.isScrollRevealBlurVisible === shouldShow) return;
+
+          this.isScrollRevealBlurVisible = shouldShow;
+          this.header.style.setProperty("--header-scroll-reveal-opacity", shouldShow ? "1" : "0");
+          this.header.style.setProperty("--header-scroll-reveal-blur", shouldShow ? "12px" : "0px");
         }
 
         scheduleHeaderLayerHide() {
@@ -3822,6 +3852,7 @@
 
           this.resetHeaderLayerHide();
           document.removeEventListener("theme:scroll", this.scrollHideEvent);
+          document.removeEventListener("theme:tmenu:state", this.handleTmenuState);
 
           if (this.isSticky) {
             document.removeEventListener("theme:scroll", this.scrollEvent);
