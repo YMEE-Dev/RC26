@@ -6,9 +6,12 @@
   - product_form_id: {String} product form id.
   - section_id: {String} id of section to which this snippet belongs.
   - show_pickup_availability: {Boolean} for the pickup availability. If true the pickup availability is rendered, false - not rendered (optional).
+  - ring_sizing_link: {String} URL for ring sizing guide (optional).
+  - bracelet_sizing_link: {String} URL for bracelet sizing guide (optional).
 
   Usage:
   {% render 'product-buttons', block: block, product: product, product_form_id: product_form_id, show_pickup_availability: true %}
+  {% render 'product-buttons', block: block, product: product, product_form_id: product_form_id, ring_sizing_link: 'https://your-site.com/ring-guide.pdf' %}
 {% endcomment %}
 
 {%- liquid
@@ -379,7 +382,9 @@
       {%- render 'ymee-variant-dropdown',
         product: product,
         current_variant: current_variant,
-        section_id: section_id
+        section_id: section_id,
+        ring_sizing_link: ring_sizing_link,
+        bracelet_sizing_link: bracelet_sizing_link
       -%}
     {%- endif -%}
 

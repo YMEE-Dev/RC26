@@ -7,9 +7,12 @@
   - product: {Object} product object
   - current_variant: {Object} the selected or first available variant
   - section_id: {String} section ID for scoping
+  - ring_sizing_link: {String} URL for ring sizing guide (optional)
+  - bracelet_sizing_link: {String} URL for bracelet sizing guide (optional)
 
   Usage:
   {% render 'ymee-variant-dropdown', product: product, current_variant: current_variant, section_id: section.id %}
+  {% render 'ymee-variant-dropdown', product: product, current_variant: current_variant, section_id: section.id, ring_sizing_link: 'https://your-custom-link.com/ring-guide.pdf' %}
 {% endcomment %}
 
 {%- liquid
@@ -105,10 +108,18 @@
           assign sizing_link = '#'
           assign sizing_link_text = 'products.product.sizing_help' | t
 
+          # Default sizing links - users can override these by passing parameters
+          assign default_ring_link = 'https://cdn.shopify.com/s/files/1/0969/2990/7075/files/Sizing-Guide-Rings_ENG_2024.pdf?v=1772819108'
+          assign default_bracelet_link = 'https://cdn.shopify.com/s/files/1/0969/2990/7075/files/Size-Guide-Bracelets_ENG_2024.pdf?v=1772819107'
+
+          # Use custom links if provided, otherwise use defaults
+          assign ring_sizing_link = ring_sizing_link | default: default_ring_link
+          assign bracelet_sizing_link = bracelet_sizing_link | default: default_bracelet_link
+
           if product_type_handle contains 'ring'
-            assign sizing_link = 'https://cdn.shopify.com/s/files/1/0969/2990/7075/files/Sizing-Guide-Rings_ENG_2024.pdf?v=1772819108'
+            assign sizing_link = ring_sizing_link
           elsif product_type_handle contains 'bracelet' or product_type_handle contains 'bangle'
-            assign sizing_link = 'https://cdn.shopify.com/s/files/1/0969/2990/7075/files/Size-Guide-Bracelets_ENG_2024.pdf?v=1772819107'
+            assign sizing_link = bracelet_sizing_link
           endif
         -%}
 
