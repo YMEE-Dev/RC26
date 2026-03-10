@@ -320,6 +320,11 @@
           height: max-content;
           overflow: visible;
           z-index: 9;
+          transition: top 0.3s ease;
+        }
+
+        body.template-product:not(.header-scroll-hide) #MainProduct--{{ section.id }} {
+          --sticky-top: calc(var(--header-height, 0px)*1.8 + var(--announcement-height, 0px));
         }
 
         #MainProduct--{{ section.id }} .product__content-columns__aside .product__block--buttons {
