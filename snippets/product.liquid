@@ -355,7 +355,7 @@
         display: flex;
         flex-direction: column;
         width: 100%;
-        align-items: stretch; 
+        align-items: stretch;
       }
 
       #MainProduct--{{ section.id }} .product__images {
@@ -387,6 +387,10 @@
         object-position: center;
         margin: var(--header-height) 0 0;
         mix-blend-mode: multiply;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla img {
@@ -509,6 +513,9 @@
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide {
         flex: 0 0 50%;
         box-sizing: border-box;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop.pdp-embla--transitioning .pdp-embla__slide:first-child {
         transition: flex-basis 500ms cubic-bezier(.4,0,.2,1);
       }
 
@@ -774,6 +781,25 @@
         max-height: calc(100vh - (var(--inner) * 2));
         overflow: auto;
         box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+        position: relative;
+        --thumb-frame-top: 0px;
+        --thumb-frame-height: 0px;
+        --thumb-frame-opacity: 0;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-thumbs--desktop .product__thumbs__holder::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: var(--thumb-frame-top);
+        height: var(--thumb-frame-height);
+        border: 1px solid #000;
+        pointer-events: none;
+        opacity: var(--thumb-frame-opacity);
+        transition: top 0.35s cubic-bezier(0.4, 0, 0.2, 1), height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+        box-sizing: border-box;
+        z-index: 3;
       }
 
       @media (min-width: 990px) {
@@ -789,21 +815,6 @@
         padding: 0;
       }
 
-      #MainProduct--{{ section.id }} .product__thumb.is-active:not(.prev-active):not(.single-active) {
-        transform: translateY(0.5px);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      #MainProduct--{{ section.id }} .product__thumb.is-active.prev-active {
-        transform: translateY(-0.5px);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      #MainProduct--{{ section.id }} .product__thumb.is-active.single-active:last-child {
-        transform: translateY(0);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
       #MainProduct--{{ section.id }} .product__thumb::after {
         content: none;
       }
@@ -815,16 +826,6 @@
         position: relative;
         text-decoration: none;
         border: 0;
-      }
-
-      #MainProduct--{{ section.id }} .product__thumb__link::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border: 1px solid transparent;
-        pointer-events: none;
-        z-index: 2;
-        transition: border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       #MainProduct--{{ section.id }} .product__thumb__link img {
@@ -841,23 +842,6 @@
 
       #MainProduct--{{ section.id }} .product__thumb.is-active .product__thumb__link {
         z-index: 1;
-      }
-
-      #MainProduct--{{ section.id }} .product__thumb.is-active .product__thumb__link::after {
-        border-color: #000;
-      }
-
-      #MainProduct--{{ section.id }} .product__thumb.is-active:not(.prev-active):not(.single-active):not(:last-child) .product__thumb__link::after {
-        border-bottom-color: transparent;
-      }
-
-      #MainProduct--{{ section.id }} .product__thumb.is-active.prev-active .product__thumb__link::after {
-        border-top-color: transparent;
-        border-bottom-color: #000;
-      }
-
-      #MainProduct--{{ section.id }} .product__thumb.is-active.single-active .product__thumb__link::after {
-        border-color: #000;
       }
 
       #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart],
@@ -986,7 +970,7 @@
       }
 
       @media only screen and (min-width: 750px) and (max-width: 989px) {
-       
+
       }
 
       @media only screen and (max-width: 749px) {
@@ -1102,11 +1086,11 @@
                       carousel.progressBar.style.left = '0%';
                       return;
                     }
-                    
+
                     // Calculate scroll progress
                     var scrollProgress = carousel.embla.scrollProgress();
                     var clampedProgress = Math.max(0, Math.min(1, scrollProgress));
-                    
+
                     // Update progress bar
                     carousel.progressBar.style.width = (clampedProgress * 100) + '%';
                     carousel.progressBar.style.left = '0%';
@@ -1231,6 +1215,7 @@
                       carouselStarted = !!started;
                       if (carouselStarted === wasStarted) return;
                       introTransitioning = true;
+                      carouselEl.classList.add('pdp-embla--transitioning');
                       if (carouselStarted) {
                         carouselEl.classList.add('pdp-embla--started');
                       } else {
@@ -1244,14 +1229,16 @@
                       setTimeout(function () {
                         embla.reInit();
                         if (typeof targetIndex === 'number') {
-                          embla.scrollTo(targetIndex, true);
+                          // Smooth scroll to target after reInit
+                          embla.scrollTo(targetIndex);
                         }
                         introTransitioning = false;
+                        carouselEl.classList.remove('pdp-embla--transitioning');
                         updateArrows();
                       }, 550);
                     }
 
-                    // Detect swipe/drag on the viewport in intro state
+                    // Detect swipe/drag on the viewport for intro stage transitions
                     if (hasIntroStage) {
                       var introSwipeStartX = 0;
                       viewport.addEventListener('pointerdown', function (e) {
@@ -1259,10 +1246,14 @@
                       });
                       viewport.addEventListener('pointerup', function (e) {
                         if (introTransitioning) return;
-                        if (carouselStarted) return;
                         var diff = introSwipeStartX - e.clientX;
-                        if (diff > 30) {
+                        // Swipe left (intro → started)
+                        if (!carouselStarted && diff > 30) {
                           setCarouselStarted(true, 0);
+                        }
+                        // Swipe right at index 0 (started → intro)
+                        if (carouselStarted && diff < -30 && embla.selectedScrollSnap() === 0) {
+                          setCarouselStarted(false, 0);
                         }
                       });
                     }
@@ -1326,6 +1317,55 @@
 
                     var carousel = { el: carouselEl, embla: embla, prevBtn: prevBtn, nextBtn: nextBtn, progressBar: progressBar, updateArrows: updateArrows, setCarouselStarted: setCarouselStarted };
 
+                    var thumbUpdatePending = false;
+                    function updateDesktopThumbs() {
+                      if (!isDesktopCarousel) return;
+                      if (thumbUpdatePending) return;
+                      thumbUpdatePending = true;
+                      requestAnimationFrame(function () {
+                        thumbUpdatePending = false;
+                        var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
+                        var thumbsHolder = productImagesEl.querySelector('.pdp-thumbs--desktop .product__thumbs__holder');
+                        var currentIndex = embla.selectedScrollSnap();
+                        var effectiveSlidesPerView = (hasIntroStage && !carouselStarted) ? 1 : 2;
+                        var activeCount = 0;
+
+                        thumbs.forEach(function(thumb) {
+                          thumb.classList.remove('is-active', 'prev-active', 'single-active');
+                        });
+
+                        if (thumbs[currentIndex]) {
+                          thumbs[currentIndex].classList.add('is-active');
+                          activeCount++;
+                        }
+
+                        for (var i = 1; i < effectiveSlidesPerView; i++) {
+                          if (thumbs[currentIndex + i]) {
+                            thumbs[currentIndex + i].classList.add('is-active', 'prev-active');
+                            activeCount++;
+                          }
+                        }
+
+                        if (activeCount === 1 && thumbs[currentIndex]) {
+                          thumbs[currentIndex].classList.add('single-active');
+                        }
+
+                        if (thumbsHolder) {
+                          if (activeCount > 0 && thumbs[currentIndex]) {
+                            var firstThumb = thumbs[currentIndex];
+                            var lastThumb = thumbs[currentIndex + activeCount - 1] || firstThumb;
+                            var frameTop = firstThumb.offsetTop;
+                            var frameHeight = (lastThumb.offsetTop + lastThumb.offsetHeight) - frameTop;
+                            thumbsHolder.style.setProperty('--thumb-frame-top', frameTop + 'px');
+                            thumbsHolder.style.setProperty('--thumb-frame-height', frameHeight + 'px');
+                            thumbsHolder.style.setProperty('--thumb-frame-opacity', '1');
+                          } else {
+                            thumbsHolder.style.setProperty('--thumb-frame-opacity', '0');
+                          }
+                        }
+                      });
+                    }
+
                     embla.on('select', function () {
                       var activeCarousel = getActiveCarousel();
                       var index = embla.selectedScrollSnap();
@@ -1343,7 +1383,7 @@
                       loadDeferredMediaByIndex(activeCarousel, index);
                       updateArrows();
                       updateProgressByIndex(activeCarousel, index);
-                      
+
                       if (!isDesktopCarousel) {
                         var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--mobile .product__thumb');
                         thumbs.forEach(function(thumb) {
@@ -1353,32 +1393,7 @@
                           thumbs[index].classList.add('is-active');
                         }
                       } else {
-                        var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
-                        thumbs.forEach(function(thumb) {
-                          thumb.classList.remove('is-active', 'prev-active', 'single-active');
-                        });
-                        
-                        var currentIndex = index;
-                        var activeCount = 0;
-                        
-                        // In intro state (not started), only slide 0 is visually shown
-                        var effectiveSlidesPerView = (hasIntroStage && !carouselStarted) ? 1 : 2;
-                        
-                        if (thumbs[currentIndex]) {
-                          thumbs[currentIndex].classList.add('is-active');
-                          activeCount++;
-                        }
-                        
-                        for (var i = 1; i < effectiveSlidesPerView; i++) {
-                          if (thumbs[currentIndex + i]) {
-                            thumbs[currentIndex + i].classList.add('is-active', 'prev-active');
-                            activeCount++;
-                          }
-                        }
-                        
-                        if (activeCount === 1 && thumbs[currentIndex]) {
-                          thumbs[currentIndex].classList.add('single-active');
-                        }
+                        updateDesktopThumbs();
                       }
                     });
 
@@ -1393,90 +1408,15 @@
                       }
                     });
 
-                    embla.on('slidesinview', function (emblaApi, event) {
-                      if (isDesktopCarousel) {
-                        var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
-                        thumbs.forEach(function(thumb) {
-                          thumb.classList.remove('is-active', 'prev-active', 'single-active');
-                        });
-                        
-                        var visibleIndexes = event.detail.slidesInView || [];
-                        
-                        visibleIndexes.forEach(function(slideIndex, index) {
-                          if (thumbs[slideIndex]) {
-                            thumbs[slideIndex].classList.add('is-active');
-                            if (index > 0) {
-                              thumbs[slideIndex].classList.add('prev-active');
-                            }
-                          }
-                        });
-                        
-                        // Add single-active class if only one thumb is active
-                        if (visibleIndexes.length === 1 && thumbs[visibleIndexes[0]]) {
-                          thumbs[visibleIndexes[0]].classList.add('single-active');
-                        }
-                      }
-                    });
-
-                    if (isDesktopCarousel) {
-                      var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
-                      thumbs.forEach(function(thumb) {
-                        thumb.classList.remove('is-active', 'prev-active', 'single-active');
-                      });
-                      
-                      var currentIndex = embla.selectedScrollSnap();
-                      var activeCount = 0;
-                      var effectiveSlidesPerView = (hasIntroStage && !carouselStarted) ? 1 : 2;
-                      
-                      if (thumbs[currentIndex]) {
-                        thumbs[currentIndex].classList.add('is-active');
-                        activeCount++;
-                      }
-                      
-                      for (var i = 1; i < effectiveSlidesPerView; i++) {
-                        if (thumbs[currentIndex + i]) {
-                          thumbs[currentIndex + i].classList.add('is-active', 'prev-active');
-                          activeCount++;
-                        }
-                      }
-                      
-                      if (activeCount === 1 && thumbs[currentIndex]) {
-                        thumbs[currentIndex].classList.add('single-active');
-                      }
-                    }
+                    // Initial desktop thumb setup
+                    updateDesktopThumbs();
 
                     embla.on('reInit', function () {
                       var activeCarousel = getActiveCarousel();
                       if (!activeCarousel || activeCarousel.el !== carouselEl) return;
                       updateArrows();
                       updateProgressByIndex(activeCarousel, embla.selectedScrollSnap());
-                      
-                      if (isDesktopCarousel) {
-                        var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
-                        thumbs.forEach(function(thumb) {
-                          thumb.classList.remove('is-active', 'prev-active', 'single-active');
-                        });
-                        
-                        var currentIndex = embla.selectedScrollSnap();
-                        var activeCount = 0;
-                        var effectiveSlidesPerView = (hasIntroStage && !carouselStarted) ? 1 : 2;
-                        
-                        if (thumbs[currentIndex]) {
-                          thumbs[currentIndex].classList.add('is-active');
-                          activeCount++;
-                        }
-                        
-                        for (var i = 1; i < effectiveSlidesPerView; i++) {
-                          if (thumbs[currentIndex + i]) {
-                            thumbs[currentIndex + i].classList.add('is-active', 'prev-active');
-                            activeCount++;
-                          }
-                        }
-                        
-                        if (activeCount === 1 && thumbs[currentIndex]) {
-                          thumbs[currentIndex].classList.add('single-active');
-                        }
-                      }
+                      updateDesktopThumbs();
                     });
 
                     updateArrows();
@@ -1495,34 +1435,43 @@
                     if (!e || !e.detail || !e.detail.id) return;
                     var activeCarousel = getActiveCarousel();
                     if (!activeCarousel) return;
-                    
+
                     var isDesktop = activeCarousel.el.classList.contains('pdp-embla--desktop');
                     var isStarted = activeCarousel.el.classList.contains('pdp-embla--started');
                     var currentIndex = activeCarousel.embla.selectedScrollSnap();
                     var targetIndex = findIndexByMediaId(activeCarousel, e.detail.id);
-                    
-                    if (isDesktop && !isStarted && currentIndex === 0 && targetIndex >= 1) {
-                      activeCarousel.setCarouselStarted(true, targetIndex);
-                      setActiveMediaByIndex(activeCarousel, targetIndex);
-                      loadDeferredMediaByIndex(activeCarousel, targetIndex);
-                      updateProgressByIndex(activeCarousel, targetIndex);
-                      return;
-                    }
-                    
-                    if (isDesktop && isStarted && targetIndex === 0) {
-                      activeCarousel.setCarouselStarted(false, 0);
-                      setActiveMediaByIndex(activeCarousel, 0);
-                      loadDeferredMediaByIndex(activeCarousel, 0);
-                      updateProgressByIndex(activeCarousel, 0);
-                      return;
-                    }
-                    
+
                     if (targetIndex < 0) return;
-                    activeCarousel.embla.scrollTo(targetIndex);
+
                     setActiveMediaByIndex(activeCarousel, targetIndex);
                     loadDeferredMediaByIndex(activeCarousel, targetIndex);
-                    activeCarousel.updateArrows && activeCarousel.updateArrows();
                     updateProgressByIndex(activeCarousel, targetIndex);
+
+                    if (isDesktop && !isStarted && targetIndex >= 1) {
+                      // Intro → started: ensure clicked slide is visible in 2-slide view
+                      var scrollTarget = Math.max(0, targetIndex - 1);
+                      activeCarousel.setCarouselStarted(true, scrollTarget);
+                      return;
+                    }
+
+                    if (isDesktop && isStarted && targetIndex === 0) {
+                      // Started → intro: smooth scroll to 0 first, then expand slide 1
+                      if (currentIndex > 0) {
+                        activeCarousel.embla.scrollTo(0);
+                        var onSettle = function () {
+                          activeCarousel.embla.off('settle', onSettle);
+                          activeCarousel.setCarouselStarted(false, 0);
+                        };
+                        activeCarousel.embla.on('settle', onSettle);
+                      } else {
+                        activeCarousel.setCarouselStarted(false, 0);
+                      }
+                      return;
+                    }
+
+                    // Normal smooth scroll
+                    activeCarousel.embla.scrollTo(targetIndex);
+                    activeCarousel.updateArrows && activeCarousel.updateArrows();
                   });
 
                   var active = productImagesEl.getAttribute('data-active-media');
@@ -1544,33 +1493,33 @@
                         loadDeferredMediaByIndex(carousel, startIndex);
                         carousel.updateArrows && carousel.updateArrows();
                         updateProgressByIndex(carousel, startIndex);
-                        
+
                         // Update thumbnails based on carousel type
                         if (carousel.el.classList.contains('pdp-embla--desktop')) {
                           var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
                           thumbs.forEach(function(thumb) {
                             thumb.classList.remove('is-active', 'prev-active', 'single-active');
                           });
-                          
+
                           var currentIndex = carousel.embla.selectedScrollSnap();
                           // On load, intro state is active (slide 1 at 100%) so only 1 slide is visually shown
                           var hasIntro = carousel.el.querySelectorAll('[data-embla-slide]').length > 1;
                           var isStarted = carousel.el.classList.contains('pdp-embla--started');
                           var effectiveSlidesPerView = (hasIntro && !isStarted) ? 1 : 2;
                           var activeCount = 0;
-                          
+
                           if (thumbs[currentIndex]) {
                             thumbs[currentIndex].classList.add('is-active');
                             activeCount++;
                           }
-                          
+
                           for (var i = 1; i < effectiveSlidesPerView; i++) {
                             if (thumbs[currentIndex + i]) {
                               thumbs[currentIndex + i].classList.add('is-active', 'prev-active');
                               activeCount++;
                             }
                           }
-                          
+
                           if (activeCount === 1 && thumbs[currentIndex]) {
                             thumbs[currentIndex].classList.add('single-active');
                           }
@@ -2755,11 +2704,11 @@
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         const desktopThumbs = document.querySelector('#MainProduct--{{ section.id }} .product__thumbs.pdp-thumbs--desktop');
-        
+
         if (desktopThumbs) {
           let lastScrollY = window.scrollY;
           let ticking = false;
-          
+
           function updateThumbsVisibility() {
             const scrollY = window.scrollY;
             const windowHeight = window.innerHeight;
@@ -2767,7 +2716,7 @@
             const scrollThreshold = documentHeight - windowHeight - 200; // 200px from bottom
             const isScrollingDown = scrollY > lastScrollY;
             const isScrollingUp = scrollY < lastScrollY;
-            
+
             // Hide when scrolling down near bottom, show when scrolling up or not near bottom
             if (isScrollingDown && scrollY > scrollThreshold) {
               desktopThumbs.style.opacity = '0';
@@ -2778,18 +2727,18 @@
               desktopThumbs.style.pointerEvents = 'auto';
               desktopThumbs.style.transition = 'opacity 0.3s ease-in-out';
             }
-            
+
             lastScrollY = scrollY;
             ticking = false;
           }
-          
+
           function requestTick() {
             if (!ticking) {
               window.requestAnimationFrame(updateThumbsVisibility);
               ticking = true;
             }
           }
-          
+
           window.addEventListener('scroll', requestTick, { passive: true });
         }
       });
