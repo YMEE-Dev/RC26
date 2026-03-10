@@ -56,8 +56,8 @@
                 {%- for link in linklists[custom_nav_list].links -%}
                   {%- if link.links == blank -%}
                     <li
-                      class="sidebar__item {% if link.active %}sidebar__item--active link--remove{% else %}link--add{% endif %}{% if forloop.index > 10 %} hidden{% endif %}"
-                      {% if forloop.index > 10 %}
+                      class="sidebar__item {% if link.active %}sidebar__item--active link--remove{% else %}link--add{% endif %}{% if forloop.index > 15 %} hidden{% endif %}"
+                      {% if forloop.index > 15 %}
                         data-link-hidden
                       {% endif %}
                     >
@@ -67,7 +67,7 @@
                 {%- endfor -%}
               </ul>
 
-              {%- if linklists[custom_nav_list].links.size > 10 -%}
+              {%- if linklists[custom_nav_list].links.size > 15 -%}
                 <div class="collection__sidebar__actions">
                   <a href="#" data-show-more class="collection__sidebar__link">
                     {%- render 'icon-arrow-separate-vertical' -%}
@@ -136,8 +136,8 @@
                   <ul class="collection-nav{% if filter.presentation == "image" %} collection-nav--image-grid{% endif %}">
                     {%- for filter_value in filter.values -%}
                       <li
-                        class="sidebar__item{% if filter_value.active %} sidebar__item--active link--remove{% elsif filter_value.count == 0 and filter_value.active == false %} link--disable{% else %} link--add{% endif %}{% if forloop.index > 10 %} hidden{% endif %}"
-                        {% if forloop.index > 10 %}
+                        class="sidebar__item{% if filter_value.active %} sidebar__item--active link--remove{% elsif filter_value.count == 0 and filter_value.active == false %} link--disable{% else %} link--add{% endif %}{% if forloop.index > 15 %} hidden{% endif %}"
+                        {% if forloop.index > 15 %}
                           data-link-hidden
                         {% endif %}
                       >
@@ -216,7 +216,7 @@
                     {%- endfor -%}
                   </ul>
 
-                  {%- if filter.values.size > 10 -%}
+                  {%- if filter.values.size > 15 -%}
                     <div class="collection__sidebar__actions">
                       <a href="#" data-show-more class="collection__sidebar__link">
                         {%- render 'icon-arrow-separate-vertical' -%}
