@@ -4,14 +4,8 @@
     {%- render 'head' -%}
 
     {{ content_for_header }}
-    {%- if page.template == 'page.store-locator' -%}
-      <style>
-        .header-sections {
-          height: 0;
-        }
-      </style>
-    {%- endif -%}
-  {% include 'pagefly-app-header' %}</head>
+    {% include 'pagefly-app-header' %}
+  </head>
 
   <body
     id="{{ page_title | handle }}"

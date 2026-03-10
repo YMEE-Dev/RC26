@@ -139,7 +139,13 @@
   }
 
   function applyGalleryFilter(sectionId, colorCode) {
-    var productImagesEl = document.querySelector('#MainProduct--' + cssEscape(sectionId) + ' product-images, #MainProduct--' + cssEscape(sectionId) + ' .product__images');
+    var productImagesEl = document.querySelector(
+      '#MainProduct--' +
+        cssEscape(sectionId) +
+        ' product-images, #MainProduct--' +
+        cssEscape(sectionId) +
+        ' .product__images'
+    );
     if (!productImagesEl) return;
 
     var visibleMediaIds = [];
@@ -176,6 +182,17 @@
       thumbItem.classList.toggle('pdp-thumb--filtered-out', !thumbVisible);
     });
 
+    // ReInit Embla first so snap points reflect filtered slides
+    productImagesEl.querySelectorAll('.pdp-embla').forEach(function (emblaRoot) {
+      if (emblaRoot._emblaInstance && typeof emblaRoot._emblaInstance.reInit === 'function') {
+        try {
+          emblaRoot._emblaInstance.reInit();
+        } catch (e) {
+          /* no-op */
+        }
+      }
+    });
+
     var activeMediaId = productImagesEl.getAttribute('data-active-media') || '';
     if (visibleMediaIds.length && activeMediaId && visibleMediaIds.indexOf(activeMediaId) === -1) {
       productImagesEl.dispatchEvent(
@@ -184,12 +201,6 @@
         })
       );
     }
-
-    productImagesEl.querySelectorAll('.pdp-embla').forEach(function (emblaRoot) {
-      if (emblaRoot._emblaInstance && typeof emblaRoot._emblaInstance.reInit === 'function') {
-        try { emblaRoot._emblaInstance.reInit(); } catch (e) { /* no-op */ }
-      }
-    });
   }
 
   function getCurrentNonSizeOptions(sectionRoot, sizeOptionIndex) {
@@ -781,7 +792,7 @@
           if (optionEl.classList.contains('is-oos')) return;
           if (e.relatedTarget && optionEl.contains(e.relatedTarget)) return;
 
-          syncVariant(optionEl);
+          setSelectedVisual(optionEl);
         });
 
         /* Color picker change is handled by a single delegated listener on document (see bottom of IIFE) */
