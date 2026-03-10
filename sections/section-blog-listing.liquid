@@ -49,6 +49,8 @@
     justify-content: flex-end;
     min-width: 0;            /* allow shrink so touch scroll works */
     touch-action: pan-x;     /* horizontal touch scroll */
+    flex: 1 1 0%;            /* take remaining space in bar so nav is constrained */
+    max-width: 100%;
   }
 
 .blog-listing__nav::-webkit-scrollbar {
@@ -607,9 +609,10 @@ a.blog-listing__view-all {
     scrollbar-width: thin;
     align-items: center;
     gap: 1.25rem;
-    width: 100%;
     min-width: 0; /* allow flex child to shrink so overflow can scroll */
     touch-action: pan-x; /* allow horizontal touch scroll */
+    flex: 1 1 0%; /* take remaining space so nav width is constrained and content scrolls */
+    max-width: 100%;
   }
 
   .blog-listing__nav::-webkit-scrollbar {
