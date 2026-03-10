@@ -42,11 +42,13 @@
     display: flex;           /* make items in a row */
     flex-wrap: nowrap;       /* prevent wrapping */
     overflow-x: auto;        /* horizontal scroll if needed */
+    overflow-y: hidden;
     -webkit-overflow-scrolling: touch; /* smooth scroll on mobile */
     gap: 10px;               /* optional spacing between links */
-        /* optional vertical padding */
     scrollbar-width: thin;   /* optional: thinner scrollbar for Firefox */
-        justify-content: flex-end;
+    justify-content: flex-end;
+    min-width: 0;            /* allow shrink so touch scroll works */
+    touch-action: pan-x;     /* horizontal touch scroll */
   }
 
 .blog-listing__nav::-webkit-scrollbar {
@@ -600,11 +602,14 @@ a.blog-listing__view-all {
     display: flex;
     flex-wrap: nowrap;
     overflow-x: auto;
+    overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
     align-items: center;
     gap: 1.25rem;
     width: 100%;
+    min-width: 0; /* allow flex child to shrink so overflow can scroll */
+    touch-action: pan-x; /* allow horizontal touch scroll */
   }
 
   .blog-listing__nav::-webkit-scrollbar {
