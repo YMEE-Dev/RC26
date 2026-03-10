@@ -17,7 +17,12 @@
     --PB: {{ section.settings.padding_bottom }}px;
     padding-inline:  var(--outer);
   }
-  
+  #NewMainBlogBanner--{{ section.id }}.new-main-blog-banner {
+    --section-heading-font: var(--FONT-STACK-HEADING, 'Portrait LS', serif);
+    --section-heading-style: var(--FONT-STYLE-HEADING, normal);
+    --section-heading-weight: var(--FONT-WEIGHT-HEADING, 500);
+    --section-heading-line-height: var(--LINE-HEIGHT-DISPLAY-L, 1.2);
+  }
 {%- endstyle -%}
 
 <section
@@ -148,7 +153,7 @@
               <p class="new-main-blog-banner__subheading">${subheading.toUpperCase()}</p>
             ` : ''}
             <h1 class="new-main-blog-banner__heading {{ section.settings.heading_font_size }}">
-              <a href="${articleUrl}">${title}</a>
+              <a class="h1" href="${articleUrl}">${title}</a>
             </h1>
             ${showDescription && excerpt ? `
               <div class="new-main-blog-banner__description rte">
@@ -159,7 +164,7 @@
           <div class="new-main-blog-banner__button-wrap">
             <a
               href="${articleUrl}"
-              class="btn ${buttonStyle} ${buttonSize} ${buttonType} new-main-blog-banner__button"
+              class="btn new-main-blog-banner__button"
             >
               ${buttonText}
             </a>
@@ -269,11 +274,16 @@
   .new-main-blog-banner__heading {
     margin: 0 0 20px;
     line-height: 1.2;
+    font-family: var(--section-heading-font, var(--FONT-STACK-HEADING, 'Portrait LS', serif));
   }
 
   .new-main-blog-banner__heading a {
     text-decoration: none;
     color: inherit;
+    font-family: var(--section-heading-font, var(--FONT-STACK-HEADING, 'Portrait LS', serif));
+    font-style: var(--section-heading-style, var(--FONT-STYLE-HEADING, normal));
+    font-weight: var(--section-heading-weight, var(--FONT-WEIGHT-HEADING, 500));
+    line-height: var(--section-heading-line-height, var(--LINE-HEIGHT-DISPLAY-L, 1.2));
     text-transform: capitalize;
   }
 
@@ -315,14 +325,16 @@
   .new-main-blog-banner__button {
     min-width: 396px;
     text-align: center;
-
+    border: 1px solid var(--000000, #000);
     /* RC26/Button (ALL CAPS) */
     font-family: Inter;
+    opacity: 1 !important;
     font-size: 12px;
     font-style: normal;
     font-weight: 600;
     line-height: 20px; /* 166.667% */
     letter-spacing: 1.2px;
+    transition: none !important;
     text-transform: uppercase;
   }
   .new-main-blog-banner__button:hover {

@@ -9,24 +9,16 @@
 -%}
 
 {%- style -%}
-  #BlogListing--{{ section.id }} {
+#BlogListing--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
     --grid-cols: {{ section.settings.columns }};
 
     padding-inline:  var(--outer);
   }
-  .blog-listing-section-wrapper {
-    border-bottom: 1px solid var(--e-5-e-5-e-5, #E5E5E5);
-    background: rgba(255, 255, 255, 0.70);
-
-    backdrop-filter: blur(30px);
-    position:sticky;
-    top: 0;
-    z-index: 100;
-    padding-top: 30px;
+  #shopify-section-{{ section.id }} .blog-listing-section-wrapper__inner {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1); 
   }
-
   #shopify-section-{{ section.id }} .blog-listing-section {
     background-color: #F9F9F9;
   }
@@ -51,54 +43,6 @@
 .blog-listing__nav::-webkit-scrollbar {
   height: 6px;             /* height of horizontal scrollbar */
 }
-
-/* Mobile dropdown styles */
-.blog-listing__dropdown {
-  display: none;
-  width: 100%;
-  padding: 10px 15px;
-  font-family: Inter;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 20px;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background-color: #fff;
-  color: #000;
-  cursor: pointer;
-}
-
-@media (max-width: 1024px) {
-  .blog-listing__nav {
-    display: none !important;
-  }
-  
-  .blog-listing__dropdown {
-    display: block;
-  }
-  .blog-listing__dropdown {
-    width: 38%;
-  }
-}
-
-@media (max-width: 768px) {
-  .blog-listing__bar  {
-    flex-direction: row !important;
-    flex-wrap: nowrap;
-  }
-}
-@media (max-width: 425px) {
-  .blog-listing__bar  {
-    flex-direction: column !important;
-    flex-wrap: wrap;
-  }
-  .blog-listing__dropdown {
-    width: 100%;
-  }
-}
-
-
 a.main-blog__filter-tag {
     display: flex;
   padding: 5px 10px;
@@ -152,6 +96,20 @@ a.blog-listing__view-all {
 .blog-listing-section-wrapper{
   padding-inline:  var(--outer);
 }
+
+
+.blog-listing-section-wrapper {
+  border-bottom: 1px solid var(--e-5-e-5-e-5, #E5E5E5);
+  background: rgba(255, 255, 255, 0.70);
+  backdrop-filter: blur(30px);
+  position:sticky;
+  top: 0;
+  z-index: 100;
+  padding-top: 30px;
+
+}
+
+
 @media (max-width: 768px) {
   .blog-listing-section-wrapper {
     padding-top: 100px;
@@ -186,9 +144,9 @@ a.blog-listing__view-all {
         </nav> {% endcomment %}
 
         <nav class="blog-listing__nav" id="blogNav" aria-label="Blog categories"></nav>
-        <select class="blog-listing__dropdown" id="blogDropdown" aria-label="Blog categories">
+        {% comment %} <select class="blog-listing__dropdown" id="blogDropdown" aria-label="Blog categories">
           <option value="">Select Category</option>
-        </select>
+        </select> {% endcomment %}
       {%- endif -%}
     </div>
   </div>
@@ -382,13 +340,13 @@ a.blog-listing__view-all {
         nav.appendChild(link);
         
         // Create dropdown option
-        const option = document.createElement("option");
+        {% comment %} const option = document.createElement("option");
         option.value = `/blogs/${blog.handle}`;
         option.textContent = blog.title.toUpperCase();
         if (blog.handle === "{{ blog.handle }}") {
           option.selected = true;
         }
-        dropdown.appendChild(option);
+        dropdown.appendChild(option); {% endcomment %}
       });
       
       // Add dropdown change event
@@ -487,7 +445,7 @@ a.blog-listing__view-all {
 
             <div class="blog-listing__card-body">
               ${article.blog.handle ? `<p class="blog-listing__card-tag">#${article.blog.handle.toUpperCase()}</p>` : ""}
-              <h2 class="blog-listing__card-title">${title}</h2>
+              <h2 class="blog-listing__card-title heading-x-large">${title}</h2>
               <p class="blog-listing__card-excerpt">${article.excerpt || ""}</p>
             </div>
 
@@ -583,7 +541,6 @@ a.blog-listing__view-all {
   
   @media (max-width: 768px) {
     .blog-listing__bar {
-      flex-direction: column;
       align-items: stretch;
     }
   }
@@ -600,9 +557,26 @@ a.blog-listing__view-all {
 
   .blog-listing__nav {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
     align-items: center;
     gap: 1.25rem;
+    min-width: 0; /* allow flex child to shrink so overflow can scroll */
+    touch-action: pan-x; /* allow horizontal touch scroll */
+    flex: 1 1 0%; /* take remaining space so nav width is constrained and content scrolls */
+    max-width: 70%;
+  }
+
+  .blog-listing__nav::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .blog-listing__nav .main-blog__filter-tag {
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .blog-listing__nav-link {
@@ -633,6 +607,12 @@ a.blog-listing__view-all {
   @media (min-width: 990px) {
     .blog-listing__grid {
       grid-template-columns: repeat(var(--grid-cols, 3), 1fr);
+    }
+  }
+  @media (max-width: 425px) {
+    .blog-listing__grid {
+
+      gap: 4rem;
     }
   }
 
@@ -683,13 +663,10 @@ a.blog-listing__view-all {
 
     /* RC26/Display/S */
     font-family: var(--FONT-STACK-HEADING);
-    font-style: normal;
-    font-weight: 500;
-    font-size: 32px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 36px;
-    text-transform: capitalize;
+    font-style: var(--FONT-STYLE-HEADING);
+    font-weight: var(--FONT-WEIGHT-HEADING);
+    font-size: var(--FONT-DISPLAY-S);
+    line-height: var(--LINE-HEIGHT-HEADLINE);
   }
 
   .blog-listing__card-excerpt {
@@ -787,6 +764,12 @@ a.blog-listing__view-all {
     opacity: 0.5;
   }
 
+  @media (max-width: 1024px) {
+    .blog-listing__card-title{
+      font-size: 26px;
+      line-height: 29px !important;
+    }
+  }
   @media (max-width: 767px) {
     .custom-js-pagination__container {
       gap: 16px;
@@ -800,6 +783,8 @@ a.blog-listing__view-all {
     .custom-js-pagination__link {
       font-size: 12px;
     }
+
+
   }
 {% endstylesheet %}
 

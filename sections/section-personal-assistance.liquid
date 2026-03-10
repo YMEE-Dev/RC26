@@ -86,9 +86,10 @@
 {% stylesheet %}
   .personal-assistance__wrapper {
     width: 100%;
-    max-width: var(--max-width, 1232px);
+    max-width: var(--max-width, 1320px);
     margin-left: auto;
     margin-right: auto;
+    padding: 0 20px;
   }
 
   .personal-assistance__grid {
@@ -166,7 +167,8 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 0 0.5rem;
+    max-width: 397px;
+    width: 100%;
   }
 
   .personal-assistance__subheading {
@@ -187,10 +189,11 @@
     margin: 0 0 40px;
     color: var(--000000, #000);
     font-family: var(--FONT-STACK-HEADING);
-    font-size: 40px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 48px; /* 120% */
+    font-size: var(--FONT-DISPLAY-M); 
+    font-style: var(--FONT-STYLE-HEADING);
+    font-weight: var(--FONT-WEIGHT-HEADING);
+    line-height: var(--LINE-HEIGHT-DISPLAY-M); /* 120% */
+    text-transform: capitalize;
   }
 
   .personal-assistance__items {
@@ -234,12 +237,19 @@ span.personal-assistance__item-value {
   .personal-assistance__item {
     display: flex;
     height: 46px;
-    padding: 11px 11px 10px 0;
+    padding: 11px 0px 10px 0;
     align-items: center;
     gap: 10px;
     align-self: stretch;
   }
-
+  a.personal-assistance__item-value {
+    border-bottom:1px solid #D6D6D6;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+  }
+  a.personal-assistance__item-value:hover {
+    opacity: 0.5;
+  }
   .personal-assistance__item:last-child {
     border-bottom: none;
   }
