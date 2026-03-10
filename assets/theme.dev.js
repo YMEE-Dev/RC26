@@ -3553,6 +3553,7 @@
           this.desktop = this.querySelector("[data-header-desktop]");
           this.body = document.body;
           this.isCollectionTemplate = this.body.classList.contains("template-collection");
+          this.isSearchTemplate = this.body.classList.contains("template-search");
           this.isSpotlightCollectionTemplate =
             this.isCollectionTemplate &&
             Boolean(document.querySelector(".main-content--collection-spotlight, .collection--spotlight"));
@@ -3709,7 +3710,7 @@
           const stickyThreshold = typeof this.headerOffset === "number" ? this.headerOffset : 0;
           const shouldShowRevealBlur = this.isSticky && goingUp && !atTop && position > stickyThreshold;
 
-          if (this.isCollectionTemplate && !this.isSpotlightCollectionTemplate) {
+          if ((this.isCollectionTemplate && !this.isSpotlightCollectionTemplate) || this.isSearchTemplate) {
             if (atTop) {
               this.body.classList.remove("header-scroll-hide");
               this.resetHeaderLayerHide();

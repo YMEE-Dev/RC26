@@ -9,12 +9,23 @@
           class="search-box"
           aria-label="{{ 'general.search.placeholder' | t }}"
           placeholder="{{ 'general.search.title' | t }}"
-          value="{{ search.terms }}">
-          <button type="reset" class="search-reset{% if search.terms == blank %} hidden{% endif %}" aria-label="{{ 'general.search.reset' | t }}">
-            {{- 'general.search.clear' | t -}}
-          </button>
-        </div>
-      <button type="submit" class="btn btn--primary btn--solid search-submit" aria-label="{{ 'general.search.search' | t }}">{%- render 'icon-search' -%}</button>
+          value="{{ search.terms }}"
+        >
+        <button
+          type="reset"
+          class="search-reset{% if search.terms == blank %} hidden{% endif %}"
+          aria-label="{{ 'general.search.reset' | t }}"
+        >
+          {{- 'general.search.clear' | t -}}
+        </button>
+      </div>
+      <button
+        type="submit"
+        class="btn btn--secondary btn--outline search-submit"
+        aria-label="{{ 'general.search.search' | t }}"
+      >
+        {%- render 'icon-search' -%}
+      </button>
     </form>
   </div>
 </main-search>

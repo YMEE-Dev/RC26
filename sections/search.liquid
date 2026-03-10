@@ -29,6 +29,7 @@
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
     --COLUMNS-MOBILE: {{ columns_mobile }};
+    --COLUMNS: {{ columns_desktop }};
   }
 {%- endstyle -%}
 
@@ -91,14 +92,16 @@
       {%- endpaginate -%}
     {%- endcapture -%}
 
-    {%- if search.results == empty -%}
-      <p class="search__caption caps">{{ 'general.search.no_results' | t: terms: search.terms }}</p>
-    {%- else -%}
-      {% assign search_results_count = search.results_count | minus: hidden_products_count %}
-      <p class="search__caption caps" data-results-count>
-        {{ 'general.search.results_with_count_and_term' | t: terms: search.terms, count: search_results_count }}
-      </p>
-    {%- endif -%}
+    {% comment %}
+      {%- if search.results == empty -%}
+        <p class='search__caption caps'>{{ 'general.search.no_results' | t: terms: search.terms }}</p>
+      {%- else -%}
+        {% assign search_results_count = search.results_count | minus: hidden_products_count %}
+        <p class='search__caption caps' data-results-count>
+          {{ 'general.search.results_with_count_and_term' | t: terms: search.terms, count: search_results_count }}
+        </p>
+      {%- endif -%}
+    {% endcomment %}
 
     {%- liquid
       assign nav_classes = ''
@@ -246,9 +249,9 @@
       "label": "Filter layout",
       "default": "inline-open",
       "options": [
-        {"label": "Slide out", "value": "slide-out"},
-        {"label": "Inline (closed)", "value": "inline-closed"},
-        {"label": "Inline (open)", "value": "inline-open"}
+        { "label": "Slide out", "value": "slide-out" },
+        { "label": "Inline (closed)", "value": "inline-closed" },
+        { "label": "Inline (open)", "value": "inline-open" }
       ]
     },
     {
@@ -267,8 +270,8 @@
       "label": "Product items per row",
       "default": "1",
       "options": [
-        {"value": "1", "label": "One"},
-        {"value": "2", "label": "Two"}
+        { "value": "1", "label": "One" },
+        { "value": "2", "label": "Two" }
       ]
     },
     {
