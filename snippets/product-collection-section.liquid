@@ -64,32 +64,47 @@
     endfor
   endif
 
-  # Use product category for display title and image
-  # (collection-based fallback can be re-enabled later when collections have data)
-  assign category_label = blank
-  assign category_collection = blank
+  # Use brand collection for display content.
+  # Fallback order:
+  # 1) product.metafields.custom.collection (reference or handle/string)
+  # 2) Collection matching product vendor handle
+  assign brand_collection = blank
+  assign assigned_brand_collection = blank
+  assign assigned_brand_collection_value = blank
 
-  if product.category != blank and product.category.name != blank
-    assign category_label = product.category.name
+  if product.metafields.custom.collection != blank
+    assign assigned_brand_collection_value = product.metafields.custom.collection.value
+
+    if assigned_brand_collection_value != blank
+      if assigned_brand_collection_value.products != blank
+        assign assigned_brand_collection = assigned_brand_collection_value
+      endif
+
+      if assigned_brand_collection == blank
+        assign assigned_brand_collection_handle = assigned_brand_collection_value | handleize
+        assign assigned_brand_collection = collections[assigned_brand_collection_handle]
+      endif
+    endif
   endif
 
-  if category_label == blank and product.type != blank
-    assign category_label = product.type
+  if assigned_brand_collection != blank
+    assign brand_collection = assigned_brand_collection
   endif
 
-  if category_label != blank
-    assign category_handle = category_label | handleize
-    assign category_collection = collections[category_handle]
+  if brand_collection == blank and product.vendor != blank
+    assign brand_handle = product.vendor | handleize
+    assign brand_collection = collections[brand_handle]
   endif
 
-  assign display_title = category_label | default: product.title
+  assign display_title = product.vendor | default: product.title
   assign display_description = blank
   assign display_image = blank
 
-  if category_collection != blank
-    assign display_image = category_collection.image
-    if category_collection.description != blank
-      assign display_description = category_collection.description
+  if brand_collection != blank
+    assign display_title = brand_collection.title | default: display_title
+    assign display_image = brand_collection.image
+    if brand_collection.description != blank
+      assign display_description = brand_collection.description
     endif
   endif
 -%}
@@ -171,6 +186,7 @@
       position: relative;
       overflow: clip;
       background: #e8e8e8;
+      max-height: 80vh;
     }
 
     .product__collection-image .image-wrapper {
@@ -188,6 +204,14 @@
       object-fit: cover;
       display: block;
       image-rendering: auto;
+    }
+
+    /* Responsive adjustments for collection image */
+    @media (max-width: 767px) {
+      .product__collection-image {
+        width: 100%;
+        max-height: 60vh;
+      }
     }
 
     .product__collection-title {

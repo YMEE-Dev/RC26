@@ -271,11 +271,11 @@ side-drawer .drawer-content__title--nav {
   margin-bottom: 10px;
   color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-BODY);
-  font-size: var(--font-body-x-small);
+  font-size: var(--FONT-SIZE-CAPTION);
   font-style: var(--FONT-STYLE-BODY);
   font-weight: var(--FONT-WEIGHT-BODY);
   line-height: 20px;
-  letter-spacing: 1.2px;
+  letter-spacing: var(--LETTER-SPACING-NAV);
   text-transform: uppercase;
 }
 
@@ -288,6 +288,10 @@ side-drawer .drawer-content__description {
   font-weight: var(--FONT-WEIGHT-BODY);
   line-height: var(--LINE-HEIGHT-BODY);
   letter-spacing: var(--LETTER-SPACING-BODY);
+}
+
+side-drawer .drawer-content__description p {
+  margin-bottom: 1rem;
 }
 
 side-drawer .drawer__section {
@@ -381,25 +385,24 @@ side-drawer .drawer__link-content {
 side-drawer .drawer__link-text {
   color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-BODY);
-  font-size: var(--FONT-SIZE-LABEL);
+  font-size: var( --BTN-FONT-SIZE);
   font-style: var(--FONT-STYLE-BODY);
-  font-weight: var(--FONT-WEIGHT-BODY-BOLD);
-  line-height: var(--LINE-HEIGHT-LABEL);
-  letter-spacing: var(--LETTER-SPACING-BODY);
-  text-transform: var(--BTN-UPPERCASE);
-}
-
-side-drawer .drawer__link-value {
-  color: var(--text-a50);
-  font-family: var(--FONT-STACK-NAV);
-  font-size: var(--FONT-SIZE-NAV);
-  font-style: var(--FONT-STYLE-NAV);
-  font-weight: var(--FONT-WEIGHT-NAV);
-  line-height: var(--LINE-HEIGHT-NAV);
+  font-weight: 600;
+  line-height: var(--LINE-HEIGHT-CAPTION);
   letter-spacing: var(--LETTER-SPACING-NAV);
   text-transform: var(--BTN-UPPERCASE);
 }
 
+side-drawer .drawer__link-value {
+  color: var(--COLOR-TEXT-A50);
+  font-family: var(--FONT-STACK-NAV);
+  font-size: var(--FONT-SIZE-NAV);
+  font-style: var(--FONT-STYLE-NAV);
+  font-weight: var(--FONT-WEIGHT-NAV);
+  line-height: var(--LINE-HEIGHT-CAPTION);
+  letter-spacing: var(--LETTER-SPACING-NAV);
+  text-transform: var(--BTN-UPPERCASE);
+}
 
 side-drawer .drawer__button {
   color: var(--COLOR-TEXT);
@@ -431,7 +434,7 @@ side-drawer .form-section__title {
   font-weight: var(--FONT-WEIGHT-BODY-BOLD);
   text-transform: var(--BTN-UPPERCASE);
   letter-spacing: var(--LETTER-SPACING-BODY);
-  color: var(--text-a50);
+  color: var(--COLOR-TEXT-A50);
 }
 
 side-drawer .form-field__label {
@@ -440,7 +443,7 @@ side-drawer .form-field__label {
   font-weight: var(--FONT-WEIGHT-BODY-BOLD);
   text-transform: var(--BTN-UPPERCASE);
   letter-spacing: var(--LETTER-SPACING-BODY);
-  color: var(--text-a50);
+  color: var(--COLOR-TEXT-A50);
 }
 
 side-drawer .form-field__input {
@@ -605,11 +608,13 @@ side-drawer .accordion {
 side-drawer .accordion__title {
   padding: 13px 0px;
   cursor: pointer;
-  font-size: var(--font-body-small);
+  color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-BODY);
+  font-size: var(--FONT-SIZE-CAPTION);
   font-style: var(--FONT-STYLE-BODY);
   font-weight: var(--FONT-WEIGHT-BODY);
-  letter-spacing: var(--LETTER-SPACING-BODY);
+  letter-spacing: var(--LETTER-SPACING-NAV);
+  line-height: var(--LINE-HEIGHT-BODY);
   text-transform: uppercase;
   display: flex;
   justify-content: space-between;
@@ -627,11 +632,15 @@ side-drawer .accordion__title .accordion-icon-wrapper {
 }
 
 side-drawer .accordion__title .accordion-icon-wrapper .icon {
-  width: 18px;
-  height: 18px;
+  width: 12px;
+  height: 12px;
   left: auto;
   right: 0;
   transition: transform 0.3s ease;
+}
+
+side-drawer .accordion__title .accordion-icon-wrapper .icon path { 
+  stroke-width: 2px;
 }
 
 side-drawer .accordion[open] .accordion-icon-wrapper .icon-plus {
@@ -657,7 +666,6 @@ side-drawer .accordion__content {
   font-style: var(--FONT-STYLE-BODY);
   font-weight: var(--FONT-WEIGHT-BODY);
   letter-spacing: var(--LETTER-SPACING-BODY);
-  text-transform: uppercase;
 }
 
 @media (max-width: 768px) {
