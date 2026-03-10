@@ -321,27 +321,8 @@
           {%- if product.type != blank -%}
             {%- assign has_type = true -%}
           {%- endif -%}
-          {%- liquid
-            assign product_category_name = product.category.name | strip
-            assign has_product_category = false
-            assign product_category_collection = blank
-
-            if product_category_name != blank
-              assign has_product_category = true
-              assign product_category_handle = product_category_name | handleize
-              assign product_category_collection = collections[product_category_handle]
-            endif
-          -%}
           <h6 class="header__logo__meta__line">
-            {%- if has_product_category -%}
-              <span class="header__logo__meta__collection">
-                {%- if product_category_collection != blank -%}
-                  <a href="{{ product_category_collection.url }}">{{ product_category_name }}</a>
-                {%- else -%}
-                  <span>{{ product_category_name }}</span>
-                {%- endif -%}
-              </span>
-            {%- elsif has_collection -%}
+            {%- if has_collection -%}
               <span class="header__logo__meta__collection">
                 {%- assign current_collection_title = current_collection.title -%}
                 {%- if current_collection_title contains ' - ' -%}
@@ -376,29 +357,31 @@
           </h6>
         {%- elsif template contains 'collection' and collection -%}
           <h6 class="header__logo__meta__collection">
-            {%- liquid
-              assign collection_title = collection.title
-              assign collection_title_parts = collection_title | split: ' - '
-              assign can_render_split_title = false
-
-              if collection_title_parts.size == 2
-                assign parent_collection_title = collection_title_parts | first | strip
-                assign child_collection_title = collection_title_parts | last | strip
-
-                if parent_collection_title != blank and child_collection_title != blank
-                  assign parent_collection_handle = parent_collection_title | handleize
-                  assign parent_collection_obj = collections[parent_collection_handle]
-
-                  if parent_collection_obj != blank
-                    assign can_render_split_title = true
-                  endif
-                endif
-              endif
-            -%}
-            {%- if can_render_split_title -%}
-              <a href="{{ parent_collection_obj.url }}">{{ parent_collection_title }}</a>
-              <span class="header__logo__meta__separator">&nbsp;/&nbsp;</span>
-              <span class="header__logo__meta__subcollection">{{ child_collection_title }}</span>
+            {%- assign collection_title = collection.title -%}
+            {%- if collection_title contains ' - ' -%}
+              {%- liquid
+                assign parent_collection_title = collection_title | split: ' - ' | first | strip
+                assign child_collection_title = collection_title | remove_first: parent_collection_title | remove_first: ' - ' | strip
+              -%}
+              {%- if parent_collection_title != blank -%}
+                {%- if child_collection_title != blank -%}
+                  {%- liquid
+                    assign parent_collection_handle = parent_collection_title | handleize
+                    assign parent_collection_obj = collections[parent_collection_handle]
+                    assign parent_collection_url = '/collections/' | append: parent_collection_handle
+                    if parent_collection_obj != blank
+                      assign parent_collection_url = parent_collection_obj.url
+                    endif
+                  -%}
+                  <a href="{{ parent_collection_url }}">{{ parent_collection_title }}</a>
+                  <span class="header__logo__meta__separator">&nbsp;/&nbsp;</span>
+                  <span class="header__logo__meta__subcollection">{{ child_collection_title }}</span>
+                {%- else -%}
+                  <a href="{{ collection.url }}">{{ collection.title }}</a>
+                {%- endif -%}
+              {%- else -%}
+                <span>{{ collection.title }}</span>
+              {%- endif -%}
             {%- else -%}
               <span>{{ collection.title }}</span>
             {%- endif -%}
