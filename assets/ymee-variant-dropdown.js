@@ -792,7 +792,7 @@
           if (optionEl.classList.contains('is-oos')) return;
           if (e.relatedTarget && optionEl.contains(e.relatedTarget)) return;
 
-          syncVariant(optionEl);
+          setSelectedVisual(optionEl);
         });
 
         /* Color picker change is handled by a single delegated listener on document (see bottom of IIFE) */
