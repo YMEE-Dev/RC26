@@ -171,16 +171,18 @@
       {%- if enable_filters -%}
         <div class="{{ collection_sidebar_class }}" id="filter-groups" data-collection-sidebar>
           <div class="collection__sidebar__head{% unless filter_layout == 'slide-out' %} mobile{% endunless %}">
-            <h3>
-              {{- 'collections.general.filters' | t -}}
+            {% comment %}
+              <h3>
+                {{- 'collections.general.filters' | t -}}
 
-              <span
-                class="filter-count{% if filter_active_count < 1 %} hidden{% endif %}"
-                data-active-filters
-              >
-                {{- filter_active_count -}}
-              </span>
-            </h3>
+                <span
+                  class="filter-count{% if filter_active_count < 1 %} hidden{% endif %}"
+                  data-active-filters
+                >
+                  {{- filter_active_count -}}
+                </span>
+              </h3>
+            {% endcomment %}
 
             <a
               href="#filters-group"
@@ -249,9 +251,9 @@
       "label": "Filter layout",
       "default": "inline-open",
       "options": [
-        { "label": "Slide out", "value": "slide-out" },
-        { "label": "Inline (closed)", "value": "inline-closed" },
-        { "label": "Inline (open)", "value": "inline-open" }
+        {"label": "Slide out", "value": "slide-out"},
+        {"label": "Inline (closed)", "value": "inline-closed"},
+        {"label": "Inline (open)", "value": "inline-open"}
       ]
     },
     {
@@ -270,8 +272,8 @@
       "label": "Product items per row",
       "default": "1",
       "options": [
-        { "value": "1", "label": "One" },
-        { "value": "2", "label": "Two" }
+        {"value": "1", "label": "One"},
+        {"value": "2", "label": "Two"}
       ]
     },
     {

@@ -248,25 +248,13 @@
       --BTN-PRIMARY-TEXT: {{ scheme.settings.btn_primary_text }};
       --BTN-PRIMARY-BORDER: {{ scheme.settings.btn_primary_border }};
       --BTN-PRIMARY-BORDER-A70: {{ scheme.settings.btn_primary_border | color_modify: 'alpha', 0.7 }};
-
-      {% assign btn_primary_brightness = scheme.settings.btn_primary_bg | color_brightness %}
-      {% if btn_primary_brightness <= 65 %}
-        --BTN-PRIMARY-BG-BRIGHTER: {{ scheme.settings.btn_primary_bg | color_lighten: 5 }};
-      {% else %}
-        --BTN-PRIMARY-BG-BRIGHTER: {{ scheme.settings.btn_primary_bg | color_darken: 5 }};
-      {% endif %}
+      --BTN-PRIMARY-BG-BRIGHTER: {{ scheme.settings.btn_primary_hover | default: '#397E70' }};
 
       --BTN-SECONDARY-BG: {{ scheme.settings.btn_secondary_bg }};
       --BTN-SECONDARY-TEXT: {{ scheme.settings.btn_secondary_text }};
       --BTN-SECONDARY-BORDER: {{ scheme.settings.btn_secondary_border }};
       --BTN-SECONDARY-BORDER-A70: {{ scheme.settings.btn_secondary_border | color_modify: 'alpha', 0.7 }};
-
-      {% assign btn_secondary_brightness = scheme.settings.btn_secondary_bg | color_brightness %}
-      {% if btn_secondary_brightness <= 65 %}
-        --BTN-SECONDARY-BG-BRIGHTER: {{ scheme.settings.btn_secondary_bg | color_lighten: 5 }};
-      {% else %}
-        --BTN-SECONDARY-BG-BRIGHTER: {{ scheme.settings.btn_secondary_bg | color_darken: 5 }};
-      {% endif %}
+      --BTN-SECONDARY-BG-BRIGHTER: {{ scheme.settings.btn_secondary_hover | default: '#000000' }};
 
       {% comment %}
         Create an appropriate poster background color
