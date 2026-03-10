@@ -597,9 +597,21 @@ a.blog-listing__view-all {
 
   .blog-listing__nav {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
     align-items: center;
     gap: 1.25rem;
+  }
+
+  .blog-listing__nav::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .blog-listing__nav .main-blog__filter-tag {
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .blog-listing__nav-link {
