@@ -6,7 +6,7 @@
   assign show_recently_viewed_indicator = settings.show_recently_viewed_indicator
   assign color_scheme = 'color-' | append: section.settings.color_scheme
 
-  assign columns_desktop = 4
+  assign columns_desktop = 3
   assign columns_medium = 3
   assign columns_small = 2
   assign columns_mobile = section.settings.grid_mobile | plus: 0
@@ -29,6 +29,7 @@
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
     --COLUMNS-MOBILE: {{ columns_mobile }};
+    --COLUMNS: {{ columns_desktop }};
   }
 {%- endstyle -%}
 
@@ -246,9 +247,9 @@
       "label": "Filter layout",
       "default": "inline-open",
       "options": [
-        {"label": "Slide out", "value": "slide-out"},
-        {"label": "Inline (closed)", "value": "inline-closed"},
-        {"label": "Inline (open)", "value": "inline-open"}
+        { "label": "Slide out", "value": "slide-out" },
+        { "label": "Inline (closed)", "value": "inline-closed" },
+        { "label": "Inline (open)", "value": "inline-open" }
       ]
     },
     {
@@ -267,8 +268,8 @@
       "label": "Product items per row",
       "default": "1",
       "options": [
-        {"value": "1", "label": "One"},
-        {"value": "2", "label": "Two"}
+        { "value": "1", "label": "One" },
+        { "value": "2", "label": "Two" }
       ]
     },
     {
