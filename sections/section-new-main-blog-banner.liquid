@@ -23,6 +23,19 @@
     --section-heading-weight: var(--FONT-WEIGHT-HEADING, 500);
     --section-heading-line-height: var(--LINE-HEIGHT-DISPLAY-L, 1.2);
   }
+  /* Apply heading font in inline style so it always resolves (same document as :root) */
+  #NewMainBlogBanner--{{ section.id }} .new-main-blog-banner__heading,
+  #NewMainBlogBanner--{{ section.id }} .new-main-blog-banner__heading a {
+    font-family: 'Portrait LS', serif;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 1.2;
+  }
+  #NewMainBlogBanner--{{ section.id }} .new-main-blog-banner__heading a {
+    text-decoration: none;
+    color: inherit;
+    text-transform: capitalize;
+  }
 {%- endstyle -%}
 
 <section
