@@ -336,7 +336,7 @@ a.blog-listing__view-all {
 
   document.addEventListener('DOMContentLoaded', function() {
     const STOREFRONT_TOKEN = "{{ shop.metaobjects.storefront_access_token.value }}";
-  const SHOP_DOMAIN = "robertocoin.myshopify.com";
+    const SHOP_DOMAIN = "{{ shop.domain }}";
       /* -----------------------------
   NAVIGATION (Blogs)
   ----------------------------- */
@@ -351,7 +351,7 @@ a.blog-listing__view-all {
     }
     `;
     
-    fetch(`https://robertocoin.myshopify.com/api/2026-01/graphql.json`, {
+    fetch(`https://${SHOP_DOMAIN}/api/2026-01/graphql.json`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -501,7 +501,7 @@ a.blog-listing__view-all {
     // Removed auto-scroll to prevent unwanted scrolling when changing categories
   }
 
-  fetch(`https://robertocoin.myshopify.com/api/2026-01/graphql.json`, {
+  fetch(`https://${SHOP_DOMAIN}/api/2026-01/graphql.json`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
