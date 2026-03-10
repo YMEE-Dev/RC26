@@ -9,7 +9,7 @@
 -%}
 
 {%- style -%}
-  #BlogListing--{{ section.id }} {
+#BlogListing--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
     --grid-cols: {{ section.settings.columns }};
@@ -100,6 +100,17 @@ a.blog-listing__view-all {
   .blog-listing-section-wrapper {
     padding-top: 100px;
   }
+}
+
+.blog-listing-section-wrapper {
+  border-bottom: 1px solid var(--e-5-e-5-e-5, #E5E5E5);
+  background: rgba(255, 255, 255, 0.70);
+  backdrop-filter: blur(30px);
+  position:sticky;
+  top: 0;
+  z-index: 100;
+  padding-top: 30px;
+
 }
 {%- endstyle -%}
 <section class="blog-listing-section-wrapper">
@@ -527,7 +538,7 @@ a.blog-listing__view-all {
   
   @media (max-width: 768px) {
     .blog-listing__bar {
-      /* flex-direction: column; */
+      flex-direction: column;
       align-items: stretch;
     }
   }
