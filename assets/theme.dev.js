@@ -3562,6 +3562,11 @@
           this.checkWidth = this.checkWidth.bind(this);
           this.scheduleHeaderLayerHide = this.scheduleHeaderLayerHide.bind(this);
           this.resetHeaderLayerHide = this.resetHeaderLayerHide.bind(this);
+          this.handleTmenuState = this.handleTmenuState.bind(this);
+          this.header = this.querySelector("[data-header-height]");
+          this.isScrollRevealBlurVisible = false;
+          this.shouldShowScrollRevealBlur = false;
+          this.isTmenuOpen = false;
           this.isSticky = this.hasAttribute("data-header-sticky");
           this.scrollHideEvent = (e) => this.toggleHeaderHideOnScroll(e);
 
@@ -3575,6 +3580,7 @@
           this.initSticky();
           this.initHeaderScrollHide();
 
+          document.addEventListener("theme:tmenu:state", this.handleTmenuState);
           if (this.style !== "drawer" && this.desktop) {
             this.minWidth = this.getMinWidth();
             this.listenWidth();
