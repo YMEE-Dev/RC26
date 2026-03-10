@@ -3553,6 +3553,7 @@
           this.desktop = this.querySelector('[data-header-desktop]');
           this.body = document.body;
           this.isCollectionTemplate = this.body.classList.contains('template-collection');
+          this.isSearchTemplate = this.body.classList.contains('template-search');
           this.isSpotlightCollectionTemplate =
             this.isCollectionTemplate &&
             Boolean(document.querySelector('.main-content--collection-spotlight, .collection--spotlight'));
@@ -3701,7 +3702,7 @@
           const goingDown = Boolean(e?.detail?.down);
           const goingUp = Boolean(e?.detail?.up);
 
-          if (this.isCollectionTemplate && !this.isSpotlightCollectionTemplate) {
+          if ((this.isCollectionTemplate && !this.isSpotlightCollectionTemplate) || this.isSearchTemplate) {
             if (atTop) {
               this.body.classList.remove('header-scroll-hide');
               this.resetHeaderLayerHide();

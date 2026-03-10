@@ -6,7 +6,7 @@
   assign show_recently_viewed_indicator = settings.show_recently_viewed_indicator
   assign color_scheme = 'color-' | append: section.settings.color_scheme
 
-  assign columns_desktop = 3
+  assign columns_desktop = 4
   assign columns_medium = 3
   assign columns_small = 2
   assign columns_mobile = section.settings.grid_mobile | plus: 0
@@ -92,14 +92,16 @@
       {%- endpaginate -%}
     {%- endcapture -%}
 
-    {%- if search.results == empty -%}
-      <p class="search__caption caps">{{ 'general.search.no_results' | t: terms: search.terms }}</p>
-    {%- else -%}
-      {% assign search_results_count = search.results_count | minus: hidden_products_count %}
-      <p class="search__caption caps" data-results-count>
-        {{ 'general.search.results_with_count_and_term' | t: terms: search.terms, count: search_results_count }}
-      </p>
-    {%- endif -%}
+    {% comment %}
+      {%- if search.results == empty -%}
+        <p class='search__caption caps'>{{ 'general.search.no_results' | t: terms: search.terms }}</p>
+      {%- else -%}
+        {% assign search_results_count = search.results_count | minus: hidden_products_count %}
+        <p class='search__caption caps' data-results-count>
+          {{ 'general.search.results_with_count_and_term' | t: terms: search.terms, count: search_results_count }}
+        </p>
+      {%- endif -%}
+    {% endcomment %}
 
     {%- liquid
       assign nav_classes = ''

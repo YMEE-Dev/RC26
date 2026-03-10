@@ -3162,7 +3162,7 @@ button {
  * Helpers
  */
 .clearfix {
-  *zoom: 1;
+  zoom: 1;
 }
 
 .clearfix::after {
@@ -10305,7 +10305,7 @@ body:has(.drawer--header:not(.is-open)) .header__mobile__hamburger {
 @supports (font: -apple-system-body) {
   .drawer__floating-menu {
     top: 80vh;
-    bottom: auto
+    bottom: auto;
   }
 
   .header__mobile__hamburger {
@@ -12191,6 +12191,7 @@ countdown-timer {
 .search-form {
   position: relative;
   display: flex;
+  height: 60px;
 }
 
 .search-form input[type=search] {
@@ -12234,10 +12235,26 @@ countdown-timer {
 .search-box {
   border-radius: var(--RADIUS) 0 0 var(--RADIUS);
 }
+@media only screen and (min-width: 960px) {
+  .template-search main-search {
+    position: sticky;
+    top: 0;
+    z-index: 13;
+    background: transparent;
+    width: 45%;
+    display: block;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .template-search .search-outer {
+    margin: 0 auto calc(0px - 60px);
+  }
+}
 
 main-search .input-holder {
   border: 1px solid var(--border);
   border-radius: var(--RADIUS) 0 0 var(--RADIUS);
+  border-right: none;
 }
 
 .search-results-item__image {
@@ -20816,8 +20833,12 @@ body.has-line-design.grid-compact .collection__products .grid,
   padding-left: calc(var(--outer) + 28px);
   padding-right: calc(var(--outer) + 28px);
   background: transparent;
-  border-top: #E5E5E5 1px solid;
-  border-bottom: #E5E5E5 1px solid;
+  border-top: #e5e5e5 1px solid;
+  border-bottom: #e5e5e5 1px solid;
+}
+
+.template-search .collection__nav {
+  backdrop-filter: blur(30px);
 }
 
 .collection__nav.is-stuck {
