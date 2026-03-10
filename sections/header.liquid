@@ -34,6 +34,8 @@
     assign transparent_header = true
   elsif template.name == 'page' and section.settings.transparent_page
     assign transparent_header = true
+  elsif template.name == 'search' and section.settings.transparent_search
+    assign transparent_header = true
   elsif template.name == 'product' and section.settings.transparent_product_page
     assign transparent_header = true
   endif
@@ -144,7 +146,6 @@
     endif
   endcapture
 -%}
-
 {%- if section.settings.show_social_icons -%}
   {%- if settings.instagram_link != ''
     or settings.pinterest_link != ''
@@ -849,12 +850,12 @@
 
     const setTmenuScrollLock = (shouldLock) => {
       if (shouldLock && !tmenuScrollLocked) {
-        document.dispatchEvent(new CustomEvent('theme:scroll:lock', { bubbles: true }));
+        document.dispatchEvent(new CustomEvent('theme:scroll:lock', {bubbles: true}));
         tmenuScrollLocked = true;
       }
 
       if (!shouldLock && tmenuScrollLocked) {
-        document.dispatchEvent(new CustomEvent('theme:scroll:unlock', { bubbles: true }));
+        document.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
         tmenuScrollLocked = false;
       }
     };
@@ -874,7 +875,7 @@
           tmenuIsActive = activeNow;
           document.dispatchEvent(
             new CustomEvent('theme:tmenu:state', {
-              detail: { isOpen: tmenuIsActive },
+              detail: {isOpen: tmenuIsActive},
             })
           );
         }
@@ -896,7 +897,7 @@
         if (!found.length) return;
         observer.disconnect();
         found.forEach(observeRoot);
-      }).observe(document.body, { childList: true, subtree: true });
+      }).observe(document.body, {childList: true, subtree: true});
     }
 
     /* Header light/dark switcher */
@@ -1084,7 +1085,7 @@
       let sectionsToObserve = selectAll(
         'main .shopify-section section, main .shopify-section collection-component, main .shopify-section [data-section-id]'
       );
-      console.log('header observer init', { sections: sectionsToObserve });
+      console.log('header observer init', {sections: sectionsToObserve});
       if (!sectionsToObserve.length) return;
 
       const DEBUG_HEADER_OBSERVER = false;
@@ -1275,7 +1276,7 @@
 
       const startObserver = () => {
         rootMargin = computeRootMargin();
-        intersectionObserver = new IntersectionObserver(onIntersect, { rootMargin, threshold: thresholds });
+        intersectionObserver = new IntersectionObserver(onIntersect, {rootMargin, threshold: thresholds});
         observeAll();
         ensureOverlay();
       };
@@ -1294,7 +1295,7 @@
       () => {
         initHeaderObserver();
       },
-      { once: true }
+      {once: true}
     );
   });
 {% endjavascript %}
@@ -1326,10 +1327,10 @@
       "label": "Header",
       "default": "logo_beside",
       "options": [
-        { "value": "logo_above", "label": "Logo above menu" },
-        { "value": "logo_beside", "label": "Logo beside menu" },
-        { "value": "drawer", "label": "Mobile drawer menu" },
-        { "value": "logo_center_menu_left", "label": "Logo center menu left" }
+        {"value": "logo_above", "label": "Logo above menu"},
+        {"value": "logo_beside", "label": "Logo beside menu"},
+        {"value": "drawer", "label": "Mobile drawer menu"},
+        {"value": "logo_center_menu_left", "label": "Logo center menu left"}
       ]
     },
     {
@@ -1377,8 +1378,8 @@
       "label": "Cart icon",
       "default": "bag",
       "options": [
-        { "value": "bag", "label": "Bag" },
-        { "value": "cart", "label": "Cart" }
+        {"value": "bag", "label": "Bag"},
+        {"value": "cart", "label": "Cart"}
       ]
     },
     {
@@ -1392,8 +1393,8 @@
       "info": "Select the light or dark logo that ships with the theme.",
       "default": "light",
       "options": [
-        { "value": "light", "label": "Light" },
-        { "value": "dark", "label": "Dark" }
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
       ]
     },
     {
@@ -1436,10 +1437,10 @@
       "label": "Color",
       "default": "btn--primary",
       "options": [
-        { "value": "btn--black", "label": "Black" },
-        { "value": "btn--white", "label": "White" },
-        { "value": "btn--primary", "label": "Primary" },
-        { "value": "btn--secondary", "label": "Secondary" }
+        {"value": "btn--black", "label": "Black"},
+        {"value": "btn--white", "label": "White"},
+        {"value": "btn--primary", "label": "Primary"},
+        {"value": "btn--secondary", "label": "Secondary"}
       ]
     },
     {
@@ -1549,6 +1550,12 @@
     },
     {
       "type": "checkbox",
+      "id": "transparent_search",
+      "label": "Enable on Search pages",
+      "default": true
+    },
+    {
+      "type": "checkbox",
       "id": "transparent_product_page",
       "label": "Enable on Product pages",
       "info": "Stretch image size recommended. Desktop only",
@@ -1596,16 +1603,16 @@
           "label": "Link position in main menu",
           "default": "1",
           "options": [
-            { "value": "1", "label": "Item 1" },
-            { "value": "2", "label": "Item 2" },
-            { "value": "3", "label": "Item 3" },
-            { "value": "4", "label": "Item 4" },
-            { "value": "5", "label": "Item 5" },
-            { "value": "6", "label": "Item 6" },
-            { "value": "7", "label": "Item 7" },
-            { "value": "8", "label": "Item 8" },
-            { "value": "9", "label": "Item 9" },
-            { "value": "10", "label": "Item 10" }
+            {"value": "1", "label": "Item 1"},
+            {"value": "2", "label": "Item 2"},
+            {"value": "3", "label": "Item 3"},
+            {"value": "4", "label": "Item 4"},
+            {"value": "5", "label": "Item 5"},
+            {"value": "6", "label": "Item 6"},
+            {"value": "7", "label": "Item 7"},
+            {"value": "8", "label": "Item 8"},
+            {"value": "9", "label": "Item 9"},
+            {"value": "10", "label": "Item 10"}
           ]
         },
         {
@@ -1641,9 +1648,9 @@
           "label": "Overlay type",
           "default": "text",
           "options": [
-            { "value": "disabled", "label": "Disabled" },
-            { "value": "opacity", "label": "Opacity overlay" },
-            { "value": "text", "label": "Text underlay" }
+            {"value": "disabled", "label": "Disabled"},
+            {"value": "opacity", "label": "Opacity overlay"},
+            {"value": "text", "label": "Text underlay"}
           ]
         },
         {
@@ -1661,12 +1668,12 @@
           "label": "Heading size",
           "default": "heading-medium",
           "options": [
-            { "value": "heading-mini", "label": "Mini" },
-            { "value": "heading-x-small", "label": "Extra small" },
-            { "value": "heading-small", "label": "Small" },
-            { "value": "heading-medium", "label": "Medium" },
-            { "value": "heading-large", "label": "Large" },
-            { "value": "heading-x-large", "label": "Extra large" }
+            {"value": "heading-mini", "label": "Mini"},
+            {"value": "heading-x-small", "label": "Extra small"},
+            {"value": "heading-small", "label": "Small"},
+            {"value": "heading-medium", "label": "Medium"},
+            {"value": "heading-large", "label": "Large"},
+            {"value": "heading-x-large", "label": "Extra large"}
           ]
         },
         {
@@ -1681,11 +1688,11 @@
           "info": "Automatically generated by the base size.",
           "default": "body-medium",
           "options": [
-            { "value": "body-x-small", "label": "Extra small" },
-            { "value": "body-small", "label": "Small" },
-            { "value": "body-medium", "label": "Medium" },
-            { "value": "body-large", "label": "Large" },
-            { "value": "body-x-large", "label": "Extra large" }
+            {"value": "body-x-small", "label": "Extra small"},
+            {"value": "body-small", "label": "Small"},
+            {"value": "body-medium", "label": "Medium"},
+            {"value": "body-large", "label": "Large"},
+            {"value": "body-x-large", "label": "Extra large"}
           ]
         },
         {

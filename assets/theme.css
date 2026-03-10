@@ -3173,7 +3173,7 @@ button {
  * Helpers
  */
 .clearfix {
-  *zoom: 1;
+  zoom: 1;
 }
 
 .clearfix::after {
@@ -8422,6 +8422,7 @@ body:not(.has-line-design) .header__dropdown {
   flex-direction: column;
   align-items: end;
   padding-right: 20px;
+  text-align: right;
 }
 
 .header__menu.header__menu--right > .navlink span {
@@ -9912,7 +9913,8 @@ header-search-popdown > details {
   padding-right: var(--scrollbar-width);
 }
 
-.theme__header.search-open .header__logo__link {
+.theme__header.search-open .header__desktop__bar__r,
+.theme__header.search-open .header__desktop__bar__l {
   visibility: hidden;
 }
 
@@ -12306,6 +12308,7 @@ countdown-timer {
 .search-form {
   position: relative;
   display: flex;
+  height: 60px;
 }
 
 .search-form input[type="search"] {
@@ -12349,10 +12352,26 @@ countdown-timer {
 .search-box {
   border-radius: var(--RADIUS) 0 0 var(--RADIUS);
 }
+@media only screen and (min-width: 960px) {
+  .template-search main-search {
+    position: sticky;
+    top: 0;
+    z-index: 13;
+    background: transparent;
+    width: 45%;
+    display: block;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .template-search .search-outer {
+    margin: 0 auto calc(0px - 60px);
+  }
+}
 
 main-search .input-holder {
   border: 1px solid var(--border);
   border-radius: var(--RADIUS) 0 0 var(--RADIUS);
+  border-right: none;
 }
 
 .search-results-item__image {
@@ -21020,6 +21039,10 @@ body.has-line-design.grid-compact .collection__products .grid,
   background: transparent;
   border-top: #e5e5e5 1px solid;
   border-bottom: #e5e5e5 1px solid;
+}
+
+.template-search .collection__nav {
+  backdrop-filter: blur(30px);
 }
 
 .collection__nav.is-stuck {
