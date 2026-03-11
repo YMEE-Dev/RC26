@@ -1,486 +1,477 @@
-{%- assign bg_url = section.settings.background_image | image_url: width: 2600 -%}
-{%- if bg_url == blank -%}
-  {%- assign bg_url = 'figma-images/hero-bg.jpg' | asset_url -%}
-{%- endif -%}
-{%- assign history_years = '1977|1986|1996|2000|2002|2003|2006|2008|2010|2013|2014|2018|2021|2022|2025|TODAY' | split: '|' -%}
+{{ 'roberto-coin-timeline.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'roberto-coin-timeline.js' | asset_url }}" defer="defer"></script>
 
-<section class="rc-history-page" style="--rc-bg:url('{{ bg_url }}');">
-  <div class="rc-history-page__fixed-bg" aria-hidden="true"></div>
-  <div class="rc-history-page__fixed-vignette" aria-hidden="true"></div>
-  <div class="rc-history-hero">
-    <div class="rc-history-hero__flower" aria-hidden="true">
-      <svg width="452" height="466" viewBox="0 0 452 466" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M253.807 274.486C269.754 297.022 275.418 309.308 275.418 330.306C275.418 356.938 258.949 385.107 228.059 405.585C197.169 385.107 180.7 356.938 180.7 330.306C180.7 309.308 186.364 297.022 202.331 274.486L198.214 272.428L186.364 286.253C155.996 321.595 147.741 338.497 147.741 354.36C147.741 394.816 196.646 427.082 216.731 455.252L224.443 466H231.653L239.386 455.252C259.471 427.602 308.377 394.816 308.377 354.36C308.377 338.476 300.142 321.574 269.754 286.253L257.924 272.428L253.807 274.486ZM10.8052 221.742L0 229.435V236.607L10.8052 244.278C39.6261 264.756 71.54 312.905 112.232 312.905C128.199 312.905 145.17 304.714 180.7 274.507L194.598 262.719L192.529 258.623C169.874 274.507 157.522 280.12 136.936 280.12C109.64 280.12 81.3421 263.218 61.2573 233.01C81.3421 202.782 109.661 185.901 136.936 185.901C157.522 185.901 169.874 191.535 192.529 207.418L194.598 203.323L180.7 191.556C145.17 161.348 128.199 153.137 112.232 153.137C71.5609 153.137 39.1245 201.784 10.8052 221.763M271.3 191.535L257.402 203.302L259.45 207.398C282.106 191.514 294.457 185.88 315.044 185.88C342.318 185.88 370.637 202.782 390.722 232.99C370.637 263.197 342.318 280.099 315.044 280.099C294.457 280.099 282.106 274.465 259.45 258.602L257.402 262.698L271.3 274.486C306.83 304.693 323.821 312.884 339.768 312.884C380.439 312.884 412.353 264.735 441.195 244.258L452 236.586V229.414L441.195 221.722C412.876 201.743 380.439 153.095 339.768 153.095C323.801 153.095 306.809 161.286 271.3 191.514M224.464 0L216.752 10.7482C196.667 38.9182 147.762 71.1838 147.762 111.64C147.762 127.503 155.996 144.405 186.384 179.747L198.235 193.572L202.352 191.514C186.384 168.978 180.721 156.692 180.721 136.214C180.721 109.083 197.712 80.9133 228.08 60.9345C258.447 80.9133 275.438 109.083 275.438 136.214C275.438 156.692 269.775 168.978 253.828 191.514L257.945 193.572L269.775 179.747C300.163 144.405 308.397 127.503 308.397 111.64C308.397 71.1838 260.014 39.438 239.407 10.7482L231.674 0H224.464Z" fill="#397E70"/>
-      </svg>
+{%- liquid
+  assign section_id = 'rc-timeline-' | append: section.id
+-%}
+
+<section
+  id="{{ section_id }}"
+  class="rc-timeline"
+  style="
+    --rc-bg: {{ section.settings.background_color }};
+    --rc-bg-soft: {{ section.settings.background_soft_color }};
+    --rc-bg-glow: {{ section.settings.background_glow_color }};
+    --rc-text: {{ section.settings.text_color }};
+    --rc-muted: {{ section.settings.text_color | color_modify: 'alpha', 0.62 }};
+    --rc-dim: {{ section.settings.text_color | color_modify: 'alpha', 0.24 }};
+    --rc-accent: {{ section.settings.accent_color }};
+    --rc-accent-soft: {{ section.settings.accent_color | color_modify: 'alpha', 0.35 }};
+    --rc-year-size: {{ section.settings.year_size }}px;
+    --rc-copy-size: {{ section.settings.caption_size }}pt;
+    --rc-panel-height: {{ section.settings.panel_height }}vh;
+    --rc-section-padding-top: {{ section.settings.section_padding_top }}px;
+    --rc-section-padding-bottom: {{ section.settings.section_padding_bottom }}px;
+  "
+  data-section-id="{{ section.id }}"
+>
+  <div class="rc-timeline__shell">
+    <div class="visually-hidden" aria-hidden="true">
+      {% for block in section.blocks %}
+        <div data-block-id="{{ block.id }}" {{ block.shopify_attributes }}></div>
+      {% endfor %}
     </div>
-    <p class="rc-history-hero__eyebrow">{{ section.settings.hero_eyebrow | default: 'SINCE 1996' }}</p>
-    <h1 class="rc-history-hero__title">{{ section.settings.hero_title | default: 'The Brand' }}</h1>
-    <p class="rc-history-hero__scroll">{{ section.settings.hero_scroll_label | default: 'Scroll to discover our story' }}</p>
-  </div>
 
-<section class="rc-history" id="rc-history-{{ section.id }}" style="--steps: {{ history_years.size }};">
-  <div class="rc-history__stage" id="rc-history-stage-{{ section.id }}">
-    <div class="rc-history__vignette" aria-hidden="true"></div>
+    <div class="rc-timeline__body" id="{{ section_id }}-timeline" aria-label="{{ section.settings.timeline_aria_label | escape }}">
+      <div class="rc-timeline__stage" data-stage>
+        <div class="rc-timeline__panel">
+          <div class="rc-timeline__media-layout" data-media-layout></div>
+          <div class="rc-timeline__caption" data-timeline-caption>
+            <p data-caption-line-one></p>
+            <p data-caption-line-two></p>
+          </div>
+        </div>
 
-    <div class="rc-history__media" id="rc-history-media-{{ section.id }}" aria-live="polite">
-      {%- for y in history_years -%}
-        <article class="rc-history__panel{% if forloop.first %} is-active{% endif %}" data-index="{{ forloop.index0 }}">
-          <figure class="rc-history__img rc-history__img--left"><span class="rc-history__ph-label">Placeholder {{ y }}</span></figure>
-          <figure class="rc-history__img rc-history__img--main"><span class="rc-history__ph-label">Main {{ y }}</span></figure>
-          <figure class="rc-history__img rc-history__img--right"><span class="rc-history__ph-label">Detail {{ y }}</span></figure>
-        </article>
-      {%- endfor -%}
-    </div> 
-
-    <div class="rc-history__years-window">
-      <div class="rc-history__years-track" id="rc-history-track-{{ section.id }}">
-        {%- for y in history_years -%}
-          <button class="rc-history__year{% if forloop.first %} is-active{% endif %}" type="button" data-index="{{ forloop.index0 }}">{{ y }}</button>
-        {%- endfor -%}
+        <div class="rc-timeline__year-rail" aria-label="{{ section.settings.year_rail_aria_label | escape }}" data-year-rail></div>
       </div>
+
+      <div class="rc-timeline__markers" data-timeline-markers></div>
     </div>
   </div>
+
+  <template data-media-card-template>
+    <article class="rc-timeline__media-card">
+      <div class="rc-timeline__media-art">
+        <span class="visually-hidden rc-timeline__media-label"></span>
+      </div>
+    </article>
+  </template>
+
+  <script type="application/json" data-timeline-data>
+    [
+      {% for block in section.blocks %}
+        {
+          "id": {{ block.id | json }},
+          "year": {{ block.settings.year | json }},
+          "title": {{ block.settings.title | json }},
+          "copy": {{ block.settings.copy | strip_html | strip_newlines | json }},
+          "media": [
+            {
+              "label": {{ block.settings.media_1_label | json }},
+              "image": {% if block.settings.media_1_image != blank %}{{ block.settings.media_1_image | image_url: width: 1800 | json }}{% else %}null{% endif %},
+              "fill": {{ block.settings.media_1_fill | json }},
+              "x": {{ block.settings.media_1_x | json }},
+              "y": {{ block.settings.media_1_y | json }},
+              "w": {{ block.settings.media_1_w | json }},
+              "h": {{ block.settings.media_1_h | json }}
+            },
+            {
+              "label": {{ block.settings.media_2_label | json }},
+              "image": {% if block.settings.media_2_image != blank %}{{ block.settings.media_2_image | image_url: width: 1800 | json }}{% else %}null{% endif %},
+              "fill": {{ block.settings.media_2_fill | json }},
+              "x": {{ block.settings.media_2_x | json }},
+              "y": {{ block.settings.media_2_y | json }},
+              "w": {{ block.settings.media_2_w | json }},
+              "h": {{ block.settings.media_2_h | json }}
+            },
+            {
+              "label": {{ block.settings.media_3_label | json }},
+              "image": {% if block.settings.media_3_image != blank %}{{ block.settings.media_3_image | image_url: width: 1800 | json }}{% else %}null{% endif %},
+              "fill": {{ block.settings.media_3_fill | json }},
+              "x": {{ block.settings.media_3_x | json }},
+              "y": {{ block.settings.media_3_y | json }},
+              "w": {{ block.settings.media_3_w | json }},
+              "h": {{ block.settings.media_3_h | json }}
+            }
+          ]
+        }{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    ]
+  </script>
 </section>
-</section>
-
-{% stylesheet %}
-  .rc-history-page {
-    position: relative;
-    background: transparent;
-  }
-
-  .rc-history-page__fixed-bg {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background: #27574D;
-  }
-
-  .rc-history-page__fixed-vignette {
-    display: none;
-  }
-
-  .rc-history-page.is-over-footer .rc-history-page__fixed-bg,
-  .rc-history-page.is-over-footer .rc-history-page__fixed-vignette {
-    opacity: 0;
-  }
-
-  .rc-history-hero {
-    position: relative;
-    z-index: 2;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: #fff;
-    margin-top: calc((var(--header-height, 0px) + var(--announcement-height, 0px)) * -1);
-    background: transparent;
-    overflow: hidden;
-  }
-
-  .rc-history-hero::before {
-    display: none;
-  }
-
-  .rc-history-hero__flower {
-    position: absolute;
-    width: 500px;
-    height: 500px;
-    opacity: 0.36;
-    z-index: 1;
-    pointer-events: none;
-    display: grid;
-    place-items: center;
-  }
-
-  .rc-history-hero__flower svg {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-
-  .rc-history-hero__eyebrow,
-  .rc-history-hero__title,
-  .rc-history-hero__scroll {
-    position: relative;
-    z-index: 2;
-  }
-
-  .rc-history-hero__eyebrow {
-    margin-top: 0;
-    font-size: 12px;
-    letter-spacing: 0.2em;
-    font-family: var(--font-body-family, "Inter", sans-serif);
-    font-weight: 500;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.82);
-  }
-
-  .rc-history-hero__title {
-    margin-top: 20px;
-    font-size: 40px;
-    letter-spacing: 0.02em;
-    font-family: "Portrait LC", "Didot", "Bodoni MT", "Times New Roman", Georgia, serif;
-    font-weight: 500;
-    color: #fff;
-  }
-
-  .rc-history-hero__scroll {
-    margin-top: 22px;
-    font-size: 12px;
-    letter-spacing: 0.16em;
-    font-family: var(--font-body-family, "Inter", sans-serif);
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.78);
-  }
-
-  .rc-history {
-    --gap-y: 60px;
-    --year-size: 46px;
-    position: relative;
-    height: calc(var(--steps, 16) * 100vh);
-    z-index: 2;
-    background: transparent;
-  }
-
-  .rc-history__stage {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow: hidden;
-    background: transparent;
-  }
-
-  .rc-history__vignette {
-    display: none;
-  }
-
-  .rc-history__media {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    pointer-events: none;
-  }
-
-  .rc-history__panel {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    transition: opacity 260ms ease;
-  }
-
-  .rc-history__panel.is-active {
-    opacity: 1;
-  }
-
-  .rc-history__img {
-    position: absolute;
-    overflow: hidden;
-    background: linear-gradient(145deg, rgba(240, 240, 240, 0.3), rgba(170, 170, 170, 0.18));
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    clip-path: inset(0 100% 0 0);
-    opacity: 0;
-    transform: translateY(18px) scale(0.985);
-  }
-
-  .rc-history__ph-label {
-    position: absolute;
-    left: 14px;
-    bottom: 12px;
-    color: rgba(255, 255, 255, 0.92);
-    font-family: var(--font-body-family, "Inter", sans-serif);
-    font-size: 12px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .rc-history__panel.is-active .rc-history__img {
-    animation: rc-history-reveal 0.65s ease-out forwards;
-  }
-
-  .rc-history__panel.is-active .rc-history__img--left { animation-delay: 0.02s; }
-  .rc-history__panel.is-active .rc-history__img--main { animation-delay: 0.09s; }
-  .rc-history__panel.is-active .rc-history__img--right { animation-delay: 0.16s; }
-
-  .rc-history__img--left {
-    width: min(30vw, 580px);
-    height: min(28vh, 340px);
-    left: min(12vw, 220px);
-    top: 34vh;
-  }
-
-  .rc-history__img--main {
-    width: min(21vw, 320px);
-    height: min(56vh, 620px);
-    left: 50%;
-    top: 18vh;
-    transform: translateX(-50%) translateY(18px) scale(0.985);
-  }
-
-  .rc-history__img--right {
-    width: min(10vw, 170px);
-    height: min(25vh, 240px);
-    left: calc(50% + min(14vw, 235px));
-    top: 18vh;
-  }
-
-  .rc-history__years-window {
-    position: absolute;
-    inset: 0;
-    z-index: 6;
-    display: grid;
-    place-items: center;
-    pointer-events: auto;
-    opacity: 0;
-    transition: opacity 420ms ease;
-  }
-
-  .rc-history__years-window.is-visible {
-    opacity: 1;
-  }
-
-  .rc-history__years-track {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--gap-y);
-    width: 100%;
-    transform: translate3d(0, 0, 0);
-    transition: transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
-    will-change: transform;
-    pointer-events: auto;
-  }
-
-  .rc-history__year {
-    appearance: none;
-    border: 0;
-    background: transparent;
-    margin: 0;
-    padding: 0;
-    color: #fff;
-    opacity: 0;
-    cursor: pointer;
-    font-family: "Portrait LC", "Didot", "Bodoni MT", "Times New Roman", Georgia, serif;
-    font-size: var(--year-size);
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    line-height: 1;
-    transform: translateY(8px) scale(0.94);
-    transition: opacity 280ms ease, transform 280ms ease;
-    text-shadow: none;
-  }
-
-  .rc-history__year.is-seen {
-    opacity: 0.38;
-    transform: translateY(0) scale(0.94);
-  }
-
-  .rc-history__year.is-active {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-
-  .rc-history__year:focus-visible {
-    outline: 1px solid rgba(255, 255, 255, 0.7);
-    outline-offset: 10px;
-  }
-
-  @keyframes rc-history-reveal {
-    from {
-      clip-path: inset(0 100% 0 0);
-      opacity: 0;
-      transform: translateY(18px) scale(0.985);
-    }
-    to {
-      clip-path: inset(0 0 0 0);
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-
-  @media (max-width: 860px) {
-    .rc-history {
-      --gap-y: 44px;
-      --year-size: 38px;
-    }
-
-    .rc-history__img--left {
-      width: 58vw;
-      height: 20vh;
-      left: 6vw;
-      top: 40vh;
-    }
-
-    .rc-history__img--main {
-      width: 36vw;
-      height: 40vh;
-      top: 23vh;
-    }
-
-    .rc-history__img--right {
-      width: 20vw;
-      height: 16vh;
-      left: auto;
-      right: 6vw;
-      top: 23vh;
-    }
-  }
-{% endstylesheet %}
-
-{% javascript %}
-  (function () {
-    var root = document.getElementById('rc-history-{{ section.id }}');
-    if (!root) return;
-
-    var stage = document.getElementById('rc-history-stage-{{ section.id }}');
-    var track = document.getElementById('rc-history-track-{{ section.id }}');
-    var media = document.getElementById('rc-history-media-{{ section.id }}');
-    var yearsWindow = root.querySelector('.rc-history__years-window');
-    if (!stage || !track || !media || !yearsWindow) return;
-
-    var years = Array.prototype.slice.call(track.querySelectorAll('.rc-history__year'));
-    var panels = Array.prototype.slice.call(media.querySelectorAll('.rc-history__panel'));
-
-    var steps = years.length;
-    var activeIndex = -1;
-    var segment = window.innerHeight;
-    var yearOffsets = [];
-
-    function clamp(n, min, max) {
-      return Math.max(min, Math.min(max, n));
-    }
-
-    function measureOffsets() {
-      var winCenter = stage.clientHeight / 2;
-      yearOffsets = years.map(function (yearEl) {
-        return winCenter - (yearEl.offsetTop + (yearEl.offsetHeight / 2));
-      });
-    }
-
-    function setTrackY(y) {
-      track.style.transform = 'translate3d(0,' + y + 'px,0)';
-    }
-
-    function setActive(index) {
-      index = clamp(index, 0, steps - 1);
-      if (index === activeIndex) return;
-      activeIndex = index;
-
-      years.forEach(function (el, i) {
-        el.classList.toggle('is-active', i === index);
-        el.classList.toggle('is-seen', i <= index);
-      });
-
-      panels.forEach(function (panel, i) {
-        panel.classList.toggle('is-active', i === index);
-      });
-    }
-
-    function syncToScrollPosition() {
-      if (segment <= 0 || steps <= 1) {
-        setActive(0);
-        return;
-      }
-
-      var rect = root.getBoundingClientRect();
-      var isVisible = rect.top <= (window.innerHeight * 0.1);
-      yearsWindow.classList.toggle('is-visible', isVisible);
-      var maxTravel = (steps - 1) * segment;
-      var scrollInside = clamp(-rect.top, 0, maxTravel);
-      var idx = clamp(Math.round(scrollInside / segment), 0, steps - 1);
-      if (yearOffsets[idx] != null) setTrackY(yearOffsets[idx]);
-      if (isVisible) {
-        setActive(idx);
-      } else {
-        years.forEach(function (el) {
-          el.classList.remove('is-active');
-          el.classList.remove('is-seen');
-        });
-      }
-    }
-
-    function scrollToYear(index) {
-      var top = root.offsetTop + (index * segment);
-      window.scrollTo({ top: top, behavior: 'smooth' });
-    }
-
-    function onResize() {
-      segment = window.innerHeight;
-      root.style.height = (steps * segment) + 'px';
-      measureOffsets();
-      if (yearOffsets[activeIndex] != null) {
-        setTrackY(yearOffsets[activeIndex]);
-      }
-      syncToScrollPosition();
-    }
-
-    years.forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        e.preventDefault();
-        var idx = parseInt(btn.getAttribute('data-index'), 10);
-        if (isNaN(idx)) return;
-        setActive(idx);
-        if (yearOffsets[idx] != null) setTrackY(yearOffsets[idx]);
-        scrollToYear(idx);
-      });
-    });
-
-    years.forEach(function (el, i) {
-      el.classList.toggle('is-active', i === 0);
-      el.classList.toggle('is-seen', i === 0);
-    });
-    panels.forEach(function (panel, i) {
-      panel.classList.toggle('is-active', i === 0);
-    });
-
-    onResize();
-
-    requestAnimationFrame(function () {
-      if (yearOffsets[0] != null) setTrackY(yearOffsets[0]);
-      syncToScrollPosition();
-    });
-
-    window.addEventListener('scroll', syncToScrollPosition, { passive: true });
-    window.addEventListener('resize', onResize);
-  })();
-{% endjavascript %}
 
 {% schema %}
 {
-  "name": "RC Timeline",
+  "name": "Roberto Coin timeline",
   "tag": "section",
-  "class": "section rc-history-section",
+  "class": "section",
   "settings": [
     {
       "type": "text",
-      "id": "hero_eyebrow",
-      "label": "Hero eyebrow",
-      "default": "SINCE 1996"
+      "id": "timeline_aria_label",
+      "label": "Timeline aria label",
+      "default": "Heritage timeline"
     },
     {
       "type": "text",
-      "id": "hero_title",
-      "label": "Hero title",
-      "default": "The Brand"
+      "id": "year_rail_aria_label",
+      "label": "Year rail aria label",
+      "default": "Timeline years"
     },
     {
-      "type": "text",
-      "id": "hero_scroll_label",
-      "label": "Hero scroll label",
-      "default": "Scroll to discover our story"
+      "type": "range",
+      "id": "section_padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 0
     },
     {
-      "type": "image_picker",
-      "id": "background_image",
-      "label": "Background image"
+      "type": "range",
+      "id": "section_padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "panel_height",
+      "label": "Panel height",
+      "min": 55,
+      "max": 95,
+      "step": 1,
+      "unit": "vh",
+      "default": 76
+    },
+    {
+      "type": "range",
+      "id": "year_size",
+      "label": "Year size",
+      "min": 24,
+      "max": 80,
+      "step": 1,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "caption_size",
+      "label": "Caption size",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "unit": "pt",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#27574d"
+    },
+    {
+      "type": "color",
+      "id": "background_soft_color",
+      "label": "Background soft color",
+      "default": "#1f4a41"
+    },
+    {
+      "type": "color",
+      "id": "background_glow_color",
+      "label": "Background glow color",
+      "default": "#4f887b"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#f4efe8"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color",
+      "default": "#397e70"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "entry",
+      "name": "Timeline entry",
+      "settings": [
+        {
+          "type": "text",
+          "id": "year",
+          "label": "Year",
+          "default": "1977"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Milestone"
+        },
+        {
+          "type": "richtext",
+          "id": "copy",
+          "label": "Copy",
+          "default": "<p>Roberto Coin returned to his homeland of Italy to study the goldsmithing tradition under the guidance of renowned Italian teachers.</p>"
+        },
+        {
+          "type": "header",
+          "content": "Media 1"
+        },
+        {
+          "type": "text",
+          "id": "media_1_label",
+          "label": "Label",
+          "default": "Workshop portrait"
+        },
+        {
+          "type": "image_picker",
+          "id": "media_1_image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "media_1_fill",
+          "label": "Fallback gradient",
+          "default": "linear-gradient(135deg, #5f5a71 0%, #241f29 65%, #0d0d12 100%)"
+        },
+        {
+          "type": "range",
+          "id": "media_1_x",
+          "label": "X position",
+          "min": 0,
+          "max": 90,
+          "step": 1,
+          "unit": "%",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "media_1_y",
+          "label": "Y position",
+          "min": 0,
+          "max": 90,
+          "step": 1,
+          "unit": "%",
+          "default": 18
+        },
+        {
+          "type": "range",
+          "id": "media_1_w",
+          "label": "Width",
+          "min": 10,
+          "max": 60,
+          "step": 1,
+          "unit": "%",
+          "default": 36
+        },
+        {
+          "type": "range",
+          "id": "media_1_h",
+          "label": "Height",
+          "min": 10,
+          "max": 70,
+          "step": 1,
+          "unit": "%",
+          "default": 46
+        },
+        {
+          "type": "header",
+          "content": "Media 2"
+        },
+        {
+          "type": "text",
+          "id": "media_2_label",
+          "label": "Label",
+          "default": "Street portrait"
+        },
+        {
+          "type": "image_picker",
+          "id": "media_2_image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "media_2_fill",
+          "label": "Fallback gradient",
+          "default": "linear-gradient(180deg, #d8d8d5 0%, #8f8e88 50%, #4e4d4a 100%)"
+        },
+        {
+          "type": "range",
+          "id": "media_2_x",
+          "label": "X position",
+          "min": 0,
+          "max": 90,
+          "step": 1,
+          "unit": "%",
+          "default": 43
+        },
+        {
+          "type": "range",
+          "id": "media_2_y",
+          "label": "Y position",
+          "min": 0,
+          "max": 90,
+          "step": 1,
+          "unit": "%",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "media_2_w",
+          "label": "Width",
+          "min": 10,
+          "max": 60,
+          "step": 1,
+          "unit": "%",
+          "default": 24
+        },
+        {
+          "type": "range",
+          "id": "media_2_h",
+          "label": "Height",
+          "min": 10,
+          "max": 70,
+          "step": 1,
+          "unit": "%",
+          "default": 58
+        },
+        {
+          "type": "header",
+          "content": "Media 3"
+        },
+        {
+          "type": "text",
+          "id": "media_3_label",
+          "label": "Label",
+          "default": "Gold detail"
+        },
+        {
+          "type": "image_picker",
+          "id": "media_3_image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "media_3_fill",
+          "label": "Fallback gradient",
+          "default": "linear-gradient(135deg, #ceb78c 0%, #89683f 50%, #20150f 100%)"
+        },
+        {
+          "type": "range",
+          "id": "media_3_x",
+          "label": "X position",
+          "min": 0,
+          "max": 90,
+          "step": 1,
+          "unit": "%",
+          "default": 74
+        },
+        {
+          "type": "range",
+          "id": "media_3_y",
+          "label": "Y position",
+          "min": 0,
+          "max": 90,
+          "step": 1,
+          "unit": "%",
+          "default": 8
+        },
+        {
+          "type": "range",
+          "id": "media_3_w",
+          "label": "Width",
+          "min": 10,
+          "max": 60,
+          "step": 1,
+          "unit": "%",
+          "default": 18
+        },
+        {
+          "type": "range",
+          "id": "media_3_h",
+          "label": "Height",
+          "min": 10,
+          "max": 70,
+          "step": 1,
+          "unit": "%",
+          "default": 26
+        }
+      ]
     }
   ],
   "presets": [
     {
-      "name": "RC Timeline"
+      "name": "Roberto Coin timeline",
+      "blocks": [
+        {
+          "type": "entry",
+          "settings": {
+            "year": "1977",
+            "title": "Milestone"
+          }
+        },
+        {
+          "type": "entry",
+          "settings": {
+            "year": "2000",
+            "title": "Global presence",
+            "copy": "<p>The brand entered a more international chapter, shaping a retail language and a product universe built to travel with consistency across markets.</p>",
+            "media_1_label": "Boutique interior",
+            "media_1_fill": "linear-gradient(135deg, #6b7f79 0%, #2e403c 100%)",
+            "media_1_x": 0,
+            "media_1_y": 14,
+            "media_1_w": 30,
+            "media_1_h": 42,
+            "media_2_label": "Campaign still",
+            "media_2_fill": "linear-gradient(135deg, #c9b7ae 0%, #6f5f57 100%)",
+            "media_2_x": 35,
+            "media_2_y": 0,
+            "media_2_w": 34,
+            "media_2_h": 54,
+            "media_3_label": "Jewel macro",
+            "media_3_fill": "linear-gradient(135deg, #a48952 0%, #3b2d17 100%)",
+            "media_3_x": 74,
+            "media_3_y": 24,
+            "media_3_w": 18,
+            "media_3_h": 22
+          }
+        },
+        {
+          "type": "entry",
+          "settings": {
+            "year": "Today",
+            "title": "Current chapter",
+            "copy": "<p>The timeline resolves into the present: a brand defined less by legacy language and more by a precise, contemporary point of view delivered across every touchpoint.</p>",
+            "media_1_label": "Flagship view",
+            "media_1_fill": "linear-gradient(135deg, #40534f 0%, #111a19 100%)",
+            "media_1_x": 0,
+            "media_1_y": 10,
+            "media_1_w": 36,
+            "media_1_h": 44,
+            "media_2_label": "House signature",
+            "media_2_fill": "linear-gradient(135deg, #b2915e 0%, #3f2e18 100%)",
+            "media_2_x": 40,
+            "media_2_y": 0,
+            "media_2_w": 18,
+            "media_2_h": 26,
+            "media_3_label": "Editorial horizon",
+            "media_3_fill": "linear-gradient(135deg, #d3c7bb 0%, #75685b 100%)",
+            "media_3_x": 63,
+            "media_3_y": 16,
+            "media_3_w": 28,
+            "media_3_h": 38
+          }
+        }
+      ]
     }
   ]
 }
