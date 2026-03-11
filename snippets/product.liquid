@@ -977,7 +977,6 @@
         }
         #MainProduct--{{ section.id }} .product__custom-drawers-row {
           grid-area: custom-drawers;
-          justify-content: space-between;
           margin-bottom: 0;
         }
         #MainProduct--{{ section.id }} .product-accordions-container {
@@ -1058,6 +1057,12 @@
         #MainProduct--{{ section.id }} .product__title-price > .product__block,
         #MainProduct--{{ section.id }} .product__title-price .shop-pay-terms {
           margin: 0;
+        }
+      }
+
+      @media only screen and (max-width: 350px) {
+        #MainProduct--{{ section.id }} .product__custom-drawers-row {
+          flex-direction: column;
         }
       }
 
@@ -2666,6 +2671,7 @@
 
                       @media only screen and (max-width: 749px) {
                         .product__custom-drawers-row {
+                          gap: 10px;
                           overflow: hidden;
                           scrollbar-width: none;
                           overflow-x: auto;
