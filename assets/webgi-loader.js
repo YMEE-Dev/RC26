@@ -2,7 +2,8 @@
 
 (function () {
   var WEBGI_VIEWER_URL = 'https://dist.pixotronics.com/webgi/runtime/viewer-0.9.2.js';
-  var ENV_MAP_URL = 'https://dist.pixotronics.com/webgi/assets/hdr/gem_2.hdr';
+  // var ENV_MAP_URL = 'https://dist.pixotronics.com/webgi/assets/hdr/gem_2.hdr';
+  var ENV_MAP_URL = "https://cdn.shopify.com/s/files/1/0969/2990/7075/files/Studio_SCENE_V3_copy.hdr?v=1773249444";
 
   var scriptLoaded = false;
   var scriptLoading = false;
