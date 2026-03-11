@@ -79,6 +79,10 @@
         {%- render 'cart-price' -%}
       </div>
 
+      <em class="cart__note caption text-right">
+        {{- 'cart.general.subtotal_note' | t -}}
+      </em>
+
       <div class="cart__buttons-all">
 
         <div class="cart__buttons-wrapper">
@@ -114,10 +118,6 @@
           <a href="{{ routes.cart_url }}" class="cart__view{% if additional_checkout_buttons %} cart__view--additional-checkout-buttons{% endif %} btn btn--primary btn--outline">{{- 'cart.general.view_cart' | t -}}</a>
         {%- endif -%}
       </div>
-
-      <em class="cart__note text-center">
-        {{- 'cart.general.subtotal_note' | t -}}
-      </em>
     </div>
   </form>
 {%- endcapture -%}

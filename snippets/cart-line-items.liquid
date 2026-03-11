@@ -116,139 +116,141 @@
             </div> {% endcomment %}
           </div>
 
-          <p class="cart__price">
-            {%- liquid
-              assign discounted = false
-              assign sale = false
+          <div class="cart__price-and-quantity-wrapper">
+            <p class="cart__price">
+              {%- liquid
+                assign discounted = false
+                assign sale = false
 
-              if line_item.original_price > line_item.final_price
-                assign discounted = true
-              endif
+                if line_item.original_price > line_item.final_price
+                  assign discounted = true
+                endif
 
-              if line_item.variant.compare_at_price > line_item.final_price
-                assign sale = true
-              endif
-            -%}
+                if line_item.variant.compare_at_price > line_item.final_price
+                  assign sale = true
+                endif
+              -%}
 
-            {%- if sale or discounted -%}
-              <ins>
+              {%- if sale or discounted -%}
+                <ins>
+                  {%- if line_item.final_price == 0 -%}
+                    {{ 'general.money.free' | t }}
+                  {%- else -%}
+                    {{- line_item_final_price -}}
+                  {%- endif -%}
+                </ins>
+              {%- else -%}
                 {%- if line_item.final_price == 0 -%}
                   {{ 'general.money.free' | t }}
                 {%- else -%}
                   {{- line_item_final_price -}}
                 {%- endif -%}
-              </ins>
-            {%- else -%}
-              {%- if line_item.final_price == 0 -%}
-                {{ 'general.money.free' | t }}
-              {%- else -%}
-                {{- line_item_final_price -}}
               {%- endif -%}
-            {%- endif -%}
 
-            {%- if sale and discounted == false -%}
-              <del>{{- line_item_variant_compare_at_price -}}</del>
-            {%- endif -%}
+              {%- if sale and discounted == false -%}
+                <del>{{- line_item_variant_compare_at_price -}}</del>
+              {%- endif -%}
 
-            {%- if discounted -%}
-              <del>{{- line_item_original_price -}}</del>
-            {%- endif -%}
+              {%- if discounted -%}
+                <del>{{- line_item_original_price -}}</del>
+              {%- endif -%}
 
-            {%- if line_item.unit_price -%}
-              {%- capture unit_price_separator -%}
-                <span aria-hidden="true">/</span><span class="visually-hidden">{{ 'general.accessibility.unit_price_separator' | t }}&nbsp;</span>
-              {%- endcapture -%}
+              {%- if line_item.unit_price -%}
+                {%- capture unit_price_separator -%}
+                  <span aria-hidden="true">/</span><span class="visually-hidden">{{ 'general.accessibility.unit_price_separator' | t }}&nbsp;</span>
+                {%- endcapture -%}
 
-              {%- capture unit_price_base_unit -%}
-                {%- if line_item.unit_price_measurement.reference_value != 1 -%}
-                  {{- line_item.unit_price_measurement.reference_value -}}
-                {%- endif -%}
+                {%- capture unit_price_base_unit -%}
+                  {%- if line_item.unit_price_measurement.reference_value != 1 -%}
+                    {{- line_item.unit_price_measurement.reference_value -}}
+                  {%- endif -%}
 
-                {{- line_item.unit_price_measurement.reference_unit -}}
-              {%- endcapture -%}
+                  {{- line_item.unit_price_measurement.reference_unit -}}
+                {%- endcapture -%}
 
-              <span class="line__price">
-                <small class="visually-hidden">{{ 'products.product.unit_price_label' | t }}</small>
+                <span class="line__price">
+                  <small class="visually-hidden">{{ 'products.product.unit_price_label' | t }}</small>
 
-                <small>{{ line_item_unit_price }}{{ unit_price_separator }}{{ unit_price_base_unit }}</small>
-              </span>
-            {%- endif -%}
-          </p>
+                  <small>{{ line_item_unit_price }}{{ unit_price_separator }}{{ unit_price_base_unit }}</small>
+                </span>
+              {%- endif -%}
+            </p>
 
-          {% comment %} {%- liquid
-            assign quantity = line_item.quantity
+            {%- liquid
+              assign quantity = line_item.quantity
 
-            if line_item.variant.inventory_policy == 'deny' and line_item.variant.inventory_management != nil and line_item.variant.inventory_quantity < quantity
-              assign quantity = line_item.variant.inventory_quantity
-            endif
-          -%}
+              if line_item.variant.inventory_policy == 'deny' and line_item.variant.inventory_management != nil and line_item.variant.inventory_quantity < quantity
+                assign quantity = line_item.variant.inventory_quantity
+              endif
+            -%}
 
-          <quantity-input class="cart__quantity-wrapper">
-            {%- if settings.quantity_style == 'dropdown' and quantity < 10  -%}
-              <popout-select class="select-popout select-popout--quantity">
-                <button type="button"
-                  class="select-popout__toggle"
-                  aria-expanded="false"
-                  aria-controls="{{ unique }}-select-quantity"
-                  aria-labelledby="{{ unique }}-select-quantity-label"
-                  data-popout-toggle>
-                  <span data-popout-toggle-text>{{ quantity }}</span>
-                  {%- render 'icon-nav-arrow-down' -%}
-                </button>
+            <quantity-input class="cart__quantity-wrapper">
+              {%- if settings.quantity_style == 'dropdown' and quantity < 10  -%}
+                <popout-select class="select-popout select-popout--quantity">
+                  <button type="button"
+                    class="select-popout__toggle"
+                    aria-expanded="false"
+                    aria-controls="{{ unique }}-select-quantity"
+                    aria-labelledby="{{ unique }}-select-quantity-label"
+                    data-popout-toggle>
+                    <span data-popout-toggle-text>{{ quantity }}</span>
+                    {%- render 'icon-nav-arrow-down' -%}
+                  </button>
 
-                <ul id="{{ unique }}-select-quantity" class="select-popout__list" data-popout-list data-scroll-lock-scrollable tabindex="-1">
-                  {%- for idx in (1..10) -%}
-                    <li class="select-popout__item{% if forloop.index == 1 %} is-active{% endif %}">
-                      <a class="select-popout__option" href="#" {% if forloop.index == 1 %}aria-current="true"{% endif %} data-value="{{ forloop.index }}" data-popout-option>
-                        <span>
-                          {{ forloop.index }} {% if forloop.last %}+{% endif %}
-                        </span>
-                      </a>
-                    </li>
-                  {%- endfor -%}
-                </ul>
-              </popout-select>
-            {%- endif -%}
+                  <ul id="{{ unique }}-select-quantity" class="select-popout__list" data-popout-list data-scroll-lock-scrollable tabindex="-1">
+                    {%- for idx in (1..10) -%}
+                      <li class="select-popout__item{% if forloop.index == 1 %} is-active{% endif %}">
+                        <a class="select-popout__option" href="#" {% if forloop.index == 1 %}aria-current="true"{% endif %} data-value="{{ forloop.index }}" data-popout-option>
+                          <span>
+                            {{ forloop.index }} {% if forloop.last %}+{% endif %}
+                          </span>
+                        </a>
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+                </popout-select>
+              {%- endif -%}
 
-            <div class="cart__quantity-counter">
-              <div class="cart__quantity">
-                <button
-                  class="cart__quantity-minus"
-                  type="button"
-                  name="decrease"
-                  title="{{ 'cart.general.decrease_quantity_label' | t }} - {{ line_item.product.title | strip_html }}">
-                  {%- render 'icon-minus' -%}
-                </button>
+              <div class="cart__quantity-counter">
+                <div class="cart__quantity">
+                  <button
+                    class="cart__quantity-minus"
+                    type="button"
+                    name="decrease"
+                    title="{{ 'cart.general.decrease_quantity_label' | t }} - {{ line_item.product.title | strip_html }}">
+                    {%- render 'icon-minus' -%}
+                  </button>
 
-                <input
-                  class="cart__quantity-field"
-                  type="number"
-                  id="updates_{{ line_item.key }}"
-                  name="updates[]"
+                  <input
+                    class="cart__quantity-field"
+                    type="number"
+                    id="updates_{{ line_item.key }}"
+                    name="updates[]"
+                    data-id="{{ line_item.key }}"
+                    value="{{ quantity }}"
+                    title="{{ 'cart.general.quantity_field_label' | t }} - {{ line_item.product.title | strip_html }}"
+                    pattern="[0-9]*"
+                    data-popout-input>
+
+                  <button
+                    class="cart__quantity-plus"
+                    type="button"
+                    name="increase"
+                    title="{{ 'cart.general.increase_quantity_label' | t }} - {{ line_item.product.title | strip_html }}">
+                    {%- render 'icon-plus' -%}
+                  </button>
+                </div>
+
+                {% comment %} <a class="cart__item__remove"
+                  href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
+                  data-item-remove
                   data-id="{{ line_item.key }}"
-                  value="{{ quantity }}"
-                  title="{{ 'cart.general.quantity_field_label' | t }} - {{ line_item.product.title | strip_html }}"
-                  pattern="[0-9]*"
-                  data-popout-input>
-
-                <button
-                  class="cart__quantity-plus"
-                  type="button"
-                  name="increase"
-                  title="{{ 'cart.general.increase_quantity_label' | t }} - {{ line_item.product.title | strip_html }}">
-                  {%- render 'icon-plus' -%}
-                </button>
+                  title="{{ 'cart.general.remove' | t }}">
+                    {{- 'cart.general.remove' | t -}}
+                </a> {% endcomment %}
               </div>
-
-              <a class="cart__item__remove"
-                href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
-                data-item-remove
-                data-id="{{ line_item.key }}"
-                title="{{ 'cart.general.remove' | t }}">
-                  {{- 'cart.general.remove' | t -}}
-              </a>
-            </div>
-          </quantity-input> {% endcomment %}
+            </quantity-input>
+          </div>
         </div>
 
         <div class="cart__item__content__right">

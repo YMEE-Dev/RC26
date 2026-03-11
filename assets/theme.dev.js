@@ -2668,7 +2668,7 @@
           countValue = "9+";
         }
 
-        this.innerText = countValue;
+        this.innerText = countValue + " items";
       }
     }
   }

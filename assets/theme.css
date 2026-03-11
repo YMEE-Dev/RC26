@@ -6945,7 +6945,7 @@ toggle-ellipsis {
 .drawer .cart__item__content__right {
   text-align: right;
   display: flex;
-  justify-content: end;
+  justify-content: start;
   flex-direction: column;
 }
 
@@ -6980,7 +6980,7 @@ toggle-ellipsis {
   flex-direction: column;
   height: 100%;
   width: 100%;
-  border-left: 1px solid var(--border);
+  /* border-left: 1px solid var(--border); */
   background: var(--bg);
 }
 
@@ -7346,7 +7346,7 @@ toggle-ellipsis {
 
 .cart__item__content {
   width: calc(100% - 180px);
-  padding-left: 30px;
+  padding-left: 10px;
 }
 
 .cart__item__title {
@@ -7370,10 +7370,10 @@ toggle-ellipsis {
   text-transform: capitalize;
   text-decoration: underline;
 }
-
+/*
 .drawer__items .cart__item__remove {
   margin-top: 8px;
-}
+} */
 
 .cart__item__meta {
   margin-bottom: 10px;
@@ -18596,6 +18596,14 @@ a.review {
   }
 }
 
+.cart__price-and-quantity-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 35px;
+  margin-bottom: 25px;
+}
+
 .cart__items .cart__price {
   width: calc(60% - 95px);
   padding: 0 10px;
@@ -18777,14 +18785,13 @@ a.review {
 
 .cart__foot__inner {
   padding: calc(var(--inner) - 2px) 0;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid #e5e5e5;
 }
 
 .cart__note {
   display: block;
-  font-size: max(0.6875rem, var(--font-body-x-small));
-  line-height: 1.36;
-  margin-top: calc(var(--inner) / 2);
+  font-style: normal;
+  color: #666;
 }
 
 .cart__total {
@@ -18795,7 +18802,7 @@ a.review {
   align-items: center;
   font-size: var(--font-body-x-small);
   line-height: 1.33;
-  margin: var(--inner) 0;
+  margin: var(--inner) 0 6px;
   font-weight: var(--FONT-WEIGHT-BODY-BOLD);
 }
 
@@ -18816,15 +18823,23 @@ a.review {
     visibility 0.5s;
 }
 
+.cart__total__price,
 .cart__total__label {
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  padding-right: 10px;
 }
 
 .cart__total__price {
-  font-size: var(--font-body-x-large);
   transition: opacity 0.5s ease-in-out;
+}
+
+.cart__buttons-all {
+  margin-top: 40px;
 }
 
 .is-loading .cart__total__price--animated {
@@ -19016,6 +19031,7 @@ input.cart__acceptance__input {
   color: inherit;
   font-weight: var(--FONT-WEIGHT-BODY-BOLD);
   text-align: center;
+  border: 0;
 }
 
 .cart__quantity input[type="number"] {
@@ -19083,7 +19099,6 @@ input.cart__acceptance__input {
 
 /*====== Cart Price ======*/
 .cart__price {
-  margin: 18px 0 0;
   font-size: var(--FONT-SIZE-PRICE);
   line-height: var(--LINE-HEIGHT-PRICE);
 }
