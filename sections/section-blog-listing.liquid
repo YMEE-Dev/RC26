@@ -320,15 +320,13 @@ a.blog-listing__view-all {
     })
     .then(res => res.json())
     .then(data => {
-      const blogs = data.data.blogs.nodes;
+      const blogs = data.data.blogs.nodes
+        .filter(blog => !'{{ section.settings.tag_to_exclude }}'.includes(blog.handle))
+        .sort((a, b) => a.title.localeCompare(b.title));
       const nav = document.getElementById("blogNav");
       const dropdown = document.getElementById("blogDropdown");
     
       blogs.forEach(blog => {
-        // Skip if tag_to_exclude contains this blog handle
-        if ('{{ section.settings.tag_to_exclude }}'.includes(blog.handle)) {
-          return;
-        }
         
         // Create nav link
         const link = document.createElement("a");
