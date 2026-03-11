@@ -1,0 +1,432 @@
+<!-- /sections/section-sticky-scroll.liquid -->
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+-%}
+
+{%- style -%}
+  #StickyScroll--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+<section
+  id="StickyScroll--{{ section.id }}"
+  class="sticky-scroll section-padding {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="sticky-scroll"
+>
+  <div class="sticky-scroll__wrapper {{ section.settings.width }}">
+    <div class="sticky-scroll__container">
+      <div class="sticky-scroll__images">
+        {%- for block in section.blocks -%}
+          <div 
+            class="sticky-scroll__image-wrapper"
+            data-index="{{ forloop.index0 }}"
+            {{ block.shopify_attributes }}
+          >
+            {%- if block.settings.image != blank -%}
+              {{ block.settings.image | image_url: width: 800 | image_tag: loading: 'lazy', class: 'sticky-scroll__image' }}
+            {%- else -%}
+              <div class="sticky-scroll__placeholder">
+                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
+
+      <div class="sticky-scroll__content">
+        {%- if section.settings.heading != blank -%}
+          <h2 class="sticky-scroll__heading {{ section.settings.heading_size }}">
+            {{ section.settings.heading }}
+          </h2>
+        {%- endif -%}
+        {%- if section.settings.description != blank -%}
+          <p class="sticky-scroll__description">{{ section.settings.description }}</p>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .sticky-scroll {
+    position: relative;
+    width: 100%;
+  }
+
+  .sticky-scroll__wrapper {
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .sticky-scroll__wrapper.wrapper {
+    max-width: 1440px;
+    padding: 0 20px;
+  }
+
+  .sticky-scroll__wrapper.wrapper--full-padded {
+    width: 100%;
+    padding: 0 40px;
+  }
+
+  .sticky-scroll__wrapper.wrapper--narrow {
+    max-width: 1200px;
+    padding: 0 20px;
+  }
+
+  .sticky-scroll__wrapper.wrapper--custom {
+    max-width: var(--custom-width, 1320px);
+    padding: 0 20px;
+  }
+
+  .sticky-scroll__container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 228px;
+    align-items: flex-start;
+    min-height: 756px;
+
+  }
+
+
+  @media (max-width: 1024px) {
+    .sticky-scroll__container {
+      gap: 80px;
+    }
+    .sticky-scroll__image-wrapper {
+        width:100% !important;
+        height: 600px !important;
+    }
+  }
+  @media (max-width: 989px) {
+    .sticky-scroll__container {
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .sticky-scroll__container {
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+    .sticky-scroll__image-wrapper{
+      width:100% !important;
+      height: 600px !important;
+    }
+  }
+  @media (max-width: 425px) {
+    .sticky-scroll__container {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+  }
+  .sticky-scroll__image-wrapper {
+    position: sticky;
+    top: 80px;
+    width:606px;
+    height: 756px;
+  }
+  @media (max-width: 1024px) {
+    .sticky-scroll__image-wrapper {
+      height: 600px !important;
+    }
+  }
+  .sticky-scroll__images {
+    position: sticky;
+    top: 0px;
+    width: 100%;
+    /* height: 600px; */
+    position: relative;
+  }
+
+  @media (max-width: 989px) {
+    .sticky-scroll__images {
+      position: relative;
+      top: 0;
+      height: auto;
+    }
+  }
+
+  /* .sticky-scroll__image-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: 1;
+  } */
+
+  .sticky-scroll__image-wrapper.active {
+    opacity: 1;
+    z-index: 2;
+  }
+
+  /* @media (max-width: 989px) {
+    .sticky-scroll__image-wrapper {
+      position: relative;
+      opacity: 1;
+      height: auto;
+      margin-bottom: 20px;
+    }
+  } */
+  @media (max-width: 768px) {
+    .sticky-scroll__image-wrapper {
+      top: 80px !important;
+      position: sticky !important;
+      height: auto !important;
+    }
+  }
+
+  .sticky-scroll__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  @media (max-width: 989px) {
+    .sticky-scroll__image {
+      height: auto;
+    }
+  }
+
+  .sticky-scroll__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #F5F5F5;
+  }
+
+  .sticky-scroll__placeholder .placeholder-svg {
+    width: 50%;
+    height: auto;
+    opacity: 0.3;
+  }
+
+  .sticky-scroll__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+  
+    height: 756px;
+    width: 100%;
+    max-width: 397px;
+    position: sticky;
+    top: 80px;
+  }
+
+  .sticky-scroll__heading {
+    color: var(--000000, #000);
+    margin: 0 0 20px;
+/* RC26/Display/L */
+    font-family: var(--FONT-STACK-HEADING);
+    font-size: 40px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 48px; /* 120% */
+  }
+
+  .sticky-scroll__heading.heading-small {
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .sticky-scroll__heading.heading-medium {
+    font-size: 32px;
+    line-height: 40px;
+  }
+
+  .sticky-scroll__heading.heading-large {
+    font-size: 40px;
+    line-height: 48px;
+  }
+
+  .sticky-scroll__heading.heading-x-large {
+    font-size: 48px;
+    line-height: 56px;
+  }
+
+  @media (max-width: 767px) {
+    .sticky-scroll__heading.heading-small {
+      font-size: 20px;
+      line-height: 28px;
+    }
+
+    .sticky-scroll__heading.heading-medium {
+      font-size: 24px;
+      line-height: 32px;
+    }
+
+    .sticky-scroll__heading.heading-large {
+      font-size: 28px;
+      line-height: 36px;
+    }
+
+    .sticky-scroll__heading.heading-x-large {
+      font-size: 32px;
+      line-height: 40px;
+    }
+  }
+
+  .sticky-scroll__text-container {
+    position: relative;
+    min-height: 756px;
+  }
+
+  .sticky-scroll__text-item {
+    opacity: 1;
+    /* transform: translateY(20px); */
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    /* margin-bottom: 400px; */
+  }
+
+  @media (max-width: 989px) {
+    .sticky-scroll__text-item {
+      opacity: 1;
+      transform: translateY(0);
+      /* margin-bottom: 60px; */
+    }
+  }
+
+  .sticky-scroll__text-item.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .sticky-scroll__title {
+    margin: 0 0 16px;
+    color: var(--000000, #000);
+    font-family: "Portrait LC", serif;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 32px;
+  }
+
+  .sticky-scroll__description {
+    margin: 0;
+    color: var(--000000, #000);
+    font-family: Inter, sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px;
+  }
+
+  @media (max-width: 425px) {
+    .sticky-scroll__content {
+      height: auto;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "c",
+  "tag": "section",
+  "class": "section-sticky-scroll",
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Item",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Our Exclusive Gift Box"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "default": "heading-large",
+      "options": [
+        { "value": "heading-small", "label": "Small" },
+        { "value": "heading-medium", "label": "Medium" },
+        { "value": "heading-large", "label": "Large" },
+        { "value": "heading-x-large", "label": "Extra large" }
+      ]
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>Item description goes here</p>"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Normal" },
+        { "value": "wrapper--narrow", "label": "Narrow" },
+        { "value": "wrapper--custom", "label": "Custom (max-width: 1232px)" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 60
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sticky scroll",
+      "category": "Image",
+     
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "aside", "footer"]
+  }
+}
+{% endschema %}
