@@ -62,36 +62,36 @@
       {% for block in section.blocks %}
         {
           "id": {{ block.id | json }},
-          "year": {{ block.settings.year | json }},
-          "title": {{ block.settings.title | json }},
-          "copy": {{ block.settings.copy | strip_html | strip_newlines | json }},
+          "year": {{ block.settings.year | default: '1977' | json }},
+          "title": {{ block.settings.title | default: 'Milestone' | json }},
+          "copy": {{ block.settings.copy | strip_html | strip_newlines | default: block.settings.title | default: block.settings.year | json }},
           "media": [
             {
-              "label": {{ block.settings.media_1_label | json }},
+              "label": {{ block.settings.media_1_label | default: 'Workshop portrait' | json }},
               "image": {% if block.settings.media_1_image != blank %}{{ block.settings.media_1_image | image_url: width: 1800 | json }}{% else %}null{% endif %},
-              "fill": {{ block.settings.media_1_fill | json }},
-              "x": {{ block.settings.media_1_x | json }},
-              "y": {{ block.settings.media_1_y | json }},
-              "w": {{ block.settings.media_1_w | json }},
-              "h": {{ block.settings.media_1_h | json }}
+              "fill": {{ block.settings.media_1_fill | default: 'linear-gradient(135deg, #5f5a71 0%, #241f29 65%, #0d0d12 100%)' | json }},
+              "x": {{ block.settings.media_1_x | default: 0 | json }},
+              "y": {{ block.settings.media_1_y | default: 18 | json }},
+              "w": {{ block.settings.media_1_w | default: 36 | json }},
+              "h": {{ block.settings.media_1_h | default: 46 | json }}
             },
             {
-              "label": {{ block.settings.media_2_label | json }},
+              "label": {{ block.settings.media_2_label | default: 'Street portrait' | json }},
               "image": {% if block.settings.media_2_image != blank %}{{ block.settings.media_2_image | image_url: width: 1800 | json }}{% else %}null{% endif %},
-              "fill": {{ block.settings.media_2_fill | json }},
-              "x": {{ block.settings.media_2_x | json }},
-              "y": {{ block.settings.media_2_y | json }},
-              "w": {{ block.settings.media_2_w | json }},
-              "h": {{ block.settings.media_2_h | json }}
+              "fill": {{ block.settings.media_2_fill | default: 'linear-gradient(180deg, #d8d8d5 0%, #8f8e88 50%, #4e4d4a 100%)' | json }},
+              "x": {{ block.settings.media_2_x | default: 43 | json }},
+              "y": {{ block.settings.media_2_y | default: 0 | json }},
+              "w": {{ block.settings.media_2_w | default: 24 | json }},
+              "h": {{ block.settings.media_2_h | default: 58 | json }}
             },
             {
-              "label": {{ block.settings.media_3_label | json }},
+              "label": {{ block.settings.media_3_label | default: 'Gold detail' | json }},
               "image": {% if block.settings.media_3_image != blank %}{{ block.settings.media_3_image | image_url: width: 1800 | json }}{% else %}null{% endif %},
-              "fill": {{ block.settings.media_3_fill | json }},
-              "x": {{ block.settings.media_3_x | json }},
-              "y": {{ block.settings.media_3_y | json }},
-              "w": {{ block.settings.media_3_w | json }},
-              "h": {{ block.settings.media_3_h | json }}
+              "fill": {{ block.settings.media_3_fill | default: 'linear-gradient(135deg, #ceb78c 0%, #89683f 50%, #20150f 100%)' | json }},
+              "x": {{ block.settings.media_3_x | default: 74 | json }},
+              "y": {{ block.settings.media_3_y | default: 8 | json }},
+              "w": {{ block.settings.media_3_w | default: 18 | json }},
+              "h": {{ block.settings.media_3_h | default: 26 | json }}
             }
           ]
         }{% unless forloop.last %},{% endunless %}
