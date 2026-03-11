@@ -34,6 +34,8 @@
     assign transparent_header = true
   elsif template.name == 'page' and section.settings.transparent_page
     assign transparent_header = true
+  elsif template.name == 'search' and section.settings.transparent_search
+    assign transparent_header = true
   elsif template.name == 'product' and section.settings.transparent_product_page
     assign transparent_header = true
   endif
@@ -144,7 +146,6 @@
     endif
   endcapture
 -%}
-
 {%- if section.settings.show_social_icons -%}
   {%- if settings.instagram_link != ''
     or settings.pinterest_link != ''
@@ -179,6 +180,7 @@
   .theme__header {
     --PT: {{ padding_top }}px;
     --PB: {{ padding_bottom }}px;
+    isolation: isolate;
 
     {% if show_separator_line %}
       {% unless border_color.alpha == 0.0 or border_color == blank %}
@@ -186,6 +188,30 @@
       {% endunless %}
       --border-opacity: {{ section.settings.separator_opacity | times: 0.01 }};
     {% endif %}
+  }
+
+  .theme__header__scroll-blur {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: calc(var(--header-scroll-reveal-fade-distance, 72px) * -1);
+    z-index: -4;
+    pointer-events: none;
+    opacity: var(--header-scroll-reveal-opacity, 0);
+    background: var(
+      --header-scroll-reveal-background,
+      linear-gradient(180deg, rgba(249, 249, 249, 0.25) 0%, rgba(249, 249, 249, 0) 100%)
+    );
+    -webkit-backdrop-filter: blur(var(--header-scroll-reveal-blur, 0px));
+    backdrop-filter: blur(var(--header-scroll-reveal-blur, 0px));
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 58%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 0%, #000 58%, transparent 100%);
+    transition:
+      opacity 0.35s ease,
+      -webkit-backdrop-filter 0.35s ease,
+      backdrop-filter 0.35s ease;
+    will-change: opacity, backdrop-filter;
   }
 
   {%- if logo_asset != blank -%}
@@ -274,7 +300,7 @@
             <img
               class="logo__img logo__img--transparent"
               src="{{ transparent_logo_asset | asset_url }}"
-              width="{{ logo_width }}" 
+              width="{{ logo_width }}"
               height="{{ logo_height | round }}"
               alt="{{ transparent_alt }}"
               loading="eager"
@@ -284,7 +310,7 @@
         {%- endif -%}
       </h1>
     </a>
-    {%- if template.name == 'product' or template contains 'collection' -%}
+    {%- if template.name == 'product' or template contains 'collection' or template contains 'page'  -%}
       <div class="header__logo__meta">
         {%- if template.name == 'product' -%}
           {%- assign current_collection = collection | default: product.collections.first -%}
@@ -296,27 +322,8 @@
           {%- if product.type != blank -%}
             {%- assign has_type = true -%}
           {%- endif -%}
-          {%- liquid
-            assign product_category_name = product.category.name | strip
-            assign has_product_category = false
-            assign product_category_collection = blank
-
-            if product_category_name != blank
-              assign has_product_category = true
-              assign product_category_handle = product_category_name | handleize
-              assign product_category_collection = collections[product_category_handle]
-            endif
-          -%}
           <h6 class="header__logo__meta__line">
-            {%- if has_product_category -%}
-              <span class="header__logo__meta__collection">
-                {%- if product_category_collection != blank -%}
-                  <a href="{{ product_category_collection.url }}">{{ product_category_name }}</a>
-                {%- else -%}
-                  <span>{{ product_category_name }}</span>
-                {%- endif -%}
-              </span>
-            {%- elsif has_collection -%}
+            {%- if has_collection -%}
               <span class="header__logo__meta__collection">
                 {%- assign current_collection_title = current_collection.title -%}
                 {%- if current_collection_title contains ' - ' -%}
@@ -351,32 +358,38 @@
           </h6>
         {%- elsif template contains 'collection' and collection -%}
           <h6 class="header__logo__meta__collection">
-            {%- liquid
-              assign collection_title = collection.title
-              assign collection_title_parts = collection_title | split: ' - '
-              assign can_render_split_title = false
-
-              if collection_title_parts.size == 2
-                assign parent_collection_title = collection_title_parts | first | strip
-                assign child_collection_title = collection_title_parts | last | strip
-
-                if parent_collection_title != blank and child_collection_title != blank
-                  assign parent_collection_handle = parent_collection_title | handleize
-                  assign parent_collection_obj = collections[parent_collection_handle]
-
-                  if parent_collection_obj != blank
-                    assign can_render_split_title = true
-                  endif
-                endif
-              endif
-            -%}
-            {%- if can_render_split_title -%}
-              <a href="{{ parent_collection_obj.url }}">{{ parent_collection_title }}</a>
-              <span class="header__logo__meta__separator">&nbsp;/&nbsp;</span>
-              <span class="header__logo__meta__subcollection">{{ child_collection_title }}</span>
+            {%- assign collection_title = collection.title -%}
+            {%- if collection_title contains ' - ' -%}
+              {%- liquid
+                assign parent_collection_title = collection_title | split: ' - ' | first | strip
+                assign child_collection_title = collection_title | remove_first: parent_collection_title | remove_first: ' - ' | strip
+              -%}
+              {%- if parent_collection_title != blank -%}
+                {%- if child_collection_title != blank -%}
+                  {%- liquid
+                    assign parent_collection_handle = parent_collection_title | handleize
+                    assign parent_collection_obj = collections[parent_collection_handle]
+                    assign parent_collection_url = '/collections/' | append: parent_collection_handle
+                    if parent_collection_obj != blank
+                      assign parent_collection_url = parent_collection_obj.url
+                    endif
+                  -%}
+                  <a href="{{ parent_collection_url }}">{{ parent_collection_title }}</a>
+                  <span class="header__logo__meta__separator">&nbsp;/&nbsp;</span>
+                  <span class="header__logo__meta__subcollection">{{ child_collection_title }}</span>
+                {%- else -%}
+                  <a href="{{ collection.url }}">{{ collection.title }}</a>
+                {%- endif -%}
+              {%- else -%}
+                <span>{{ collection.title }}</span>
+              {%- endif -%}
             {%- else -%}
               <span>{{ collection.title }}</span>
             {%- endif -%}
+          </h6>
+        {%  elsif template contains 'page' %}
+          <h6 class="header__logo__meta__page">
+            <span>{{ page.title }}</span>
           </h6>
         {%- endif -%}
       </div>
@@ -394,7 +407,7 @@
       </cart-count>
 
       {%- if cart_icon_as_circle == false -%}
-        {%- render 'header-icon', filename: icon_string_cart -%}
+        {%- render 'icon-cart' -%}
       {%- endif -%}
     </span>
   </div>
@@ -600,10 +613,12 @@
   <header
     class="theme__header{% if show_separator_line %} has-border{% endif %}"
     role="banner"
+    style="--header-scroll-reveal-opacity: 0; --header-scroll-reveal-blur: 0px; --header-scroll-reveal-background: linear-gradient(180deg, rgba(249, 249, 249, 0.25) 0%, rgba(249, 249, 249, 0.00) 100%);"
     data-header-height
     data-aos="fade"
     data-header-desktop
   >
+    <span class="theme__header__scroll-blur" aria-hidden="true"></span>
     {%- if toolbar != blank -%}
       {{ toolbar }}
     {%- endif -%}
@@ -824,6 +839,7 @@
     };
 
     const rootSelector = '.tmenu_item.tmenu_item--root.tmenu_item_level_0.tmenu_item_submenu_type_mega';
+    const tmenuActiveSelector = '.tmenu_item--root.tmenu_item_level_0.tmenu_item_active';
     let initialized = false;
     let tmenuIsActive = false;
     let tmenuScrollLocked = false;
@@ -834,12 +850,12 @@
 
     const setTmenuScrollLock = (shouldLock) => {
       if (shouldLock && !tmenuScrollLocked) {
-        document.dispatchEvent(new CustomEvent('theme:scroll:lock', { bubbles: true }));
+        document.dispatchEvent(new CustomEvent('theme:scroll:lock', {bubbles: true}));
         tmenuScrollLocked = true;
       }
 
       if (!shouldLock && tmenuScrollLocked) {
-        document.dispatchEvent(new CustomEvent('theme:scroll:unlock', { bubbles: true }));
+        document.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
         tmenuScrollLocked = false;
       }
     };
@@ -850,13 +866,18 @@
           initialized = true;
           applyMenuOpenStyles();
         }
-        const activeNow = Boolean(document.querySelector('.tmenu_item_active'));
+        const activeNow = Boolean(document.querySelector(tmenuActiveSelector));
         if (activeNow && !tmenuIsActive) {
           applyMenuOpenStyles();
         }
         if (activeNow !== tmenuIsActive) {
           setTmenuScrollLock(activeNow);
           tmenuIsActive = activeNow;
+          document.dispatchEvent(
+            new CustomEvent('theme:tmenu:state', {
+              detail: {isOpen: tmenuIsActive},
+            })
+          );
         }
       };
       new MutationObserver(handleMutations).observe(root, {
@@ -876,7 +897,7 @@
         if (!found.length) return;
         observer.disconnect();
         found.forEach(observeRoot);
-      }).observe(document.body, { childList: true, subtree: true });
+      }).observe(document.body, {childList: true, subtree: true});
     }
 
     /* Header light/dark switcher */
@@ -985,9 +1006,11 @@
 
       const logoLightUrl = logoLinks[0].dataset.logoLight;
       const logoDarkUrl = logoLinks[0].dataset.logoDark;
-      const drawerLogoMode = 'light';
+      const forcedLightLogoMode = 'light';
 
       const drawerIsOpen = () => drawerWrapper?.classList.contains('is-open');
+      const tmenuIsOpen = () => tmenuIsActive || Boolean(document.querySelector(tmenuActiveSelector));
+      const shouldForceLightLogo = () => drawerIsOpen() || tmenuIsOpen();
 
       const setHeaderColors = (mode) => {
         const colorSet = colors[mode] || colors.light;
@@ -1023,15 +1046,14 @@
         if (resolved === currentMode) return;
         currentMode = resolved;
         setHeaderColors(currentMode);
-        if (!drawerIsOpen()) {
+        if (!shouldForceLightLogo()) {
           setLogoSource(currentMode);
         }
       };
 
-      const syncLogoWithDrawer = () => {
-        if (!drawerWrapper) return;
-        if (drawerIsOpen()) {
-          setLogoSource(drawerLogoMode);
+      const syncLogoWithHeaderState = () => {
+        if (shouldForceLightLogo()) {
+          setLogoSource(forcedLightLogoMode);
           return;
         }
         setLogoSource(currentMode);
@@ -1039,29 +1061,31 @@
 
       setHeaderColors(currentMode);
       setLogoSource(currentMode);
-      syncLogoWithDrawer();
+      syncLogoWithHeaderState();
 
       if (drawerWrapper) {
         document.addEventListener('theme:drawer:open', (event) => {
           if (event.target !== drawerWrapper) return;
-          syncLogoWithDrawer();
+          syncLogoWithHeaderState();
         });
 
         document.addEventListener('theme:drawer:close', (event) => {
           if (event.target !== drawerWrapper) return;
-          syncLogoWithDrawer();
+          syncLogoWithHeaderState();
         });
 
-        new MutationObserver(syncLogoWithDrawer).observe(drawerWrapper, {
+        new MutationObserver(syncLogoWithHeaderState).observe(drawerWrapper, {
           attributes: true,
           attributeFilter: ['class'],
         });
       }
 
+      document.addEventListener('theme:tmenu:state', syncLogoWithHeaderState);
+
       let sectionsToObserve = selectAll(
         'main .shopify-section section, main .shopify-section collection-component, main .shopify-section [data-section-id]'
       );
-      console.log('header observer init', { sections: sectionsToObserve });
+      console.log('header observer init', {sections: sectionsToObserve});
       if (!sectionsToObserve.length) return;
 
       const DEBUG_HEADER_OBSERVER = false;
@@ -1252,7 +1276,7 @@
 
       const startObserver = () => {
         rootMargin = computeRootMargin();
-        intersectionObserver = new IntersectionObserver(onIntersect, { rootMargin, threshold: thresholds });
+        intersectionObserver = new IntersectionObserver(onIntersect, {rootMargin, threshold: thresholds});
         observeAll();
         ensureOverlay();
       };
@@ -1271,7 +1295,7 @@
       () => {
         initHeaderObserver();
       },
-      { once: true }
+      {once: true}
     );
   });
 {% endjavascript %}
@@ -1303,10 +1327,10 @@
       "label": "Header",
       "default": "logo_beside",
       "options": [
-        { "value": "logo_above", "label": "Logo above menu" },
-        { "value": "logo_beside", "label": "Logo beside menu" },
-        { "value": "drawer", "label": "Mobile drawer menu" },
-        { "value": "logo_center_menu_left", "label": "Logo center menu left" }
+        {"value": "logo_above", "label": "Logo above menu"},
+        {"value": "logo_beside", "label": "Logo beside menu"},
+        {"value": "drawer", "label": "Mobile drawer menu"},
+        {"value": "logo_center_menu_left", "label": "Logo center menu left"}
       ]
     },
     {
@@ -1354,8 +1378,8 @@
       "label": "Cart icon",
       "default": "bag",
       "options": [
-        { "value": "bag", "label": "Bag" },
-        { "value": "cart", "label": "Cart" }
+        {"value": "bag", "label": "Bag"},
+        {"value": "cart", "label": "Cart"}
       ]
     },
     {
@@ -1369,8 +1393,8 @@
       "info": "Select the light or dark logo that ships with the theme.",
       "default": "light",
       "options": [
-        { "value": "light", "label": "Light" },
-        { "value": "dark", "label": "Dark" }
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
       ]
     },
     {
@@ -1413,10 +1437,10 @@
       "label": "Color",
       "default": "btn--primary",
       "options": [
-        { "value": "btn--black", "label": "Black" },
-        { "value": "btn--white", "label": "White" },
-        { "value": "btn--primary", "label": "Primary" },
-        { "value": "btn--secondary", "label": "Secondary" }
+        {"value": "btn--black", "label": "Black"},
+        {"value": "btn--white", "label": "White"},
+        {"value": "btn--primary", "label": "Primary"},
+        {"value": "btn--secondary", "label": "Secondary"}
       ]
     },
     {
@@ -1526,6 +1550,12 @@
     },
     {
       "type": "checkbox",
+      "id": "transparent_search",
+      "label": "Enable on Search pages",
+      "default": true
+    },
+    {
+      "type": "checkbox",
       "id": "transparent_product_page",
       "label": "Enable on Product pages",
       "info": "Stretch image size recommended. Desktop only",
@@ -1573,16 +1603,16 @@
           "label": "Link position in main menu",
           "default": "1",
           "options": [
-            { "value": "1", "label": "Item 1" },
-            { "value": "2", "label": "Item 2" },
-            { "value": "3", "label": "Item 3" },
-            { "value": "4", "label": "Item 4" },
-            { "value": "5", "label": "Item 5" },
-            { "value": "6", "label": "Item 6" },
-            { "value": "7", "label": "Item 7" },
-            { "value": "8", "label": "Item 8" },
-            { "value": "9", "label": "Item 9" },
-            { "value": "10", "label": "Item 10" }
+            {"value": "1", "label": "Item 1"},
+            {"value": "2", "label": "Item 2"},
+            {"value": "3", "label": "Item 3"},
+            {"value": "4", "label": "Item 4"},
+            {"value": "5", "label": "Item 5"},
+            {"value": "6", "label": "Item 6"},
+            {"value": "7", "label": "Item 7"},
+            {"value": "8", "label": "Item 8"},
+            {"value": "9", "label": "Item 9"},
+            {"value": "10", "label": "Item 10"}
           ]
         },
         {
@@ -1618,9 +1648,9 @@
           "label": "Overlay type",
           "default": "text",
           "options": [
-            { "value": "disabled", "label": "Disabled" },
-            { "value": "opacity", "label": "Opacity overlay" },
-            { "value": "text", "label": "Text underlay" }
+            {"value": "disabled", "label": "Disabled"},
+            {"value": "opacity", "label": "Opacity overlay"},
+            {"value": "text", "label": "Text underlay"}
           ]
         },
         {
@@ -1638,12 +1668,12 @@
           "label": "Heading size",
           "default": "heading-medium",
           "options": [
-            { "value": "heading-mini", "label": "Mini" },
-            { "value": "heading-x-small", "label": "Extra small" },
-            { "value": "heading-small", "label": "Small" },
-            { "value": "heading-medium", "label": "Medium" },
-            { "value": "heading-large", "label": "Large" },
-            { "value": "heading-x-large", "label": "Extra large" }
+            {"value": "heading-mini", "label": "Mini"},
+            {"value": "heading-x-small", "label": "Extra small"},
+            {"value": "heading-small", "label": "Small"},
+            {"value": "heading-medium", "label": "Medium"},
+            {"value": "heading-large", "label": "Large"},
+            {"value": "heading-x-large", "label": "Extra large"}
           ]
         },
         {
@@ -1658,11 +1688,11 @@
           "info": "Automatically generated by the base size.",
           "default": "body-medium",
           "options": [
-            { "value": "body-x-small", "label": "Extra small" },
-            { "value": "body-small", "label": "Small" },
-            { "value": "body-medium", "label": "Medium" },
-            { "value": "body-large", "label": "Large" },
-            { "value": "body-x-large", "label": "Extra large" }
+            {"value": "body-x-small", "label": "Extra small"},
+            {"value": "body-small", "label": "Small"},
+            {"value": "body-medium", "label": "Medium"},
+            {"value": "body-large", "label": "Large"},
+            {"value": "body-x-large", "label": "Extra large"}
           ]
         },
         {

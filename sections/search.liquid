@@ -29,6 +29,7 @@
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
     --COLUMNS-MOBILE: {{ columns_mobile }};
+    --COLUMNS: {{ columns_desktop }};
   }
 {%- endstyle -%}
 
@@ -91,14 +92,16 @@
       {%- endpaginate -%}
     {%- endcapture -%}
 
-    {%- if search.results == empty -%}
-      <p class="search__caption caps">{{ 'general.search.no_results' | t: terms: search.terms }}</p>
-    {%- else -%}
-      {% assign search_results_count = search.results_count | minus: hidden_products_count %}
-      <p class="search__caption caps" data-results-count>
-        {{ 'general.search.results_with_count_and_term' | t: terms: search.terms, count: search_results_count }}
-      </p>
-    {%- endif -%}
+    {% comment %}
+      {%- if search.results == empty -%}
+        <p class='search__caption caps'>{{ 'general.search.no_results' | t: terms: search.terms }}</p>
+      {%- else -%}
+        {% assign search_results_count = search.results_count | minus: hidden_products_count %}
+        <p class='search__caption caps' data-results-count>
+          {{ 'general.search.results_with_count_and_term' | t: terms: search.terms, count: search_results_count }}
+        </p>
+      {%- endif -%}
+    {% endcomment %}
 
     {%- liquid
       assign nav_classes = ''
@@ -168,16 +171,18 @@
       {%- if enable_filters -%}
         <div class="{{ collection_sidebar_class }}" id="filter-groups" data-collection-sidebar>
           <div class="collection__sidebar__head{% unless filter_layout == 'slide-out' %} mobile{% endunless %}">
-            <h3>
-              {{- 'collections.general.filters' | t -}}
+            {% comment %}
+              <h3>
+                {{- 'collections.general.filters' | t -}}
 
-              <span
-                class="filter-count{% if filter_active_count < 1 %} hidden{% endif %}"
-                data-active-filters
-              >
-                {{- filter_active_count -}}
-              </span>
-            </h3>
+                <span
+                  class="filter-count{% if filter_active_count < 1 %} hidden{% endif %}"
+                  data-active-filters
+                >
+                  {{- filter_active_count -}}
+                </span>
+              </h3>
+            {% endcomment %}
 
             <a
               href="#filters-group"
