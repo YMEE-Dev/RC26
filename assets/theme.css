@@ -5068,7 +5068,37 @@ hr.hr--color,
   stroke: var(--icons, currentColor);
   stroke-width: var(--ICON-STROKE-WIDTH);
 }
+.icon-minus, .icon-plus {
+  fill: #000 !important;
+}
 
+.plus_icon, .minus_icon {
+  display: inline-block;
+  right: 0;
+  position: absolute;
+}
+.icon-minus,
+.icon-plus{
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* default */
+.icon-minus ,.minus_icon{
+  opacity:0;
+  transform: rotate(0deg);
+  position:absolute;
+}
+
+/* open */
+.accordion[open="true"] .icon-plus, .accordion[open="true"] .plus_icon{
+  opacity:0;
+  transform: rotate(90deg);
+}
+
+.accordion[open="true"] .icon-minus, .accordion[open="true"] .minus_icon{
+  opacity:1;
+  transform: rotate(180deg); 
+}
 .icon path {
   stroke-width: inherit;
 }
