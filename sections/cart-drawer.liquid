@@ -34,10 +34,10 @@
 -%}
 
 {%- capture cart_title -%}
-  <h3 class="drawer__heading">
+  <h3 class="drawer__heading navlink">
     {{ title_block[0].settings.title | default: cart_title_default }}
 
-    <cart-count class="cart__items-count" data-cart-count="{{ cart_item_count }}">{{ cart_item_count }}</cart-count>
+    <cart-count class="cart__items-count " data-cart-count="{{ cart_item_count }}"> {{ cart_item_count }} items</cart-count>
   </h3>
 
   <button type="button" class="drawer__close" data-cart-drawer-close aria-label="{{ 'general.accessibility.close' | t }} {{ 'cart.general.title' | t }}">

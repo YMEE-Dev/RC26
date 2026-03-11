@@ -46,13 +46,13 @@
       <div class="cart__item__content">
         <div class="cart__item__content__left">
           <div class="cart__item__content-inner">
-            <h4 class="cart__item__title">
+            <h4 class="cart__item__title navlink">
               <a href="{{ line_item.url }}">
                 {{- line_item.product.title | strip_html -}}
               </a>
             </h4>
 
-            <div class="cart__item__meta body-x-small">
+            {% comment %} <div class="cart__item__meta body-x-small">
               {%- assign properties_html = '' -%}
               {%- assign property_size = line_item.properties | size -%}
 
@@ -113,7 +113,7 @@
               {%- if properties_html != '' -%}
                 {{ properties_html }}
               {%- endif -%}
-            </div>
+            </div> {% endcomment %}
           </div>
 
           <p class="cart__price">
@@ -175,7 +175,7 @@
             {%- endif -%}
           </p>
 
-          {%- liquid
+          {% comment %} {%- liquid
             assign quantity = line_item.quantity
 
             if line_item.variant.inventory_policy == 'deny' and line_item.variant.inventory_management != nil and line_item.variant.inventory_quantity < quantity
@@ -248,17 +248,17 @@
                   {{- 'cart.general.remove' | t -}}
               </a>
             </div>
-          </quantity-input>
+          </quantity-input> {% endcomment %}
         </div>
 
         <div class="cart__item__content__right">
-          <div class="cart__item__price">
-            {%- if line_item.final_price == 0 -%}
-              {{ 'general.money.free' | t }}
-            {%- else -%}
-              {{- line_item.final_price | times: quantity | money -}}
-            {%- endif -%}
-          </div>
+          <a class="caption cart__item__remove "
+            href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
+            data-item-remove
+            data-id="{{ line_item.key }}"
+            title="{{ 'cart.general.remove' | t }}">
+              {{- 'cart.general.remove' | t -}}
+          </a>
         </div>
       </div>
 
