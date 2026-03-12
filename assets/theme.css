@@ -3582,7 +3582,7 @@ body.is-focused .highlights__item:focus {
   transition:
     opacity 600ms cubic-bezier(0.7, 0, 0.3, 1),
     visibility 600ms cubic-bezier(0.7, 0, 0.3, 1);
-  backdrop-filter: blur(30px);
+  backdrop-filter: blur(0px);
   z-index: 5999;
 }
 
@@ -5069,37 +5069,43 @@ hr.hr--color,
   stroke: var(--icons, currentColor);
   stroke-width: var(--ICON-STROKE-WIDTH);
 }
-.icon-minus, .icon-plus {
+.icon-minus,
+.icon-plus {
   fill: #000 !important;
 }
 
-.plus_icon, .minus_icon {
+.plus_icon,
+.minus_icon {
   display: inline-block;
   right: 0;
   position: absolute;
 }
 .icon-minus,
-.icon-plus{
-  transition: transform 0.3s ease, opacity 0.3s ease;
+.icon-plus {
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
 }
 
 /* default */
 .accordion .icon-minus,
 .accordion .minus_icon {
-  opacity:0;
+  opacity: 0;
   transform: rotate(0deg);
-  position:absolute;
+  position: absolute;
 }
 
 /* open */
-.accordion[open="true"] .icon-plus, .accordion[open="true"] .plus_icon{
-  opacity:0;
+.accordion[open="true"] .icon-plus,
+.accordion[open="true"] .plus_icon {
+  opacity: 0;
   transform: rotate(90deg);
 }
 
-.accordion[open="true"] .icon-minus, .accordion[open="true"] .minus_icon{
-  opacity:1;
-  transform: rotate(180deg); 
+.accordion[open="true"] .icon-minus,
+.accordion[open="true"] .minus_icon {
+  opacity: 1;
+  transform: rotate(180deg);
 }
 .icon path {
   stroke-width: inherit;
@@ -7018,7 +7024,7 @@ toggle-ellipsis {
   flex-direction: column;
   height: 100%;
   width: 100%;
-  /* border-left: 1px solid var(--border); */
+  border-left: 1px solid #e5e5e5;
   background: var(--bg);
 }
 
@@ -28253,4 +28259,3 @@ body.has-header-sticky .timeline {
 }
 
 /*! ============ Add any custom styles below this line ================== */
- 
