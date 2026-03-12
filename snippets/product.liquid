@@ -529,6 +529,10 @@
         flex: 0 0 100%;
       }
 
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-media-type="model"] {
+        flex: 0 0 100% !important;
+      }
+
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__viewport {
         overflow: hidden;
       }
@@ -809,6 +813,7 @@
 
       #MainProduct--{{ section.id }} .pdp-embla__arrow:disabled {
         opacity: 0.3;
+        pointer-events: none;
         cursor: default;
       }
 
@@ -1298,7 +1303,9 @@
 
                     var isDesktopCarousel = carouselEl.classList.contains('pdp-embla--desktop');
 
-                    var hasIntroStage = isDesktopCarousel && carouselEl.querySelectorAll('[data-embla-slide]').length > 1;
+                    var allSlides = carouselEl.querySelectorAll('[data-embla-slide]');
+                    var firstSlideIsModel = allSlides.length > 0 && allSlides[0].getAttribute('data-media-type') === 'model';
+                    var hasIntroStage = isDesktopCarousel && allSlides.length > 1 && !firstSlideIsModel;
                     var carouselStarted = false;
                     var introTransitioning = false;
 
@@ -1335,7 +1342,6 @@
                     }
 
                     var embla = window.EmblaCarousel(viewport, emblaOptions);
-
                     var prevBtn = carouselEl.querySelector('[data-embla-prev]');
                     var nextBtn = carouselEl.querySelector('[data-embla-next]');
                     var progressBar = carouselEl.querySelector('[data-embla-progress-bar]');
@@ -1411,13 +1417,18 @@
                         canPrev = true;
                       }
 
-                      // Disable next if at the last unique snap position (trimSnaps merges end snaps)
-                      if (isDesktopCarousel && canNext) {
-                        var snaps = embla.scrollSnapList();
-                        var currentSnap = snaps[selectedIndex];
-                        var lastSnap = snaps[snaps.length - 1];
-                        if (Math.abs(currentSnap - lastSnap) < 0.001) {
+                      // Disable next if at the last slide or last unique snap position
+                      if (isDesktopCarousel) {
+                        var slideCount = carouselEl.querySelectorAll('[data-embla-slide]').length;
+                        if (selectedIndex >= slideCount - 1) {
                           canNext = false;
+                        } else if (canNext) {
+                          var snaps = embla.scrollSnapList();
+                          var currentSnap = snaps[selectedIndex];
+                          var lastSnap = snaps[snaps.length - 1];
+                          if (Math.abs(currentSnap - lastSnap) < 0.001) {
+                            canNext = false;
+                          }
                         }
                       }
 
@@ -1471,7 +1482,8 @@
                         var currentIndex = embla.selectedScrollSnap();
                         var slideEls = carouselEl.querySelectorAll('[data-embla-slide]');
                         var isModelSlide = slideEls[currentIndex] && slideEls[currentIndex].getAttribute('data-media-type') === 'model';
-                        var effectiveSlidesPerView = (hasIntroStage && !carouselStarted) || isModelSlide ? 1 : 2;
+                        var isNextModelSlide = slideEls[currentIndex + 1] && slideEls[currentIndex + 1].getAttribute('data-media-type') === 'model';
+                        var effectiveSlidesPerView = (hasIntroStage && !carouselStarted) || isModelSlide || isNextModelSlide ? 1 : 2;
                         var activeCount = 0;
 
                         thumbs.forEach(function(thumb) {
@@ -1552,6 +1564,17 @@
                       }
                     });
 
+                    // Disable WebGI canvas pointer events during carousel drag to prevent
+                    // the 3D orbit controls from fighting Embla and causing lag
+                    embla.on('pointerDown', function () {
+                      var webgiCanvases = carouselEl.querySelectorAll('.webgi-container canvas');
+                      webgiCanvases.forEach(function (c) { c.style.pointerEvents = 'none'; });
+                    });
+                    embla.on('pointerUp', function () {
+                      var webgiCanvases = carouselEl.querySelectorAll('.webgi-container canvas');
+                      webgiCanvases.forEach(function (c) { c.style.pointerEvents = ''; });
+                    });
+
                     // Initial desktop thumb setup
                     updateDesktopThumbs();
 
@@ -1591,14 +1614,19 @@
                     loadDeferredMediaByIndex(activeCarousel, targetIndex);
                     updateProgressByIndex(activeCarousel, targetIndex);
 
-                    if (isDesktop && !isStarted && targetIndex >= 1) {
+                    var carouselHasIntroStage = activeCarousel.el.classList.contains('pdp-embla--desktop') &&
+                      activeCarousel.el.querySelectorAll('[data-embla-slide]').length > 1 &&
+                      (activeCarousel.el.querySelector('[data-embla-slide]') &&
+                       activeCarousel.el.querySelector('[data-embla-slide]').getAttribute('data-media-type') !== 'model');
+
+                    if (carouselHasIntroStage && isDesktop && !isStarted && targetIndex >= 1) {
                       // Intro → started: ensure clicked slide is visible in 2-slide view
                       var scrollTarget = Math.max(0, targetIndex - 1);
                       activeCarousel.setCarouselStarted(true, scrollTarget);
                       return;
                     }
 
-                    if (isDesktop && isStarted && targetIndex === 0) {
+                    if (carouselHasIntroStage && isDesktop && isStarted && targetIndex === 0) {
                       // Started → intro: smooth scroll to 0 first, then expand slide 1
                       if (currentIndex > 0) {
                         activeCarousel.embla.scrollTo(0);
@@ -1651,7 +1679,8 @@
                           var isStarted = carousel.el.classList.contains('pdp-embla--started');
                           var slideEls = carousel.el.querySelectorAll('[data-embla-slide]');
                           var isModelSlide = slideEls[currentIndex] && slideEls[currentIndex].getAttribute('data-media-type') === 'model';
-                          var effectiveSlidesPerView = (hasIntro && !isStarted) || isModelSlide ? 1 : 2;
+                          var isNextModelSlide = slideEls[currentIndex + 1] && slideEls[currentIndex + 1].getAttribute('data-media-type') === 'model';
+                          var effectiveSlidesPerView = (hasIntro && !isStarted) || isModelSlide || isNextModelSlide ? 1 : 2;
                           var activeCount = 0;
 
                           if (thumbs[currentIndex]) {
