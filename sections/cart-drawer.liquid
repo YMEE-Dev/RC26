@@ -34,10 +34,10 @@
 -%}
 
 {%- capture cart_title -%}
-  <h3 class="drawer__heading">
+  <h3 class="drawer__heading navlink">
     {{ title_block[0].settings.title | default: cart_title_default }}
 
-    <cart-count class="cart__items-count" data-cart-count="{{ cart_item_count }}">{{ cart_item_count }}</cart-count>
+    <cart-count class="cart__items-count " data-cart-count="{{ cart_item_count }}"> {{ cart_item_count }} items</cart-count>
   </h3>
 
   <button type="button" class="drawer__close" data-cart-drawer-close aria-label="{{ 'general.accessibility.close' | t }} {{ 'cart.general.title' | t }}">
@@ -79,6 +79,10 @@
         {%- render 'cart-price' -%}
       </div>
 
+      <em class="cart__note caption text-right">
+        {{- 'cart.general.subtotal_note' | t -}}
+      </em>
+
       <div class="cart__buttons-all">
 
         <div class="cart__buttons-wrapper">
@@ -99,13 +103,28 @@
 
                 {{- 'cart.general.checkout' | t -}}
               </button>
+            </fieldset>
 
-              {%- if checkout_buttons_block[0].settings.enable_additional_buttons and additional_checkout_buttons -%}
-                <div class="additional-checkout-buttons additional-checkout-buttons--vertical">
+            {%- if checkout_buttons_block[0].settings.enable_additional_buttons and additional_checkout_buttons -%}
+              <fieldset class="cart__buttons__fieldset" data-cart-checkout-button>
+                <button
+                  type="button"
+                  class="btn btn--secondary btn--outline btn--full cart__checkout cart__express-toggle"
+                  aria-expanded="false"
+                  aria-controls="cart-express-checkout-{{ section.id }}"
+                  data-aria-toggle
+                >
+                  EXPRESS CHECKOUT
+                </button>
+
+                <div
+                  id="cart-express-checkout-{{ section.id }}"
+                  class="additional-checkout-buttons additional-checkout-buttons--vertical additional-checkout-buttons--express"
+                >
                   {{- content_for_additional_checkout_buttons -}}
                 </div>
-              {%- endif -%}
-            </fieldset>
+              </fieldset>
+            {%- endif -%}
           </div>
         </div>
 
@@ -114,10 +133,6 @@
           <a href="{{ routes.cart_url }}" class="cart__view{% if additional_checkout_buttons %} cart__view--additional-checkout-buttons{% endif %} btn btn--primary btn--outline">{{- 'cart.general.view_cart' | t -}}</a>
         {%- endif -%}
       </div>
-
-      <em class="cart__note text-center">
-        {{- 'cart.general.subtotal_note' | t -}}
-      </em>
     </div>
   </form>
 {%- endcapture -%}
