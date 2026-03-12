@@ -103,13 +103,28 @@
 
                 {{- 'cart.general.checkout' | t -}}
               </button>
+            </fieldset>
 
-              {%- if checkout_buttons_block[0].settings.enable_additional_buttons and additional_checkout_buttons -%}
-                <div class="additional-checkout-buttons additional-checkout-buttons--vertical">
+            {%- if checkout_buttons_block[0].settings.enable_additional_buttons and additional_checkout_buttons -%}
+              <fieldset class="cart__buttons__fieldset" data-cart-checkout-button>
+                <button
+                  type="button"
+                  class="btn btn--secondary btn--outline btn--full cart__checkout cart__express-toggle"
+                  aria-expanded="false"
+                  aria-controls="cart-express-checkout-{{ section.id }}"
+                  data-aria-toggle
+                >
+                  EXPRESS CHECKOUT
+                </button>
+
+                <div
+                  id="cart-express-checkout-{{ section.id }}"
+                  class="additional-checkout-buttons additional-checkout-buttons--vertical additional-checkout-buttons--express"
+                >
                   {{- content_for_additional_checkout_buttons -}}
                 </div>
-              {%- endif -%}
-            </fieldset>
+              </fieldset>
+            {%- endif -%}
           </div>
         </div>
 

@@ -37,7 +37,7 @@
         <a href="{{ line_item.url }}" aria-label="{{ line_item.title | escape }}">
           {%- if line_item.image -%}
             <div class="lazy-image is-loading">
-              {{ line_item.image | image_url: width: 180 | image_tag: widths: '90, 180, 270, 360', sizes: '90px', class: 'is-loading', loading: 'lazy', fetchpriority: fetchpriority }}
+              {{ line_item.image | image_url: width: 540 | image_tag: widths: '180, 270, 360, 540', sizes: '180px', class: 'is-loading', loading: 'eager', fetchpriority: fetchpriority }}
             </div>
           {%- endif -%}
         </a>
