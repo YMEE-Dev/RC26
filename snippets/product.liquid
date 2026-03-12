@@ -252,6 +252,7 @@
           margin: 0 auto;
           padding: 0;
           width: 100%;
+          max-width: min(var(--content-max), 1200px);
         }
 
         #MainProduct--{{ section.id }} .product__sticky-bar {
@@ -565,7 +566,6 @@
         }
 
         #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item[data-pair-role='secondary'] img {
-          text-indent: -100vw;
           overflow: hidden;
         }
       }
@@ -933,6 +933,42 @@
         fill: #fff;
       }
 
+      @media only screen and (min-width: 990px) and (max-width: 1200px) {
+        #MainProduct--{{ section.id }} {
+          overflow-x: hidden;
+        }
+        #MainProduct--{{ section.id }} .product__sticky-bar__inner {
+          max-width: min(var(--content-max), 1200px);
+          padding-left: 20px;
+          padding-right: 20px;
+          grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+        }
+        #MainProduct--{{ section.id }} .product__content-columns {
+          grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+          padding-left: 20px;
+          padding-right: 20px;
+          max-width: min(var(--content-max), 1200px);
+          margin: 0 auto;
+          box-sizing: border-box;
+        }
+        #MainProduct--{{ section.id }} .product__content-columns__main,
+        #MainProduct--{{ section.id }} .product__content-columns__aside {
+          min-width: 0;
+        }
+        #MainProduct--{{ section.id }} .form__width {
+          max-width: min(var(--content-max), 1200px);
+        }
+        #MainProduct--{{ section.id }} .pdp-embla__arrows {
+          right: auto;
+        }
+      }
+
+      @media only screen and (min-width: 990px) and (max-width: 1063px) {
+        #MainProduct--{{ section.id }} .product__content-columns__aside .product__block--buttons.has-ymee-color-picker {
+          margin-top: calc(var(--pdp-sticky-bar-height, 100px) * -1 - 40px);
+        }
+      }
+
       @media only screen and (max-width: 989px) {
         #MainProduct--{{ section.id }} .product__sticky-bar {
           padding-top: 20px;
@@ -1060,6 +1096,12 @@
         }
       }
 
+      @media only screen and (min-width: 990px) and (max-width: 1450px) {
+        #MainProduct--{{ section.id }} .product__custom-drawers-row {
+          flex-direction: column;
+          gap: 0;
+        }
+      }
       @media only screen and (max-width: 350px) {
         #MainProduct--{{ section.id }} .product__custom-drawers-row {
           flex-direction: column;
