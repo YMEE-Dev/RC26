@@ -7,33 +7,36 @@
  * made to this file may be overwritten.
  * ------------------------------------------------------------
  */
- {
+{
   "sections": {
-    "section_new_main_blog_banner_QkVDbQ": {
-      "type": "section-new-main-blog-banner",
-      "name": "Blog banner",
+    "featured-posts": {
+      "type": "featured-posts",
+      "blocks": {
+        "featured_post": {
+          "type": "featured_post",
+          "settings": {
+            "subheading": "Featured post"
+          }
+        }
+      },
+      "block_order": [
+        "featured_post"
+      ],
       "settings": {
-        "image_alt": "",
-        "show_subheading": true,
-        "subheading_prefix": "Latest in #",
-        "subheading": "",
-        "show_description": true,
-        "description_length": 120,
-        "button_text": "Read story",
-        "button_style": "btn--outline",
-        "button_type": "btn--black",
-        "button_size": "btn--small",
-        "heading_font_size": "heading-x-large",
-        "width": "wrapper--custom",
-        "padding_top": 40,
-        "padding_bottom": 40,
-        "empty_message": "No posts yet.",
-        "color_scheme": ""
+        "show_author": false,
+        "show_date": false,
+        "show_button": true,
+        "heading_font_size": "heading-medium",
+        "width": "wrapper--full",
+        "height": "five-fifty-height-hero",
+        "mobile_height": "screen-height-one-half--mobile",
+        "color_scheme": "scheme-3",
+        "padding_top": 0,
+        "padding_bottom": 0
       }
     },
     "blog": {
       "type": "blog",
-      "disabled": true,
       "settings": {
         "show_title": false,
         "show_rss": false,
@@ -52,67 +55,10 @@
         "padding_bottom": 0,
         "title_tag": "automatic"
       }
-    },
-    "section_blog_listing_QxQmjq": {
-      "type": "section-blog-listing",
-      "blocks": {
-        "blog_link_tEapNW": {
-          "type": "blog_link",
-          "settings": {
-            "blog": "culture",
-            "label": ""
-          }
-        },
-        "blog_link_AmkTEn": {
-          "type": "blog_link",
-          "settings": {
-            "blog": "fashion",
-            "label": ""
-          }
-        },
-        "blog_link_PiPjqr": {
-          "type": "blog_link",
-          "settings": {
-            "blog": "inspiration",
-            "label": ""
-          }
-        },
-        "blog_link_RHBgXa": {
-          "type": "blog_link",
-          "settings": {
-            "blog": "special-occasions",
-            "label": ""
-          }
-        }
-      },
-      "block_order": [
-        "blog_link_tEapNW",
-        "blog_link_AmkTEn",
-        "blog_link_PiPjqr",
-        "blog_link_RHBgXa"
-      ],
-      "name": "Blog listing",
-      "settings": {
-        "tag_to_exclude": "all, uncategorized, default-blog,news",
-        "view_all_text": "View all",
-        "featured_articles": [],
-        "articles_per_page": 9,
-        "columns": 3,
-        "show_tag": true,
-        "show_excerpt": true,
-        "excerpt_words": 20,
-        "title_font_size": "heading-small",
-        "width": "wrapper--custom",
-        "padding_top": 40,
-        "padding_bottom": 40,
-        "empty_message": "Select a blog in the section settings.",
-        "color_scheme": ""
-      }
     }
   },
   "order": [
-    "section_new_main_blog_banner_QkVDbQ",
-    "blog",
-    "section_blog_listing_QxQmjq"
+    "featured-posts",
+    "blog"
   ]
 }

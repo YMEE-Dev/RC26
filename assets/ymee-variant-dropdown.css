@@ -212,7 +212,7 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
 }
 
 .ymee-variant-dropdown__menu {
-  border-top: 1px solid var(--border, #b0abab);
+  border-top: 1px solid #E5E5E5;
   padding: 0;
   margin: 0;
   opacity: 0;
@@ -231,7 +231,7 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
     width: 100%;
     z-index: 5;
     background: #fff;
-    border: 1px solid var(--border, #b0abab);
+    border: 1px solid #E5E5E5;
     border-bottom: none;
     max-height: 420px;
     overflow: auto;
@@ -271,7 +271,7 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   }
 
   .ymee-variant-dropdown__option.is-selected {
-    background-color: #f6f6f6;
+    background-color: #f9f9f9;
   }
 
   .ymee-variant-dropdown__option .ymee-variant-dropdown__submit,
@@ -343,7 +343,7 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
 
   .ymee-variant-dropdown__option {
     padding-right: 15px;
-    background: #f6f6f6 !important;
+    background: #f9f9f9 !important;
   }
 
   .ymee-variant-dropdown__option.is-selected {
@@ -361,7 +361,7 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   align-items: center;
   justify-content: space-between;
   padding: 0 12px;
-  border-bottom: 1px solid var(--border, #e5e5e5);
+  border-bottom: 1px solid #E5E5E5;
   cursor: pointer;
   min-height: 45px;
   background-color: #fff;
@@ -379,11 +379,14 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
 
 .ymee-variant-dropdown__value[data-ymee-variant-dropdown-value],
 .ymee-variant-dropdown__size {
-  color: var(--text, #000);
-  font-size: var(--FONT-SIZE-BASE, 14px);
-  font-style: normal;
-  font-weight: var(--FONT-WEIGHT-BODY, 400);
-  line-height: var(--LINE-HEIGHT-BODY, 1.4);
+  color: var(--COLOR-TEXT);
+  font-family: var(--FONT-STACK-BODY);
+  font-size: var( --BTN-FONT-SIZE);
+  font-style: var(--FONT-STYLE-BODY);
+  font-weight: var(--FONT-WEIGHT-BODY);
+  line-height: var(--LINE-HEIGHT-CAPTION);
+  letter-spacing: var(--LETTER-SPACING-NAV);
+  text-transform: var(--BTN-UPPERCASE);
 }
 
 .ymee-variant-dropdown__option.is-oos .ymee-variant-dropdown__size {
@@ -392,18 +395,19 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
 }
 
 .ymee-variant-dropdown__action[data-action="notify"] {
-  color: var(--text, #000);
   text-align: right;
-  font-size: var(--FONT-SIZE-LABEL, 12px);
-  font-style: normal;
-  font-weight: var(--FONT-WEIGHT-BODY, 400);
-  line-height: var(--LINE-HEIGHT-BODY, 18px);
-  text-transform: uppercase;
-  letter-spacing: var(--LETTER-SPACING-BODY, 0.04em);
   text-decoration: none;
   border: 0;
   background: transparent;
   cursor: pointer;
+  color: var(--COLOR-TEXT);
+  font-family: var(--FONT-STACK-BODY);
+  font-size: var( --BTN-FONT-SIZE);
+  font-style: var(--FONT-STYLE-BODY);
+  font-weight: var(--FONT-WEIGHT-BODY);
+  line-height: var(--LINE-HEIGHT-CAPTION);
+  letter-spacing: var(--LETTER-SPACING-NAV);
+  text-transform: var(--BTN-UPPERCASE);
 }
 
 .ymee-variant-dropdown__option .ymee-variant-dropdown__note {
@@ -448,20 +452,27 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   background: transparent;
   font: inherit;
   cursor: pointer;
-  font-size: var(--FONT-SIZE-LABEL, 12px);
-  font-weight: var(--FONT-WEIGHT-BODY, 400);
-    line-height: var(--LINE-HEIGHT-BODY, 18px);
-  text-transform: uppercase;
-  letter-spacing: var(--LETTER-SPACING-BODY, 0.04em);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
+  color: var(--COLOR-TEXT);
+  font-family: var(--FONT-STACK-BODY);
+  font-size: var( --BTN-FONT-SIZE);
+  font-style: var(--FONT-STYLE-BODY);
+  font-weight: 600;
+  line-height: var(--LINE-HEIGHT-CAPTION);
+  letter-spacing: var(--LETTER-SPACING-NAV);
+  text-transform: var(--BTN-UPPERCASE);
 }
 
-.ymee-variant-dropdown__bag-icon {
+.ymee-variant-dropdown__submit svg {
   width: 18px;
-  height: 18px;
+  height: 19px;
   flex-shrink: 0;
+}
+
+.ymee-variant-dropdown__submit svg path {
+  fill: var(--COLOR-TEXT);
 }
 
 .ymee-variant-dropdown__accelerated {
@@ -486,18 +497,24 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
 .ymee-variant-dropdown__sizing-link {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  color: var(--text, #000);
-  font-size: var(--FONT-SIZE-LABEL, 12px);
-  font-weight: var(--FONT-WEIGHT-BODY, 400);
-  line-height: var(--LINE-HEIGHT-BODY, 18px);
+  gap: 10px;
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
 }
 
 .ymee-variant-dropdown__sizing-link:hover {
-  opacity: 0.7;
+  opacity: 1;
+}
+
+.ymee-variant-dropdown__note,
+.ymee-variant-dropdown__sizing-link {
+  color: var(--COLOR-TEXT);
+  font-family: var(--FONT-STACK-BODY);
+  font-size: var( --BTN-FONT-SIZE);
+  font-style: var(--FONT-STYLE-BODY);
+  font-weight: var(--FONT-WEIGHT-BODY);
+  line-height: var(--LINE-HEIGHT-CAPTION);
 }
 
 @media only screen and (max-width: 749px) {
@@ -506,9 +523,9 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   }
 }
 
-.ymee-variant-dropdown__tape-icon {
-  width: 20px;
-  height: 20px;
+.ymee-variant-dropdown__sizing-link svg {
+  width: 18px;
+  height: 13px;
   flex-shrink: 0;
 }
 
@@ -582,7 +599,7 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
 }
 
 .ymee-variant-sheet__footer {
-  background: #f6f6f6;
+  background: #f9f9f9;
   padding: 12px;
   flex: 0 0 auto;
 }

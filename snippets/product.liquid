@@ -172,10 +172,6 @@
 
     {%- if template.name == 'product' and featured_product == false -%}
 
-      body.template-product .header__desktop__upper {
-        overflow-x: hidden;
-      }
-
       body.template-product header-component.js__header__stuck .theme__header::after {
         content: "";
         background: transparent;
@@ -256,13 +252,14 @@
           margin: 0 auto;
           padding: 0;
           width: 100%;
+          max-width: min(var(--content-max), 1200px);
         }
 
         #MainProduct--{{ section.id }} .product__sticky-bar {
           position: relative;
           top: auto;
           z-index: 6;
-          border-top: 1px solid var(--border);
+          border-top: 1px solid #E5E5E5;
           margin: 0;
           width: 100%;
         }
@@ -285,7 +282,7 @@
         #MainProduct--{{ section.id }} .product__content-columns {
           display: grid;
           grid-template-columns: 7fr 3fr;
-          gap: var(--inner);
+          gap: 50px;
           align-items: start;
         }
 
@@ -345,6 +342,10 @@
         font-weight: var(--FONT-WEIGHT-BODY);
         letter-spacing: var(--LETTER-SPACING-NAV);
         text-transform: uppercase;
+      }
+
+      #MainProduct--{{ section.id }} .product__content-columns__aside .divider {
+        border-color: #E5E5E5;
       }
 
       #MainProduct--{{ section.id }} .product__content-columns__aside .link-with-icon__text {
@@ -521,7 +522,7 @@
       }
 
       #MainProduct--{{ section.id }} .pdp-embla--desktop.pdp-embla--transitioning .pdp-embla__slide:first-child {
-        transition: flex-basis 500ms cubic-bezier(.4,0,.2,1);
+        transition: flex-basis 300ms cubic-bezier(.4,0,.2,1);
       }
 
       #MainProduct--{{ section.id }} .pdp-embla--desktop:not(.pdp-embla--started) .pdp-embla__slide:first-child {
@@ -565,7 +566,6 @@
         }
 
         #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item[data-pair-role='secondary'] img {
-          text-indent: -100vw;
           overflow: hidden;
         }
       }
@@ -588,6 +588,19 @@
         width: 45px;
         height: 45px;
         object-fit: cover;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-thumbs--desktop .product__thumb__link .icon-media-model {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 22px;
+        height: 22px;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-thumbs--desktop .product__thumb__link[data-media-type="model"] img {
+        display: none;
       }
 
       #MainProduct--{{ section.id }} .pdp-thumbs--desktop .product__thumb__link--pair img {
@@ -624,6 +637,13 @@
         height: 100%;
       }
 
+      #MainProduct--{{ section.id }} .pdp-embla__slide[data-media-type="model"] .product__slide {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #F9F9F9;
+       }
+
       @media only screen and (max-width: 749px) {
         #MainProduct--{{ section.id }} .pdp-embla__slide .product__slide {
           width: 100%;
@@ -637,10 +657,12 @@
         justify-content: center;
         position: relative;
         background-color: #F9F9F9;
+        aspect-ratio: 1 / 1;
+        min-height: 400px;
+        width: 100%;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .shopify-model-viewer-ui {
-        mix-blend-mode: multiply;
         background-color: #F9F9F9;
       }
 
@@ -651,6 +673,7 @@
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media > model-viewer,
+      #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media > .webgi-container,
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media > video,
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media > iframe {
         width: 100%;
@@ -659,10 +682,53 @@
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media > model-viewer {
         display: block;
-        margin: auto;
         pointer-events: auto;
+        position: absolute;
+        inset: 0;
+        margin: auto;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media > .webgi-container {
+        display: block;
+        pointer-events: auto;
+        width: 100%;
+        height: 100%;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla__slide .webgi-container canvas {
+        width: 100% !important;
+        height: 100% !important;
+        display: block;
+        mix-blend-mode: multiply;
+      }
+
+      .webgi-loader {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #F9F9F9;
+        transition: opacity 0.4s ease;
+      }
+      .webgi-loader--done {
         opacity: 0;
-        transition: opacity 200ms ease;
+        pointer-events: none;
+      }
+      .webgi-spinner {
+        width: 50px !important;
+        height: 50px !important;
+        opacity: 0.4;
+        animation: webgi-pulse 1.4s ease-in-out infinite;
+        display: block;
+        left: 50% !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%) !important;
+      }
+      @keyframes webgi-pulse {
+        0%, 100% { opacity: 0.2; transform: scale(0.95); }
+        50% { opacity: 0.5; transform: scale(1.05); }
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide model-viewer::part(default-progress-bar) {
@@ -840,6 +906,19 @@
         object-fit: cover;
       }
 
+      #MainProduct--{{ section.id }} .product__thumb__link .icon-media-model {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 22px;
+        height: 22px;
+      }
+
+      #MainProduct--{{ section.id }} .product__thumb__link[data-media-type="model"] img {
+        display: none;
+      }
+
       #MainProduct--{{ section.id }} .product__thumb.is-active {
         position: relative;
         z-index: 2;
@@ -878,6 +957,42 @@
       #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart]:hover .btn__icon path,
       #MainProduct--{{ section.id }} .product__submit__buttons .btn[data-popup-open]:hover .btn__icon path {
         fill: #fff;
+      }
+
+      @media only screen and (min-width: 990px) and (max-width: 1200px) {
+        #MainProduct--{{ section.id }} {
+          overflow-x: hidden;
+        }
+        #MainProduct--{{ section.id }} .product__sticky-bar__inner {
+          max-width: min(var(--content-max), 1200px);
+          padding-left: 20px;
+          padding-right: 20px;
+          grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+        }
+        #MainProduct--{{ section.id }} .product__content-columns {
+          grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+          padding-left: 20px;
+          padding-right: 20px;
+          max-width: min(var(--content-max), 1200px);
+          margin: 0 auto;
+          box-sizing: border-box;
+        }
+        #MainProduct--{{ section.id }} .product__content-columns__main,
+        #MainProduct--{{ section.id }} .product__content-columns__aside {
+          min-width: 0;
+        }
+        #MainProduct--{{ section.id }} .form__width {
+          max-width: min(var(--content-max), 1200px);
+        }
+        #MainProduct--{{ section.id }} .pdp-embla__arrows {
+          right: auto;
+        }
+      }
+
+      @media only screen and (min-width: 990px) and (max-width: 1063px) {
+        #MainProduct--{{ section.id }} .product__content-columns__aside .product__block--buttons.has-ymee-color-picker {
+          margin-top: calc(var(--pdp-sticky-bar-height, 100px) * -1 - 40px);
+        }
       }
 
       @media only screen and (max-width: 989px) {
@@ -924,7 +1039,6 @@
         }
         #MainProduct--{{ section.id }} .product__custom-drawers-row {
           grid-area: custom-drawers;
-          justify-content: space-between;
           margin-bottom: 0;
         }
         #MainProduct--{{ section.id }} .product-accordions-container {
@@ -1005,6 +1119,18 @@
         #MainProduct--{{ section.id }} .product__title-price > .product__block,
         #MainProduct--{{ section.id }} .product__title-price .shop-pay-terms {
           margin: 0;
+        }
+      }
+
+      @media only screen and (min-width: 990px) and (max-width: 1450px) {
+        #MainProduct--{{ section.id }} .product__custom-drawers-row {
+          flex-direction: column;
+          gap: 0;
+        }
+      }
+      @media only screen and (max-width: 350px) {
+        #MainProduct--{{ section.id }} .product__custom-drawers-row {
+          flex-direction: column;
         }
       }
 
@@ -1230,17 +1356,28 @@
                         embla.scrollTo(targetIndex, true);
                       }
                       updateArrows();
-                      // Wait for CSS flex-basis transition to finish, then reInit
-                      setTimeout(function () {
+
+                      var firstSlide = carouselEl.querySelector('[data-embla-slide]');
+                      var done = false;
+                      function finishTransition() {
+                        if (done) return;
+                        done = true;
+                        if (firstSlide) firstSlide.removeEventListener('transitionend', onTransitionEnd);
                         embla.reInit();
                         if (typeof targetIndex === 'number') {
-                          // Smooth scroll to target after reInit
-                          embla.scrollTo(targetIndex);
+                          embla.scrollTo(targetIndex, true);
                         }
                         introTransitioning = false;
                         carouselEl.classList.remove('pdp-embla--transitioning');
                         updateArrows();
-                      }, 550);
+                        updateDesktopThumbs();
+                      }
+                      function onTransitionEnd(e) {
+                        if (e.propertyName === 'flex-basis') finishTransition();
+                      }
+                      if (firstSlide) firstSlide.addEventListener('transitionend', onTransitionEnd);
+                      // Fallback in case transitionend doesn't fire
+                      setTimeout(finishTransition, 350);
                     }
 
                     // Detect swipe/drag on the viewport for intro stage transitions
@@ -1332,7 +1469,9 @@
                         var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
                         var thumbsHolder = productImagesEl.querySelector('.pdp-thumbs--desktop .product__thumbs__holder');
                         var currentIndex = embla.selectedScrollSnap();
-                        var effectiveSlidesPerView = (hasIntroStage && !carouselStarted) ? 1 : 2;
+                        var slideEls = carouselEl.querySelectorAll('[data-embla-slide]');
+                        var isModelSlide = slideEls[currentIndex] && slideEls[currentIndex].getAttribute('data-media-type') === 'model';
+                        var effectiveSlidesPerView = (hasIntroStage && !carouselStarted) || isModelSlide ? 1 : 2;
                         var activeCount = 0;
 
                         thumbs.forEach(function(thumb) {
@@ -1510,7 +1649,9 @@
                           // On load, intro state is active (slide 1 at 100%) so only 1 slide is visually shown
                           var hasIntro = carousel.el.querySelectorAll('[data-embla-slide]').length > 1;
                           var isStarted = carousel.el.classList.contains('pdp-embla--started');
-                          var effectiveSlidesPerView = (hasIntro && !isStarted) ? 1 : 2;
+                          var slideEls = carousel.el.querySelectorAll('[data-embla-slide]');
+                          var isModelSlide = slideEls[currentIndex] && slideEls[currentIndex].getAttribute('data-media-type') === 'model';
+                          var effectiveSlidesPerView = (hasIntro && !isStarted) || isModelSlide ? 1 : 2;
                           var activeCount = 0;
 
                           if (thumbs[currentIndex]) {
@@ -1576,7 +1717,7 @@
                 <div class="pdp-embla__viewport" data-embla-viewport>
                   <div class="pdp-embla__container">
                     {%- for media in ordered_media -%}
-                      <div class="pdp-embla__slide" data-embla-slide>
+                      <div class="pdp-embla__slide" data-embla-slide data-media-type="{{ media.media_type }}">
                         {%- render 'media',
                           media: media,
                           featured_media: featured_media,
@@ -1611,7 +1752,7 @@
                     {%- if media_count > 0 -%}
                       {%- assign intro_media = ordered_media[0] -%}
                       {%- assign intro_next_media = ordered_media[1] -%}
-                      <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="single" data-primary-media-id="{{ section.id }}-{{ intro_media.id }}">
+                      <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="single" data-primary-media-id="{{ section.id }}-{{ intro_media.id }}" data-media-type="{{ intro_media.media_type }}">
                         <div class="pdp-embla__pair">
                           <div class="pdp-embla__pair__item">
                             {%- render 'media',
@@ -1627,7 +1768,7 @@
                       </div>
 
                       {%- if intro_next_media != blank -%}
-                        <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="single" data-primary-media-id="{{ section.id }}-{{ intro_next_media.id }}">
+                        <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="single" data-primary-media-id="{{ section.id }}-{{ intro_next_media.id }}" data-media-type="{{ intro_next_media.media_type }}">
                           <div class="pdp-embla__pair">
                             <div class="pdp-embla__pair__item">
                               {%- render 'media',
@@ -1645,7 +1786,7 @@
 
                       {%- if media_count > 2 -%}
                         {%- for media in ordered_media offset: 2 -%}
-                          <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="single" data-primary-media-id="{{ section.id }}-{{ media.id }}">
+                          <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="single" data-primary-media-id="{{ section.id }}-{{ media.id }}" data-media-type="{{ media.media_type }}">
                             <div class="pdp-embla__pair">
                               <div class="pdp-embla__pair__item">
                                 {%- render 'media',
@@ -1689,6 +1830,7 @@
                           href="{{ media.preview_image.src | image_url }}"
                           aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
                           data-media-id="{{ section.id }}-{{ media.id }}"
+                          data-media-type="{{ media.media_type }}"
                           data-thumb-link
                         >
                           {%- liquid
@@ -1716,6 +1858,7 @@
                           class="product__thumb__link"
                           href="{{ media.preview_image.src | image_url }}"
                           data-media-id="{{ section.id }}-{{ media.id }}"
+                          data-media-type="{{ media.media_type }}"
                           data-thumb-link
                         >
                           {%- liquid
@@ -1769,6 +1912,7 @@
                           href="{{ media.preview_image.src | image_url }}"
                           aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
                           data-media-id="{{ section.id }}-{{ media.id }}"
+                          data-media-type="{{ media.media_type }}"
                           data-thumb-link
                         >
                           {%- liquid
@@ -1901,7 +2045,8 @@
                     product: product,
                     block: price_block,
                     block_style: price_block_style,
-                    onboarding_product: onboarding_product
+                    onboarding_product: onboarding_product,
+                    pdp_sticky_price: true
                   -%}
                 {%- endif -%}
               </div>
@@ -2069,7 +2214,9 @@
                       product: product,
                       product_form_id: product_form_id,
                       preorder: preorder,
-                      onboarding_product: onboarding_product
+                      onboarding_product: onboarding_product,
+                      ring_sizing_link: block.settings.ring_sizing_link,
+                      bracelet_sizing_link: block.settings.bracelet_sizing_link
                     -%}
 
                   {%- when 'description' -%}
@@ -2530,7 +2677,9 @@
                         product: product,
                         product_form_id: product_form_id,
                         preorder: preorder,
-                        onboarding_product: onboarding_product
+                        onboarding_product: onboarding_product,
+                        ring_sizing_link: buttons_block.settings.ring_sizing_link,
+                        bracelet_sizing_link: buttons_block.settings.bracelet_sizing_link
                       -%}
                     {%- endif -%}
 
@@ -2593,6 +2742,7 @@
 
                       @media only screen and (max-width: 749px) {
                         .product__custom-drawers-row {
+                          gap: 10px;
                           overflow: hidden;
                           scrollbar-width: none;
                           overflow-x: auto;
