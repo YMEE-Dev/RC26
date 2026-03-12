@@ -590,6 +590,19 @@
         object-fit: cover;
       }
 
+      #MainProduct--{{ section.id }} .pdp-thumbs--desktop .product__thumb__link .icon-media-model {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 22px;
+        height: 22px;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-thumbs--desktop .product__thumb__link[data-media-type="model"] img {
+        display: none;
+      }
+
       #MainProduct--{{ section.id }} .pdp-thumbs--desktop .product__thumb__link--pair img {
         box-sizing: border-box;
       }
@@ -891,6 +904,19 @@
         width: 45px;
         height: 45px;
         object-fit: cover;
+      }
+
+      #MainProduct--{{ section.id }} .product__thumb__link .icon-media-model {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 22px;
+        height: 22px;
+      }
+
+      #MainProduct--{{ section.id }} .product__thumb__link[data-media-type="model"] img {
+        display: none;
       }
 
       #MainProduct--{{ section.id }} .product__thumb.is-active {
@@ -1804,6 +1830,7 @@
                           href="{{ media.preview_image.src | image_url }}"
                           aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
                           data-media-id="{{ section.id }}-{{ media.id }}"
+                          data-media-type="{{ media.media_type }}"
                           data-thumb-link
                         >
                           {%- liquid
@@ -1831,6 +1858,7 @@
                           class="product__thumb__link"
                           href="{{ media.preview_image.src | image_url }}"
                           data-media-id="{{ section.id }}-{{ media.id }}"
+                          data-media-type="{{ media.media_type }}"
                           data-thumb-link
                         >
                           {%- liquid
@@ -1884,6 +1912,7 @@
                           href="{{ media.preview_image.src | image_url }}"
                           aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
                           data-media-id="{{ section.id }}-{{ media.id }}"
+                          data-media-type="{{ media.media_type }}"
                           data-thumb-link
                         >
                           {%- liquid
