@@ -160,8 +160,9 @@
       var controls = camera ? camera.controls : null;
       if (controls) {
         controls.autoRotate = true;
-        controls.autoRotateSpeed = 3;
-        controls.dampingFactor = 0.25;
+        controls.autoRotateSpeed = 5;
+        controls.enableDamping = false;
+        controls.dampingFactor = 0;
         controls.zoomSpeed = 1.0;
         if (typeof controls.getDistance === "function") {
           var dist = controls.getDistance();
