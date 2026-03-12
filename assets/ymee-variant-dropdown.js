@@ -187,17 +187,31 @@
       if (emblaRoot._emblaInstance && typeof emblaRoot._emblaInstance.reInit === 'function') {
         try {
           emblaRoot._emblaInstance.reInit();
-        } catch (e) {
-          /* no-op */
-        }
+        } catch (e) {}
       }
     });
 
     var activeMediaId = productImagesEl.getAttribute('data-active-media') || '';
     if (visibleMediaIds.length && activeMediaId && visibleMediaIds.indexOf(activeMediaId) === -1) {
+      // Prefer first non-model visible media; fall back to visibleMediaIds[0]
+      var preferredId = visibleMediaIds[0];
+      var slides = productImagesEl.querySelectorAll("[data-embla-slide]");
+      for (var si = 0; si < visibleMediaIds.length; si++) {
+        var mid = visibleMediaIds[si];
+        var found = false;
+        slides.forEach(function (slide) {
+          if (found) return;
+          var mediaEl = slide.querySelector('[data-media-id="' + mid + '"]');
+          if (mediaEl && slide.getAttribute("data-media-type") !== "model") {
+            preferredId = mid;
+            found = true;
+          }
+        });
+        if (found) break;
+      }
       productImagesEl.dispatchEvent(
-        new CustomEvent('theme:media:select', {
-          detail: { id: visibleMediaIds[0] },
+        new CustomEvent("theme:media:select", {
+          detail: { id: preferredId },
         })
       );
     }
