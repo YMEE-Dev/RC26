@@ -1301,6 +1301,28 @@
   }
   FetchError.prototype = Error.prototype;
 
+  function safeJsonParse(text) {
+    if (typeof text !== "string" || text.trim() === "") {
+      return null;
+    }
+
+    try {
+      return JSON.parse(text);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function parseResponseBody(response) {
+    return response.text().then((text) => {
+      return {
+        response: response,
+        text: text,
+        json: safeJsonParse(text),
+      };
+    });
+  }
+
   const classes$i = {
     animated: "is-animated",
     active: "is-active",
@@ -1859,16 +1881,34 @@
         method: "POST",
         headers: {
           "X-Requested-With": "XMLHttpRequest",
-          Accept: "application/javascript",
+          Accept: "application/json",
         },
         body: formData,
       })
-        .then((response) => {
-          return response.json();
-        })
-        .then((response) => {
-          if (response.status) {
-            this.addToCartError(response, button);
+        .then(parseResponseBody)
+        .then(({ response, json, text }) => {
+          if (!response.ok) {
+            throw (
+              json || {
+                status: response.status,
+                statusText: response.statusText,
+                message: "Unable to add this item to your cart.",
+                description: response.statusText || text || "Unexpected server response.",
+              }
+            );
+          }
+
+          const addResponse = json || {};
+
+          if (!json) {
+            console.warn("Cart add response was empty or not JSON. Refreshing cart state.", {
+              status: response.status,
+              contentType: response.headers.get("content-type"),
+            });
+          }
+
+          if (addResponse.status) {
+            this.addToCartError(addResponse, button);
 
             if (button) {
               button.classList.remove(classes$i.loading);
@@ -1886,7 +1926,7 @@
               button.dispatchEvent(
                 new CustomEvent("theme:product:add", {
                   detail: {
-                    response: response,
+                    response: addResponse,
                     button: button,
                   },
                   bubbles: true,
@@ -1904,7 +1944,15 @@
         })
         .catch((error) => {
           this.addToCartError(error, button);
-          this.enableCartButtons();
+
+          if (button) {
+            button.classList.remove(classes$i.loading);
+            button.disabled = false;
+          }
+
+          if (this.cart) {
+            this.enableCartButtons();
+          }
         });
     }
 
@@ -2073,11 +2121,12 @@
 
     cartErrorsHandler(response) {
       if (!response.ok) {
-        return response.json().then(function (json) {
+        return parseResponseBody(response).then(function ({ json, text }) {
           const e = new FetchError({
-            status: response.statusText,
+            status: response.status,
             headers: response.headers,
             json: json,
+            body: text,
           });
           throw e;
         });
@@ -2122,9 +2171,25 @@
         }
 
         if (errorContainer) {
-          let errorMessage = `${data.message}: ${data.description}`;
+          const normalizedData = data?.json && typeof data.json === "object" ? data.json : data;
+          const message = typeof normalizedData?.message === "string" ? normalizedData.message : "";
+          const description = typeof normalizedData?.description === "string" ? normalizedData.description : "";
+          const statusText = typeof normalizedData?.statusText === "string" ? normalizedData.statusText : "";
+          const genericError = typeof normalizedData?.error === "string" ? normalizedData.error : "";
+          const errorMessageDefault = "Unable to add this item to your cart. Please try again.";
+          let errorMessage = errorMessageDefault;
 
-          if (data.message == data.description) {
+          if (message && description && message !== description) {
+            errorMessage = `${message}: ${description}`;
+          } else if (description) {
+            errorMessage = description;
+          } else if (message) {
+            errorMessage = message;
+          } else if (genericError) {
+            errorMessage = genericError;
+          } else if (statusText) {
+            errorMessage = statusText;
+          } else if (data instanceof Error && data.message) {
             errorMessage = data.message;
           }
 
@@ -2603,7 +2668,7 @@
           countValue = "9+";
         }
 
-        this.innerText = countValue;
+        this.innerText = countValue + " items";
       }
     }
   }
@@ -6502,11 +6567,12 @@
 
     upsellErrorsHandler(response) {
       if (!response.ok) {
-        return response.json().then(function (json) {
+        return parseResponseBody(response).then(function ({ json, text }) {
           const e = new FetchError({
-            status: response.statusText,
+            status: response.status,
             headers: response.headers,
             json: json,
+            body: text,
           });
           throw e;
         });
