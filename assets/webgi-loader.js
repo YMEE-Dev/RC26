@@ -98,34 +98,22 @@
       var isMobile = navigator.maxTouchPoints > 0 || window.innerWidth <= 768;
 
       var ssr = viewer.getPlugin(SSRPlugin);
-      if (ssr) {
-        ssr.enabled = !isMobile;
-      }
+      if (ssr) ssr.enabled = false;
 
       var ssao = viewer.getPlugin(SSAOPlugin);
-      if (ssao) {
-        ssao.enabled = !isMobile;
-        if (!isMobile) {
-          ssao.intensity = 1.2;
-          ssao.radius = 0.4;
-        }
-      }
+      if (ssao) ssao.enabled = false;
 
       var ground = viewer.getPlugin(GroundPlugin);
       if (ground) {
         ground.enabled = true;
         ground.shadowBaker.attachedMesh.material.transparent = true;
         ground.shadowBaker.shadowIntensity = 0.6;
-        ground.shadowBaker.shadowMapSize = 2048;
+        ground.shadowBaker.shadowMapSize = 4096;
+        ground.shadowBaker.autoUpdate = false;
       }
 
       var envMap = await manager.importer.importSinglePath(ENV_MAP_URL);
       viewer.scene.setEnvironment(envMap);
-
-      viewer.scene.addEventListener('addSceneObject', function () {
-        var ldr = container.querySelector('.webgi-loader');
-        if (ldr) ldr.classList.add('webgi-loader--done');
-      });
 
       var options = {
         autoCenter: true,
@@ -139,17 +127,44 @@
       if (bloom) bloom.enabled = false;
 
       if (ground) {
-        ground.material.aoMapIntensity = 0.8;
+        ground.material.aoMapIntensity = 0.3;
+        if (ground.shadowBaker && typeof ground.shadowBaker.bake === "function") {
+          await ground.shadowBaker.bake();
+        } else if (ground.shadowBaker && typeof ground.shadowBaker.needsUpdate !== "undefined") {
+          ground.shadowBaker.needsUpdate = true;
+        }
       }
 
-      var controls = viewer.scene.activeCamera.controls;
+      var camera = viewer.scene.activeCamera;
+      if (camera && typeof camera.positionTargetUpdated === "function") {
+        camera.positionTargetUpdated(true);
+      }
+      var controls = camera ? camera.controls : null;
       if (controls) {
         controls.autoRotate = true;
-        controls.autoRotateSpeed = 2;
+        controls.autoRotateSpeed = 3;
         controls.dampingFactor = 0.25;
         controls.zoomSpeed = 1.0;
+        if (typeof controls.getDistance === "function") {
+          var dist = controls.getDistance();
+          controls.minDistance = dist * 0.7;
+          controls.maxDistance = dist * 2;
+          if (typeof controls.dollyTo === "function") {
+            controls.dollyTo(dist * 0.8, true);
+          } else if (typeof controls.zoom === "number") {
+            controls.zoom = controls.zoom * 1.2;
+          }
+        }
         controls.update();
       }
+
+      viewer.renderer.refreshPipeline();
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          var ldr = container.querySelector(".webgi-loader");
+          if (ldr) ldr.classList.add("webgi-loader--done");
+        });
+      });
 
       var resizeObserver = new ResizeObserver(function () {
         var rect = canvas.getBoundingClientRect();
