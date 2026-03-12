@@ -1,3389 +1,418 @@
-{%- comment -%}
-  Section: RC Heritage Timeline
-  Source migrated from assets/preview.html
-{%- endcomment -%}
+{{ 'roberto-coin-story.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'roberto-coin-story.js' | asset_url }}" defer="defer"></script>
 
-{%- style -%}
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body { font-family: var(--body); background: #0b1d17; overflow-x: hidden; }
-    img { display: block; max-width: 100%; }
-    .rc-heritage-page figure.image-wrapper { margin: 0; }
-    a { text-decoration: none; color: inherit; }
+{%- liquid
+  assign section_id = 'rc-story-' | append: section.id
+  assign history_id = section_id | append: '-history'
+  assign creator_id = section_id | append: '-creator'
+  assign ruby_id = section_id | append: '-ruby'
+  assign timeline_id = section_id | append: '-timeline'
+-%}
 
-    :root {
-      --ruby:   #B3261E;
-      --green:  #26564C;
-      --teal:   #397E70;
-      --dark:   #27574D;
-      --gold:   #B29437;
-      --white:  #FFFFFF;
-      --light:  #E5E5E5;
-      --timeline-ruby-red: #A21616;
-      --head:   var(--font-heading-family, 'Portrait LC', Georgia, serif);
-      --body:   var(--font-body-family, 'Inter', sans-serif);
-    }
-    .hero {
-      --hero-foreground-shift: 100px;
-    }
+<section
+  id="{{ section_id }}"
+  class="rc-story"
+  style="
+    --bg: {{ section.settings.background_color }};
+    --bg-soft: {{ section.settings.background_soft_color }};
+    --bg-glow: {{ section.settings.background_glow_color }};
+    --text: {{ section.settings.text_color }};
+    --muted: {{ section.settings.text_color | color_modify: 'alpha', 0.62 }};
+    --dim: {{ section.settings.text_color | color_modify: 'alpha', 0.34 }};
+    --accent: {{ section.settings.accent_color }};
+    --accent-soft: {{ section.settings.accent_color | color_modify: 'alpha', 0.35 }};
+    --logo-color: {{ section.settings.logo_color }};
+    --today-color: {{ section.settings.today_color }};
+    --active-year-color: {{ section.settings.active_year_color }};
+    --year-size: {{ section.settings.year_size }}px;
+    --copy-size: {{ section.settings.caption_size }}px;
+    --panel-height: {{ section.settings.panel_height }}vh;
+  "
+  data-section-id="{{ section.id }}"
+>
+  <div class="page-shell">
+    <aside class="site-nav site-nav-left" aria-label="Primary">
+      <button class="search-toggle" aria-label="Search">
+        <span class="search-icon"></span>
+      </button>
+      <nav>
+        <a href="{{ section.settings.left_link_1_url }}">{{ section.settings.left_link_1_label }}</a>
+        <a href="{{ section.settings.left_link_2_url }}">{{ section.settings.left_link_2_label }}</a>
+        <a href="{{ section.settings.left_link_3_url }}">{{ section.settings.left_link_3_label }}</a>
+        <a href="{{ section.settings.left_link_4_url }}">{{ section.settings.left_link_4_label }}</a>
+      </nav>
+    </aside>
 
-    /* Pull this first section up so it aligns under the top header instead of starting below it. */
-    .rc-heritage-page {
-      margin-top: calc((var(--header-height, 0px) + var(--announcement-height, 0px)) * -1);
-    }
+    <aside class="site-nav site-nav-right" aria-label="Utility">
+      <nav>
+        <a href="{{ section.settings.right_link_1_url }}">{{ section.settings.right_link_1_label }}</a>
+        <a href="{{ section.settings.right_link_2_url }}">{{ section.settings.right_link_2_label }}</a>
+        <a href="{{ section.settings.right_link_3_url }}">{{ section.settings.right_link_3_label }}</a>
+        <a href="{{ section.settings.right_link_4_url }}">{{ section.settings.right_link_4_label }}</a>
+      </nav>
+      <a class="bag-link" href="{{ section.settings.bag_link_url }}" aria-label="Shopping bag">
+        <span class="bag-icon"></span>
+        <span class="bag-count">{{ section.settings.bag_count }}</span>
+      </a>
+    </aside>
 
-    /* ═══════════════════════════════════════
-       HERO
-    ═══════════════════════════════════════ */
-    .hero {
-      position: relative;
-      width: 100%;
-      min-height: calc(100vh + var(--header-height, 0px) + var(--announcement-height, 0px));
-      background: transparent;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
+    <main>
+      <section class="hero" id="{{ section_id }}-top">
+        <header class="brand-header">
+          <div class="brand-logo" aria-label="Roberto Coin">
+            <svg width="814" height="76" viewBox="0 0 814 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g clip-path="url(#clip0_5975_3294)">
+                <path d="M583.434 0.939453C591.581 0.939453 600.78 2.92969 606.803 6.42937L605.391 25.9404H603.854C600.554 11.1031 591.694 3.39929 583.434 1.53205V0.950634V0.939453Z" fill="black"/>
+                <path d="M317.023 2.33728V1.75586C331.895 1.75586 341.455 8.062 341.455 20.3277C341.455 28.501 332.607 36.5626 321.747 38.3069V37.6025C326.584 34.3264 329.533 27.4388 329.533 19.7351C329.533 12.0313 326.109 3.96972 317.023 2.33728Z" fill="black"/>
+                <path d="M249.625 1.75586H272.644L272.17 21.9601H270.633C266.858 9.58263 261.66 6.08294 256.349 4.56231L249.625 2.57208V1.75586Z" fill="black"/>
+                <path d="M269.098 41.8062L250.215 36.2045V35.6231L267.798 31.7656L269.098 41.8062Z" fill="black"/>
+                <path d="M29.2422 1.75586C44.1137 1.75586 53.674 8.062 53.674 20.3277C53.674 28.501 44.8256 36.5626 33.9658 38.3069V37.6025C38.8025 34.3264 41.7519 27.4388 41.7519 19.7351C41.7519 12.0313 38.3278 3.96972 29.2422 2.33728V1.75586Z" fill="black"/>
+                <path d="M26.5309 73.8063H-0.5V72.4087L1.86181 71.3576C6.23513 69.3674 7.6477 67.9698 7.6477 62.4799V13.0818C7.6477 7.59185 6.23513 6.19422 1.86181 4.20398L-0.5 3.15296V1.74414H20.9823V2.32556L18.3832 3.958V35.4887L22.6322 38.0603V38.6418L18.3832 40.632V62.4687C18.3832 67.9586 19.7958 69.3562 24.1691 71.3465L26.5309 72.3975V73.7951V73.8063Z" fill="black"/>
+                <path d="M64.8861 69.7251C62.0497 72.7664 58.3996 74.7455 55.0885 74.7455C50.0146 74.7455 47.0651 71.4806 40.0927 58.3987L32.5439 44.154C31.4817 42.0519 29.8318 40.5313 27.8203 39.2455V38.6641C37.8552 39.2455 43.4038 42.7452 45.8786 47.0722L56.2638 65.4092C58.3883 69.1437 59.8009 69.7251 64.8748 69.1437V69.7251H64.8861Z" fill="black"/>
+                <path d="M101.602 1.75519C90.1545 4.79645 82.0068 19.276 82.0068 36.9086C82.0068 56.1736 90.1545 71.4805 101.602 73.9292V74.6336C82.8317 73.2359 69.7344 57.6942 69.7344 36.9086C69.7344 18.9182 82.843 4.20385 101.602 1.05078V1.75519Z" fill="black"/>
+                <path d="M113.523 74.6219V73.9174C124.971 71.4688 133.119 56.1619 133.119 36.8968C133.119 19.2642 124.971 4.78473 113.523 1.74347V1.03906C132.294 4.19213 145.391 18.9065 145.391 36.8968C145.391 57.6825 132.294 73.213 113.523 74.6219Z" fill="black"/>
+                <path d="M177.968 36.0813L173.719 38.0715V71.4695L176.793 73.2249V73.8063H154.836V72.4087L157.198 71.3576C161.56 69.3674 162.984 67.9698 162.984 62.4799L163.097 13.0818C163.097 7.59185 161.684 6.19422 157.311 4.20398L154.949 3.15296V1.74414H176.782V2.32556L173.708 4.08099V32.9282L177.957 35.4999V36.0813H177.968Z" fill="black"/>
+                <path d="M184.465 73.8068H180.578V73.2254C197.811 70.542 200.885 65.2868 200.885 53.4908C200.885 41.6947 194.749 38.1951 183.302 36.3278L181.889 36.093L182.126 35.5116C184.251 35.3886 185.901 35.1538 187.2 35.042C191.8 32.0119 194.76 25.5828 194.76 18.5834C194.76 11.1033 191.336 3.9809 182.251 2.46027V1.75586C197.122 1.75586 206.682 7.59239 206.682 19.0418C206.682 26.1642 199.721 32.4703 190.986 34.6842H191.461C204.321 34.6842 212.706 43.9086 212.706 52.4398C212.706 66.5727 202.671 73.8068 184.499 73.8068" fill="black"/>
+                <path d="M245.488 36.5509L241.239 38.5411V71.4806L244.301 73.2361V73.8175H222.469V72.4198L224.831 71.3688C229.204 69.3786 230.616 67.9809 230.616 62.491V13.0818C230.616 7.59185 229.204 6.19422 224.831 4.20398L222.469 3.15296V1.74414H244.301V2.32556L241.239 4.08099V33.3866L245.488 35.9583V36.5397V36.5509Z" fill="black"/>
+                <path d="M274.882 73.8056H249.625V72.9893L259.536 71.2339C264.734 70.2947 270.034 64.9278 274.17 52.6621H275.707L274.882 73.7944V73.8056Z" fill="black"/>
+                <path d="M314.308 73.8063H287.277V72.4087L289.639 71.3576C294.012 69.3674 295.425 67.9698 295.425 62.4799V13.0818C295.425 7.59185 294.012 6.19422 289.639 4.20398L287.277 3.15296V1.74414H308.76V2.32556L306.161 3.958V35.4887L310.41 38.0603V38.6418L306.161 40.632V62.4687C306.161 67.9586 307.573 69.3562 311.946 71.3465L314.308 72.3975V73.7951V73.8063Z" fill="black"/>
+                <path d="M352.664 69.7251C349.827 72.7664 346.177 74.7455 342.866 74.7455C337.792 74.7455 334.843 71.4806 327.882 58.3987L320.333 44.154C319.271 42.0519 317.621 40.5313 315.609 39.2455V38.6641C325.644 39.2455 331.193 42.7452 333.668 47.0722L344.053 65.4092C346.177 69.1437 347.59 69.7251 352.664 69.1437V69.7251Z" fill="black"/>
+                <path d="M358.689 21.9597L357.152 21.8367L357.864 0L375.448 1.75543V2.33685L372.736 3.49968C366.713 5.94834 362.588 11.7961 358.689 21.9485" fill="black"/>
+                <path d="M405.551 73.8068H373.797V72.4092L376.159 71.3582C381.583 68.9095 384.306 67.2659 384.306 61.7872L384.193 4.32751L380.656 2.33728V1.75586H398.602V2.33728L395.053 4.32751V61.7872C395.053 67.2771 397.765 68.9095 403.201 71.3582L405.563 72.4092V73.8068H405.551Z" fill="black"/>
+                <path d="M420.423 21.9597C416.061 9.80582 411.451 5.72472 406.738 3.62268L403.789 2.33685V1.75543L421.373 0L421.96 21.8367L420.423 21.9597Z" fill="black"/>
+                <path d="M460.551 1.75519C449.104 4.79645 440.956 19.276 440.956 36.9086C440.956 56.1736 449.104 71.4805 460.551 73.9292V74.6336C441.781 73.2359 428.684 57.6942 428.684 36.9086C428.684 18.9182 441.792 4.20385 460.551 1.05078V1.75519Z" fill="black"/>
+                <path d="M472.473 74.6219V73.9174C483.92 71.4688 492.068 56.1619 492.068 36.8968C492.068 19.2642 483.92 4.78473 472.473 1.74347V1.03906C491.243 4.19213 504.34 18.9065 504.34 36.8968C504.34 57.6825 491.243 73.213 472.473 74.6219Z" fill="black"/>
+                <path d="M575.172 1.75519C563.725 4.79645 555.577 19.276 555.577 36.9086C555.577 56.1736 563.725 71.4805 575.172 73.9292V74.6336C556.402 73.2359 543.305 57.6942 543.305 36.9086C543.305 18.9182 556.402 4.20385 575.172 1.05078V1.75519Z" fill="black"/>
+                <path d="M583.433 74.6235V74.0421C594.881 71.5934 600.78 63.5318 603.966 49.2871H605.503L606.916 69.0217C600.893 72.5214 591.57 74.6235 583.422 74.6235" fill="black"/>
+                <path d="M648.704 1.75519C637.256 4.79645 629.108 19.276 629.108 36.9086C629.108 56.1736 637.256 71.4805 648.704 73.9292V74.6336C629.933 73.2359 616.836 57.6942 616.836 36.9086C616.836 18.9182 629.933 4.20385 648.704 1.05078V1.75519Z" fill="black"/>
+                <path d="M660.629 74.6219V73.9174C672.076 71.4688 680.224 56.1619 680.224 36.8968C680.224 19.2642 672.076 4.78473 660.629 1.74347V1.03906C679.399 4.19213 692.496 18.9065 692.496 36.8968C692.496 57.6825 679.399 73.213 660.629 74.6219Z" fill="black"/>
+                <path d="M728.035 73.8063H701.953V72.4087L704.315 71.3576C708.677 69.3674 710.214 67.9698 710.214 62.4799V13.0818C710.214 7.59185 708.801 6.19422 704.428 4.20398L702.066 3.15296V1.74414H727.911V3.15296L725.549 4.20398C721.187 6.19422 719.763 7.59185 719.763 13.0818V62.4799C719.763 67.9698 721.3 69.3674 725.662 71.3576L728.023 72.4087V73.8063H728.035Z" fill="black"/>
+                <path d="M758.129 73.8065H740.184V72.4088L741.72 71.5926C746.681 69.021 747.981 66.8071 747.981 62.2452V25.2246H750.343V62.2452C750.343 66.7959 751.642 69.021 756.603 71.5926L758.14 72.4088V73.8065H758.129Z" fill="black"/>
+                <path d="M814.313 3.15296L812.776 3.96918C807.815 6.54083 806.527 8.75469 806.527 13.3166V75.0921H805.578L748.691 12.1426L737.594 2.33674V1.75532H754.115L804.154 58.2758V13.3166C804.154 8.76587 802.854 6.54083 797.893 3.96918L796.357 3.15296V1.74414H814.302V3.15296H814.313Z" fill="black"/>
+              </g>
+              <defs>
+                <clipPath id="clip0_5975_3294">
+                  <rect width="814" height="75.0923" fill="white"/>
+                </clipPath>
+              </defs>
+            </svg>
+          </div>
+        </header>
 
-    /* Background image — fixed so it persists through history section on scroll */
-    .rc-heritage-page .hero__bg {
-      position: fixed;
-      inset: 0;
-      background: url('{{ 'figma-images/hero-bg.jpg' | asset_url }}') center / cover no-repeat;
-      filter: brightness(0.55);
-      z-index: -2;
-    }
+        <div class="hero-center">
+          <div class="hero-collage" aria-hidden="true">
+            <figure class="hero-collage__item hero-collage__item--top">
+              {% if section.settings.hero_image_top != blank %}
+                <img src="{{ section.settings.hero_image_top | image_url: width: 1400 }}" alt="{{ section.settings.hero_image_top.alt | escape }}">
+              {% endif %}
+            </figure>
+            <figure class="hero-collage__item hero-collage__item--right">
+              {% if section.settings.hero_image_right != blank %}
+                <img src="{{ section.settings.hero_image_right | image_url: width: 1800 }}" alt="{{ section.settings.hero_image_right.alt | escape }}">
+              {% endif %}
+            </figure>
+            <figure class="hero-collage__item hero-collage__item--left">
+              {% if section.settings.hero_image_left != blank %}
+                <img src="{{ section.settings.hero_image_left | image_url: width: 1800 }}" alt="{{ section.settings.hero_image_left.alt | escape }}">
+              {% endif %}
+            </figure>
+            <figure class="hero-collage__item hero-collage__item--bottom">
+              {% if section.settings.hero_image_bottom != blank %}
+                <img src="{{ section.settings.hero_image_bottom | image_url: width: 1800 }}" alt="{{ section.settings.hero_image_bottom.alt | escape }}">
+              {% endif %}
+            </figure>
+          </div>
 
-    /* Vignette — also fixed, sits on top of bg layer */
-    .rc-heritage-page .hero__vignette {
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      pointer-events: none;
-      background:
-        radial-gradient(ellipse 90% 90% at 50% 50%,
-          transparent 0%,
-          rgba(5, 14, 10, 0.664) 55%,
-          rgba(3, 9, 6, 0.923) 100%),
-        linear-gradient(to bottom,
-          rgba(0,0,0,0.3) 0%,
-          transparent 25%,
-          transparent 75%,
-          rgba(0, 0, 0, 0.749) 100%);
-    }
+          <div class="hero-copy">
+            <p class="eyebrow">{{ section.settings.hero_eyebrow }}</p>
+            <h2>{{ section.settings.hero_title }}</h2>
+          </div>
 
-    /* Decorative 4-petal ornament — centered behind text */
-    .hero__ornament {
-      position: absolute;
-      top: calc(50% - var(--hero-foreground-shift));
-      left: -12px;
-      right: 0;
-      transform: translateY(calc(-50% - 18px));
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      opacity: 0;
-      transition: opacity 0.9s ease, transform 0.9s ease;
-      pointer-events: none;
-      z-index: 1;
-    }
-    .hero.hero--ornament-in .hero__ornament {
-      opacity: 0.62;
-      transform: translateY(-50%);
-    }
-    .hero__lottie {
-      width: min(620px, 76vw);
-      height: min(640px, 78vw);
-      display: block;
-      position: relative;
-      z-index: 1;
-      transform-origin: center;
-      animation: hero-flower-float 8s ease-in-out infinite;
-      background: transparent !important;
-    }
-    .hero__lottie svg {
-      overflow: visible;
-      background: transparent !important;
-    }
-    .hero__lottie svg rect {
-      fill: transparent !important;
-      fill-opacity: 0 !important;
-      opacity: 0 !important;
-    }
-    .hero__lottie svg path[stroke] {
-      filter: drop-shadow(0 0 10px rgba(255,255,255,0.68))
-              drop-shadow(0 0 22px rgba(39,87,77,0.58));
-      animation: lottie-line-glow-fade 2.6s ease-in-out infinite;
-    }
-    @keyframes lottie-line-glow-fade {
-      0% { opacity: 0.32; }
-      35% { opacity: 1; }
-      100% { opacity: 0.35; }
-    }
-    .hero__ornament-fallback {
-      display: block;
-      width: min(520px, 70vw);
-      height: auto;
-      position: relative;
-      z-index: 1;
-      transform-origin: center;
-      animation: hero-flower-float 8s ease-in-out infinite;
-      opacity: 0.45;
-    }
-    .hero__ornament.has-lottie .hero__ornament-fallback {
-      display: none;
-    }
-    .hero__ornament:not(.has-lottie) .hero__lottie {
-      display: none;
-    }
-    .hero__star-pattern {
-      display: none;
-    }
-    .hero__star {
-      width: 64px;
-      height: 66px;
-      color: #fff;
-      opacity: 0;
-      animation: hero-star-fade 26s ease-in-out infinite;
-    }
-    .hero__star svg {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-    @keyframes hero-star-fade {
-      0%, 100% { opacity: 0; }
-      50% { opacity: 0.03; }
-    }
-    @keyframes hero-star-diagonal-wave {
-      0%, 100% { opacity: 0; }
-      40% { opacity: 0.05; }
-      65% { opacity: 0.02; }
-    }
-    @keyframes hero-flower-float {
-      0%, 100% { transform: scale(1); opacity: 0.95; }
-      50% { transform: scale(1.035); opacity: 1; }
-    }
+          <a class="scroll-link" href="#{{ timeline_id }}">{{ section.settings.scroll_text }}</a>
+        </div>
+      </section>
 
-    /* Text content */
-    .hero__content {
-      position: relative;
-      z-index: 10;
-      text-align: center;
-      color: var(--white);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0;
-      opacity: 1;
-      transform: translateY(0);
-      transition: opacity 0.7s ease, transform 0.7s ease;
-      text-shadow: 0 2px 18px rgba(0, 0, 0, 0.45);
-      background: transparent !important;
-      padding: 0 !important;
-      min-width: auto !important;
-      margin-top: calc((var(--hero-foreground-shift) * -1) - 70px);
-    }
-    .hero.hero--text-in .hero__content {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .hero__eyebrow,
-    .hero__title {
-      opacity: 1;
-      transform: translateY(0);
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-    .hero.hero--text-in .hero__eyebrow {
-      opacity: 1;
-      transform: translateY(0);
-      transition-delay: 0.08s;
-    }
-    .hero.hero--text-in .hero__title {
-      opacity: 1;
-      transform: translateY(0);
-      transition-delay: 0.2s;
-    }
-    .hero__eyebrow {
-      font-family: var(--body);
-      font-size: 13px;
-      font-weight: 400;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.7);
-      margin-bottom: 8px;
-    }
-    .hero__title {
-      font-family: var(--head);
-      font-size: 40px;
-      font-weight: 500;
-      letter-spacing: 0.02em;
-      line-height: 1.1;
-      color: var(--white);
-    }
+      <section id="{{ history_id }}" class="history">
+        <div class="history__inner">
+          <div class="history__left">
+            <h2 class="history__title">{{ section.settings.history_title }}</h2>
+            <p>{{ section.settings.history_left_copy }}</p>
+          </div>
 
-    /* Scroll CTA */
-    .hero__scroll {
-      position: absolute;
-      bottom: calc(190px + var(--hero-foreground-shift));
-      left: 50%;
-      right: auto;
-      z-index: 2;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      opacity: 0;
-      transition: opacity 0.55s ease, transform 0.55s ease;
-      transform: translate(-50%, -10px);
-      width: max-content;
-    }
-    .hero.hero--scroll-in .hero__scroll {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
-    .hero__scroll.is-hidden {
-      opacity: 0;
-      transform: translate(-50%, 8px);
-      pointer-events: none;
-    }
-    .hero.hero--scroll-in .hero__scroll.is-hidden {
-      opacity: 0;
-      transform: translate(-50%, 8px);
-      pointer-events: none;
-    }
-    .hero__scroll-label {
-      font-family: var(--body);
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.75);
-    }
-    .hero__scroll-line {
-      width: 1px;
-      height: 20px;
-      background: rgba(255,255,255,0.5);
-      animation: line-pulse 2s ease-in-out infinite;
-    }
-    @keyframes line-pulse {
-      0%,100% { height: 20px; opacity: 0.5; }
-      50%      { height: 30px; opacity: 1; }
-    }
-    /* ═══════════════════════════════════════
-       SECTION NAV  (custom pill shape)
-    ═══════════════════════════════════════ */
-    .section-nav {
-      position: fixed;
-      bottom: 42px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1000;
-      width: 814px;
-      max-width: 95vw;
-    }
-    .section-nav.nav-intro {
-      opacity: 0;
-      transform: translate(-50%, -16px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-    .section-nav.nav-intro.nav-intro-run {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
-    .section-nav__shape {
-      position: relative;
-      width: 100%;
-      overflow: hidden;
-      border-radius: 999px;
-    }
-    .section-nav__progress {
-      display: none;
-    }
-    .section-nav__shape svg.nav-bg {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      height: auto;
-      display: block;
-      transform-origin: 50% 50%;
-      transform-box: fill-box;
-    }
-    /* Highlight paths — animate via opacity */
-    .nav-highlight {
-      opacity: 0;
-      transition: opacity 0.24s ease;
-      pointer-events: none;
-    }
-    .nav-highlight.is-active { opacity: 1; }
-    /* Clickable tab overlays on top of SVG */
-    .section-nav__tabs {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      grid-template-columns: 193fr 207fr 211fr 203fr;
-      z-index: 3;
-    }
-    .section-nav__mobile {
-      display: none;
-    }
-    .section-nav__tab {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--body);
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.75);
-      cursor: pointer;
-      transition: color 0.2s, opacity 0.45s ease, transform 0.45s ease;
-      user-select: none;
-      opacity: 1;
-      transform: translateY(0);
-      -webkit-tap-highlight-color: transparent;
-    }
-    .section-nav__tab:focus,
-    .section-nav__tab:focus-visible,
-    .section-nav__tab:active {
-      outline: none !important;
-      box-shadow: none !important;
-      border: 0 !important;
-    }
-    #rct-history:target,
-    #rct-creator:target,
-    #rct-ruby:target,
-    #rct-timeline:target {
-      outline: none !important;
-      box-shadow: none !important;
-      border: 0 !important;
-    }
-    .section-nav__tab.is-active { color: var(--white); }
-    .section-nav__tabs {
-      opacity: 1;
-      transition: opacity 0.45s ease;
-    }
-    .section-nav.nav-intro .nav-bg {
-      transform: scaleX(0.16);
-      opacity: 0.96;
-      filter: saturate(0.94);
-    }
-    .section-nav.nav-intro.nav-intro-run .nav-bg {
-      animation: nav-shape-expand 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    }
-    .section-nav.nav-intro .section-nav__tabs {
-      pointer-events: none;
-    }
-    .section-nav.nav-intro .section-nav__tab {
-      opacity: 0;
-      transform: translateY(6px);
-    }
-    .section-nav.nav-intro .section-nav__mobile-bg {
-      transform-origin: 50% 50%;
-      transform: scaleX(0.16);
-      opacity: 0.96;
-      filter: saturate(0.94);
-    }
-    .section-nav.nav-intro.nav-intro-run .section-nav__mobile-bg {
-      animation: nav-shape-expand 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    }
-    .section-nav.nav-intro .section-nav__mobile-main,
-    .section-nav.nav-intro .section-nav__mobile-menu {
-      opacity: 0;
-      transform: translateY(6px);
-      pointer-events: none;
-    }
-    .section-nav.nav-ready .section-nav__tabs {
-      pointer-events: auto;
-    }
-    .section-nav.nav-ready .section-nav__tab {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .section-nav.nav-ready .section-nav__mobile-main,
-    .section-nav.nav-ready .section-nav__mobile-menu {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-      transition: opacity 0.45s ease, transform 0.45s ease;
-    }
-    .section-nav.nav-ready .section-nav__tab:nth-child(1) { transition-delay: 0.04s; }
-    .section-nav.nav-ready .section-nav__tab:nth-child(2) { transition-delay: 0.12s; }
-    .section-nav.nav-ready .section-nav__tab:nth-child(3) { transition-delay: 0.20s; }
-    .section-nav.nav-ready .section-nav__tab:nth-child(4) { transition-delay: 0.28s; }
-    @keyframes nav-shape-expand {
-      0% {
-        transform: scaleX(0.16);
-        opacity: 0.97;
-        filter: saturate(0.94);
-      }
-      100% {
-        transform: scaleX(1);
-        opacity: 1;
-        filter: saturate(1);
-      }
-    }
+          <div class="history__center">
+            {% if section.settings.history_ring_drawing != blank %}
+              <img class="history__ring history__ring--drawing" src="{{ section.settings.history_ring_drawing | image_url: width: 2200 }}" alt="{{ section.settings.history_ring_drawing.alt | escape }}">
+            {% endif %}
+            {% if section.settings.history_ring_photo != blank %}
+              <img class="history__ring history__ring--photo" src="{{ section.settings.history_ring_photo | image_url: width: 2200 }}" alt="{{ section.settings.history_ring_photo.alt | escape }}">
+            {% endif %}
+          </div>
 
-    /* ═══════════════════════════════════════
-       HISTORY
-    ═══════════════════════════════════════ */
-    .history {
-      background: transparent;
-      padding: 120px 0;
-      min-height: 1000px;
-    }
-    .history__inner {
-      display: grid;
-      grid-template-columns: 1fr minmax(360px, 520px) 1fr;
-      gap: 56px;
-      align-items: center;
-      max-width: 1200px;
-      width: 100%;
-      margin: 0 auto;
-    }
-    .history__left {
-      color: var(--white);
-      align-self: start;
-      margin-top: 120px;
-      margin-left: 0;
-    }
-    .history__right {
-      color: var(--white);
-      align-self: start;
-      margin-top: 340px;
-      margin-bottom: 0;
-      padding-right: 0;
-    }
-    .history__title {
-      font-family: var(--head);
-      font-size: clamp(28px,4vw,40px);
-      font-weight: 500;
-      color: var(--white);
-      margin-bottom: 28px;
-    }
-    .history__left p, .history__right p {
-      font-size: 14px;
-      line-height: 1.85;
-      color: rgba(255,255,255,0.78);
-    }
-    .history__center {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .history__center img {
-      width: 730px;
-      max-width: 100%;
-      height: auto;
-      mix-blend-mode: screen;
-      display: block;
-      opacity: 0;
-      transform: rotate(-18deg);
-      backface-visibility: hidden;
-      transform-origin: center;
-      will-change: transform;
-    }
-    .history__center.fade {
-      opacity: 1;
-      transform: none;
-      transition: none;
-    }
+          <div class="history__right">
+            <p>{{ section.settings.history_right_copy }}</p>
+          </div>
+        </div>
+      </section>
 
-    /* ═══════════════════════════════════════
-       THE CREATOR
-    ═══════════════════════════════════════ */
-    .creator {
-      position: relative;
-      background: transparent;
-      overflow: visible;
-    }
-    .creator__inner {
-      display: grid;
-      grid-template-columns: 644px 1fr;
-      gap: 50px;
-      align-items: start;
-      max-width: none;
-      width: 100%;
-      margin: 0 auto;
-      padding: 80px 80px 140px;
-      min-height: 780px;
-    }
-    .creator__image {
-      margin-top: -140px;
-      margin-left: 170px;
-      overflow: visible;
-      z-index: 2;
-    }
-    .creator__image img {
-      width: 580px;
-      height: auto;
-      object-fit: cover;
-      display: block;
-    }
-    .creator__text {
-      position: relative;
-      z-index: 3;
-      max-width: 620px;
-      margin-top: 24px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-    }
-    .creator__title {
-      font-family: var(--head);
-      font-size: clamp(28px,4vw,40px);
-      font-weight: 500;
-      color: #fff;
-      margin-bottom: 28px;
-    }
-    .creator__body p {
-      font-size: 14px;
-      line-height: 1.8;
-      color: rgba(255,255,255,0.9);
-      margin-bottom: 18px;
-    }
-    .creator__body {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 28px;
-      align-items: start;
-    }
-    .creator__body p:last-child { margin-bottom: 0; }
-    .creator__vicenza {
-      position: absolute;
-      right: 0;
-      bottom: -130px;
-      width: 760px;
-      max-width: 100%;
-      height: auto;
-      pointer-events: none;
-      mix-blend-mode: multiply;
-      z-index: 1;
-    }
+      <section id="{{ creator_id }}" class="creator">
+        <div class="creator__inner">
+          <div class="creator__image reveal-up">
+            {% if section.settings.creator_image != blank %}
+              <img src="{{ section.settings.creator_image | image_url: width: 1800 }}" alt="{{ section.settings.creator_image.alt | escape }}">
+            {% endif %}
+          </div>
+          <div class="creator__text reveal-up reveal-up--delay-1">
+            <h2 class="creator__title">{{ section.settings.creator_title }}</h2>
+            <div class="creator__body reveal-up reveal-up--delay-2">
+              <p>{{ section.settings.creator_copy_1 }}</p>
+              <p>{{ section.settings.creator_copy_2 }}</p>
+            </div>
+          </div>
+        </div>
+        {% if section.settings.creator_drawing != blank %}
+          <img class="creator__vicenza reveal-up reveal-up--delay-3" src="{{ section.settings.creator_drawing | image_url: width: 2200 }}" alt="{{ section.settings.creator_drawing.alt | escape }}">
+        {% endif %}
+      </section>
 
-    /* ═══════════════════════════════════════
-       THE RUBY
-    ═══════════════════════════════════════ */
-    .ruby-section {
-      position: relative;
-      min-height: auto;
-      display: flex;
-      align-items: center;
-      overflow: visible;
-      background: transparent;
-      padding: 120px 0 0px;
-      margin-bottom: -350px;
-      z-index: 2;
-      isolation: isolate;
-    }
-    .ruby-section__bg {
-      display: none;
-    }
-    .ruby-section__overlay {
-      display: none;
-    }
-    .ruby-section__inner {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      padding: 90px 100px;
-      max-width: none;
-      margin: 0 auto;
-      width: min(1232px, calc(100% - 48px));
-      min-height: 700px;
-      background: url('{{ 'figma-images/ruby-section.jpg' | asset_url }}') center / cover no-repeat;
-      background-position: center calc(50% + 30px);
-    }
-    .ruby-section__content {
-      width: min(380px, 38%);
-      margin-left: auto;
-      padding-top: 130px;
-    }
-    .ruby-section__title {
-      font-family: var(--head);
-      font-size: clamp(28px,4vw,40px);
-      font-weight: 500;
-      color: var(--white);
-      margin-bottom: 28px;
-    }
-    .ruby-section__body p {
-      font-size: 14px;
-      line-height: 1.8;
-      color: rgba(255,255,255,0.85);
-      margin-bottom: 18px;
-    }
-    .ruby-section__gem {
-      display: none;
-      position: relative;
-      z-index: 2;
-    }
-    .ruby-section__gem img {
-      width: min(366px, 80%);
-      height: auto;
-      filter: drop-shadow(0 20px 60px rgba(179,38,30,0.5));
-    }
+      <section id="{{ ruby_id }}" class="ruby-section">
+        {% if section.settings.ruby_background != blank %}
+          <div class="ruby-section__bg" style="background-image: url('{{ section.settings.ruby_background | image_url: width: 2400 }}');"></div>
+        {% else %}
+          <div class="ruby-section__bg"></div>
+        {% endif %}
+        <div class="ruby-section__overlay"></div>
+        <div class="ruby-section__inner">
+          <div class="ruby-section__content">
+            <h2 class="ruby-section__title">{{ section.settings.ruby_title }}</h2>
+            <div class="ruby-section__body">
+              {{ section.settings.ruby_copy }}
+            </div>
+          </div>
+          <div class="ruby-section__gem">
+            {% if section.settings.ruby_gem_image != blank %}
+              <img src="{{ section.settings.ruby_gem_image | image_url: width: 1600 }}" alt="{{ section.settings.ruby_gem_image.alt | escape }}">
+            {% endif %}
+          </div>
+        </div>
+      </section>
 
-    /* ═══════════════════════════════════════
-       TIMELINE
-    ═══════════════════════════════════════ */
-    .timeline-section {
-      position: relative;
-      background: var(--light);
-      padding: 500px 0 0;
-      overflow: visible;
-      margin-top: 0;
-      z-index: 1;
-    }
-    .timeline-section__title,
-    .era-light,
-    .timeline-era--ruby {
-      position: relative;
-      z-index: 2;
-    }
-    .timeline-era--ruby__map {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: -310px;
-      transform: translateX(200px);
-      z-index: 1;
-      pointer-events: none;
-      mix-blend-mode: multiply;
-      opacity: 0.95;
-    }
-    .timeline-era--ruby__map img {
-      display: block;
-      width: min(1200px, 100%);
-      height: auto;
-      margin: 0 auto;
-    }
-    .timeline-transition {
-      position: relative;
-      margin-top: -60px;
-      margin-bottom: 1200px;
-      height: 0px;
-      pointer-events: none;
-      overflow: visible;
-      z-index: 0;
-      display: flex;
-      justify-content: center;
-      background: transparent;
-      width: 100vw;
-      margin-left: calc(50% - 50vw);
-      margin-right: calc(50% - 50vw);
-      isolation: isolate;
-    }
-    .timeline-transition::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: -220px;
-      height: 260px;
-      pointer-events: none;
-      z-index: -1;
-      background: linear-gradient(
-        to bottom,
-        rgba(67, 31, 24, 0.98) 0%,
-        rgba(67, 31, 24, 0.78) 42%,
-        rgba(67, 31, 24, 0) 100%
-      );
-    }
-    .timeline-transition__shape-svg {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      top: 0;
-      width: 100vw;
-      max-width: none;
-      height: auto;
-      z-index: 0;
-      pointer-events: none;
-      opacity: 0.98;
-    }
-    .timeline-transition__shape-base {
-      fill: url(#timeline-transition-shape-texture);
-    }
-    .timeline-transition__shape-overlay {
-      fill: var(--timeline-ruby-red);
-      opacity: 0.92;
-    }
-    .timeline-transition__flower-red-svg {
-      position: absolute;
-      left: 50%;
-      top: calc(clamp(26px, 4.2vw, 72px) - 550px);
-      transform: translateX(-50%);
-      width: 100vw;
-      max-width: none;
-      height: auto;
-      z-index: 0;
-      pointer-events: none;
-      opacity: 0.95;
-    }
-    .timeline-transition__flower-svg {
-      position: absolute;
-      left: 50%;
-      top: calc(clamp(26px, 4.2vw, 72px) - 550px);
-      transform: translateX(-50%);
-      width: 100vw;
-      max-width: none;
-      height: auto;
-      z-index: 0;
-      pointer-events: none;
-    }
-    .timeline-transition__flower-svg { mix-blend-mode: normal !important; }
-    .rebranding {
-      position: relative;
-      background: transparent;
-      padding: 80px 0 24px;
-      min-height: auto;
-      display: block;
-      z-index: 6;
-      margin-bottom: 300px;
-    }
-    .rebranding__logo {
-      position: relative;
-      width: min(850px, 92vw);
-      height: auto;
-      min-height: 180px;
-      display: block;
-      margin: 0 auto;
-    }
-    .timeline-section__title {
-      font-family: var(--head);
-      font-size: clamp(28px,4vw,40px);
-      font-weight: 500;
-      color: #111;
-      text-align: center;
-      margin-bottom: 40px;
-      padding: 0 40px;
-    }
+      <section class="timeline" id="{{ timeline_id }}" aria-label="{{ section.settings.timeline_aria_label | escape }}">
+        <div class="timeline-stage" data-stage>
+          <div class="timeline-panel">
+            <div class="media-layout" data-media-layout></div>
+            <div class="timeline-caption" data-timeline-caption>
+              <p data-caption-line-one></p>
+              <p data-caption-line-two></p>
+            </div>
+          </div>
+          <div class="year-rail" aria-label="{{ section.settings.year_rail_aria_label | escape }}" data-year-rail></div>
+        </div>
+        <div class="timeline-markers" data-timeline-markers></div>
+      </section>
+    </main>
 
-    /* Light band for early years */
-    .era-light {
-      background: transparent;
-      padding: 40px 0 0;
-      overflow: visible;
-      position: relative;
-      z-index: 3;
-    }
-
-    .timeline {
-      position: relative;
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 0 20px;
-      overflow: visible;
-    }
-    .timeline__spine {
-      position: absolute;
-      left: 50%; top: 0; bottom: 0;
-      width: 1px;
-      background: repeating-linear-gradient(
-        to bottom,
-        rgba(179, 38, 30, 0.5) 0 5px,
-        transparent 5px 10px
-      );
-      transform: translateX(-50%);
-      clip-path: inset(0 0 100% 0);
-      will-change: clip-path;
-    }
-    .era-light .timeline__spine {
-      background: repeating-linear-gradient(
-        to bottom,
-        rgba(179, 38, 30, 0.5) 0 5px,
-        transparent 5px 10px
-      );
-    }
-
-    .tl-item {
-      display: grid;
-      grid-template-columns: 1fr 70px 1fr;
-      align-items: start;
-      row-gap: 0px;
-      margin-bottom: 175px;
-      opacity: 0;
-      transition: opacity 0.6s ease;
-    }
-    .tl-item + .tl-item {
-      margin-top: -200px;
-    }
-    .tl-item.visible { opacity: 1; }
-    .tl-item .tl-event,
-    .tl-item .tl-media {
-      margin-top: 20px;
-    }
-
-    .tl-item--left .tl-event {
-      grid-column: 1;
-      grid-row: 1;
-      text-align: left;
-      padding-right: 130px;
-    }
-    .tl-item--left .tl-media {
-      grid-column: 1;
-      grid-row: 2;
-      padding-right: 130px;
-    }
-    .tl-item--left .tl-center {
-      grid-column: 2;
-      grid-row: 1 / span 2;
-    }
-    .tl-item--right .tl-event {
-      grid-column: 3;
-      grid-row: 1;
-      text-align: left;
-      padding-left: 130px;
-    }
-    .tl-item--right .tl-media {
-      grid-column: 3;
-      grid-row: 2;
-      padding-left: 130px;
-    }
-    .tl-item--right .tl-center {
-      grid-column: 2;
-      grid-row: 1 / span 2;
-    }
-
-    .tl-center { display:flex; flex-direction:column; align-items:center; }
-    .tl-dot {
-      background: transparent;
-      border: 0;
-      color: #111;
-      font-family: var(--head);
-      font-size: 40px;
-      font-weight: 500;
-      letter-spacing: 0.02em;
-      line-height: 1.1;
-      margin-top: 30px;
-      margin-bottom: 30px;
-      flex-shrink: 0;
-      position: relative;
-      z-index: 2;
-      background: var(--light);
-      padding: 0 6px;
-    }
-    .tl-connector {
-      width: 1px;
-      min-height: 54px;
-      flex: 1;
-      background: transparent;
-    }
-    .era-light .tl-connector { background: transparent; }
-
-    .tl-year {
-      font-family: var(--head);
-      font-size: clamp(22px,3vw,38px);
-      font-weight: 500;
-      color: #111;
-      margin-bottom: 10px;
-      line-height: 1.2;
-    }
-    .tl-event .tl-year { display: none; }
-    .tl-body { font-size:14px; line-height:1.75; color:#222; width:100%; max-width:400px; }
-    .tl-cta {
-      display:inline-block; margin-top:12px;
-      font-size:11px; font-weight:600; letter-spacing:0.1em;
-      text-transform:uppercase; color:#111;
-      border-bottom:1px solid rgba(0,0,0,0.35); padding-bottom:2px;
-    }
-    .tl-media img { width:100%; max-width:368px; height:auto; object-fit:cover; }
-    @media (min-width:768px) {
-      .hero__star-pattern {
-        --pattern-step-x: 78px;
-        --pattern-step-y: 68px;
-        position: absolute;
-        inset: 0;
-        z-index: 0;
-        display: grid;
-        grid-template-columns: repeat(30, var(--pattern-step-x));
-        grid-auto-rows: var(--pattern-step-y);
-        justify-content: center;
-        align-content: start;
-        justify-items: center;
-        align-items: center;
-        column-gap: 0;
-        row-gap: 0;
-        padding: 0;
-        pointer-events: none;
-        overflow: hidden;
-        -webkit-mask-image:
-          radial-gradient(ellipse calc(42% - 150px) 42% at 50% 40%, transparent 0%, transparent 66%, #000 80%, #000 100%),
-          linear-gradient(to bottom, #000 0%, #000 68%, rgba(0,0,0,0.75) 80%, rgba(0,0,0,0.38) 90%, transparent 100%);
-        -webkit-mask-composite: source-in;
-        mask-image:
-          radial-gradient(ellipse calc(42% - 150px) 42% at 50% 40%, transparent 0%, transparent 66%, #000 80%, #000 100%),
-          linear-gradient(to bottom, #000 0%, #000 68%, rgba(0,0,0,0.75) 80%, rgba(0,0,0,0.38) 90%, transparent 100%);
-        mask-composite: intersect;
-      }
-      .hero__star {
-        width: 64px;
-        height: 66px;
-        opacity: 0;
-        animation: hero-star-diagonal-wave 9s ease-in-out infinite;
-      }
-      .hero__star:nth-child(9n + 1) { animation-delay: -0.1s; }
-      .hero__star:nth-child(9n + 2) { animation-delay: -0.5s; }
-      .hero__star:nth-child(9n + 3) { animation-delay: -0.9s; }
-      .hero__star:nth-child(9n + 4) { animation-delay: -1.3s; }
-      .hero__star:nth-child(9n + 5) { animation-delay: -1.7s; }
-      .hero__star:nth-child(9n + 6) { animation-delay: -2.1s; }
-      .hero__star:nth-child(9n + 7) { animation-delay: -2.5s; }
-      .hero__star:nth-child(9n + 8) { animation-delay: -2.9s; }
-      .hero__star:nth-child(9n + 9) { animation-delay: -3.3s; }
-      .hero__star:nth-child(n + 301) { animation-delay: -4.0s; }
-      .hero__star:nth-child(n + 451) { animation-delay: -4.8s; }
-      .hero__star:nth-child(n + 571) { animation-delay: -5.4s; }
-      .hero__star:nth-child(60n + 31),
-      .hero__star:nth-child(60n + 32),
-      .hero__star:nth-child(60n + 33),
-      .hero__star:nth-child(60n + 34),
-      .hero__star:nth-child(60n + 35),
-      .hero__star:nth-child(60n + 36),
-      .hero__star:nth-child(60n + 37),
-      .hero__star:nth-child(60n + 38),
-      .hero__star:nth-child(60n + 39),
-      .hero__star:nth-child(60n + 40),
-      .hero__star:nth-child(60n + 41),
-      .hero__star:nth-child(60n + 42),
-      .hero__star:nth-child(60n + 43),
-      .hero__star:nth-child(60n + 44),
-      .hero__star:nth-child(60n + 45),
-      .hero__star:nth-child(60n + 46),
-      .hero__star:nth-child(60n + 47),
-      .hero__star:nth-child(60n + 48),
-      .hero__star:nth-child(60n + 49),
-      .hero__star:nth-child(60n + 50),
-      .hero__star:nth-child(60n + 51),
-      .hero__star:nth-child(60n + 52),
-      .hero__star:nth-child(60n + 53),
-      .hero__star:nth-child(60n + 54),
-      .hero__star:nth-child(60n + 55),
-      .hero__star:nth-child(60n + 56),
-      .hero__star:nth-child(60n + 57),
-      .hero__star:nth-child(60n + 58),
-      .hero__star:nth-child(60n + 59),
-      .hero__star:nth-child(60n + 60) {
-        transform: translateX(calc(var(--pattern-step-x) / 2));
-      }
-    }
-    @media (min-width:861px) {
-      .timeline-era--ruby {
-        background-color: #431F18 !important;
-        background-image: none !important;
-      }
-      .ruby-section__inner {
-        width: min(1230px, calc(100% - 48px)) !important;
-        background-size: 100% auto !important;
-        background-repeat: no-repeat !important;
-        background-position: center calc(50% + 100px) !important;
-      }
-      .timeline-era--ruby__map {
-        bottom: -160px;
-        transform: translateX(500px);
-        display: block !important;
-        clip-path: none !important;
-      }
-      .timeline {
-        max-width: 1280px;
-      }
-      .tl-item--left .tl-event,
-      .tl-item--left .tl-media {
-        padding-right: 48px;
-      }
-      .tl-item--right .tl-event,
-      .tl-item--right .tl-media {
-        padding-left: 48px;
-      }
-      .tl-media img,
-      .tl-item--1977 .tl-media img,
-      .tl-item--2014 .tl-media img {
-        width: min(450px, 100%) !important;
-        max-width: 450px !important;
-        height: auto !important;
-      }
-      .tl-item--1984 .tl-media img {
-        width: min(700px, 100%) !important;
-        max-width: 700px !important;
-        height: auto !important;
-      }
-      .tl-item--1984 .tl-media {
-        padding-left: 0 !important;
-      }
-      .tl-item--2000 .tl-media img {
-        width: min(300px, 100%) !important;
-        max-width: 300px !important;
-        height: auto !important;
-      }
-      .tl-item--2022 .tl-media img {
-        width: min(500px, 100%) !important;
-        max-width: 500px !important;
-        height: auto !important;
-      }
-    }
-    .tl-item--1977 .tl-media img { max-width: 390px; }
-    .tl-item--1984 .tl-media img { width: min(780px, 100%); max-width: 780px; }
-    .tl-item--2014 .tl-media img { max-width: 300px; }
-    .tl-item--2000 .tl-media img {
-      height: 100px;
-      width: auto;
-      max-width: none;
-    }
-    @media (min-width:861px) {
-      .tl-item--1984 .tl-media img {
-        width: 700px !important;
-        max-width: 700px !important;
-      }
-    }
-    .tl-media--empty { min-height:1px; }
-
-    .timeline-break {
-      position: relative;
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 0 56px 190px;
-      overflow: visible;
-      z-index: 4;
-    }
-    .timeline-break__line {
-      display: none;
-    }
-    .timeline-break__dot {
-      background: transparent;
-      border: 0;
-      color: #111;
-      font-family: var(--head);
-      font-size: 40px;
-      font-weight: 500;
-      letter-spacing: 0.02em;
-      line-height: 1.1;
-      margin: 30px auto;
-      text-align: center;
-      position: relative;
-      z-index: 2;
-      background: var(--light);
-      padding: 0 6px;
-    }
-    .timeline-break__event {
-      max-width: 420px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .timeline-break__year { display: none; }
-    .timeline-break__body {
-      font-size: 14px;
-      line-height: 1.75;
-      color: #222;
-      margin-top: 10px;
-    }
-    .timeline-break__ruby {
-      position: absolute;
-      left: 50%;
-      bottom: -228px;
-      transform: translateX(-50%);
-      width: min(440px, 42vw);
-      height: auto;
-      z-index: 10;
-      pointer-events: none;
-    }
-    .timeline-break__event {
-      opacity: 0;
-      transition: opacity 0.7s ease;
-    }
-    .timeline-break__event.visible {
-      opacity: 1;
-    }
-    .timeline-break__ruby,
-    .timeline-break__dot {
-      opacity: 0;
-      transition: opacity 0.7s ease;
-    }
-    .timeline-break__ruby.visible,
-    .timeline-break__dot.visible { opacity: 1; }
-
-    .timeline-era--ruby {
-      position: relative;
-      margin-top: 0;
-      padding: 180px 0 0px;
-      overflow: visible;
-      z-index: 1;
-      background-color: #431F18;
-      background-image: none;
-    }
-    .timeline-era--ruby::before {
-      display: none;
-    }
-    .timeline-era--ruby .timeline {
-      position: relative;
-      z-index: 4;
-    }
-    .timeline-era--ruby .tl-item,
-    .timeline-era--ruby .tl-event,
-    .timeline-era--ruby .tl-media,
-    .timeline-era--ruby .tl-center {
-      position: relative;
-      z-index: 4;
-    }
-    .timeline-era--ruby .timeline__spine {
-      background: repeating-linear-gradient(
-        to bottom,
-        rgba(179, 38, 30, 0.5) 0 5px,
-        transparent 5px 10px
-      );
-    }
-    .timeline-era--ruby .tl-dot {
-      color: var(--white);
-      background: transparent;
-    }
-    .timeline-era--ruby .tl-year { color: var(--white); }
-    .timeline-era--ruby .tl-body { color: rgba(255,255,255,0.88); }
-    .timeline-era--ruby .tl-cta {
-      color: var(--white);
-      border-color: rgba(255,255,255,0.5);
-    }
-    .era-light .tl-item:last-child { margin-bottom: 0; }
-
-    .tl-item--today .tl-dot { color: #fff; }
-    .tl-item--today .tl-event {
-      grid-column: 1 / span 3;
-      grid-row: 2;
-      text-align: center;
-      margin-top: 40px;
-      max-width: 440px;
-      margin-left: auto;
-      margin-right: auto;
-      padding: 0;
-    }
-    .tl-item--today .tl-media { display: none; }
-    .tl-item--today .tl-body {
-      margin-top: 52px;
-    }
-
-    /* ═══════════════════════════════════════
-       COLLECTIONS
-    ═══════════════════════════════════════ */
-    .collections {
-      background: transparent;
-      display: grid;
-      grid-template-columns: minmax(540px, 1.15fr) minmax(420px, 1fr);
-      min-height: 620px;
-      width: min(1300px, calc(100% - 48px));
-      margin: 0 auto 100px;
-      padding: 96px 56px 112px;
-      gap: clamp(44px, 6vw, 96px);
-      align-items: center;
-    }
-    .collections__content {
-      width: min(760px, 100%);
-    }
-    .collections__title {
-      font-family: 'Inter', var(--font-body-family), sans-serif !important;
-      font-size: 16px !important;
-      font-weight: 400;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #fff !important;
-      margin-bottom: 20px;
-    }
-    .collections__columns {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      align-items: start;
-    }
-    .collections__list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-    }
-    .collections__list li {
-      margin: 0;
-      padding: 0;
-    }
-    .collections__list li + li {
-      margin-top: 0px;
-    }
-    .collections__link-h3 {
-      margin: 0 !important;
-    }
-    .collections__list li a {
-      font-size: 32px;
-      color: #666666;
-      transition: color 0.2s;
-      text-decoration: none;
-    }
-    .collections__list li a.is-active {
-      color: #fff;
-      font-weight: 500;
-    }
-    .collections__list li a:hover { color: #fff; }
-    .collections__img {
-      overflow: hidden;
-      width: 530px;
-      height: 530px;
-      max-width: 100%;
-      justify-self: end;
-    }
-    .collections__img img { width:530px; height:530px; object-fit:cover; }
-
-    /* ═══════════════════════════════════════
-       FADE UTILITY
-    ═══════════════════════════════════════ */
-    .fade { opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .7s ease; }
-    .fade.d1 { transition-delay:.1s; }
-    .fade.d2 { transition-delay:.22s; }
-    .fade.visible { opacity:1; transform:none; }
-
-    /* ── Responsive ── */
-    @media (max-width:860px) {
-      .history__inner, .creator__inner, .ruby-section__inner, .collections { grid-template-columns:1fr; }
-      .history, .ruby-section__inner, .collections { padding:60px 24px; }
-      .collections {
-        min-height: auto;
-        gap: 28px;
-      }
-      .collections__columns {
-        grid-template-columns: 1fr;
-        gap: 12px;
-      }
-      .collections__title { margin-bottom: 20px; }
-      .collections__img {
-        justify-self: start;
-        width: min(530px, 100%);
-        height: min(530px, calc(100vw - 48px));
-        max-width: none;
-      }
-      .collections__img img {
-        width: 100%;
-        height: 100%;
-      }
-      .history__left {
-        margin-top: 0;
-        margin-left: 0;
-      }
-      .history__right {
-        align-self: start;
-        margin-top: 16px;
-        margin-bottom: 0;
-        padding-right: 0;
-      }
-      .history__center img { width: min(680px, 92vw); }
-      .timeline-break {
-        padding: 8px 24px 120px;
-        margin-top: 40px;
-      }
-      .timeline-break__line {
-        display: block !important;
-        position: absolute;
-        left: 50%;
-        top: 0;
-        bottom: 0;
-        width: 1px;
-        z-index: 1;
-        transform: translateX(-50%);
-        background: repeating-linear-gradient(
-          to bottom,
-          rgba(179, 38, 30, 0.5) 0 5px,
-          transparent 5px 10px
-        );
-        clip-path: inset(0 0 100% 0);
-        will-change: clip-path;
-      }
-      .tl-dot,
-      .timeline-break__dot { font-size: 30px; }
-      .timeline-break__dot {
-        margin: 0 auto 14px;
-        padding: 0;
-        text-align: center;
-        position: relative;
-        z-index: 2;
-        background: transparent;
-      }
-      .timeline-break__event {
-        margin: 0 auto;
-        text-align: center;
-        max-width: min(92vw, 560px);
-        padding-left: 0;
-      }
-      .timeline-break__ruby {
-        bottom: -200px;
-        width: min(85vw, 470px);
-      }
-      .timeline-era--ruby {
-        padding: 240px 0 180px;
-        background-color: #431F18;
-        background-image: none;
-      }
-      .timeline-era--ruby__map {
-        bottom: 1090px;
-        opacity: 0.72;
-        z-index: 0;
-      }
-      .timeline-era--ruby__map img {
-        width: calc(100% + 300px);
-        max-width: none;
-      }
-      .timeline-transition {
-        margin-top: -80px;
-        margin-bottom: 100px;
-      }
-      .timeline-transition__shape-svg {
-        width: 100vw;
-        top: -2px;
-      }
-      .timeline-transition__flower-red-svg,
-      .timeline-transition__flower-svg {
-        width: 100vw;
-        max-width: none;
-        top: calc(clamp(22px, 5vw, 54px) - 550px);
-      }
-      .rebranding {
-        padding: 80px 0 32px;
-        min-height: auto;
-      }
-      .rebranding__logo {
-        width: min(850px, 94vw);
-        min-height: 140px;
-      }
-      .creator { overflow: visible; }
-      .creator__inner {
-        grid-template-columns: 1fr;
-        gap: 24px;
-        padding: 60px 24px 120px;
-        min-height: auto;
-      }
-      .creator__image {
-        margin-top: 0;
-        margin-left: 0;
-      }
-      .creator__image img {
-        width: 100%;
-        height: auto;
-        max-width: 580px;
-      }
-      .creator__text {
-        max-width: none;
-        margin-top: 0;
-      }
-      .creator__body {
-        grid-template-columns: 1fr;
-        gap: 0;
-      }
-      .creator__vicenza {
-        right: 24px;
-        width: min(420px, 72vw);
-      }
-      .ruby-section {
-        padding: 60px 0 80px;
-      }
-      .ruby-section__inner {
-        min-height: 520px;
-        padding: 48px 28px;
-        justify-content: center;
-        width: min(1232px, calc(100% - 32px));
-        background-size: auto 100%;
-        background-position: calc(50% - 0px) calc(50% - 0px);
-      }
-      .ruby-section__content {
-        width: min(420px, 100%);
-        position: relative;
-        z-index: 2;
-      }
-      .ruby-section__inner::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        z-index: 1;
-        background: linear-gradient(
-          to bottom,
-          rgba(8, 12, 10, 0.28) 0%,
-          rgba(8, 12, 10, 0.58) 48%,
-          rgba(8, 12, 10, 0.82) 100%
-        );
-      }
-      .timeline {
-        position: relative;
-      }
-      .timeline__spine {
-        display: block !important;
-        position: absolute;
-        left: 50%;
-        top: 0;
-        bottom: 0;
-        width: 1px;
-        z-index: 1;
-        transform: translateX(-50%);
-        clip-path: inset(0 0 100% 0);
-        will-change: clip-path;
-      }
-      .tl-item {
-        grid-template-columns: 1fr;
-        margin-bottom: 150px;
-        row-gap: 12px;
-      }
-      .tl-item + .tl-item {
-        margin-top: 0;
-      }
-      .tl-item .tl-event,
-      .tl-item .tl-media { margin-top: 0; }
-      .tl-center {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        grid-column: 1;
-        grid-row: 2;
-        position: relative;
-        z-index: 2;
-        padding-left: 0;
-      }
-      .tl-dot {
-        width: 0;
-        height: 0;
-        font-size: 0;
-        line-height: 0;
-        margin: 0;
-        padding: 0;
-        text-align: center;
-        white-space: nowrap;
-        background: transparent;
-        opacity: 0;
-        transform: translateY(8px);
-        transition: opacity 0.45s ease, transform 0.45s ease;
-      }
-      .tl-item.visible .tl-dot {
-        opacity: 1;
-        transform: none;
-      }
-      .tl-connector { display: none; }
-      .tl-item--left .tl-event, .tl-item--right .tl-event {
-        grid-column: 1;
-        grid-row: 1;
-        text-align: center;
-        padding: 0 0 12px;
-        border-left: 0;
-        margin: 0 auto;
-        width: 100%;
-        max-width: min(92vw, 560px);
-        position: relative;
-        z-index: 3;
-      }
-      .tl-item--left .tl-media, .tl-item--right .tl-media {
-        grid-column: 1;
-        grid-row: 3;
-        padding: 12px 0 0;
-        width: 100%;
-        max-width: min(92vw, 660px);
-        margin: 0 auto !important;
-        justify-self: center;
-        text-align: center;
-        position: relative;
-        z-index: 3;
-      }
-      .tl-item .tl-media img {
-        display: block;
-        margin-left: auto !important;
-        margin-right: auto !important;
-      }
-      .tl-item--left .tl-event::before,
-      .tl-item--right .tl-event::before,
-      .tl-item--left .tl-media::before,
-      .tl-item--right .tl-media::before {
-        content: none;
-      }
-      .era-light {
-        --tl-mask-color: #E5E5E5;
-      }
-      .timeline-era--ruby {
-        --tl-mask-color: #A21616;
-      }
-      .tl-event .tl-year {
-        display: block;
-        margin-bottom: 10px;
-        font-size: clamp(26px, 6vw, 34px);
-        line-height: 1.1;
-      }
-      .tl-item--today .tl-event {
-        grid-column: 1;
-        grid-row: 1;
-        text-align: center;
-        margin: 0 auto;
-        max-width: min(92vw, 560px);
-        padding: 0;
-      }
-      .tl-item--today .tl-body {
-        margin-top: 10px;
-      }
-      .section-nav { bottom: 24px; }
-      .hero__scroll { bottom: 160px; }
-      .hero__lottie {
-        width: min(1470px, calc(76vw + 850px)) !important;
-        height: min(1490px, calc(78vw + 850px)) !important;
-      }
-      .hero__ornament-fallback {
-        width: min(1220px, calc(70vw + 700px)) !important;
-      }
-    }
-    @media (max-width:767px) {
-      .hero__eyebrow {
-        margin-bottom: -2px;
-      }
-      .history__center {
-        width: calc(100% + 50px);
-        margin-left: -35px;
-        margin-top: -30px;
-        margin-bottom: -30px;
-      }
-      .history__center img {
-        width: calc(100vw + 50px) !important;
-        max-width: none !important;
-      }
-      .hero__star-pattern {
-        position: absolute;
-        inset: 0 0 64px 0;
-        width: 100%;
-        transform: none;
-        z-index: 0;
-        display: grid;
-        grid-template-columns: repeat(8, minmax(0, 1fr));
-        grid-auto-rows: 52px;
-        justify-items: center;
-        align-items: center;
-        column-gap: 10px;
-        row-gap: 0;
-        padding: 10px 8px;
-        -webkit-mask-image:
-          radial-gradient(ellipse 44% 34% at 50% 44%, transparent 0%, transparent 62%, #000 76%, #000 100%),
-          linear-gradient(to bottom, #000 0%, #000 68%, rgba(0,0,0,0.75) 80%, rgba(0,0,0,0.38) 90%, transparent 100%);
-        -webkit-mask-composite: source-in;
-        mask-image:
-          radial-gradient(ellipse 44% 34% at 50% 44%, transparent 0%, transparent 62%, #000 76%, #000 100%),
-          linear-gradient(to bottom, #000 0%, #000 68%, rgba(0,0,0,0.75) 80%, rgba(0,0,0,0.38) 90%, transparent 100%);
-        mask-composite: intersect;
-        pointer-events: none;
-      }
-      .hero__star {
-        width: 40px;
-        height: 41px;
-      }
-      /* Offset every second row to fill middle gaps between 4-star blocks */
-      .hero__star:nth-child(16n + 9),
-      .hero__star:nth-child(16n + 10),
-      .hero__star:nth-child(16n + 11),
-      .hero__star:nth-child(16n + 12),
-      .hero__star:nth-child(16n + 13),
-      .hero__star:nth-child(16n + 14),
-      .hero__star:nth-child(16n + 15),
-      .hero__star:nth-child(16n + 16) {
-        transform: translateX(25px);
-      }
-      .hero__star:nth-child(4n + 1) { animation-delay: 0s; }
-      .hero__star:nth-child(4n + 2) { animation-delay: -4.5s; }
-      .hero__star:nth-child(4n + 3) { animation-delay: -9s; }
-      .hero__star:nth-child(4n + 4) { animation-delay: -13.5s; }
-      body:has(.drawer--header:not(.is-open)) .header__mobile__hamburger {
-        display: none !important;
-      }
-      .history__title,
-      .creator__title,
-      .ruby-section__title,
-      .timeline-section__title,
-      .tl-event .tl-year,
-      .timeline-break__dot {
-        font-size: 36px !important;
-      }
-      .section-nav__progress {
-        display: none;
-      }
-      .timeline-section {
-        padding: 400px 0 0;
-        margin-top: 0;
-      }
-      .history {
-        margin-top: -100px;
-      }
-      .ruby-section {
-        margin-top: 100px;
-      }
-      .timeline-era--ruby {
-        padding-bottom: 0;
-        margin-bottom: -300px;
-        background-color: #431F18 !important;
-        background-image: none !important;
-      }
-      .timeline-era--ruby::before {
-        display: none !important;
-      }
-      .timeline-era--ruby__map {
-        bottom: 220px !important;
-        transform: translateX(-300px) !important;
-        clip-path: none !important;
-        display: block !important;
-        mix-blend-mode: multiply !important;
-        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.75) 18%, #000 34%, #000 100%);
-        mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.75) 18%, #000 34%, #000 100%);
-      }
-      .creator__vicenza {
-        right: -26px;
-        width: min(720px, calc(72vw + 300px));
-      }
-      .hero__content {
-        margin-top: calc((var(--hero-foreground-shift) * -1) - 90px);
-      }
-      .hero__lottie {
-        width: min(1420px, calc(76vw + 800px)) !important;
-        height: min(1440px, calc(78vw + 800px)) !important;
-      }
-      .hero__ornament-fallback {
-        width: min(1220px, calc(70vw + 700px)) !important;
-      }
-      .hero__scroll {
-        bottom: 260px;
-      }
-      html,
-      body,
-      .rc-heritage-page {
-        width: 100%;
-        max-width: 100%;
-        overflow-x: clip !important;
-      }
-      .hero__ornament {
-        left: -10px;
-      }
-      .timeline-transition {
-        width: 100%;
-        margin-left: 0;
-        margin-right: 0;
-        margin-top: 0;
-        margin-bottom: 600px;
-        background: transparent;
-      }
-      .timeline-transition__shape-svg,
-      .timeline-transition__flower-red-svg,
-      .timeline-transition__flower-svg {
-        left: 0;
-        width: 100%;
-        transform: none;
-      }
-      .timeline-transition__flower-red-svg,
-      .timeline-transition__flower-svg {
-        left: 50%;
-        width: calc(100% + 200px);
-        transform: translateX(-50%);
-        top: calc(clamp(22px, 5vw, 54px) - 170px);
-      }
-      .rebranding {
-        background: transparent;
-        margin-top: 749px;
-        margin-bottom: 300;
-
-      }
-      .collections {
-        background: transparent;
-        margin-top: 0;
-      }
-      .tl-item--left .tl-media,
-      .tl-item--right .tl-media {
-        max-width: min(92vw, 660px);
-      }
-      .tl-item--2022 .tl-media {
-        max-width: min(calc(92vw + 50px), 710px);
-      }
-      .tl-media img {
-        width: min(92vw, 540px) !important;
-        max-width: 92vw !important;
-        height: auto !important;
-      }
-      .ruby-section__content {
-        margin-top: 200px !important;
-        padding-top: 0 !important;
-      }
-      .section-nav--fixed {
-        display: block !important;
-        width: min(362px, 94vw);
-      }
-      .section-nav--fixed .section-nav__shape {
-        height: 50px;
-        overflow: visible;
-      }
-      .section-nav--fixed .nav-bg {
-        display: none !important;
-      }
-      .section-nav--fixed .section-nav__tabs {
-        display: none !important;
-      }
-      .section-nav--fixed .section-nav__mobile {
-        position: absolute;
-        inset: 0;
-        display: grid !important;
-        grid-template-columns: 1fr 76px;
-        align-items: stretch;
-        pointer-events: none;
-      }
-      .section-nav__mobile-dropdown {
-        position: absolute;
-        left: 0;
-        right: 76px;
-        bottom: calc(100% + 8px);
-        background: rgba(87, 116, 110, 0.95);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 12px;
-        padding: 10px 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        opacity: 0;
-        transform: translateY(8px);
-        pointer-events: none;
-        transition: opacity 0.22s ease, transform 0.22s ease;
-        z-index: 4;
-      }
-      .section-nav--fixed.is-mobile-open .section-nav__mobile-dropdown {
-        opacity: 1;
-        transform: translateY(0);
-        pointer-events: auto;
-      }
-      .section-nav__mobile-link {
-        color: #fff;
-        font-family: var(--body);
-        font-size: 12px;
-        font-weight: 600;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        line-height: 1.2;
-        text-align: left;
-        padding: 8px 10px;
-      }
-      .section-nav__mobile-link + .section-nav__mobile-link {
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-      }
-      .section-nav__mobile-bg {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        display: block;
-        pointer-events: none;
-      }
-      .section-nav__mobile-main {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        margin-left: 15px;
-        z-index: 1;
-        overflow: hidden;
-        pointer-events: auto;
-        cursor: pointer;
-      }
-      .section-nav__mobile-progress-rect {
-        transform-box: fill-box;
-        transform-origin: left center;
-        transform: scaleX(var(--nav-mobile-progress, 0));
-        transition: transform 0.16s linear;
-      }
-      .section-nav__mobile-label {
-        font-family: var(--body);
-        font-size: 16px;
-        font-weight: 600;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: #fff;
-        white-space: nowrap;
-        opacity: 1;
-        transform: translateY(0);
-        transition: opacity 0.2s ease, transform 0.2s ease;
-        position: relative;
-        z-index: 1;
-      }
-      .section-nav__mobile-label.is-out {
-        opacity: 0;
-        transform: translateY(-12px);
-      }
-      .section-nav__mobile-label.is-in {
-        opacity: 0;
-        transform: translateY(12px);
-      }
-      .section-nav__mobile-menu {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        z-index: 1;
-        pointer-events: auto;
-        cursor: pointer;
-      }
-      .section-nav__mobile-flower {
-        width: 33px;
-        height: 33px;
-        display: block;
-        transform: translateX(-5px);
-      }
-      .section-nav__mobile-flower path {
-        fill: #27574D;
-      }
-      /* Final mobile centering override for milestone media/images */
-      .timeline .tl-item .tl-media {
-        max-width: min(92vw, 590px) !important;
-        width: 100% !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
-        justify-self: center !important;
-        text-align: center !important;
-        transform: none !important;
-        left: auto !important;
-        right: auto !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-      }
-      .timeline .tl-item .tl-media img {
-        display: block !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
-      }
-    }
-{%- endstyle -%}
-
-{%- assign hero_bg_url = section.settings.hero_image | image_url: width: 2400 -%}
-{%- if hero_bg_url == blank -%}{%- assign hero_bg_url = 'figma-images/hero-bg.jpg' | asset_url -%}{%- endif -%}
-{%- assign history_img_url = section.settings.history_image | image_url: width: 1600 -%}
-{%- if history_img_url == blank -%}{%- assign history_img_url = 'figma-images/History-Ring_2x.png' | asset_url -%}{%- endif -%}
-{%- assign creator_img_url = section.settings.creator_image | image_url: width: 1400 -%}
-{%- if creator_img_url == blank -%}{%- assign creator_img_url = 'figma-images/creator-portrait.jpg' | asset_url -%}{%- endif -%}
-{%- assign creator_vicenza_url = section.settings.creator_vicenza_image | image_url: width: 1600 -%}
-{%- if creator_vicenza_url == blank -%}{%- assign creator_vicenza_url = 'figma-images/Vicenza_drawing_image.png' | asset_url -%}{%- endif -%}
-{%- assign ruby_bg_url = section.settings.ruby_bg_image | image_url: width: 2400 -%}
-{%- if ruby_bg_url == blank -%}{%- assign ruby_bg_url = 'figma-images/ruby-section.jpg' | asset_url -%}{%- endif -%}
-{%- assign timeline_bg_url = 'figma-images/hero-bg-ruby.jpg' | asset_url -%}
-{%- assign timeline_world_map_url = section.settings.timeline_world_map_image | image_url: width: 2200 -%}
-{%- if timeline_world_map_url == blank -%}{%- assign timeline_world_map_url = 'figma-images/world map.png' | asset_url -%}{%- endif -%}
-{%- assign img_1977_url = section.settings.timeline_img_1977 | image_url: width: 1200 -%}
-{%- if img_1977_url == blank -%}{%- assign img_1977_url = 'figma-images/1977.png' | asset_url -%}{%- endif -%}
-{%- assign img_1984_url = section.settings.timeline_img_1984 | image_url: width: 1200 -%}
-{%- if img_1984_url == blank -%}{%- assign img_1984_url = 'figma-images/RC_Drawing image 1.png' | asset_url -%}{%- endif -%}
-{%- assign img_2000_url = section.settings.timeline_img_2000 | image_url: width: 1200 -%}
-{%- if img_2000_url == blank -%}{%- assign img_2000_url = 'figma-images/GroupDiamond.svg' | asset_url -%}{%- endif -%}
-{%- assign img_2006_url = section.settings.timeline_img_2006 | image_url: width: 1200 -%}
-{%- if img_2006_url == blank -%}{%- assign img_2006_url = 'figma-images/timeline-1996.jpg' | asset_url -%}{%- endif -%}
-{%- assign img_2007_url = section.settings.timeline_img_2007 | image_url: width: 1200 -%}
-{%- if img_2007_url == blank -%}{%- assign img_2007_url = 'figma-images/Roberto_Coin_Store Dubai.png' | asset_url -%}{%- endif -%}
-{%- assign img_1996_url = section.settings.timeline_img_1996 | image_url: width: 1200 -%}
-{%- if img_1996_url == blank -%}{%- assign img_1996_url = 'figma-images/RUBY Trasnparent  1.png' | asset_url -%}{%- endif -%}
-{%- assign img_2003_url = section.settings.timeline_img_2003 | image_url: width: 1200 -%}
-{%- if img_2003_url == blank -%}{%- assign img_2003_url = 'figma-images/timeline-2003.jpg' | asset_url -%}{%- endif -%}
-{%- assign img_2008_url = section.settings.timeline_img_2008 | image_url: width: 1200 -%}
-{%- if img_2008_url == blank -%}{%- assign img_2008_url = 'figma-images/Roberto Coin Store Rome.png' | asset_url -%}{%- endif -%}
-{%- assign img_2013_url = section.settings.timeline_img_2013 | image_url: width: 1200 -%}
-{%- if img_2013_url == blank -%}{%- assign img_2013_url = 'figma-images/Roberto Coin Award.png' | asset_url -%}{%- endif -%}
-{%- assign img_2014_url = section.settings.timeline_img_2014 | image_url: width: 1200 -%}
-{%- if img_2014_url == blank -%}{%- assign img_2014_url = 'figma-images/RC_Poismois.png' | asset_url -%}{%- endif -%}
-{%- assign img_2018_url = section.settings.timeline_img_2018 | image_url: width: 1200 -%}
-{%- if img_2018_url == blank -%}{%- assign img_2018_url = 'figma-images/RC_Diamons.png' | asset_url -%}{%- endif -%}
-{%- assign img_2021_url = section.settings.timeline_img_2021 | image_url: width: 1200 -%}
-{%- if img_2021_url == blank -%}{%- assign img_2021_url = 'figma-images/RC_Princessflower.png' | asset_url -%}{%- endif -%}
-{%- if section.settings.timeline_img_2022 != blank -%}
-  {%- assign img_2022_url = section.settings.timeline_img_2022 | image_url: width: 1200 -%}
-{%- else -%}
-  {%- assign img_2022_url = 'figma-images/Emily in paris.png' | asset_url -%}
-{%- endif -%}
-{%- assign img_2025_url = section.settings.timeline_img_2025 | image_url: width: 1200 -%}
-{%- if img_2025_url == blank -%}{%- assign img_2025_url = 'figma-images/Lifetimachievment award.png' | asset_url -%}{%- endif -%}
-{%- assign img_today_url = section.settings.timeline_img_today | image_url: width: 1200 -%}
-{%- if img_today_url == blank -%}{%- assign img_today_url = 'figma-images/timeline-today.jpg' | asset_url -%}{%- endif -%}
-{%- assign collections_img_url = section.settings.collections_image | image_url: width: 1600 -%}
-{%- if collections_img_url == blank -%}{%- assign collections_img_url = 'figma-images/collections-bg.jpg' | asset_url -%}{%- endif -%}
-{%- assign collections_cover_image = section.settings.collections_cover_collection.featured_image -%}
-{%- assign flower_json_url = section.settings.hero_lottie_json_url -%}
-{%- if flower_json_url == blank -%}{%- assign flower_json_url = 'figma-images/RC_Flower.json' | asset_url -%}{%- endif -%}
-{%- assign rebranding_logo_json_url = section.settings.rebranding_logo_lottie_json_url -%}
-{%- if rebranding_logo_json_url == blank -%}{%- assign rebranding_logo_json_url = 'figma-images/RobertoCoin_logo.json' | asset_url -%}{%- endif -%}
-
-
-<!-- ════════════════════════════════════════
-     HERO
-════════════════════════════════════════ -->
-<section class="hero" id="hero">
-  <div class="hero__bg" style="position:fixed;inset:0;background-image:url('{{ hero_bg_url }}');"></div>
-  <div class="hero__vignette" style="position:fixed;inset:0;"></div>
-  <div class="hero__star-pattern" aria-hidden="true">
-    {%- for i in (1..600) -%}
-      <span class="hero__star">
-        <svg viewBox="0 0 181 187" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M135.61 125.55C151.84 125.55 164.58 106.23 176.09 98.01L180.41 94.93V92.05L176.09 88.97C164.79 80.96 151.84 61.43 135.61 61.43C129.24 61.43 122.46 64.72 108.28 76.84L102.73 81.57L103.55 83.21C112.59 76.84 117.52 74.58 125.74 74.58C136.63 74.58 147.93 81.36 155.95 93.49C147.94 105.61 136.63 112.39 125.74 112.39C117.52 112.39 112.59 110.13 103.55 103.76L102.73 105.4L108.28 110.13C122.46 122.25 129.24 125.54 135.61 125.54M44.79 125.55C51.16 125.55 57.94 122.26 72.12 110.14L77.67 105.41L76.85 103.77C67.81 110.14 62.88 112.4 54.66 112.4C43.77 112.4 32.47 105.62 24.45 93.5C32.46 81.38 43.77 74.59 54.66 74.59C62.88 74.59 67.81 76.85 76.85 83.22L77.67 81.58L72.12 76.85C57.94 64.73 51.16 61.44 44.79 61.44C28.56 61.44 15.61 80.96 4.31 88.98L0 92.06V94.94L4.31 98.02C15.82 106.24 28.56 125.56 44.79 125.56M89.58 187H92.46L95.54 182.69C103.55 171.59 123.08 158.44 123.08 142.21C123.08 135.84 119.79 129.06 107.67 114.88L102.94 109.33L101.3 110.15C107.67 119.19 109.93 124.12 109.93 132.55C109.93 143.24 103.35 154.54 91.03 162.76C78.7 154.54 72.12 143.24 72.12 132.55C72.12 124.13 74.38 119.19 80.75 110.15L79.11 109.33L74.38 114.88C62.26 129.06 58.97 135.84 58.97 142.21C58.97 158.44 78.49 171.39 86.51 182.69L89.59 187H89.58ZM79.1 77.68L80.74 76.86C74.37 67.82 72.11 62.89 72.11 54.67C72.11 43.78 78.89 32.48 91.02 24.46C103.14 32.47 109.92 43.78 109.92 54.67C109.92 62.89 107.66 67.82 101.29 76.86L102.93 77.68L107.66 72.13C119.78 57.95 123.07 51.17 123.07 44.8C123.07 28.57 103.75 15.83 95.53 4.32L92.45 0H89.57L86.49 4.32C78.48 15.62 58.95 28.57 58.95 44.8C58.95 51.17 62.24 57.95 74.36 72.13L79.09 77.68H79.1Z" fill="currentColor"/>
+    <nav class="section-nav" aria-label="Page sections">
+      <div class="section-nav__shape">
+        <svg class="nav-bg" viewBox="0 0 814 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M34.7305 1H778.762C784.657 1.00012 790.067 4.57408 795.223 9.1416C797.788 11.4147 800.23 13.8755 802.618 16.1982C804.986 18.5016 807.305 20.6729 809.565 22.2842V22.2852L812.5 24.3945V25.6143L809.566 27.7158C807.308 29.3267 804.99 31.4991 802.623 33.8027C800.236 36.1251 797.795 38.5855 795.229 40.8584C790.103 45.3997 784.723 48.9576 778.862 48.998H34.7305C28.8352 48.998 23.4245 45.4239 18.2686 40.8564C15.7027 38.5835 13.2608 36.1233 10.873 33.8008C8.65216 31.6406 6.47441 29.596 4.34766 28.0215L3.92285 27.7129L1 25.6133V24.3916L3.92285 22.2852C6.18196 20.6742 8.50119 18.5016 10.8691 16.1973C13.2555 13.875 15.6961 11.4144 18.2617 9.1416C23.4175 4.57429 28.8308 1 34.7305 1Z" fill="#27574D" fill-opacity="0.6"/>
+          <path class="nav-highlight" d="M1 25.61 L3.92 27.71 L4.35 28.02 C6.47 29.6,8.65 31.64,10.87 33.8 C13.26 36.12,15.7 38.58,18.27 40.86 C23.42 45.4,28.84 49,34.73 49 H193 V1 H34.73 C28.83 1,23.42 4.57,18.26 9.14 C15.7 11.41,13.26 13.88,10.87 16.2 C8.5 18.5,6.18 20.67,3.92 22.28 L1 24.39 Z" fill="#3F625B" fill-opacity="0.72"/>
+          <path class="nav-highlight" d="M193 1 H407 V49 H193 Z" fill="#3F625B" fill-opacity="0.72"/>
+          <path class="nav-highlight" d="M407 1 H611 V49 H407 Z" fill="#3F625B" fill-opacity="0.72"/>
+          <path class="nav-highlight" d="M611 1 H778.76 C784.66 1,790.07 4.57,795.22 9.14 C797.79 11.41,800.23 13.88,802.62 16.2 C804.99 18.5,807.31 20.67,809.57 22.28 L812.5 24.39 V25.61 L809.57 27.72 C807.31 29.33,804.99 31.5,802.62 33.8 C800.24 36.12,797.8 38.58,795.23 40.86 C790.1 45.4,784.72 49,778.86 49 H611 Z" fill="#3F625B" fill-opacity="0.72"/>
+          <path d="M34.7305 1H778.762C784.657 1.00012 790.067 4.57408 795.223 9.1416C797.788 11.4147 800.23 13.8755 802.618 16.1982C804.986 18.5016 807.305 20.6729 809.565 22.2842V22.2852L812.5 24.3945V25.6143L809.566 27.7158C807.308 29.3267 804.99 31.4991 802.623 33.8027C800.236 36.1251 797.795 38.5855 795.229 40.8584C790.103 45.3997 784.723 48.9576 778.862 48.998H34.7305C28.8352 48.998 23.4245 45.4239 18.2686 40.8564C15.7027 38.5835 13.2608 36.1233 10.873 33.8008C8.65216 31.6406 6.47441 29.596 4.34766 28.0215L3.92285 27.7129L1 25.6133V24.3916L3.92285 22.2852C6.18196 20.6742 8.50119 18.5016 10.8691 16.1973C13.2555 13.875 15.6961 11.4144 18.2617 9.1416C23.4175 4.57429 28.8308 1 34.7305 1Z" fill="none" stroke="#27574D" stroke-width="2"/>
+          <line x1="193" y1="4" x2="193" y2="46" stroke="#27574D" stroke-width="1.5" stroke-opacity="0.8"/>
+          <line x1="407" y1="4" x2="407" y2="46" stroke="#27574D" stroke-width="1.5" stroke-opacity="0.8"/>
+          <line x1="611" y1="4" x2="611" y2="46" stroke="#27574D" stroke-width="1.5" stroke-opacity="0.8"/>
         </svg>
-      </span>
-    {%- endfor -%}
-  </div>
-
-  <!-- Decorative 4-petal ornament -->
-  <div class="hero__ornament">
-    <div class="hero__lottie" id="hero-lottie" data-flower-json="{{ flower_json_url }}" aria-hidden="true"></div>
-    <svg class="hero__ornament-fallback" width="460" height="474" viewBox="0 0 460 474" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <g filter="url(#filter0_d_3465_714)">
-        <mask id="path-1-inside-1_3465_714" fill="white">
-          <path d="M257.807 274.486C273.754 297.022 279.418 309.308 279.418 330.306C279.418 356.938 262.949 385.107 232.059 405.585C201.169 385.107 184.7 356.938 184.7 330.306C184.7 309.308 190.364 297.022 206.331 274.486L202.214 272.428L190.364 286.253C159.996 321.595 151.741 338.497 151.741 354.36C151.741 394.816 200.646 427.082 220.731 455.252L228.443 466H235.653L243.386 455.252C263.471 427.602 312.377 394.816 312.377 354.36C312.377 338.476 304.142 321.574 273.754 286.253L261.924 272.428L257.807 274.486ZM14.8052 221.742L4 229.435V236.607L14.8052 244.278C43.6261 264.756 75.54 312.905 116.232 312.905C132.199 312.905 149.17 304.714 184.7 274.507L198.598 262.719L196.529 258.623C173.874 274.507 161.522 280.12 140.936 280.12C113.64 280.12 85.3421 263.218 65.2573 233.01C85.3421 202.782 113.661 185.901 140.936 185.901C161.522 185.901 173.874 191.535 196.529 207.418L198.598 203.323L184.7 191.556C149.17 161.348 132.199 153.137 116.232 153.137C75.5609 153.137 43.1245 201.784 14.8052 221.763M275.3 191.535L261.402 203.302L263.45 207.398C286.106 191.514 298.457 185.88 319.044 185.88C346.318 185.88 374.637 202.782 394.722 232.99C374.637 263.197 346.318 280.099 319.044 280.099C298.457 280.099 286.106 274.465 263.45 258.602L261.402 262.698L275.3 274.486C310.83 304.693 327.821 312.884 343.768 312.884C384.439 312.884 416.353 264.735 445.195 244.258L456 236.586V229.414L445.195 221.722C416.876 201.743 384.439 153.095 343.768 153.095C327.801 153.095 310.809 161.286 275.3 191.514M228.464 0L220.752 10.7482C200.667 38.9182 151.762 71.1838 151.762 111.64C151.762 127.503 159.996 144.405 190.384 179.747L202.235 193.572L206.352 191.514C190.384 168.978 184.721 156.692 184.721 136.214C184.721 109.083 201.712 80.9133 232.08 60.9345C262.447 80.9133 279.438 109.083 279.438 136.214C279.438 156.692 273.775 168.978 257.828 191.514L261.945 193.572L273.775 179.747C304.163 144.405 312.397 127.503 312.397 111.64C312.397 71.1838 264.014 39.438 243.407 10.7482L235.674 0H228.464Z"/>
-        </mask>
-        <path d="M257.807 274.486C273.754 297.022 279.418 309.308 279.418 330.306C279.418 356.938 262.949 385.107 232.059 405.585C201.169 385.107 184.7 356.938 184.7 330.306C184.7 309.308 190.364 297.022 206.331 274.486L202.214 272.428L190.364 286.253C159.996 321.595 151.741 338.497 151.741 354.36C151.741 394.816 200.646 427.082 220.731 455.252L228.443 466H235.653L243.386 455.252C263.471 427.602 312.377 394.816 312.377 354.36C312.377 338.476 304.142 321.574 273.754 286.253L261.924 272.428L257.807 274.486ZM14.8052 221.742L4 229.435V236.607L14.8052 244.278C43.6261 264.756 75.54 312.905 116.232 312.905C132.199 312.905 149.17 304.714 184.7 274.507L198.598 262.719L196.529 258.623C173.874 274.507 161.522 280.12 140.936 280.12C113.64 280.12 85.3421 263.218 65.2573 233.01C85.3421 202.782 113.661 185.901 140.936 185.901C161.522 185.901 173.874 191.535 196.529 207.418L198.598 203.323L184.7 191.556C149.17 161.348 132.199 153.137 116.232 153.137C75.5609 153.137 43.1245 201.784 14.8052 221.763M275.3 191.535L261.402 203.302L263.45 207.398C286.106 191.514 298.457 185.88 319.044 185.88C346.318 185.88 374.637 202.782 394.722 232.99C374.637 263.197 346.318 280.099 319.044 280.099C298.457 280.099 286.106 274.465 263.45 258.602L261.402 262.698L275.3 274.486C310.83 304.693 327.821 312.884 343.768 312.884C384.439 312.884 416.353 264.735 445.195 244.258L456 236.586V229.414L445.195 221.722C416.876 201.743 384.439 153.095 343.768 153.095C327.801 153.095 310.809 161.286 275.3 191.514M228.464 0L220.752 10.7482C200.667 38.9182 151.762 71.1838 151.762 111.64C151.762 127.503 159.996 144.405 190.384 179.747L202.235 193.572L206.352 191.514C190.384 168.978 184.721 156.692 184.721 136.214C184.721 109.083 201.712 80.9133 232.08 60.9345C262.447 80.9133 279.438 109.083 279.438 136.214C279.438 156.692 273.775 168.978 257.828 191.514L261.945 193.572L273.775 179.747C304.163 144.405 312.397 127.503 312.397 111.64C312.397 71.1838 264.014 39.438 243.407 10.7482L235.674 0H228.464Z" fill="#27574D" mask="url(#path-1-inside-1_3465_714)"/>
-      </g>
-      <defs>
-        <filter id="filter0_d_3465_714" x="0" y="0" width="460" height="474" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-          <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-          <feOffset dy="4"/>
-          <feGaussianBlur stdDeviation="2"/>
-          <feComposite in2="hardAlpha" operator="out"/>
-          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_3465_714"/>
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_3465_714" result="shape"/>
-        </filter>
-      </defs>
-    </svg>
-  </div>
-
-  <!-- Centered text -->
-  <div class="hero__content fade">
-    <p class="hero__eyebrow">{{ section.settings.hero_eyebrow | default: 'SINCE 1996' }}</p>
-    <h1 class="hero__title">{{ section.settings.hero_title | default: 'The Brand' }}</h1>
-  </div>
-
-  <!-- Scroll CTA -->
-  <div class="hero__scroll">
-    <span class="hero__scroll-label">{{ section.settings.hero_scroll_label | default: 'SCROLL TO DISCOVER OUR STORY' }}</span>
-    <span class="hero__scroll-line"></span>
-  </div>
-
-  <!-- Nav (fixed to viewport bottom — moved outside hero below) -->
-  <nav class="section-nav section-nav--hero-hidden" aria-label="Page sections" style="display:none!important">
-    <div class="section-nav__shape">
-      <!-- Single SVG: background + shaped highlights + dividers -->
-      <svg class="nav-bg" viewBox="0 0 814 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M34.7305 1H778.762C784.657 1.00012 790.067 4.57408 795.223 9.1416C797.788 11.4147 800.23 13.8755 802.618 16.1982C804.986 18.5016 807.305 20.6729 809.565 22.2842V22.2852L812.5 24.3945V25.6143L809.566 27.7158C807.308 29.3267 804.99 31.4991 802.623 33.8027C800.236 36.1251 797.795 38.5855 795.229 40.8584C790.103 45.3997 784.723 48.9576 778.862 48.998H34.7305C28.8352 48.998 23.4245 45.4239 18.2686 40.8564C15.7027 38.5835 13.2608 36.1233 10.873 33.8008C8.65216 31.6406 6.47441 29.596 4.34766 28.0215L3.92285 27.7129L1 25.6133V24.3916L3.92285 22.2852C6.18196 20.6742 8.50119 18.5016 10.8691 16.1973C13.2555 13.875 15.6961 11.4144 18.2617 9.1416C23.4175 4.57429 28.8308 1 34.7305 1Z"
-              fill="#27574D" fill-opacity="0.6"/>
-
-        <!-- ── Tab highlight shapes (one per tab) ── -->
-
-        <!-- HISTORY: left pointed tip → x=193 -->
-        <path class="nav-highlight" id="hl-0"
-          d="M1 25.61 L3.92 27.71 L4.35 28.02
-             C6.47 29.6,8.65 31.64,10.87 33.8
-             C13.26 36.12,15.7 38.58,18.27 40.86
-             C23.42 45.4,28.84 49,34.73 49
-             H193 V1
-             H34.73 C28.83 1,23.42 4.57,18.26 9.14
-             C15.7 11.41,13.26 13.88,10.87 16.2
-             C8.5 18.5,6.18 20.67,3.92 22.28
-             L1 24.39 Z"
-          fill="#5E7D77" fill-opacity="0.55"/>
-
-        <!-- THE CREATOR: x=193 → x=407 -->
-        <path class="nav-highlight" id="hl-1"
-          d="M193 1 H407 V49 H193 Z"
-          fill="#5E7D77" fill-opacity="0.55"/>
-
-        <!-- THE RUBY: x=407 → x=611 -->
-        <path class="nav-highlight" id="hl-2"
-          d="M407 1 H611 V49 H407 Z"
-          fill="#5E7D77" fill-opacity="0.55"/>
-
-        <!-- TIMELINE: x=611 → right pointed tip -->
-        <path class="nav-highlight" id="hl-3"
-          d="M611 1
-             H778.76 C784.66 1,790.07 4.57,795.22 9.14
-             C797.79 11.41,800.23 13.88,802.62 16.2
-             C804.99 18.5,807.31 20.67,809.57 22.28
-             L812.5 24.39 V25.61
-             L809.57 27.72
-             C807.31 29.33,804.99 31.5,802.62 33.8
-             C800.24 36.12,797.8 38.58,795.23 40.86
-             C790.1 45.4,784.72 49,778.86 49
-             H611 Z"
-          fill="#5E7D77" fill-opacity="0.55"/>
-
-        <!-- ── Background pill outline ── -->
-        <path d="M34.7305 1H778.762C784.657 1.00012 790.067 4.57408 795.223 9.1416C797.788 11.4147 800.23 13.8755 802.618 16.1982C804.986 18.5016 807.305 20.6729 809.565 22.2842V22.2852L812.5 24.3945V25.6143L809.566 27.7158C807.308 29.3267 804.99 31.4991 802.623 33.8027C800.236 36.1251 797.795 38.5855 795.229 40.8584C790.103 45.3997 784.723 48.9576 778.862 48.998H34.7305C28.8352 48.998 23.4245 45.4239 18.2686 40.8564C15.7027 38.5835 13.2608 36.1233 10.873 33.8008C8.65216 31.6406 6.47441 29.596 4.34766 28.0215L3.92285 27.7129L1 25.6133V24.3916L3.92285 22.2852C6.18196 20.6742 8.50119 18.5016 10.8691 16.1973C13.2555 13.875 15.6961 11.4144 18.2617 9.1416C23.4175 4.57429 28.8308 1 34.7305 1Z"
-              fill="none" stroke="#27574D" stroke-width="2"/>
-
-        <!-- ── Dividers ── -->
-        <line x1="193" y1="4" x2="193" y2="46" stroke="#27574D" stroke-width="1.5" stroke-opacity="0.8"/>
-        <line x1="407" y1="4" x2="407" y2="46" stroke="#27574D" stroke-width="1.5" stroke-opacity="0.8"/>
-        <line x1="611" y1="4" x2="611" y2="46" stroke="#27574D" stroke-width="1.5" stroke-opacity="0.8"/>
-      </svg>
-
-      <!-- Interactive tab labels (invisible hit areas, positioned over SVG) -->
-      <div class="section-nav__tabs">
-        <a class="section-nav__tab" data-idx="0" data-section="rct-history"  href="#rct-history">The Brand</a>
-        <a class="section-nav__tab"           data-idx="1" data-section="rct-creator"  href="#rct-creator">The Creator</a>
-        <a class="section-nav__tab"           data-idx="2" data-section="rct-ruby"     href="#rct-ruby">The Ruby</a>
-        <a class="section-nav__tab"           data-idx="3" data-section="rct-timeline" href="#rct-timeline">MILESTONES</a>
-      </div>
-    </div>
-  </nav>
-</section>
-
-<!-- ════════════════════════════════════════
-     FIXED NAV PILL (always bottom of screen)
-════════════════════════════════════════ -->
-<nav class="section-nav section-nav--fixed" aria-label="Page sections">
-  <div class="section-nav__shape">
-    <svg class="nav-bg" viewBox="0 0 814 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M34.7305 1H778.762C784.657 1.00012 790.067 4.57408 795.223 9.1416C797.788 11.4147 800.23 13.8755 802.618 16.1982C804.986 18.5016 807.305 20.6729 809.565 22.2842V22.2852L812.5 24.3945V25.6143L809.566 27.7158C807.308 29.3267 804.99 31.4991 802.623 33.8027C800.236 36.1251 797.795 38.5855 795.229 40.8584C790.103 45.3997 784.723 48.9576 778.862 48.998H34.7305C28.8352 48.998 23.4245 45.4239 18.2686 40.8564C15.7027 38.5835 13.2608 36.1233 10.873 33.8008C8.65216 31.6406 6.47441 29.596 4.34766 28.0215L3.92285 27.7129L1 25.6133V24.3916L3.92285 22.2852C6.18196 20.6742 8.50119 18.5016 10.8691 16.1973C13.2555 13.875 15.6961 11.4144 18.2617 9.1416C23.4175 4.57429 28.8308 1 34.7305 1Z"
-            fill="#27574D" fill-opacity="0.6"/>
-      <path class="nav-highlight" id="hl-0"
-        d="M1 25.61 L3.92 27.71 L4.35 28.02
-           C6.47 29.6,8.65 31.64,10.87 33.8
-           C13.26 36.12,15.7 38.58,18.27 40.86
-           C23.42 45.4,28.84 49,34.73 49
-           H193 V1
-           H34.73 C28.83 1,23.42 4.57,18.26 9.14
-           C15.7 11.41,13.26 13.88,10.87 16.2
-           C8.5 18.5,6.18 20.67,3.92 22.28
-           L1 24.39 Z"
-        fill="#5E7D77" fill-opacity="0.55"/>
-      <path class="nav-highlight" id="hl-1"
-        d="M193 1 H407 V49 H193 Z"
-        fill="#5E7D77" fill-opacity="0.55"/>
-      <path class="nav-highlight" id="hl-2"
-        d="M407 1 H611 V49 H407 Z"
-        fill="#5E7D77" fill-opacity="0.55"/>
-      <path class="nav-highlight" id="hl-3"
-        d="M611 1
-           H778.76 C784.66 1,790.07 4.57,795.22 9.14
-           C797.79 11.41,800.23 13.88,802.62 16.2
-           C804.99 18.5,807.31 20.67,809.57 22.28
-           L812.5 24.39 V25.61
-           L809.57 27.72
-           C807.31 29.33,804.99 31.5,802.62 33.8
-           C800.24 36.12,797.8 38.58,795.23 40.86
-           C790.1 45.4,784.72 49,778.86 49
-           H611 Z"
-        fill="#5E7D77" fill-opacity="0.55"/>
-      <path d="M34.7305 1H778.762C784.657 1.00012 790.067 4.57408 795.223 9.1416C797.788 11.4147 800.23 13.8755 802.618 16.1982C804.986 18.5016 807.305 20.6729 809.565 22.2842V22.2852L812.5 24.3945V25.6143L809.566 27.7158C807.308 29.3267 804.99 31.4991 802.623 33.8027C800.236 36.1251 797.795 38.5855 795.229 40.8584C790.103 45.3997 784.723 48.9576 778.862 48.998H34.7305C28.8352 48.998 23.4245 45.4239 18.2686 40.8564C15.7027 38.5835 13.2608 36.1233 10.873 33.8008C8.65216 31.6406 6.47441 29.596 4.34766 28.0215L3.92285 27.7129L1 25.6133V24.3916L3.92285 22.2852C6.18196 20.6742 8.50119 18.5016 10.8691 16.1973C13.2555 13.875 15.6961 11.4144 18.2617 9.1416C23.4175 4.57429 28.8308 1 34.7305 1Z"
-            fill="none" stroke="#27574D" stroke-width="2"/>
-      <line x1="193" y1="4" x2="193" y2="46" stroke="#27574D" stroke-width="1.5" stroke-opacity="0.8"/>
-      <line x1="407" y1="4" x2="407" y2="46" stroke="#27574D" stroke-width="1.5" stroke-opacity="0.8"/>
-      <line x1="611" y1="4" x2="611" y2="46" stroke="#27574D" stroke-width="1.5" stroke-opacity="0.8"/>
-    </svg>
-    <div class="section-nav__tabs">
-      <a class="section-nav__tab" data-idx="0" data-section="rct-history"  href="#rct-history">The Brand</a>
-      <a class="section-nav__tab"           data-idx="1" data-section="rct-creator"  href="#rct-creator">The Creator</a>
-      <a class="section-nav__tab"           data-idx="2" data-section="rct-ruby"     href="#rct-ruby">The Ruby</a>
-      <a class="section-nav__tab"           data-idx="3" data-section="rct-timeline" href="#rct-timeline">MILESTONES</a>
-    </div>
-    <div class="section-nav__mobile" aria-hidden="true">
-      <div class="section-nav__mobile-dropdown" aria-hidden="true">
-        <a class="section-nav__mobile-link" href="#rct-history" data-section="rct-history" data-idx="0">The Brand</a>
-        <a class="section-nav__mobile-link" href="#rct-creator" data-section="rct-creator" data-idx="1">The Creator</a>
-        <a class="section-nav__mobile-link" href="#rct-ruby" data-section="rct-ruby" data-idx="2">The Ruby</a>
-        <a class="section-nav__mobile-link" href="#rct-timeline" data-section="rct-timeline" data-idx="3">Milestones</a>
-      </div>
-      <svg class="section-nav__mobile-bg" viewBox="0 0 362 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <g opacity="0.85">
-          <mask id="mask0_4058_4572_{{ section.id }}" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="362" height="50">
-            <path d="M326.761 50C339.354 50 349.39 34.7756 358.149 28.529L361.5 26.1286V23.882L358.149 21.4731C349.381 15.2245 339.345 0 326.761 0L34.7301 0C22.1376 0 12.1019 15.2244 3.34241 21.471L0 23.8799V26.1265L3.34241 28.5269C12.1104 34.7734 22.1461 49.9979 34.7301 49.9979H326.761V50Z" fill="#D9D9D9"/>
-          </mask>
-          <g mask="url(#mask0_4058_4572_{{ section.id }})">
-            <rect width="286" height="50" fill="#57746E"/>
-            <rect class="section-nav__mobile-progress-rect" width="286" height="50" fill="url(#mobile-nav-progress-{{ section.id }})"/>
-            <rect x="286" width="76" height="50" fill="white"/>
-          </g>
-          <path d="M326.761 49.25C333.005 49.25 338.486 45.4647 343.626 41.25C348.695 37.0943 353.334 32.6264 357.713 29.5039L360.75 27.327V22.6827L357.714 20.4978C353.336 17.3745 348.697 12.9058 343.627 8.75096C338.488 4.53658 333.007 0.75 326.761 0.75L34.7301 0.75C28.4868 0.75 23.0055 4.53595 17.8655 8.74995C12.7969 12.9046 8.15835 17.3715 3.77822 20.4948L0.75 22.6778V27.3222L3.77845 29.4969C8.15718 32.6208 12.7949 37.0894 17.8629 41.2441C23.0018 45.4575 28.4828 49.2434 34.7301 49.2479H326.761V49.25Z" stroke="#27574d" stroke-width="2.5"/>
-          <defs>
-            <linearGradient id="mobile-nav-progress-{{ section.id }}" x1="0" y1="25" x2="286" y2="25" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#50716A" stop-opacity="0.82"/>
-              <stop offset="1" stop-color="#7FA19A" stop-opacity="0.78"/>
-            </linearGradient>
-          </defs>
-        </g>
-      </svg>
-      <div class="section-nav__mobile-main">
-        <span class="section-nav__mobile-label">THE BRAND</span>
-      </div>
-      <div class="section-nav__mobile-menu">
-        <svg class="section-nav__mobile-flower" width="1064" height="1023" viewBox="0 0 1064 1023" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-          <path d="M437.088 574.435C385.654 610.527 357.613 623.346 309.691 623.346C248.91 623.346 184.619 586.072 137.883 516.159C184.619 446.247 248.91 408.973 309.691 408.973C357.613 408.973 385.654 421.792 437.088 457.931L441.785 448.612L410.232 421.792C329.571 353.062 290.996 334.378 254.794 334.378C162.46 334.378 88.8217 445.064 24.5301 490.522L-0.000266461 507.976L-0.000267178 524.295L24.5301 541.797C87.6355 587.254 162.46 697.941 254.794 697.941C291.044 697.941 329.619 679.304 410.232 610.527L441.785 583.754L437.088 574.435ZM557.462 24.4552L539.907 -2.06387e-09L523.537 -7.13866e-07L506.029 24.4552C459.293 89.6846 349.404 161.915 349.404 254.012C349.404 290.15 368.099 328.56 437.04 408.973L463.943 440.429L473.29 435.746C437.04 384.471 424.229 356.515 424.229 309.923C424.229 248.146 462.804 184.099 531.746 138.642C600.735 184.099 639.262 248.194 639.262 309.923C639.262 356.515 626.404 384.471 590.154 435.746L599.501 440.429L626.356 408.973C695.298 328.56 714.04 290.15 714.04 254.012C714.04 161.962 603.012 88.5494 557.415 24.4552M626.404 614.027L599.548 582.571L590.201 587.207C626.451 638.482 639.309 666.438 639.309 713.03C639.309 774.759 600.735 838.853 531.793 884.311C462.852 838.853 424.277 774.759 424.277 713.03C424.277 666.438 437.135 638.482 473.337 587.207L463.99 582.571L437.088 614.027C368.146 694.44 349.452 732.897 349.452 768.988C349.452 861.038 459.34 933.268 506.076 998.545L523.585 1023L539.954 1023L557.51 998.545C603.107 934.451 714.134 861.038 714.134 768.988C714.134 732.85 695.44 694.393 626.451 614.027M1063.54 508.023L1039.01 490.569C974.717 445.112 901.078 334.425 808.745 334.425C772.543 334.425 733.968 353.062 653.307 421.839L621.754 448.659L626.451 457.978C677.884 421.839 705.926 409.02 752.662 409.02C814.581 409.02 878.873 447.477 924.47 516.207C878.873 584.936 814.581 623.393 752.662 623.393C705.926 623.393 677.884 610.574 626.451 574.483L621.754 583.801L653.307 610.574C733.968 679.351 772.543 697.988 808.745 697.988C901.078 697.988 973.531 588.484 1039.01 541.844L1063.54 524.343L1063.54 508.023Z" fill="#27574D"/>
-        </svg>
-      </div>
-    </div>
-  </div>
-</nav>
-
-<!-- ════════════════════════════════════════
-     HISTORY
-════════════════════════════════════════ -->
-<section id="rct-history" class="history">
-  <div class="history__inner">
-
-    <!-- Left: title + first paragraph -->
-    <div class="history__left">
-      <h2 class="history__title fade">The Brand</h2>
-      <p class="fade d1">In 1996, Roberto Coin introduced Appassionata, the first collection to feature a hidden ruby, a symbol of protection, passion and prosperity. This signature detail became the heart of the Maison.</p>
-    </div>
-
-    <!-- Center: ring illustration with multiply blend -->
-    <div class="history__center fade">
-      {%- if section.settings.history_image != blank -%}
-        {% render 'image', image: section.settings.history_image, alt: 'Roberto Coin ring illustration', loading: 'lazy', modifier: 'rc-inline-image' %}
-      {%- else -%}
-        {{ history_img_url | image_tag: alt: 'Roberto Coin ring illustration', loading: 'lazy', class: 'rc-inline-image' }}
-      {%- endif -%}
-    </div>
-
-    <!-- Right: second paragraph -->
-    <div class="history__right">
-      <p class="fade d1">Guided by Roberto Coin's creative vision and brought to life by master Italian artisans, the brand quickly gained international recognition. In 2000, he became a founding member of the World Diamond Council, supporting the Kimberley Process. Today, the Maison is present in over 60 countries worldwide, and the ruby remains its enduring symbol.</p>
-    </div>
-
-  </div>
-</section>
-
-<!-- ════════════════════════════════════════
-     THE CREATOR
-════════════════════════════════════════ -->
-<section id="rct-creator" class="creator">
-  <div class="creator__inner">
-    <div class="creator__image">
-      {%- if section.settings.creator_image != blank -%}
-        {% render 'image', image: section.settings.creator_image, alt: 'Roberto Coin', loading: 'lazy', modifier: 'rc-inline-image' %}
-      {%- else -%}
-        <img src="{{ creator_img_url }}" alt="Roberto Coin" loading="lazy" class="rc-inline-image">
-      {%- endif -%}
-    </div>
-    <div class="creator__text">
-      <h2 class="creator__title fade">The Creator</h2>
-      <div class="creator__body">
-        <p class="fade d1">Roberto Coin’s journey did not begin in jewelry. After a successful career in luxury hospitality across Europe, he returned to Italy and immersed himself in the goldsmith tradition of Vicenza. In 1984, he began designing under his own name, marking the start of a new creative chapter.</p>
-        <p class="fade d2">At 33, he returned to Italy and immersed himself in the goldsmith tradition of Vicenza, the historic heart of Italian jewelry. In 1984, he began designing under his own name, transforming experience into creativity and vision into craftsmanship. That decision marked the true beginning of the Maison.</p>
-      </div>
-    </div>
-  </div>
-  {%- if section.settings.creator_vicenza_image != blank -%}
-    {{ section.settings.creator_vicenza_image | image_url: width: 1600 | image_tag: alt: 'Vicenza drawing', loading: 'lazy', class: 'creator__vicenza rc-inline-image' }}
-  {%- else -%}
-    <img src="{{ creator_vicenza_url }}" alt="Vicenza drawing" loading="lazy" class="creator__vicenza rc-inline-image">
-  {%- endif -%}
-</section>
-
-<!-- ════════════════════════════════════════
-     THE RUBY
-════════════════════════════════════════ -->
-<section id="rct-ruby" class="ruby-section">
-  <div class="ruby-section__bg"></div>
-  <div class="ruby-section__overlay"></div>
-  <div class="ruby-section__inner" style="background-image:url('{{ ruby_bg_url }}');">
-    <div class="ruby-section__content">
-      <h2 class="ruby-section__title fade">The Ruby</h2>
-      <div class="ruby-section__body">
-        <p class="fade d1">Roberto Coin chose the ruby as the hidden signature of his creations.</p>
-
-        <p class="fade d2">Inspired by ancient cultures, where the ruby symbolized protection, vitality and passion, he transformed it into a discreet talisman worn close to the skin.</p>
-
-        <p class="fade">Set inside every jewel, the ruby is not meant to be seen but to be felt. A quiet symbol of strength, courage and enduring beauty that connects each creation to its wearer.</p>
-      </div>
-    </div>
-    <div class="ruby-section__gem fade d1"></div>
-  </div>
-</section>
-
-<!-- ════════════════════════════════════════
-     TIMELINE
-════════════════════════════════════════ -->
-<section id="rct-timeline" class="timeline-section">
-  <h2 class="timeline-section__title fade">Milestones</h2>
-
-  <!-- Early era — light background -->
-  <div class="era-light">
-    <div class="timeline">
-      <div class="timeline__spine"></div>
-
-      <div class="tl-item tl-item--left tl-item--1977">
-        <div class="tl-media">
-          {%- if section.settings.timeline_img_1977 != blank -%}
-            {% render 'image', image: section.settings.timeline_img_1977, alt: '1977', loading: 'lazy', modifier: 'rc-inline-image' %}
-          {%- else -%}
-            {{ img_1977_url | image_tag: alt: '1977', loading: 'lazy', class: 'rc-inline-image' }}
-          {%- endif -%}
-        </div>
-        <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-        <div class="tl-event">
-          <div class="tl-year">1977</div>
-          <p class="tl-body">{{ section.settings.timeline_text_1977 | default: "Roberto Coin returned to his homeland of Italy to study the goldsmithing tradition. He launched his jewelry trade on the British market." }}</p>
+        <div class="section-nav__tabs">
+          <a class="section-nav__tab" data-idx="0" data-section="{{ history_id }}" href="#{{ history_id }}">{{ section.settings.section_nav_history }}</a>
+          <a class="section-nav__tab" data-idx="1" data-section="{{ creator_id }}" href="#{{ creator_id }}">{{ section.settings.section_nav_creator }}</a>
+          <a class="section-nav__tab" data-idx="2" data-section="{{ ruby_id }}" href="#{{ ruby_id }}">{{ section.settings.section_nav_ruby }}</a>
+          <a class="section-nav__tab" data-idx="3" data-section="{{ timeline_id }}" href="#{{ timeline_id }}">{{ section.settings.section_nav_timeline }}</a>
         </div>
       </div>
+    </nav>
 
-      <div class="tl-item tl-item--right tl-item--1984">
-        <div class="tl-event">
-          <div class="tl-year">1984</div>
-          <p class="tl-body">{{ section.settings.timeline_text_1984 | default: "He began designing and creating jewelry for some of the most prestigious international brands." }}</p>
-        </div>
-        <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-        <div class="tl-media">
-          {%- if section.settings.timeline_img_1984 != blank -%}
-            {% render 'image', image: section.settings.timeline_img_1984, alt: '1984', loading: 'lazy', modifier: 'rc-inline-image' %}
-          {%- else -%}
-            {{ img_1984_url | image_tag: alt: '1984', loading: 'lazy', class: 'rc-inline-image' }}
-          {%- endif -%}
-        </div>
-      </div>
-    </div>
+    <template data-media-card-template>
+      <article class="media-card">
+        <div class="media-art"></div>
+      </article>
+    </template>
 
-    <div class="timeline-break">
-      <div class="timeline-break__line"></div>
-      <div class="timeline-break__dot" data-year="1996"></div>
-      <div class="timeline-break__event">
-        <p class="timeline-break__body">{{ section.settings.timeline_text_1996 | default: "He launched his brand in the United States with the Appassionata collection and began signing his creations with a small ruby." }}</p>
-      </div>
-      {%- if section.settings.timeline_img_1996 != blank -%}
-        {{ section.settings.timeline_img_1996 | image_url: width: 1200 | image_tag: alt: '1996 Ruby', loading: 'lazy', class: 'timeline-break__ruby rc-inline-image' }}
-      {%- else -%}
-        {{ img_1996_url | image_tag: alt: '1996 Ruby', loading: 'lazy', class: 'timeline-break__ruby rc-inline-image' }}
-      {%- endif -%}
-    </div>
-  </div>
+    <script type="application/json" data-timeline-data>
+      [
+        {% for block in section.blocks %}
+          {
+            "id": {{ block.id | json }},
+            "year": {{ block.settings.year | default: '1977' | json }},
+            "title": {{ block.settings.title | default: 'Milestone' | json }},
+            "copy": {{ block.settings.copy | strip_html | strip_newlines | default: block.settings.title | default: block.settings.year | json }},
+            "media": [
+              {
+                "label": {{ block.settings.media_1_label | default: 'Media 1' | json }},
+                "image": {% if block.settings.media_1_image != blank %}{{ block.settings.media_1_image | image_url: width: 2200 | json }}{% else %}null{% endif %},
+                "fill": {{ block.settings.media_1_fill | default: 'linear-gradient(135deg, #5f5a71 0%, #241f29 65%, #0d0d12 100%)' | json }},
+                "x": {{ block.settings.media_1_x | default: 0 | json }},
+                "y": {{ block.settings.media_1_y | default: 18 | json }},
+                "w": {{ block.settings.media_1_w | default: 36 | json }},
+                "h": {{ block.settings.media_1_h | default: 46 | json }}
+              },
+              {
+                "label": {{ block.settings.media_2_label | default: 'Media 2' | json }},
+                "image": {% if block.settings.media_2_image != blank %}{{ block.settings.media_2_image | image_url: width: 2200 | json }}{% else %}null{% endif %},
+                "fill": {{ block.settings.media_2_fill | default: 'linear-gradient(180deg, #d8d8d5 0%, #8f8e88 50%, #4e4d4a 100%)' | json }},
+                "x": {{ block.settings.media_2_x | default: 43 | json }},
+                "y": {{ block.settings.media_2_y | default: 0 | json }},
+                "w": {{ block.settings.media_2_w | default: 24 | json }},
+                "h": {{ block.settings.media_2_h | default: 58 | json }}
+              },
+              {
+                "label": {{ block.settings.media_3_label | default: 'Media 3' | json }},
+                "image": {% if block.settings.media_3_image != blank %}{{ block.settings.media_3_image | image_url: width: 2200 | json }}{% else %}null{% endif %},
+                "fill": {{ block.settings.media_3_fill | default: 'linear-gradient(135deg, #ceb78c 0%, #89683f 50%, #20150f 100%)' | json }},
+                "x": {{ block.settings.media_3_x | default: 74 | json }},
+                "y": {{ block.settings.media_3_y | default: 8 | json }},
+                "w": {{ block.settings.media_3_w | default: 18 | json }},
+                "h": {{ block.settings.media_3_h | default: 26 | json }}
+              }
+            ]
+          }{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+      ]
+    </script>
 
-  <!-- Later era — ruby red background -->
-  <div class="timeline-era--ruby">
-    <div class="timeline-era--ruby__map">
-      {%- if section.settings.timeline_world_map_image != blank -%}
-        {% render 'image', image: section.settings.timeline_world_map_image, alt: 'World map', loading: 'lazy', modifier: 'rc-inline-image' %}
-      {%- else -%}
-        {{ timeline_world_map_url | image_tag: alt: 'World map', loading: 'lazy', class: 'rc-inline-image' }}
-      {%- endif -%}
-    </div>
-    <div class="timeline">
-      <div class="timeline__spine"></div>
-
-      <div class="tl-item tl-item--left tl-item--2000" style="padding-top:0">
-        <div class="tl-event">
-          <div class="tl-year">2000</div>
-          <p class="tl-body">{{ section.settings.timeline_text_2000 | default: "He became one of the founders and a member of the Board of Directors of the World Diamond Council, the organization that established the Kimberley Process in collaboration with the United Nations." }}</p>
-        </div>
-        <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-        <div class="tl-media">
-          {%- if section.settings.timeline_img_2000 != blank -%}
-            {% render 'image', image: section.settings.timeline_img_2000, alt: '2000 Group Diamond', loading: 'lazy', modifier: 'rc-inline-image' %}
-          {%- else -%}
-            {{ img_2000_url | image_tag: alt: '2000 Group Diamond', loading: 'lazy', class: 'rc-inline-image' }}
-          {%- endif -%}
-        </div>
-      </div>
-
-    <div class="tl-item tl-item--right">
-      <div class="tl-media">
-        {%- if section.settings.timeline_img_2003 != blank -%}
-          {% render 'image', image: section.settings.timeline_img_2003, alt: 'Cento 2003', loading: 'lazy', modifier: 'rc-inline-image' %}
-        {%- else -%}
-          {{ img_2003_url | image_tag: alt: 'Cento 2003', loading: 'lazy', class: 'rc-inline-image' }}
-        {%- endif -%}
-      </div>
-      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-      <div class="tl-event">
-        <div class="tl-year">2003</div>
-        <p class="tl-body">{{ section.settings.timeline_text_2003 | default: "He launched the Cento collection, his revolutionary diamond with 100 facets." }}</p>
-        <a class="tl-cta" href="{{ section.settings.cento_url | default: '#' }}">Discover Cento Collection</a>
-      </div>
-    </div>
-
-    <div class="tl-item tl-item--left tl-item--2014">
-      <div class="tl-event">
-        <div class="tl-year">2006</div>
-        <p class="tl-body">{{ section.settings.timeline_text_2006 | default: "He opened his first single-brand boutique in Atlanta, USA." }}</p>
-      </div>
-      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-      <div class="tl-media">
-        {%- if section.settings.timeline_img_2006 != blank -%}
-          {% render 'image', image: section.settings.timeline_img_2006, alt: '2006 Atlanta Boutique', loading: 'lazy', modifier: 'rc-inline-image' %}
-        {%- else -%}
-          {{ img_2006_url | image_tag: alt: '2006 Atlanta Boutique', loading: 'lazy', class: 'rc-inline-image' }}
-        {%- endif -%}
-      </div>
-    </div>
-
-    <div class="tl-item tl-item--right">
-      <div class="tl-media">
-        {%- if section.settings.timeline_img_2007 != blank -%}
-          {% render 'image', image: section.settings.timeline_img_2007, alt: '2007 Dubai Store', loading: 'lazy', modifier: 'rc-inline-image' %}
-        {%- else -%}
-          {{ img_2007_url | image_tag: alt: '2007 Dubai Store', loading: 'lazy', class: 'rc-inline-image' }}
-        {%- endif -%}
-      </div>
-      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-      <div class="tl-event">
-        <div class="tl-year">2007</div>
-        <p class="tl-body">{{ section.settings.timeline_text_2007 | default: "He opened his first single-brand boutique in Dubai and founded the Middle East LLC, in partnership with local partner, Damas." }}</p>
-      </div>
-    </div>
-
-    <div class="tl-item tl-item--left">
-      <div class="tl-event">
-        <div class="tl-year">2008</div>
-        <p class="tl-body">{{ section.settings.timeline_text_2008 | default: "He opened his first European single-brand boutique in Rome." }}</p>
-      </div>
-      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-      <div class="tl-media">
-        {%- if section.settings.timeline_img_2008 != blank -%}
-          {% render 'image', image: section.settings.timeline_img_2008, alt: '2008 Rome Store', loading: 'lazy', modifier: 'rc-inline-image' %}
-        {%- else -%}
-          {{ img_2008_url | image_tag: alt: '2008 Rome Store', loading: 'lazy', class: 'rc-inline-image' }}
-        {%- endif -%}
-      </div>
-    </div>
-
-    <div class="tl-item tl-item--right">
-      <div class="tl-media">
-        {%- if section.settings.timeline_img_2013 != blank -%}
-          {% render 'image', image: section.settings.timeline_img_2013, alt: '2013 Roberto Coin Award', loading: 'lazy', modifier: 'rc-inline-image' %}
-        {%- else -%}
-          {{ img_2013_url | image_tag: alt: '2013 Roberto Coin Award', loading: 'lazy', class: 'rc-inline-image' }}
-        {%- endif -%}
-      </div>
-      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-      <div class="tl-event">
-        <div class="tl-year">2013</div>
-        <p class="tl-body">{{ section.settings.timeline_text_2013 | default: "He was recognized by the Phillips Collection in Washington for his contribution to American culture and honored at Vicenzaoro for Corporate Social Responsibility." }}</p>
-      </div>
-    </div>
-
-    <div class="tl-item tl-item--left">
-      <div class="tl-event">
-        <div class="tl-year">2014</div>
-        <p class="tl-body">{{ section.settings.timeline_text_2014 | default: "His collection, Pois Moi, was awarded the Best Italian Collection in the World at the Vicenza Fair during the Andrea Palladio International Jewelry Awards." }}</p>
-        <a class="tl-cta" href="{{ section.settings.pois_moi_url | default: '#' }}">Discover Pois Moi Collection</a>
-      </div>
-      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-      <div class="tl-media">
-        {%- if section.settings.timeline_img_2014 != blank -%}
-          {% render 'image', image: section.settings.timeline_img_2014, alt: '2014 RC Pois Moi', loading: 'lazy', modifier: 'rc-inline-image' %}
-        {%- else -%}
-          {{ img_2014_url | image_tag: alt: '2014 RC Pois Moi', loading: 'lazy', class: 'rc-inline-image' }}
-        {%- endif -%}
-      </div>
-    </div>
-
-    <div class="tl-item tl-item--right">
-      <div class="tl-media">
-        {%- if section.settings.timeline_img_2018 != blank -%}
-          {% render 'image', image: section.settings.timeline_img_2018, alt: '2018', loading: 'lazy', modifier: 'rc-inline-image' %}
-        {%- else -%}
-          {{ img_2018_url | image_tag: alt: '2018', loading: 'lazy', class: 'rc-inline-image' }}
-        {%- endif -%}
-      </div>
-      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-      <div class="tl-event">
-        <div class="tl-year">2018</div>
-        <p class="tl-body">{{ section.settings.timeline_text_2018 | default: "He began personally inspecting each of the brand's diamonds, using a special laser incision to guarantee 100% natural origin." }}</p>
-      </div>
-    </div>
-
-    <div class="tl-item tl-item--left">
-      <div class="tl-event">
-        <div class="tl-year">2021</div>
-        <p class="tl-body">{{ section.settings.timeline_text_2021 | default: "CNN released its third feature on Roberto Coin, highlighting the Maison’s creative vision and the Love in Verona collection." }}</p>
-      </div>
-      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-      <div class="tl-media">
-        {%- if section.settings.timeline_img_2021 != blank -%}
-          {% render 'image', image: section.settings.timeline_img_2021, alt: '2021 RC Princess Flower', loading: 'lazy', modifier: 'rc-inline-image' %}
-        {%- else -%}
-          {{ img_2021_url | image_tag: alt: '2021 RC Princess Flower', loading: 'lazy', class: 'rc-inline-image' }}
-        {%- endif -%}
-      </div>
-    </div>
-
-    <div class="tl-item tl-item--right tl-item--2022">
-      <div class="tl-event">
-        <div class="tl-year">2022</div>
-        <p class="tl-body">{{ section.settings.timeline_text_2022 | default: "He created an enchanting collection for the second season of Emily in Paris." }}</p>
-      </div>
-      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-      <div class="tl-media">
-        {%- if section.settings.timeline_img_2022 != blank -%}
-          {% render 'image', image: section.settings.timeline_img_2022, alt: '2022 Emily in Paris', loading: 'lazy', modifier: 'rc-inline-image' %}
-        {%- else -%}
-          <img src="{{ img_2022_url }}" alt="2022 Emily in Paris" loading="lazy" class="rc-inline-image">
-        {%- endif -%}
-      </div>
-    </div>
-
-    <div class="tl-item tl-item--left">
-      <div class="tl-event">
-        <div class="tl-year">2025</div>
-        <p class="tl-body">{{ section.settings.timeline_text_2025 | default: "Roberto Coin received the Lifetime Achievement Award in Jewelry at the Fashion Group International Night of Stars Gala in Dallas and was invited as a guest speaker at the United Nations Fashion & Lifestyle Network, promoting innovation, responsibility and sustainable growth." }}</p>
-      </div>
-      <div class="tl-center"><div class="tl-dot"></div><div class="tl-connector"></div></div>
-      <div class="tl-media">
-        {%- if section.settings.timeline_img_2025 != blank -%}
-          {% render 'image', image: section.settings.timeline_img_2025, alt: '2025', loading: 'lazy', modifier: 'rc-inline-image' %}
-        {%- else -%}
-          {{ img_2025_url | image_tag: alt: '2025', loading: 'lazy', class: 'rc-inline-image' }}
-        {%- endif -%}
-      </div>
-    </div>
-
-      <div class="tl-item tl-item--left tl-item--today">
-
-        <div class="tl-event">
-          <div class="tl-year">Today</div>
-          <p class="tl-body">{{ section.settings.timeline_text_today | default: "Present in over 60 countries worldwide. The ruby has become an enduring symbol of the Maison.<br><br>A renewed identity in Verde Amazzonite reflects harmony, strength and daring grace while the ruby remains the eternal heart of the Maison." }}</p>
-        </div>
-        <div class="tl-center"><div class="tl-dot"></div></div>
-        <div class="tl-media">
-          {%- if section.settings.timeline_img_today != blank -%}
-            {% render 'image', image: section.settings.timeline_img_today, alt: 'Today', loading: 'lazy', modifier: 'rc-inline-image' %}
-          {%- else -%}
-            {{ img_today_url | image_tag: alt: 'Today', loading: 'lazy', class: 'rc-inline-image' }}
-          {%- endif -%}
-        </div>
-      </div>
-    </div>
-    <div class="timeline-transition" aria-hidden="true">
-      <svg class="timeline-transition__flower-svg timeline-transition__flower-red-svg" width="1729" height="1660" viewBox="0 0 1729 1660" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0 0V1258.96C0 1258.96 105.3 1244.89 184.15 1211.16C261.15 1178.22 352.51 1121.05 352.51 1121.05L376.91 1103.65C440.96 1058.17 514.35 947.54 606.41 947.54C642.45 947.54 680.9 966.11 761.32 1034.88L792.74 1061.68L800.97 1039.49L774.17 1008.07C705.5 927.76 686.83 945.22 686.83 853.16C686.83 761.1 797.46 687.71 842.94 623.66L860.41 599.16H876.67L894.14 623.66C940.72 688.92 1050.25 761.1 1050.25 853.16C1050.25 889.2 1031.68 927.65 962.91 1008.07L936.11 1039.49H935.68L935.11 1061.68L966.53 1034.88C1046.84 966.21 1029.38 947.54 1121.44 947.54C1213.5 947.54 1286.89 1058.17 1350.94 1103.65L1375.34 1121.05C1374.6 1120.36 1492.25 1199.3 1537.01 1219C1607.18 1249.88 1733.23 1261.59 1728.02 1258.96V0H0Z" fill="url(#paint0_radial_3994_4019)"/>
-        <path d="M1121.43 1310.96C1213.49 1310.96 1285.67 1201.43 1350.93 1154.85L1375.43 1137.38V1121.12L1350.93 1103.65C1286.88 1058.17 1213.49 947.54 1121.43 947.54C1029.37 947.54 1046.84 966.21 966.52 1034.88L935.1 1061.68L938.61 1069.81C992.22 1029.05 1024.85 1011.58 1077.25 1011.58C1129.65 1011.58 1211.17 1053.54 1260.17 1129.24C1211.28 1204.94 1142.51 1246.9 1077.25 1246.9C1011.99 1246.9 992.22 1229.43 938.61 1188.67L935.1 1196.8L966.52 1223.6C1046.93 1292.37 1085.38 1310.94 1121.43 1310.94M606.41 1310.96C642.55 1310.96 681 1292.29 761.32 1223.62L792.74 1196.82L789.23 1188.69C735.62 1229.45 702.99 1246.92 650.59 1246.92C598.19 1246.92 516.57 1204.96 467.67 1129.26C516.56 1053.56 585.33 1011.6 650.59 1011.6C715.85 1011.6 735.62 1029.07 789.23 1069.83L792.74 1061.7L761.32 1034.9C680.91 966.13 642.46 947.56 606.41 947.56C514.35 947.56 440.96 1058.19 376.91 1103.67L352.41 1121.14V1137.4L376.91 1154.87C442.17 1201.45 514.35 1310.98 606.41 1310.98M860.4 1659.32H876.66L894.13 1634.82C939.61 1570.77 1050.24 1497.38 1050.24 1405.32C1050.24 1313.26 1031.57 1330.73 962.9 1250.41L936.1 1218.99L927.97 1222.5C968.73 1276.11 986.2 1308.74 986.2 1361.14C986.2 1413.54 943.13 1496.27 868.54 1544.06C793.95 1496.27 750.88 1426.4 750.88 1361.14C750.88 1295.88 768.35 1276.11 809.11 1222.5L800.98 1218.99L774.18 1250.41C705.41 1330.82 686.84 1369.27 686.84 1405.32C686.84 1497.38 797.47 1570.77 842.95 1634.82L860.42 1659.32H860.4ZM800.97 1039.49L809.1 1035.98C768.34 982.37 750.87 949.74 750.87 897.34C750.87 844.94 792.83 763.32 868.53 714.42C944.23 763.31 986.19 832.08 986.19 897.34C986.19 962.6 968.72 982.37 927.96 1035.98L936.09 1039.49L962.89 1008.07C1031.66 927.66 1050.23 889.21 1050.23 853.16C1050.23 761.1 940.7 688.92 894.12 623.66L876.65 599.16H860.39L842.92 623.66C797.44 687.71 686.81 761.1 686.81 853.16C686.81 945.22 705.48 927.75 774.15 1008.07L800.95 1039.49H800.97Z" fill="#27574D"/>
-        <defs>
-          <radialGradient id="paint0_radial_3994_4019" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(878 1054) rotate(-88.0494) scale(1219.21 1673.13)">
-            <stop offset="0.00480769" stop-color="#431F18" stop-opacity="0"/>
-            <stop offset="0.447115" stop-color="#431F18"/>
-          </radialGradient>
-        </defs>
-      </svg>
+    <div class="visually-hidden" aria-hidden="true">
+      {% for block in section.blocks %}
+        <div data-block-id="{{ block.id }}" {{ block.shopify_attributes }}></div>
+      {% endfor %}
     </div>
   </div>
 </section>
-
-<!-- ════════════════════════════════════════
-     REBRANDING
-════════════════════════════════════════ -->
-<section class="rebranding" id="rct-rebranding">
-  <div class="rebranding__logo" id="rebranding-logo-lottie" data-logo-json="{{ rebranding_logo_json_url }}" aria-hidden="true"></div>
-</section>
-
-<!-- ════════════════════════════════════════
-     COLLECTIONS
-════════════════════════════════════════ -->
-<section class="collections">
-  {%- assign default_collections_image = collections_img_url -%}
-  {%- if collections_cover_image != blank -%}
-    {%- assign default_collections_image = collections_cover_image | image_url: width: 1060, height: 1060 -%}
-  {%- endif -%}
-  <div class="collections__content">
-    <h2 class="collections__title h5 fade">DISCOVER our Collections</h2>
-    <div class="collections__columns">
-      <ul class="collections__list">
-        {%- if section.settings.collections_left != blank -%}
-          {%- for collection in section.settings.collections_left -%}
-            {%- assign item_image = default_collections_image -%}
-            {%- if collection.featured_image != blank -%}
-              {%- assign item_image = collection.featured_image | image_url: width: 1060, height: 1060 -%}
-            {%- endif -%}
-            <li><h3 class="collections__link-h3 h3"><a class="h3 collections__link{% if forloop.first %} is-active{% endif %}" href="{{ collection.url }}" data-collection-image="{{ item_image }}">{{ collection.title }}</a></h3></li>
-          {%- endfor -%}
-        {%- else -%}
-          {%- assign fallback_left = "Carousel|Princess Flower|Love in Verona|Venetian Princess|Art Deco|Tiaré|Sauvage Privé|Animalier" | split: "|" -%}
-          {%- for item in fallback_left -%}
-            {%- assign item_handle = item | handleize -%}
-            {%- assign item_collection = collections[item_handle] -%}
-            {%- assign item_url = '#' -%}
-            {%- assign item_image = default_collections_image -%}
-            {%- if item_collection != blank -%}
-              {%- assign item_url = item_collection.url -%}
-              {%- if item_collection.featured_image != blank -%}
-                {%- assign item_image = item_collection.featured_image | image_url: width: 1060, height: 1060 -%}
-              {%- endif -%}
-            {%- endif -%}
-            <li><h3 class="collections__link-h3 h3"><a class="h3 collections__link{% if forloop.first %} is-active{% endif %}" href="{{ item_url }}" data-collection-image="{{ item_image }}">{{ item }}</a></h3></li>
-          {%- endfor -%}
-        {%- endif -%}
-      </ul>
-      <ul class="collections__list">
-        {%- if section.settings.collections_right != blank -%}
-          {%- for collection in section.settings.collections_right -%}
-            {%- assign item_image = default_collections_image -%}
-            {%- if collection.featured_image != blank -%}
-              {%- assign item_image = collection.featured_image | image_url: width: 1060, height: 1060 -%}
-            {%- endif -%}
-            <li><h3 class="collections__link-h3 h3"><a class="h3 collections__link" href="{{ collection.url }}" data-collection-image="{{ item_image }}">{{ collection.title }}</a></h3></li>
-          {%- endfor -%}
-        {%- else -%}
-          {%- assign fallback_right = "Venetian Medallions|Diamond Princess|Domino|Jasmine|Navarra|Princess|Princess Star" | split: "|" -%}
-          {%- for item in fallback_right -%}
-            {%- assign item_handle = item | handleize -%}
-            {%- assign item_collection = collections[item_handle] -%}
-            {%- assign item_url = '#' -%}
-            {%- assign item_image = default_collections_image -%}
-            {%- if item_collection != blank -%}
-              {%- assign item_url = item_collection.url -%}
-              {%- if item_collection.featured_image != blank -%}
-                {%- assign item_image = item_collection.featured_image | image_url: width: 1060, height: 1060 -%}
-              {%- endif -%}
-            {%- endif -%}
-            <li><h3 class="collections__link-h3 h3"><a class="h3 collections__link" href="{{ item_url }}" data-collection-image="{{ item_image }}">{{ item }}</a></h3></li>
-          {%- endfor -%}
-        {%- endif -%}
-      </ul>
-    </div>
-  </div>
-  <div class="collections__img fade d1">
-    <img id="collections-hover-image" src="{{ default_collections_image }}" alt="Collections" loading="lazy" class="rc-inline-image">
-  </div>
-</section>
-
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
-<script src="https://unpkg.com/lottie-web@5.12.2/build/player/lottie.min.js"></script>
-<script src="{{ 'figma-images/RC_Flower.data.js' | asset_url }}"></script>
-<script src="{{ 'figma-images/RobertoCoin_logo.data.js' | asset_url }}"></script>
-
-{% javascript %}
-(function(){
-  // Target only the fixed nav (not the hidden one inside hero)
-  var fixedNav = document.querySelector('.section-nav--fixed');
-  var heroSection = document.getElementById('hero');
-  var tabs = fixedNav ? fixedNav.querySelectorAll('.section-nav__tab') : document.querySelectorAll('.section-nav--fixed .section-nav__tab');
-  var highlights = fixedNav
-    ? fixedNav.querySelectorAll('.nav-highlight')
-    : document.querySelectorAll('.section-nav--fixed .nav-highlight');
-  var activeIdx = 0;
-  var hoverIdx = -1;
-  var heroScrollCta = document.querySelector('.hero__scroll');
-  var historySection = document.querySelector('.history');
-  var historyRing = document.querySelector('.history__center img');
-  var historyRotateStart = -18;
-  var historyRotateEnd = 40;
-  var historyCurrentAngle = historyRotateStart;
-  var historyTargetAngle = historyRotateStart;
-  var historyCurrentOpacity = 0;
-  var historyTargetOpacity = 0;
-  var historyRingRaf = null;
-  var scrollTicking = false;
-  var timelineLines = document.querySelectorAll('.timeline__spine, .timeline-break__line');
-  var timelineItems = document.querySelectorAll('.tl-item');
-  var timelineBreak = document.querySelector('.timeline-break');
-  var heroOrnament = document.querySelector('.hero__ornament');
-  var heroLottieContainer = document.getElementById('hero-lottie');
-  var heroFlowerJsonPath = heroLottieContainer ? heroLottieContainer.getAttribute('data-flower-json') : '';
-  var rebrandingLogoContainer = document.getElementById('rebranding-logo-lottie');
-  var rebrandingLogoJsonPath = rebrandingLogoContainer ? rebrandingLogoContainer.getAttribute('data-logo-json') : '';
-  var navScrollRaf = null;
-  var isNavAutoScrolling = false;
-  var mobileLabel = fixedNav ? fixedNav.querySelector('.section-nav__mobile-label') : null;
-  var mobileMain = fixedNav ? fixedNav.querySelector('.section-nav__mobile-main') : null;
-  var mobileLabelTimerA = null;
-  var mobileActiveIdx = -1;
-  var mobileMenuButton = fixedNav ? fixedNav.querySelector('.section-nav__mobile-menu') : null;
-  var mobileDropdown = fixedNav ? fixedNav.querySelector('.section-nav__mobile-dropdown') : null;
-  var mobileLinks = fixedNav ? fixedNav.querySelectorAll('.section-nav__mobile-link') : [];
-  var mobileMenuOpen = false;
-
-  function initHeroLottie(){
-    if (!heroOrnament || !heroLottieContainer || !window.lottie) return;
-    function loadFromData(){
-      if (!window.__RC_FLOWER_DATA) return null;
-      var fallback = window.lottie.loadAnimation({
-        container: heroLottieContainer,
-        renderer: 'svg',
-        loop: true,
-        autoplay: true,
-        animationData: window.__RC_FLOWER_DATA
-      });
-      fallback.addEventListener('DOMLoaded', function(){
-        fallback.loop = true;
-        fallback.goToAndPlay(0, true);
-        heroOrnament.classList.add('has-lottie');
-      });
-      return fallback;
-    }
-
-    try {
-      if (!heroFlowerJsonPath) {
-        loadFromData();
-        return;
-      }
-      var lottieSrc = heroFlowerJsonPath;
-      var lottiePath = lottieSrc + (lottieSrc.indexOf('?') === -1 ? '?cb=' : '&cb=') + Date.now();
-      var anim = window.lottie.loadAnimation({
-        container: heroLottieContainer,
-        renderer: 'svg',
-        loop: true,
-        autoplay: true,
-        path: lottiePath
-      });
-      anim.addEventListener('DOMLoaded', function(){
-        anim.loop = true;
-        anim.goToAndPlay(0, true);
-        heroOrnament.classList.add('has-lottie');
-      });
-      anim.addEventListener('data_failed', function(){
-        try { anim.destroy(); } catch (_e) {}
-        loadFromData();
-      });
-    } catch (_err) {
-      loadFromData();
-    }
-  }
-
-  function initRebrandingLogoLottie(){
-    if (!rebrandingLogoContainer || !window.lottie) return;
-    var logoAnim = null;
-    var played = false;
-
-    function getWordmarkOnlyData(){
-      if (!window.__ROBERTCOIN_LOGO_DATA) return null;
-      try {
-        var data = JSON.parse(JSON.stringify(window.__ROBERTCOIN_LOGO_DATA));
-        if (Array.isArray(data.layers)) {
-          data.layers = data.layers.filter(function(layer){
-            var name = (layer && layer.nm ? String(layer.nm) : '');
-            return !/flower/i.test(name);
-          });
-        }
-        return data;
-      } catch (_e) {
-        return null;
-      }
-    }
-
-    function loadFromData(){
-      var filteredData = getWordmarkOnlyData();
-      if (!filteredData) return null;
-      return window.lottie.loadAnimation({
-        container: rebrandingLogoContainer,
-        renderer: 'svg',
-        loop: false,
-        autoplay: false,
-        animationData: filteredData
-      });
-    }
-
-    function loadFromPath(){
-      if (!rebrandingLogoJsonPath) return null;
-      var logoSrc = rebrandingLogoJsonPath;
-      var logoPath = logoSrc + (logoSrc.indexOf('?') === -1 ? '?cb=' : '&cb=') + Date.now();
-      try {
-        var pathAnim = window.lottie.loadAnimation({
-          container: rebrandingLogoContainer,
-          renderer: 'svg',
-          loop: false,
-          autoplay: false,
-          path: logoPath
-        });
-        pathAnim.addEventListener('data_failed', function(){
-          try { pathAnim.destroy(); } catch (_e) {}
-          if (!logoAnim) logoAnim = loadFromData();
-        });
-        return pathAnim;
-      } catch (_e) {
-        return null;
-      }
-    }
-
-    logoAnim = loadFromPath() || loadFromData();
-
-    if (!logoAnim) return;
-
-    var io = new IntersectionObserver(function(entries){
-      entries.forEach(function(entry){
-        if (!played && entry.isIntersecting) {
-          played = true;
-          logoAnim.goToAndPlay(0, true);
-          io.disconnect();
-        }
-      });
-    }, { threshold: 0.3 });
-    io.observe(rebrandingLogoContainer);
-  }
-
-
-  function hydrateTimelineYearMarkers(){
-    document.querySelectorAll('.tl-item').forEach(function(item){
-      var year = item.querySelector('.tl-year');
-      var dot = item.querySelector('.tl-dot');
-      if (year && dot) dot.textContent = year.textContent.trim();
-    });
-
-    var breakYear = document.querySelector('.timeline-break__year');
-    var breakDot = document.querySelector('.timeline-break__dot');
-    if (breakDot) {
-      if (breakYear) breakDot.textContent = breakYear.textContent.trim();
-      else if (breakDot.dataset.year) breakDot.textContent = breakDot.dataset.year;
-    }
-  }
-
-  function initCollectionsHover(){
-    var collectionsSection = document.querySelector('.collections');
-    if (!collectionsSection) return;
-
-    var imageEl = collectionsSection.querySelector('#collections-hover-image');
-    var links = collectionsSection.querySelectorAll('.collections__link');
-    if (!imageEl || !links.length) return;
-
-    function activate(link){
-      links.forEach(function(l){ l.classList.remove('is-active'); });
-      link.classList.add('is-active');
-      var imageUrl = link.getAttribute('data-collection-image');
-      if (imageUrl) {
-        imageEl.setAttribute('src', imageUrl);
-      }
-    }
-
-    links.forEach(function(link){
-      link.addEventListener('mouseenter', function(){ activate(link); });
-      link.addEventListener('focus', function(){ activate(link); });
-    });
-  }
-
-  function renderNavState() {
-    var idx = hoverIdx >= 0 ? hoverIdx : activeIdx;
-    tabs.forEach(function(t){ t.classList.remove('is-active'); });
-    highlights.forEach(function(h){ if(h) h.classList.remove('is-active'); });
-    if (tabs[idx]) tabs[idx].classList.add('is-active');
-    if (highlights[idx]) highlights[idx].classList.add('is-active');
-  }
-  function updateMobileSectionLabel(idx, force) {
-    if (!mobileLabel) return;
-    var safeIdx = idx >= 0 ? idx : 0;
-    if (!tabs[safeIdx]) return;
-    if (!force && safeIdx === mobileActiveIdx) return;
-
-    var nextText = tabs[safeIdx].textContent.trim();
-    mobileActiveIdx = safeIdx;
-    if (mobileLabelTimerA) window.clearTimeout(mobileLabelTimerA);
-
-    mobileLabel.classList.remove('is-in');
-    mobileLabel.classList.add('is-out');
-
-    mobileLabelTimerA = window.setTimeout(function(){
-      mobileLabel.textContent = nextText;
-      mobileLabel.classList.remove('is-out');
-      mobileLabel.classList.add('is-in');
-      requestAnimationFrame(function(){
-        requestAnimationFrame(function(){
-          mobileLabel.classList.remove('is-in');
-        });
-      });
-    }, 120);
-  }
-  function setActive(idx) {
-    activeIdx = idx;
-    renderNavState();
-    updateMobileSectionLabel(idx, false);
-  }
-  function clearActive() {
-    activeIdx = -1;
-    renderNavState();
-    updateMobileSectionLabel(-1, false);
-  }
-  function setHover(idx) {
-    hoverIdx = idx;
-    renderNavState();
-  }
-  function clearHover() {
-    hoverIdx = -1;
-    renderNavState();
-  }
-  function setMobileMenuOpen(open) {
-    if (!fixedNav || !mobileDropdown) return;
-    mobileMenuOpen = !!open;
-    fixedNav.classList.toggle('is-mobile-open', mobileMenuOpen);
-    mobileDropdown.setAttribute('aria-hidden', mobileMenuOpen ? 'false' : 'true');
-  }
-  function updateNavProgress() {
-    if (!fixedNav || !sections || !sections.length) return;
-    var firstSection = sections[0];
-    var lastSection = sections[sections.length - 1];
-    if (!firstSection || !lastSection) return;
-
-    var viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-    var startY = firstSection.getBoundingClientRect().top + window.scrollY - (viewportHeight * 0.55);
-    var endY = lastSection.getBoundingClientRect().bottom + window.scrollY - (viewportHeight * 0.6);
-    var span = Math.max(1, endY - startY);
-    var rawProgress = ((window.scrollY || window.pageYOffset) - startY) / span;
-    var progress = Math.max(0, Math.min(1, rawProgress));
-    fixedNav.style.setProperty('--nav-progress', progress.toFixed(4));
-    fixedNav.style.setProperty('--nav-mobile-progress', progress.toFixed(4));
-  }
-  function triggerGlobalBurgerMenu() {
-    var selectors = [
-      '.header__mobile__hamburger button',
-      '.header__mobile__hamburger',
-      'button[aria-controls*="menu-drawer"]',
-      'button[aria-controls*="MenuDrawer"]',
-      '.header__icon--menu',
-      '.header__icon--hamburger'
-    ];
-    for (var i = 0; i < selectors.length; i += 1) {
-      var candidate = document.querySelector(selectors[i]);
-      if (!candidate) continue;
-      if (fixedNav && fixedNav.contains(candidate)) continue;
-      candidate.click();
-      return true;
-    }
-    return false;
-  }
-
-  function smoothScrollToY(targetY, duration) {
-    if (navScrollRaf) {
-      window.cancelAnimationFrame(navScrollRaf);
-      navScrollRaf = null;
-    }
-    var startY = window.scrollY || window.pageYOffset;
-    var delta = targetY - startY;
-    if (Math.abs(delta) < 1) return;
-    var startTime = null;
-
-    function easeInOutSine(t) {
-      return -(Math.cos(Math.PI * t) - 1) / 2;
-    }
-
-    isNavAutoScrolling = true;
-    function step(ts) {
-      if (!startTime) startTime = ts;
-      var elapsed = ts - startTime;
-      var progress = Math.min(elapsed / duration, 1);
-      var eased = easeInOutSine(progress);
-      window.scrollTo(0, startY + (delta * eased));
-      if (progress < 1) {
-        navScrollRaf = window.requestAnimationFrame(step);
-      } else {
-        navScrollRaf = null;
-        isNavAutoScrolling = false;
-      }
-    }
-
-    navScrollRaf = window.requestAnimationFrame(step);
-  }
-
-  clearActive();
-  updateMobileSectionLabel(0, true);
-
-  if (heroSection) {
-    setTimeout(function(){ heroSection.classList.add('hero--ornament-in'); }, 60);
-    setTimeout(function(){ heroSection.classList.add('hero--text-in'); }, 700);
-    setTimeout(function(){ heroSection.classList.add('hero--scroll-in'); }, 1020);
-  }
-
-  if (fixedNav) {
-    fixedNav.classList.add('nav-intro');
-    setTimeout(function(){
-      requestAnimationFrame(function(){
-        requestAnimationFrame(function(){
-          fixedNav.classList.add('nav-intro-run');
-        });
-      });
-    }, 980);
-    setTimeout(function(){
-      fixedNav.classList.add('nav-ready');
-    }, 1800);
-    setTimeout(function(){
-      fixedNav.classList.remove('nav-intro');
-      fixedNav.classList.remove('nav-intro-run');
-    }, 3060);
-  }
-
-  tabs.forEach(function(tab){
-    tab.addEventListener('mouseenter', function(){
-      var idx = parseInt(tab.getAttribute('data-idx'));
-      setHover(idx);
-    });
-    tab.addEventListener('mouseleave', clearHover);
-    tab.addEventListener('click', function(e){
-      e.preventDefault();
-      var idx = parseInt(tab.getAttribute('data-idx'));
-      setActive(idx);
-      var target = document.getElementById(tab.getAttribute('data-section'));
-      if (target) {
-        var targetY = target.getBoundingClientRect().top + window.scrollY - 20;
-        isNavAutoScrolling = true;
-        window.scrollTo({
-          top: targetY,
-          behavior: 'smooth'
-        });
-        window.setTimeout(function(){
-          isNavAutoScrolling = false;
-        }, 900);
-      }
-      tab.blur();
-    });
-  });
-
-  if (mobileMenuButton) {
-    mobileMenuButton.addEventListener('click', function(e){
-      e.preventDefault();
-      e.stopPropagation();
-      triggerGlobalBurgerMenu();
-      setMobileMenuOpen(false);
-    });
-  }
-  if (mobileMain) {
-    mobileMain.addEventListener('click', function(e){
-      e.preventDefault();
-      e.stopPropagation();
-      setMobileMenuOpen(!mobileMenuOpen);
-    });
-  }
-  if (mobileLinks && mobileLinks.length) {
-    mobileLinks.forEach(function(link){
-      link.addEventListener('click', function(e){
-        e.preventDefault();
-        var idx = parseInt(link.getAttribute('data-idx'), 10);
-        if (!isNaN(idx)) setActive(idx);
-        var target = document.getElementById(link.getAttribute('data-section'));
-        if (target) {
-          var targetY = target.getBoundingClientRect().top + window.scrollY - 20;
-          isNavAutoScrolling = true;
-          window.scrollTo({ top: targetY, behavior: 'smooth' });
-          window.setTimeout(function(){ isNavAutoScrolling = false; }, 900);
-        }
-        setMobileMenuOpen(false);
-      });
-    });
-  }
-  document.addEventListener('click', function(e){
-    if (!mobileMenuOpen || !fixedNav) return;
-    if (fixedNav.contains(e.target)) return;
-    setMobileMenuOpen(false);
-  });
-
-  /* ── Scroll-spy ── */
-  var sections = ['rct-history','rct-creator','rct-ruby','rct-timeline']
-    .map(function(id){ return document.getElementById(id); }).filter(Boolean);
-
-  function updateNav(){
-    var y = window.scrollY + 100;
-    var found = -1;
-    sections.forEach(function(s,i){ if(s && s.getBoundingClientRect().top + window.scrollY <= y) found = i; });
-    if (found === -1) {
-      if (activeIdx !== -1) clearActive();
-    } else if (found !== activeIdx) {
-      setActive(found);
-    }
-    if (heroScrollCta) heroScrollCta.classList.toggle('is-hidden', window.scrollY > 0);
-  }
-
-  function animateHistoryRing(){
-    if (!historyRing) return;
-    var angleDelta = historyTargetAngle - historyCurrentAngle;
-    var opacityDelta = historyTargetOpacity - historyCurrentOpacity;
-    historyCurrentAngle += angleDelta * 0.18;
-    historyCurrentOpacity += opacityDelta * 0.2;
-
-    historyRing.style.transform = 'rotate(' + historyCurrentAngle.toFixed(3) + 'deg)';
-    historyRing.style.opacity = historyCurrentOpacity.toFixed(3);
-
-    if (Math.abs(angleDelta) > 0.01 || Math.abs(opacityDelta) > 0.002) {
-      historyRingRaf = window.requestAnimationFrame(animateHistoryRing);
-    } else {
-      historyRingRaf = null;
-    }
-  }
-
-  function updateHistoryRingRotation(){
-    if (!historySection || !historyRing) return;
-    var rect = historySection.getBoundingClientRect();
-    var vh = window.innerHeight || document.documentElement.clientHeight;
-
-    // Progress only while the section is crossing the viewport.
-    var startPoint = vh * 0.9;
-    var endPoint = -rect.height * 0.35;
-    var progress = (startPoint - rect.top) / (startPoint - endPoint);
-    progress = Math.max(0, Math.min(1, progress));
-
-    var angle = historyRotateStart + (historyRotateEnd - historyRotateStart) * progress;
-    var fadeProgress = (progress - 0.05) / 0.3;
-    fadeProgress = Math.max(0, Math.min(1, fadeProgress));
-    historyTargetAngle = angle;
-    historyTargetOpacity = fadeProgress;
-    if (!historyRingRaf) {
-      historyRingRaf = window.requestAnimationFrame(animateHistoryRing);
-    }
-  }
-
-  function updateTimelineLineDraw(){
-    if (!timelineLines.length) return;
-    var vh = window.innerHeight || document.documentElement.clientHeight;
-    timelineLines.forEach(function(line){
-      var rect = line.getBoundingClientRect();
-      var start = vh * 0.88;
-      var end = vh * 0.16;
-      var progress = (start - rect.top) / (rect.height + start - end);
-      progress = Math.max(0, Math.min(1, progress));
-      line.style.clipPath = 'inset(0 0 ' + ((1 - progress) * 100).toFixed(2) + '% 0)';
-    });
-  }
-
-  function updateTimelineItemRevealByLine(){
-    if (!timelineItems.length) return;
-    var vh = window.innerHeight || document.documentElement.clientHeight;
-
-    timelineItems.forEach(function(item){
-      if (item.classList.contains('visible')) return;
-      var rect = item.getBoundingClientRect();
-      if (rect.top <= vh * 0.9) item.classList.add('visible');
-    });
-  }
-
-  function updateTimelineBreakRevealByLine(){
-    if (!timelineBreak) return;
-    var breakDot = timelineBreak.querySelector('.timeline-break__dot');
-    if (!breakDot) return;
-
-    var vh = window.innerHeight || document.documentElement.clientHeight;
-    var breakRect = timelineBreak.getBoundingClientRect();
-    if (breakRect.top <= vh * 0.9) {
-      var eventEl = timelineBreak.querySelector('.timeline-break__event');
-      var rubyEl = timelineBreak.querySelector('.timeline-break__ruby');
-      if (eventEl) eventEl.classList.add('visible');
-      if (breakDot) breakDot.classList.add('visible');
-      if (rubyEl) rubyEl.classList.add('visible');
-    }
-  }
-
-  function onScroll(){
-    if (scrollTicking) return;
-    scrollTicking = true;
-    window.requestAnimationFrame(function(){
-      updateNav();
-      updateNavProgress();
-      if (!isNavAutoScrolling) {
-        updateHistoryRingRotation();
-        updateTimelineLineDraw();
-        updateTimelineItemRevealByLine();
-        updateTimelineBreakRevealByLine();
-      }
-      scrollTicking = false;
-    });
-  }
-
-  window.addEventListener('scroll', onScroll, { passive:true });
-  window.addEventListener('resize', function(){
-    updateHistoryRingRotation();
-    updateTimelineLineDraw();
-    updateNavProgress();
-  });
-  hydrateTimelineYearMarkers();
-  initCollectionsHover();
-  initHeroLottie();
-  initRebrandingLogoLottie();
-  updateNav();
-  updateNavProgress();
-  updateHistoryRingRotation();
-  updateTimelineLineDraw();
-  updateTimelineItemRevealByLine();
-  updateTimelineBreakRevealByLine();
-
-  /* ── Fade-in on scroll ── */
-  var io = new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if (e.isIntersecting){ e.target.classList.add('visible'); io.unobserve(e.target); }
-    });
-  }, { threshold: 0, rootMargin: '0px 0px -1px 0px' });
-  document.querySelectorAll('.fade:not(.hero__content)').forEach(function(el){ io.observe(el); });
-})();
-{% endjavascript %}
 
 {% schema %}
 {
-  "name": "RC Heritage Timeline",
-  "tag": "div",
-  "class": "rc-heritage-page",
+  "name": "Roberto Coin timeline",
+  "tag": "section",
+  "class": "section",
   "settings": [
+    { "type": "header", "content": "Theme" },
+    { "type": "color", "id": "background_color", "label": "Background color", "default": "#f9f9f9" },
+    { "type": "color", "id": "background_soft_color", "label": "Background soft color", "default": "#f1f1f1" },
+    { "type": "color", "id": "background_glow_color", "label": "Background glow color", "default": "#e7e7e7" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#1f2f2b" },
+    { "type": "color", "id": "accent_color", "label": "Accent color", "default": "#397e70" },
+    { "type": "color", "id": "logo_color", "label": "Logo color", "default": "#000000" },
+    { "type": "color", "id": "active_year_color", "label": "Active year color", "default": "#ffffff" },
+    { "type": "color", "id": "today_color", "label": "Today year color", "default": "#27574d" },
+
+    { "type": "header", "content": "Hero" },
+    { "type": "text", "id": "hero_eyebrow", "label": "Eyebrow", "default": "Since 1996" },
+    { "type": "text", "id": "hero_title", "label": "Title", "default": "The Brand" },
+    { "type": "text", "id": "scroll_text", "label": "Scroll label", "default": "Scroll to Explore" },
+    { "type": "image_picker", "id": "hero_image_top", "label": "Hero image top" },
+    { "type": "image_picker", "id": "hero_image_right", "label": "Hero image right (front portrait)" },
+    { "type": "image_picker", "id": "hero_image_left", "label": "Hero image left" },
+    { "type": "image_picker", "id": "hero_image_bottom", "label": "Hero image bottom" },
+
+    { "type": "header", "content": "History" },
+    { "type": "text", "id": "history_title", "label": "History title", "default": "History" },
+    { "type": "textarea", "id": "history_left_copy", "label": "Left copy", "default": "In 1996, Roberto Coin introduced Appassionata, the first collection to feature a hidden ruby, a symbol of protection, passion and prosperity." },
+    { "type": "textarea", "id": "history_right_copy", "label": "Right copy", "default": "Today, the Maison is present in over 60 countries worldwide, and the ruby remains its enduring symbol." },
+    { "type": "image_picker", "id": "history_ring_drawing", "label": "History ring drawing image" },
+    { "type": "image_picker", "id": "history_ring_photo", "label": "History ring photo image" },
+
+    { "type": "header", "content": "Creator" },
+    { "type": "text", "id": "creator_title", "label": "Creator title", "default": "The Creator" },
+    { "type": "textarea", "id": "creator_copy_1", "label": "Creator copy 1", "default": "Roberto Coin’s journey did not begin in jewelry. After a successful career in luxury hospitality across Europe, he returned to Italy and immersed himself in the goldsmith tradition of Vicenza." },
+    { "type": "textarea", "id": "creator_copy_2", "label": "Creator copy 2", "default": "In 1984, he began designing under his own name, transforming experience into creativity and vision into craftsmanship." },
+    { "type": "image_picker", "id": "creator_image", "label": "Creator portrait image" },
+    { "type": "image_picker", "id": "creator_drawing", "label": "Vicenza drawing image" },
+
+    { "type": "header", "content": "Ruby" },
+    { "type": "text", "id": "ruby_title", "label": "Ruby title", "default": "The Ruby" },
+    { "type": "richtext", "id": "ruby_copy", "label": "Ruby copy", "default": "<p>Roberto Coin chose the ruby as the hidden signature of his creations.</p><p>Set inside every jewel, the ruby is not meant to be seen but to be felt.</p>" },
+    { "type": "image_picker", "id": "ruby_background", "label": "Ruby background image" },
+    { "type": "image_picker", "id": "ruby_gem_image", "label": "Ruby gem image" },
+
+    { "type": "header", "content": "Top nav links" },
+    { "type": "text", "id": "left_link_1_label", "label": "Left link 1 label", "default": "High Jewelry" },
+    { "type": "url", "id": "left_link_1_url", "label": "Left link 1 URL" },
+    { "type": "text", "id": "left_link_2_label", "label": "Left link 2 label", "default": "Jewelry" },
+    { "type": "url", "id": "left_link_2_url", "label": "Left link 2 URL" },
+    { "type": "text", "id": "left_link_3_label", "label": "Left link 3 label", "default": "Occasions" },
+    { "type": "url", "id": "left_link_3_url", "label": "Left link 3 URL" },
+    { "type": "text", "id": "left_link_4_label", "label": "Left link 4 label", "default": "Maison" },
+    { "type": "url", "id": "left_link_4_url", "label": "Left link 4 URL" },
+    { "type": "text", "id": "right_link_1_label", "label": "Right link 1 label", "default": "Find a Boutique" },
+    { "type": "url", "id": "right_link_1_url", "label": "Right link 1 URL" },
+    { "type": "text", "id": "right_link_2_label", "label": "Right link 2 label", "default": "Concierge" },
+    { "type": "url", "id": "right_link_2_url", "label": "Right link 2 URL" },
+    { "type": "text", "id": "right_link_3_label", "label": "Right link 3 label", "default": "Log In" },
+    { "type": "url", "id": "right_link_3_url", "label": "Right link 3 URL" },
+    { "type": "text", "id": "right_link_4_label", "label": "Right link 4 label", "default": "Keep in Touch" },
+    { "type": "url", "id": "right_link_4_url", "label": "Right link 4 URL" },
+    { "type": "url", "id": "bag_link_url", "label": "Bag link URL" },
+    { "type": "text", "id": "bag_count", "label": "Bag count", "default": "2" },
+
+    { "type": "header", "content": "Bottom nav labels" },
+    { "type": "text", "id": "section_nav_history", "label": "History label", "default": "History" },
+    { "type": "text", "id": "section_nav_creator", "label": "Creator label", "default": "The Creator" },
+    { "type": "text", "id": "section_nav_ruby", "label": "Ruby label", "default": "The Ruby" },
+    { "type": "text", "id": "section_nav_timeline", "label": "Timeline label", "default": "Timeline" },
+
+    { "type": "header", "content": "Timeline layout" },
+    { "type": "text", "id": "timeline_aria_label", "label": "Timeline aria label", "default": "Heritage timeline" },
+    { "type": "text", "id": "year_rail_aria_label", "label": "Year rail aria label", "default": "Timeline years" },
+    { "type": "range", "id": "panel_height", "label": "Panel height", "min": 55, "max": 95, "step": 1, "unit": "vh", "default": 76 },
+    { "type": "range", "id": "year_size", "label": "Year size", "min": 24, "max": 80, "step": 1, "unit": "px", "default": 40 },
+    { "type": "range", "id": "caption_size", "label": "Caption size", "min": 10, "max": 22, "step": 1, "unit": "px", "default": 16 }
+  ],
+  "blocks": [
     {
-      "type": "header",
-      "content": "Hero Section"
-    },
-    {
-      "type": "image_picker",
-      "id": "hero_image",
-      "label": "Hero background image"
-    },
-    {
-      "type": "text",
-      "id": "hero_eyebrow",
-      "label": "Eyebrow text",
-      "default": "SINCE 1996"
-    },
-    {
-      "type": "text",
-      "id": "hero_title",
-      "label": "Hero title",
-      "default": "The Brand"
-    },
-    {
-      "type": "text",
-      "id": "hero_scroll_label",
-      "label": "Scroll CTA label",
-      "default": "Scroll to discover OUR story"
-    },
-    {
-      "type": "text",
-      "id": "hero_lottie_json_url",
-      "label": "Hero flower animation JSON URL (optional)"
-    },
-    {
-      "type": "header",
-      "content": "History Section"
-    },
-    {
-      "type": "image_picker",
-      "id": "history_image",
-      "label": "History section image"
-    },
-    {
-      "type": "header",
-      "content": "The Creator Section"
-    },
-    {
-      "type": "image_picker",
-      "id": "creator_image",
-      "label": "Creator portrait image"
-    },
-    {
-      "type": "image_picker",
-      "id": "creator_vicenza_image",
-      "label": "Creator Vicenza drawing image"
-    },
-    {
-      "type": "header",
-      "content": "The Ruby Section"
-    },
-    {
-      "type": "image_picker",
-      "id": "ruby_bg_image",
-      "label": "Ruby section background image"
-    },
-    {
-      "type": "image_picker",
-      "id": "ruby_gem_image",
-      "label": "Ruby gem image (transparent PNG)"
-    },
-    {
-      "type": "image_picker",
-      "id": "timeline_bg_image",
-      "label": "Timeline background image"
-    },
-    {
-      "type": "image_picker",
-      "id": "timeline_world_map_image",
-      "label": "Timeline world map image"
-    },
-    {
-      "type": "header",
-      "content": "Timeline Images"
-    },
-    {
-      "type": "image_picker",
-      "id": "timeline_img_1977",
-      "label": "1977 — image"
-    },
-    {
-      "type": "image_picker",
-      "id": "timeline_img_1984",
-      "label": "1984 — image"
-    },
-    {
-      "type": "image_picker",
-      "id": "timeline_img_1996",
-      "label": "1996 — image"
-    },
-    {
-      "type": "image_picker",
-      "id": "timeline_img_2000",
-      "label": "2000 — image"
-    },
-    {
-      "type": "image_picker",
-      "id": "timeline_img_2003",
-      "label": "2003 — Cento image"
-    },
-    {
-      "type": "image_picker",
-      "id": "timeline_img_2006",
-      "label": "2006 — image"
-    },
-    {
-      "type": "image_picker",
-      "id": "timeline_img_2007",
-      "label": "2007 — Dubai store image"
-    },
-    {
-      "type": "image_picker",
-      "id": "timeline_img_2008",
-      "label": "2008 — Rome boutique image"
-    },
-    {
-      "type": "image_picker",
-      "id": "timeline_img_2013",
-      "label": "2013 — image"
-    },
-    {
-      "type": "image_picker",
-      "id": "timeline_img_2014",
-      "label": "2014 — Pois Moi image"
-    },
-    {
-      "type": "image_picker",
-      "id": "timeline_img_2018",
-      "label": "2018 — image"
-    },
-    {
-      "type": "image_picker",
-      "id": "timeline_img_2021",
-      "label": "2021 — image"
-    },
-    {
-      "type": "image_picker",
-      "id": "timeline_img_2022",
-      "label": "2022 — Emily in Paris image"
-    },
-    {
-      "type": "image_picker",
-      "id": "timeline_img_2025",
-      "label": "2025 — Lifetime Achievement image"
-    },
-    {
-      "type": "image_picker",
-      "id": "timeline_img_today",
-      "label": "Today — image"
-    },
-    {
-      "type": "header",
-      "content": "Timeline Text"
-    },
-    {
-      "type": "textarea",
-      "id": "timeline_text_1977",
-      "label": "1977 — text"
-    },
-    {
-      "type": "textarea",
-      "id": "timeline_text_1984",
-      "label": "1984 — text"
-    },
-    {
-      "type": "textarea",
-      "id": "timeline_text_1996",
-      "label": "1996 — text"
-    },
-    {
-      "type": "textarea",
-      "id": "timeline_text_2000",
-      "label": "2000 — text"
-    },
-    {
-      "type": "textarea",
-      "id": "timeline_text_2003",
-      "label": "2003 — text"
-    },
-    {
-      "type": "textarea",
-      "id": "timeline_text_2006",
-      "label": "2006 — text"
-    },
-    {
-      "type": "textarea",
-      "id": "timeline_text_2007",
-      "label": "2007 — text"
-    },
-    {
-      "type": "textarea",
-      "id": "timeline_text_2008",
-      "label": "2008 — text"
-    },
-    {
-      "type": "textarea",
-      "id": "timeline_text_2013",
-      "label": "2013 — text"
-    },
-    {
-      "type": "textarea",
-      "id": "timeline_text_2014",
-      "label": "2014 — text"
-    },
-    {
-      "type": "textarea",
-      "id": "timeline_text_2018",
-      "label": "2018 — text"
-    },
-    {
-      "type": "textarea",
-      "id": "timeline_text_2021",
-      "label": "2021 — text"
-    },
-    {
-      "type": "textarea",
-      "id": "timeline_text_2022",
-      "label": "2022 — text"
-    },
-    {
-      "type": "textarea",
-      "id": "timeline_text_2025",
-      "label": "2025 — text"
-    },
-    {
-      "type": "textarea",
-      "id": "timeline_text_today",
-      "label": "Today — text"
-    },
-    {
-      "type": "header",
-      "content": "Timeline CTAs"
-    },
-    {
-      "type": "url",
-      "id": "cento_url",
-      "label": "Cento Collection URL"
-    },
-    {
-      "type": "url",
-      "id": "pois_moi_url",
-      "label": "Pois Moi Collection URL"
-    },
-    {
-      "type": "header",
-      "content": "Collections Section"
-    },
-    {
-      "type": "collection",
-      "id": "collections_cover_collection",
-      "label": "Collections cover source"
-    },
-    {
-      "type": "collection_list",
-      "id": "collections_left",
-      "label": "Collections left column"
-    },
-    {
-      "type": "collection_list",
-      "id": "collections_right",
-      "label": "Collections right column"
-    },
-    {
-      "type": "header",
-      "content": "End Animation"
-    },
-    {
-      "type": "text",
-      "id": "rebranding_logo_lottie_json_url",
-      "label": "End logo animation JSON URL (optional)"
-    },
-    {
-      "type": "image_picker",
-      "id": "collections_image",
-      "label": "Collections showcase image"
+      "type": "entry",
+      "name": "Timeline entry",
+      "settings": [
+        { "type": "text", "id": "year", "label": "Year", "default": "1977" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Milestone" },
+        { "type": "richtext", "id": "copy", "label": "Copy", "default": "<p>Roberto Coin returned to his homeland of Italy to study the goldsmithing tradition under the guidance of renowned Italian teachers. He launched his jewelry trade on the British market.</p>" },
+
+        { "type": "header", "content": "Media 1" },
+        { "type": "text", "id": "media_1_label", "label": "Label", "default": "Workshop portrait" },
+        { "type": "image_picker", "id": "media_1_image", "label": "Image" },
+        { "type": "text", "id": "media_1_fill", "label": "Fallback gradient", "default": "linear-gradient(135deg, #5f5a71 0%, #241f29 65%, #0d0d12 100%)" },
+        { "type": "range", "id": "media_1_x", "label": "X position", "min": 0, "max": 90, "step": 1, "unit": "%", "default": 0 },
+        { "type": "range", "id": "media_1_y", "label": "Y position", "min": 0, "max": 90, "step": 1, "unit": "%", "default": 18 },
+        { "type": "range", "id": "media_1_w", "label": "Width", "min": 10, "max": 60, "step": 1, "unit": "%", "default": 36 },
+        { "type": "range", "id": "media_1_h", "label": "Height", "min": 10, "max": 70, "step": 1, "unit": "%", "default": 46 },
+
+        { "type": "header", "content": "Media 2" },
+        { "type": "text", "id": "media_2_label", "label": "Label", "default": "Street portrait" },
+        { "type": "image_picker", "id": "media_2_image", "label": "Image" },
+        { "type": "text", "id": "media_2_fill", "label": "Fallback gradient", "default": "linear-gradient(180deg, #d8d8d5 0%, #8f8e88 50%, #4e4d4a 100%)" },
+        { "type": "range", "id": "media_2_x", "label": "X position", "min": 0, "max": 90, "step": 1, "unit": "%", "default": 43 },
+        { "type": "range", "id": "media_2_y", "label": "Y position", "min": 0, "max": 90, "step": 1, "unit": "%", "default": 0 },
+        { "type": "range", "id": "media_2_w", "label": "Width", "min": 10, "max": 60, "step": 1, "unit": "%", "default": 24 },
+        { "type": "range", "id": "media_2_h", "label": "Height", "min": 10, "max": 70, "step": 1, "unit": "%", "default": 58 },
+
+        { "type": "header", "content": "Media 3" },
+        { "type": "text", "id": "media_3_label", "label": "Label", "default": "Gold detail" },
+        { "type": "image_picker", "id": "media_3_image", "label": "Image" },
+        { "type": "text", "id": "media_3_fill", "label": "Fallback gradient", "default": "linear-gradient(135deg, #ceb78c 0%, #89683f 50%, #20150f 100%)" },
+        { "type": "range", "id": "media_3_x", "label": "X position", "min": 0, "max": 90, "step": 1, "unit": "%", "default": 74 },
+        { "type": "range", "id": "media_3_y", "label": "Y position", "min": 0, "max": 90, "step": 1, "unit": "%", "default": 8 },
+        { "type": "range", "id": "media_3_w", "label": "Width", "min": 10, "max": 60, "step": 1, "unit": "%", "default": 18 },
+        { "type": "range", "id": "media_3_h", "label": "Height", "min": 10, "max": 70, "step": 1, "unit": "%", "default": 26 }
+      ]
     }
   ],
+  "max_blocks": 30,
   "presets": [
     {
-      "name": "RC Heritage Timeline"
+      "name": "Roberto Coin timeline",
+      "blocks": [
+        { "type": "entry", "settings": { "year": "1977", "title": "Milestone" } },
+        { "type": "entry", "settings": { "year": "1984", "title": "Expansion", "copy": "<p>He began designing and creating jewelry for some of the most prestigious international brands.</p>" } }
+      ]
     }
   ]
 }
