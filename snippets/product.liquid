@@ -694,6 +694,7 @@
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media > .webgi-container {
         display: block;
+        position: relative;
         pointer-events: auto;
         width: 100%;
         height: 100%;
@@ -1573,6 +1574,16 @@
                     embla.on('pointerUp', function () {
                       var webgiCanvases = carouselEl.querySelectorAll('.webgi-container canvas');
                       webgiCanvases.forEach(function (c) { c.style.pointerEvents = ''; });
+                    });
+
+                    // WebGI edge zone swipe: scroll carousel when user swipes on 3D model edges
+                    carouselEl.addEventListener('webgi:edge:swipe', function (e) {
+                      if (!e.detail) return;
+                      if (e.detail.direction === 'next') {
+                        embla.scrollNext();
+                      } else {
+                        embla.scrollPrev();
+                      }
                     });
 
                     // Initial desktop thumb setup

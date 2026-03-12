@@ -60,6 +60,48 @@
     canvas.style.touchAction = "pan-y";
     container.appendChild(canvas);
 
+    // Edge zones: left and right 20% of container block canvas pointer events
+    // so gallery swipe gestures work on the edges while center is 3D-interactive
+    var edgeStyle = "position:absolute;top:0;bottom:0;width:20%;z-index:10;pointer-events:all;";
+    var edgeLeft = document.createElement("div");
+    edgeLeft.className = "webgi-edge-zone webgi-edge-zone--left";
+    edgeLeft.style.cssText = edgeStyle + "left:0;";
+    var edgeRight = document.createElement("div");
+    edgeRight.className = "webgi-edge-zone webgi-edge-zone--right";
+    edgeRight.style.cssText = edgeStyle + "right:0;";
+    container.appendChild(edgeLeft);
+    container.appendChild(edgeRight);
+
+    // Swipe detection on edge zones — dispatch webgi:edge:swipe so the carousel can scroll
+    [edgeLeft, edgeRight].forEach(function (zone) {
+      var startX = 0;
+      var startY = 0;
+      var tracking = false;
+      zone.addEventListener("pointerdown", function (e) {
+        startX = e.clientX;
+        startY = e.clientY;
+        tracking = true;
+        zone.setPointerCapture(e.pointerId);
+      });
+      zone.addEventListener("pointerup", function (e) {
+        if (!tracking) return;
+        tracking = false;
+        var dx = e.clientX - startX;
+        var dy = e.clientY - startY;
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+          container.dispatchEvent(
+            new CustomEvent("webgi:edge:swipe", {
+              bubbles: true,
+              detail: { direction: dx < 0 ? "next" : "prev" },
+            })
+          );
+        }
+      });
+      zone.addEventListener("pointercancel", function () {
+        tracking = false;
+      });
+    });
+
     function startViewer() {
       var rect = canvas.getBoundingClientRect();
       var w = Math.round(rect.width) || 600;
@@ -179,7 +221,7 @@
         controls.dampingFactor = 0.25;
         controls.zoomSpeed = 1.0;
         controls.maxSpeed = 1.0;
-        controls.minDistance = defaultDist * 0.7; //max zoom in
+        controls.minDistance = defaultDist * 0.4; // max zoom in
         controls.maxDistance = defaultDist * 1.5; // max zoom out
         controls.update();
       }
