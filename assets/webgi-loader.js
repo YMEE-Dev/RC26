@@ -76,64 +76,41 @@
 
   async function setupViewer(canvas, glbUrl, container) {
     try {
+      var isMobile = navigator.maxTouchPoints > 0 || window.innerWidth <= 1024;
+
       var viewer = new ViewerApp({
         canvas: canvas,
         useRgbm: true,
-        useGBufferDepth: true,
-        isAntialiased: true
+        useGBufferDepth: false,
+        isAntialiased: false,
       });
 
       var manager = await viewer.addPlugin(AssetManagerPlugin);
       await addBasePlugins(viewer);
 
-      var isMobile = navigator.maxTouchPoints > 0 || window.innerWidth <= 768;
-
-      viewer.renderer.displayCanvasScaling = isMobile ? 1 : Math.min(window.devicePixelRatio, 2);
+      viewer.renderer.displayCanvasScaling = Math.min(window.devicePixelRatio, 1.5);
+      if (viewer.renderer.renderer) {
+        viewer.renderer.renderer.setClearAlpha(0);
+        viewer.renderer.renderer.setClearColor(0x000000, 0);
+      }
       viewer.renderer.refreshPipeline();
 
-      var tonemap = viewer.getPlugin(TonemapPlugin);
-      if (tonemap) {
-        tonemap.contrast = 1.1;
-        tonemap.saturation = 1.15;
-        if (typeof tonemap.exposure !== "undefined") tonemap.exposure = 1.1;
-      }
-
-      var ssr = viewer.getPlugin(SSRPlugin);
-      if (ssr) {
-        if (isMobile) {
-          ssr.enabled = false;
-        } else {
-          ssr.enabled = true;
-          if (typeof ssr.intensity !== "undefined") ssr.intensity = 0.6;
-          if (typeof ssr.stepSize !== "undefined") ssr.stepSize = 0.02;
-        }
-      }
-
-      var ssao = viewer.getPlugin(SSAOPlugin);
-      if (ssao) {
-        if (isMobile) {
-          ssao.enabled = false;
-        } else {
-          ssao.enabled = true;
-          if (typeof ssao.intensity !== "undefined") ssao.intensity = 0.4;
-          if (typeof ssao.radius !== "undefined") ssao.radius = 0.1;
-          if (typeof ssao.bias !== "undefined") ssao.bias = 0.025;
-        }
+      if (isMobile) {
+        var ssr = viewer.getPlugin(SSRPlugin);
+        if (ssr) ssr.enabled = false;
+        var ssao = viewer.getPlugin(SSAOPlugin);
+        if (ssao) ssao.enabled = false;
       }
 
       var ground = viewer.getPlugin(GroundPlugin);
       if (ground) {
-        ground.enabled = true;
         ground.shadowBaker.attachedMesh.material.transparent = true;
-        ground.shadowBaker.shadowIntensity = 0.6;
-        ground.shadowBaker.shadowMapSize = 4096;
-        ground.shadowBaker.autoUpdate = false;
       }
 
       var options = {
         autoCenter: true,
         autoScale: true,
-        autoScaleRadius: 2
+        autoScaleRadius: 2,
       };
 
       await manager.addFromPath(glbUrl, options);
@@ -145,35 +122,31 @@
       if (bloom) bloom.enabled = false;
 
       if (ground) {
-        ground.material.aoMapIntensity = 0.3;
-        if (ground.shadowBaker && typeof ground.shadowBaker.bake === "function") {
-          await ground.shadowBaker.bake();
-        } else if (ground.shadowBaker && typeof ground.shadowBaker.needsUpdate !== "undefined") {
-          ground.shadowBaker.needsUpdate = true;
-        }
+        ground.material.aoMapIntensity = 0.5;
       }
 
-      var camera = viewer.scene.activeCamera;
-      if (camera && typeof camera.positionTargetUpdated === "function") {
-        camera.positionTargetUpdated(true);
-      }
-      var controls = camera ? camera.controls : null;
+      var controls = viewer.scene.activeCamera ? viewer.scene.activeCamera.controls : null;
       if (controls) {
-        controls.autoRotate = true;
-        controls.autoRotateSpeed = 5;
-        controls.enableDamping = false;
-        controls.dampingFactor = 0;
-        controls.zoomSpeed = 1.0;
-        if (typeof controls.getDistance === "function") {
-          var dist = controls.getDistance();
-          controls.minDistance = dist * 0.7;
-          controls.maxDistance = dist * 2;
-          if (typeof controls.dollyTo === "function") {
-            controls.dollyTo(dist * 0.8, true);
-          } else if (typeof controls.zoom === "number") {
-            controls.zoom = controls.zoom * 1.2;
-          }
+        var modelObj = viewer.scene.modelObject;
+        if (modelObj && typeof THREE !== "undefined") {
+          var box = new THREE.Box3().setFromObject(modelObj);
+          var size = box.getSize(new THREE.Vector3());
+          var maxDist = size.length();
+          controls.maxDistance = maxDist;
+          controls.minDistance = maxDist * 0.45;
         }
+        var camOptions = viewer.scene.activeCamera.getCameraOptions
+          ? viewer.scene.activeCamera.getCameraOptions()
+          : null;
+        if (camOptions) {
+          camOptions.zoom = 1;
+          viewer.scene.activeCamera.setCameraOptions(camOptions);
+        }
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 2;
+        controls.dampingFactor = 0.25;
+        controls.zoomSpeed = 1.0;
+        controls.maxSpeed = 1.0;
         controls.update();
       }
 
@@ -189,10 +162,9 @@
         var rect = canvas.getBoundingClientRect();
         var w = Math.round(rect.width);
         var h = Math.round(rect.height);
-        var dpr = isMobile ? 1 : Math.min(window.devicePixelRatio, 2);
         if (w > 0 && h > 0) {
-          canvas.width = w * dpr;
-          canvas.height = h * dpr;
+          canvas.width = w * Math.min(window.devicePixelRatio, 1.5);
+          canvas.height = h * Math.min(window.devicePixelRatio, 1.5);
           viewer.renderer.refreshPipeline();
           if (viewer.scene.activeCamera) viewer.scene.activeCamera.setDirty();
         }
