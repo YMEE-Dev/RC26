@@ -86,22 +86,40 @@
       var manager = await viewer.addPlugin(AssetManagerPlugin);
       await addBasePlugins(viewer);
 
-      viewer.renderer.displayCanvasScaling = window.devicePixelRatio;
+      var isMobile = navigator.maxTouchPoints > 0 || window.innerWidth <= 768;
+
+      viewer.renderer.displayCanvasScaling = isMobile ? 1 : Math.min(window.devicePixelRatio, 2);
       viewer.renderer.refreshPipeline();
 
       var tonemap = viewer.getPlugin(TonemapPlugin);
       if (tonemap) {
-        tonemap.contrast = 1.05;
-        tonemap.saturation = 1.05;
+        tonemap.contrast = 1.1;
+        tonemap.saturation = 1.15;
+        if (typeof tonemap.exposure !== "undefined") tonemap.exposure = 1.1;
       }
 
-      var isMobile = navigator.maxTouchPoints > 0 || window.innerWidth <= 768;
-
       var ssr = viewer.getPlugin(SSRPlugin);
-      if (ssr) ssr.enabled = false;
+      if (ssr) {
+        if (isMobile) {
+          ssr.enabled = false;
+        } else {
+          ssr.enabled = true;
+          if (typeof ssr.intensity !== "undefined") ssr.intensity = 0.6;
+          if (typeof ssr.stepSize !== "undefined") ssr.stepSize = 0.02;
+        }
+      }
 
       var ssao = viewer.getPlugin(SSAOPlugin);
-      if (ssao) ssao.enabled = false;
+      if (ssao) {
+        if (isMobile) {
+          ssao.enabled = false;
+        } else {
+          ssao.enabled = true;
+          if (typeof ssao.intensity !== "undefined") ssao.intensity = 0.4;
+          if (typeof ssao.radius !== "undefined") ssao.radius = 0.1;
+          if (typeof ssao.bias !== "undefined") ssao.bias = 0.025;
+        }
+      }
 
       var ground = viewer.getPlugin(GroundPlugin);
       if (ground) {
@@ -112,9 +130,6 @@
         ground.shadowBaker.autoUpdate = false;
       }
 
-      var envMap = await manager.importer.importSinglePath(ENV_MAP_URL);
-      viewer.scene.setEnvironment(envMap);
-
       var options = {
         autoCenter: true,
         autoScale: true,
@@ -122,6 +137,9 @@
       };
 
       await manager.addFromPath(glbUrl, options);
+
+      var envMap = await manager.importer.importSinglePath(ENV_MAP_URL);
+      viewer.scene.setEnvironment(envMap);
 
       var bloom = viewer.getPlugin(BloomPlugin);
       if (bloom) bloom.enabled = false;
@@ -170,9 +188,10 @@
         var rect = canvas.getBoundingClientRect();
         var w = Math.round(rect.width);
         var h = Math.round(rect.height);
+        var dpr = isMobile ? 1 : Math.min(window.devicePixelRatio, 2);
         if (w > 0 && h > 0) {
-          canvas.width = w * window.devicePixelRatio;
-          canvas.height = h * window.devicePixelRatio;
+          canvas.width = w * dpr;
+          canvas.height = h * dpr;
           viewer.renderer.refreshPipeline();
           if (viewer.scene.activeCamera) viewer.scene.activeCamera.setDirty();
         }
