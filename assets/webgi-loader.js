@@ -76,7 +76,7 @@
   async function setupViewer(viewerDiv, glbUrl, container, loader) {
     try {
       var isMobile = navigator.maxTouchPoints > 0 || window.innerWidth <= 1024;
-      var dpr = isMobile ? Math.min(window.devicePixelRatio, 0.75) : Math.min(window.devicePixelRatio, 1.75);
+      var dpr = isMobile ? Math.min(window.devicePixelRatio, 1.25) : Math.min(window.devicePixelRatio, 1.75);
 
       var viewer, manager;
       if (typeof CoreViewerApp !== "undefined") {
@@ -115,16 +115,15 @@
 
       // Get canvas (CoreViewerApp manages its own; fallback already appended canvas0)
       var canvas = viewer.canvas || viewerDiv.querySelector("canvas");
-      if (canvas) canvas.style.touchAction = "pan-y";
+      if (canvas) canvas.style.touchAction = isMobile ? "none" : "pan-y";
       var diamondPlugin = viewer.getPlugin(DiamondPlugin) || null;
 
       // Match slide background color (#f9f9f9)
-      // WebGI post-processing pipeline overrides setClearColor, so we use a CSS
-      // brightness filter to shift the white canvas output to #f9f9f9.
-      // 249/255 ≈ 0.9765 maps white (#fff) to #f9f9f9 exactly.
+      // WebGI tonemapping renders background as #e7e7e7.
+      // CSS brightness filter: 249/231 ≈ 1.078 shifts #e7e7e7 → #f9f9f9.
       container.style.backgroundColor = "#f9f9f9";
       viewerDiv.style.backgroundColor = "#f9f9f9";
-      if (canvas) canvas.style.filter = "brightness(0.9765)";
+      if (canvas) canvas.style.filter = "brightness(1.078)";
 
       viewer.renderer.displayCanvasScaling = dpr;
       viewer.renderer.refreshPipeline();
@@ -350,42 +349,33 @@
           }
         } catch (e) {}
 
-        // On mobile: fit model to viewport width by computing ideal distance from FOV
+        // On mobile: use WebGI fitToView for proper model-to-viewport fitting
         if (isMobile) {
           try {
-            var camObj2 = viewer.scene.activeCamera.cameraObject;
-            var containerWidth = container.clientWidth || window.innerWidth;
-            var containerHeight = container.clientHeight || containerWidth;
-            var aspect = containerWidth / containerHeight;
-            var fovRad = ((camObj2 && camObj2.fov ? camObj2.fov : 50) * Math.PI) / 180;
-            var modelRadius = 2; // autoScaleRadius: 2
-            // Distance needed so model fills width: radius / (tan(fov/2) * aspect)
-            var fitDist = modelRadius / (Math.tan(fovRad / 2) * Math.min(aspect, 1));
-            fitDist = fitDist * 1.1; // 10% padding
-            if (fitDist > 0.1) defaultDist = fitDist;
-            // Move camera to this distance along its current direction
-            if (camObj2 && controls.target) {
-              var tgt2 = controls.target;
-              var cdx = camObj2.position.x - tgt2.x;
-              var cdy = camObj2.position.y - tgt2.y;
-              var cdz = camObj2.position.z - tgt2.z;
-              var curLen = Math.sqrt(cdx * cdx + cdy * cdy + cdz * cdz);
-              if (curLen > 0.001) {
-                camObj2.position.x = tgt2.x + (cdx / curLen) * fitDist;
-                camObj2.position.y = tgt2.y + (cdy / curLen) * fitDist;
-                camObj2.position.z = tgt2.z + (cdz / curLen) * fitDist;
-              }
+            if (typeof viewer.fitToView === "function") {
+              await viewer.fitToView(undefined, 1.15); // 15% padding
+            }
+            // Re-measure distance after fitToView
+            var camObjFit = viewer.scene.activeCamera.cameraObject;
+            var tgtFit = controls.target;
+            if (camObjFit && tgtFit) {
+              var fdx = camObjFit.position.x - tgtFit.x;
+              var fdy = camObjFit.position.y - tgtFit.y;
+              var fdz = camObjFit.position.z - tgtFit.z;
+              var fitMeasured = Math.sqrt(fdx * fdx + fdy * fdy + fdz * fdz);
+              if (fitMeasured > 0.1) defaultDist = fitMeasured;
             }
           } catch (e) {}
         }
 
         controls.autoRotate = true;
         controls.autoRotateSpeed = 2;
-        controls.dampingFactor = isMobile ? 0.05 : 0.1;
-        controls.zoomSpeed = isMobile ? 0.4 : 1.0;
+        controls.dampingFactor = isMobile ? 0.12 : 0.1;
+        controls.zoomSpeed = isMobile ? 0.8 : 1.0;
         controls.maxSpeed = 1.0;
-        controls.minDistance = defaultDist * 0.4; // max zoom in
-        controls.maxDistance = defaultDist * 1.5; // max zoom out
+        controls.enableDamping = true;
+        controls.minDistance = defaultDist * 0.35; // max zoom in
+        controls.maxDistance = defaultDist * 1.6; // max zoom out
         controls.update();
 
         // Resume auto-rotation 3s after user stops interacting
