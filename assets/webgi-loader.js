@@ -348,25 +348,6 @@
           }
         } catch (e) {}
 
-        // On mobile: use WebGI fitToView for proper model-to-viewport fitting
-        if (isMobile) {
-          try {
-            if (typeof viewer.fitToView === "function") {
-              await viewer.fitToView(undefined, 1.15); // 15% padding
-            }
-            // Re-measure distance after fitToView
-            var camObjFit = viewer.scene.activeCamera.cameraObject;
-            var tgtFit = controls.target;
-            if (camObjFit && tgtFit) {
-              var fdx = camObjFit.position.x - tgtFit.x;
-              var fdy = camObjFit.position.y - tgtFit.y;
-              var fdz = camObjFit.position.z - tgtFit.z;
-              var fitMeasured = Math.sqrt(fdx * fdx + fdy * fdy + fdz * fdz);
-              if (fitMeasured > 0.1) defaultDist = fitMeasured;
-            }
-          } catch (e) {}
-        }
-
         controls.autoRotate = true;
         controls.autoRotateSpeed = 2;
         controls.dampingFactor = isMobile ? 0.12 : 0.1;
