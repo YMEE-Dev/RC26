@@ -749,14 +749,8 @@
 {%- if template.name == 'product' -%}
   <link rel="stylesheet" href="{{ 'side-drawer.css' | asset_url }}">
   <script src="{{ 'side-drawer.js' | asset_url }}" defer="defer"></script>
-  {% comment %} Use v19 for better performance or v9 to free version but less performance {% endcomment %}
-  {%- assign webgi_version = 'v19' -%}
-  <script src="{{ 'webgi-loader.js' | asset_url }}" defer="defer" data-webgi-version="{{ webgi_version }}"></script>
-  {%- if webgi_version == 'v19' -%}
-    <link rel="preload" href="https://releases.ijewel3d.com/webgi/runtime/viewer-0.9.19.js" as="script" crossorigin>
-  {%- else -%}
-    <link rel="preload" href="https://dist.pixotronics.com/webgi/runtime/viewer-0.9.9.js" as="script" crossorigin>
-  {%- endif -%}
+  <script src="{{ 'webgi-loader.js' | asset_url }}" defer="defer"></script>
+  <link rel="preload" href="https://releases.ijewel3d.com/webgi/runtime/viewer-0.9.19.js" as="script" crossorigin>
 {%- endif -%}
 {%- if request.design_mode -%}
   <script

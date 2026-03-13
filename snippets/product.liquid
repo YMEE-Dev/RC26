@@ -370,12 +370,10 @@
 
       #MainProduct--{{ section.id }} .product__images .image-wrapper--cover {
         background-color: #F9F9F9;
-        mix-blend-mode: multiply;
       }
 
       #MainProduct--{{ section.id }} .product__images .image-wrapper--cover img {
         object-fit: contain;
-        mix-blend-mode: multiply;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item:not([data-pair-role='secondary']) .image-wrapper--cover {
@@ -671,9 +669,25 @@
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .shopify-model-viewer-ui__controls-overlay,
-      #MainProduct--{{ section.id }} .pdp-embla__slide .shopify-model-viewer-ui__controls-area,
-      #MainProduct--{{ section.id }} .pdp-embla__slide .shopify-model-viewer-ui__button {
+      #MainProduct--{{ section.id }} .pdp-embla__slide .shopify-model-viewer-ui__controls-area {
         display: none !important;
+      }
+
+      .customContextGrid[data-tag="MaterialConfiguratorPlugin"],
+      .customContextGrid[data-tag="VariationConfiguratorPlugin"],
+      .webgi-loading-bar,
+      .webgi-popup,
+      .webgi-loading-screen,
+      [class*="AssetManagerLoadingBar"],
+      [class*="AssetManagerBasicPopup"],
+      [class*="LoadingScreen"],
+      [class*="ijewel"][class*="watermark"],
+      [class*="ijewel"][class*="logo"],
+      [class*="ijewel"][class*="badge"],
+      .tippy-box[data-theme*="webgi"] {
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media > model-viewer,
@@ -704,8 +718,6 @@
         width: 100% !important;
         height: 100% !important;
         display: block;
-
-        /* mix-blend-mode: multiply; */
       }
 
       .webgi-loader {
@@ -771,14 +783,12 @@
 
       #MainProduct--{{ section.id }} .pdp-embla--mobile .image-wrapper--cover {
         background-color: #F9F9F9;
-        mix-blend-mode: multiply;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__photo {
         height: 100%;
         padding-top: 0;
         background-color: #F9F9F9;
-        mix-blend-mode: multiply;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla .media--hidden,
@@ -1612,6 +1622,7 @@
 
                   productImagesEl.addEventListener('theme:media:select', function (e) {
                     if (!e || !e.detail || !e.detail.id) return;
+                    if (productImagesEl.querySelector('[data-embla-slide][data-media-type="model"]')) return;
                     var activeCarousel = getActiveCarousel();
                     if (!activeCarousel) return;
 
