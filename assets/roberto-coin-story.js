@@ -667,17 +667,19 @@
           return;
         }
 
-        if (window.innerWidth > 820 && (index === 0 || index === 3)) {
+        if (window.innerWidth > 820) {
           const width = Number.parseFloat(styles.width || "0");
           const height = Number.parseFloat(styles.height || "0");
           if (width > 0) {
-            styles.width = `${width + 50}px`;
+            styles.width = `${width + 40}px`;
           }
           if (height > 0) {
-            styles.height = `${height + 50}px`;
+            styles.height = `${height + 40}px`;
           }
 
           if (index === 0) {
+            styles.width = `${Number.parseFloat(styles.width || "0") + 10}px`;
+            styles.height = `${Number.parseFloat(styles.height || "0") + 10}px`;
             if (styles.left) {
               styles.left = `calc(${styles.left} + 50px)`;
             }
@@ -687,12 +689,18 @@
           }
 
           if (index === 3) {
+            styles.width = `${Number.parseFloat(styles.width || "0") + 10}px`;
+            styles.height = `${Number.parseFloat(styles.height || "0") + 10}px`;
             if (styles.right) {
               styles.right = `calc(${styles.right} + 50px)`;
             }
             if (styles.bottom) {
               styles.bottom = `calc(${styles.bottom} + 25px)`;
             }
+          }
+
+          if (index === 2 && styles.left) {
+            styles.left = `calc(${styles.left} - 50px)`;
           }
         }
 
