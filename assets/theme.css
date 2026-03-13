@@ -5065,9 +5065,9 @@ hr.hr--color,
   width: var(--icon-size, 20px);
   height: var(--icon-size, 20px);
   vertical-align: middle;
-  fill: none;
-  stroke: var(--icons, currentColor);
-  stroke-width: var(--ICON-STROKE-WIDTH);
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 0.2px;
 }
 .icon-minus,
 .icon-plus {
@@ -8046,7 +8046,6 @@ body:not(.is-loaded) .header__desktop {
 
 .navlink .icon {
   --icon-size: 24px;
-  fill: none;
 }
 
 .navlink--search {
@@ -9570,7 +9569,9 @@ html.supports-touch ticker-bar[data-slide]:not([paused]) .ticker--animated {
 }
 
 .mobile-menu__block {
+  --bg: inherit !important;
   padding: 0 var(--inner) 0;
+  margin-bottom: 0 !important;
   transition:
     opacity 0.5s ease,
     transform 0.5s,
@@ -10457,6 +10458,10 @@ body:has(.drawer--header:not(.is-open)) .header__mobile__hamburger {
 .drawer__floating-menu .icon {
   color: var(--globaltext);
   stroke: var(--globaltext);
+}
+
+.drawer__floating-menu .drawer__close svg {
+  stroke-width: 1px !important;
 }
 
 .drawer__floating__button {
