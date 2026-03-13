@@ -166,7 +166,7 @@
       --PB: {{ section.settings.padding_bottom }}px;
 
       --swatch-size: var(--swatch-size-product);
-      --pdp-sticky-bar-height: 100px;
+      --pdp-sticky-bar-height: 100px; /* fallback, will be overridden on mobile */
       --bg-color: #f9f9f9;
     }
 
@@ -460,14 +460,14 @@
       @media only screen and (min-width: 750px) and (max-width: 989px) {
 
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: var(--full-screen, var(--full-height, 100vh));
+          height: calc(100dvh - var(--pdp-sticky-bar-height, 100px));
         }
       }
 
       @media only screen and (max-width: 749px) {
 
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: var(--full-screen, var(--full-height, 100vh));
+          height: calc(100dvh - var(--pdp-sticky-bar-height, 100px));
         }
       }
 
@@ -649,6 +649,14 @@
       @media only screen and (max-width: 749px) {
         #MainProduct--{{ section.id }} .pdp-embla__slide .product__slide {
           width: 100%;
+          height: 100%;
+        }
+
+        #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media {
+          aspect-ratio: unset;
+          min-height: 0;
+          height: 100%;
+          align-items: center;
         }
       }
 
@@ -1015,9 +1023,7 @@
 
       @media only screen and (max-width: 989px) {
         #MainProduct--{{ section.id }} .product__sticky-bar {
-          padding-top: 20px;
-          padding-left: 20px;
-          padding-right: 20px;
+          padding: 20px;
         }
 
         #MainProduct--{{ section.id }} .product__content-columns {
@@ -1080,7 +1086,7 @@
         }
 
         #MainProduct--{{ section.id }} .product__content {
-          margin: 20px 0 0;
+          margin: 0;
           padding-left: 20px;
           padding-right: 20px;
         }
@@ -3065,3 +3071,47 @@
   </div>
   <span class="underlay drawer__underlay" data-drawer-underlay></span>
 </side-drawer>
+
+<script>
+  (function() {
+    var isMobile = window.innerWidth <= 749 || navigator.maxTouchPoints > 0;
+    if (!isMobile) return;
+
+    var sectionId = '{{ section.id }}';
+    var sectionEl = document.getElementById('MainProduct--' + sectionId);
+    if (!sectionEl) return;
+
+    function updateStickyBarHeight() {
+      var stickyBar = sectionEl.querySelector('.product__sticky-bar');
+      if (!stickyBar) return;
+
+      var height = stickyBar.offsetHeight;
+      if (height > 0) {
+        sectionEl.style.setProperty('--pdp-sticky-bar-height', height + 'px');
+      }
+    }
+
+    // Initial measurement
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', updateStickyBarHeight);
+    } else {
+      updateStickyBarHeight();
+    }
+
+    // Watch for size changes (e.g., when variant changes affect button layout)
+    var resizeObserver = new ResizeObserver(function() {
+      updateStickyBarHeight();
+    });
+
+    var stickyBar = sectionEl.querySelector('.product__sticky-bar');
+    if (stickyBar) {
+      resizeObserver.observe(stickyBar);
+    }
+
+    // Also watch the inner content since buttons might change
+    var stickyBarInner = sectionEl.querySelector('.product__sticky-bar__inner');
+    if (stickyBarInner) {
+      resizeObserver.observe(stickyBarInner);
+    }
+  })();
+</script>
