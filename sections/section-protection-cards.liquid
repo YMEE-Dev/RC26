@@ -7,8 +7,6 @@
   #ProtectionCards--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
-    padding-inline:  var(--outer);
-
   }
 {%- endstyle -%}
 
@@ -137,14 +135,14 @@
 
   .protection-cards__grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);     
+    grid-template-columns: 2fr 2fr 2fr;     
     gap: 80px;
     width: 100%;
   }
 
   @media (max-width: 1024px) {
     .protection-cards__grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: 2fr 2fr;
       gap: 80px;
     }
   }
@@ -157,7 +155,7 @@
   }
   @media (max-width: 425px) {
     .protection-cards__grid {
-      grid-template-columns: repeat(1, 1fr);
+      grid-template-columns: 1fr;
       gap: 80px;
     }
   }
@@ -174,7 +172,7 @@
     width: 100%;
     height: 318px;
     margin-bottom: 40px;
-    aspect-ratio: 357/318;
+    /* aspect-ratio: 357/318; */
     display: flex;
     align-items: center;
     justify-content: center;

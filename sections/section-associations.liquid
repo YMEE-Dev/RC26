@@ -12,7 +12,7 @@
   #Associations--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
-    padding-inline:  var(--outer);
+
   }
   #Associations--{{ section.id }} .associations__dark {
     background-image: url('{{ section.settings.image | img_url: 'master'}}');
@@ -88,7 +88,8 @@
 
 {% stylesheet %}
 #shopify-section-{{ section.id }} .associations__wrapper {
-  max-width: var(--max-width, 1232px);
+  max-width: var(--max-width, 1320px);
+  padding: 0 20px;
 }
   .associations__wrapper {
     width: 100%;
@@ -105,7 +106,10 @@
 
   @media (min-width: 990px) {
     .associations__grid {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 4fr 2fr;
+    }
+    .associations__dark {
+      width: 100% !important;
     }
   }
   h2.associations__heading.heading-large {
