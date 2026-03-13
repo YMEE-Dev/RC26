@@ -118,11 +118,15 @@
       if (canvas) canvas.style.touchAction = "pan-y";
       var diamondPlugin = viewer.getPlugin(DiamondPlugin) || null;
 
+      // Match slide background color (#f9f9f9)
+      // WebGI post-processing pipeline overrides setClearColor, so we use a CSS
+      // brightness filter to shift the white canvas output to #f9f9f9.
+      // 249/255 ≈ 0.9765 maps white (#fff) to #f9f9f9 exactly.
+      container.style.backgroundColor = "#f9f9f9";
+      viewerDiv.style.backgroundColor = "#f9f9f9";
+      if (canvas) canvas.style.filter = "brightness(0.9765)";
+
       viewer.renderer.displayCanvasScaling = dpr;
-      // Opaque background required for diamond/gem refraction to render correctly
-      if (viewer.renderer.renderer) {
-        viewer.renderer.renderer.setClearColor(0xf9f9f9, 1);
-      }
       viewer.renderer.refreshPipeline();
 
       // Disable SDK UI plugins — we use our own loader overlay
