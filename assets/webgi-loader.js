@@ -119,11 +119,10 @@
       var diamondPlugin = viewer.getPlugin(DiamondPlugin) || null;
 
       // Match slide background color (#f9f9f9)
-      // WebGI tonemapping renders background as #e7e7e7.
-      // CSS brightness filter: 249/231 ≈ 1.078 shifts #e7e7e7 → #f9f9f9.
+      // Desktop canvas renders ~#fff (needs dimming), mobile renders ~#e7e7e7 (needs brightening).
       container.style.backgroundColor = "#f9f9f9";
       viewerDiv.style.backgroundColor = "#f9f9f9";
-      if (canvas) canvas.style.filter = "brightness(1.078)";
+      if (canvas) canvas.style.filter = isMobile ? "brightness(1.078)" : "brightness(0.9765)";
 
       viewer.renderer.displayCanvasScaling = dpr;
       viewer.renderer.refreshPipeline();
