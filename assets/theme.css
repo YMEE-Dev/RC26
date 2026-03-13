@@ -3582,8 +3582,14 @@ body.is-focused .highlights__item:focus {
   transition:
     opacity 600ms cubic-bezier(0.7, 0, 0.3, 1),
     visibility 600ms cubic-bezier(0.7, 0, 0.3, 1);
-  backdrop-filter: blur(0px);
-  z-index: 5999;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  z-index: 6001;
+}
+
+.header__wrapper .underlay {
+  -webkit-backdrop-filter: blur(30px);
+  backdrop-filter: blur(30px);
 }
 
 .expanded ~ .underlay,
@@ -19098,6 +19104,7 @@ input.cart__acceptance__input {
 
 .cart__quantity .icon {
   --icon-size: 16px;
+  stroke-width: 1.5px;
 }
 
 .cart__quantity .cart__quantity-field {
