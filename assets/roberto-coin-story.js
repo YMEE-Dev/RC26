@@ -662,9 +662,38 @@
 
       const preset = heroAltLayoutPresets[Math.floor(Math.random() * heroAltLayoutPresets.length)];
       heroCollageItems.forEach((item, index) => {
-        const styles = preset[index];
+        const styles = { ...(preset[index] || {}) };
         if (!styles) {
           return;
+        }
+
+        if (window.innerWidth > 820 && (index === 0 || index === 3)) {
+          const width = Number.parseFloat(styles.width || "0");
+          const height = Number.parseFloat(styles.height || "0");
+          if (width > 0) {
+            styles.width = `${width + 50}px`;
+          }
+          if (height > 0) {
+            styles.height = `${height + 50}px`;
+          }
+
+          if (index === 0) {
+            if (styles.left) {
+              styles.left = `calc(${styles.left} + 50px)`;
+            }
+            if (styles.top) {
+              styles.top = `calc(${styles.top} + 25px)`;
+            }
+          }
+
+          if (index === 3) {
+            if (styles.right) {
+              styles.right = `calc(${styles.right} + 50px)`;
+            }
+            if (styles.bottom) {
+              styles.bottom = `calc(${styles.bottom} + 25px)`;
+            }
+          }
         }
 
         item.style.top = styles.top ?? "auto";
