@@ -95,6 +95,7 @@
     const timelineMarkers = section.querySelector("[data-timeline-markers]");
     const mediaCardTemplate = section.querySelector("[data-media-card-template]");
     const timelineStage = section.querySelector("[data-stage]");
+    const timelineRoot = section.querySelector(".timeline");
     const timelineCaption = section.querySelector("[data-timeline-caption]");
     const captionLineOne = section.querySelector("[data-caption-line-one]");
     const captionLineTwo = section.querySelector("[data-caption-line-two]");
@@ -218,6 +219,18 @@
         }
 
         button.addEventListener("click", () => {
+          if (window.innerWidth <= 820) {
+            if (timelineRoot) {
+              const timelineTop = timelineRoot.getBoundingClientRect().top + window.scrollY;
+              const currentY = window.scrollY || window.pageYOffset;
+              if (currentY < timelineTop - 24) {
+                smoothScrollToY(timelineTop - 12, 550);
+              }
+            }
+            setActiveEntry(index);
+            return;
+          }
+
           section
             .querySelector(`[data-step-index="${index}"]`)
             ?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -397,16 +410,32 @@
 
     function updateActiveEntryOnScroll() {
       const triggerLine = window.innerHeight * 0.58;
-      const steps = [...section.querySelectorAll(".timeline-step")];
+      if (timelineRoot) {
+        const timelineTop = timelineRoot.getBoundingClientRect().top;
+        if (timelineTop > triggerLine) {
+          setActiveEntry(-1);
+          return;
+        }
+      }
 
-      let nextIndex = -1;
+      const steps = [...section.querySelectorAll(".timeline-step")];
+      let nextIndex = activeIndex;
+      let found = false;
 
       steps.forEach((step, index) => {
         const { top } = step.getBoundingClientRect();
         if (top <= triggerLine) {
           nextIndex = index;
+          found = true;
         }
       });
+
+      if (!found) {
+        if (activeIndex >= 0) {
+          return;
+        }
+        nextIndex = 0;
+      }
 
       setActiveEntry(nextIndex);
     }
@@ -768,8 +797,10 @@
         window.setTimeout(() => {
           if (showAlt) {
             applyHeroAltLayout();
+            heroCollage?.classList.add("is-alt");
           } else {
             heroCollageItems.forEach(resetHeroItemPosition);
+            heroCollage?.classList.remove("is-alt");
           }
         }, totalFadeOutMs + 20);
 
