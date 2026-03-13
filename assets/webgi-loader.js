@@ -58,6 +58,7 @@
 
     var canvas = document.createElement("canvas");
     canvas.style.touchAction = "pan-y";
+    canvas.style.backgroundColor = "#F9F9F9";
     container.appendChild(canvas);
 
     // Edge zones: left and right 20% of container block canvas pointer events
@@ -141,13 +142,12 @@
       }
       viewer.renderer.refreshPipeline();
 
-      var ssr = viewer.getPlugin(SSRPlugin);
-      if (ssr) ssr.enabled = false;
-      var ssao = viewer.getPlugin(SSAOPlugin);
-      if (ssao) ssao.enabled = false;
-
+      // Match WP: SSR + SSAO + GroundPlugin all run at addBasePlugins defaults
+      // (SSR = screen-space reflections critical for diamond sparkle)
       var ground = viewer.getPlugin(GroundPlugin);
-      if (ground) ground.enabled = false;
+      if (ground) {
+        ground.shadowBaker.attachedMesh.material.transparent = true;
+      }
 
       var envMap = await manager.importer.importSinglePath(ENV_MAP_URL);
       viewer.scene.setEnvironment(envMap);
@@ -162,6 +162,18 @@
 
       var bloom = viewer.getPlugin(BloomPlugin);
       if (bloom) bloom.enabled = false;
+
+      // Boost SSR intensity for better diamond/gem reflections and sparkle
+      try {
+        var ssr = viewer.getPlugin(SSRPlugin);
+        if (ssr) {
+          if (typeof ssr.intensity !== "undefined") ssr.intensity = 0.9;
+          else if (ssr.passes && ssr.passes[0]) {
+            var p = ssr.passes[0].passObject || ssr.passes[0];
+            if (typeof p.intensity !== "undefined") p.intensity = 0.9;
+          }
+        }
+      } catch (e) {}
 
       var controls = viewer.scene.activeCamera ? viewer.scene.activeCamera.controls : null;
       if (controls) {
