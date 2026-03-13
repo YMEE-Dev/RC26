@@ -92,6 +92,14 @@
           debug: false,
         });
         manager = viewer.getManager ? viewer.getManager() : null;
+        // MaterialConfiguratorPlugin is not added by CoreViewerApp.initialize() by default
+        try {
+          if (typeof MaterialConfiguratorPlugin !== "undefined" && !viewer.getPlugin(MaterialConfiguratorPlugin)) {
+            await viewer.addPlugin(MaterialConfiguratorPlugin);
+          }
+        } catch (e) {
+          console.warn("[WebGI] Could not add MaterialConfiguratorPlugin:", e);
+        }
       } else {
         // Fallback: ViewerApp + addBasePlugins
         var canvas0 = document.createElement("canvas");
@@ -170,17 +178,6 @@
         await manager.addFromPath(glbUrl, { autoCenter: true, autoScale: true, autoScaleRadius: 2 });
       }
 
-      // Log material names and MaterialConfiguratorPlugin variations for dev
-      try {
-        var matNames = [];
-        viewer.scene.traverse(function (obj) {
-          if (obj.material && obj.material.name && matNames.indexOf(obj.material.name) === -1) {
-            matNames.push(obj.material.name);
-          }
-        });
-        if (matNames.length) console.log("[WebGI] Material names:", matNames);
-      } catch (e) {}
-
       var matConfigPlugin = null;
       try {
         matConfigPlugin =
@@ -189,17 +186,24 @@
           (viewer.getPluginByType && viewer.getPluginByType("MaterialConfiguratorPlugin")) ||
           null;
       } catch (e) {}
-      console.log("[WebGI] MaterialConfiguratorPlugin:", matConfigPlugin);
       if (matConfigPlugin && matConfigPlugin.variations) {
-        console.log(
-          "[WebGI] MaterialConfigurator variations:",
-          matConfigPlugin.variations.map(function (v) {
-            return v.title;
-          })
-        );
       }
 
+      // Cache gold materials once at load time — avoids expensive traverse on every color click
+      var goldMaterials = [];
+      try {
+        viewer.scene.traverse(function (obj) {
+          if (!obj.material) return;
+          if (typeof obj.material.refractionIndex !== "undefined") return;
+          if ((obj.material.name || "").toLowerCase().indexOf("gold") === -1) return;
+          if (goldMaterials.indexOf(obj.material) === -1) goldMaterials.push(obj.material);
+        });
+      } catch (e) {}
+
       var WEBGI_COLOR_MAP = {
+        "18kt yellow gold": "#D4A832",
+        "18kt white gold": "#E8E8E8",
+        "18kt rose gold": "#CF9FA6",
         "yellow gold": "#D4A832",
         "white gold": "#E8E8E8",
         "rose gold": "#CF9FA6",
@@ -208,76 +212,66 @@
         platinum: "#E5E4E2",
       };
 
-      function applyColorToModel(colorValue) {
-        var key = (colorValue || "").trim().toLowerCase();
-        // Primary: MaterialConfiguratorPlugin.applyVariation
-        if (matConfigPlugin && matConfigPlugin.variations && matConfigPlugin.variations.length) {
-          // 1. Exact title match
-          var matched = null;
-          for (var vi = 0; vi < matConfigPlugin.variations.length; vi++) {
-            var vTitle = (matConfigPlugin.variations[vi].title || "").trim().toLowerCase();
-            if (vTitle === key) {
-              matched = matConfigPlugin.variations[vi];
-              break;
-            }
+      // Find the "Gold" variation in MaterialConfiguratorPlugin
+      var goldVariation = null;
+      if (matConfigPlugin && matConfigPlugin.variations) {
+        for (var vi = 0; vi < matConfigPlugin.variations.length; vi++) {
+          if ((matConfigPlugin.variations[vi].title || "").toLowerCase() === "gold") {
+            goldVariation = matConfigPlugin.variations[vi];
+            break;
           }
-          // 2. Key contains variation title (e.g. "yellow gold" contains "gold")
-          if (!matched) {
-            for (var vi2 = 0; vi2 < matConfigPlugin.variations.length; vi2++) {
-              var vTitle2 = (matConfigPlugin.variations[vi2].title || "").trim().toLowerCase();
-              if (vTitle2 && key.indexOf(vTitle2) !== -1) {
-                matched = matConfigPlugin.variations[vi2];
-                break;
-              }
-            }
-          }
-          // 3. Variation title contains key word (e.g. variation "Gold" matched by key "gold")
-          if (!matched) {
-            for (var vi3 = 0; vi3 < matConfigPlugin.variations.length; vi3++) {
-              var vTitle3 = (matConfigPlugin.variations[vi3].title || "").trim().toLowerCase();
-              if (vTitle3 && vTitle3.indexOf(key) !== -1) {
-                matched = matConfigPlugin.variations[vi3];
-                break;
-              }
-            }
-          }
-          if (matched) {
-            try {
-              console.log("[WebGI] applyVariation:", matched.title);
-              matConfigPlugin.applyVariation(matched);
-              viewer.renderer.refreshPipeline();
-              return;
-            } catch (e) {
-              console.warn("[WebGI] applyVariation error:", e);
-            }
-          }
-        }
-        // Fallback: direct material.color on non-gem materials named 'Gold'
-        var hex = WEBGI_COLOR_MAP[key];
-        if (!hex) return;
-        var r = parseInt(hex.slice(1, 3), 16) / 255;
-        var g = parseInt(hex.slice(3, 5), 16) / 255;
-        var b = parseInt(hex.slice(5, 7), 16) / 255;
-        try {
-          viewer.scene.traverse(function (obj) {
-            if (!obj.material) return;
-            if (typeof obj.material.refractionIndex !== "undefined") return;
-            if ((obj.material.name || "").toLowerCase().indexOf("gold") === -1) return;
-            if (obj.material.color) {
-              obj.material.color.r = r;
-              obj.material.color.g = g;
-              obj.material.color.b = b;
-              obj.material.setDirty && obj.material.setDirty();
-            }
-          });
-          viewer.renderer.refreshPipeline();
-        } catch (e) {
-          console.warn("[WebGI] applyColor error:", e);
         }
       }
 
-      // Expose on container for the delegated listener
+      function applyColorToModel(colorValue) {
+        if (!goldVariation || !matConfigPlugin) return;
+        var key = (colorValue || "").trim().toLowerCase();
+        var matName = null;
+        if (key.indexOf("rose") !== -1) matName = "rose";
+        else if (key.indexOf("white") !== -1) matName = "white";
+        else if (key.indexOf("yellow") !== -1 || key.indexOf("gold") !== -1) matName = "yellow";
+        if (!matName) return;
+        var targetIndex = -1;
+        var targetUuid = null;
+        for (var i = 0; i < goldVariation.materials.length; i++) {
+          if ((goldVariation.materials[i].name || "").toLowerCase() === matName) {
+            targetIndex = i;
+            targetUuid = goldVariation.materials[i].uuid;
+            break;
+          }
+        }
+        if (targetIndex === -1) return;
+        goldVariation.selectedIndex = targetIndex;
+        // copyProps doesn't update Three.js Color objects — set color directly on live materials
+        var hex = WEBGI_COLOR_MAP[key];
+        var r = 1,
+          g = 1,
+          b = 1;
+        if (hex) {
+          r = parseInt(hex.slice(1, 3), 16) / 255;
+          g = parseInt(hex.slice(3, 5), 16) / 255;
+          b = parseInt(hex.slice(5, 7), 16) / 255;
+        }
+        var mats = goldMaterials.filter(function (m) {
+          return m && m.color && m.color.isColor;
+        });
+        if (!mats.length) return;
+        for (var mi = 0; mi < mats.length; mi++) {
+          var m = mats[mi];
+          m.color.r = r;
+          m.color.g = g;
+          m.color.b = b;
+          m.needsUpdate = true;
+        }
+        // Mark scene dirty so the next render frame picks up the color change instantly
+        viewer.setDirty();
+        if (viewer.scene.activeCamera) viewer.scene.activeCamera.setDirty();
+        console.log("[WebGI] applied color:", matName, hex);
+      }
+
       container.__webgiApplyColor = applyColorToModel;
+      container.__webgiViewer = viewer;
+      container.__webgiManager = manager;
 
       // Sync with the currently selected color picker on page load
       var _sectionId = container.getAttribute("data-section-id");
@@ -512,20 +506,55 @@
   window.__webgiInitViewer = initWebGIViewer;
   if (typeof window.__webgiInitViewerReady === "function") window.__webgiInitViewerReady();
 
+  function applyColorFromInput(input) {
+    if (!input) return;
+    var picker = input.closest("[data-ymee-color-picker]");
+    if (!picker) return;
+    var sectionId = picker.getAttribute("data-section-id");
+    if (!sectionId) return;
+
+    var sectionRoot = document.querySelector("#MainProduct--" + sectionId) || document;
+    var scopedContainers = sectionRoot.querySelectorAll('.webgi-container[data-section-id="' + sectionId + '"]');
+    var allSectionContainers = document.querySelectorAll('.webgi-container[data-section-id="' + sectionId + '"]');
+    var applied = false;
+    var appliedCount = 0;
+
+    function tryApply(container) {
+      if (!container || typeof container.__webgiApplyColor !== "function") return;
+      container.__webgiApplyColor(input.value);
+      applied = true;
+      appliedCount += 1;
+    }
+
+    scopedContainers.forEach(tryApply);
+    if (!applied) allSectionContainers.forEach(tryApply);
+    if (!applied) {
+    } else {
+    }
+  }
+
   // Delegated: color picker change → apply color to 3D model (no gallery scroll)
   document.addEventListener(
     "change",
     function (e) {
       var input = e.target.closest("[data-ymee-color-input]");
       if (!input) return;
-      var picker = input.closest("[data-ymee-color-picker]");
-      if (!picker) return;
-      var sectionId = picker.getAttribute("data-section-id");
-      if (!sectionId) return;
-      var webgiContainer = document.querySelector('.webgi-container[data-section-id="' + sectionId + '"]');
-      if (webgiContainer && typeof webgiContainer.__webgiApplyColor === "function") {
-        webgiContainer.__webgiApplyColor(input.value);
-      }
+      applyColorFromInput(input);
+    },
+    true
+  );
+
+  // Fallback for label clicks if upstream scripts/DOM swaps interfere with change timing
+  document.addEventListener(
+    "click",
+    function (e) {
+      var item = e.target.closest(".ymee-color-picker__item");
+      if (!item) return;
+      var input = item.querySelector("[data-ymee-color-input]");
+      if (!input) return;
+      requestAnimationFrame(function () {
+        applyColorFromInput(input);
+      });
     },
     true
   );
