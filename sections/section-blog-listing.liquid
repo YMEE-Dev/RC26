@@ -129,30 +129,7 @@ a.blog-listing__view-all {
         {{ section.settings.view_all_text | default: 'View all' | upcase }}
       </a>
       {%- if blog_links.size > 0 -%}
-        {% comment %} <nav class="blog-listing__nav" aria-label="Blog categories">
-          {% comment %} {%- for block in blog_links -%}
-            {%- if block.settings.blog != blank -%}
-              {%- assign link_blog = blogs[block.settings.blog] -%}
-              {%- if link_blog != blank -%}
-               
-              {%- endif -%}
-            {%- endif -%}
-          {%- endfor -%} {% endcomment %}
-
-          {%- for tag in blog.all_tags -%}
-            <a
-              href="{{ blog.url }}/tagged/{{ tag | handleize }}"
-              class="main-blog__filter-tag {% if current_tags contains tag %}main-blog__filter-tag--active{% endif %}"
-            >
-              {{ tag | upcase }}
-            </a>
-          {%- endfor -%}
-        </nav> {% endcomment %}
-
         <nav class="blog-listing__nav" id="blogNav" aria-label="Blog categories"></nav>
-        {% comment %} <select class="blog-listing__dropdown" id="blogDropdown" aria-label="Blog categories">
-          <option value="">Select Category</option>
-        </select> {% endcomment %}
       {%- endif -%}
     </div>
   </div>
@@ -342,15 +319,6 @@ a.blog-listing__view-all {
         }
         link.textContent = blog.title.toUpperCase();
         nav.appendChild(link);
-        
-        // Create dropdown option
-        {% comment %} const option = document.createElement("option");
-        option.value = `/blogs/${blog.handle}`;
-        option.textContent = blog.title.toUpperCase();
-        if (blog.handle === "{{ blog.handle }}") {
-          option.selected = true;
-        }
-        dropdown.appendChild(option); {% endcomment %}
       });
       
       // Add dropdown change event
