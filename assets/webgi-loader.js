@@ -1,16 +1,8 @@
 'use strict';
 
 (function () {
-  var WEBGI_VIEWER_URLS = {
-    v9: "https://dist.pixotronics.com/webgi/runtime/viewer-0.9.9.js",
-    v19: "https://releases.ijewel3d.com/webgi/runtime/viewer-0.9.19.js",
-  };
-  var _loaderScript = document.currentScript || document.querySelector("script[data-webgi-version]");
-  var _webgiVersion = (_loaderScript && _loaderScript.dataset.webgiVersion) || "v9";
-  var WEBGI_VIEWER_URL = WEBGI_VIEWER_URLS[_webgiVersion] || WEBGI_VIEWER_URLS["v9"];
+  var WEBGI_VIEWER_URL = "https://releases.ijewel3d.com/webgi/runtime/viewer-0.9.19.js";
   var ENV_MAP_URL = "https://demo-assets.pixotronics.com/pixo/hdr/gem_2.hdr";
-  var ENV_MAP_URL_STUDIO =
-    "https://cdn.shopify.com/s/files/1/0969/2990/7075/files/Studio_SCENE_V3_copy.hdr?v=1773249444";
 
   var scriptLoaded = false;
   var scriptLoading = false;
@@ -178,6 +170,126 @@
         await manager.addFromPath(glbUrl, { autoCenter: true, autoScale: true, autoScaleRadius: 2 });
       }
 
+      // Log material names and MaterialConfiguratorPlugin variations for dev
+      try {
+        var matNames = [];
+        viewer.scene.traverse(function (obj) {
+          if (obj.material && obj.material.name && matNames.indexOf(obj.material.name) === -1) {
+            matNames.push(obj.material.name);
+          }
+        });
+        if (matNames.length) console.log("[WebGI] Material names:", matNames);
+      } catch (e) {}
+
+      var matConfigPlugin = null;
+      try {
+        matConfigPlugin =
+          (typeof MaterialConfiguratorPlugin !== "undefined" && viewer.getPlugin(MaterialConfiguratorPlugin)) ||
+          viewer.getPlugin("MaterialConfiguratorPlugin") ||
+          (viewer.getPluginByType && viewer.getPluginByType("MaterialConfiguratorPlugin")) ||
+          null;
+      } catch (e) {}
+      console.log("[WebGI] MaterialConfiguratorPlugin:", matConfigPlugin);
+      if (matConfigPlugin && matConfigPlugin.variations) {
+        console.log(
+          "[WebGI] MaterialConfigurator variations:",
+          matConfigPlugin.variations.map(function (v) {
+            return v.title;
+          })
+        );
+      }
+
+      var WEBGI_COLOR_MAP = {
+        "yellow gold": "#D4A832",
+        "white gold": "#E8E8E8",
+        "rose gold": "#CF9FA6",
+        gold: "#D4A832",
+        silver: "#C0C0C0",
+        platinum: "#E5E4E2",
+      };
+
+      function applyColorToModel(colorValue) {
+        var key = (colorValue || "").trim().toLowerCase();
+        // Primary: MaterialConfiguratorPlugin.applyVariation
+        if (matConfigPlugin && matConfigPlugin.variations && matConfigPlugin.variations.length) {
+          // 1. Exact title match
+          var matched = null;
+          for (var vi = 0; vi < matConfigPlugin.variations.length; vi++) {
+            var vTitle = (matConfigPlugin.variations[vi].title || "").trim().toLowerCase();
+            if (vTitle === key) {
+              matched = matConfigPlugin.variations[vi];
+              break;
+            }
+          }
+          // 2. Key contains variation title (e.g. "yellow gold" contains "gold")
+          if (!matched) {
+            for (var vi2 = 0; vi2 < matConfigPlugin.variations.length; vi2++) {
+              var vTitle2 = (matConfigPlugin.variations[vi2].title || "").trim().toLowerCase();
+              if (vTitle2 && key.indexOf(vTitle2) !== -1) {
+                matched = matConfigPlugin.variations[vi2];
+                break;
+              }
+            }
+          }
+          // 3. Variation title contains key word (e.g. variation "Gold" matched by key "gold")
+          if (!matched) {
+            for (var vi3 = 0; vi3 < matConfigPlugin.variations.length; vi3++) {
+              var vTitle3 = (matConfigPlugin.variations[vi3].title || "").trim().toLowerCase();
+              if (vTitle3 && vTitle3.indexOf(key) !== -1) {
+                matched = matConfigPlugin.variations[vi3];
+                break;
+              }
+            }
+          }
+          if (matched) {
+            try {
+              console.log("[WebGI] applyVariation:", matched.title);
+              matConfigPlugin.applyVariation(matched);
+              viewer.renderer.refreshPipeline();
+              return;
+            } catch (e) {
+              console.warn("[WebGI] applyVariation error:", e);
+            }
+          }
+        }
+        // Fallback: direct material.color on non-gem materials named 'Gold'
+        var hex = WEBGI_COLOR_MAP[key];
+        if (!hex) return;
+        var r = parseInt(hex.slice(1, 3), 16) / 255;
+        var g = parseInt(hex.slice(3, 5), 16) / 255;
+        var b = parseInt(hex.slice(5, 7), 16) / 255;
+        try {
+          viewer.scene.traverse(function (obj) {
+            if (!obj.material) return;
+            if (typeof obj.material.refractionIndex !== "undefined") return;
+            if ((obj.material.name || "").toLowerCase().indexOf("gold") === -1) return;
+            if (obj.material.color) {
+              obj.material.color.r = r;
+              obj.material.color.g = g;
+              obj.material.color.b = b;
+              obj.material.setDirty && obj.material.setDirty();
+            }
+          });
+          viewer.renderer.refreshPipeline();
+        } catch (e) {
+          console.warn("[WebGI] applyColor error:", e);
+        }
+      }
+
+      // Expose on container for the delegated listener
+      container.__webgiApplyColor = applyColorToModel;
+
+      // Sync with the currently selected color picker on page load
+      var _sectionId = container.getAttribute("data-section-id");
+      if (_sectionId) {
+        var _initInput = document.querySelector(
+          '[data-ymee-color-picker][data-section-id="' +
+            _sectionId +
+            '"] .ymee-color-picker__item.is-selected [data-ymee-color-input]'
+        );
+        if (_initInput && _initInput.value) applyColorToModel(_initInput.value);
+      }
+
       // Set gem_2.hdr on DiamondPlugin + boost normalMapRes for better cut simulation
       if (diamondPlugin) {
         diamondPlugin.envMap = envMap;
@@ -279,8 +391,7 @@
         controls.update();
 
         // Resume auto-rotation 3s after user stops interacting
-        // Disable SSR during drag for smooth performance, re-enable after
-        var ssrPlugin = viewer.getPlugin(SSRPlugin) || null;
+        // Keep SSR always on to avoid white blink during drag
         var autoRotateTimer = null;
         canvas.addEventListener("pointerdown", function () {
           controls.autoRotate = false;
@@ -288,17 +399,14 @@
             clearTimeout(autoRotateTimer);
             autoRotateTimer = null;
           }
-          if (ssrPlugin) ssrPlugin.enabled = false;
         });
         canvas.addEventListener("pointerup", function () {
-          if (ssrPlugin) ssrPlugin.enabled = true;
           if (autoRotateTimer) clearTimeout(autoRotateTimer);
           autoRotateTimer = setTimeout(function () {
             controls.autoRotate = true;
           }, 3000);
         });
         canvas.addEventListener("pointercancel", function () {
-          if (ssrPlugin) ssrPlugin.enabled = true;
           if (autoRotateTimer) clearTimeout(autoRotateTimer);
           autoRotateTimer = setTimeout(function () {
             controls.autoRotate = true;
@@ -402,4 +510,23 @@
   }
 
   window.__webgiInitViewer = initWebGIViewer;
+  if (typeof window.__webgiInitViewerReady === "function") window.__webgiInitViewerReady();
+
+  // Delegated: color picker change → apply color to 3D model (no gallery scroll)
+  document.addEventListener(
+    "change",
+    function (e) {
+      var input = e.target.closest("[data-ymee-color-input]");
+      if (!input) return;
+      var picker = input.closest("[data-ymee-color-picker]");
+      if (!picker) return;
+      var sectionId = picker.getAttribute("data-section-id");
+      if (!sectionId) return;
+      var webgiContainer = document.querySelector('.webgi-container[data-section-id="' + sectionId + '"]');
+      if (webgiContainer && typeof webgiContainer.__webgiApplyColor === "function") {
+        webgiContainer.__webgiApplyColor(input.value);
+      }
+    },
+    true
+  );
 })();
