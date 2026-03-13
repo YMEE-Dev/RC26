@@ -53,6 +53,7 @@
   scroll-behavior: smooth;
   margin: 0;
   min-height: 100vh;
+  padding-top: var(--header-height, 0px);
   background: var(--bg);
   color: var(--text);
   font-family: "Inter", sans-serif;
@@ -317,8 +318,8 @@
 }
 
 .hero {
-  min-height: 82vh;
-  padding: 1.5rem clamp(1.5rem, 3vw, 2.5rem) 2rem;
+  min-height: calc(82vh - var(--header-height, 0px));
+  padding: 0.5rem clamp(1.5rem, 3vw, 2.5rem) 2rem;
   display: flex;
   flex-direction: column;
 }
@@ -684,7 +685,10 @@
   width: min(1232px, calc(100% - 48px));
   min-height: 700px;
   margin: 0 auto;
-  background: url("./images/ruby-section.jpg") center / cover no-repeat;
+  background: linear-gradient(135deg, #7f0f22 0%, #4f0c1c 45%, #23070f 100%);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 .ruby-section__content {
