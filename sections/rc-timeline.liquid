@@ -140,7 +140,7 @@
       </section>
     </main>
 
-    <nav class="section-nav" aria-label="Page sections">
+    <nav class="section-nav section-nav--fixed" aria-label="Page sections">
       <div class="section-nav__shape">
         <svg class="nav-bg" viewBox="0 0 814 50" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M34.7305 1H778.762C784.657 1.00012 790.067 4.57408 795.223 9.1416C797.788 11.4147 800.23 13.8755 802.618 16.1982C804.986 18.5016 807.305 20.6729 809.565 22.2842V22.2852L812.5 24.3945V25.6143L809.566 27.7158C807.308 29.3267 804.99 31.4991 802.623 33.8027C800.236 36.1251 797.795 38.5855 795.229 40.8584C790.103 45.3997 784.723 48.9576 778.862 48.998H34.7305C28.8352 48.998 23.4245 45.4239 18.2686 40.8564C15.7027 38.5835 13.2608 36.1233 10.873 33.8008C8.65216 31.6406 6.47441 29.596 4.34766 28.0215L3.92285 27.7129L1 25.6133V24.3916L3.92285 22.2852C6.18196 20.6742 8.50119 18.5016 10.8691 16.1973C13.2555 13.875 15.6961 11.4144 18.2617 9.1416C23.4175 4.57429 28.8308 1 34.7305 1Z" fill="#27574D" fill-opacity="0.6"/>
@@ -158,6 +158,41 @@
           <a class="section-nav__tab" data-idx="1" data-section="{{ creator_id }}" href="#{{ creator_id }}">{{ section.settings.section_nav_creator }}</a>
           <a class="section-nav__tab" data-idx="2" data-section="{{ ruby_id }}" href="#{{ ruby_id }}">{{ section.settings.section_nav_ruby }}</a>
           <a class="section-nav__tab" data-idx="3" data-section="{{ timeline_id }}" href="#{{ timeline_id }}">{{ section.settings.section_nav_timeline }}</a>
+        </div>
+        <div class="section-nav__mobile" aria-hidden="true">
+          <div class="section-nav__mobile-dropdown" aria-hidden="true">
+            <a class="section-nav__mobile-link" href="#{{ history_id }}" data-section="{{ history_id }}" data-idx="0">{{ section.settings.section_nav_history }}</a>
+            <a class="section-nav__mobile-link" href="#{{ creator_id }}" data-section="{{ creator_id }}" data-idx="1">{{ section.settings.section_nav_creator }}</a>
+            <a class="section-nav__mobile-link" href="#{{ ruby_id }}" data-section="{{ ruby_id }}" data-idx="2">{{ section.settings.section_nav_ruby }}</a>
+            <a class="section-nav__mobile-link" href="#{{ timeline_id }}" data-section="{{ timeline_id }}" data-idx="3">{{ section.settings.section_nav_timeline }}</a>
+          </div>
+          <svg class="section-nav__mobile-bg" viewBox="0 0 362 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g opacity="0.85">
+              <mask id="mask0_4058_4572_{{ section.id }}" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="362" height="50">
+                <path d="M326.761 50C339.354 50 349.39 34.7756 358.149 28.529L361.5 26.1286V23.882L358.149 21.4731C349.381 15.2245 339.345 0 326.761 0L34.7301 0C22.1376 0 12.1019 15.2244 3.34241 21.471L0 23.8799V26.1265L3.34241 28.5269C12.1104 34.7734 22.1461 49.9979 34.7301 49.9979H326.761V50Z" fill="#D9D9D9"/>
+              </mask>
+              <g mask="url(#mask0_4058_4572_{{ section.id }})">
+                <rect width="286" height="50" fill="#57746E"/>
+                <rect class="section-nav__mobile-progress-rect" width="286" height="50" fill="url(#mobile-nav-progress-{{ section.id }})"/>
+                <rect x="286" width="76" height="50" fill="white"/>
+              </g>
+              <path d="M326.761 49.25C333.005 49.25 338.486 45.4647 343.626 41.25C348.695 37.0943 353.334 32.6264 357.713 29.5039L360.75 27.327V22.6827L357.714 20.4978C353.336 17.3745 348.697 12.9058 343.627 8.75096C338.488 4.53658 333.007 0.75 326.761 0.75L34.7301 0.75C28.4868 0.75 23.0055 4.53595 17.8655 8.74995C12.7969 12.9046 8.15835 17.3715 3.77822 20.4948L0.75 22.6778V27.3222L3.77845 29.4969C8.15718 32.6208 12.7949 37.0894 17.8629 41.2441C23.0018 45.4575 28.4828 49.2434 34.7301 49.2479H326.761V49.25Z" stroke="#27574d" stroke-width="2.5"/>
+              <defs>
+                <linearGradient id="mobile-nav-progress-{{ section.id }}" x1="0" y1="25" x2="286" y2="25" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#50716A" stop-opacity="0.82"/>
+                  <stop offset="1" stop-color="#7FA19A" stop-opacity="0.78"/>
+                </linearGradient>
+              </defs>
+            </g>
+          </svg>
+          <div class="section-nav__mobile-main">
+            <span class="section-nav__mobile-label">{{ section.settings.section_nav_history | upcase }}</span>
+          </div>
+          <button class="section-nav__mobile-flower-trigger" type="button" aria-label="Open section navigation">
+            <svg class="section-nav__mobile-flower" width="1064" height="1023" viewBox="0 0 1064 1023" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+              <path d="M437.088 574.435C385.654 610.527 357.613 623.346 309.691 623.346C248.91 623.346 184.619 586.072 137.883 516.159C184.619 446.247 248.91 408.973 309.691 408.973C357.613 408.973 385.654 421.792 437.088 457.931L441.785 448.612L410.232 421.792C329.571 353.062 290.996 334.378 254.794 334.378C162.46 334.378 88.8217 445.064 24.5301 490.522L-0.000266461 507.976L-0.000267178 524.295L24.5301 541.797C87.6355 587.254 162.46 697.941 254.794 697.941C291.044 697.941 329.619 679.304 410.232 610.527L441.785 583.754L437.088 574.435ZM557.462 24.4552L539.907 -2.06387e-09L523.537 -7.13866e-07L506.029 24.4552C459.293 89.6846 349.404 161.915 349.404 254.012C349.404 290.15 368.099 328.56 437.04 408.973L463.943 440.429L473.29 435.746C437.04 384.471 424.229 356.515 424.229 309.923C424.229 248.146 462.804 184.099 531.746 138.642C600.735 184.099 639.262 248.194 639.262 309.923C639.262 356.515 626.404 384.471 590.154 435.746L599.501 440.429L626.356 408.973C695.298 328.56 714.04 290.15 714.04 254.012C714.04 161.962 603.012 88.5494 557.415 24.4552M626.404 614.027L599.548 582.571L590.201 587.207C626.451 638.482 639.309 666.438 639.309 713.03C639.309 774.759 600.735 838.853 531.793 884.311C462.852 838.853 424.277 774.759 424.277 713.03C424.277 666.438 437.135 638.482 473.337 587.207L463.99 582.571L437.088 614.027C368.146 694.44 349.452 732.897 349.452 768.988C349.452 861.038 459.34 933.268 506.076 998.545L523.585 1023L539.954 1023L557.51 998.545C603.107 934.451 714.134 861.038 714.134 768.988C714.134 732.85 695.44 694.393 626.451 614.027M1063.54 508.023L1039.01 490.569C974.717 445.112 901.078 334.425 808.745 334.425C772.543 334.425 733.968 353.062 653.307 421.839L621.754 448.659L626.451 457.978C677.884 421.839 705.926 409.02 752.662 409.02C814.581 409.02 878.873 447.477 924.47 516.207C878.873 584.936 814.581 623.393 752.662 623.393C705.926 623.393 677.884 610.574 626.451 574.483L621.754 583.801L653.307 610.574C733.968 679.351 772.543 697.988 808.745 697.988C901.078 697.988 973.531 588.484 1039.01 541.844L1063.54 524.343L1063.54 508.023Z" fill="#27574D"/>
+            </svg>
+          </button>
         </div>
       </div>
     </nav>
@@ -222,7 +257,7 @@
 {
   "name": "Roberto Coin timeline",
   "tag": "section",
-  "class": "section",
+  "class": "section section-overlay-header",
   "settings": [
     { "type": "header", "content": "Theme" },
     { "type": "color", "id": "background_color", "label": "Background color", "default": "#f9f9f9" },
@@ -261,26 +296,6 @@
     { "type": "text", "id": "ruby_title", "label": "Ruby title", "default": "The Ruby" },
     { "type": "richtext", "id": "ruby_copy", "label": "Ruby copy", "default": "<p>Roberto Coin chose the ruby as the hidden signature of his creations.</p><p>Set inside every jewel, the ruby is not meant to be seen but to be felt.</p>" },
     { "type": "image_picker", "id": "ruby_image", "label": "Ruby image" },
-
-    { "type": "header", "content": "Top nav links" },
-    { "type": "text", "id": "left_link_1_label", "label": "Left link 1 label", "default": "High Jewelry" },
-    { "type": "url", "id": "left_link_1_url", "label": "Left link 1 URL" },
-    { "type": "text", "id": "left_link_2_label", "label": "Left link 2 label", "default": "Jewelry" },
-    { "type": "url", "id": "left_link_2_url", "label": "Left link 2 URL" },
-    { "type": "text", "id": "left_link_3_label", "label": "Left link 3 label", "default": "Occasions" },
-    { "type": "url", "id": "left_link_3_url", "label": "Left link 3 URL" },
-    { "type": "text", "id": "left_link_4_label", "label": "Left link 4 label", "default": "Maison" },
-    { "type": "url", "id": "left_link_4_url", "label": "Left link 4 URL" },
-    { "type": "text", "id": "right_link_1_label", "label": "Right link 1 label", "default": "Find a Boutique" },
-    { "type": "url", "id": "right_link_1_url", "label": "Right link 1 URL" },
-    { "type": "text", "id": "right_link_2_label", "label": "Right link 2 label", "default": "Concierge" },
-    { "type": "url", "id": "right_link_2_url", "label": "Right link 2 URL" },
-    { "type": "text", "id": "right_link_3_label", "label": "Right link 3 label", "default": "Log In" },
-    { "type": "url", "id": "right_link_3_url", "label": "Right link 3 URL" },
-    { "type": "text", "id": "right_link_4_label", "label": "Right link 4 label", "default": "Keep in Touch" },
-    { "type": "url", "id": "right_link_4_url", "label": "Right link 4 URL" },
-    { "type": "url", "id": "bag_link_url", "label": "Bag link URL" },
-    { "type": "text", "id": "bag_count", "label": "Bag count", "default": "2" },
 
     { "type": "header", "content": "Bottom nav labels" },
     { "type": "text", "id": "section_nav_history", "label": "History label", "default": "History" },

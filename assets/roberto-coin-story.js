@@ -87,6 +87,8 @@
       return;
     }
 
+    document.body.classList.add("has-rc-story");
+
     const dataNode = section.querySelector("[data-timeline-data]");
     const mediaLayout = section.querySelector("[data-media-layout]");
     const yearRail = section.querySelector("[data-year-rail]");
@@ -107,6 +109,11 @@
     const sectionNav = section.querySelector(".section-nav");
     const sectionNavTabs = sectionNav ? [...sectionNav.querySelectorAll(".section-nav__tab")] : [];
     const sectionNavHighlights = sectionNav ? [...sectionNav.querySelectorAll(".nav-highlight")] : [];
+    const sectionNavMobileMain = sectionNav ? sectionNav.querySelector(".section-nav__mobile-main") : null;
+    const sectionNavMobileMenu = sectionNav ? sectionNav.querySelector(".section-nav__mobile-flower-trigger") : null;
+    const sectionNavMobileDropdown = sectionNav ? sectionNav.querySelector(".section-nav__mobile-dropdown") : null;
+    const sectionNavMobileLabel = sectionNav ? sectionNav.querySelector(".section-nav__mobile-label") : null;
+    const sectionNavMobileLinks = sectionNav ? [...sectionNav.querySelectorAll(".section-nav__mobile-link")] : [];
 
     let timelineEntries = [];
 
@@ -141,6 +148,17 @@
     const historyRotateEnd = 8;
     let activeSectionIndex = -1;
     let heroIntroComplete = false;
+    let mobileNavOpen = false;
+
+    function setMobileMenuOpen(open) {
+      if (!sectionNav || !sectionNavMobileDropdown) {
+        return;
+      }
+
+      mobileNavOpen = !!open;
+      sectionNav.classList.toggle("is-mobile-open", mobileNavOpen);
+      sectionNavMobileDropdown.setAttribute("aria-hidden", mobileNavOpen ? "false" : "true");
+    }
 
     function setSectionNavState(index) {
       sectionNavHighlights.forEach((highlight, highlightIndex) => {
@@ -150,6 +168,10 @@
       sectionNavTabs.forEach((tab, tabIndex) => {
         tab.classList.toggle("is-active", tabIndex === index);
       });
+
+      if (sectionNavMobileLabel && sectionNavTabs[index]) {
+        sectionNavMobileLabel.textContent = sectionNavTabs[index].textContent.trim();
+      }
 
       activeSectionIndex = index;
     }
@@ -406,7 +428,8 @@
 
       const rect = historySection.getBoundingClientRect();
       const vh = window.innerHeight || document.documentElement.clientHeight;
-      const startPoint = vh * 0.9;
+      // Start when the section is near viewport middle instead of near the bottom.
+      const startPoint = vh * 0.55;
       const endPoint = -rect.height * 0.35;
       let progress = (startPoint - rect.top) / (startPoint - endPoint);
 
@@ -579,6 +602,54 @@
         });
       });
 
+      if (sectionNavMobileMenu) {
+        sectionNavMobileMenu.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+          setMobileMenuOpen(!mobileNavOpen);
+        });
+      }
+
+      if (sectionNavMobileMain) {
+        sectionNavMobileMain.addEventListener("click", (event) => {
+          event.preventDefault();
+          setMobileMenuOpen(!mobileNavOpen);
+        });
+      }
+
+      sectionNavMobileLinks.forEach((link) => {
+        link.addEventListener("click", (event) => {
+          event.preventDefault();
+          const sectionId = link.dataset.section || "";
+          const target = section.querySelector(`#${sectionId}`);
+          const idx = Number.parseInt(link.dataset.idx || "-1", 10);
+
+          if (Number.isInteger(idx) && idx >= 0) {
+            setSectionNavState(idx);
+          }
+
+          if (target) {
+            const targetY = target.getBoundingClientRect().top + window.scrollY - 20;
+            const distance = Math.abs(targetY - (window.scrollY || window.pageYOffset));
+            const duration = Math.max(900, Math.min(1800, distance * 0.9));
+            smoothScrollToY(targetY, duration);
+          }
+
+          setMobileMenuOpen(false);
+        });
+      });
+
+      document.addEventListener("click", (event) => {
+        if (!mobileNavOpen || !sectionNav) {
+          return;
+        }
+
+        if (!sectionNav.contains(event.target)) {
+          setMobileMenuOpen(false);
+        }
+      });
+
       updateSectionNav();
     }
 
@@ -623,5 +694,11 @@
 
   document.addEventListener("shopify:section:load", (event) => {
     event.target?.querySelectorAll?.(".rc-story").forEach(initStorySection);
+  });
+
+  document.addEventListener("shopify:section:unload", () => {
+    if (!document.querySelector(".rc-story")) {
+      document.body.classList.remove("has-rc-story");
+    }
   });
 })();
