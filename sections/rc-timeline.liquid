@@ -38,22 +38,50 @@
           <div class="hero-collage" aria-hidden="true">
             <figure class="hero-collage__item hero-collage__item--top">
               {% if section.settings.hero_image_top != blank %}
-                <img src="{{ section.settings.hero_image_top | image_url: width: 1400 }}" alt="{{ section.settings.hero_image_top.alt | escape }}">
+                <img
+                  src="{{ section.settings.hero_image_top | image_url: width: 1400 }}"
+                  alt="{{ section.settings.hero_image_top.alt | escape }}"
+                  data-image-a="{{ section.settings.hero_image_top | image_url: width: 1400 }}"
+                  data-image-b="{% if section.settings.hero_image_top_alt != blank %}{{ section.settings.hero_image_top_alt | image_url: width: 1400 }}{% else %}{{ section.settings.hero_image_top | image_url: width: 1400 }}{% endif %}"
+                  data-alt-a="{{ section.settings.hero_image_top.alt | escape }}"
+                  data-alt-b="{% if section.settings.hero_image_top_alt != blank %}{{ section.settings.hero_image_top_alt.alt | escape }}{% else %}{{ section.settings.hero_image_top.alt | escape }}{% endif %}"
+                >
               {% endif %}
             </figure>
             <figure class="hero-collage__item hero-collage__item--right">
               {% if section.settings.hero_image_right != blank %}
-                <img src="{{ section.settings.hero_image_right | image_url: width: 1800 }}" alt="{{ section.settings.hero_image_right.alt | escape }}">
+                <img
+                  src="{{ section.settings.hero_image_right | image_url: width: 1800 }}"
+                  alt="{{ section.settings.hero_image_right.alt | escape }}"
+                  data-image-a="{{ section.settings.hero_image_right | image_url: width: 1800 }}"
+                  data-image-b="{% if section.settings.hero_image_right_alt != blank %}{{ section.settings.hero_image_right_alt | image_url: width: 1800 }}{% else %}{{ section.settings.hero_image_right | image_url: width: 1800 }}{% endif %}"
+                  data-alt-a="{{ section.settings.hero_image_right.alt | escape }}"
+                  data-alt-b="{% if section.settings.hero_image_right_alt != blank %}{{ section.settings.hero_image_right_alt.alt | escape }}{% else %}{{ section.settings.hero_image_right.alt | escape }}{% endif %}"
+                >
               {% endif %}
             </figure>
             <figure class="hero-collage__item hero-collage__item--left">
               {% if section.settings.hero_image_left != blank %}
-                <img src="{{ section.settings.hero_image_left | image_url: width: 1800 }}" alt="{{ section.settings.hero_image_left.alt | escape }}">
+                <img
+                  src="{{ section.settings.hero_image_left | image_url: width: 1800 }}"
+                  alt="{{ section.settings.hero_image_left.alt | escape }}"
+                  data-image-a="{{ section.settings.hero_image_left | image_url: width: 1800 }}"
+                  data-image-b="{% if section.settings.hero_image_left_alt != blank %}{{ section.settings.hero_image_left_alt | image_url: width: 1800 }}{% else %}{{ section.settings.hero_image_left | image_url: width: 1800 }}{% endif %}"
+                  data-alt-a="{{ section.settings.hero_image_left.alt | escape }}"
+                  data-alt-b="{% if section.settings.hero_image_left_alt != blank %}{{ section.settings.hero_image_left_alt.alt | escape }}{% else %}{{ section.settings.hero_image_left.alt | escape }}{% endif %}"
+                >
               {% endif %}
             </figure>
             <figure class="hero-collage__item hero-collage__item--bottom">
               {% if section.settings.hero_image_bottom != blank %}
-                <img src="{{ section.settings.hero_image_bottom | image_url: width: 1800 }}" alt="{{ section.settings.hero_image_bottom.alt | escape }}">
+                <img
+                  src="{{ section.settings.hero_image_bottom | image_url: width: 1800 }}"
+                  alt="{{ section.settings.hero_image_bottom.alt | escape }}"
+                  data-image-a="{{ section.settings.hero_image_bottom | image_url: width: 1800 }}"
+                  data-image-b="{% if section.settings.hero_image_bottom_alt != blank %}{{ section.settings.hero_image_bottom_alt | image_url: width: 1800 }}{% else %}{{ section.settings.hero_image_bottom | image_url: width: 1800 }}{% endif %}"
+                  data-alt-a="{{ section.settings.hero_image_bottom.alt | escape }}"
+                  data-alt-b="{% if section.settings.hero_image_bottom_alt != blank %}{{ section.settings.hero_image_bottom_alt.alt | escape }}{% else %}{{ section.settings.hero_image_bottom.alt | escape }}{% endif %}"
+                >
               {% endif %}
             </figure>
           </div>
@@ -277,6 +305,10 @@
     { "type": "image_picker", "id": "hero_image_right", "label": "Hero image right (front portrait)" },
     { "type": "image_picker", "id": "hero_image_left", "label": "Hero image left" },
     { "type": "image_picker", "id": "hero_image_bottom", "label": "Hero image bottom" },
+    { "type": "image_picker", "id": "hero_image_top_alt", "label": "Hero image top (set 2)" },
+    { "type": "image_picker", "id": "hero_image_right_alt", "label": "Hero image right (set 2)" },
+    { "type": "image_picker", "id": "hero_image_left_alt", "label": "Hero image left (set 2)" },
+    { "type": "image_picker", "id": "hero_image_bottom_alt", "label": "Hero image bottom (set 2)" },
 
     { "type": "header", "content": "History" },
     { "type": "text", "id": "history_title", "label": "History title", "default": "History" },

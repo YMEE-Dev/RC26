@@ -66,6 +66,18 @@ body.has-rc-story .header__backfill {
   padding: 0 !important;
 }
 
+body.has-rc-story .header-sections,
+body.has-rc-story .header__wrapper,
+body.has-rc-story .theme__header {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+body.has-rc-story .header__wrapper {
+  z-index: 40 !important;
+}
+
 .rc-story a {
   color: inherit;
   text-decoration: none;
@@ -83,6 +95,21 @@ body.has-rc-story .header__backfill {
   transform: translateX(-50%);
   z-index: 7;
   width: min(814px, calc(100vw - 48px));
+}
+
+@media (min-width: 750px) {
+  .section-nav:not(.is-history-visible) {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 12px);
+  }
+
+  .section-nav.is-history-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, 0);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
 }
 
 .section-nav.nav-intro {
@@ -198,12 +225,7 @@ body.has-rc-story .header__backfill {
 }
 
 @media (max-width: 749px) {
-  body.has-rc-story .header-sections,
-  body.has-rc-story .header__wrapper,
-  body.has-rc-story .theme__header,
-  body.has-rc-story .header__desktop,
-  body.has-rc-story .header__mobile,
-  body.has-rc-story .header__backfill {
+  body.has-rc-story .header__mobile__button {
     display: none !important;
   }
 
@@ -541,14 +563,14 @@ body.has-rc-story .header__backfill {
   opacity: 1;
   transform: none;
   transition:
-    top 1s cubic-bezier(0.22, 1, 0.36, 1),
-    right 1s cubic-bezier(0.22, 1, 0.36, 1),
-    bottom 1s cubic-bezier(0.22, 1, 0.36, 1),
-    left 1s cubic-bezier(0.22, 1, 0.36, 1),
-    width 1s cubic-bezier(0.22, 1, 0.36, 1),
-    height 1s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.7s ease,
-    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    top 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
+    right 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
+    bottom 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
+    left 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
+    width 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
+    height 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
+    opacity 0.9s cubic-bezier(0.33, 0.01, 0.25, 1),
+    transform 1.15s cubic-bezier(0.2, 0.88, 0.28, 1);
   will-change: opacity, transform;
 }
 
@@ -561,11 +583,15 @@ body.has-rc-story .header__backfill {
 
 .hero-collage.is-intro .hero-collage__item {
   opacity: 0;
-  transform: translateY(14px) scale(0.98);
+  transform: translateY(8px) scale(0.995);
+  transition-duration: 1.1s;
+  transition-timing-function: cubic-bezier(0.22, 0.84, 0.28, 1);
+  transition-delay: var(--intro-delay, 0ms);
 }
 
 .hero-collage.is-intro.is-intro-visible .hero-collage__item {
-  animation: hero-collage-fade-in 0.5s ease forwards;
+  opacity: 1;
+  transform: none;
 }
 
 .hero-collage__item--top {
@@ -600,34 +626,19 @@ body.has-rc-story .header__backfill {
 }
 
 .hero-collage.is-intro.is-intro-visible .hero-collage__item--top {
-  transition-delay: 0ms;
-  animation-delay: 0ms;
+  --intro-delay: 0ms;
 }
 
 .hero-collage.is-intro.is-intro-visible .hero-collage__item--right {
-  transition-delay: 0ms;
-  animation-delay: 250ms;
+  --intro-delay: 170ms;
 }
 
 .hero-collage.is-intro.is-intro-visible .hero-collage__item--left {
-  transition-delay: 0ms;
-  animation-delay: 500ms;
+  --intro-delay: 340ms;
 }
 
 .hero-collage.is-intro.is-intro-visible .hero-collage__item--bottom {
-  transition-delay: 0ms;
-  animation-delay: 750ms;
-}
-
-@keyframes hero-collage-fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(14px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+  --intro-delay: 510ms;
 }
 
 .hero-copy {
@@ -673,7 +684,7 @@ body.has-rc-story .header__backfill {
 
 .scroll-link.is-hidden {
   opacity: 0;
-  transform: translate(-50%, 112px);
+  transform: translate(-50%, 62px);
   pointer-events: none;
 }
 
@@ -692,7 +703,7 @@ body.has-rc-story .header__backfill {
 }
 
 .history {
-  padding: 80px 48px 40px;
+  padding: 80px 0 40px;
 }
 
 .history__inner {
@@ -700,7 +711,7 @@ body.has-rc-story .header__backfill {
   grid-template-columns: minmax(220px, 320px) minmax(420px, 1fr) minmax(220px, 320px);
   gap: 32px;
   align-items: start;
-  width: min(1440px, 100%);
+  width: min(1440px, calc(100% - 160px));
   margin: 0 auto;
 }
 
@@ -764,6 +775,7 @@ body.has-rc-story .header__backfill {
 .creator {
   background: transparent;
   overflow: visible;
+  position: relative;
 }
 
 .creator__inner {
@@ -779,6 +791,8 @@ body.has-rc-story .header__backfill {
 .creator__image {
   margin-top: -80px;
   margin-left: 20px;
+  position: relative;
+  z-index: 2;
 }
 
 .creator__image img {
@@ -791,6 +805,8 @@ body.has-rc-story .header__backfill {
 .creator__text {
   max-width: 620px;
   margin-top: 24px;
+  position: relative;
+  z-index: 2;
 }
 
 .creator__body {
@@ -802,14 +818,14 @@ body.has-rc-story .header__backfill {
 
 .creator__vicenza {
   position: absolute;
-  right: 0;
+  right: -100px;
   bottom: -130px;
   width: min(910px, 70vw);
   max-width: 100%;
   height: auto;
   pointer-events: none;
   mix-blend-mode: multiply !important;
-  z-index: 1;
+  z-index: 0;
 }
 
 .reveal-up {
@@ -924,7 +940,7 @@ body.has-rc-story .header__backfill {
 
 .media-layout {
   position: relative;
-  width: min(1160px, calc(100% + 200px));
+  width: min(1260px, calc(100% + 300px));
   min-height: calc(var(--panel-height) + 200px);
   z-index: 2;
 }
@@ -1084,8 +1100,9 @@ body.has-rc-story .header__backfill {
 }
 
 .year-rail button.is-active {
-  color: var(--active-year-color);
+  color: #e5e5e5;
   opacity: 1;
+  font-size: 200px;
   transform: translateY(0) scale(1);
 }
 
@@ -1172,8 +1189,10 @@ body.has-rc-story .header__backfill {
   }
 
   .creator__vicenza {
-    width: min(560px, 88vw);
+    position: absolute;
+    right: -100px;
     bottom: -60px;
+    width: min(560px, 88vw);
   }
 
   .ruby-section {
@@ -1294,4 +1313,10 @@ body.has-rc-story .header__backfill {
   .scroll-link::after {
     animation: none;
   }
+}
+
+body.has-rc-story mobile-menu .drawer__main-menu .navlink,
+body.has-rc-story mobile-menu .drawer__main-menu .sliderow__title,
+body.has-rc-story mobile-menu .drawer__main-menu .sliderow__links a {
+  color: #fff !important;
 }
