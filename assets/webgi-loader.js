@@ -144,6 +144,13 @@
 
       // Match WP: SSR + SSAO + GroundPlugin all run at addBasePlugins defaults
       // (SSR = screen-space reflections critical for diamond sparkle)
+      // Disable SSR+SSAO on mobile to keep rotation smooth (lighter render pipeline)
+      if (isMobile) {
+        var ssrM = viewer.getPlugin(SSRPlugin);
+        if (ssrM) ssrM.enabled = false;
+        var ssaoM = viewer.getPlugin(SSAOPlugin);
+        if (ssaoM) ssaoM.enabled = false;
+      }
       var ground = viewer.getPlugin(GroundPlugin);
       if (ground) {
         ground.shadowBaker.attachedMesh.material.transparent = true;
@@ -230,7 +237,7 @@
 
         controls.autoRotate = true;
         controls.autoRotateSpeed = 2;
-        controls.dampingFactor = 0.25;
+        controls.dampingFactor = isMobile ? 0.05 : 0.1;
         controls.zoomSpeed = 1.0;
         controls.maxSpeed = 1.0;
         controls.minDistance = defaultDist * 0.4; // max zoom in
