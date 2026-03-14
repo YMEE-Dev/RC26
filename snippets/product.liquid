@@ -316,12 +316,12 @@
           align-self: start;
           height: max-content;
           overflow: visible;
-          z-index: 6003;
+          z-index: 9;
           transition: top 0.3s ease;
         }
 
         body.template-product:not(.header-scroll-hide) #MainProduct--{{ section.id }} {
-          --sticky-top: calc(var(--header-height, 0px)*1.8 + var(--announcement-height, 0px));
+          --sticky-top: calc(var(--header-height, 0px)*2 + var(--announcement-height, 0px));
         }
 
         #MainProduct--{{ section.id }} .product__content-columns__aside .product__block--buttons {
@@ -830,6 +830,10 @@
         border: 0;
         background: transparent;
         color: inherit;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla__arrow .icon {
+        stroke: currentColor;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__arrow:disabled {
@@ -1792,10 +1796,10 @@
 
                 <div class="pdp-embla__arrows" aria-label="{{ 'general.accessibility.controls' | t | escape }}">
                   <button type="button" class="pdp-embla__arrow" data-embla-prev aria-label="{{ 'general.accessibility.previous' | t | escape }}">
-                    {%- render 'icon-nav-arrow-left' -%}
+                    <svg aria-hidden="true" focusable="false" role="presentation" width="25px" height="25px" stroke-width="1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M15 6l-6 6 6 6" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                   </button>
                   <button type="button" class="pdp-embla__arrow" data-embla-next aria-label="{{ 'general.accessibility.next' | t | escape }}">
-                    {%- render 'icon-nav-arrow-right' -%}
+                    <svg aria-hidden="true" focusable="false" role="presentation" width="25px" height="25px" stroke-width="1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M9 6l6 6-6 6" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                   </button>
                 </div>
 
@@ -1867,10 +1871,10 @@
 
                 <div class="pdp-embla__arrows" aria-label="{{ 'general.accessibility.controls' | t | escape }}">
                   <button type="button" class="pdp-embla__arrow" data-embla-prev aria-label="{{ 'general.accessibility.previous' | t | escape }}">
-                    {%- render 'icon-nav-arrow-left' -%}
+                    <svg aria-hidden="true" focusable="false" role="presentation" width="25px" height="25px" stroke-width="1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M15 6l-6 6 6 6" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                   </button>
                   <button type="button" class="pdp-embla__arrow" data-embla-next aria-label="{{ 'general.accessibility.next' | t | escape }}">
-                    {%- render 'icon-nav-arrow-right' -%}
+                    <svg aria-hidden="true" focusable="false" role="presentation" width="25px" height="25px" stroke-width="1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M9 6l6 6-6 6" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                   </button>
                 </div>
 
