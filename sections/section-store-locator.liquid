@@ -102,102 +102,105 @@
 </section>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const section = document.querySelector('[data-section-id="{{ section.id }}"]');
-    if (!section) return;
-    const enableFetch = section.dataset.enableFetch === 'true';
+  (function() {
     const sectionId = '{{ section.id }}';
+    const swiperInstances = window.__storeLocatorSwipers || {};
+    window.__storeLocatorSwipers = swiperInstances;
 
-    function initSwiper() {
-      if (typeof Swiper === 'undefined') return;
-      var el = document.querySelector('#StoreLocator--' + sectionId + ' .store-locator__swiper');
-      if (!el) return;
-      new Swiper(el, {
-        slidesPerView: 1,
-        spaceBetween: 80,
-        loop: false,
-        smooth: true,
-        {% comment %} autoplay: {
-          delay: 2000,
-          disableOnInteraction: false,
-        }, {% endcomment %}
-        breakpoints: {
-          640: {
-            slidesPerView: 2,
-            spaceBetween: 80,
-          },
-          990: {
-            slidesPerView: 2.7,
-            spaceBetween: 80,
-          },
-          1200: {
-            slidesPerView: 2.7,
-            spaceBetween: 80,
-          }
+    function initStoreLocatorSection() {
+      const section = document.querySelector('[data-section-id="' + sectionId + '"]');
+      if (!section) return;
+
+      const enableFetch = section.dataset.enableFetch === 'true';
+
+      function initSwiper() {
+        if (typeof Swiper === 'undefined') return;
+        var el = document.querySelector('#StoreLocator--' + sectionId + ' .store-locator__swiper');
+        if (!el) return;
+
+        if (swiperInstances[sectionId]) {
+          swiperInstances[sectionId].destroy(true, true);
+          delete swiperInstances[sectionId];
         }
-      });
-    }
 
-    // If fetch from app is enabled
-    if (enableFetch) {
-      const loading = document.getElementById('storeLocatorLoading--' + sectionId);
-      const carousel = section.querySelector('.store-locator__carousel-container');
-      
-      loading.style.display = 'flex';
-      if (carousel) carousel.style.display = 'none';
-
-      // Fetch locations from your app/API
-      // Replace this URL with your actual API endpoint
-      fetch('/apps/store-locator/locations')
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.locations && data.locations.length > 0) {
-            renderLocations(data.locations);
+        swiperInstances[sectionId] = new Swiper(el, {
+          slidesPerView: 1,
+          spaceBetween: 80,
+          loop: false,
+          smooth: true,
+          breakpoints: {
+            640: { slidesPerView: 2, spaceBetween: 80 },
+            990: { slidesPerView: 2.7, spaceBetween: 80 },
+            1200: { slidesPerView: 2.7, spaceBetween: 80 }
           }
-          loading.style.display = 'none';
-          if (carousel) carousel.style.display = 'block';
-          initSwiper();
-        })
-        .catch(err => {
-          console.error('Error fetching locations:', err);
-          loading.style.display = 'none';
-          if (carousel) carousel.style.display = 'block';
-          initSwiper();
         });
-    } else {
-      // Initialize swiper with static blocks
-      initSwiper();
-    }
+      }
 
-    function renderLocations(locations) {
-      const swiperWrapper = section.querySelector('.swiper-wrapper');
-      swiperWrapper.innerHTML = '';
+      function renderLocations(locations) {
+        const swiperWrapper = section.querySelector('.swiper-wrapper');
+        if (!swiperWrapper) return;
+        swiperWrapper.innerHTML = '';
 
-      locations.forEach(location => {
-        const slide = document.createElement('div');
-        slide.className = 'swiper-slide';
-        slide.innerHTML = `
-          <div class="store-locator__card">
-            ${location.image 
-              ? `<div class="store-locator__card-image">
-                  <img src="${location.image}" alt="${location.name}" loading="lazy">
-                </div>`
-              : `<div class="store-locator__card-placeholder">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 525.5 525.5">
-                    <path d="M375 262.7L262.7 375 150.4 262.7l112.3-112.3z"/>
-                  </svg>
-                </div>`
-            }
-            <div class="store-locator__card-content">
-              ${location.subheading ? `<p class="store-locator__card-subheading">${location.subheading.toUpperCase()}</p>` : ''}
-              ${location.name ? `<h3 class="store-locator__card-heading">${location.name}</h3>` : ''}
+        locations.forEach(location => {
+          const slide = document.createElement('div');
+          slide.className = 'swiper-slide';
+          slide.innerHTML = `
+            <div class="store-locator__card">
+              ${location.image 
+                ? `<div class="store-locator__card-image"><img src="${location.image}" alt="${location.name}" loading="lazy"></div>`
+                : `<div class="store-locator__card-placeholder"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 525.5 525.5"><path d="M375 262.7L262.7 375 150.4 262.7l112.3-112.3z"/></svg></div>`
+              }
+              <div class="store-locator__card-content">
+                ${location.subheading ? `<p class="store-locator__card-subheading">${location.subheading.toUpperCase()}</p>` : ''}
+                ${location.name ? `<h3 class="store-locator__card-heading">${location.name}</h3>` : ''}
+              </div>
             </div>
-          </div>
-        `;
-        swiperWrapper.appendChild(slide);
-      });
+          `;
+          swiperWrapper.appendChild(slide);
+        });
+      }
+
+      if (enableFetch) {
+        const loading = document.getElementById('storeLocatorLoading--' + sectionId);
+        const carousel = section.querySelector('.store-locator__carousel-container');
+        loading.style.display = 'flex';
+        if (carousel) carousel.style.display = 'none';
+
+        fetch('/apps/store-locator/locations')
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.locations && data.locations.length > 0) renderLocations(data.locations);
+            loading.style.display = 'none';
+            if (carousel) carousel.style.display = 'block';
+            initSwiper();
+          })
+          .catch(function(err) {
+            console.error('Error fetching locations:', err);
+            loading.style.display = 'none';
+            if (carousel) carousel.style.display = 'block';
+            initSwiper();
+          });
+      } else {
+        initSwiper();
+      }
     }
-  });
+
+    function runInit() {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initStoreLocatorSection);
+      } else {
+        initStoreLocatorSection();
+      }
+    }
+
+    runInit();
+
+    document.addEventListener('shopify:section:load', function(event) {
+      if (event.detail && event.detail.sectionId === sectionId) {
+        initStoreLocatorSection();
+      }
+    });
+  })();
 </script>
 
 {% schema %}
