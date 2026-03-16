@@ -7110,8 +7110,8 @@ toggle-ellipsis {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px;
-  color: var(--link);
+  padding: 0;
+  color: #212121;
   background: transparent;
   border-radius: var(--RADIUS);
   font-size: 0;
@@ -7119,12 +7119,19 @@ toggle-ellipsis {
   transform: translate3d(0, -50%, 0);
   transition: color 0.3s ease;
 }
+.drawer__close svg {
+  stroke-width: 1px;
+}
 
-.cart-block .drawer__close {
-  top: 45px;
+.cart-block--top .drawer__close {
   right: 40px;
-  transform: none;
-  padding: 0;
+  z-index: 2;
+}
+
+@media only screen and (max-width: 960px) {
+  .cart-block--top .drawer__close {
+    right: 20px;
+  }
 }
 
 .drawer__close .icon {
@@ -7137,7 +7144,7 @@ toggle-ellipsis {
 
 @media (hover: hover) {
   .drawer__close:hover {
-    color: var(--link-hover);
+    color: #212121;
   }
 
   .drawer__close:hover .icon {
@@ -7305,6 +7312,12 @@ toggle-ellipsis {
   background: #f9f9f9;
 }
 
+@media only screen and (max-width: 960px) {
+  .cart-block--top {
+    padding: 45px 20px 20px;
+  }
+}
+
 .cart-block--items {
   z-index: 10;
 }
@@ -7341,6 +7354,12 @@ toggle-ellipsis {
   justify-content: flex-start;
   align-items: center;
   padding: 0 40px;
+}
+
+@media only screen and (max-width: 960px) {
+  .cart__item {
+    padding: 0 20px;
+  }
 }
 
 .cart__item a {
@@ -7386,6 +7405,13 @@ toggle-ellipsis {
   text-decoration: none;
 }
 
+@media only screen and (max-width: 960px) {
+  .cart__item__image a {
+    width: 140px;
+    height: 140px;
+  }
+}
+
 .cart__item__image .lazy-image {
   height: 100%;
 }
@@ -7397,6 +7423,12 @@ toggle-ellipsis {
 .cart__item__content {
   width: calc(100% - 180px);
   padding-left: 10px;
+}
+
+@media only screen and (max-width: 960px) {
+  .cart__item__content {
+    width: calc(100% - 140px);
+  }
 }
 
 .cart__item__title {
@@ -9769,7 +9801,14 @@ mobile-menu .header__logo__link {
 
 mobile-menu .drawer__close {
   top: 0;
+  color: #fff;
   transform: none;
+}
+
+@media (hover: hover) {
+  mobile-menu .drawer__close:hover {
+    color: #fff;
+  }
 }
 
 mobile-menu .drawer__text {
@@ -18895,6 +18934,12 @@ a.review {
 
 .cart__buttons-all {
   margin-top: 40px;
+}
+
+@media only screen and (max-width: 749px) {
+  .cart__buttons-all {
+    margin-top: 20px;
+  }
 }
 
 .is-loading .cart__total__price--animated {
