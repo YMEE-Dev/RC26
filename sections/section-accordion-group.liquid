@@ -1,4 +1,6 @@
 <!-- /sections/section-accordion-group.liquid -->
+{{ 'custom-accordion.css' | asset_url | stylesheet_tag }}
+
 {%- liquid
   assign columns = section.settings.columns
   assign animation_anchor = '#AccordionGroup--' | append: section.id
@@ -10,62 +12,9 @@
   #AccordionGroup--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
-
-   
-   
-
     --accordion-columns: {{ columns }};
   }
 
-  .accordion:last-child{
-    border-bottom:none
-  }
-  .accordion:last-child{
-      line-height: 170%;
-  }
-
-  .accordion:last-child  P{
-      margin:0;
-      padding: 13px 30px 13px 0;
-  }
-
-  summary.accordion__title p{
-    margin:0 !important; 
-  }
-  summary.accordion__title p a{
-      color: #000;
-      font-family: Inter;
-      font-size: 14px;
-      font-style: normal;
-      font-weight: 400;
-      line-height: 100%;
-  }
-  .accordion__content li{
-    text-transform: math-auto;
-  }
-  .accordion__content p{
-    margin:0 !important; 
-
-    color: #000;
-    text-transform: math-auto;
-    /* RC26/Body */
-    font-family: Inter;
-    font-size: 13px !important;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 21px !important; /* 157.143% */
-  }
-  .accordion__link {
-    color: #000;
-
-    /* RC26/Body */
-    font-family: Inter;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 22px;
-
-  }
 {%- endstyle -%}
 
 <div id="AccordionGroup--{{ section.id }}" class="accordion-group section-padding {{ color_scheme }}">
