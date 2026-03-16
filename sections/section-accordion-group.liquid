@@ -1,5 +1,48 @@
 <!-- /sections/section-accordion-group.liquid -->
-{{ 'custom-accordion.css' | asset_url | stylesheet_tag }}
+{%- stylesheet -%}
+  .accordion:last-child {
+    border-bottom: none;
+  }
+  .accordion:last-child {
+    line-height: 170%;
+  }
+  .accordion:last-child P {
+    margin: 0;
+    padding: 13px 30px 13px 0;
+  }
+  summary.accordion__title p {
+    margin: 0 !important;
+  }
+  summary.accordion__title p a {
+    color: #000;
+    font-family: Inter;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 100%;
+  }
+  .accordion__content li {
+    text-transform: math-auto;
+  }
+  .accordion__content p {
+    margin: 0 !important;
+    color: #000;
+    text-transform: math-auto;
+    font-family: Inter;
+    font-size: 13px !important;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 21px !important;
+  }
+  .accordion__link {
+    color: #000;
+    font-family: Inter;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px;
+  }
+{%- endstylesheet -%}
 
 {%- liquid
   assign columns = section.settings.columns
