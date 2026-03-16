@@ -799,9 +799,9 @@
         }
 
         const sourceA = image.dataset.imageA || image.getAttribute("src") || "";
-        const sourceB = image.dataset.imageB || sourceA;
+        const sourceB = image.dataset.imageB || "";
         const altA = image.dataset.altA || image.getAttribute("alt") || "";
-        const altB = image.dataset.altB || altA;
+        const altB = image.dataset.altB || "";
         const nextSource = showAlt ? sourceB : sourceA;
         const nextAlt = showAlt ? altB : altA;
 
@@ -811,15 +811,6 @@
 
         image.setAttribute("alt", nextAlt);
       });
-    }
-
-    function shuffleArray(values) {
-      const next = [...values];
-      for (let i = next.length - 1; i > 0; i -= 1) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [next[i], next[j]] = [next[j], next[i]];
-      }
-      return next;
     }
 
     function initHeroSlideshow() {
@@ -839,9 +830,9 @@
         }
 
         const sourceA = image.dataset.imageA || image.getAttribute("src") || "";
-        const sourceB = image.dataset.imageB || sourceA;
+        const sourceB = image.dataset.imageB || "";
         const altA = image.dataset.altA || image.getAttribute("alt") || "";
-        const altB = image.dataset.altB || altA;
+        const altB = image.dataset.altB || "";
 
         sourcesA.push(sourceA);
         altsA.push(altA);
@@ -853,16 +844,14 @@
         return;
       }
 
-      const hasTrueAlternateSet = sourcesA.some((source, index) => source && source !== sourcesB[index]);
-      const fallbackSourcesB = shuffleArray(sourcesA);
-      const fallbackAltsB = fallbackSourcesB.map((source, index) => {
-        const sourceIndex = sourcesA.indexOf(source);
-        return sourceIndex >= 0 ? altsA[sourceIndex] : altsA[index] || "";
-      });
+      const hasTrueAlternateSet = sourcesB.some((source) => Boolean(source));
       let heroSwapAnimating = false;
 
-      const preloadSources = hasTrueAlternateSet ? sourcesB : fallbackSourcesB;
-      [...new Set(preloadSources.filter(Boolean))].forEach((source) => {
+      if (!hasTrueAlternateSet) {
+        return;
+      }
+
+      [...new Set(sourcesB.filter(Boolean))].forEach((source) => {
         const preloadImage = new Image();
         preloadImage.decoding = "async";
         preloadImage.src = source;
@@ -887,25 +876,8 @@
             return;
           }
 
-          let mappedIndex = index;
-          if (showAlt && window.innerWidth > 820) {
-            if (index === 1) {
-              mappedIndex = 3;
-            } else if (index === 3) {
-              mappedIndex = 1;
-            }
-          }
-
-          const nextSource = showAlt
-            ? hasTrueAlternateSet
-              ? sourcesB[mappedIndex]
-              : fallbackSourcesB[mappedIndex]
-            : sourcesA[index];
-          const nextAlt = showAlt
-            ? hasTrueAlternateSet
-              ? altsB[mappedIndex]
-              : fallbackAltsB[mappedIndex]
-            : altsA[index];
+          const nextSource = showAlt ? sourcesB[index] : sourcesA[index];
+          const nextAlt = showAlt ? altsB[index] : altsA[index];
 
           const startDelay = index * staggerMs;
 

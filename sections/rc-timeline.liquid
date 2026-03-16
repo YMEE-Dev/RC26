@@ -54,9 +54,9 @@
                   src="{{ hero_top_a | default: hero_top_b | image_url: width: 1400 }}"
                   alt="{{ hero_top_a.alt | default: hero_top_b.alt | escape }}"
                   data-image-a="{{ hero_top_a | default: hero_top_b | image_url: width: 1400 }}"
-                  data-image-b="{{ hero_top_b | default: hero_top_a | image_url: width: 1400 }}"
+                  data-image-b="{% if hero_top_b != blank %}{{ hero_top_b | image_url: width: 1400 }}{% endif %}"
                   data-alt-a="{{ hero_top_a.alt | default: hero_top_b.alt | escape }}"
-                  data-alt-b="{{ hero_top_b.alt | default: hero_top_a.alt | escape }}"
+                  data-alt-b="{% if hero_top_b != blank %}{{ hero_top_b.alt | escape }}{% endif %}"
                 >
               {% endif %}
             </figure>
@@ -66,9 +66,9 @@
                   src="{{ hero_right_a | default: hero_right_b | image_url: width: 1800 }}"
                   alt="{{ hero_right_a.alt | default: hero_right_b.alt | escape }}"
                   data-image-a="{{ hero_right_a | default: hero_right_b | image_url: width: 1800 }}"
-                  data-image-b="{{ hero_right_b | default: hero_right_a | image_url: width: 1800 }}"
+                  data-image-b="{% if hero_right_b != blank %}{{ hero_right_b | image_url: width: 1800 }}{% endif %}"
                   data-alt-a="{{ hero_right_a.alt | default: hero_right_b.alt | escape }}"
-                  data-alt-b="{{ hero_right_b.alt | default: hero_right_a.alt | escape }}"
+                  data-alt-b="{% if hero_right_b != blank %}{{ hero_right_b.alt | escape }}{% endif %}"
                 >
               {% endif %}
             </figure>
@@ -78,9 +78,9 @@
                   src="{{ hero_left_a | default: hero_left_b | image_url: width: 1800 }}"
                   alt="{{ hero_left_a.alt | default: hero_left_b.alt | escape }}"
                   data-image-a="{{ hero_left_a | default: hero_left_b | image_url: width: 1800 }}"
-                  data-image-b="{{ hero_left_b | default: hero_left_a | image_url: width: 1800 }}"
+                  data-image-b="{% if hero_left_b != blank %}{{ hero_left_b | image_url: width: 1800 }}{% endif %}"
                   data-alt-a="{{ hero_left_a.alt | default: hero_left_b.alt | escape }}"
-                  data-alt-b="{{ hero_left_b.alt | default: hero_left_a.alt | escape }}"
+                  data-alt-b="{% if hero_left_b != blank %}{{ hero_left_b.alt | escape }}{% endif %}"
                 >
               {% endif %}
             </figure>
@@ -90,9 +90,9 @@
                   src="{{ hero_bottom_a | default: hero_bottom_b | image_url: width: 1800 }}"
                   alt="{{ hero_bottom_a.alt | default: hero_bottom_b.alt | escape }}"
                   data-image-a="{{ hero_bottom_a | default: hero_bottom_b | image_url: width: 1800 }}"
-                  data-image-b="{{ hero_bottom_b | default: hero_bottom_a | image_url: width: 1800 }}"
+                  data-image-b="{% if hero_bottom_b != blank %}{{ hero_bottom_b | image_url: width: 1800 }}{% endif %}"
                   data-alt-a="{{ hero_bottom_a.alt | default: hero_bottom_b.alt | escape }}"
-                  data-alt-b="{{ hero_bottom_b.alt | default: hero_bottom_a.alt | escape }}"
+                  data-alt-b="{% if hero_bottom_b != blank %}{{ hero_bottom_b.alt | escape }}{% endif %}"
                 >
               {% endif %}
             </figure>
