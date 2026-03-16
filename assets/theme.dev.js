@@ -3788,7 +3788,7 @@
             return;
           }
 
-          if (atTop || goingUp) {
+          if (atTop) {
             this.body.classList.remove("header-scroll-hide");
             this.resetHeaderLayerHide();
           } else if (goingDown) {
