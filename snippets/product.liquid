@@ -166,7 +166,7 @@
       --PB: {{ section.settings.padding_bottom }}px;
 
       --swatch-size: var(--swatch-size-product);
-      --pdp-sticky-bar-height: 100px;
+      --pdp-sticky-bar-height: 100px; /* fallback, will be overridden on mobile */
       --bg-color: #f9f9f9;
     }
 
@@ -321,7 +321,7 @@
         }
 
         body.template-product:not(.header-scroll-hide) #MainProduct--{{ section.id }} {
-          --sticky-top: calc(var(--header-height, 0px)*1.8 + var(--announcement-height, 0px));
+          --sticky-top: calc(var(--header-height, 0px)*2 + var(--announcement-height, 0px));
         }
 
         #MainProduct--{{ section.id }} .product__content-columns__aside .product__block--buttons {
@@ -368,14 +368,12 @@
         position: relative;
       }
 
-      #MainProduct--{{ section.id }} .product__images .image-wrapper--cover {
-        background-color: #F9F9F9;
-        mix-blend-mode: multiply;
+      #MainProduct--{{ section.id }} .product__images .pdp-embla .image-wrapper--cover {
+        background-color: var(--bg-color);
       }
 
-      #MainProduct--{{ section.id }} .product__images .image-wrapper--cover img {
+      #MainProduct--{{ section.id }} .product__images .pdp-embla .image-wrapper--cover img {
         object-fit: contain;
-        mix-blend-mode: multiply;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item:not([data-pair-role='secondary']) .image-wrapper--cover {
@@ -462,14 +460,14 @@
       @media only screen and (min-width: 750px) and (max-width: 989px) {
 
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: var(--full-screen, var(--full-height, 100vh));
+          height: calc(100dvh - var(--pdp-sticky-bar-height, 100px));
         }
       }
 
       @media only screen and (max-width: 749px) {
 
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: var(--full-screen, var(--full-height, 100vh));
+          height: calc(100dvh - var(--pdp-sticky-bar-height, 100px));
         }
       }
 
@@ -645,12 +643,20 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: #F9F9F9;
+        background-color: var(--bg-color);
        }
 
       @media only screen and (max-width: 749px) {
         #MainProduct--{{ section.id }} .pdp-embla__slide .product__slide {
           width: 100%;
+          height: 100%;
+        }
+
+        #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media {
+          aspect-ratio: unset;
+          min-height: 0;
+          height: 100%;
+          align-items: center;
         }
       }
 
@@ -660,20 +666,36 @@
         align-items: flex-end;
         justify-content: center;
         position: relative;
-        background-color: #F9F9F9;
+        background-color: var(--bg-color);
         aspect-ratio: 1 / 1;
         min-height: 400px;
         width: 100%;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .shopify-model-viewer-ui {
-        background-color: #F9F9F9;
+        background-color: var(--bg-color);
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .shopify-model-viewer-ui__controls-overlay,
-      #MainProduct--{{ section.id }} .pdp-embla__slide .shopify-model-viewer-ui__controls-area,
-      #MainProduct--{{ section.id }} .pdp-embla__slide .shopify-model-viewer-ui__button {
+      #MainProduct--{{ section.id }} .pdp-embla__slide .shopify-model-viewer-ui__controls-area {
         display: none !important;
+      }
+
+      .customContextGrid[data-tag="MaterialConfiguratorPlugin"],
+      .customContextGrid[data-tag="VariationConfiguratorPlugin"],
+      .webgi-loading-bar,
+      .webgi-popup,
+      .webgi-loading-screen,
+      [class*="AssetManagerLoadingBar"],
+      [class*="AssetManagerBasicPopup"],
+      [class*="LoadingScreen"],
+      [class*="ijewel"][class*="watermark"],
+      [class*="ijewel"][class*="logo"],
+      [class*="ijewel"][class*="badge"],
+      .tippy-box[data-theme*="webgi"] {
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media > model-viewer,
@@ -694,16 +716,17 @@
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media > .webgi-container {
         display: block;
+        position: relative;
         pointer-events: auto;
         width: 100%;
         height: 100%;
+        background-color: var(--bg-color);
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .webgi-container canvas {
         width: 100% !important;
         height: 100% !important;
         display: block;
-        mix-blend-mode: multiply;
       }
 
       .webgi-loader {
@@ -713,7 +736,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: #F9F9F9;
+        background-color: var(--bg-color);
         transition: opacity 0.4s ease;
       }
       .webgi-loader--done {
@@ -768,15 +791,13 @@
       }
 
       #MainProduct--{{ section.id }} .pdp-embla--mobile .image-wrapper--cover {
-        background-color: #F9F9F9;
-        mix-blend-mode: multiply;
+        background-color: var(--bg-color);
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__photo {
         height: 100%;
         padding-top: 0;
-        background-color: #F9F9F9;
-        mix-blend-mode: multiply;
+        background-color: var(--bg-color);
       }
 
       #MainProduct--{{ section.id }} .pdp-embla .media--hidden,
@@ -809,6 +830,10 @@
         border: 0;
         background: transparent;
         color: inherit;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla__arrow .icon {
+        stroke: currentColor;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__arrow:disabled {
@@ -1002,9 +1027,7 @@
 
       @media only screen and (max-width: 989px) {
         #MainProduct--{{ section.id }} .product__sticky-bar {
-          padding-top: 20px;
-          padding-left: 20px;
-          padding-right: 20px;
+          padding: 20px;
         }
 
         #MainProduct--{{ section.id }} .product__content-columns {
@@ -1067,7 +1090,7 @@
         }
 
         #MainProduct--{{ section.id }} .product__content {
-          margin: 20px 0 0;
+          margin: 0;
           padding-left: 20px;
           padding-right: 20px;
         }
@@ -1575,6 +1598,16 @@
                       webgiCanvases.forEach(function (c) { c.style.pointerEvents = ''; });
                     });
 
+                    // WebGI edge zone swipe: scroll carousel when user swipes on 3D model edges
+                    carouselEl.addEventListener('webgi:edge:swipe', function (e) {
+                      if (!e.detail) return;
+                      if (e.detail.direction === 'next') {
+                        embla.scrollNext();
+                      } else {
+                        embla.scrollPrev();
+                      }
+                    });
+
                     // Initial desktop thumb setup
                     updateDesktopThumbs();
 
@@ -1600,6 +1633,7 @@
 
                   productImagesEl.addEventListener('theme:media:select', function (e) {
                     if (!e || !e.detail || !e.detail.id) return;
+                    if (productImagesEl.querySelector('[data-embla-slide][data-media-type="model"]')) return;
                     var activeCarousel = getActiveCarousel();
                     if (!activeCarousel) return;
 
@@ -1762,10 +1796,10 @@
 
                 <div class="pdp-embla__arrows" aria-label="{{ 'general.accessibility.controls' | t | escape }}">
                   <button type="button" class="pdp-embla__arrow" data-embla-prev aria-label="{{ 'general.accessibility.previous' | t | escape }}">
-                    {%- render 'icon-nav-arrow-left' -%}
+                    <svg aria-hidden="true" focusable="false" role="presentation" width="25px" height="25px" stroke-width="1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M15 6l-6 6 6 6" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                   </button>
                   <button type="button" class="pdp-embla__arrow" data-embla-next aria-label="{{ 'general.accessibility.next' | t | escape }}">
-                    {%- render 'icon-nav-arrow-right' -%}
+                    <svg aria-hidden="true" focusable="false" role="presentation" width="25px" height="25px" stroke-width="1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M9 6l6 6-6 6" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                   </button>
                 </div>
 
@@ -1837,10 +1871,10 @@
 
                 <div class="pdp-embla__arrows" aria-label="{{ 'general.accessibility.controls' | t | escape }}">
                   <button type="button" class="pdp-embla__arrow" data-embla-prev aria-label="{{ 'general.accessibility.previous' | t | escape }}">
-                    {%- render 'icon-nav-arrow-left' -%}
+                    <svg aria-hidden="true" focusable="false" role="presentation" width="25px" height="25px" stroke-width="1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M15 6l-6 6 6 6" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                   </button>
                   <button type="button" class="pdp-embla__arrow" data-embla-next aria-label="{{ 'general.accessibility.next' | t | escape }}">
-                    {%- render 'icon-nav-arrow-right' -%}
+                    <svg aria-hidden="true" focusable="false" role="presentation" width="25px" height="25px" stroke-width="1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M9 6l6 6-6 6" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                   </button>
                 </div>
 
@@ -3041,3 +3075,47 @@
   </div>
   <span class="underlay drawer__underlay" data-drawer-underlay></span>
 </side-drawer>
+
+<script>
+  (function() {
+    var isMobile = window.innerWidth <= 749 || navigator.maxTouchPoints > 0;
+    if (!isMobile) return;
+
+    var sectionId = '{{ section.id }}';
+    var sectionEl = document.getElementById('MainProduct--' + sectionId);
+    if (!sectionEl) return;
+
+    function updateStickyBarHeight() {
+      var stickyBar = sectionEl.querySelector('.product__sticky-bar');
+      if (!stickyBar) return;
+
+      var height = stickyBar.offsetHeight;
+      if (height > 0) {
+        sectionEl.style.setProperty('--pdp-sticky-bar-height', height + 'px');
+      }
+    }
+
+    // Initial measurement
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', updateStickyBarHeight);
+    } else {
+      updateStickyBarHeight();
+    }
+
+    // Watch for size changes (e.g., when variant changes affect button layout)
+    var resizeObserver = new ResizeObserver(function() {
+      updateStickyBarHeight();
+    });
+
+    var stickyBar = sectionEl.querySelector('.product__sticky-bar');
+    if (stickyBar) {
+      resizeObserver.observe(stickyBar);
+    }
+
+    // Also watch the inner content since buttons might change
+    var stickyBarInner = sectionEl.querySelector('.product__sticky-bar__inner');
+    if (stickyBarInner) {
+      resizeObserver.observe(stickyBarInner);
+    }
+  })();
+</script>
