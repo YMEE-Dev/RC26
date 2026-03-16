@@ -23,7 +23,7 @@
     --accent-soft: {{ section.settings.accent_color | color_modify: 'alpha', 0.35 }};
     --logo-color: {{ section.settings.logo_color }};
     --today-color: {{ section.settings.today_color }};
-    --active-year-color: {{ section.settings.active_year_color }};
+    --active-year-color: {{ section.settings.timeline_active_year_color | default: section.settings.active_year_color }};
     --year-size: {{ section.settings.year_size }}px;
     --copy-size: {{ section.settings.caption_size }}px;
     --panel-height: {{ section.settings.panel_height }}vh;
@@ -305,10 +305,13 @@
             "year": {{ block.settings.year | default: '1977' | json }},
             "title": {{ block.settings.title | default: 'Milestone' | json }},
             "copy": {{ block.settings.copy | strip_html | strip_newlines | default: block.settings.title | default: block.settings.year | json }},
+            "caption_x": {{ block.settings.caption_x | default: 74 | json }},
+            "caption_y": {{ block.settings.caption_y | default: 38 | json }},
             "media": [
               {
                 "label": {{ block.settings.media_1_label | default: 'Media 1' | json }},
                 "image": {% if block.settings.media_1_image != blank %}{{ block.settings.media_1_image | image_url: width: 2200 | json }}{% elsif block.settings.timeline_image != blank %}{{ block.settings.timeline_image | image_url: width: 2200 | json }}{% elsif section.settings.use_year_fallback_images and fallback_timeline_asset_1 != blank %}{{ fallback_timeline_asset_1 | asset_url | json }}{% else %}null{% endif %},
+                "image_source": {% if block.settings.media_1_image != blank %}"custom"{% elsif block.settings.timeline_image != blank %}"custom"{% elsif section.settings.use_year_fallback_images and fallback_timeline_asset_1 != blank %}"fallback"{% else %}"none"{% endif %},
                 "fill": {{ block.settings.media_1_fill | default: 'linear-gradient(135deg, #5f5a71 0%, #241f29 65%, #0d0d12 100%)' | json }},
                 "x": {{ block.settings.media_1_x | default: 0 | json }},
                 "y": {{ block.settings.media_1_y | default: 18 | json }},
@@ -319,6 +322,7 @@
               {
                 "label": {{ block.settings.media_2_label | default: 'Media 2' | json }},
                 "image": {% if block.settings.media_2_image != blank %}{{ block.settings.media_2_image | image_url: width: 2200 | json }}{% elsif section.settings.use_year_fallback_images and fallback_timeline_asset_2 != blank %}{{ fallback_timeline_asset_2 | asset_url | json }}{% else %}null{% endif %},
+                "image_source": {% if block.settings.media_2_image != blank %}"custom"{% elsif section.settings.use_year_fallback_images and fallback_timeline_asset_2 != blank %}"fallback"{% else %}"none"{% endif %},
                 "fill": {{ block.settings.media_2_fill | default: 'linear-gradient(180deg, #d8d8d5 0%, #8f8e88 50%, #4e4d4a 100%)' | json }},
                 "x": {{ block.settings.media_2_x | default: 43 | json }},
                 "y": {{ block.settings.media_2_y | default: 0 | json }},
@@ -329,6 +333,7 @@
               {
                 "label": {{ block.settings.media_3_label | default: 'Media 3' | json }},
                 "image": {% if block.settings.media_3_image != blank %}{{ block.settings.media_3_image | image_url: width: 2200 | json }}{% elsif section.settings.use_year_fallback_images and fallback_timeline_asset_3 != blank %}{{ fallback_timeline_asset_3 | asset_url | json }}{% else %}null{% endif %},
+                "image_source": {% if block.settings.media_3_image != blank %}"custom"{% elsif section.settings.use_year_fallback_images and fallback_timeline_asset_3 != blank %}"fallback"{% else %}"none"{% endif %},
                 "fill": {{ block.settings.media_3_fill | default: 'linear-gradient(135deg, #ceb78c 0%, #89683f 50%, #20150f 100%)' | json }},
                 "x": {{ block.settings.media_3_x | default: 74 | json }},
                 "y": {{ block.settings.media_3_y | default: 8 | json }},
@@ -363,7 +368,8 @@
     { "type": "color", "id": "text_color", "label": "Text color", "default": "#1f2f2b" },
     { "type": "color", "id": "accent_color", "label": "Accent color", "default": "#397e70" },
     { "type": "color", "id": "logo_color", "label": "Logo color", "default": "#000000" },
-    { "type": "color", "id": "active_year_color", "label": "Active year color", "default": "#ffffff" },
+    { "type": "color", "id": "active_year_color", "label": "Active year color (legacy)", "default": "#ffffff" },
+    { "type": "color", "id": "timeline_active_year_color", "label": "Timeline active year color", "default": "#ffffff" },
     { "type": "color", "id": "today_color", "label": "Today year color", "default": "#27574d" },
 
     { "type": "header", "content": "Hero" },
@@ -420,6 +426,8 @@
         { "type": "text", "id": "year", "label": "Year", "default": "1977" },
         { "type": "text", "id": "title", "label": "Title", "default": "Milestone" },
         { "type": "richtext", "id": "copy", "label": "Copy", "default": "<p>Roberto Coin returned to his homeland of Italy to study the goldsmithing tradition under the guidance of renowned Italian teachers. He launched his jewelry trade on the British market.</p>" },
+        { "type": "range", "id": "caption_x", "label": "Text X position", "min": 0, "max": 90, "step": 1, "unit": "%", "default": 74 },
+        { "type": "range", "id": "caption_y", "label": "Text Y position", "min": 0, "max": 90, "step": 1, "unit": "%", "default": 38 },
         { "type": "image_picker", "id": "timeline_image", "label": "Timeline image (primary)" },
 
         { "type": "header", "content": "Media 1" },

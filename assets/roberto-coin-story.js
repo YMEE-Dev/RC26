@@ -149,6 +149,8 @@
           id: String(entry.id || ""),
           year: yearValue,
           title: String(entry.title || "").trim(),
+          captionX: Number.isFinite(Number(entry.caption_x)) ? Number(entry.caption_x) : 74,
+          captionY: Number.isFinite(Number(entry.caption_y)) ? Number(entry.caption_y) : 38,
           copy: isYear2013
             ? TIMELINE_COPY_2013
             : String(entry.copy || entry.title || entry.year || "").trim(),
@@ -320,8 +322,8 @@
       captionLineOne.textContent = lineOne;
       captionLineTwo.textContent = lineTwo;
 
-      timelineCaption.style.left = "74%";
-      timelineCaption.style.top = "38%";
+      timelineCaption.style.left = `${entry.captionX}%`;
+      timelineCaption.style.top = `${entry.captionY}%`;
       timelineCaption.style.width = "24%";
 
       captionRevealTimer = window.setTimeout(() => {
@@ -346,7 +348,8 @@
     function buildTimelineMediaLayout(entry) {
       const mediaItems = (entry.media || []).map((item) => ({ ...item }));
       if (String(entry.year).trim() === "2013") {
-        const preferred = mediaItems[1] || mediaItems[0] || mediaItems[2];
+        const preferredCustom = mediaItems.find((item) => item.image_source === "custom" || item.imageSource === "custom");
+        const preferred = preferredCustom || mediaItems[0] || mediaItems[1] || mediaItems[2];
         if (!preferred) {
           return [];
         }
