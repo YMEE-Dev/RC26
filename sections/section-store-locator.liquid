@@ -196,7 +196,10 @@
     runInit();
 
     document.addEventListener('shopify:section:load', function(event) {
-      if (event.detail && event.detail.sectionId === sectionId) {
+      const loadedSection = event.target?.querySelector?.('[data-section-id]') || event.target;
+      const isOurSection = (loadedSection && loadedSection.dataset?.sectionId === sectionId) ||
+        (event.detail && String(event.detail.sectionId) === String(sectionId));
+      if (isOurSection) {
         initStoreLocatorSection();
       }
     });
