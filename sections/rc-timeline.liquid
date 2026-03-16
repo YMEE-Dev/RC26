@@ -34,53 +34,65 @@
     <main>
       <section class="hero" id="{{ section_id }}-top">
 
+        {%- liquid
+          assign hero_top_a = section.settings.rc_tl_hero_image_top | default: section.settings.hero_image_top
+          assign hero_right_a = section.settings.rc_tl_hero_image_right | default: section.settings.hero_image_right
+          assign hero_left_a = section.settings.rc_tl_hero_image_left | default: section.settings.hero_image_left
+          assign hero_bottom_a = section.settings.rc_tl_hero_image_bottom | default: section.settings.hero_image_bottom
+          assign hero_top_b = section.settings.rc_tl_hero_image_top_alt | default: section.settings.hero_image_top_alt
+          assign hero_right_b = section.settings.rc_tl_hero_image_right_alt | default: section.settings.hero_image_right_alt
+          assign hero_left_b = section.settings.rc_tl_hero_image_left_alt | default: section.settings.hero_image_left_alt
+          assign hero_bottom_b = section.settings.rc_tl_hero_image_bottom_alt | default: section.settings.hero_image_bottom_alt
+          assign hero_eyebrow = section.settings.rc_tl_hero_eyebrow | default: section.settings.hero_eyebrow
+          assign hero_title = section.settings.rc_tl_hero_title | default: section.settings.hero_title
+        -%}
         <div class="hero-center">
           <div class="hero-collage" aria-hidden="true">
             <figure class="hero-collage__item hero-collage__item--top">
-              {% if section.settings.hero_image_top != blank %}
+              {% if hero_top_a != blank or hero_top_b != blank %}
                 <img
-                  src="{{ section.settings.hero_image_top | image_url: width: 1400 }}"
-                  alt="{{ section.settings.hero_image_top.alt | escape }}"
-                  data-image-a="{{ section.settings.hero_image_top | image_url: width: 1400 }}"
-                  data-image-b="{% if section.settings.hero_image_top_alt != blank %}{{ section.settings.hero_image_top_alt | image_url: width: 1400 }}{% else %}{{ 'rc-slider-2-top.png' | asset_url }}{% endif %}"
-                  data-alt-a="{{ section.settings.hero_image_top.alt | escape }}"
-                  data-alt-b="{% if section.settings.hero_image_top_alt != blank %}{{ section.settings.hero_image_top_alt.alt | escape }}{% else %}{{ section.settings.hero_image_top.alt | escape }}{% endif %}"
+                  src="{{ hero_top_a | default: hero_top_b | image_url: width: 1400 }}"
+                  alt="{{ hero_top_a.alt | default: hero_top_b.alt | escape }}"
+                  data-image-a="{{ hero_top_a | default: hero_top_b | image_url: width: 1400 }}"
+                  data-image-b="{{ hero_top_b | default: hero_top_a | image_url: width: 1400 }}"
+                  data-alt-a="{{ hero_top_a.alt | default: hero_top_b.alt | escape }}"
+                  data-alt-b="{{ hero_top_b.alt | default: hero_top_a.alt | escape }}"
                 >
               {% endif %}
             </figure>
             <figure class="hero-collage__item hero-collage__item--right">
-              {% if section.settings.hero_image_right != blank %}
+              {% if hero_right_a != blank or hero_right_b != blank %}
                 <img
-                  src="{{ section.settings.hero_image_right | image_url: width: 1800 }}"
-                  alt="{{ section.settings.hero_image_right.alt | escape }}"
-                  data-image-a="{{ section.settings.hero_image_right | image_url: width: 1800 }}"
-                  data-image-b="{% if section.settings.hero_image_right_alt != blank %}{{ section.settings.hero_image_right_alt | image_url: width: 1800 }}{% else %}{{ 'rc-slider-2-right.webp' | asset_url }}{% endif %}"
-                  data-alt-a="{{ section.settings.hero_image_right.alt | escape }}"
-                  data-alt-b="{% if section.settings.hero_image_right_alt != blank %}{{ section.settings.hero_image_right_alt.alt | escape }}{% else %}{{ section.settings.hero_image_right.alt | escape }}{% endif %}"
+                  src="{{ hero_right_a | default: hero_right_b | image_url: width: 1800 }}"
+                  alt="{{ hero_right_a.alt | default: hero_right_b.alt | escape }}"
+                  data-image-a="{{ hero_right_a | default: hero_right_b | image_url: width: 1800 }}"
+                  data-image-b="{{ hero_right_b | default: hero_right_a | image_url: width: 1800 }}"
+                  data-alt-a="{{ hero_right_a.alt | default: hero_right_b.alt | escape }}"
+                  data-alt-b="{{ hero_right_b.alt | default: hero_right_a.alt | escape }}"
                 >
               {% endif %}
             </figure>
             <figure class="hero-collage__item hero-collage__item--left">
-              {% if section.settings.hero_image_left != blank %}
+              {% if hero_left_a != blank or hero_left_b != blank %}
                 <img
-                  src="{{ section.settings.hero_image_left | image_url: width: 1800 }}"
-                  alt="{{ section.settings.hero_image_left.alt | escape }}"
-                  data-image-a="{{ section.settings.hero_image_left | image_url: width: 1800 }}"
-                  data-image-b="{% if section.settings.hero_image_left_alt != blank %}{{ section.settings.hero_image_left_alt | image_url: width: 1800 }}{% else %}{{ 'rc-slider-2-left.jpg' | asset_url }}{% endif %}"
-                  data-alt-a="{{ section.settings.hero_image_left.alt | escape }}"
-                  data-alt-b="{% if section.settings.hero_image_left_alt != blank %}{{ section.settings.hero_image_left_alt.alt | escape }}{% else %}{{ section.settings.hero_image_left.alt | escape }}{% endif %}"
+                  src="{{ hero_left_a | default: hero_left_b | image_url: width: 1800 }}"
+                  alt="{{ hero_left_a.alt | default: hero_left_b.alt | escape }}"
+                  data-image-a="{{ hero_left_a | default: hero_left_b | image_url: width: 1800 }}"
+                  data-image-b="{{ hero_left_b | default: hero_left_a | image_url: width: 1800 }}"
+                  data-alt-a="{{ hero_left_a.alt | default: hero_left_b.alt | escape }}"
+                  data-alt-b="{{ hero_left_b.alt | default: hero_left_a.alt | escape }}"
                 >
               {% endif %}
             </figure>
             <figure class="hero-collage__item hero-collage__item--bottom">
-              {% if section.settings.hero_image_bottom != blank %}
+              {% if hero_bottom_a != blank or hero_bottom_b != blank %}
                 <img
-                  src="{{ section.settings.hero_image_bottom | image_url: width: 1800 }}"
-                  alt="{{ section.settings.hero_image_bottom.alt | escape }}"
-                  data-image-a="{{ section.settings.hero_image_bottom | image_url: width: 1800 }}"
-                  data-image-b="{{ 'rc-slider-2-bottom.jpg' | asset_url }}"
-                  data-alt-a="{{ section.settings.hero_image_bottom.alt | escape }}"
-                  data-alt-b="s-l1600"
+                  src="{{ hero_bottom_a | default: hero_bottom_b | image_url: width: 1800 }}"
+                  alt="{{ hero_bottom_a.alt | default: hero_bottom_b.alt | escape }}"
+                  data-image-a="{{ hero_bottom_a | default: hero_bottom_b | image_url: width: 1800 }}"
+                  data-image-b="{{ hero_bottom_b | default: hero_bottom_a | image_url: width: 1800 }}"
+                  data-alt-a="{{ hero_bottom_a.alt | default: hero_bottom_b.alt | escape }}"
+                  data-alt-b="{{ hero_bottom_b.alt | default: hero_bottom_a.alt | escape }}"
                 >
               {% endif %}
             </figure>
@@ -90,8 +102,8 @@
             <svg class="hero-copy__flower" width="452" height="466" viewBox="0 0 452 466" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
               <path d="M253.807 274.486C269.754 297.022 275.418 309.308 275.418 330.306C275.418 356.938 258.949 385.107 228.059 405.585C197.169 385.107 180.7 356.938 180.7 330.306C180.7 309.308 186.364 297.022 202.331 274.486L198.214 272.428L186.364 286.253C155.996 321.595 147.741 338.497 147.741 354.36C147.741 394.816 196.646 427.082 216.731 455.252L224.443 466H231.653L239.386 455.252C259.471 427.602 308.377 394.816 308.377 354.36C308.377 338.476 300.142 321.574 269.754 286.253L257.924 272.428L253.807 274.486ZM10.8052 221.742L0 229.435V236.607L10.8052 244.278C39.6261 264.756 71.54 312.905 112.232 312.905C128.199 312.905 145.17 304.714 180.7 274.507L194.598 262.719L192.529 258.623C169.874 274.507 157.522 280.12 136.936 280.12C109.64 280.12 81.3421 263.218 61.2573 233.01C81.3421 202.782 109.661 185.901 136.936 185.901C157.522 185.901 169.874 191.535 192.529 207.418L194.598 203.323L180.7 191.556C145.17 161.348 128.199 153.137 112.232 153.137C71.5609 153.137 39.1245 201.784 10.8052 221.763M271.3 191.535L257.402 203.302L259.45 207.398C282.106 191.514 294.457 185.88 315.044 185.88C342.318 185.88 370.637 202.782 390.722 232.99C370.637 263.197 342.318 280.099 315.044 280.099C294.457 280.099 282.106 274.465 259.45 258.602L257.402 262.698L271.3 274.486C306.83 304.693 323.821 312.884 339.768 312.884C380.439 312.884 412.353 264.735 441.195 244.258L452 236.586V229.414L441.195 221.722C412.876 201.743 380.439 153.095 339.768 153.095C323.801 153.095 306.809 161.286 271.3 191.514M224.464 0L216.752 10.7482C196.667 38.9182 147.762 71.1838 147.762 111.64C147.762 127.503 155.996 144.405 186.384 179.747L198.235 193.572L202.352 191.514C186.384 168.978 180.721 156.692 180.721 136.214C180.721 109.083 197.712 80.9133 228.08 60.9345C258.447 80.9133 275.438 109.083 275.438 136.214C275.438 156.692 269.775 168.978 253.828 191.514L257.945 193.572L269.775 179.747C300.163 144.405 308.397 127.503 308.397 111.64C308.397 71.1838 260.014 39.438 239.407 10.7482L231.674 0H224.464Z" fill="#397E70"/>
             </svg>
-            <p class="eyebrow">{{ section.settings.hero_eyebrow }}</p>
-            <h2>{{ section.settings.hero_title }}</h2>
+            <p class="eyebrow">{{ hero_eyebrow }}</p>
+            <h2>{{ hero_title }}</h2>
           </div>
 
           <a class="scroll-link" href="#{{ timeline_id }}">{{ section.settings.scroll_text }}</a>
