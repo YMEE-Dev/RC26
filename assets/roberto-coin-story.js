@@ -753,10 +753,10 @@
 
       if (window.innerWidth > 820) {
         const altDesktopLayout = [
-          { top: "20px", left: "31%", width: "152px", height: "228px" },
-          { top: "8px", right: "4%", width: "300px", height: "416px" },
-          { left: "calc(6% - 100px)", bottom: "84px", width: "430px", height: "318px" },
-          { right: "4%", bottom: "-10px", width: "286px", height: "206px" },
+          { top: "-100px", left: "25%", width: "252px", height: "328px" },
+          { top: "-42px", right: "4%", width: "300px", height: "416px" },
+          { left: "calc(6% - 100px)", bottom: "100px", width: "530px", height: "418px" },
+          { right: "-50px", bottom: "0px", width: "386px", height: "256px" },
         ];
 
         heroCollageItems.forEach((item, index) => {
