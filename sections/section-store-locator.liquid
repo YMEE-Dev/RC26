@@ -1,4 +1,5 @@
 <!-- /sections/section-store-locator.liquid -->
+{{ 'store-locator.css' | asset_url | stylesheet_tag }}
 {%- liquid
   assign color_scheme = 'color-' | append: section.settings.color_scheme
 -%}
@@ -8,7 +9,7 @@
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
     --bg-color: {{ section.settings.background_color }};
-    padding-inline:  var(--outer);
+    /* padding-inline:  var(--outer); */
     overflow: hidden;
   }
 {%- endstyle -%}
@@ -100,407 +101,110 @@
   </div>
 </section>
 
-<!-- Swiper JS CDN -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const section = document.querySelector('[data-section-id="{{ section.id }}"]');
-    const enableFetch = section.dataset.enableFetch === 'true';
+  (function() {
     const sectionId = '{{ section.id }}';
+    const swiperInstances = window.__storeLocatorSwipers || {};
+    window.__storeLocatorSwipers = swiperInstances;
 
-    // Initialize Swiper
-    function initSwiper() {
-      const swiper = new Swiper('#StoreLocator--' + sectionId + ' .store-locator__swiper', {
-        slidesPerView: 1,
-        spaceBetween: 80,
-        loop: false,
-        smooth: true,
-        {% comment %} autoplay: {
-          delay: 2000,
-          disableOnInteraction: false,
-        }, {% endcomment %}
-        breakpoints: {
-          640: {
-            slidesPerView: 2,
-            spaceBetween: 80,
-          },
-          990: {
-            slidesPerView: 2.7,
-            spaceBetween: 80,
-          },
-          1200: {
-            slidesPerView: 2.7,
-            spaceBetween: 80,
-          }
+    function initStoreLocatorSection() {
+      const section = document.querySelector('[data-section-id="' + sectionId + '"]');
+      if (!section) return;
+
+      const enableFetch = section.dataset.enableFetch === 'true';
+
+      function initSwiper() {
+        if (typeof Swiper === 'undefined') return;
+        var el = document.querySelector('#StoreLocator--' + sectionId + ' .store-locator__swiper');
+        if (!el) return;
+
+        if (swiperInstances[sectionId]) {
+          swiperInstances[sectionId].destroy(true, true);
+          delete swiperInstances[sectionId];
         }
-      });
-    }
 
-    // If fetch from app is enabled
-    if (enableFetch) {
-      const loading = document.getElementById('storeLocatorLoading--' + sectionId);
-      const carousel = section.querySelector('.store-locator__carousel-container');
-      
-      loading.style.display = 'flex';
-      if (carousel) carousel.style.display = 'none';
-
-      // Fetch locations from your app/API
-      // Replace this URL with your actual API endpoint
-      fetch('/apps/store-locator/locations')
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.locations && data.locations.length > 0) {
-            renderLocations(data.locations);
+        swiperInstances[sectionId] = new Swiper(el, {
+          slidesPerView: 1,
+          spaceBetween: 80,
+          loop: false,
+          smooth: true,
+          breakpoints: {
+            640: { slidesPerView: 2, spaceBetween: 80 },
+            990: { slidesPerView: 2.7, spaceBetween: 80 },
+            1200: { slidesPerView: 2.7, spaceBetween: 80 }
           }
-          loading.style.display = 'none';
-          if (carousel) carousel.style.display = 'block';
-          initSwiper();
-        })
-        .catch(err => {
-          console.error('Error fetching locations:', err);
-          loading.style.display = 'none';
-          if (carousel) carousel.style.display = 'block';
-          initSwiper();
         });
-    } else {
-      // Initialize swiper with static blocks
-      initSwiper();
-    }
+      }
 
-    function renderLocations(locations) {
-      const swiperWrapper = section.querySelector('.swiper-wrapper');
-      swiperWrapper.innerHTML = '';
+      function renderLocations(locations) {
+        const swiperWrapper = section.querySelector('.swiper-wrapper');
+        if (!swiperWrapper) return;
+        swiperWrapper.innerHTML = '';
 
-      locations.forEach(location => {
-        const slide = document.createElement('div');
-        slide.className = 'swiper-slide';
-        slide.innerHTML = `
-          <div class="store-locator__card">
-            ${location.image 
-              ? `<div class="store-locator__card-image">
-                  <img src="${location.image}" alt="${location.name}" loading="lazy">
-                </div>`
-              : `<div class="store-locator__card-placeholder">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 525.5 525.5">
-                    <path d="M375 262.7L262.7 375 150.4 262.7l112.3-112.3z"/>
-                  </svg>
-                </div>`
-            }
-            <div class="store-locator__card-content">
-              ${location.subheading ? `<p class="store-locator__card-subheading">${location.subheading.toUpperCase()}</p>` : ''}
-              ${location.name ? `<h3 class="store-locator__card-heading">${location.name}</h3>` : ''}
+        locations.forEach(location => {
+          const slide = document.createElement('div');
+          slide.className = 'swiper-slide';
+          slide.innerHTML = `
+            <div class="store-locator__card">
+              ${location.image 
+                ? `<div class="store-locator__card-image"><img src="${location.image}" alt="${location.name}" loading="lazy"></div>`
+                : `<div class="store-locator__card-placeholder"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 525.5 525.5"><path d="M375 262.7L262.7 375 150.4 262.7l112.3-112.3z"/></svg></div>`
+              }
+              <div class="store-locator__card-content">
+                ${location.subheading ? `<p class="store-locator__card-subheading">${location.subheading.toUpperCase()}</p>` : ''}
+                ${location.name ? `<h3 class="store-locator__card-heading">${location.name}</h3>` : ''}
+              </div>
             </div>
-          </div>
-        `;
-        swiperWrapper.appendChild(slide);
-      });
+          `;
+          swiperWrapper.appendChild(slide);
+        });
+      }
+
+      if (enableFetch) {
+        const loading = document.getElementById('storeLocatorLoading--' + sectionId);
+        const carousel = section.querySelector('.store-locator__carousel-container');
+        loading.style.display = 'flex';
+        if (carousel) carousel.style.display = 'none';
+
+        fetch('/apps/store-locator/locations')
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.locations && data.locations.length > 0) renderLocations(data.locations);
+            loading.style.display = 'none';
+            if (carousel) carousel.style.display = 'block';
+            initSwiper();
+          })
+          .catch(function(err) {
+            console.error('Error fetching locations:', err);
+            loading.style.display = 'none';
+            if (carousel) carousel.style.display = 'block';
+            initSwiper();
+          });
+      } else {
+        initSwiper();
+      }
     }
-  });
+
+    function runInit() {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initStoreLocatorSection);
+      } else {
+        initStoreLocatorSection();
+      }
+    }
+
+    runInit();
+
+    document.addEventListener('shopify:section:load', function(event) {
+      const loadedSection = event.target?.querySelector?.('[data-section-id]') || event.target;
+      const isOurSection = (loadedSection && loadedSection.dataset?.sectionId === sectionId) ||
+        (event.detail && String(event.detail.sectionId) === String(sectionId));
+      if (isOurSection) {
+        initStoreLocatorSection();
+      }
+    });
+  })();
 </script>
-
-{% stylesheet %}
-  .store-locator {
-    position: relative;
-    width: 100%;
-  }
-  .store-locator.wrapper--custom {
-    max-width: var(--custom-width, 1232px);
-    padding: 0 20px;
-  }
-  .store-locator__wrapper {
-    width: 100%;
-    margin: 0 auto;
-  }
-
-  .store-locator__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 40px;
-    margin-bottom: 40px;
-  }
-
-  .store-locator__header-content {
-    flex: 1;
-    text-align: left;
-  }
-
-  .store-locator__header-button {
-    flex-shrink: 0;
-  }
-
-  .store-locator__subheading {
-    margin: 0 0 10px;
-    color: var(--000000, #000);
-
-    /* RC26/Title (ALL CAPS) */
-    font-family: Inter;
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 22px; /* 137.5% */
-    letter-spacing: 1.6px;
-    text-transform: uppercase;
-  }
-
-  .store-locator__heading {
-    margin: 0;
-    color: var(--000000, #000);
-    font-family: var(--FONT-STACK-HEADING);
-
-    font-size: 40px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 48px; /* 120% */
-  }
-
-  .store-locator__heading.heading-small {
-    font-size: 24px;
-    line-height: 32px;
-  }
-
-  .store-locator__heading.heading-medium {
-    font-size: 32px;
-    line-height: 40px;
-  }
-
-  .store-locator__heading.heading-large {
-    font-size: 40px;
-    line-height: 48px;
-  }
-
-  .store-locator__heading.heading-x-large {
-    font-size: 48px;
-    line-height: 56px;
-  }
-  #shopify-section-{{ section.id }} .swiper{
-    overflow:visible !important;
-  }
-  .store-locator__button { 
-    display: inline-flex;
-    padding: 14px 32px;
-    justify-content: center;
-    align-items: center;
-    color: #000;
-    background-color: #FFF;
-    border: 1px solid #000;
-    font-family: Inter;
-    font-size: 12px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: 20px;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-
-    width: 377px;
-  }
-
-  .store-locator__button:hover {
-    background-color: #000;
-    color: #FFF;
-  }
-
-  .store-locator__carousel-container {
-    position: relative;
-    margin: 0 auto;
-    max-width: 1400px;
-  }
-
-  .store-locator__swiper {
-    padding: 0 50px;
-  }
-
-  .store-locator__card {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    /* background: #fff; */
-    overflow: hidden;
-  }
-
-  .store-locator__card-image {
-    width: 100%;
-    aspect-ratio: 397/516;
-    overflow: hidden;
-  }
-
-  .store-locator__card-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .store-locator__card-placeholder {
-    width: 100%;
-    aspect-ratio: 294/325;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #F5F5F5;
-  }
-
-  .store-locator__card-placeholder svg {
-    width: 50%;
-    height: auto;
-    opacity: 0.3;
-  }
-
-  .store-locator__card-content {
-    padding: 20px 0;
-    text-align: center;
-  }
-
-  .store-locator__card-subheading {
-    margin: 0 0 10px;
-    color: var(--000000, #000);
-    font-family: Inter;
-    font-size: 12px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 20px;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-  }
-
-  .store-locator__card-heading {
-    margin: 0;
-    color: var(--000000, #000);
-    text-align: center;
-
-    /* RC26/Display/S */
-    font-family: var(--FONT-STACK-HEADING);
-    font-size: 32px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 36px; /* 112.5% */
-  }
-
-  /* Swiper navigation buttons */
-  .store-locator__nav-prev,
-  .store-locator__nav-next {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 40px;
-    height: 40px;
-    background: #fff;
-    border: 1px solid #000;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 10;
-    transition: all 0.3s ease;
-  }
-
-  .store-locator__nav-prev:hover,
-  .store-locator__nav-next:hover {
-    background: #000;
-  }
-
-  .store-locator__nav-prev:after,
-  .store-locator__nav-next:after {
-    font-size: 16px;
-    font-weight: bold;
-    color: #000;
-  }
-
-  .store-locator__nav-prev:hover:after,
-  .store-locator__nav-next:hover:after {
-    color: #fff;
-  }
-
-  .store-locator__nav-prev {
-    left: 0;
-  }
-
-  .store-locator__nav-next {
-    right: 0;
-  }
-
-  .store-locator__nav-prev.swiper-button-disabled,
-  .store-locator__nav-next.swiper-button-disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
-
-  /* Loading state */
-  .store-locator__loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 80px 20px;
-    gap: 20px;
-  }
-
-  .store-locator__loading .spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #ddd;
-    border-top-color: #000;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  .store-locator__loading p {
-    margin: 0;
-    color: #000;
-    font-family: Inter;
-    font-size: 14px;
-    font-weight: 400;
-  }
-
-  /* Mobile adjustments */
-  @media (max-width: 768px) {
-    .store-locator__header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 20px;
-      margin-bottom: 40px;
-    }
-
-    .store-locator__header-button {
-      width: 100%;
-    }
-
-    .store-locator__button {
-      width: 100%;
-      justify-content: center;
-    }
-
-    .store-locator__heading {
-      font-size: 28px;
-      line-height: 36px;
-    }
-
-    .store-locator__swiper {
-      padding: 0 40px;
-    }
-
-    .store-locator__nav-prev,
-    .store-locator__nav-next {
-      width: 32px;
-      height: 32px;
-    }
-
-    .store-locator__nav-prev:after,
-    .store-locator__nav-next:after {
-      font-size: 14px;
-    }
-  }
-{% endstylesheet %}
 
 {% schema %}
 {

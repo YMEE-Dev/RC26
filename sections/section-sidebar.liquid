@@ -15,6 +15,30 @@
 
     --link: var(--text);
   }
+
+  .accordion__title {
+    padding: 13px 0px;
+    cursor: pointer;
+    color: var(--COLOR-TEXT);
+    font-family: var(--FONT-STACK-BODY);
+    font-size: var(--FONT-SIZE-CAPTION);
+    font-style: var(--FONT-STYLE-BODY);
+    font-weight: var(--FONT-WEIGHT-BODY);
+    letter-spacing: var(--LETTER-SPACING-NAV);
+    line-height: var(--LINE-HEIGHT-BODY);
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .section-sidebar__title {
+    color: #000;
+    font-family: var(--FONT-STACK-HEADING);
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 36px; /* 112.5% */
+  }
 {%- endstyle -%}
 
 {%- if section.blocks.size > 0 -%}
@@ -63,8 +87,9 @@
         <details class="accordion" data-collapsible {{ block.shopify_attributes }}>
           <summary class="accordion__title subheading" data-collapsible-trigger>
             <span>{{ title }}</span>
-
-            {%- render 'icon-nav-arrow-down' -%}
+            {%- render 'icon-plus-svg' -%}
+            {%- render 'icon-minus-svg' -%}
+            {% comment %} {%- render 'icon-nav-arrow-down' -%} {% endcomment %}
           </summary>
 
           <div class="accordion__body rte" data-collapsible-body>
@@ -158,7 +183,9 @@
       "default": "wrapper--full-padded",
       "options": [
         {"value": "wrapper--full-padded", "label": "Full width padded"},
-        {"value": "wrapper", "label": "Normal"}
+        {"value": "wrapper", "label": "Normal"},
+        {"value": "wrapper--narrow", "label": "Narrow"},
+        {"value": "wrapper--custom", "label": "Custom (max-width: 1232px)"}
       ]
     },
     {
