@@ -3,6 +3,7 @@
 
   @param {product} product - Product object rendered in the tile
   @param {number} [index] - Position index used for unique DOM IDs
+  @param {boolean} [pdp_mode] - When true, shows the second product image in the trigger instead of the first
 {% enddoc %}
 
 {%- liquid
@@ -90,9 +91,16 @@
         Your browser does not support the video tag.
       </video>
     {%- else -%}
-      {%- if first_image -%}
+      {%- liquid
+        if pdp_mode and modal_image != blank
+          assign trigger_image = modal_image
+        else
+          assign trigger_image = first_image
+        endif
+      -%}
+      {%- if trigger_image -%}
         {{
-          first_image
+          trigger_image
           | image_url: width: 2048
           | image_tag: alt: product.title, loading: 'eager', fetchpriority: 'high'
         }}

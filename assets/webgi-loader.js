@@ -1,16 +1,8 @@
 'use strict';
 
 (function () {
-  var WEBGI_VIEWER_URLS = {
-    v9: "https://dist.pixotronics.com/webgi/runtime/viewer-0.9.9.js",
-    v19: "https://releases.ijewel3d.com/webgi/runtime/viewer-0.9.19.js",
-  };
-  var _loaderScript = document.currentScript || document.querySelector("script[data-webgi-version]");
-  var _webgiVersion = (_loaderScript && _loaderScript.dataset.webgiVersion) || "v9";
-  var WEBGI_VIEWER_URL = WEBGI_VIEWER_URLS[_webgiVersion] || WEBGI_VIEWER_URLS["v9"];
+  var WEBGI_VIEWER_URL = "https://releases.ijewel3d.com/webgi/runtime/viewer-0.9.19.js";
   var ENV_MAP_URL = "https://demo-assets.pixotronics.com/pixo/hdr/gem_2.hdr";
-  var ENV_MAP_URL_STUDIO =
-    "https://cdn.shopify.com/s/files/1/0969/2990/7075/files/Studio_SCENE_V3_copy.hdr?v=1773249444";
 
   var scriptLoaded = false;
   var scriptLoading = false;
@@ -84,7 +76,7 @@
   async function setupViewer(viewerDiv, glbUrl, container, loader) {
     try {
       var isMobile = navigator.maxTouchPoints > 0 || window.innerWidth <= 1024;
-      var dpr = isMobile ? Math.min(window.devicePixelRatio, 0.75) : Math.min(window.devicePixelRatio, 1.75);
+      var dpr = isMobile ? Math.min(window.devicePixelRatio, 1.25) : Math.min(window.devicePixelRatio, 1.75);
 
       var viewer, manager;
       if (typeof CoreViewerApp !== "undefined") {
@@ -100,6 +92,14 @@
           debug: false,
         });
         manager = viewer.getManager ? viewer.getManager() : null;
+        // MaterialConfiguratorPlugin is not added by CoreViewerApp.initialize() by default
+        try {
+          if (typeof MaterialConfiguratorPlugin !== "undefined" && !viewer.getPlugin(MaterialConfiguratorPlugin)) {
+            await viewer.addPlugin(MaterialConfiguratorPlugin);
+          }
+        } catch (e) {
+          console.warn("[WebGI] Could not add MaterialConfiguratorPlugin:", e);
+        }
       } else {
         // Fallback: ViewerApp + addBasePlugins
         var canvas0 = document.createElement("canvas");
@@ -115,14 +115,16 @@
 
       // Get canvas (CoreViewerApp manages its own; fallback already appended canvas0)
       var canvas = viewer.canvas || viewerDiv.querySelector("canvas");
-      if (canvas) canvas.style.touchAction = "pan-y";
+      if (canvas) canvas.style.touchAction = isMobile ? "none" : "pan-y";
       var diamondPlugin = viewer.getPlugin(DiamondPlugin) || null;
 
+      // Match slide background color (#f9f9f9)
+      // Desktop canvas renders ~#fff (needs dimming), mobile renders ~#e7e7e7 (needs brightening).
+      container.style.backgroundColor = "#f9f9f9";
+      viewerDiv.style.backgroundColor = "#f9f9f9";
+      if (canvas) canvas.style.filter = isMobile ? "brightness(1.078)" : "brightness(0.9765)";
+
       viewer.renderer.displayCanvasScaling = dpr;
-      // Opaque background required for diamond/gem refraction to render correctly
-      if (viewer.renderer.renderer) {
-        viewer.renderer.renderer.setClearColor(0xf9f9f9, 1);
-      }
       viewer.renderer.refreshPipeline();
 
       // Disable SDK UI plugins — we use our own loader overlay
@@ -176,6 +178,112 @@
         await viewer.load(glbUrl);
       } else {
         await manager.addFromPath(glbUrl, { autoCenter: true, autoScale: true, autoScaleRadius: 2 });
+      }
+
+      var matConfigPlugin = null;
+      try {
+        matConfigPlugin =
+          (typeof MaterialConfiguratorPlugin !== "undefined" && viewer.getPlugin(MaterialConfiguratorPlugin)) ||
+          viewer.getPlugin("MaterialConfiguratorPlugin") ||
+          (viewer.getPluginByType && viewer.getPluginByType("MaterialConfiguratorPlugin")) ||
+          null;
+      } catch (e) {}
+      if (matConfigPlugin && matConfigPlugin.variations) {
+      }
+
+      // Cache gold materials once at load time — avoids expensive traverse on every color click
+      var goldMaterials = [];
+      try {
+        viewer.scene.traverse(function (obj) {
+          if (!obj.material) return;
+          if (typeof obj.material.refractionIndex !== "undefined") return;
+          if ((obj.material.name || "").toLowerCase().indexOf("gold") === -1) return;
+          if (goldMaterials.indexOf(obj.material) === -1) goldMaterials.push(obj.material);
+        });
+      } catch (e) {}
+
+      var WEBGI_COLOR_MAP = {
+        "18kt yellow gold": "#D4A832",
+        "18kt white gold": "#E8E8E8",
+        "18kt rose gold": "#CF9FA6",
+        "yellow gold": "#D4A832",
+        "white gold": "#E8E8E8",
+        "rose gold": "#CF9FA6",
+        gold: "#D4A832",
+        silver: "#C0C0C0",
+        platinum: "#E5E4E2",
+      };
+
+      // Find the "Gold" variation in MaterialConfiguratorPlugin
+      var goldVariation = null;
+      if (matConfigPlugin && matConfigPlugin.variations) {
+        for (var vi = 0; vi < matConfigPlugin.variations.length; vi++) {
+          if ((matConfigPlugin.variations[vi].title || "").toLowerCase() === "gold") {
+            goldVariation = matConfigPlugin.variations[vi];
+            break;
+          }
+        }
+      }
+
+      function applyColorToModel(colorValue) {
+        if (!goldVariation || !matConfigPlugin) return;
+        var key = (colorValue || "").trim().toLowerCase();
+        var matName = null;
+        if (key.indexOf("rose") !== -1) matName = "rose";
+        else if (key.indexOf("white") !== -1) matName = "white";
+        else if (key.indexOf("yellow") !== -1 || key.indexOf("gold") !== -1) matName = "yellow";
+        if (!matName) return;
+        var targetIndex = -1;
+        var targetUuid = null;
+        for (var i = 0; i < goldVariation.materials.length; i++) {
+          if ((goldVariation.materials[i].name || "").toLowerCase() === matName) {
+            targetIndex = i;
+            targetUuid = goldVariation.materials[i].uuid;
+            break;
+          }
+        }
+        if (targetIndex === -1) return;
+        goldVariation.selectedIndex = targetIndex;
+        // copyProps doesn't update Three.js Color objects — set color directly on live materials
+        var hex = WEBGI_COLOR_MAP[key];
+        var r = 1,
+          g = 1,
+          b = 1;
+        if (hex) {
+          r = parseInt(hex.slice(1, 3), 16) / 255;
+          g = parseInt(hex.slice(3, 5), 16) / 255;
+          b = parseInt(hex.slice(5, 7), 16) / 255;
+        }
+        var mats = goldMaterials.filter(function (m) {
+          return m && m.color && m.color.isColor;
+        });
+        if (!mats.length) return;
+        for (var mi = 0; mi < mats.length; mi++) {
+          var m = mats[mi];
+          m.color.r = r;
+          m.color.g = g;
+          m.color.b = b;
+          m.needsUpdate = true;
+        }
+        // Mark scene dirty so the next render frame picks up the color change instantly
+        viewer.setDirty();
+        if (viewer.scene.activeCamera) viewer.scene.activeCamera.setDirty();
+        console.log("[WebGI] applied color:", matName, hex);
+      }
+
+      container.__webgiApplyColor = applyColorToModel;
+      container.__webgiViewer = viewer;
+      container.__webgiManager = manager;
+
+      // Sync with the currently selected color picker on page load
+      var _sectionId = container.getAttribute("data-section-id");
+      if (_sectionId) {
+        var _initInput = document.querySelector(
+          '[data-ymee-color-picker][data-section-id="' +
+            _sectionId +
+            '"] .ymee-color-picker__item.is-selected [data-ymee-color-input]'
+        );
+        if (_initInput && _initInput.value) applyColorToModel(_initInput.value);
       }
 
       // Set gem_2.hdr on DiamondPlugin + boost normalMapRes for better cut simulation
@@ -240,47 +348,18 @@
           }
         } catch (e) {}
 
-        // On mobile: fit model to viewport width by computing ideal distance from FOV
-        if (isMobile) {
-          try {
-            var camObj2 = viewer.scene.activeCamera.cameraObject;
-            var containerWidth = container.clientWidth || window.innerWidth;
-            var containerHeight = container.clientHeight || containerWidth;
-            var aspect = containerWidth / containerHeight;
-            var fovRad = ((camObj2 && camObj2.fov ? camObj2.fov : 50) * Math.PI) / 180;
-            var modelRadius = 2; // autoScaleRadius: 2
-            // Distance needed so model fills width: radius / (tan(fov/2) * aspect)
-            var fitDist = modelRadius / (Math.tan(fovRad / 2) * Math.min(aspect, 1));
-            fitDist = fitDist * 1.1; // 10% padding
-            if (fitDist > 0.1) defaultDist = fitDist;
-            // Move camera to this distance along its current direction
-            if (camObj2 && controls.target) {
-              var tgt2 = controls.target;
-              var cdx = camObj2.position.x - tgt2.x;
-              var cdy = camObj2.position.y - tgt2.y;
-              var cdz = camObj2.position.z - tgt2.z;
-              var curLen = Math.sqrt(cdx * cdx + cdy * cdy + cdz * cdz);
-              if (curLen > 0.001) {
-                camObj2.position.x = tgt2.x + (cdx / curLen) * fitDist;
-                camObj2.position.y = tgt2.y + (cdy / curLen) * fitDist;
-                camObj2.position.z = tgt2.z + (cdz / curLen) * fitDist;
-              }
-            }
-          } catch (e) {}
-        }
-
         controls.autoRotate = true;
         controls.autoRotateSpeed = 2;
-        controls.dampingFactor = isMobile ? 0.05 : 0.1;
-        controls.zoomSpeed = isMobile ? 0.4 : 1.0;
+        controls.dampingFactor = isMobile ? 0.12 : 0.1;
+        controls.zoomSpeed = isMobile ? 0.8 : 1.0;
         controls.maxSpeed = 1.0;
-        controls.minDistance = defaultDist * 0.4; // max zoom in
-        controls.maxDistance = defaultDist * 1.5; // max zoom out
+        controls.enableDamping = true;
+        controls.minDistance = defaultDist * 0.35; // max zoom in
+        controls.maxDistance = defaultDist * 1.6; // max zoom out
         controls.update();
 
         // Resume auto-rotation 3s after user stops interacting
-        // Disable SSR during drag for smooth performance, re-enable after
-        var ssrPlugin = viewer.getPlugin(SSRPlugin) || null;
+        // Keep SSR always on to avoid white blink during drag
         var autoRotateTimer = null;
         canvas.addEventListener("pointerdown", function () {
           controls.autoRotate = false;
@@ -288,17 +367,14 @@
             clearTimeout(autoRotateTimer);
             autoRotateTimer = null;
           }
-          if (ssrPlugin) ssrPlugin.enabled = false;
         });
         canvas.addEventListener("pointerup", function () {
-          if (ssrPlugin) ssrPlugin.enabled = true;
           if (autoRotateTimer) clearTimeout(autoRotateTimer);
           autoRotateTimer = setTimeout(function () {
             controls.autoRotate = true;
           }, 3000);
         });
         canvas.addEventListener("pointercancel", function () {
-          if (ssrPlugin) ssrPlugin.enabled = true;
           if (autoRotateTimer) clearTimeout(autoRotateTimer);
           autoRotateTimer = setTimeout(function () {
             controls.autoRotate = true;
@@ -402,4 +478,58 @@
   }
 
   window.__webgiInitViewer = initWebGIViewer;
+  if (typeof window.__webgiInitViewerReady === "function") window.__webgiInitViewerReady();
+
+  function applyColorFromInput(input) {
+    if (!input) return;
+    var picker = input.closest("[data-ymee-color-picker]");
+    if (!picker) return;
+    var sectionId = picker.getAttribute("data-section-id");
+    if (!sectionId) return;
+
+    var sectionRoot = document.querySelector("#MainProduct--" + sectionId) || document;
+    var scopedContainers = sectionRoot.querySelectorAll('.webgi-container[data-section-id="' + sectionId + '"]');
+    var allSectionContainers = document.querySelectorAll('.webgi-container[data-section-id="' + sectionId + '"]');
+    var applied = false;
+    var appliedCount = 0;
+
+    function tryApply(container) {
+      if (!container || typeof container.__webgiApplyColor !== "function") return;
+      container.__webgiApplyColor(input.value);
+      applied = true;
+      appliedCount += 1;
+    }
+
+    scopedContainers.forEach(tryApply);
+    if (!applied) allSectionContainers.forEach(tryApply);
+    if (!applied) {
+    } else {
+    }
+  }
+
+  // Delegated: color picker change → apply color to 3D model (no gallery scroll)
+  document.addEventListener(
+    "change",
+    function (e) {
+      var input = e.target.closest("[data-ymee-color-input]");
+      if (!input) return;
+      applyColorFromInput(input);
+    },
+    true
+  );
+
+  // Fallback for label clicks if upstream scripts/DOM swaps interfere with change timing
+  document.addEventListener(
+    "click",
+    function (e) {
+      var item = e.target.closest(".ymee-color-picker__item");
+      if (!item) return;
+      var input = item.querySelector("[data-ymee-color-input]");
+      if (!input) return;
+      requestAnimationFrame(function () {
+        applyColorFromInput(input);
+      });
+    },
+    true
+  );
 })();

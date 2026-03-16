@@ -3,7 +3,7 @@
   Detects if the current product is referenced by any storytelling product
   (via ste_products metafield). If so, renders that storytelling tile with
   "Shop the look" modal. Otherwise shows the plain collection image.
-  
+
   @param {product} product - The current product
 {% endcomment %}
 
@@ -114,7 +114,7 @@
 
   <div class="product__collection-section block-padding" style="--block-padding-bottom: 65px;">
     <div class="product__collection-image product__collection-image--storytelling">
-      {%- render 'product-tile-storytelling', product: found_storytelling, index: product.id -%}
+      {%- render 'product-tile-storytelling', product: found_storytelling, index: product.id, pdp_mode: true -%}
     </div>
 
     <div class="product__collection-info">
@@ -174,7 +174,115 @@
   </div>
 
   <script src="{{ 'storytelling-lookup.js' | asset_url }}" defer></script>
-{%- endif -%}
+
+  <script>
+    (function () {
+      if (window.__pdpCollectionSectionInitialized) return;
+      window.__pdpCollectionSectionInitialized = true;
+
+      function updateProgress(slider, progressTrack, progressThumb) {
+        var maxScroll = Math.max(slider.scrollWidth - slider.clientWidth, 0);
+        if (maxScroll <= 0) {
+          progressTrack.classList.add('is-hidden');
+          progressThumb.style.width = '100%';
+          progressThumb.style.transform = 'translateX(0)';
+          return;
+        }
+        progressTrack.classList.remove('is-hidden');
+        var trackWidth = progressTrack.clientWidth;
+        if (!trackWidth) return;
+        var thumbWidth = Math.max((slider.clientWidth / slider.scrollWidth) * trackWidth, 18);
+        var offset = Math.max(trackWidth - thumbWidth, 0) * (slider.scrollLeft / maxScroll);
+        progressThumb.style.width = thumbWidth + 'px';
+        progressThumb.style.transform = 'translateX(' + offset + 'px)';
+      }
+
+      function bindProgress(modal) {
+        modal.querySelectorAll('.storytelling-modal__slider-shell').forEach(function (shell) {
+          var slider = shell.querySelector('[data-grid-slider]');
+          var track = shell.querySelector('[data-storytelling-slider-progress]');
+          var thumb = shell.querySelector('[data-storytelling-slider-progress-thumb]');
+          if (!slider || !track || !thumb || slider.__progressBound) return;
+          slider.__progressBound = true;
+          slider.addEventListener('scroll', function () { updateProgress(slider, track, thumb); }, { passive: true });
+          if ('ResizeObserver' in window) {
+            var ro = new ResizeObserver(function () { updateProgress(slider, track, thumb); });
+            ro.observe(slider);
+            ro.observe(track);
+          }
+          updateProgress(slider, track, thumb);
+        });
+      }
+
+      function closeModal(modal, trigger) {
+        if (typeof modal.close === 'function') modal.close();
+        else modal.removeAttribute('open');
+        document.dispatchEvent(new CustomEvent('theme:scroll:unlock', { bubbles: true }));
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
+      }
+
+      function openModal(modal, trigger) {
+        if (modal.open) return;
+        if (typeof modal.showModal === 'function') modal.showModal();
+        else modal.setAttribute('open', '');
+        document.dispatchEvent(new CustomEvent('theme:scroll:lock', { bubbles: true }));
+        trigger.setAttribute('aria-expanded', 'true');
+
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            modal.querySelectorAll('grid-slider').forEach(function (gs) {
+              if (typeof gs.toggleSlider === 'function') gs.toggleSlider();
+              if (typeof gs.positionArrows === 'function') gs.positionArrows();
+            });
+            bindProgress(modal);
+          });
+        });
+
+        if (!modal.__pdpListenersBound) {
+          modal.__pdpListenersBound = true;
+          modal.addEventListener('click', function (e) {
+            if (e.target === modal) closeModal(modal, trigger);
+          });
+          var closeBtn = modal.querySelector('[data-storytelling-modal-close]');
+          if (closeBtn) {
+            closeBtn.addEventListener('click', function () { closeModal(modal, trigger); });
+          }
+        }
+      }
+
+      function initCollectionSection() {
+        document.querySelectorAll('.product__collection-title').forEach(function (title) {
+          title.textContent = title.textContent.toLowerCase().replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+        });
+
+        document.querySelectorAll('[data-read-more-btn]').forEach(function (button) {
+          button.addEventListener('click', function () {
+            var desc = this.closest('[data-collection-description]');
+            var more = this.querySelector('[data-read-more-text]');
+            var less = this.querySelector('[data-read-less-text]');
+            var expanded = desc.classList.toggle('expanded');
+            more.style.display = expanded ? 'none' : 'inline';
+            less.style.display = expanded ? 'inline' : 'none';
+          });
+        });
+
+        document.addEventListener('click', function (event) {
+          var trigger = event.target.closest('[data-storytelling-modal-trigger]');
+          if (!trigger || !trigger.closest('.product__collection-section')) return;
+          event.preventDefault();
+          event.stopPropagation();
+          var modal = document.getElementById(trigger.getAttribute('data-storytelling-modal-target'));
+          if (modal) openModal(modal, trigger);
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCollectionSection);
+      } else {
+        initCollectionSection();
+      }
+    })();
+  </script>
 
   <style>
     .product__collection-section {
@@ -221,7 +329,7 @@
       font-size: var(--LINE-HEIGHT-DISPLAY-S);
       line-height: var(--LINE-HEIGHT-DISPLAY-M);
       letter-spacing: 0;
-      text-transform: capitalize;
+      text-transform: capitalize !important;
       color: var(--COLOR-TEXT-DARK);
       margin: 40px 0 20px;
     }
@@ -251,7 +359,7 @@
         transition: all 0.3s ease;
       }
 
-      .product__collection-description[data-collection-description].expanded 
+      .product__collection-description[data-collection-description].expanded
         .collection-description__content[data-description-content] {
         -webkit-line-clamp: unset;
         display: block;
@@ -279,7 +387,7 @@
       .collection-description__read-more {
         display: none;
       }
-      
+
       .collection-description__content[data-description-content] {
         -webkit-line-clamp: unset !important;
         display: block !important;
@@ -288,20 +396,23 @@
 
     /* Storytelling tile within product collection section */
     .product__collection-image--storytelling .product-storytelling {
-      display: block;
+      display: flex;
       width: 100%;
+      padding: 0 !important;
+      position: initial !important;
     }
 
     .product__collection-image--storytelling .grid-media__media-wrapper {
-      width: 100%;
-      height: 0;
-      padding-top: calc(1 / var(--aspect-ratio) * 100%);
-      position: relative;
-      overflow: hidden;
-      cursor: pointer;
+      position: initial;
     }
 
-    .product__collection-image--storytelling .grid-media__media-wrapper img,
+    .product__collection-image--storytelling .grid-media__media-wrapper > img {
+      position: relative;
+      min-height: 80vh;
+      object-fit: cover !important;
+      object-position: center;
+    }
+
     .product__collection-image--storytelling .grid-media__media-wrapper video {
       position: absolute;
       top: 0;
@@ -331,30 +442,4 @@
       }
     }
   </style>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Read more functionality for collection descriptions
-      const readMoreButtons = document.querySelectorAll('[data-read-more-btn]');
-      
-      readMoreButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          const description = this.closest('[data-collection-description]');
-          const readMoreText = this.querySelector('[data-read-more-text]');
-          const readLessText = this.querySelector('[data-read-less-text]');
-          
-          if (description.classList.contains('expanded')) {
-            // Collapse
-            description.classList.remove('expanded');
-            readMoreText.style.display = 'inline';
-            readLessText.style.display = 'none';
-          } else {
-            // Expand
-            description.classList.add('expanded');
-            readMoreText.style.display = 'none';
-            readLessText.style.display = 'inline';
-          }
-        });
-      });
-    });
-  </script>
+{%- endif -%}
