@@ -3790,12 +3790,18 @@
             return;
           }
 
-          if (atTop || goingUp) {
-            this.body.classList.remove("header-scroll-hide");
-            this.resetHeaderLayerHide();
-          } else if (goingDown) {
+          if (goingDown) {
+            this.lastScrollDownPosition = position;
             this.body.classList.add("header-scroll-hide");
             this.scheduleHeaderLayerHide();
+          } else if (atTop) {
+            this.lastScrollDownPosition = null;
+            this.body.classList.remove("header-scroll-hide");
+            this.resetHeaderLayerHide();
+          } else if (goingUp && this.lastScrollDownPosition !== null && this.lastScrollDownPosition - position >= this.scrollUpShowThreshold) {
+            this.lastScrollDownPosition = null;
+            this.body.classList.remove("header-scroll-hide");
+            this.resetHeaderLayerHide();
           }
 
           this.shouldShowScrollRevealBlur = shouldShowRevealBlur;
