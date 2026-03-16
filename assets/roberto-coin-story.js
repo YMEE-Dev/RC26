@@ -413,19 +413,20 @@
         const card = mediaCardTemplate.content.firstElementChild.cloneNode(true);
         const art = card.querySelector(".media-art");
         const isYear2013 = String(entry.year).trim() === "2013";
+        const scaleFactor = Math.max(0.6, Math.min(1.8, Number(item.scale || 100) / 100));
 
         if (isYear2013 && mediaItems.length === 1) {
           card.style.left = `calc(${item.x}% - 50px)`;
-          card.style.width = `calc(${item.w}% + 100px)`;
+          card.style.width = `calc((${item.w}% + 100px) * ${scaleFactor})`;
         } else if (index === 1) {
           card.style.left = `calc(${item.x}% - 50px)`;
-          card.style.width = `calc(${item.w}% + 100px)`;
+          card.style.width = `calc((${item.w}% + 100px) * ${scaleFactor})`;
         } else {
           card.style.left = `${item.x}%`;
-          card.style.width = `${item.w}%`;
+          card.style.width = `calc(${item.w}% * ${scaleFactor})`;
         }
         card.style.top = `${item.y}%`;
-        card.style.height = `${item.h}%`;
+        card.style.height = `calc(${item.h}% * ${scaleFactor})`;
         card.style.opacity = "0";
         card.style.transform = "translateY(42px) scale(0.92)";
         card.style.filter = "blur(12px)";
@@ -434,8 +435,6 @@
         if (item.image) {
           art.classList.add("has-image");
           art.style.backgroundImage = `url("${item.image}")`;
-          art.style.backgroundSize = `${Math.max(60, Math.min(180, item.scale || 100))}%`;
-          art.style.backgroundPosition = "center";
         } else {
           art.style.setProperty("--card-fill", item.fill);
         }
