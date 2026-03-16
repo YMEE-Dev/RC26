@@ -108,14 +108,6 @@
     const enableFetch = section.dataset.enableFetch === 'true';
     const sectionId = '{{ section.id }}';
 
-    function whenSwiperReady(callback) {
-      if (typeof Swiper !== 'undefined') {
-        callback();
-      } else {
-        window.addEventListener('swiper-ready', callback, { once: true });
-      }
-    }
-
     function initSwiper() {
       if (typeof Swiper === 'undefined') return;
       var el = document.querySelector('#StoreLocator--' + sectionId + ' .store-locator__swiper');
@@ -164,17 +156,17 @@
           }
           loading.style.display = 'none';
           if (carousel) carousel.style.display = 'block';
-          whenSwiperReady(initSwiper);
+          initSwiper();
         })
         .catch(err => {
           console.error('Error fetching locations:', err);
           loading.style.display = 'none';
           if (carousel) carousel.style.display = 'block';
-          whenSwiperReady(initSwiper);
+          initSwiper();
         });
     } else {
       // Initialize swiper with static blocks
-      whenSwiperReady(initSwiper);
+      initSwiper();
     }
 
     function renderLocations(locations) {
