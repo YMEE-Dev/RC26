@@ -375,6 +375,16 @@ body.has-rc-story {
     height: 33px;
     display: block;
     transform: translateX(-5px);
+    position: relative;
+    z-index: 2;
+  }
+
+  .section-nav__mobile-flower--back {
+    position: absolute;
+    z-index: 1;
+    opacity: 0.1;
+    transform: translateX(-5px) scale(1.35);
+    pointer-events: none;
   }
 
   .section-nav__mobile-flower path {
@@ -562,6 +572,7 @@ body.has-rc-story {
   position: relative;
   width: min(980px, 82vw);
   min-height: 620px;
+  transform: translateY(50px);
   z-index: 1;
 }
 
@@ -664,6 +675,25 @@ body.has-rc-story {
   z-index: 10;
 }
 
+.hero-copy__flower {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(452px, 62vw);
+  height: auto;
+  transform: translate(-50%, -50%);
+  opacity: 0.1;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero-copy .eyebrow,
+.hero-copy h2 {
+  position: relative;
+  z-index: 1;
+}
+
 .eyebrow {
   margin: 0 0 0.4rem;
   font-size: var(--eyebrow-size);
@@ -687,7 +717,7 @@ body.has-rc-story {
   position: absolute;
   left: 50%;
   bottom: 4rem;
-  transform: translate(-50%, 100px);
+  transform: translate(-50%, 150px);
   display: inline-flex;
   flex-direction: column;
   align-items: center;
@@ -698,7 +728,7 @@ body.has-rc-story {
 
 .scroll-link.is-hidden {
   opacity: 0;
-  transform: translate(-50%, 62px);
+  transform: translate(-50%, 112px);
   pointer-events: none;
 }
 
@@ -735,8 +765,8 @@ body.has-rc-story {
 }
 
 .history__right {
-  align-self: start;
-  margin-top: 280px;
+  align-self: end;
+  margin-top: 0;
 }
 
 .history__title,
@@ -904,6 +934,27 @@ body.has-rc-story {
 
 .ruby-section__body p {
   color: rgba(255, 255, 255, 0.88);
+}
+
+.ruby-section__body--stagger p {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.55s ease,
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ruby-section__body--stagger.reveal-up.is-visible p {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ruby-section__body--stagger.reveal-up.is-visible p:nth-child(2) {
+  transition-delay: 0.12s;
+}
+
+.ruby-section__body--stagger.reveal-up.is-visible p:nth-child(3) {
+  transition-delay: 0.24s;
 }
 
 .ruby-section__title {
@@ -1269,6 +1320,7 @@ body.has-rc-story {
 
   .hero-copy {
     width: min(88vw, 24rem);
+    transform: translate(-50%, calc(-50% - 70px));
   }
 
   .hero-collage {
@@ -1279,23 +1331,24 @@ body.has-rc-story {
 
   .hero-collage__item--top {
     top: 34px;
-    left: 33%;
+    left: 0%;
     width: 92px;
     height: 166px;
   }
 
   .hero-collage__item--right {
-    top: 12px;
-    right: 2%;
+    top: -20px;
+    right:-5%;
     width: 184px;
     height: 248px;
   }
 
   .hero-collage__item--left {
     left: 0;
-    bottom: 120px;
-    width: 196px;
+    bottom: 100px;
+    width: 250px;
     height: 132px;
+       z-index: 40;
   }
 
   .hero-collage__item--bottom {
@@ -1303,6 +1356,7 @@ body.has-rc-story {
     bottom: 12px;
     width: 188px;
     height: 126px;
+ 
   }
 
   .timeline-stage {

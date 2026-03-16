@@ -28,6 +28,8 @@
       h: 26,
     },
   ];
+  const TIMELINE_COPY_2013 =
+    "He received an award from the Phillips Collection in Washington for his contribution to American culture. He was honored at Vicenzaoro, the Vicenza Gold Trade Fair, as President of the Best Corporate Social Responsibility Brand during the Andrea Palladio International Jewelry Awards.";
 
   function normalizeMediaItem(item, index) {
     const fallback = fallbackMedia[index] || fallbackMedia[fallbackMedia.length - 1];
@@ -82,6 +84,10 @@
     window.requestAnimationFrame(step);
   }
 
+  function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+  }
+
   function initStorySection(section) {
     if (section.dataset.storyInitialized === "true") {
       return;
@@ -130,15 +136,19 @@
       .map((entry) => {
         const media = (entry.media || [])
           .map((item, index) => normalizeMediaItem(item, index))
-          .filter((item) => item && item.w > 0 && item.h > 0);
+          .filter((item) => item && item.w > 0 && item.h > 0 && item.image && String(item.image).trim() !== "");
+        const yearValue = String(entry.year || "").trim();
+        const isYear2013 = yearValue === "2013";
 
         return {
           ...entry,
           id: String(entry.id || ""),
-          year: String(entry.year || "").trim(),
+          year: yearValue,
           title: String(entry.title || "").trim(),
-          copy: String(entry.copy || entry.title || entry.year || "").trim(),
-          media: media.length ? media : fallbackMedia.map((item) => ({ ...item })),
+          copy: isYear2013
+            ? TIMELINE_COPY_2013
+            : String(entry.copy || entry.title || entry.year || "").trim(),
+          media,
         };
       })
       .filter((entry) => entry.year);
@@ -293,9 +303,11 @@
         return;
       }
 
-      const anchor = entry.media[entry.media.length - 1];
+      const isYear2013 = String(entry.year).trim() === "2013";
+      const layoutMedia = buildTimelineMediaLayout(entry);
+      const anchor = layoutMedia[layoutMedia.length - 1] || { x: 34, y: 60, w: 32, h: 20 };
       const [lineOne, lineTwo] = toTwoLineCaption(entry.copy);
-      const lastImageDelay = Math.max(entry.media.length - 1, 0) * 320;
+      const lastImageDelay = Math.max(layoutMedia.length - 1, 0) * 320;
       const captionDelay = lastImageDelay + 260;
 
       if (captionRevealTimer) {
@@ -306,9 +318,15 @@
       captionLineOne.textContent = lineOne;
       captionLineTwo.textContent = lineTwo;
 
-      timelineCaption.style.left = `${anchor.x}%`;
-      timelineCaption.style.top = `${Math.min(anchor.y + anchor.h + 4, 88)}%`;
-      timelineCaption.style.width = `${Math.max(anchor.w, 24)}%`;
+      if (isYear2013) {
+        timelineCaption.style.left = `${Math.min(anchor.x + anchor.w + 3, 72)}%`;
+        timelineCaption.style.top = `${Math.max(anchor.y + 6, 10)}%`;
+        timelineCaption.style.width = "26%";
+      } else {
+        timelineCaption.style.left = `${anchor.x}%`;
+        timelineCaption.style.top = `${Math.min(anchor.y + anchor.h + 4, 88)}%`;
+        timelineCaption.style.width = `${Math.max(anchor.w, 24)}%`;
+      }
 
       captionRevealTimer = window.setTimeout(() => {
         timelineCaption.classList.add("is-visible");
@@ -316,10 +334,77 @@
       }, captionDelay);
     }
 
-    function renderMedia(mediaItems) {
+    function getTimelineLayoutVariant(year) {
+      const yearText = String(year || "").trim().toLowerCase();
+      const yearNumber = parseInt(yearText.replace(/[^\d]/g, ""), 10);
+      if (Number.isFinite(yearNumber)) {
+        return Math.abs(yearNumber) % 4;
+      }
+      let seed = 0;
+      for (let i = 0; i < yearText.length; i += 1) {
+        seed += yearText.charCodeAt(i);
+      }
+      return Math.abs(seed) % 4;
+    }
+
+    function buildTimelineMediaLayout(entry) {
+      const mediaItems = (entry.media || []).map((item) => ({ ...item }));
+      if (String(entry.year).trim() === "2013") {
+        const preferred = mediaItems[1] || mediaItems[0] || mediaItems[2];
+        if (!preferred) {
+          return [];
+        }
+        return [
+          {
+            ...preferred,
+            x: 34,
+            y: 4,
+            w: 28,
+            h: 62,
+          },
+        ];
+      }
+      const variant = getTimelineLayoutVariant(entry.year);
+      const variantOffsets = [
+        [
+          { x: 0, y: 0, w: 0, h: 0 },
+          { x: 0, y: 0, w: 0, h: 0 },
+          { x: 0, y: 0, w: 0, h: 0 },
+        ],
+        [
+          { x: -3, y: -2, w: 3, h: 2 },
+          { x: 1, y: -1, w: 2, h: 0 },
+          { x: 2, y: 4, w: -2, h: -1 },
+        ],
+        [
+          { x: 2, y: 3, w: -2, h: 1 },
+          { x: -1, y: 2, w: 1, h: 2 },
+          { x: -3, y: -2, w: 2, h: 1 },
+        ],
+        [
+          { x: -1, y: 4, w: 1, h: -2 },
+          { x: 2, y: -3, w: 0, h: 1 },
+          { x: 1, y: 1, w: -1, h: 2 },
+        ],
+      ];
+
+      return mediaItems.map((item, index) => {
+        const offset = (variantOffsets[variant] || variantOffsets[0])[index] || { x: 0, y: 0, w: 0, h: 0 };
+        return {
+          ...item,
+          x: clamp(item.x + offset.x, -8, 92),
+          y: clamp(item.y + offset.y, -8, 92),
+          w: clamp(item.w + offset.w, 12, 68),
+          h: clamp(item.h + offset.h, 16, 74),
+        };
+      });
+    }
+
+    function renderMedia(entry) {
       if (!mediaLayout || !mediaCardTemplate) {
         return;
       }
+      const mediaItems = buildTimelineMediaLayout(entry);
 
       const existingLayers = [...mediaLayout.querySelectorAll(".media-layer")];
       const currentLayer = existingLayers[existingLayers.length - 1] || null;
@@ -331,10 +416,19 @@
       mediaItems.forEach((item, index) => {
         const card = mediaCardTemplate.content.firstElementChild.cloneNode(true);
         const art = card.querySelector(".media-art");
+        const isYear2013 = String(entry.year).trim() === "2013";
 
-        card.style.left = `${item.x}%`;
+        if (isYear2013 && mediaItems.length === 1) {
+          card.style.left = `calc(${item.x}% - 50px)`;
+          card.style.width = `calc(${item.w}% + 100px)`;
+        } else if (index === 1) {
+          card.style.left = `calc(${item.x}% - 50px)`;
+          card.style.width = `calc(${item.w}% + 100px)`;
+        } else {
+          card.style.left = `${item.x}%`;
+          card.style.width = `${item.w}%`;
+        }
         card.style.top = `${item.y}%`;
-        card.style.width = `${item.w}%`;
         card.style.height = `${item.h}%`;
         card.style.opacity = "0";
         card.style.transform = "translateY(42px) scale(0.92)";
@@ -403,7 +497,7 @@
 
       activeIndex = index;
       timelineStage.classList.add("is-active");
-      renderMedia(entry.media);
+      renderMedia(entry);
       renderCaption(entry);
       updateYearRail(index);
     }
@@ -660,48 +754,32 @@
         return;
       }
 
+      if (window.innerWidth > 820) {
+        const mirroredDesktopLayout = [
+          { top: "-40px", right: "20%", width: "218px", height: "312px" },
+          { top: "-20", left: "5%", width: "300px", height: "416px" },
+          { right: "calc(8% - 100px)", bottom: "92px", width: "414px", height: "310px" },
+          { left: "220px", bottom: "-12px", width: "240px", height: "338px" },
+        ];
+
+        heroCollageItems.forEach((item, index) => {
+          const styles = mirroredDesktopLayout[index] || {};
+          item.style.top = styles.top ?? "auto";
+          item.style.right = styles.right ?? "auto";
+          item.style.bottom = styles.bottom ?? "auto";
+          item.style.left = styles.left ?? "auto";
+          item.style.width = styles.width ?? "";
+          item.style.height = styles.height ?? "";
+          item.style.zIndex = index === 3 ? "8" : "";
+        });
+        return;
+      }
+
       const preset = heroAltLayoutPresets[Math.floor(Math.random() * heroAltLayoutPresets.length)];
       heroCollageItems.forEach((item, index) => {
         const styles = { ...(preset[index] || {}) };
         if (!styles) {
           return;
-        }
-
-        if (window.innerWidth > 820) {
-          const width = Number.parseFloat(styles.width || "0");
-          const height = Number.parseFloat(styles.height || "0");
-          if (width > 0) {
-            styles.width = `${width + 40}px`;
-          }
-          if (height > 0) {
-            styles.height = `${height + 40}px`;
-          }
-
-          if (index === 0) {
-            styles.width = `${Number.parseFloat(styles.width || "0") + 10}px`;
-            styles.height = `${Number.parseFloat(styles.height || "0") + 10}px`;
-            if (styles.left) {
-              styles.left = `calc(${styles.left} + 50px)`;
-            }
-            if (styles.top) {
-              styles.top = `calc(${styles.top} + 25px)`;
-            }
-          }
-
-          if (index === 3) {
-            styles.width = `${Number.parseFloat(styles.width || "0") + 10}px`;
-            styles.height = `${Number.parseFloat(styles.height || "0") + 10}px`;
-            if (styles.right) {
-              styles.right = `calc(${styles.right} + 50px)`;
-            }
-            if (styles.bottom) {
-              styles.bottom = `calc(${styles.bottom} + 25px)`;
-            }
-          }
-
-          if (index === 2 && styles.left) {
-            styles.left = `calc(${styles.left} - 50px)`;
-          }
         }
 
         item.style.top = styles.top ?? "auto";
@@ -783,6 +861,13 @@
       });
       let heroSwapAnimating = false;
 
+      const preloadSources = hasTrueAlternateSet ? sourcesB : fallbackSourcesB;
+      [...new Set(preloadSources.filter(Boolean))].forEach((source) => {
+        const preloadImage = new Image();
+        preloadImage.decoding = "async";
+        preloadImage.src = source;
+      });
+
       function animateHeroSwap(showAlt) {
         if (heroSwapAnimating || !heroCollageItems.length) {
           return;
@@ -802,15 +887,24 @@
             return;
           }
 
+          let mappedIndex = index;
+          if (showAlt && window.innerWidth > 820) {
+            if (index === 1) {
+              mappedIndex = 3;
+            } else if (index === 3) {
+              mappedIndex = 1;
+            }
+          }
+
           const nextSource = showAlt
             ? hasTrueAlternateSet
-              ? sourcesB[index]
-              : fallbackSourcesB[index]
+              ? sourcesB[mappedIndex]
+              : fallbackSourcesB[mappedIndex]
             : sourcesA[index];
           const nextAlt = showAlt
             ? hasTrueAlternateSet
-              ? altsB[index]
-              : fallbackAltsB[index]
+              ? altsB[mappedIndex]
+              : fallbackAltsB[mappedIndex]
             : altsA[index];
 
           const startDelay = index * staggerMs;
@@ -829,6 +923,7 @@
           window.setTimeout(() => {
             item.style.opacity = "1";
           }, totalFadeOutMs + 80 + startDelay);
+
         });
 
         window.setTimeout(() => {
@@ -849,7 +944,7 @@
       window.setInterval(() => {
         heroSlideshowShowingAlt = !heroSlideshowShowingAlt;
         animateHeroSwap(heroSlideshowShowingAlt);
-      }, 8000);
+      }, 6000);
     }
 
     function initSectionNav() {
