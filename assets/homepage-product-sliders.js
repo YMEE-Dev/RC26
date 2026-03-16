@@ -5,22 +5,6 @@
   const activeSections = new Set();
   const initializedSections = new WeakSet();
 
-  const getClosestSlideIndex = (items, slider) => {
-    let closestIndex = 0;
-    let minDistance = Number.POSITIVE_INFINITY;
-
-    items.forEach((item, index) => {
-      const distance = Math.abs(item.offsetLeft - slider.scrollLeft);
-
-      if (distance < minDistance) {
-        minDistance = distance;
-        closestIndex = index;
-      }
-    });
-
-    return closestIndex;
-  };
-
   const setupProgress = (gridSlider) => {
     const slider = gridSlider.querySelector(relatedSliderSelector);
 
@@ -102,50 +86,6 @@
 
       resizeObserver.observe(slider);
       slider.setAttribute('data-related-progress-resize-bound', 'true');
-    }
-
-    if (!gridSlider.hasAttribute('data-related-arrow-bound')) {
-      gridSlider.addEventListener('click', (event) => {
-        const arrow = event.target.closest('[data-button-arrow]');
-
-        if (!arrow || !gridSlider.contains(arrow)) {
-          return;
-        }
-
-        const items = Array.from(slider.querySelectorAll(gridItemSelector));
-        if (items.length < 2) {
-          return;
-        }
-
-        const firstVisibleSlide = slider.querySelector(`${gridItemSelector}.is-visible`);
-        let currentIndex = firstVisibleSlide ? items.indexOf(firstVisibleSlide) : getClosestSlideIndex(items, slider);
-
-        if (currentIndex < 0) {
-          currentIndex = 0;
-        }
-
-        let targetIndex = currentIndex;
-        if (arrow.hasAttribute('data-button-prev')) {
-          targetIndex = Math.max(0, currentIndex - 1);
-        }
-
-        if (arrow.hasAttribute('data-button-next')) {
-          targetIndex = Math.min(items.length - 1, currentIndex + 1);
-        }
-
-        if (targetIndex === currentIndex) {
-          return;
-        }
-
-        event.preventDefault();
-        slider.scrollTo({
-          top: 0,
-          left: items[targetIndex].offsetLeft,
-          behavior: 'smooth',
-        });
-      });
-
-      gridSlider.setAttribute('data-related-arrow-bound', 'true');
     }
 
     updateActive();

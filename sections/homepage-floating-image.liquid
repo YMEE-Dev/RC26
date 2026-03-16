@@ -1,0 +1,130 @@
+<!-- /sections/homepage-floating-image.liquid -->
+{%- liquid
+  assign section_title = section.settings.title | strip
+  assign section_eyebrow = section.settings.eyebrow | strip
+  assign image = section.settings.image
+  assign button_label = section.settings.button_label | strip
+  assign button_link = section.settings.button_link
+-%}
+
+<section
+  id="HomepageFloatingImage--{{ section.id }}"
+  class="homepage-floating-image"
+  data-section-id="{{ section.id }}"
+  data-section-type="homepage-floating-image"
+  style="
+    --homepage-floating-image-bg: {{ section.settings.background_color }};
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="homepage-floating-image__inner">
+    <div class="homepage-floating-image__media">
+      {%- if image != blank -%}
+        {{
+          image
+          | image_url: width: 2400
+          | image_tag:
+            class: 'homepage-floating-image__image',
+            loading: 'lazy',
+            sizes: '(min-width: 1200px) 1200px, 100vw',
+            widths: '375, 550, 750, 990, 1200, 1600, 2000, 2400'
+        }}
+      {%- else -%}
+        <div class="homepage-floating-image__placeholder">
+          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+        </div>
+      {%- endif -%}
+
+      <div class="homepage-floating-image__content">
+        {%- if section_eyebrow != blank -%}
+          <p class="homepage-floating-image__eyebrow">{{ section_eyebrow | escape }}</p>
+        {%- endif -%}
+
+        {%- if section_title != blank -%}
+          <h2 class="homepage-floating-image__title">{{ section_title | escape }}</h2>
+        {%- endif -%}
+
+        {%- if button_label != blank and button_link != blank -%}
+          <a href="{{ button_link }}" class="btn btn--outline homepage-floating-image__button">
+            {{- button_label | escape -}}
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Homepage floating image",
+  "settings": [
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#efefef"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "The Ruby"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Roberto Coin's Signature"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Discover more"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Homepage floating image"
+    }
+  ],
+  "enabled_on": {
+    "templates": ["index"]
+  }
+}
+{% endschema %}

@@ -9,21 +9,27 @@
 (function() {
   // Add custom code below this line
   const currentScript = document.currentScript;
-  const homepageProductSlidersSrc = currentScript && currentScript.dataset
-    ? currentScript.dataset.homepageProductSlidersSrc
-    : '';
+  const dataset = currentScript && currentScript.dataset ? currentScript.dataset : {};
 
-  if (homepageProductSlidersSrc) {
-    const existingScript = document.querySelector(`script[src="${homepageProductSlidersSrc}"]`);
-
-    if (!existingScript) {
-      const homepageProductSlidersScript = document.createElement('script');
-      homepageProductSlidersScript.src = homepageProductSlidersSrc;
-      homepageProductSlidersScript.defer = true;
-      homepageProductSlidersScript.setAttribute('data-homepage-product-sliders-script', 'true');
-      document.head.appendChild(homepageProductSlidersScript);
+  const loadScriptOnce = (src, marker) => {
+    if (!src) {
+      return;
     }
-  }
+
+    const existingScript = document.querySelector(`script[src="${src}"]`);
+    if (existingScript) {
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = src;
+    script.defer = true;
+    script.setAttribute(marker, 'true');
+    document.head.appendChild(script);
+  };
+
+  loadScriptOnce(dataset.homepageProductSlidersSrc || '', 'data-homepage-product-sliders-script');
+  loadScriptOnce(dataset.homepageFloatingImageSrc || '', 'data-homepage-floating-image-script');
 
 
   
