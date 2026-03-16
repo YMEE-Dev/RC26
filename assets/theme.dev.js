@@ -3618,6 +3618,7 @@
           this.desktop = this.querySelector("[data-header-desktop]");
           this.body = document.body;
           this.isCollectionTemplate = this.body.classList.contains("template-collection");
+          this.isBlogTemplate = this.body.classList.contains("template-blog");
           this.isSearchTemplate = this.body.classList.contains("template-search");
           this.isSpotlightCollectionTemplate =
             this.isCollectionTemplate &&
@@ -3775,7 +3776,7 @@
           const stickyThreshold = typeof this.headerOffset === "number" ? this.headerOffset : 0;
           const shouldShowRevealBlur = this.isSticky && goingUp && !atTop && position > stickyThreshold;
 
-          if ((this.isCollectionTemplate && !this.isSpotlightCollectionTemplate) || this.isSearchTemplate) {
+          if ((this.isCollectionTemplate && !this.isSpotlightCollectionTemplate) || this.isSearchTemplate || this.isBlogTemplate) {
             if (atTop) {
               this.body.classList.remove("header-scroll-hide");
               this.resetHeaderLayerHide();
@@ -3788,7 +3789,7 @@
             return;
           }
 
-          if (atTop) {
+          if (atTop || goingUp) {
             this.body.classList.remove("header-scroll-hide");
             this.resetHeaderLayerHide();
           } else if (goingDown) {
