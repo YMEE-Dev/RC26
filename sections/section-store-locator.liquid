@@ -101,19 +101,18 @@
   </div>
 </section>
 
-<!-- Swiper JS CDN -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const section = document.querySelector('[data-section-id="{{ section.id }}"]');
+    if (!section) return;
     const enableFetch = section.dataset.enableFetch === 'true';
     const sectionId = '{{ section.id }}';
 
-    // Initialize Swiper
     function initSwiper() {
-      const swiper = new Swiper('#StoreLocator--' + sectionId + ' .store-locator__swiper', {
+      if (typeof Swiper === 'undefined') return;
+      var el = document.querySelector('#StoreLocator--' + sectionId + ' .store-locator__swiper');
+      if (!el) return;
+      new Swiper(el, {
         slidesPerView: 1,
         spaceBetween: 80,
         loop: false,

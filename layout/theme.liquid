@@ -61,6 +61,22 @@
     {%- endcomment -%}
     <!-- Paste marketing code or third party scripts below this comment line ============== -->
 
+    <!-- Swiper: load only when store locator section is present (avoids conflicting with theme's slider library) -->
+    <script>
+      (function() {
+        if (document.querySelector('[data-section-type="store-locator"]')) {
+          var link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css';
+          document.head.appendChild(link);
+          var script = document.createElement('script');
+          script.src = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
+          script.onload = function() { window.dispatchEvent(new Event('swiper-ready')); };
+          document.body.appendChild(script);
+        }
+      })();
+    </script>
+
     <!-- And above this comment line ================================================== -->
   </body>
 </html>
