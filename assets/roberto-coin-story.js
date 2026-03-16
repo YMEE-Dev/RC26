@@ -8,7 +8,6 @@
       y: 18,
       w: 36,
       h: 46,
-      scale: 100,
     },
     {
       label: "Street portrait",
@@ -18,7 +17,6 @@
       y: 0,
       w: 24,
       h: 58,
-      scale: 100,
     },
     {
       label: "Gold detail",
@@ -28,7 +26,6 @@
       y: 8,
       w: 18,
       h: 26,
-      scale: 100,
     },
   ];
   const TIMELINE_COPY_2013 =
@@ -42,9 +39,6 @@
     normalized.y = Number.isFinite(Number(normalized.y)) ? Number(normalized.y) : fallback.y;
     normalized.w = Number.isFinite(Number(normalized.w)) && Number(normalized.w) > 0 ? Number(normalized.w) : fallback.w;
     normalized.h = Number.isFinite(Number(normalized.h)) && Number(normalized.h) > 0 ? Number(normalized.h) : fallback.h;
-    normalized.scale =
-      Number.isFinite(Number(normalized.scale)) && Number(normalized.scale) > 0 ? Number(normalized.scale) : fallback.scale;
-
     return normalized;
   }
 
@@ -321,11 +315,9 @@
       captionLineOne.textContent = lineOne;
       captionLineTwo.textContent = lineTwo;
 
-      const minX = layoutMedia.length ? Math.min(...layoutMedia.map((item) => item.x)) : 0;
-      const maxBottom = layoutMedia.length ? Math.max(...layoutMedia.map((item) => item.y + item.h)) : 68;
-      timelineCaption.style.left = `${Math.max(minX, 0)}%`;
-      timelineCaption.style.top = `${Math.min(maxBottom + 4, 88)}%`;
-      timelineCaption.style.width = `${Math.max(24, Math.min(40, 100 - Math.max(minX, 0) - 4))}%`;
+      timelineCaption.style.left = "74%";
+      timelineCaption.style.top = "38%";
+      timelineCaption.style.width = "24%";
 
       captionRevealTimer = window.setTimeout(() => {
         timelineCaption.classList.add("is-visible");
@@ -437,8 +429,6 @@
         if (item.image) {
           art.classList.add("has-image");
           art.style.backgroundImage = `url("${item.image}")`;
-          art.style.backgroundSize = `${Math.max(60, Math.min(180, item.scale || 100))}%`;
-          art.style.backgroundPosition = "center";
         } else {
           art.style.setProperty("--card-fill", item.fill);
         }
