@@ -1,5 +1,5 @@
 (() => {
-  const sectionSelector = '[data-section-type="homepage-product-list"]';
+  const sectionSelector = '[data-section-type="homepage-product-sliders"]';
   const relatedSliderSelector = '[data-grid-slider]';
   const gridItemSelector = '[data-grid-item]';
   const activeSections = new Set();

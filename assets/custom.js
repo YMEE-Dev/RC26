@@ -9,19 +9,19 @@
 (function() {
   // Add custom code below this line
   const currentScript = document.currentScript;
-  const homepageProductListSrc = currentScript && currentScript.dataset
-    ? currentScript.dataset.homepageProductListSrc
+  const homepageProductSlidersSrc = currentScript && currentScript.dataset
+    ? currentScript.dataset.homepageProductSlidersSrc
     : '';
 
-  if (homepageProductListSrc) {
-    const existingScript = document.querySelector(`script[src="${homepageProductListSrc}"]`);
+  if (homepageProductSlidersSrc) {
+    const existingScript = document.querySelector(`script[src="${homepageProductSlidersSrc}"]`);
 
     if (!existingScript) {
-      const homepageProductListScript = document.createElement('script');
-      homepageProductListScript.src = homepageProductListSrc;
-      homepageProductListScript.defer = true;
-      homepageProductListScript.setAttribute('data-homepage-product-list-script', 'true');
-      document.head.appendChild(homepageProductListScript);
+      const homepageProductSlidersScript = document.createElement('script');
+      homepageProductSlidersScript.src = homepageProductSlidersSrc;
+      homepageProductSlidersScript.defer = true;
+      homepageProductSlidersScript.setAttribute('data-homepage-product-sliders-script', 'true');
+      document.head.appendChild(homepageProductSlidersScript);
     }
   }
 
