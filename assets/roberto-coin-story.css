@@ -1025,6 +1025,7 @@ body.has-rc-story {
   position: absolute;
   z-index: 2;
   max-width: min(24rem, 34vw);
+  text-align: left;
   opacity: 0;
   transform: translateY(0.8rem);
   transition:
@@ -1039,6 +1040,7 @@ body.has-rc-story {
 
 .timeline-caption p {
   margin: 0;
+  text-align: left;
   font-family: "Inter", sans-serif;
   font-size: 12pt;
   font-weight: 400;
@@ -1093,30 +1095,15 @@ body.has-rc-story {
 }
 
 .media-art::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.14), transparent 32%),
-    linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.48) 100%),
-    var(--card-fill, linear-gradient(135deg, #446d63 0%, #243b38 100%));
+  display: none;
 }
 
 .media-art.has-image::before {
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.16), transparent 28%),
-    linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.4) 100%);
+  display: none;
 }
 
 .media-art::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(0deg, rgba(255, 255, 255, 0.08), transparent 40%),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 14px);
-  mix-blend-mode: screen;
-  opacity: 0.45;
+  display: none;
 }
 
 .year-rail {

@@ -8,6 +8,7 @@
       y: 18,
       w: 36,
       h: 46,
+      scale: 100,
     },
     {
       label: "Street portrait",
@@ -17,6 +18,7 @@
       y: 0,
       w: 24,
       h: 58,
+      scale: 100,
     },
     {
       label: "Gold detail",
@@ -26,6 +28,7 @@
       y: 8,
       w: 18,
       h: 26,
+      scale: 100,
     },
   ];
   const TIMELINE_COPY_2013 =
@@ -39,6 +42,8 @@
     normalized.y = Number.isFinite(Number(normalized.y)) ? Number(normalized.y) : fallback.y;
     normalized.w = Number.isFinite(Number(normalized.w)) && Number(normalized.w) > 0 ? Number(normalized.w) : fallback.w;
     normalized.h = Number.isFinite(Number(normalized.h)) && Number(normalized.h) > 0 ? Number(normalized.h) : fallback.h;
+    normalized.scale =
+      Number.isFinite(Number(normalized.scale)) && Number(normalized.scale) > 0 ? Number(normalized.scale) : fallback.scale;
 
     return normalized;
   }
@@ -303,9 +308,7 @@
         return;
       }
 
-      const isYear2013 = String(entry.year).trim() === "2013";
       const layoutMedia = buildTimelineMediaLayout(entry);
-      const anchor = layoutMedia[layoutMedia.length - 1] || { x: 34, y: 60, w: 32, h: 20 };
       const [lineOne, lineTwo] = toTwoLineCaption(entry.copy);
       const lastImageDelay = Math.max(layoutMedia.length - 1, 0) * 320;
       const captionDelay = lastImageDelay + 260;
@@ -318,15 +321,11 @@
       captionLineOne.textContent = lineOne;
       captionLineTwo.textContent = lineTwo;
 
-      if (isYear2013) {
-        timelineCaption.style.left = `${Math.min(anchor.x + anchor.w + 3, 72)}%`;
-        timelineCaption.style.top = `${Math.max(anchor.y + 6, 10)}%`;
-        timelineCaption.style.width = "26%";
-      } else {
-        timelineCaption.style.left = `${anchor.x}%`;
-        timelineCaption.style.top = `${Math.min(anchor.y + anchor.h + 4, 88)}%`;
-        timelineCaption.style.width = `${Math.max(anchor.w, 24)}%`;
-      }
+      const minX = layoutMedia.length ? Math.min(...layoutMedia.map((item) => item.x)) : 0;
+      const maxBottom = layoutMedia.length ? Math.max(...layoutMedia.map((item) => item.y + item.h)) : 68;
+      timelineCaption.style.left = `${Math.max(minX, 0)}%`;
+      timelineCaption.style.top = `${Math.min(maxBottom + 4, 88)}%`;
+      timelineCaption.style.width = `${Math.max(24, Math.min(40, 100 - Math.max(minX, 0) - 4))}%`;
 
       captionRevealTimer = window.setTimeout(() => {
         timelineCaption.classList.add("is-visible");
@@ -438,6 +437,8 @@
         if (item.image) {
           art.classList.add("has-image");
           art.style.backgroundImage = `url("${item.image}")`;
+          art.style.backgroundSize = `${Math.max(60, Math.min(180, item.scale || 100))}%`;
+          art.style.backgroundPosition = "center";
         } else {
           art.style.setProperty("--card-fill", item.fill);
         }

@@ -313,7 +313,8 @@
                 "x": {{ block.settings.media_1_x | default: 0 | json }},
                 "y": {{ block.settings.media_1_y | default: 18 | json }},
                 "w": {{ block.settings.media_1_w | default: 36 | json }},
-                "h": {{ block.settings.media_1_h | default: 46 | json }}
+                "h": {{ block.settings.media_1_h | default: 46 | json }},
+                "scale": {{ block.settings.media_1_scale | default: 100 | json }}
               },
               {
                 "label": {{ block.settings.media_2_label | default: 'Media 2' | json }},
@@ -322,7 +323,8 @@
                 "x": {{ block.settings.media_2_x | default: 43 | json }},
                 "y": {{ block.settings.media_2_y | default: 0 | json }},
                 "w": {{ block.settings.media_2_w | default: 24 | json }},
-                "h": {{ block.settings.media_2_h | default: 58 | json }}
+                "h": {{ block.settings.media_2_h | default: 58 | json }},
+                "scale": {{ block.settings.media_2_scale | default: 100 | json }}
               },
               {
                 "label": {{ block.settings.media_3_label | default: 'Media 3' | json }},
@@ -331,7 +333,8 @@
                 "x": {{ block.settings.media_3_x | default: 74 | json }},
                 "y": {{ block.settings.media_3_y | default: 8 | json }},
                 "w": {{ block.settings.media_3_w | default: 18 | json }},
-                "h": {{ block.settings.media_3_h | default: 26 | json }}
+                "h": {{ block.settings.media_3_h | default: 26 | json }},
+                "scale": {{ block.settings.media_3_scale | default: 100 | json }}
               }
             ]
           }{% unless forloop.last %},{% endunless %}
@@ -427,6 +430,7 @@
         { "type": "range", "id": "media_1_y", "label": "Y position", "min": 0, "max": 90, "step": 1, "unit": "%", "default": 18 },
         { "type": "range", "id": "media_1_w", "label": "Width", "min": 10, "max": 60, "step": 1, "unit": "%", "default": 36 },
         { "type": "range", "id": "media_1_h", "label": "Height", "min": 10, "max": 70, "step": 1, "unit": "%", "default": 46 },
+        { "type": "range", "id": "media_1_scale", "label": "Image scale", "min": 60, "max": 180, "step": 1, "unit": "%", "default": 100 },
 
         { "type": "header", "content": "Media 2" },
         { "type": "text", "id": "media_2_label", "label": "Label", "default": "Street portrait" },
@@ -436,6 +440,7 @@
         { "type": "range", "id": "media_2_y", "label": "Y position", "min": 0, "max": 90, "step": 1, "unit": "%", "default": 0 },
         { "type": "range", "id": "media_2_w", "label": "Width", "min": 10, "max": 60, "step": 1, "unit": "%", "default": 24 },
         { "type": "range", "id": "media_2_h", "label": "Height", "min": 10, "max": 70, "step": 1, "unit": "%", "default": 58 },
+        { "type": "range", "id": "media_2_scale", "label": "Image scale", "min": 60, "max": 180, "step": 1, "unit": "%", "default": 100 },
 
         { "type": "header", "content": "Media 3" },
         { "type": "text", "id": "media_3_label", "label": "Label", "default": "Gold detail" },
@@ -444,7 +449,8 @@
         { "type": "range", "id": "media_3_x", "label": "X position", "min": 0, "max": 90, "step": 1, "unit": "%", "default": 74 },
         { "type": "range", "id": "media_3_y", "label": "Y position", "min": 0, "max": 90, "step": 1, "unit": "%", "default": 8 },
         { "type": "range", "id": "media_3_w", "label": "Width", "min": 10, "max": 60, "step": 1, "unit": "%", "default": 18 },
-        { "type": "range", "id": "media_3_h", "label": "Height", "min": 10, "max": 70, "step": 1, "unit": "%", "default": 26 }
+        { "type": "range", "id": "media_3_h", "label": "Height", "min": 10, "max": 70, "step": 1, "unit": "%", "default": 26 },
+        { "type": "range", "id": "media_3_scale", "label": "Image scale", "min": 60, "max": 180, "step": 1, "unit": "%", "default": 100 }
       ]
     }
   ],
