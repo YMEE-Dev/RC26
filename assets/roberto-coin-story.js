@@ -8,6 +8,7 @@
       y: 18,
       w: 36,
       h: 46,
+      scale: 100,
     },
     {
       label: "Street portrait",
@@ -17,6 +18,7 @@
       y: 0,
       w: 24,
       h: 58,
+      scale: 100,
     },
     {
       label: "Gold detail",
@@ -26,6 +28,7 @@
       y: 8,
       w: 18,
       h: 26,
+      scale: 100,
     },
   ];
   const TIMELINE_COPY_2013 =
@@ -39,6 +42,8 @@
     normalized.y = Number.isFinite(Number(normalized.y)) ? Number(normalized.y) : fallback.y;
     normalized.w = Number.isFinite(Number(normalized.w)) && Number(normalized.w) > 0 ? Number(normalized.w) : fallback.w;
     normalized.h = Number.isFinite(Number(normalized.h)) && Number(normalized.h) > 0 ? Number(normalized.h) : fallback.h;
+    normalized.scale =
+      Number.isFinite(Number(normalized.scale)) && Number(normalized.scale) > 0 ? Number(normalized.scale) : fallback.scale;
     return normalized;
   }
 
@@ -429,6 +434,8 @@
         if (item.image) {
           art.classList.add("has-image");
           art.style.backgroundImage = `url("${item.image}")`;
+          art.style.backgroundSize = `${Math.max(60, Math.min(180, item.scale || 100))}%`;
+          art.style.backgroundPosition = "center";
         } else {
           art.style.setProperty("--card-fill", item.fill);
         }
