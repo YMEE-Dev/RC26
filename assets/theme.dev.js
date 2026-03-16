@@ -3757,6 +3757,8 @@
         }
 
         initHeaderScrollHide() {
+          this.scrollUpShowThreshold = 80;
+          this.lastScrollDownPosition = null;
           document.addEventListener("theme:scroll", this.scrollHideEvent);
           this.toggleHeaderHideOnScroll({
             detail: {
