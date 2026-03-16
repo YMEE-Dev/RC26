@@ -1,4 +1,5 @@
 <!-- /sections/section-blog-listing.liquid -->
+{{ 'blog-listing.css' | asset_url | stylesheet_tag }}
 {%- liquid
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   comment
@@ -16,12 +17,12 @@
 
     /* padding-inline:  var(--outer); */
   }
-  #shopify-section-{{ section.id }} .blog-listing-section-wrapper__inner {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1); 
-  }
-  #shopify-section-{{ section.id }} .blog-listing-section {
-    background-color: #F9F9F9;
-  }
+#shopify-section-{{ section.id }} .blog-listing-section-wrapper__inner {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1); 
+}
+#shopify-section-{{ section.id }} .blog-listing-section {
+  background-color: #F9F9F9;
+}
  
 {%- endstyle -%}
 <section class="blog-listing-section-wrapper">
