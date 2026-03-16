@@ -3799,7 +3799,7 @@
             this.body.classList.remove("header-scroll-hide");
             this.resetHeaderLayerHide();
           } else if (goingUp) {
-            const scrolledUpEnough = this.lastScrollDownPosition !== null && this.lastScrollDownPosition - position >= this.scrollUpShowThreshold;
+            const scrolledUpEnough = this.lastScrollDownPosition === null || this.lastScrollDownPosition - position >= this.scrollUpShowThreshold;
             if (scrolledUpEnough) {
               this.lastScrollDownPosition = null;
               this.body.classList.remove("header-scroll-hide");
