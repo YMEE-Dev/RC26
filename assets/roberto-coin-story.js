@@ -755,15 +755,15 @@
       }
 
       if (window.innerWidth > 820) {
-        const mirroredDesktopLayout = [
-          { top: "-40px", right: "20%", width: "218px", height: "312px" },
-          { top: "-20", left: "5%", width: "300px", height: "416px" },
-          { right: "calc(8% - 100px)", bottom: "92px", width: "414px", height: "310px" },
-          { left: "220px", bottom: "-12px", width: "240px", height: "338px" },
+        const altDesktopLayout = [
+          { top: "20px", left: "31%", width: "152px", height: "228px" },
+          { top: "8px", right: "4%", width: "300px", height: "416px" },
+          { left: "calc(6% - 100px)", bottom: "84px", width: "430px", height: "318px" },
+          { right: "4%", bottom: "-10px", width: "286px", height: "206px" },
         ];
 
         heroCollageItems.forEach((item, index) => {
-          const styles = mirroredDesktopLayout[index] || {};
+          const styles = altDesktopLayout[index] || {};
           item.style.top = styles.top ?? "auto";
           item.style.right = styles.right ?? "auto";
           item.style.bottom = styles.bottom ?? "auto";
