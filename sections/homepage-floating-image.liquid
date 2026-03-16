@@ -3,6 +3,8 @@
   assign section_title = section.settings.title | strip
   assign section_eyebrow = section.settings.eyebrow | strip
   assign image = section.settings.image
+  assign mobile_image = section.settings.mobile_image
+  assign desktop_image = image | default: mobile_image
   assign button_label = section.settings.button_label | strip
   assign button_link = section.settings.button_link
 -%}
@@ -19,17 +21,29 @@
   "
 >
   <div class="homepage-floating-image__inner">
-    <div class="homepage-floating-image__media">
-      {%- if image != blank -%}
+    <div class="homepage-floating-image__media{% if mobile_image != blank %} homepage-floating-image__media--has-mobile-image{% endif %}">
+      {%- if desktop_image != blank -%}
         {{
-          image
+          desktop_image
           | image_url: width: 2400
           | image_tag:
-            class: 'homepage-floating-image__image',
+            class: 'homepage-floating-image__image homepage-floating-image__image--desktop',
             loading: 'lazy',
             sizes: '(min-width: 1200px) 1200px, 100vw',
             widths: '375, 550, 750, 990, 1200, 1600, 2000, 2400'
         }}
+
+        {%- if mobile_image != blank -%}
+          {{
+            mobile_image
+            | image_url: width: 1500
+            | image_tag:
+              class: 'homepage-floating-image__image homepage-floating-image__image--mobile',
+              loading: 'lazy',
+              sizes: '(max-width: 749px) calc(100vw - 40px), 1px',
+              widths: '320, 375, 550, 750, 990, 1200, 1500'
+          }}
+        {%- endif -%}
       {%- else -%}
         <div class="homepage-floating-image__placeholder">
           {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
@@ -37,16 +51,18 @@
       {%- endif -%}
 
       <div class="homepage-floating-image__content">
-        {%- if section_eyebrow != blank -%}
-          <p class="homepage-floating-image__eyebrow">{{ section_eyebrow | escape }}</p>
-        {%- endif -%}
+        <div class="homepage-floating-image__copy">
+          {%- if section_eyebrow != blank -%}
+            <p class="homepage-floating-image__eyebrow title">{{ section_eyebrow | escape }}</p>
+          {%- endif -%}
 
-        {%- if section_title != blank -%}
-          <h2 class="homepage-floating-image__title">{{ section_title | escape }}</h2>
-        {%- endif -%}
+          {%- if section_title != blank -%}
+            <h2 class="homepage-floating-image__title ">{{ section_title | escape }}</h2>
+          {%- endif -%}
+        </div>
 
         {%- if button_label != blank and button_link != blank -%}
-          <a href="{{ button_link }}" class="btn btn--outline homepage-floating-image__button">
+          <a href="{{ button_link }}" class="btn btn-secondary btn--outline homepage-floating-image__button">
             {{- button_label | escape -}}
           </a>
         {%- endif -%}
@@ -81,6 +97,11 @@
       "type": "image_picker",
       "id": "image",
       "label": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "Mobile image"
     },
     {
       "type": "text",
