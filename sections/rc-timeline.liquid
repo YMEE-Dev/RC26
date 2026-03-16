@@ -303,8 +303,8 @@
           {
             "id": {{ block.id | json }},
             "year": {{ block.settings.year | default: '1977' | json }},
-            "title": {{ block.settings.entry_title | default: block.settings.title | default: 'Milestone' | json }},
-            "copy": {{ block.settings.copy | strip_html | strip_newlines | default: block.settings.entry_title | default: block.settings.title | default: block.settings.year | json }},
+            "title": {{ block.settings.title | default: 'Milestone' | json }},
+            "copy": {{ block.settings.copy | strip_html | strip_newlines | default: block.settings.title | default: block.settings.year | json }},
             "media": [
               {
                 "label": {{ block.settings.media_1_label | default: 'Media 1' | json }},
@@ -415,10 +415,10 @@
   "blocks": [
     {
       "type": "entry",
-      "name": "Timeline",
+      "name": "Timeline entry",
       "settings": [
         { "type": "text", "id": "year", "label": "Year", "default": "1977" },
-        { "type": "text", "id": "entry_title", "label": "Title", "default": "Milestone" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Milestone" },
         { "type": "richtext", "id": "copy", "label": "Copy", "default": "<p>Roberto Coin returned to his homeland of Italy to study the goldsmithing tradition under the guidance of renowned Italian teachers. He launched his jewelry trade on the British market.</p>" },
         { "type": "image_picker", "id": "timeline_image", "label": "Timeline image (primary)" },
 
@@ -459,8 +459,8 @@
     {
       "name": "Roberto Coin timeline",
       "blocks": [
-        { "type": "entry", "settings": { "year": "1977", "entry_title": "Milestone" } },
-        { "type": "entry", "settings": { "year": "1984", "entry_title": "Expansion", "copy": "<p>He began designing and creating jewelry for some of the most prestigious international brands.</p>" } }
+        { "type": "entry", "settings": { "year": "1977", "title": "Milestone" } },
+        { "type": "entry", "settings": { "year": "1984", "title": "Expansion", "copy": "<p>He began designing and creating jewelry for some of the most prestigious international brands.</p>" } }
       ]
     }
   ]
