@@ -3731,17 +3731,22 @@
         cartToggleEvent() {
           if (theme.settings.cartType !== "drawer") return;
 
-          this.querySelectorAll("[data-cart-toggle]")?.forEach((button) => {
-            button.addEventListener("click", (e) => {
-              const cartDrawer = document.querySelector("cart-drawer");
+          if (window.theme.cartToggleHandlerInitialized) return;
 
-              if (cartDrawer) {
-                e.preventDefault();
-                cartDrawer.dispatchEvent(new CustomEvent("theme:cart-drawer:show"));
-                window.a11y.lastElement = button;
-              }
-            });
+          document.addEventListener("click", (e) => {
+            const button = e.target.closest("[data-cart-toggle]");
+            if (!button) return;
+
+            const cartDrawer = document.querySelector("cart-drawer");
+
+            if (cartDrawer) {
+              e.preventDefault();
+              cartDrawer.dispatchEvent(new CustomEvent("theme:cart-drawer:show"));
+              window.a11y.lastElement = button;
+            }
           });
+
+          window.theme.cartToggleHandlerInitialized = true;
         }
 
         initSticky() {
