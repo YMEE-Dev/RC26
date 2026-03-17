@@ -9,7 +9,10 @@
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
     --bg-color: {{ section.settings.background_color }};
-    /* padding-inline:  var(--outer); */
+    --COLUMNS: 3;
+    --COLUMNS-MEDIUM: 2;
+    --COLUMNS-SMALL: 2;
+    --COLUMNS-MOBILE: 1;
     overflow: hidden;
   }
 {%- endstyle -%}
@@ -58,10 +61,13 @@
     {%- assign location_blocks = section.blocks | where: 'type', 'location_card' -%}
     {%- if location_blocks.size > 0 -%}
       <div class="store-locator__carousel-container">
-        <div class="swiper store-locator__swiper">
-          <div class="swiper-wrapper">
+        <grid-slider align-arrows>
+          <div
+            class="store-locator__grid grid grid--slider grid--mobile-slider{% if location_blocks.size <= 4 %} grid--slider-disabled{% endif %}"
+            data-grid-slider
+          >
             {%- for block in location_blocks -%}
-              <div class="swiper-slide" {{ block.shopify_attributes }}>
+              <div class="grid-item store-locator__grid-item" data-grid-item {{ block.shopify_attributes }}>
                 <div class="store-locator__card">
                   {%- if block.settings.image != blank -%}
                     <div class="store-locator__card-image">
@@ -85,11 +91,7 @@
               </div>
             {%- endfor -%}
           </div>
-          
-          <!-- Navigation buttons -->
-          {% comment %} <div class="swiper-button-prev store-locator__nav-prev"></div>
-          <div class="swiper-button-next store-locator__nav-next"></div> {% endcomment %}
-        </div>
+        </grid-slider>
       </div>
     {%- endif -%}
 
@@ -104,8 +106,6 @@
 <script>
   (function() {
     const sectionId = '{{ section.id }}';
-    const swiperInstances = window.__storeLocatorSwipers || {};
-    window.__storeLocatorSwipers = swiperInstances;
 
     function initStoreLocatorSection() {
       const section = document.querySelector('[data-section-id="' + sectionId + '"]');
@@ -113,50 +113,32 @@
 
       const enableFetch = section.dataset.enableFetch === 'true';
 
-      function initSwiper() {
-        if (typeof Swiper === 'undefined') return;
-        var el = document.querySelector('#StoreLocator--' + sectionId + ' .store-locator__swiper');
-        if (!el) return;
-
-        if (swiperInstances[sectionId]) {
-          swiperInstances[sectionId].destroy(true, true);
-          delete swiperInstances[sectionId];
+      function initGridSlider() {
+        const gridSlider = section.querySelector('grid-slider');
+        if (gridSlider) {
+          gridSlider.dispatchEvent(new CustomEvent('theme:grid-slider:init'));
         }
-
-        swiperInstances[sectionId] = new Swiper(el, {
-          slidesPerView: 1,
-          spaceBetween: 80,
-          loop: false,
-          smooth: true,
-          breakpoints: {
-            640: { slidesPerView: 2, spaceBetween: 80 },
-            990: { slidesPerView: 2.7, spaceBetween: 80 },
-            1200: { slidesPerView: 2.7, spaceBetween: 80 }
-          }
-        });
       }
 
       function renderLocations(locations) {
-        const swiperWrapper = section.querySelector('.swiper-wrapper');
-        if (!swiperWrapper) return;
-        swiperWrapper.innerHTML = '';
+        const gridSlider = section.querySelector('[data-grid-slider]');
+        if (!gridSlider) return;
+        gridSlider.innerHTML = '';
 
-        locations.forEach(location => {
-          const slide = document.createElement('div');
-          slide.className = 'swiper-slide';
-          slide.innerHTML = `
-            <div class="store-locator__card">
-              ${location.image 
-                ? `<div class="store-locator__card-image"><img src="${location.image}" alt="${location.name}" loading="lazy"></div>`
-                : `<div class="store-locator__card-placeholder"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 525.5 525.5"><path d="M375 262.7L262.7 375 150.4 262.7l112.3-112.3z"/></svg></div>`
-              }
-              <div class="store-locator__card-content">
-                ${location.subheading ? `<p class="store-locator__card-subheading">${location.subheading.toUpperCase()}</p>` : ''}
-                ${location.name ? `<h3 class="store-locator__card-heading">${location.name}</h3>` : ''}
-              </div>
-            </div>
-          `;
-          swiperWrapper.appendChild(slide);
+        locations.forEach(function(location) {
+          const item = document.createElement('div');
+          item.className = 'grid-item store-locator__grid-item';
+          item.setAttribute('data-grid-item', '');
+          item.innerHTML = '<div class="store-locator__card">' +
+            (location.image
+              ? '<div class="store-locator__card-image"><img src="' + location.image + '" alt="' + (location.name || '') + '" loading="lazy"></div>'
+              : '<div class="store-locator__card-placeholder"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 525.5 525.5"><path d="M375 262.7L262.7 375 150.4 262.7l112.3-112.3z"/></svg></div>'
+            ) +
+            '<div class="store-locator__card-content">' +
+            (location.subheading ? '<p class="store-locator__card-subheading">' + location.subheading.toUpperCase() + '</p>' : '') +
+            (location.name ? '<h3 class="store-locator__card-heading">' + location.name + '</h3>' : '') +
+            '</div></div>';
+          gridSlider.appendChild(item);
         });
       }
 
@@ -167,21 +149,21 @@
         if (carousel) carousel.style.display = 'none';
 
         fetch('/apps/store-locator/locations')
-          .then(res => res.json())
-          .then(data => {
+          .then(function(res) { return res.json(); })
+          .then(function(data) {
             if (data && data.locations && data.locations.length > 0) renderLocations(data.locations);
             loading.style.display = 'none';
             if (carousel) carousel.style.display = 'block';
-            initSwiper();
+            initGridSlider();
           })
           .catch(function(err) {
             console.error('Error fetching locations:', err);
             loading.style.display = 'none';
             if (carousel) carousel.style.display = 'block';
-            initSwiper();
+            initGridSlider();
           });
       } else {
-        initSwiper();
+        initGridSlider();
       }
     }
 
