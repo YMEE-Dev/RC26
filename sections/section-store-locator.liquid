@@ -28,7 +28,8 @@
   }
   @media (min-width: 990px) {
     #StoreLocator--{{ section.id }} .grid--slider {
-      --item-width: calc((100vw - var(--scrollbar-width, 0px) - var(--outer, 20px) * 2) * 0.35);
+      /* ~40% per item so 3+ items overflow and slider activates */
+      --item-width: calc((100vw - var(--scrollbar-width, 0px) - var(--outer, 20px) * 2) * 0.4);
     }
   }
 {%- endstyle -%}
