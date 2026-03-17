@@ -282,6 +282,13 @@
 
         sectionRoot.setAttribute('data-ymee-variant-dropdown-enabled', 'true');
 
+        var productInfoEl =
+          sectionRoot.closest("product-info") || sectionRoot.querySelector("product-info") || sectionRoot;
+        if (productInfoEl && productInfoEl.tagName === "PRODUCT-INFO") {
+          productInfoEl.setAttribute("data-variant-image-scroll", "false");
+          productInfoEl.variantImageScroll = false;
+        }
+
         var toggle = root.querySelector('.ymee-variant-dropdown__toggle');
         var menu = root.querySelector('.ymee-variant-dropdown__menu');
         var placeholderEl = root.querySelector('[data-ymee-variant-dropdown-placeholder]');
@@ -953,25 +960,6 @@
       picker.closest('[data-section-id="' + cssEscape(sectionId) + '"]') ||
       document;
 
-    // Gentle scroll to top on color click
-    var startPosition = window.pageYOffset || window.scrollY || 0;
-    var startTime = null;
-    var duration = 300; // ms
-
-    function easeInOutCubic(t) {
-      return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
-    }
-
-    function animateScroll(currentTime) {
-      if (startTime === null) startTime = currentTime;
-      var timeElapsed = currentTime - startTime;
-      var run = easeInOutCubic(Math.min(timeElapsed / duration, 1));
-      window.scrollTo(0, startPosition * (1 - run));
-      if (timeElapsed < duration) {
-        requestAnimationFrame(animateScroll);
-      }
-    }
-    requestAnimationFrame(animateScroll);
 
     // Update selected state
     picker.querySelectorAll('.ymee-color-picker__item').forEach(function (item) {
