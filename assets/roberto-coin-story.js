@@ -139,7 +139,10 @@
     timelineEntries = timelineEntries
       .map((entry) => {
         const media = (entry.media || [])
-          .map((item, index) => normalizeMediaItem(item, index))
+          .map((item, index) => ({
+            ...normalizeMediaItem(item, index),
+            slot: index + 1,
+          }))
           .filter((item) => item && item.w > 0 && item.h > 0 && item.image && String(item.image).trim() !== "");
         const yearValue = String(entry.year || "").trim();
         const isYear2013 = yearValue === "2013";
@@ -291,6 +294,11 @@
         return;
       }
 
+      if (window.innerWidth <= 820) {
+        yearRail.style.setProperty("--rail-shift", "0px");
+        return;
+      }
+
       const activeButton = buttons[index];
       if (!activeButton) {
         return;
@@ -348,8 +356,17 @@
     function buildTimelineMediaLayout(entry) {
       const mediaItems = (entry.media || []).map((item) => ({ ...item }));
       if (String(entry.year).trim() === "2013") {
-        const preferredCustom = mediaItems.find((item) => item.image_source === "custom" || item.imageSource === "custom");
-        const preferred = preferredCustom || mediaItems[0] || mediaItems[1] || mediaItems[2];
+        const customItems = mediaItems.filter((item) => item.image_source === "custom" || item.imageSource === "custom");
+        const preferredCustom =
+          customItems.find((item) => item.slot === 2) ||
+          customItems.find((item) => item.slot === 1) ||
+          customItems.find((item) => item.slot === 3);
+        const preferred =
+          preferredCustom ||
+          mediaItems.find((item) => item.slot === 2) ||
+          mediaItems.find((item) => item.slot === 1) ||
+          mediaItems.find((item) => item.slot === 3) ||
+          mediaItems[0];
         if (!preferred) {
           return [];
         }
@@ -503,6 +520,38 @@
     }
 
     function updateActiveEntryOnScroll() {
+      if (window.innerWidth <= 820 && timelineEntries.length) {
+        const triggerLine = (window.innerHeight || document.documentElement.clientHeight) * 0.62;
+
+        if (timelineRoot) {
+          const timelineTop = timelineRoot.getBoundingClientRect().top;
+          if (timelineTop > triggerLine) {
+            setActiveEntry(-1);
+            return;
+          }
+        }
+
+        const steps = [...section.querySelectorAll(".timeline-step")];
+        let nextIndex = 0;
+        let found = false;
+
+        steps.forEach((step, index) => {
+          const top = step.getBoundingClientRect().top;
+          if (top <= triggerLine) {
+            nextIndex = index;
+            found = true;
+          }
+        });
+
+        if (!found) {
+          setActiveEntry(0);
+          return;
+        }
+
+        setActiveEntry(clamp(nextIndex, 0, timelineEntries.length - 1));
+        return;
+      }
+
       const triggerLine = window.innerHeight * 0.58;
       if (timelineRoot) {
         const timelineTop = timelineRoot.getBoundingClientRect().top;
