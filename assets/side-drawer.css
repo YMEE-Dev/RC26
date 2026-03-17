@@ -403,6 +403,12 @@ side-drawer .drawer__link-value {
   text-transform: var(--BTN-UPPERCASE);
 }
 
+@media (max-width: 767px) {
+  side-drawer .drawer-concierge .drawer__link-value {
+    display: none;
+  }
+}
+
 side-drawer .drawer__button {
   color: var(--COLOR-TEXT);
   text-align: center;
@@ -617,6 +623,7 @@ side-drawer .accordion__title {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
 }
 
 side-drawer .accordion__title::after {
@@ -627,14 +634,18 @@ side-drawer .accordion__title .accordion-icon-wrapper {
   margin-left: auto;
   display: flex;
   align-items: center;
+  position: relative;
+  width: 12px;
+  height: 12px;
 }
 
 side-drawer .accordion__title .accordion-icon-wrapper .icon {
   width: 12px;
   height: 12px;
-  left: auto;
-  right: 0;
-  transition: transform 0.3s ease;
+  position: absolute;
+  left: 0;
+  top: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 side-drawer .accordion__title .accordion-icon-wrapper .icon path {
@@ -642,19 +653,23 @@ side-drawer .accordion__title .accordion-icon-wrapper .icon path {
 }
 
 side-drawer .accordion[open] .accordion-icon-wrapper .icon-plus {
-  display: none;
+  opacity: 0;
+  transform: scale(0.8);
 }
 
 side-drawer .accordion[open] .accordion-icon-wrapper .icon-minus {
-  display: block;
+  opacity: 1;
+  transform: scale(1);
 }
 
 side-drawer .accordion:not([open]) .accordion-icon-wrapper .icon-plus {
-  display: block;
+  opacity: 1;
+  transform: scale(1);
 }
 
 side-drawer .accordion:not([open]) .accordion-icon-wrapper .icon-minus {
-  display: none;
+  opacity: 0;
+  transform: scale(0.8);
 }
 
 side-drawer .accordion__content {
@@ -664,6 +679,45 @@ side-drawer .accordion__content {
   font-style: var(--FONT-STYLE-BODY);
   font-weight: var(--FONT-WEIGHT-BODY);
   letter-spacing: var(--LETTER-SPACING-BODY);
+}
+
+/* Smooth accordion animations for drawer */
+side-drawer [data-collapsible-body] {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+  transition: height 0.3s ease;
+}
+
+side-drawer [data-collapsible-content] {
+  display: grid;
+  grid-template-columns: 100%;
+}
+
+side-drawer [data-collapsible][open="false"] [data-collapsible-content] {
+  animation: fadeOut 0.3s ease-in;
+}
+
+side-drawer [data-collapsible][open="true"] [data-collapsible-content] {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 @media (max-width: 768px) {
