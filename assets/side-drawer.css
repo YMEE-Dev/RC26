@@ -206,11 +206,12 @@ side-drawer .drawer__close {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: background-color 0.2s ease;
+  outline: none;
 }
 
-side-drawer .drawer__close:hover {
-  background-color: var(--bg-accent);
+side-drawer .drawer__close:focus-visible {
+  outline: 2px solid var(--COLOR-TEXT);
+  outline-offset: 2px;
 }
 
 side-drawer .drawer__close svg {
@@ -221,14 +222,15 @@ side-drawer .drawer__close svg {
 
 side-drawer .drawer__content-wrapper {
   padding: 40px;
-  height: 100%;
+  flex: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 side-drawer .drawer-content__main {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  min-height: 100%;
 }
 
 side-drawer .drawer-content__link {
@@ -258,7 +260,7 @@ side-drawer .drawer-content__title {
   margin-bottom: 15px;
   color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-HEADING);
-  font-size: var(--font-display-s);
+  font-size: var(--FONT-DISPLAY-S);
   font-style: var(--FONT-STYLE-HEADING);
   font-weight: var(--FONT-WEIGHT-HEADING);
   line-height: var(--LINE-HEIGHT-DISPLAY-S);
@@ -282,7 +284,7 @@ side-drawer .drawer-content__description {
   margin-bottom: 20px;
   color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-BODY);
-  font-size: var(--font-body-medium);
+  font-size: var(--FONT-SIZE-BASE);
   font-style: var(--FONT-STYLE-BODY);
   font-weight: var(--FONT-WEIGHT-BODY);
   line-height: var(--LINE-HEIGHT-BODY);
@@ -347,7 +349,7 @@ side-drawer .drawer__link {
   border-bottom: 1px solid #e5e5e5;
   transition: opacity 0.2s ease;
   font-family: var(--FONT-STACK-BODY);
-  font-size: var(--font-body-medium);
+  font-size: var(--FONT-SIZE-BASE);
   font-weight: var(--FONT-WEIGHT-BODY);
   line-height: var(--LINE-HEIGHT-BODY);
 }
@@ -779,8 +781,8 @@ side-drawer[aria-hidden="false"] .drawer__underlay {
   }
 
   side-drawer .drawer__close {
-    top: 20px;
-    right: 20px;
+    top: 40px;
+    right: 12px;
   }
 }
 

@@ -282,6 +282,13 @@
 
         sectionRoot.setAttribute('data-ymee-variant-dropdown-enabled', 'true');
 
+        var productInfoEl =
+          sectionRoot.closest("product-info") || sectionRoot.querySelector("product-info") || sectionRoot;
+        if (productInfoEl && productInfoEl.tagName === "PRODUCT-INFO") {
+          productInfoEl.setAttribute("data-variant-image-scroll", "false");
+          productInfoEl.variantImageScroll = false;
+        }
+
         var toggle = root.querySelector('.ymee-variant-dropdown__toggle');
         var menu = root.querySelector('.ymee-variant-dropdown__menu');
         var placeholderEl = root.querySelector('[data-ymee-variant-dropdown-placeholder]');
@@ -293,21 +300,25 @@
           return document.getElementById(productFormId);
         }
 
-        function submitProductForm() {
+        function submitProductForm(variantId) {
           var liveFormEl = getLiveFormEl();
           if (!liveFormEl) return;
 
-          try {
-            if (typeof liveFormEl.requestSubmit === 'function') {
-              liveFormEl.requestSubmit();
-              return;
-            }
-          } catch (err) { /* no-op */ }
+          var idInput = liveFormEl.querySelector('input[name="id"]');
+          if (idInput) {
+            idInput.disabled = false;
+            if (variantId) idInput.value = variantId;
+          }
 
-          try {
-            var realSubmit = liveFormEl.querySelector('button[type="submit"], input[type="submit"]');
-            if (realSubmit && typeof realSubmit.click === 'function') realSubmit.click();
-          } catch (err2) { /* no-op */ }
+          var submitBtn = liveFormEl.querySelector('button[type="submit"]');
+          if (submitBtn) submitBtn.disabled = false;
+
+          document.dispatchEvent(
+            new CustomEvent("theme:cart:add", {
+              detail: { button: submitBtn },
+              bubbles: false,
+            })
+          );
         }
 
         function getLiveVariantIdInput() {
@@ -701,6 +712,7 @@
 
           variantIdInput = getLiveVariantIdInput();
           if (variantIdInput && variantId) {
+            variantIdInput.disabled = false;
             if (String(variantIdInput.value) !== String(variantId)) {
               variantIdInput.value = variantId;
               variantIdInput.dispatchEvent(new Event('change', { bubbles: true }));
@@ -760,11 +772,12 @@
             if (addBtn) {
               e.preventDefault();
               e.stopPropagation();
+              var addVariantId = optionEl.getAttribute("data-variant-id");
               syncVariant(optionEl, { userSelected: true });
               closeMenu();
 
               setTimeout(function () {
-                submitProductForm();
+                submitProductForm(addVariantId);
               }, 0);
               return;
             }
@@ -783,7 +796,7 @@
 
             if (action === 'buy') {
               closeMenu();
-              submitProductForm();
+              submitProductForm(optionEl.getAttribute("data-variant-id"));
               return;
             }
 
@@ -801,15 +814,38 @@
           true
         );
 
-        menu.addEventListener('mouseover', function (e) {
+        menu.addEventListener("mouseover", function (e) {
           if (isMobileViewport()) return;
-          var optionEl = e.target.closest('.ymee-variant-dropdown__option');
+          var optionEl = e.target.closest(".ymee-variant-dropdown__option");
           if (!optionEl || !menu.contains(optionEl)) return;
-          if (optionEl.style.display === 'none') return;
-          if (optionEl.classList.contains('is-oos')) return;
-          if (e.relatedTarget && optionEl.contains(e.relatedTarget)) return;
+          if (optionEl.style.display === "none") return;
 
+          // Prevent multiple firings with a data attribute
+          if (optionEl.dataset.hoverActive === "true") return;
+          optionEl.dataset.hoverActive = "true";
+
+          // Clear any existing selection first
+          clearSelectedVisual();
+
+          // Add is-selected to ALL hovered options (including is-oos)
           setSelectedVisual(optionEl);
+        });
+
+        menu.addEventListener("mouseout", function (e) {
+          if (isMobileViewport()) return;
+          var optionEl = e.target.closest(".ymee-variant-dropdown__option");
+          if (optionEl) {
+            optionEl.dataset.hoverActive = "false";
+          }
+          // Always clear when leaving any option
+          clearSelectedVisual();
+        });
+
+        root.addEventListener("mouseleave", function (e) {
+          // Only clear if we're not moving to a child element within the dropdown
+          if (!e.relatedTarget || !root.contains(e.relatedTarget)) {
+            clearSelectedVisual();
+          }
         });
 
         /* Color picker change is handled by a single delegated listener on document (see bottom of IIFE) */
@@ -930,25 +966,6 @@
       picker.closest('[data-section-id="' + cssEscape(sectionId) + '"]') ||
       document;
 
-    // Gentle scroll to top on color click
-    var startPosition = window.pageYOffset || window.scrollY || 0;
-    var startTime = null;
-    var duration = 300; // ms
-
-    function easeInOutCubic(t) {
-      return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
-    }
-
-    function animateScroll(currentTime) {
-      if (startTime === null) startTime = currentTime;
-      var timeElapsed = currentTime - startTime;
-      var run = easeInOutCubic(Math.min(timeElapsed / duration, 1));
-      window.scrollTo(0, startPosition * (1 - run));
-      if (timeElapsed < duration) {
-        requestAnimationFrame(animateScroll);
-      }
-    }
-    requestAnimationFrame(animateScroll);
 
     // Update selected state
     picker.querySelectorAll('.ymee-color-picker__item').forEach(function (item) {
