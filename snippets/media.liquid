@@ -45,12 +45,32 @@
     render 'image' image: media.preview_image, sizes: image_sizes, loading: loading, fetchpriority: fetchpriority, preload: preload, attributes: attributes, aspect_ratio: media_aspect_ratio, cover: cover
 
   endcapture
+
+  assign media_alt_lower = media.alt | downcase
+  assign media_kind = 'other'
+
+  if media_alt_lower contains 'model' or media.media_type != 'image'
+    assign media_kind = 'model'
+  elsif media_alt_lower contains 'still life' or media_alt_lower contains 'still-life' or media_alt_lower contains 'still_life'
+    assign media_kind = 'still'
+  endif
+
+  assign media_color = ''
+  if media_alt_lower contains 'variant--y' or media_alt_lower contains 'variant--yellow' or media_alt_lower contains ' color y'
+    assign media_color = 'y'
+  elsif media_alt_lower contains 'variant--w' or media_alt_lower contains 'variant--white' or media_alt_lower contains ' color w'
+    assign media_color = 'w'
+  elsif media_alt_lower contains 'variant--r' or media_alt_lower contains 'variant--rose' or media_alt_lower contains ' color r'
+    assign media_color = 'r'
+  endif
 -%}
 
 <div
   class="product__slide{% unless featured_media == media %} media--hidden{% else %} media--active{% endunless %}"
   data-image-id="{{ media.id }}"
   data-media-id="{{ sectionkey }}-{{ media.id }}"
+  data-media-kind="{{ media_kind }}"
+  data-media-color="{{ media_color }}"
   data-type="{{ media.media_type }}"
   {% if media.media_type == 'video' or media.media_type == 'external_video' %}
     data-video
@@ -99,20 +119,29 @@
         </button>
 
         <template>
-          {%- liquid
-            case media.media_type
-              when 'model'
-                echo media | model_viewer_tag: image_size: image_size, toggleable: true, data-model-id: media.id
-              when 'video'
-                echo media | media_tag: image_size: image_size, class: 'media-video', autoplay: true, loop: enable_video_looping, controls: true, preload: 'none'
-              when 'external_video'
-                if media.host == 'youtube'
-                  echo media | external_video_url: autoplay: true, playsinline: true, loop: enable_video_looping, playlist: media.external_id | external_video_tag: loading: 'lazy', data-host: media.host
-                else
-                  echo media | external_video_url: autoplay: true, playsinline: true, loop: enable_video_looping | external_video_tag: loading: 'lazy', data-host: media.host
-                endif
-            endcase
-          -%}
+          {%- if media.media_type == 'model' -%}
+            {%- assign glb_source = media.sources | where: 'format', 'glb' | first -%}
+            <div
+              class="webgi-container"
+              data-webgi-src="{{ glb_source.url }}"
+              data-model-id="{{ media.id }}"
+              data-section-id="{{ sectionkey }}"
+              style="width: 100%; height: 100%; position: relative;"
+            ></div>
+          {%- else -%}
+            {%- liquid
+              case media.media_type
+                when 'video'
+                  echo media | media_tag: image_size: image_size, class: 'media-video', autoplay: true, loop: enable_video_looping, controls: true, preload: 'none'
+                when 'external_video'
+                  if media.host == 'youtube'
+                    echo media | external_video_url: autoplay: true, playsinline: true, loop: enable_video_looping, playlist: media.external_id | external_video_tag: loading: 'lazy', data-host: media.host
+                  else
+                    echo media | external_video_url: autoplay: true, playsinline: true, loop: enable_video_looping | external_video_tag: loading: 'lazy', data-host: media.host
+                  endif
+              endcase
+            -%}
+          {%- endif -%}
         </template>
 
     {%- if media.media_type == 'model' -%}

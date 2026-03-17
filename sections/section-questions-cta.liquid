@@ -1,0 +1,381 @@
+<!-- /sections/section-questions-cta.liquid -->
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+-%}
+
+{%- style -%}
+  #QuestionsCta--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+<section
+  id="QuestionsCta--{{ section.id }}"
+  class="questions-cta section-padding {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="questions-cta"
+>
+  <div class="questions-cta__wrapper {{ section.settings.width }}">
+    <div 
+      class="questions-cta__container" 
+      style="background-color: {{ section.settings.background_color }};"
+    >
+      <div class="questions-cta__content">
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+            {%- when 'heading' -%}
+              <h2 class="questions-cta__heading {{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
+                {{ block.settings.text }}
+              </h2>
+            
+            {%- when 'button' -%}
+              <div class="questions-cta__button-wrap" {{ block.shopify_attributes }}>
+                <a
+                  href="{{ block.settings.link | default: '#' }}"
+                  class="questions-cta__button"
+                >
+                  {{ block.settings.text | upcase }}
+                </a>
+              </div>
+          {%- endcase -%}
+        {%- endfor -%}
+      </div>
+
+      <div class="questions-cta__media">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'image' -%}
+            {%- if block.settings.image != blank -%}
+              <div class="questions-cta__image" {{ block.shopify_attributes }}>
+                {{ block.settings.image | image_url: width: 800 | image_tag: loading: 'lazy' }}
+              </div>
+            {%- else -%}
+              <div class="questions-cta__placeholder" {{ block.shopify_attributes }}>
+                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+              </div>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .questions-cta {
+    position: relative;
+    width: 100%;
+  }
+
+  .questions-cta__container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 100px;padding: 0 206px;
+    border-radius: 4px;
+    justify-content: center;
+  }
+
+  .questions-cta__content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    width: 297px;
+  }
+
+  @media (max-width: 1024px) {
+    .questions-cta__content {
+      width: 100%;
+    }
+  }
+  .questions-cta__heading {
+    margin: 0;
+    color: var(--000000, #000);
+    font-family: var(--FONT-STACK-HEADING);
+    font-size: 40px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 48px;
+  }
+
+  .questions-cta__heading.heading-small {
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .questions-cta__heading.heading-medium {
+    font-size: 32px;
+    line-height: 40px;
+  }
+
+  .questions-cta__heading.heading-large {
+    color: var(--000000, #000);
+
+/* RC26/Display/S */
+    font-family: var(--FONT-STACK-HEADING);
+    font-size: 32px !important;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 36px; /* 112.5% */
+  }
+
+  .questions-cta__heading.heading-x-large {
+    font-size: 48px;
+    line-height: 56px;
+  }
+
+  .questions-cta__button-wrap {
+    display: flex;
+    width: 100%;
+  }
+
+  .questions-cta__button {
+    display: inline-flex;
+    padding: 14px 32px;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    color: #000;
+    background-color: transparent;
+    border: 1px solid #000;
+    font-family: Inter;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .questions-cta__button:hover {
+    background-color: #000;
+    color: #FFF;
+  }
+
+  .questions-cta__media {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .questions-cta__image {
+    width: 100%;
+    aspect-ratio: 397/447;
+    overflow: hidden;
+  }
+
+  .questions-cta__image img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .questions-cta__placeholder {
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .questions-cta__placeholder svg {
+    width: 50%;
+    height: auto;
+    opacity: 0.3;
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 990px) {
+    .questions-cta__container {
+      grid-template-columns: 1fr;
+      gap: 40px;
+      padding: 40px 30px;
+    }
+
+    .questions-cta__content {
+      text-align: center;
+      align-items: center;
+    }
+
+    .questions-cta__heading {
+      font-size: 28px;
+      line-height: 36px;
+    }
+    .questions-cta__button {
+      width: fit-content;
+      margin: 0 auto;
+    }
+
+    .questions-cta__media {
+      order: -1;
+    }
+
+    .questions-cta__image,
+    .questions-cta__placeholder {
+      max-width: 300px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .questions-cta__container {
+      padding: 30px 20px;
+    }
+
+    .questions-cta__heading {
+      font-size: 24px;
+      line-height: 32px;
+    }
+
+    .questions-cta__content {
+      gap: 20px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Questions CTA",
+  "tag": "section",
+  "class": "section-questions-cta",
+  "blocks": [
+    {
+      "type": "heading",
+      "name": "Heading",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Have More Questions?"
+        },
+        {
+          "type": "select",
+          "id": "heading_size",
+          "label": "Heading size",
+          "default": "heading-large",
+          "options": [
+            { "value": "heading-small", "label": "Small" },
+            { "value": "heading-medium", "label": "Medium" },
+            { "value": "heading-large", "label": "Large" },
+            { "value": "heading-x-large", "label": "Extra large" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "name": "Button",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Button text",
+          "default": "Discover all the faq"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Button link"
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "name": "Image",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Normal" },
+        { "value": "wrapper--narrow", "label": "Narrow" },
+        { "value": "wrapper--custom", "label": "Custom (max-width: 1232px)" }
+      ]
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Container background color",
+      "default": "#F5F5F5"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 60
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Questions CTA",
+      "category": "Text",
+      "blocks": [
+        {
+          "type": "heading",
+          "settings": {
+            "text": "Have More Questions?"
+          }
+        },
+        {
+          "type": "button",
+          "settings": {
+            "text": "Discover all the faq"
+          }
+        },
+        {
+          "type": "image"
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "aside", "footer"]
+  }
+}
+{% endschema %}

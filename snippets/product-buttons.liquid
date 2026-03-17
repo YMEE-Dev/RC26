@@ -6,9 +6,12 @@
   - product_form_id: {String} product form id.
   - section_id: {String} id of section to which this snippet belongs.
   - show_pickup_availability: {Boolean} for the pickup availability. If true the pickup availability is rendered, false - not rendered (optional).
+  - ring_sizing_link: {String} URL for ring sizing guide (optional).
+  - bracelet_sizing_link: {String} URL for bracelet sizing guide (optional).
 
   Usage:
   {% render 'product-buttons', block: block, product: product, product_form_id: product_form_id, show_pickup_availability: true %}
+  {% render 'product-buttons', block: block, product: product, product_form_id: product_form_id, ring_sizing_link: 'https://your-site.com/ring-guide.pdf' %}
 {% endcomment %}
 
 {%- liquid
@@ -27,8 +30,6 @@
   assign qty_sum = form_qty | plus: cart_qty
 
   assign max_inventory = ''
-  assign max_inventory_reached = false
-  assign error_message_position = 'cart'
 
   if current_variant.inventory_management and current_variant.inventory_policy == 'deny'
     assign max_inventory = current_variant.inventory_quantity
@@ -36,11 +37,9 @@
 
   if max_inventory != ''
     if qty_sum > max_inventory
-      assign max_inventory_reached = true
     endif
 
     if cart_qty == max_inventory
-      assign error_message_position = 'form'
     endif
   endif
 
@@ -330,14 +329,67 @@
   {%- endif -%}
 {%- endcapture -%}
 
+{%- if product != blank -%}
+  {%- liquid
+    assign ymee_has_size = false
+    assign ymee_has_color_picker = false
+    assign ymee_size_t = 'general.size_chart.size' | t
+    assign ymee_size_list = ymee_size_t | remove: ' ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
+    for opt in product.options_with_values
+      assign opt_h = opt.name | handle
+      if ymee_size_list contains opt_h
+        assign ymee_has_size = true
+      else
+        assign has_real_images = false
+        for value in opt.values
+          assign value_name = value | append: ''
+          for variant in product.variants
+            assign variant_option_index = opt.position | minus: 1
+            assign variant_option_value = variant.options[variant_option_index]
+            if variant_option_value == value_name
+              if variant.featured_media
+                assign has_real_images = true
+                break
+              endif
+            endif
+          endfor
+          if has_real_images
+            break
+          endif
+        endfor
+        if has_real_images
+          assign ymee_has_color_picker = true
+        endif
+      endif
+    endfor
+  -%}
+{%- endif -%}
+
 <div
-  class="product__block product__block--buttons block-padding {{ color_scheme }}"
+  class="product__block product__block--buttons block-padding {{ color_scheme }}{% if ymee_has_color_picker %} has-ymee-color-picker{% endif %}"
   {{ block_style }}
   {{ block.shopify_attributes }}
 >
   {%- if product != blank -%}
+
+    {%- render 'ymee-color-picker',
+      product: product,
+      current_variant: current_variant,
+      section_id: section_id
+    -%}
+
+    {%- if ymee_has_size -%}
+      {%- render 'ymee-variant-dropdown',
+        product: product,
+        current_variant: current_variant,
+        section_id: section_id,
+        ring_sizing_link: ring_sizing_link,
+        bracelet_sizing_link: bracelet_sizing_link
+      -%}
+    {%- endif -%}
+
     <product-form
-      class="product-form"
+      class="product-form{% if ymee_has_size %} ymee-hidden-form{% endif %}"
       data-hide-errors="{{ gift_card_recipient_feature_active }}"
       data-section-id="{{ section_id }}"
     >
@@ -391,27 +443,8 @@
                 {% endif %}
               >
                 <span class="btn__text" data-add-to-cart-text>
+                  {%- render 'icon-add2cart', class: 'btn__icon' -%}
                   {{- button_text -}}
-                  {%- if settings.atc_show_product_price -%}
-                    <span
-                      class="btn__price"
-                      data-product-price
-                      {% if current_variant.compare_at_price > current_variant.price %}
-                        class="product__price--sale"
-                      {% endif %}
-                    >
-                      {%- if current_variant.price == 0 -%}
-                        {{ 'general.money.free' | t }}
-                      {%- else -%}
-                        {%- if current_variant.compare_at_price > current_variant.price -%}
-                          {{ current_variant.price | money }}
-                          <s>{{ current_variant.compare_at_price | money }}</s>
-                        {%- else -%}
-                          {{ current_variant.price | money }}
-                        {%- endif -%}
-                      {%- endif -%}
-                    </span>
-                  {%- endif -%}
                 </span>
                 <span class="btn__added">&nbsp;</span>
 
@@ -502,5 +535,6 @@
           </div>
         </div>
       </div>
+    </div>
   {%- endif -%}
 </div>

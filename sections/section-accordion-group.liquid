@@ -1,4 +1,6 @@
 <!-- /sections/section-accordion-group.liquid -->
+{{ 'custom-accordion.css' | asset_url | stylesheet_tag }}
+
 {%- liquid
   assign columns = section.settings.columns
   assign animation_anchor = '#AccordionGroup--' | append: section.id
@@ -10,9 +12,9 @@
   #AccordionGroup--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
-
     --accordion-columns: {{ columns }};
   }
+
 {%- endstyle -%}
 
 <div id="AccordionGroup--{{ section.id }}" class="accordion-group section-padding {{ color_scheme }}">
@@ -29,6 +31,7 @@
               assign title = block.settings.title
               assign content = block.settings.content
               assign default_open = block.settings.default_open
+              assign link = block.settings.link
             -%}
 
             {%- if block.type == 'heading' and title != blank -%}
@@ -43,6 +46,12 @@
               >
                 {{ title }}
               </h3>
+            {%- endif -%}
+            {%- if block.type == 'link' and link != blank -%}
+              {%- assign animation_order = animation_order | plus: 1 -%}
+              <div class="accordion aos-animate accordion__link {{ section.settings.heading_font_size }}" data-aos="hero" data-aos-anchor="{{ animation_anchor }}" data-aos-order="{{ animation_order }}" {{ block.shopify_attributes }}>
+                {{ link }}
+              </div>
             {%- endif -%}
 
             {%- if block.type == 'question' and title != blank and content != blank -%}
@@ -60,6 +69,7 @@
                   {{ block.shopify_attributes }}
                 >
                   <summary
+                    style="text-transform: {{ block.settings.text_case }};"
                     class="accordion__title font-heading {{ section.settings.question_font_size }}"
                     data-collapsible-trigger
                   >
@@ -99,7 +109,9 @@
 
                     {{ title }}
 
-                    {%- render 'icon-nav-arrow-down' -%}
+                    {% comment %} {%- render 'icon-nav-arrow-down' -%} {% endcomment %}
+                    {% render 'icon-plus-svg' %}
+                    {% render 'icon-minus-svg' %}
                   </summary>
 
                   <div
@@ -170,7 +182,11 @@
       "default": "wrapper",
       "options": [
         {"value": "wrapper", "label": "Normal"},
-        {"value": "wrapper--narrow", "label": "Narrow"}
+        {"value": "wrapper--narrow", "label": "Narrow"},
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper--full", "label": "Full width"},
+        {"value": "wrapper--wide", "label": "Wide"},
+        {"value": "wrapper--custom", "label": "Custom (max-width: 1232px)"}
       ]
     },
     {
@@ -220,6 +236,18 @@
   ],
   "blocks": [
     {
+      "name": "Link",
+      "type": "link",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "link",
+          "label": "Link",
+          "default": "<p>Link text</p>"
+        }
+      ]
+    },
+    {
       "name": "Heading",
       "type": "heading",
       "settings": [
@@ -251,6 +279,18 @@
           "label": "Question",
           "info": "Block will not be visible if left empty.",
           "default": "Frequently asked question"
+        },
+        {
+          "type": "select",
+          "id": "text_case",
+          "label": "Question case",
+          "default": "uppercase",
+          "options": [
+            {"value": "uppercase", "label": "Uppercase"},
+            {"value": "lowercase", "label": "Lowercase"},
+            {"value": "capitalize", "label": "Capitalize"},
+            {"value": "math-auto", "label": "Sentence case"}
+          ]
         },
         {
           "type": "richtext",

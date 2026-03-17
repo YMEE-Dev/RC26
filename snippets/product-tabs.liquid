@@ -16,7 +16,7 @@
   assign product_description_title = 'products.general.description' | t
   assign product_description_content = product.description | strip
 -%}
-  
+
 {%- if block.type == 'tab_richtext' -%}
   {%- liquid
     assign tab_links_html = ''
@@ -115,17 +115,9 @@
 
   {%- liquid
     if accordion_style == 'collapsible' or accordion_style == 'drawer'
-      assign show_icon = block.settings.show_icon
-      assign icon_size = block.settings.icon_size | default: 24
-      assign icon_color = block.settings.icon_color | default: 'rgba(0,0,0,0)'
-      assign icon_name = block.settings.icon_name | default: 'icon-chevron-down'
-      assign image = block.settings.image
-
       if accordion_heading == blank and accordion_content == blank
         assign accordion_heading = 'products.general.accordion_heading' | t
       endif
-    else
-      assign show_icon = false
     endif
   -%}
 
@@ -134,7 +126,6 @@
       {%- liquid
         assign icon_size = block.settings.icon_size
         assign icon_color = block.settings.icon_color
-        assign icon_name = block.settings.icon_name
         assign image = block.settings.image
 
         capture icon_style
@@ -275,32 +266,47 @@
 {%- endif -%}
 
 {% stylesheet %}
+
+  .product-accordion .accordion {
+    border-color: #E5E5E5;
+  }
+
   .product__block--accordion .accordion__title,
   .accordion__content {
     font-size: var(--font-body-small);
     font-family: var(--FONT-STACK-BODY);
     font-style: var(--FONT-STYLE-BODY);
     font-weight: var(--FONT-WEIGHT-BODY);
-    letter-spacing: var(--LETTER-SPACING-BODY);
+    letter-spacing: var(--LETTER-SPACING-NAV);
+  }
+
+  .product__block--accordion .accordion__title {
     text-transform: uppercase;
   }
+
+  .accordion__content {
+    font-size: var(--FONT-SIZE-BASE);
+    letter-spacing: var(--LETTER-SPACING-BODY);
+  }
+
   .product__block--accordion .accordion__title {
     display: inline-flex;
     align-items: center;
     gap: 1.5rem;
     padding-right: 1rem;
   }
+
   .product__block--accordion .accordion__title .accordion__sku {
     color: #A7A7A7;
     padding-left: 1rem;
   }
-  
+
   .variant-description {
     margin-bottom: 1rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid #e5e5e5;
   }
-  
+
   .variant-description:last-child {
     margin-bottom: 0;
     padding-bottom: 0;
@@ -312,7 +318,7 @@
     position: relative;
     margin-left: auto;
   }
-  
+
   .accordion-icon-wrapper svg {
     position: absolute;
     top: 50%;
@@ -321,21 +327,32 @@
     transition: opacity 0.2s ease;
     stroke: #000;
     fill: #000;
-    width: 15px;
-    height: 15px;
+    width: 12px;
+    height: 12px;
   }
-  
+
+  .accordion-icon-wrapper svg path {
+    stroke-width: 2px;
+  }
+
   .accordion-icon-wrapper svg:last-child {
     opacity: 0;
   }
-  
+
   details[open] .accordion-icon-wrapper svg:first-child {
     opacity: 0;
   }
-  
+
   details[open] .accordion-icon-wrapper svg:last-child {
     opacity: 1;
   }
+
+  @media only screen and (max-width: 749px) {
+    .product__block--accordion .accordion__title .accordion__sku {
+      display: none;
+    }
+  }
+
 {% endstylesheet %}
 
 {% javascript %}
@@ -343,7 +360,7 @@
     function updateVariantSKU(variant) {
       // Only update SKU elements in accordions that have SKU enabled
       const skuElements = document.querySelectorAll('.product-accordion--has-sku [data-variant-sku], .accordion--has-sku [data-variant-sku]');
-      
+
       skuElements.forEach(element => {
         if (variant && variant.sku) {
           element.textContent = 'SKU | ' + variant.sku;
@@ -353,11 +370,11 @@
         }
       });
     }
-    
+
     function updateVariantDescription(variant) {
       // Only update description elements in accordions that have SKU enabled
       const descriptionElements = document.querySelectorAll('.product-accordion--has-sku [data-variant-description], .accordion--has-sku [data-variant-description]');
-      
+
       descriptionElements.forEach(element => {
         if (variant && variant.description && variant.description !== '') {
           element.innerHTML = variant.description;
@@ -367,13 +384,13 @@
         }
       });
     }
-    
+
     function getCurrentVariant() {
-      const selectedId = document.querySelector('input[name="id"]:checked')?.value || 
+      const selectedId = document.querySelector('input[name="id"]:checked')?.value ||
                         document.querySelector('input[name="id"]')?.value;
-      
+
       if (!selectedId) return null;
-      
+
       const productDataElement = document.querySelector('#ProductData-' + document.querySelector('[data-product-id]')?.getAttribute('data-product-id'));
       if (productDataElement) {
         try {
@@ -383,32 +400,32 @@
           console.error('Error parsing product data:', e);
         }
       }
-      
+
       return null;
     }
-    
+
     function handleVariantChange() {
       const variant = getCurrentVariant();
       updateVariantSKU(variant);
       updateVariantDescription(variant);
     }
-    
+
     const variantInputs = document.querySelectorAll('input[name="id"]');
     const variantSelects = document.querySelectorAll('select[name="id"]');
-    
+
     variantInputs.forEach(input => {
       input.addEventListener('change', handleVariantChange);
     });
-    
+
     variantSelects.forEach(select => {
       select.addEventListener('change', handleVariantChange);
     });
-    
+
     document.addEventListener('theme:variant:change', function(event) {
       updateVariantSKU(event.detail.variant);
       updateVariantDescription(event.detail.variant);
     });
-    
+
     const observer = new MutationObserver(function(mutations) {
       mutations.forEach(function(mutation) {
         if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
@@ -419,11 +436,11 @@
         }
       });
     });
-    
+
     variantInputs.forEach(input => {
       observer.observe(input, { attributes: true });
     });
-    
+
     const initialVariant = getCurrentVariant();
     if (initialVariant) {
       updateVariantSKU(initialVariant);

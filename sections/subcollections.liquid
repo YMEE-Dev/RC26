@@ -21,6 +21,7 @@
         background-repeat: initial;
         background-position: center;
         background-size: cover;
+        min-height: 500px;
       {% endif %}
     }
   {%- endstyle -%}
@@ -87,14 +88,14 @@
         {%- endif -%}
       {%- endfor -%}
 
-      {%- if sub_collection_html != '' -%}
+      {%- if sub_collection_html != '' and template.suffix != 'media-only' -%}
         {%- liquid
           assign layout_slider = false
           if section.settings.subcollection_layout == 'slider' and sub_collection_counter > 4
             assign layout_slider = true
           endif
 
-          assign columns_desktop = sub_collection_counter | at_most: 4
+          assign columns_desktop = sub_collection_counter | at_most: 5
           assign columns_medium = 3
 
           if columns_desktop == 2 or columns_desktop == 4

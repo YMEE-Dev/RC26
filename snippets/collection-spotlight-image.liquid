@@ -1,0 +1,47 @@
+{% doc %}
+  Renders a spotlight collection media tile (image or video) inside the product grid.
+
+  @param {untyped} media - Media object from custom.spotlight_collection_images list
+  @param {number} [index] - Fallback index for unique id
+  @param {number} [stack_index] - Stack order index used by sticky overlay behavior
+  @param {string} [image_sizes] - Responsive sizes value for the image snippet
+{% enddoc %}
+
+{%- liquid
+  assign spotlight_media = media.value | default: media
+  assign spotlight_media_type = spotlight_media.media_type | default: ''
+  assign spotlight_image_src = ''
+
+  if spotlight_media_type == 'image'
+    assign spotlight_image_src = spotlight_media | image_url: width: 2400
+  endif
+
+  if spotlight_image_src == blank and spotlight_media.preview_image != blank
+    assign spotlight_image_src = spotlight_media.preview_image | image_url: width: 2400
+  endif
+
+  if spotlight_image_src == blank and spotlight_media.url != blank
+    assign spotlight_image_src = spotlight_media.url
+
+    unless spotlight_image_src contains '//'
+      assign spotlight_image_src = spotlight_image_src | split: '/' | last | file_url
+    endunless
+  endif
+
+  if spotlight_image_src == blank and spotlight_media.aspect_ratio != blank
+    assign spotlight_image_src = spotlight_media | image_url: width: 2400
+  endif
+-%}
+<div
+  class="grid-item product-item product-item--featured-image spotlight-collection-image"
+  id="Spotlight-image--{{ spotlight_media.id | default: index }}"
+  style="--spotlight-stack-index: {{ stack_index | default: index | default: 1 }};"
+>
+  <div class="product-item__image">
+    {%- if spotlight_image_src != blank -%}
+      <div class="product-item__bg">
+        <img src="{{ spotlight_image_src }}" alt="" loading="eager" class="spotlight-collection-image__media">
+      </div>
+    {%- endif -%}
+  </div>
+</div>

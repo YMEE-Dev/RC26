@@ -1,6 +1,16 @@
 <!-- /sections/product.liquid -->
+{%- liquid
+  assign product_title_downcase = product.handle | downcase | strip
+  assign product_title_prefix = product_title_downcase | slice: 0, 3
+-%}
 
-{%- render 'product' -%}
+{%- if product_title_prefix == 'st-' -%}
+  <script>
+    window.location.replace('{{ routes.root_url }}');
+  </script>
+{%- else -%}
+  {%- render 'product' -%}
+{%- endif -%}
 
 {% schema %}
 {
@@ -401,6 +411,22 @@
         {
           "type": "header",
           "content": "Gift card"
+        },
+        {
+          "type": "header",
+          "content": "Sizing guides"
+        },
+        {
+          "type": "url",
+          "id": "ring_sizing_link",
+          "label": "Ring sizing guide URL",
+          "info": "Leave empty to use default ring sizing guide"
+        },
+        {
+          "type": "url",
+          "id": "bracelet_sizing_link",
+          "label": "Bracelet sizing guide URL",
+          "info": "Leave empty to use default bracelet sizing guide"
         },
         {
           "type": "checkbox",

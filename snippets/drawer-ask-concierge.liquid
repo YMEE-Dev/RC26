@@ -1,23 +1,21 @@
 {% doc %}
-  Renders a drawer content for "Ask your concierge" functionality.
-  
-  @param {block} block - The block object containing settings
+  Renders a drawer content for "Ask our concierge" functionality.
 {% enddoc %}
 
-<div class="drawer-concierge">
+<div class="drawer-concierge drawer__content-wrapper">
   {% comment %} <h3 class="drawer__title">{{ 'products.product.ask_concierge_title' | t }}</h3> {% endcomment %}
   
-  <div class="drawer__content">
+  <div class="drawer__content drawer-content__main">
     <div class="drawer__image">
-      <img src="https://cdn.shopify.com/s/files/1/0969/2990/7075/files/roberto-concierge_header_V2.jpg?v=1771364672" alt="Roberto Coin Concierge" loading="lazy">
+      <img src="https://cdn.shopify.com/s/files/1/0969/2990/7075/files/roberto-concierge_header_V2.jpg?v=1771364672" alt="Roberto Coin Concierge" loading="lazy" width="600" height="400">
     </div>
     
     <div class="drawer__section">
-      <p class="drawer__heading">OPENING HOURS</p>
-      <p>Mon-Fri from 10am to 5pm CET (Central European Time)</p>
-    </div>
+      <div class="drawer__opening-hours">
+        <p class="drawer-content__title--nav">OPENING HOURS</p>
+        <p>We are available Mon-Fri from 10am to 5pm CET (Central European Time)</p>
+      </div>
 
-    <div class="drawer__section">
       <a href="tel:+390444202202" class="drawer__link">
         <span class="drawer__link-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -59,82 +57,16 @@
 </div>
 
 {% stylesheet %}
-  .drawer-concierge {
-    padding: 20px;
+  .drawer-concierge .drawer__image {
+    margin-top: 30px;
   }
-  
-  .drawer__image {
-    margin-bottom: 30px;
-    text-align: center;
-  }
-  
-  .drawer__image img {
-    max-width: 100%;
-    height: auto;
-  }
-  
-  .drawer__section {
-    margin-bottom: 30px;
-  }
-  
-  .drawer__section:last-child {
+
+  .drawer-concierge .drawer__section {
+    margin-top: auto;
     margin-bottom: 0;
   }
-  
-  .drawer__section > p:not(.drawer__heading) {
-    margin: 0;
-    font-size: 16px;
-    line-height: 1.6;
-    color: var(--text-color-primary);
-  }
-  
-  .drawer__link {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 16px 0;
-    text-decoration: none;
-    color: inherit;
-    border-bottom: 1px solid var(--border-color);
-    transition: opacity 0.2s ease;
-  }
-  
-  .drawer__link:last-child {
-    border-bottom: none;
-  }
-  
-  .drawer__link:hover {
-    opacity: 0.7;
-  }
-  
-  .drawer__link-icon {
-    flex-shrink: 0;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--background-color-secondary);
-    border-radius: 50%;
-  }
-  
-  .drawer__link-content {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  
-  .drawer__link-text {
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--text-color-secondary);
-  }
-  
-  .drawer__link-value {
-    font-size: 16px;
-    font-weight: 500;
-    color: var(--text-color-primary);
+
+  .drawer-concierge .drawer__opening-hours {
+    margin-bottom: 30px;
   }
 {% endstylesheet %}
