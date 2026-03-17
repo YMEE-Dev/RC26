@@ -20,15 +20,22 @@
   #StoreLocator--{{ section.id }} .store-locator__carousel-container {
     overflow: visible;
   }
-  /* Item width as % of container so 2–3 slides visible (viewport-based showed 1 only in narrow wrappers) */
+  /* Item width: ~30–35% so 2–3 slides visible (was 1 due to viewport-based calc in narrow wrappers) */
   @media (min-width: 750px) {
-    #StoreLocator--{{ section.id }} .grid--slider {
-      --item-width: 35%;
+    #StoreLocator--{{ section.id }} .store-locator__grid.grid--slider {
+      --item-width: 32%;
     }
   }
   @media (min-width: 990px) {
-    #StoreLocator--{{ section.id }} .grid--slider {
-      --item-width: 35%;
+    #StoreLocator--{{ section.id }} .store-locator__grid.grid--slider {
+      --item-width: 33%;
+    }
+  }
+  /* Mobile: ensure 2 slides visible (override any single-column behavior) */
+  @media (max-width: 749px) {
+    #StoreLocator--{{ section.id }} .store-locator__grid.grid--mobile-slider .grid-item {
+      width: calc(50% - (var(--gap, 20px) / 2));
+      min-width: calc(50% - (var(--gap, 20px) / 2));
     }
   }
 {%- endstyle -%}

@@ -75,6 +75,17 @@
   .store-locator__carousel-container .grid--slider .grid-item {
     margin-right: var(--gap);
   }
+  /* Ensure 2–3 slides visible: override item width (35% = ~3 slides, 50% = 2 on mobile) */
+  .store-locator__carousel-container .grid--slider .grid-item {
+    flex: 0 0 var(--item-width);
+    max-width: var(--item-width);
+  }
+  @media (max-width: 749px) {
+    .store-locator__carousel-container .grid--mobile-slider .grid-item {
+      width: calc(50% - (var(--gap) / 2)) !important;
+      min-width: 140px;
+    }
+  }
   .store-locator__button { 
     display: inline-flex;
     padding: 14px 32px;
