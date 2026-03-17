@@ -794,6 +794,10 @@
         background-color: var(--bg-color);
       }
 
+      #MainProduct--{{ section.id }} .pdp-embla--mobile .image-wrapper--cover img {
+        mix-blend-mode: multiply;
+      }
+
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__photo {
         height: 100%;
         padding-top: 0;
@@ -1032,7 +1036,7 @@
 
         #MainProduct--{{ section.id }} .product__content-columns {
           display: grid;
-          grid-template-columns: 1fr;
+          grid-template-columns: minmax(0, 1fr);
           grid-template-areas:
             "description"
             "buttons"
@@ -1042,6 +1046,8 @@
             "ruby-signature"
             "collection";
           gap: 0px;
+          min-width: 0;
+          max-width: 100%;
         }
 
         /* flatten wrappers so children participate in same grid */
@@ -1060,28 +1066,38 @@
         /* map real blocks to areas */
         #MainProduct--{{ section.id }} .product__description {
           grid-area: description;
+          min-width: 0;
           margin-bottom: 40px;
         }
         #MainProduct--{{ section.id }} .product__block--buttons {
           grid-area: buttons;
+          min-width: 0;
         }
         #MainProduct--{{ section.id }} .product__custom-drawers-row {
           grid-area: custom-drawers;
+          min-width: 0;
           margin-bottom: 0;
         }
         #MainProduct--{{ section.id }} .product-accordions-container {
           grid-area: accordions;
+          min-width: 0;
           margin: 80px 0;
+        }
+        #MainProduct--{{ section.id }} .product__custom-drawers-ee {
+          display: contents;
         }
         #MainProduct--{{ section.id }} .product__custom-drawers-row-ee {
           grid-area: custom-drawers-ecom;
+          min-width: 0;
         }
         #MainProduct--{{ section.id }} .product__ruby-signature {
           grid-area: ruby-signature;
+          min-width: 0;
           margin: 40px 0 80px 0;
         }
         #MainProduct--{{ section.id }} .product__collection-section {
           grid-area: collection;
+          min-width: 0;
           margin-top: 0;
           margin-bottom: 40px;
         }
