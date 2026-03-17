@@ -20,22 +20,18 @@
   #StoreLocator--{{ section.id }} .store-locator__carousel-container {
     overflow: visible;
   }
-  /* Hide slider navigation arrows */
-  #StoreLocator--{{ section.id }} .slider__arrows {
-    display: none;
-  }
   #StoreLocator--{{ section.id }} .grid--slider {
     padding-left: 0;
   }
-  /* Item width: ~42% so 2 full + half of 3rd slide visible (peek effect) */
+  /* Item width: ~30–35% so 2–3 slides visible (was 1 due to viewport-based calc in narrow wrappers) */
   @media (min-width: 750px) {
     #StoreLocator--{{ section.id }} .store-locator__grid.grid--slider {
-      --item-width: 45%;
+      --item-width: 32%;
     }
   }
   @media (min-width: 990px) {
     #StoreLocator--{{ section.id }} .store-locator__grid.grid--slider {
-      --item-width: 45%;
+      --item-width: 33%;
     }
   }
   /* Mobile: ensure 2 slides visible (override any single-column behavior) */
@@ -91,7 +87,7 @@
     {%- assign location_blocks = section.blocks | where: 'type', 'location_card' -%}
     {%- if location_blocks.size > 0 -%}
       <div class="store-locator__carousel-container grid-outer">
-        <grid-slider>
+        <grid-slider align-arrows>
           <div
             class="store-locator__grid grid grid--slider grid--mobile-slider"
             data-grid-slider
