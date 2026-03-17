@@ -31,8 +31,6 @@
       scale: 100,
     },
   ];
-  const TIMELINE_COPY_2013 =
-    "He received an award from the Phillips Collection in Washington for his contribution to American culture. He was honored at Vicenzaoro, the Vicenza Gold Trade Fair, as President of the Best Corporate Social Responsibility Brand during the Andrea Palladio International Jewelry Awards.";
 
   function normalizeMediaItem(item, index) {
     const fallback = fallbackMedia[index] || fallbackMedia[fallbackMedia.length - 1];
@@ -145,7 +143,6 @@
           }))
           .filter((item) => item && item.w > 0 && item.h > 0 && item.image && String(item.image).trim() !== "");
         const yearValue = String(entry.year || "").trim();
-        const isYear2013 = yearValue === "2013";
 
         return {
           ...entry,
@@ -154,9 +151,7 @@
           title: String(entry.title || "").trim(),
           captionX: Number.isFinite(Number(entry.caption_x)) ? Number(entry.caption_x) : 74,
           captionY: Number.isFinite(Number(entry.caption_y)) ? Number(entry.caption_y) : 38,
-          copy: isYear2013
-            ? TIMELINE_COPY_2013
-            : String(entry.copy || entry.title || entry.year || "").trim(),
+          copy: String(entry.copy || entry.title || entry.year || "").trim(),
           media,
         };
       })
@@ -355,31 +350,6 @@
 
     function buildTimelineMediaLayout(entry) {
       const mediaItems = (entry.media || []).map((item) => ({ ...item }));
-      if (String(entry.year).trim() === "2013") {
-        const customItems = mediaItems.filter((item) => item.image_source === "custom" || item.imageSource === "custom");
-        const preferredCustom =
-          customItems.find((item) => item.slot === 2) ||
-          customItems.find((item) => item.slot === 1) ||
-          customItems.find((item) => item.slot === 3);
-        const preferred =
-          preferredCustom ||
-          mediaItems.find((item) => item.slot === 2) ||
-          mediaItems.find((item) => item.slot === 1) ||
-          mediaItems.find((item) => item.slot === 3) ||
-          mediaItems[0];
-        if (!preferred) {
-          return [];
-        }
-        return [
-          {
-            ...preferred,
-            x: 34,
-            y: 4,
-            w: 28,
-            h: 62,
-          },
-        ];
-      }
       const variant = getTimelineLayoutVariant(entry.year);
       const variantOffsets = [
         [
@@ -432,13 +402,9 @@
       mediaItems.forEach((item, index) => {
         const card = mediaCardTemplate.content.firstElementChild.cloneNode(true);
         const art = card.querySelector(".media-art");
-        const isYear2013 = String(entry.year).trim() === "2013";
         const scaleFactor = Math.max(0.6, Math.min(1.8, Number(item.scale || 100) / 100));
 
-        if (isYear2013 && mediaItems.length === 1) {
-          card.style.left = `calc(${item.x}% - 50px)`;
-          card.style.width = `calc((${item.w}% + 100px) * ${scaleFactor})`;
-        } else if (index === 1) {
+        if (index === 1) {
           card.style.left = `calc(${item.x}% - 50px)`;
           card.style.width = `calc((${item.w}% + 100px) * ${scaleFactor})`;
         } else {
