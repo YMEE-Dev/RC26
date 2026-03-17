@@ -27,8 +27,7 @@
       loop: false,
       smooth: true,
       breakpoints: {
-        640: { slidesPerView: 2, spaceBetween: 80 },
-        990: { slidesPerView: 2.7, spaceBetween: 80 },
+        960: { slidesPerView: 2.7, spaceBetween: 80 },
         1200: { slidesPerView: 2.7, spaceBetween: 80 }
       }
     });
