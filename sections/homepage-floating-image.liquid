@@ -1,4 +1,5 @@
 <!-- /sections/homepage-floating-image.liquid -->
+{{ 'homepage-floating-image.css' | asset_url | stylesheet_tag }}
 {%- liquid
   assign section_title = section.settings.title | strip
   assign section_eyebrow = section.settings.eyebrow | strip
@@ -24,7 +25,7 @@
       --PB: {{ section.settings.padding_bottom }}px;
     "
   >
-    <div class="homepage-floating-image__inner">
+    <div class="homepage-floating-image__inner wrapper">
       <div class="homepage-floating-image__media{% if mobile_image != blank %} homepage-floating-image__media--has-mobile-image{% endif %}">
         {%- if desktop_image != blank -%}
           {{
