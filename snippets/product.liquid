@@ -275,6 +275,10 @@
           margin: 0 auto;
         }
 
+        #MainProduct--{{ section.id }} .product__sticky-bar__swatches {
+          display: none;
+        }
+
         #MainProduct--{{ section.id }} .form__width {
           max-width: min(var(--content-max), 1200px);
         }
@@ -1034,13 +1038,62 @@
           padding: 20px;
         }
 
+        #MainProduct--{{ section.id }} .product__content-columns .ymee-color-picker {
+          display: none;
+        }
+
+        #MainProduct--{{ section.id }} .product__sticky-bar__inner {
+          display: flex;
+          flex-direction: column-reverse;
+          align-items: center;
+          gap: 10px;
+        }
+
+        #MainProduct--{{ section.id }} .product__sticky-bar__swatches {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 5px;
+        }
+
+        #MainProduct--{{ section.id }} .product__sticky-bar__swatches .product__sticky-swatch {
+          padding: 2px;
+          margin: 0;
+        }
+
+        #MainProduct--{{ section.id }} .product__sticky-bar__swatches .product__sticky-swatch .swatch__link {
+          border: 1px solid rgba(0, 0, 0, 0.1);
+          width: 17px;
+          height: 17px;
+          overflow: initial;
+        }
+
+        #MainProduct--{{ section.id }} .product__sticky-bar__swatches .product__sticky-swatch.is-active .swatch__link:after {
+          content: '';
+          position: absolute;
+          bottom: -7px;
+          left: 0;
+          width: 17px;
+          height: 1px;
+          background: currentColor;
+        }
+
+        #MainProduct--{{ section.id }} .product__sticky-bar__swatches .product__sticky-swatch input:checked ~ .swatch__link {
+          box-shadow: 0 0 0 2px var(--bg, #fff);
+        }
+
+        #MainProduct--{{ section.id }} .product__sticky-bar__swatches .product__sticky-swatch input:checked ~ .swatch__link::after {
+          opacity: 1;
+          transform: translateZ(0);
+        }
+
         #MainProduct--{{ section.id }} .product__content-columns {
           display: grid;
           grid-template-columns: minmax(0, 1fr);
           grid-template-areas:
-            "description"
             "buttons"
             "custom-drawers"
+            "description"
             "accordions"
             "custom-drawers-ecom"
             "ruby-signature"
@@ -1067,7 +1120,7 @@
         #MainProduct--{{ section.id }} .product__description {
           grid-area: description;
           min-width: 0;
-          margin-bottom: 40px;
+          margin-bottom: 0;
         }
         #MainProduct--{{ section.id }} .product__block--buttons {
           grid-area: buttons;
@@ -1076,12 +1129,12 @@
         #MainProduct--{{ section.id }} .product__custom-drawers-row {
           grid-area: custom-drawers;
           min-width: 0;
-          margin-bottom: 0;
+          margin-bottom: 20px;
         }
         #MainProduct--{{ section.id }} .product-accordions-container {
           grid-area: accordions;
           min-width: 0;
-          margin: 80px 0;
+          margin: 70px 0;
         }
         #MainProduct--{{ section.id }} .product__custom-drawers-ee {
           grid-area: custom-drawers-ecom;
@@ -2126,6 +2179,70 @@
                   -%}
                 {%- endif -%}
               </div>
+
+              {%- liquid
+                assign sticky_size_translation = 'general.size_chart.size' | t
+                assign sticky_translation_string_size = sticky_size_translation | remove: ' ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
+              -%}
+              {%- for option in product.options_with_values -%}
+                {%- liquid
+                  assign sticky_opt_handle = option.name | handle
+                  assign sticky_is_size = false
+                  if sticky_translation_string_size contains sticky_opt_handle
+                    assign sticky_is_size = true
+                  endif
+                -%}
+                {%- unless sticky_is_size -%}
+                  {%- liquid
+                    assign sticky_has_swatches = false
+                    for value in option.values
+                      if value.swatch.color != blank or value.swatch.image != blank
+                        assign sticky_has_swatches = true
+                        break
+                      endif
+                    endfor
+                  -%}
+                  {%- if sticky_has_swatches -%}
+                    <div class="product__sticky-bar__swatches" data-sticky-color-swatches data-option-position="{{ option.position }}">
+                      {%- for value in option.values -%}
+                        {%- liquid
+                          if value.swatch.image
+                            assign sticky_swatch = value.swatch.image | image_url: width: 48 | prepend: 'url(' | append: ')'
+                          else
+                            assign sticky_swatch = value.swatch.color
+                          endif
+                          assign sticky_swatch_style = '--swatch: ' | append: sticky_swatch | append: ';'
+                        -%}
+                        {%- capture sticky_input_id -%}sticky-color-{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}-{{ product.id }}{%- endcapture -%}
+                        {%- capture sticky_input_name -%}sticky-{{ option.name }}-{{ option.position }}{%- endcapture -%}
+                        <label
+                          class="product__sticky-swatch swatch__button swatch__button--{{ settings.swatch_style }}{% if value.selected %} is-active{% endif %}"
+                          for="{{ sticky_input_id }}"
+                          title="{{ value | escape }}"
+                          data-value="{{ value | escape }}"
+                          style="{{ sticky_swatch_style }}"
+                        >
+                          <input
+                            type="radio"
+                            id="{{ sticky_input_id }}"
+                            name="{{ sticky_input_name | escape }}"
+                            value="{{ value | escape }}"
+                            {% if value.selected %}checked{% endif %}
+                            data-option-value-id="{{ value.id }}"
+                            data-product-url="{{ value.product_url }}"
+                            data-ymee-color-input
+                            class="visually-hidden"
+                          >
+                          <span class="swatch__link" style="{{ sticky_swatch_style }}">
+                            <span class="visually-hidden">{{ value | escape }}</span>
+                          </span>
+                        </label>
+                      {%- endfor -%}
+                    </div>
+                  {%- endif -%}
+                {%- endunless -%}
+              {%- endfor -%}
+
             </div>
           </div>
         {%- endif -%}
