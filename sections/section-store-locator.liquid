@@ -15,6 +15,21 @@
     --COLUMNS-MOBILE: 1;
     --gap: 80px;
     --column-count: 3;
+    overflow-x: visible;
+  }
+  #StoreLocator--{{ section.id }} .store-locator__carousel-container {
+    overflow: visible;
+  }
+  /* Ensure items overflow so grid-slider activates (default 28% fits 3 items) */
+  @media (min-width: 750px) {
+    #StoreLocator--{{ section.id }} .grid--slider {
+      --item-width: calc((100vw - var(--scrollbar-width, 0px) - var(--outer, 20px) * 2) * 0.38);
+    }
+  }
+  @media (min-width: 990px) {
+    #StoreLocator--{{ section.id }} .grid--slider {
+      --item-width: calc((100vw - var(--scrollbar-width, 0px) - var(--outer, 20px) * 2) * 0.35);
+    }
   }
 {%- endstyle -%}
 
@@ -61,11 +76,12 @@
 
     {%- assign location_blocks = section.blocks | where: 'type', 'location_card' -%}
     {%- if location_blocks.size > 0 -%}
-      <div class="store-locator__carousel-container">
+      <div class="store-locator__carousel-container grid-outer">
         <grid-slider align-arrows>
           <div
             class="store-locator__grid grid grid--slider grid--mobile-slider"
             data-grid-slider
+            style="--column-count: {{ location_blocks.size }};"
           >
             {%- for block in location_blocks -%}
               <div class="grid-item store-locator__grid-item" data-grid-item {{ block.shopify_attributes }}>
