@@ -30,6 +30,7 @@
 
   loadScriptOnce(dataset.homepageProductSlidersSrc || '', 'data-homepage-product-sliders-script');
   loadScriptOnce(dataset.homepageFloatingImageSrc || '', 'data-homepage-floating-image-script');
+  loadScriptOnce(dataset.homepageCollectionSpotlightSrc || '', 'data-homepage-collection-spotlight-script');
 
 
   

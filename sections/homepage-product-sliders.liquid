@@ -130,6 +130,7 @@
 {%- endfor -%}
 
 {%- capture style -%}
+  --bg-color: {{ section.settings.background_color }};
   --PT: {{ section.settings.padding_top }}px;
   --PB: {{ section.settings.padding_bottom }}px;
 {%- endcapture -%}
@@ -202,6 +203,12 @@
       "id": "color_scheme",
       "default": "scheme_1",
       "label": "Color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#F9F9F9"
     },
     {
       "type": "header",

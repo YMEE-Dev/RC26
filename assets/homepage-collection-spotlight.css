@@ -1,0 +1,283 @@
+.homepage-collection-spotlight {
+  padding-top: var(--PT, 0px);
+  padding-bottom: var(--PB, 0px);
+}
+
+.homepage-collection-spotlight__wrapper {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.homepage-collection-spotlight__layout {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  column-gap: clamp(10px, 1.5vw, 18px);
+  row-gap: 32px;
+  align-items: center;
+}
+
+.homepage-collection-spotlight__content,
+.homepage-collection-spotlight__media {
+  min-width: 0;
+}
+
+.homepage-collection-spotlight__content {
+  order: 2;
+  grid-column: 6 / span 2;
+  width: 100%;
+  max-width: none;
+  justify-self: stretch;
+}
+
+.homepage-collection-spotlight__media {
+  order: 1;
+  grid-column: 2 / span 3;
+  width: 100%;
+  max-width: 100%;
+  justify-self: stretch;
+}
+
+.homepage-collection-spotlight--reversed .homepage-collection-spotlight__content {
+  order: 1;
+  grid-column: 2 / span 2;
+}
+
+.homepage-collection-spotlight--reversed .homepage-collection-spotlight__media {
+  order: 2;
+  grid-column: 5 / span 3;
+}
+
+.homepage-collection-spotlight__copy {
+  max-width: 320px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.homepage-collection-spotlight__eyebrow {
+  margin: 0 0 12px;
+  color: #111;
+  font-family: Inter;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.homepage-collection-spotlight__title {
+  margin: 0 0 14px;
+  color: #111;
+  font-family: var(--FONT-STACK-HEADING);
+  font-size: 36px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 40px;
+}
+
+.homepage-collection-spotlight__description {
+  max-width: 320px;
+  margin: 0 auto;
+  color: #111;
+  font-family: Inter;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 18px;
+}
+
+.homepage-collection-spotlight__description p {
+  margin: 0;
+}
+
+.homepage-collection-spotlight__products {
+  position: relative;
+  width: 100%;
+  margin-top: 36px;
+}
+
+.homepage-collection-spotlight__products .image-wrapper img {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: auto;
+}
+
+.homepage-collection-spotlight__products grid-slider {
+  display: block;
+}
+
+.homepage-collection-spotlight__products .grid--slider {
+  --item-width: 100%;
+}
+
+.homepage-collection-spotlight__products .grid-item {
+  margin-right: 0;
+}
+
+.homepage-collection-spotlight__products .product-item {
+  text-align: center;
+}
+
+.homepage-collection-spotlight__products .product-item__image {
+  max-width: 240px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.homepage-collection-spotlight__products .product-item__info {
+  text-align: center;
+}
+
+.homepage-collection-spotlight__products .product-item__title {
+  color: #111;
+  font-family: Inter;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 15px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.homepage-collection-spotlight__products .product-item__price__holder,
+.homepage-collection-spotlight__products .product-item__price {
+  justify-content: center;
+  color: #111;
+  font-family: Inter;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 15px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.homepage-collection-spotlight__products .product-item__siblings,
+.homepage-collection-spotlight__products .product-item__recently-viewed {
+  display: none !important;
+}
+
+.homepage-collection-spotlight__products .slider__arrows {
+  top: 50%;
+  bottom: auto;
+  width: 100%;
+  transform: translateY(-60%);
+}
+
+.homepage-collection-spotlight__products .slider__button {
+  width: 42px;
+  height: 42px;
+  border: 1px solid #111;
+  background: #fff;
+}
+
+.homepage-collection-spotlight__products .slider__button--prev {
+  left: -56px;
+}
+
+.homepage-collection-spotlight__products .slider__button--next {
+  right: -56px;
+}
+
+.homepage-collection-spotlight__media {
+  aspect-ratio: 446 / 508;
+  overflow: hidden;
+}
+
+.homepage-collection-spotlight__image,
+.homepage-collection-spotlight__placeholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.homepage-collection-spotlight__image {
+  object-fit: cover;
+}
+
+.homepage-collection-spotlight__image--mobile {
+  display: none;
+}
+
+.homepage-collection-spotlight__placeholder {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.homepage-collection-spotlight__placeholder .placeholder-svg {
+  width: 100%;
+  height: 100%;
+}
+
+@media only screen and (max-width: 989px) {
+  .homepage-collection-spotlight {
+    padding-top: calc(var(--PT, 0px) * 0.5);
+    padding-bottom: calc(var(--PB, 0px) * 0.5);
+  }
+
+  .homepage-collection-spotlight__products .slider__button--prev {
+    left: -20px;
+  }
+
+  .homepage-collection-spotlight__products .slider__button--next {
+    right: -20px;
+  }
+}
+
+@media only screen and (max-width: 749px) {
+  .homepage-collection-spotlight__layout {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .homepage-collection-spotlight__content,
+  .homepage-collection-spotlight__media,
+  .homepage-collection-spotlight--reversed .homepage-collection-spotlight__content,
+  .homepage-collection-spotlight--reversed .homepage-collection-spotlight__media {
+    grid-column: auto;
+    order: initial;
+  }
+
+  .homepage-collection-spotlight__content {
+    max-width: none;
+  }
+
+  .homepage-collection-spotlight__copy {
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  .homepage-collection-spotlight__title {
+    font-size: 32px;
+    line-height: 36px;
+  }
+
+  .homepage-collection-spotlight__products {
+    margin-top: 28px;
+  }
+
+  .homepage-collection-spotlight__products .product-item__image {
+    max-width: 100%;
+  }
+
+  .homepage-collection-spotlight__products .slider__arrows {
+    display: none;
+  }
+
+  .homepage-collection-spotlight__media {
+    aspect-ratio: 335 / 398;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+
+  .homepage-collection-spotlight__media--has-mobile-image .homepage-collection-spotlight__image--desktop {
+    display: none;
+  }
+
+  .homepage-collection-spotlight__media--has-mobile-image .homepage-collection-spotlight__image--mobile {
+    display: block;
+  }
+}
