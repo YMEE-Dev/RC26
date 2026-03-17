@@ -403,6 +403,12 @@ side-drawer .drawer__link-value {
   text-transform: var(--BTN-UPPERCASE);
 }
 
+@media (max-width: 767px) {
+  side-drawer .drawer-concierge .drawer__link-value {
+    display: none;
+  }
+}
+
 side-drawer .drawer__button {
   color: var(--COLOR-TEXT);
   text-align: center;
@@ -634,7 +640,7 @@ side-drawer .accordion__title .accordion-icon-wrapper .icon {
   height: 12px;
   left: auto;
   right: 0;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
 side-drawer .accordion__title .accordion-icon-wrapper .icon path {
@@ -642,19 +648,23 @@ side-drawer .accordion__title .accordion-icon-wrapper .icon path {
 }
 
 side-drawer .accordion[open] .accordion-icon-wrapper .icon-plus {
-  display: none;
+  opacity: 0;
+  transform: scale(0.8);
 }
 
 side-drawer .accordion[open] .accordion-icon-wrapper .icon-minus {
-  display: block;
+  opacity: 1;
+  transform: scale(1);
 }
 
 side-drawer .accordion:not([open]) .accordion-icon-wrapper .icon-plus {
-  display: block;
+  opacity: 1;
+  transform: scale(1);
 }
 
 side-drawer .accordion:not([open]) .accordion-icon-wrapper .icon-minus {
-  display: none;
+  opacity: 0;
+  transform: scale(0.8);
 }
 
 side-drawer .accordion__content {
