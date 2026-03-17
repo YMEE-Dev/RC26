@@ -20,16 +20,15 @@
   #StoreLocator--{{ section.id }} .store-locator__carousel-container {
     overflow: visible;
   }
-  /* Ensure items overflow so grid-slider activates (default 28% fits 3 items) */
+  /* Item width: ~35-38% = 2–3 slides visible in any container (viewport-based was showing 1 only) */
   @media (min-width: 750px) {
     #StoreLocator--{{ section.id }} .grid--slider {
-      --item-width: calc((100vw - var(--scrollbar-width, 0px) - var(--outer, 20px) * 2) * 0.38);
+      --item-width: min(38%, calc((100% - var(--gap, 20px) * 2) / 2.7));
     }
   }
   @media (min-width: 990px) {
     #StoreLocator--{{ section.id }} .grid--slider {
-      /* ~40% per item so 3+ items overflow and slider activates */
-      --item-width: calc((100vw - var(--scrollbar-width, 0px) - var(--outer, 20px) * 2) * 0.4);
+      --item-width: min(40%, calc((100% - var(--gap, 20px) * 2) / 2.5));
     }
   }
 {%- endstyle -%}
