@@ -300,21 +300,25 @@
           return document.getElementById(productFormId);
         }
 
-        function submitProductForm() {
+        function submitProductForm(variantId) {
           var liveFormEl = getLiveFormEl();
           if (!liveFormEl) return;
 
-          try {
-            if (typeof liveFormEl.requestSubmit === 'function') {
-              liveFormEl.requestSubmit();
-              return;
-            }
-          } catch (err) { /* no-op */ }
+          var idInput = liveFormEl.querySelector('input[name="id"]');
+          if (idInput) {
+            idInput.disabled = false;
+            if (variantId) idInput.value = variantId;
+          }
 
-          try {
-            var realSubmit = liveFormEl.querySelector('button[type="submit"], input[type="submit"]');
-            if (realSubmit && typeof realSubmit.click === 'function') realSubmit.click();
-          } catch (err2) { /* no-op */ }
+          var submitBtn = liveFormEl.querySelector('button[type="submit"]');
+          if (submitBtn) submitBtn.disabled = false;
+
+          document.dispatchEvent(
+            new CustomEvent("theme:cart:add", {
+              detail: { button: submitBtn },
+              bubbles: false,
+            })
+          );
         }
 
         function getLiveVariantIdInput() {
@@ -708,6 +712,7 @@
 
           variantIdInput = getLiveVariantIdInput();
           if (variantIdInput && variantId) {
+            variantIdInput.disabled = false;
             if (String(variantIdInput.value) !== String(variantId)) {
               variantIdInput.value = variantId;
               variantIdInput.dispatchEvent(new Event('change', { bubbles: true }));
@@ -767,11 +772,12 @@
             if (addBtn) {
               e.preventDefault();
               e.stopPropagation();
+              var addVariantId = optionEl.getAttribute("data-variant-id");
               syncVariant(optionEl, { userSelected: true });
               closeMenu();
 
               setTimeout(function () {
-                submitProductForm();
+                submitProductForm(addVariantId);
               }, 0);
               return;
             }
@@ -790,7 +796,7 @@
 
             if (action === 'buy') {
               closeMenu();
-              submitProductForm();
+              submitProductForm(optionEl.getAttribute("data-variant-id"));
               return;
             }
 
