@@ -801,15 +801,38 @@
           true
         );
 
-        menu.addEventListener('mouseover', function (e) {
+        menu.addEventListener("mouseover", function (e) {
           if (isMobileViewport()) return;
-          var optionEl = e.target.closest('.ymee-variant-dropdown__option');
+          var optionEl = e.target.closest(".ymee-variant-dropdown__option");
           if (!optionEl || !menu.contains(optionEl)) return;
-          if (optionEl.style.display === 'none') return;
-          if (optionEl.classList.contains('is-oos')) return;
-          if (e.relatedTarget && optionEl.contains(e.relatedTarget)) return;
+          if (optionEl.style.display === "none") return;
 
+          // Prevent multiple firings with a data attribute
+          if (optionEl.dataset.hoverActive === "true") return;
+          optionEl.dataset.hoverActive = "true";
+
+          // Clear any existing selection first
+          clearSelectedVisual();
+
+          // Add is-selected to ALL hovered options (including is-oos)
           setSelectedVisual(optionEl);
+        });
+
+        menu.addEventListener("mouseout", function (e) {
+          if (isMobileViewport()) return;
+          var optionEl = e.target.closest(".ymee-variant-dropdown__option");
+          if (optionEl) {
+            optionEl.dataset.hoverActive = "false";
+          }
+          // Always clear when leaving any option
+          clearSelectedVisual();
+        });
+
+        root.addEventListener("mouseleave", function (e) {
+          // Only clear if we're not moving to a child element within the dropdown
+          if (!e.relatedTarget || !root.contains(e.relatedTarget)) {
+            clearSelectedVisual();
+          }
         });
 
         /* Color picker change is handled by a single delegated listener on document (see bottom of IIFE) */
