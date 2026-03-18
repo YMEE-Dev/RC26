@@ -3623,9 +3623,6 @@
           this.isSpotlightCollectionTemplate =
             this.isCollectionTemplate &&
             Boolean(document.querySelector(".main-content--collection-spotlight, .collection--spotlight"));
-            this.isSpotlightBlogTemplate =
-            this.isBlogTemplate &&
-            Boolean(document.querySelector(".main-content--blog-spotlight, .blog--spotlight"));
           this.deadLinks = document.querySelectorAll('.navlink[href="#"]');
           this.resizeObserver = null;
           this.headerHideLayerTimeout = null;
