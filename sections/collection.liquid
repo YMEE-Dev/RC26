@@ -33,6 +33,7 @@
   assign blocks_featured_image = section.blocks | where: 'type', 'featured_image'
   assign collection_template_suffix = collection.template_suffix | default: template.suffix | downcase | strip
   assign is_spotlight_collection_template = false
+  assign is_media_only_collection_template = false
   assign should_use_spotlight_images = false
   assign spotlight_images = collection.metafields.custom.spotlight_collection_images.value
   assign spotlight_menu_color = collection.metafields.custom.spotlight_collection_menu_color.value
@@ -40,6 +41,10 @@
 
   if collection_template_suffix == 'spotlight'
     assign is_spotlight_collection_template = true
+  endif
+
+  if collection_template_suffix == 'media-only'
+    assign is_media_only_collection_template = true
   endif
 
   assign spotlight_images_position = collection.metafields.custom.spotlight_collection_images_position.value | default: 'left' | downcase | strip
@@ -228,7 +233,7 @@
     {%- endif -%}
 
     {%- if enable_sort or enable_filters -%}
-      <nav class="collection__nav {{ align_classes }}" data-collection-nav>
+      <nav class="collection__nav {{ align_classes }}{% if is_media_only_collection_template %} collection__nav--media-only{% endif %}" data-collection-nav>
         <div class="availability_filter-wrapper" data-availability-filter>
           <a
             href="{{ collection.url | split: '-' | first }}"

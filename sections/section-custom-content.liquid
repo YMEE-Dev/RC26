@@ -24,8 +24,12 @@
   assign show_video_background = false
   assign video_blocks = section.blocks | where: 'type', 'video'
   for block in video_blocks
-    if block.settings.video != null
-      assign show_video_background = true
+    if block.settings.video != blank
+      if block.settings.video.media_type == 'video'
+        assign show_video_background = true
+      elsif block.settings.video.sources != blank
+        assign show_video_background = true
+      endif
     endif
 
     if block.settings.show_video_popup
