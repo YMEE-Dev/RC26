@@ -953,6 +953,31 @@
     var input = e.target.closest('[data-ymee-color-input]');
     if (!input) return;
 
+    /* ── Sticky-bar swatch → delegate to main ymee-color-picker ── */
+    var stickyContainer = input.closest('[data-sticky-color-swatches]');
+    if (stickyContainer) {
+      var optPos = stickyContainer.getAttribute('data-option-position');
+      var sectionRoot = stickyContainer.closest('[id^="MainProduct--"]') || document;
+      var mainPicker = sectionRoot.querySelector(
+        '[data-ymee-color-picker][data-option-position="' + optPos + '"]'
+      );
+      if (mainPicker) {
+        var mainInput = mainPicker.querySelector(
+          '[data-ymee-color-input][value="' + cssEscape(input.value) + '"]'
+        );
+        if (mainInput && !mainInput.checked) {
+          mainInput.checked = true;
+          mainInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+      // Update sticky swatch visual state
+      stickyContainer.querySelectorAll('.product__sticky-swatch').forEach(function (sw) {
+        var swInput = sw.querySelector('[data-ymee-color-input]');
+        sw.classList.toggle('is-active', swInput === input);
+      });
+      return;
+    }
+
     var picker = input.closest('[data-ymee-color-picker]');
     if (!picker) return;
 
@@ -982,6 +1007,21 @@
         valueEl.setAttribute('hidden', '');
       }
     });
+
+    // Sync sticky bar swatches
+    var stickySwatches = sectionRoot.querySelector(
+      '[data-sticky-color-swatches][data-option-position="' + optionPos + '"]'
+    );
+    if (stickySwatches) {
+      stickySwatches.querySelectorAll('.product__sticky-swatch').forEach(function (sw) {
+        var swInput = sw.querySelector('[data-ymee-color-input]');
+        if (swInput) {
+          var isMatch = swInput.value === input.value;
+          swInput.checked = isMatch;
+          sw.classList.toggle('is-active', isMatch);
+        }
+      });
+    }
 
     var variantSelects =
       sectionRoot.querySelector('variant-selects[data-section="' + cssEscape(sectionId) + '"]') ||
