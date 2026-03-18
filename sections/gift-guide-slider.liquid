@@ -27,7 +27,7 @@
         {%- for block in section.blocks -%}
           {%- case block.type -%}
             {%- when 'subheading' -%}
-              <p class="gift-guide-slider__subheading" {{ block.shopify_attributes }}>
+              <p class="gift-guide-slider__subheading title" {{ block.shopify_attributes }}>
                 {{ block.settings.text | upcase }}
               </p>
             {%- when 'heading' -%}
@@ -78,7 +78,9 @@
 
                     <div class="gift-guide-slider__card-content">
                       {%- if block.settings.subheading != blank -%}
-                        <p class="gift-guide-slider__card-subheading">{{ block.settings.subheading | upcase }}</p>
+                        <p class="gift-guide-slider__card-subheading navlink">
+                          {{ block.settings.subheading | upcase }}
+                        </p>
                       {%- endif -%}
                       {%- if block.settings.heading != blank -%}
                         <h3 class="gift-guide-slider__card-heading">{{ block.settings.heading }}</h3>
@@ -99,7 +101,9 @@
 
                     <div class="gift-guide-slider__card-content">
                       {%- if block.settings.subheading != blank -%}
-                        <p class="gift-guide-slider__card-subheading">{{ block.settings.subheading | upcase }}</p>
+                        <p class="gift-guide-slider__card-subheading navlink">
+                          {{ block.settings.subheading | upcase }}
+                        </p>
                       {%- endif -%}
                       {%- if block.settings.heading != blank -%}
                         <h3 class="gift-guide-slider__card-heading">{{ block.settings.heading }}</h3>
@@ -152,10 +156,10 @@
           "label": "Heading size",
           "default": "heading-large",
           "options": [
-            { "value": "heading-small", "label": "Small" },
-            { "value": "heading-medium", "label": "Medium" },
-            { "value": "heading-large", "label": "Large" },
-            { "value": "heading-x-large", "label": "Extra large" }
+            {"value": "heading-small", "label": "Small"},
+            {"value": "heading-medium", "label": "Medium"},
+            {"value": "heading-large", "label": "Large"},
+            {"value": "heading-x-large", "label": "Extra large"}
           ]
         }
       ]
@@ -218,10 +222,10 @@
       "label": "Width",
       "default": "wrapper",
       "options": [
-        { "value": "wrapper--full-padded", "label": "Full width padded" },
-        { "value": "wrapper", "label": "Normal" },
-        { "value": "wrapper--narrow", "label": "Narrow" },
-        { "value": "wrapper--custom", "label": "Custom (max-width: 1232px)" }
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"},
+        {"value": "wrapper--narrow", "label": "Narrow"},
+        {"value": "wrapper--custom", "label": "Custom (max-width: 1232px)"}
       ]
     },
     {
