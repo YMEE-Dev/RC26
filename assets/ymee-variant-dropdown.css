@@ -334,6 +334,7 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   .ymee-variant-dropdown {
     border: none;
     margin: 0;
+    position: relative;
   }
 
   .ymee-variant-dropdown__toggle {
@@ -347,6 +348,7 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
     position: relative;
     isolation: isolate;
     height: 50px;
+    z-index: 7;
   }
 
   .ymee-variant-dropdown__toggle:hover {
@@ -417,7 +419,7 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
 
   .ymee-variant-dropdown__option {
     padding-right: 15px;
-    background: #f9f9f9 !important;
+    background: #fff !important;
   }
 
   .ymee-variant-dropdown__option.is-selected {
@@ -593,11 +595,6 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   line-height: var(--LINE-HEIGHT-CAPTION);
 }
 
-@media only screen and (max-width: 749px) {
-  .ymee-variant-dropdown__sizing-link {
-    color: #fff;
-  }
-}
 
 .ymee-variant-dropdown__sizing-link svg {
   width: 18px;
@@ -606,32 +603,33 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
 }
 
 .ymee-variant-sheet-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 9998;
-  opacity: 0;
-  transition: opacity 240ms ease;
-}
-
-.ymee-variant-sheet-backdrop[hidden] {
-  display: none;
+  display: none !important;
 }
 
 .ymee-variant-sheet {
-  position: fixed;
+  position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  background: #000;
-  color: #fff;
-  z-index: 9999;
-  max-height: min(80vh, 640px);
+  background: #fff;
+  color: var(--COLOR-TEXT, #000);
+  z-index: 6;
+  max-height: 420px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transform: translateY(100%);
-  transition: transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  border: 1px solid #E5E5E5;
+  border-bottom: none;
+  border-top: none;
+  transform: translateY(0) translateY(-30px);
+  opacity: 0;
+  visibility: hidden;
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.ymee-variant-sheet .ymee-variant-dropdown__footer {
+  padding-bottom: 35px;
 }
 
 .ymee-variant-sheet[hidden] {
@@ -639,45 +637,34 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
 }
 
 .ymee-variant-sheet__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px;
-}
-
-.ymee-variant-sheet__title {
-  color: #fff;
-  font: inherit;
-  font-size: var(--BTN-FONT-SIZE);
-  font-weight: var(--BTN-FONT-WEIGHT);
-  line-height: var(--BTN-LINE-HEIGHT);
-  letter-spacing: var(--BTN-LETTER-SPACING);
-  text-transform: uppercase;
-}
-
-.ymee-variant-sheet__close {
-  display: flex;
-  border: 0;
-  background: transparent;
-  font: inherit;
-  cursor: pointer;
-}
-
-.ymee-variant-sheet__close svg path {
-  stroke: #fff;
-  stroke-width: 1px;
+  display: none;
 }
 
 .ymee-variant-sheet__body {
-  padding: 0 12px 12px;
   overflow: auto;
+  overflow-x: hidden;
   flex: 1 1 auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+}
+
+.ymee-variant-sheet__body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ymee-variant-sheet__body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ymee-variant-sheet__body::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.25);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 .ymee-variant-sheet__footer {
-  background: #f9f9f9;
-  padding: 12px;
-  flex: 0 0 auto;
+  display: none;
 }
 
 .ymee-variant-sheet__footer-actions {
@@ -747,25 +734,13 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   border-radius: 0;
 }
 
-@media screen and (max-width: 1024px) {
-  .ymee-variant-sheet__body {
-    padding: 0;
-    overflow-x: hidden;
-  }
-}
-
-html.ymee-variant-sheet-open,
-html.ymee-variant-sheet-open body {
-  overflow: hidden;
-}
-
 html.ymee-variant-sheet-open .ymee-variant-sheet {
-  transform: translateY(0);
+  transform: translateY(-25px);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
-html.ymee-variant-sheet-open .ymee-variant-sheet-backdrop {
-  opacity: 1;
-}
 
 @media (prefers-reduced-motion: reduce) {
   .ymee-variant-sheet,
