@@ -751,6 +751,17 @@
           applyGalleryFilter(sectionId, colorCode);
         }
 
+        var toggleIcon = toggle.querySelector(".ymee-variant-dropdown__toggle-icon");
+        if (toggleIcon) {
+          toggleIcon.addEventListener("click", function (e) {
+            if (!isMobileViewport()) return;
+            e.preventDefault();
+            e.stopPropagation();
+            var hamburger = document.querySelector('.header__mobile__hamburger[data-drawer-toggle="hamburger"]');
+            if (hamburger) hamburger.click();
+          });
+        }
+
         toggle.addEventListener('click', function (e) {
           e.preventDefault();
           if (menu.hidden) openMenu();
