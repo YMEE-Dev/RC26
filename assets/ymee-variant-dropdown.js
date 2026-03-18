@@ -53,8 +53,7 @@
 
     var body = document.createElement('div');
     body.className = 'ymee-variant-sheet__body';
-    body.setAttribute('data-ymee-variant-sheet-body', '');
-
+    body.setAttribute("data-ymee-variant-sheet-body", "");
     sheet.appendChild(body);
 
     var parent = mountParent && mountParent.appendChild ? mountParent : document.body;
@@ -246,6 +245,7 @@
         var toggle = root.querySelector('.ymee-variant-dropdown__toggle');
         var menu = root.querySelector('.ymee-variant-dropdown__menu');
         var placeholderEl = root.querySelector('[data-ymee-variant-dropdown-placeholder]');
+        var footerAtcBtn = menu.querySelector("[data-ymee-footer-atc]");
 
         var productFormId = 'product-form-' + sectionId;
         var formEl = document.getElementById(productFormId);
@@ -496,22 +496,25 @@
 
         function updateSheetFooterState() {
           if (!sheetState) return;
-          var visualSelected = menu.querySelector('.ymee-variant-dropdown__option.is-selected:not([style*="display: none"])');
+          var visualSelected = menu.querySelector(
+            '.ymee-variant-dropdown__option.is-selected:not([style*="display: none"])'
+          );
 
           if (isMobileViewport()) {
-            if (sheetState.footer) sheetState.footer.hidden = !visualSelected;
-            if (!visualSelected) {
-              if (sheetState.footerAddBtn) sheetState.footerAddBtn.disabled = true;
-              return;
+            if (footerAtcBtn) {
+              if (visualSelected && !visualSelected.classList.contains("is-oos")) {
+                footerAtcBtn.hidden = false;
+                footerAtcBtn.disabled = false;
+              } else {
+                footerAtcBtn.hidden = true;
+              }
             }
+            if (!visualSelected) return;
           }
+        }
 
-          var selected = visualSelected || getSelectedOptionEl();
-          if (!selected) return;
-
-          if (sheetState.footerAddBtn) {
-            sheetState.footerAddBtn.disabled = !!selected.classList.contains('is-oos');
-          }
+        function hideFooterAtc() {
+          if (footerAtcBtn) footerAtcBtn.hidden = true;
         }
 
         function closeSheet() {
@@ -604,10 +607,9 @@
           if (sheetState.backdrop) sheetState.backdrop.addEventListener('click', closeMenu);
           if (sheetState.closeBtn) sheetState.closeBtn.addEventListener('click', closeMenu);
 
-          if (sheetState.footerAddBtn && !sheetState.footerAddBtn.dataset.ymeeBound) {
-            sheetState.footerAddBtn.dataset.ymeeBound = 'true';
-            sheetState.footerAddBtn.addEventListener('click', function (e) {
-              if (!isMobileViewport()) return;
+          if (footerAtcBtn && !footerAtcBtn.dataset.ymeeBound) {
+            footerAtcBtn.dataset.ymeeBound = "true";
+            footerAtcBtn.addEventListener("click", function (e) {
               e.preventDefault();
               e.stopPropagation();
 
@@ -943,6 +945,39 @@
         }
       });
   }
+
+  /* ── Sticky swatch click → close any open ymee-variant-sheet + reset size placeholder ── */
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.product__sticky-swatch')) return;
+
+    var openSheet = document.querySelector('.ymee-variant-sheet:not([hidden])');
+    if (openSheet) {
+      document.documentElement.classList.remove('ymee-variant-sheet-open');
+      openSheet.hidden = true;
+    }
+
+    var swatch = e.target.closest('.product__sticky-swatch');
+    var sectionRoot = swatch.closest('[id^="MainProduct--"]') || document;
+
+    // Reset placeholder to default "choose size" text
+    var placeholderEl = sectionRoot.querySelector('[data-ymee-variant-dropdown-placeholder]');
+    var valueEl = sectionRoot.querySelector('[data-ymee-variant-dropdown-value]');
+    if (placeholderEl) {
+      placeholderEl.textContent = window.ymeeChooseSizeText || '';
+      placeholderEl.removeAttribute('hidden');
+    }
+    if (valueEl) valueEl.hidden = true;
+
+    // Hide footer ATC button
+    var footerAtc = sectionRoot.querySelector('[data-ymee-footer-atc]');
+    if (footerAtc) footerAtc.hidden = true;
+
+    // Clear selected variant state
+    sectionRoot.removeAttribute('data-ymee-variant-selected');
+    sectionRoot.querySelectorAll('.ymee-variant-dropdown__option.is-selected').forEach(function (opt) {
+      opt.classList.remove('is-selected');
+    });
+  });
 
   /* ── Delegated color-picker change handler ──────────────────────────
    * Bound ONCE on document – survives any product-info DOM replacement.
