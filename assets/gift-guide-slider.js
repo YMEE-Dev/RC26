@@ -73,6 +73,12 @@
       spaceBetween: 80,
       loop: false,
       smooth: true,
+      mousewheel: {
+        enabled: true,
+        forceToAxis: true,
+        releaseOnEdges: true,
+        sensitivity: 1
+      },
       on: {
         afterInit() {
           requestAnimationFrame(() => updateProgress(sectionId));
