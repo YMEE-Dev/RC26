@@ -20,29 +20,31 @@
   #StoreLocator--{{ section.id }} .store-locator__carousel-container {
     overflow: visible;
   }
-  /* Hide slider navigation arrows */
-  #StoreLocator--{{ section.id }} .slider__arrows {
-    display: none;
-  }
   #StoreLocator--{{ section.id }} .grid--slider {
     padding-left: 0;
   }
-  /* Item width: ~42% so 2 full + half of 3rd slide visible (peek effect) */
+  #StoreLocator--{{ section.id }} .slider__button  {
+    display: none;
+  }
+  /* Item width: ~30–35% so 2–3 slides visible (was 1 due to viewport-based calc in narrow wrappers) */
   @media (min-width: 750px) {
     #StoreLocator--{{ section.id }} .store-locator__grid.grid--slider {
-      --item-width: 42%;
+      --item-width: 32%;
     }
   }
   @media (min-width: 990px) {
     #StoreLocator--{{ section.id }} .store-locator__grid.grid--slider {
-      --item-width: 42%;
+      --item-width: 33%;
     }
   }
-  /* Mobile: ensure 2 slides visible (override any single-column behavior) */
-  @media (max-width: 749px) {
+  /* Mobile: 1.5 slides visible, reduced gap */
+  @media (max-width: 768px) {
+    #StoreLocator--{{ section.id }} {
+      --gap: 8px;
+    }
     #StoreLocator--{{ section.id }} .store-locator__grid.grid--mobile-slider .grid-item {
-      width: calc(50% - (var(--gap, 20px) / 2));
-      min-width: calc(50% - (var(--gap, 20px) / 2));
+      width: calc(66.67% - (var(--gap) / 2));
+      min-width: calc(66.67% - (var(--gap) / 2));
     }
   }
 {%- endstyle -%}
@@ -91,7 +93,7 @@
     {%- assign location_blocks = section.blocks | where: 'type', 'location_card' -%}
     {%- if location_blocks.size > 0 -%}
       <div class="store-locator__carousel-container grid-outer">
-        <grid-slider>
+        <grid-slider align-arrows>
           <div
             class="store-locator__grid grid grid--slider grid--mobile-slider"
             data-grid-slider
