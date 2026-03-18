@@ -421,11 +421,13 @@
     --PRODUCT-GRID-ASPECT-RATIO: {{ settings.product_grid_aspect_ratio | times: 100 }}%;
 
     /* === Typography ===*/
+    --FONT-DISPLAY-L: {{ settings.display_l_size | append: 'px' }};
     --FONT-DISPLAY-M: {{ settings.display_m_size | append: 'px' }};
     --FONT-DISPLAY-S: {{ settings.display_s_size | append: 'px' }};
     --FONT-HEADLINE: {{ settings.headline_size | append: 'px' }};
     --FONT-TITLE: {{ settings.title_size | append: 'px' }};
 
+    --LINE-HEIGHT-DISPLAY-L: {{ settings.display_l_line_height | append: 'px' }};
     --LINE-HEIGHT-DISPLAY-M: {{ settings.display_m_line_height | append: 'px' }};
     --LINE-HEIGHT-DISPLAY-S: {{ settings.display_s_line_height | append: 'px' }};
     --LINE-HEIGHT-HEADLINE: {{ settings.headline_line_height | append: 'px' }};
@@ -747,6 +749,15 @@
 <!-- Theme Javascript ============================================================== -->
 <script src="{{ 'vendor.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'theme.dev.js' | asset_url }}" defer="defer"></script>
+<script
+  src="{{ 'custom.js' | asset_url }}"
+  defer="defer"
+  data-homepage-product-sliders-src="{{ 'homepage-product-sliders.js' | asset_url }}"
+  data-homepage-floating-image-src="{{ 'homepage-floating-image.js' | asset_url }}"
+  data-homepage-stacked-images-src="{{ 'homepage-stacked-images.js' | asset_url }}"
+  data-homepage-collection-spotlight-src="{{ 'homepage-collection-spotlight.js' | asset_url }}"
+  data-homepage-collection-hover-src="{{ 'homepage-collection-hover.js' | asset_url }}"
+></script>
 
 {%- if template.name == 'product' -%}
   <link rel="stylesheet" href="{{ 'side-drawer.css' | asset_url }}">

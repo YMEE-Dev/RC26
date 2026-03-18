@@ -4700,13 +4700,16 @@ h5,
 
 h6,
 .h6,
+.title,
 .article__author-bio h3,
 .blog-section .article__image .article__tags {
+  font-family: var(--FONT-STACK-BODY);
   font-size: var(--FONT-TITLE);
   line-height: var(--LINE-HEIGHT-TITLE);
   margin: 0;
   font-weight: 400;
   letter-spacing: 1.6px;
+  text-transform: uppercase;
 }
 
 .navlink {
@@ -12268,6 +12271,7 @@ countdown-timer {
   width: 75vw;
 }
 
+.modal button.close,
 .modal--default button.close {
   --icon-size: 24px;
   position: absolute;
@@ -12287,8 +12291,10 @@ countdown-timer {
   --icon-size: 20px;
   top: 30px;
   right: 20px;
+  z-index: 1;
 }
 
+.modal button.close .icon,
 .modal--default button.close .icon {
   display: block;
   fill: currentcolor;
@@ -23084,6 +23090,7 @@ native-scrollbar {
 .tabs__head {
   z-index: 2;
   overflow: hidden;
+  padding-inline: var(--inner);
 }
 
 .tabs__head .tabs__arrow::before {

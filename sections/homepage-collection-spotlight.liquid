@@ -1,0 +1,253 @@
+<!-- /sections/homepage-collection-spotlight.liquid -->
+{{ 'homepage-collection-spotlight.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign section_eyebrow = section.settings.eyebrow | strip
+  assign section_title = section.settings.title | strip
+  assign section_description = section.settings.description
+  assign image = section.settings.image
+  assign mobile_image = section.settings.mobile_image
+  assign layout = section.settings.layout
+  assign show_recently_viewed_indicator = settings.show_recently_viewed_indicator
+  assign sizes = '(min-width: 960px) 360px, calc(50vw - 30px)'
+  assign rendered_products_count = 0
+-%}
+
+{%- style -%}
+  #HomepageCollectionSpotlight--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    --bg-color: {{ section.settings.background_color }};
+  }
+{%- endstyle -%}
+
+{%- if show_recently_viewed_indicator -%}
+  <script src="{{ 'grid-item.js' | asset_url }}" defer></script>
+{%- endif -%}
+
+{%- if settings.quickview_enable -%}
+  <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+<section
+  id="HomepageCollectionSpotlight--{{ section.id }}"
+  class="homepage-collection-spotlight section-padding {{ color_scheme }}{% if layout == 'reversed' %} homepage-collection-spotlight--reversed{% endif %}"
+  data-section-id="{{ section.id }}"
+  data-section-type="homepage-collection-spotlight"
+  style="background-color: var(--bg-color);"
+>
+  <div class="homepage-collection-spotlight__wrapper {{ section.settings.width }}">
+    <div class="homepage-collection-spotlight__layout">
+      <div class="homepage-collection-spotlight__content">
+        <div class="homepage-collection-spotlight__copy">
+          {%- if section_eyebrow != blank -%}
+            <p class="homepage-collection-spotlight__eyebrow">{{ section_eyebrow | escape }}</p>
+          {%- endif -%}
+
+          {%- if section_title != blank -%}
+            <h2 class="homepage-collection-spotlight__title">{{ section_title | escape }}</h2>
+          {%- endif -%}
+
+          {%- if section_description != blank -%}
+            <div class="homepage-collection-spotlight__description rte">
+              {{ section_description }}
+            </div>
+          {%- endif -%}
+        </div>
+
+        <div class="homepage-collection-spotlight__products">
+          <grid-slider>
+            <div
+              class="grid grid--slider grid--mobile-slider{% if section.settings.product_list.count <= 1 %} grid--slider-disabled{% endif %}"
+              data-grid-slider
+              id="HomepageCollectionSpotlightSlider--{{ section.id }}"
+            >
+              {%- for product in section.settings.product_list -%}
+                {%- liquid
+                  assign hidden_product = false
+                  if product.tags contains 'hide'
+                    assign hidden_product = true
+                  endif
+                -%}
+
+                {%- if hidden_product == false -%}
+                  {%- assign rendered_products_count = rendered_products_count | plus: 1 -%}
+                  {%- render 'product-grid-item',
+                    product: product,
+                    index: rendered_products_count,
+                    sizes: sizes,
+                    modifier_class: 'homepage-collection-spotlight__product-card'
+                  -%}
+                {%- endif -%}
+              {%- endfor -%}
+
+              {%- if rendered_products_count == 0 -%}
+                {%- for i in (1..2) -%}
+                  {%- liquid
+                    assign placeholder = 'product-' | append: forloop.index
+                    capture placeholder_title
+                      cycle 'Spotlight Product', 'Collection Piece'
+                    endcapture
+                  -%}
+                  {%- render 'onboarding-product-grid-item',
+                    title: placeholder_title,
+                    placeholder: placeholder,
+                    index: forloop.index,
+                    animation_delay: forloop.index0
+                  -%}
+                {%- endfor -%}
+              {%- endif -%}
+            </div>
+          </grid-slider>
+        </div>
+      </div>
+
+      <div class="homepage-collection-spotlight__media{% if mobile_image != blank %} homepage-collection-spotlight__media--has-mobile-image{% endif %}">
+        {%- if image != blank or mobile_image != blank -%}
+          {%- assign desktop_image = image | default: mobile_image -%}
+          {{
+            desktop_image
+            | image_url: width: 2400
+            | image_tag:
+              class: 'homepage-collection-spotlight__image homepage-collection-spotlight__image--desktop',
+              loading: 'lazy',
+              sizes: '(min-width: 960px) 50vw, 100vw',
+              widths: '375, 550, 750, 990, 1200, 1600, 2000, 2400'
+          }}
+
+          {%- if mobile_image != blank -%}
+            {{
+              mobile_image
+              | image_url: width: 1500
+              | image_tag:
+                class: 'homepage-collection-spotlight__image homepage-collection-spotlight__image--mobile',
+                loading: 'lazy',
+                sizes: '100vw',
+                widths: '320, 375, 550, 750, 990, 1200, 1500'
+            }}
+          {%- endif -%}
+        {%- else -%}
+          <div class="homepage-collection-spotlight__placeholder">
+            {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Collection spotlight",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Collection spotlight"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Tiare"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>Inspired by the luminous beauty of the Tiare flower, this Roberto Coin Tiara collection expresses effortless femininity, pure light, and feminine strength.</p>"
+    },
+    {
+      "type": "product_list",
+      "id": "product_list",
+      "label": "Products",
+      "limit": 8
+    },
+    {
+      "type": "header",
+      "content": "Media"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "Mobile image"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Desktop layout",
+      "default": "",
+      "options": [
+        {"value": "", "label": "Image left, content right"},
+        {"value": "reversed", "label": "Content left, image right"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        {"value": "wrapper--full", "label": "Full width"},
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"}
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Homepage collection spotlight"
+    }
+  ]
+}
+{% endschema %}
