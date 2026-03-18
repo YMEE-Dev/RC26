@@ -106,6 +106,32 @@
   position: relative;
   margin: 0 auto;
   max-width: 1400px;
+  padding-bottom: 28px;
+}
+
+.gift-guide-slider__carousel-container .related-slider-progress {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 1px;
+  background: rgba(17, 17, 17, 0.2);
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.gift-guide-slider__carousel-container .related-slider-progress.hidden {
+  display: none;
+}
+
+.gift-guide-slider__carousel-container .related-slider-progress__line {
+  display: block;
+  width: var(--related-slider-progress, 0%);
+  height: 100%;
+  background: #111111;
+  transition: width 0.2s ease;
 }
 
 .gift-guide-slider__card {
@@ -205,5 +231,9 @@
 
   .gift-guide-slider__swiper {
     padding: 0 40px;
+  }
+
+  .gift-guide-slider__carousel-container {
+    padding-bottom: 20px;
   }
 }

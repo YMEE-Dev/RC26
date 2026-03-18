@@ -13,6 +13,8 @@
 
 .homepage-collection-hover__mobile {
   display: block;
+  position: relative;
+  padding-bottom: 20px;
 }
 
 .homepage-collection-hover__mobile-slider {
@@ -26,6 +28,31 @@
 
 .homepage-collection-hover__mobile-slider .grid-item:last-child {
   margin-right: 0;
+}
+
+.homepage-collection-hover__mobile .related-slider-progress {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 1px;
+  background: rgba(17, 17, 17, 0.2);
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.homepage-collection-hover__mobile .related-slider-progress.hidden {
+  display: none;
+}
+
+.homepage-collection-hover__mobile .related-slider-progress__line {
+  display: block;
+  width: var(--related-slider-progress, 0%);
+  height: 100%;
+  background: #111111;
+  transition: width 0.2s ease;
 }
 
 .homepage-collection-hover__card {

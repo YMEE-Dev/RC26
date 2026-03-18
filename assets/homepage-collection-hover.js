@@ -1,6 +1,78 @@
 (() => {
   const sectionSelector = '[data-section-type="homepage-collection-hover"]';
   const initializedAttribute = 'data-homepage-collection-hover-initialized';
+  const activeSections = new Set();
+
+  const ensureProgress = (container) => {
+    let progress = container.querySelector('[data-related-slider-progress]');
+
+    if (!progress) {
+      progress = document.createElement('div');
+      progress.className = 'related-slider-progress';
+      progress.setAttribute('data-related-slider-progress', '');
+      progress.innerHTML = '<span class="related-slider-progress__line"></span>';
+      container.append(progress);
+    }
+
+    return progress;
+  };
+
+  const setupMobileProgress = (section) => {
+    const container = section.querySelector('.homepage-collection-hover__mobile');
+    const slider = section.querySelector('.homepage-collection-hover__mobile-slider');
+
+    if (!container || !slider) {
+      return;
+    }
+
+    const progress = ensureProgress(container);
+
+    const updateProgress = () => {
+      const isVisible = slider.clientWidth > 0;
+      const isScrollable = isVisible && slider.scrollWidth > slider.clientWidth + 1;
+      progress.classList.toggle('hidden', !isScrollable);
+
+      if (!isScrollable) {
+        progress.style.setProperty('--related-slider-progress', '0%');
+        return;
+      }
+
+      const progressPercent = ((slider.scrollLeft + slider.clientWidth) / slider.scrollWidth) * 100;
+      const safeProgress = Math.max(0, Math.min(100, progressPercent));
+      progress.style.setProperty('--related-slider-progress', `${safeProgress}%`);
+    };
+
+    if (!slider.hasAttribute('data-related-progress-bound')) {
+      slider.addEventListener(
+        'scroll',
+        () => {
+          requestAnimationFrame(updateProgress);
+        },
+        {passive: true}
+      );
+      slider.setAttribute('data-related-progress-bound', 'true');
+    }
+
+    if (!slider.hasAttribute('data-related-progress-observer-bound')) {
+      const observer = new MutationObserver(() => {
+        requestAnimationFrame(updateProgress);
+      });
+
+      observer.observe(slider, {childList: true, subtree: true});
+      slider.setAttribute('data-related-progress-observer-bound', 'true');
+    }
+
+    if (!slider.hasAttribute('data-related-progress-resize-bound') && window.ResizeObserver) {
+      const resizeObserver = new ResizeObserver(() => {
+        requestAnimationFrame(updateProgress);
+      });
+
+      resizeObserver.observe(slider);
+      slider.setAttribute('data-related-progress-resize-bound', 'true');
+    }
+
+    updateProgress();
+  };
 
   const updateState = (section, targetId) => {
     if (!section || !targetId) {
@@ -29,25 +101,31 @@
   };
 
   const initSection = (section) => {
-    if (!section || section.hasAttribute(initializedAttribute)) {
+    if (!section) {
       return;
     }
 
-    section.setAttribute(initializedAttribute, 'true');
+    activeSections.add(section);
 
-    const triggers = section.querySelectorAll('[data-hover-target]');
+    if (!section.hasAttribute(initializedAttribute)) {
+      section.setAttribute(initializedAttribute, 'true');
 
-    triggers.forEach((trigger) => {
-      const targetId = trigger.getAttribute('data-hover-target');
+      const triggers = section.querySelectorAll('[data-hover-target]');
 
-      if (!targetId) {
-        return;
-      }
+      triggers.forEach((trigger) => {
+        const targetId = trigger.getAttribute('data-hover-target');
 
-      const handleActivate = () => updateState(section, targetId);
-      trigger.addEventListener('mouseenter', handleActivate);
-      trigger.addEventListener('focus', handleActivate);
-    });
+        if (!targetId) {
+          return;
+        }
+
+        const handleActivate = () => updateState(section, targetId);
+        trigger.addEventListener('mouseenter', handleActivate);
+        trigger.addEventListener('focus', handleActivate);
+      });
+    }
+
+    setupMobileProgress(section);
 
     const selectedTrigger = section.querySelector('[data-hover-target].is-selected');
 
@@ -56,7 +134,7 @@
       return;
     }
 
-    const firstTrigger = triggers[0];
+    const firstTrigger = section.querySelector('[data-hover-target]');
 
     if (firstTrigger) {
       updateState(section, firstTrigger.getAttribute('data-hover-target'));
@@ -101,6 +179,36 @@
         initSection(section);
       });
     });
+
+    document.addEventListener('shopify:section:unload', (event) => {
+      const container = event.target instanceof Element ? event.target : null;
+
+      if (!container) {
+        return;
+      }
+
+      if (container.matches(sectionSelector)) {
+        activeSections.delete(container);
+      }
+
+      container.querySelectorAll(sectionSelector).forEach((section) => {
+        activeSections.delete(section);
+      });
+    });
+
+    const refreshActiveSections = () => {
+      activeSections.forEach((section) => {
+        if (!document.body.contains(section)) {
+          activeSections.delete(section);
+          return;
+        }
+
+        setupMobileProgress(section);
+      });
+    };
+
+    document.addEventListener('theme:resize:width', refreshActiveSections);
+    window.addEventListener('resize', refreshActiveSections, {passive: true});
   } else {
     initAllSections();
   }
