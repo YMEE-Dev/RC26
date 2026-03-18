@@ -48,11 +48,31 @@
       aria-haspopup="listbox"
       aria-expanded="false"
     >
-      <span class="ymee-variant-dropdown__placeholder" data-ymee-variant-dropdown-placeholder>
-        {{ 'products.product.choose_size' | t }}
+      <svg class="ymee-variant-dropdown__toggle-bg" viewBox="0 0 362 50" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="none">
+        <defs>
+          <mask id="ymee-toggle-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="362" height="50">
+            <path d="M326.761 50C339.354 50 349.39 34.7756 358.149 28.529L361.5 26.1286V23.882L358.149 21.4731C349.381 15.2245 339.345 0 326.761 0L34.7301 0C22.1376 0 12.1019 15.2244 3.34241 21.471L0 23.8799V26.1265L3.34241 28.5269C12.1104 34.7734 22.1461 49.9979 34.7301 49.9979H326.761V50Z" fill="white"/>
+          </mask>
+        </defs>
+        <g mask="url(#ymee-toggle-mask)">
+          <rect width="286" height="50" fill="black"/>
+          <rect x="286" width="76" height="50" fill="white"/>
+        </g>
+        <path d="M326.761 50C339.354 50 349.39 34.7756 358.149 28.529L361.5 26.1286V23.882L358.149 21.4731C349.381 15.2245 339.345 0 326.761 0L34.7301 0C22.1376 0 12.1019 15.2244 3.34241 21.471L0 23.8799V26.1265L3.34241 28.5269C12.1104 34.7734 22.1461 49.9979 34.7301 49.9979H326.761V50Z" fill="none" stroke="#E5E5E5" stroke-width="1"/>
+      </svg>
+      <span class="ymee-variant-dropdown__toggle-label">
+        <span class="ymee-variant-dropdown__placeholder" data-ymee-variant-dropdown-placeholder>
+          {{ 'products.product.choose_size' | t }}
+        </span>
+        <span class="ymee-variant-dropdown__value" data-ymee-variant-dropdown-value hidden>
+          {{- ymee_selected_size | escape -}}
+        </span>
       </span>
-      <span class="ymee-variant-dropdown__value" data-ymee-variant-dropdown-value hidden>
-        {{- ymee_selected_size | escape -}}
+      <span class="ymee-variant-dropdown__toggle-icon" aria-hidden="true">
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="0" y1="3" x2="18" y2="3" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="0" y1="9" x2="18" y2="9" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
       </span>
     </button>
 
