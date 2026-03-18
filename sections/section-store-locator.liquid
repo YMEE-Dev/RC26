@@ -37,11 +37,14 @@
       --item-width: 33%;
     }
   }
-  /* Mobile: ensure 2 slides visible (override any single-column behavior) */
-  @media (max-width: 749px) {
+  /* Mobile: 1.5 slides visible, reduced gap */
+  @media (max-width: 768px) {
+    #StoreLocator--{{ section.id }} {
+      --gap: 8px;
+    }
     #StoreLocator--{{ section.id }} .store-locator__grid.grid--mobile-slider .grid-item {
-      width: calc(50% - (var(--gap, 20px) / 2));
-      min-width: calc(50% - (var(--gap, 20px) / 2));
+      width: calc(66.67% - (var(--gap) / 2));
+      min-width: calc(66.67% - (var(--gap) / 2));
     }
   }
 {%- endstyle -%}
