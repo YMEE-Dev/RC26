@@ -64,7 +64,7 @@
       <div class="protection-cards__actions">
         <a
           href="{{ section.settings.button_link | default: '#' }}"
-          class="btn btn-secondary btn--outline protection-cards__button"
+          class="btn btn--solid btn--primary protection-cards__button"
         >
           {{ section.settings.button_text | escape }}
         </a>
@@ -465,9 +465,13 @@
       window.__protectionCardsProgressInitialized = true;
 
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-          initAllSections();
-        }, {once: true});
+        document.addEventListener(
+          'DOMContentLoaded',
+          () => {
+            initAllSections();
+          },
+          {once: true}
+        );
       } else {
         initAllSections();
       }

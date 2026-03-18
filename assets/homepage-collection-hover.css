@@ -2,13 +2,12 @@
   overflow-x: clip;
 }
 
+.homepage-collection-hover__wrapper {
+  padding: 0 var(--outer);
+}
+
 .homepage-collection-hover__title {
-  margin: 0 0 2rem;
-  font-size: 1rem;
-  font-weight: 400;
-  letter-spacing: 0.18em;
-  line-height: 1.2;
-  text-transform: uppercase;
+  margin: 0 0 20px;
 }
 
 .homepage-collection-hover__mobile {
@@ -103,39 +102,37 @@
 
   .homepage-collection-hover__desktop {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(28rem, 36rem);
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     align-items: start;
-    gap: clamp(4rem, 9vw, 12rem);
+    column-gap: clamp(10px, 1.5vw, 18px);
+    row-gap: 32px;
   }
 
   .homepage-collection-hover__desktop-copy {
-    max-width: 47rem;
-    padding-top: 1.2rem;
+    grid-column: 2 / span 2;
+    width: 100%;
+    max-width: none;
   }
 
   .homepage-collection-hover__title {
     margin-bottom: 2.2rem;
-    font-size: 1rem;
   }
 
   .homepage-collection-hover__links {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     column-gap: clamp(2rem, 4vw, 5rem);
-    row-gap: 0.8rem;
+    row-gap: 10px;
     align-items: start;
   }
 
   .homepage-collection-hover__link {
     display: block;
     color: var(--text);
-    font-family: var(--FONT-STACK-HEADING);
-    font-size: clamp(2rem, 2.2vw, 3.4rem);
-    font-weight: 400;
-    line-height: 1.1;
     text-decoration: none;
     opacity: 0.58;
     transition: opacity 0.2s ease;
+    margin: 0;
   }
 
   .homepage-collection-hover__link:hover,
@@ -146,10 +143,11 @@
 
   .homepage-collection-hover__desktop-media {
     position: relative;
+    grid-column: 5 / span 2;
     width: 100%;
-    max-width: 36rem;
+    max-width: none;
     aspect-ratio: 0.83;
-    justify-self: end;
+    justify-self: stretch;
   }
 
   .homepage-collection-hover__preview {

@@ -38,7 +38,7 @@
   data-section-id="{{ section.id }}"
   data-section-type="homepage-collection-hover"
 >
-  <div class="homepage-collection-hover__wrapper {{ section.settings.width }}">
+  <div class="homepage-collection-hover__wrapper">
     <div class="homepage-collection-hover__mobile">
       {%- if section_title != blank -%}
         <h2 class="homepage-collection-hover__title title">{{ section_title | escape }}</h2>
@@ -114,7 +114,7 @@
 
               <a
                 href="{{ collection_url }}"
-                class="homepage-collection-hover__link{% if unique == active_block_id %} is-selected{% endif %}"
+                class="homepage-collection-hover__link h4{% if unique == active_block_id %} is-selected{% endif %}"
                 data-hover-target="{{ unique }}"
               >
                 {{- title | escape -}}

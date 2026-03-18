@@ -5717,8 +5717,8 @@ button {
   --btn-bg: transparent;
   --btn-text: #fff;
   --btn-border-hover: #fff;
-  --btn-bg-hover: transparent;
-  --btn-text-hover: #fff;
+  --btn-bg-hover: var(--BTN-SECONDARY-BG);
+  --btn-text-hover: var(--BTN-SECONDARY-TEXT);
 }
 
 .btn--outline.btn--black,
@@ -5819,6 +5819,13 @@ button {
   z-index: 1;
 }
 
+.btn--solid.btn--secondary,
+.btn--outline.btn--secondary {
+  --btn-border-hover: var(--BTN-SECONDARY-BG-HOVER);
+  --btn-bg-hover: var(--BTN-SECONDARY-BG-HOVER);
+  --btn-text-hover: var(--BTN-SECONDARY-BG);
+}
+
 .btn--outline::after,
 .btn--outline .shopify-payment-button__button--unbranded::after,
 .btn--solid::after,
@@ -5830,8 +5837,8 @@ button {
   z-index: -1;
   width: 100%;
   height: 100%;
-  background-color: currentcolor;
-  opacity: 0.05;
+  background-color: var(--btn-bg-hover);
+  /* opacity: 0.05; */
   transform: translate3d(0, 100%, 0);
   transition: transform 0.5s cubic-bezier(0.33, 0, 0, 1);
 }
