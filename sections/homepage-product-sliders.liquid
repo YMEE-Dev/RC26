@@ -54,19 +54,29 @@
         {%- for selected_product in block.settings.product_list -%}
           {%- liquid
             assign hidden_product = false
+            assign excluded_product = false
+            assign product_type = selected_product.type | strip | downcase
             if selected_product.tags contains 'hide'
               assign hidden_product = true
             endif
+
+            if product_type == 'storytelling'
+              assign excluded_product = true
+            endif
           -%}
 
-          {%- if hidden_product == false and tab_products_count < tab_products_limit -%}
-            {%- assign tab_products_count = tab_products_count | plus: 1 -%}
-            {%- render 'product-grid-item',
-              product: selected_product,
-              animation_delay: forloop.index0 | times: 1,
-              animation_anchor: '#HomepageProductSlidersTab--' | append: section.id | append: '-' | append: rendered_tab_count,
-              index: forloop.index
-            -%}
+          {%- if hidden_product == false -%}
+            {%- if excluded_product == false -%}
+              {%- if tab_products_count < tab_products_limit -%}
+                {%- assign tab_products_count = tab_products_count | plus: 1 -%}
+                {%- render 'product-grid-item',
+                  product: selected_product,
+                  animation_delay: forloop.index0 | times: 1,
+                  animation_anchor: '#HomepageProductSlidersTab--' | append: section.id | append: '-' | append: rendered_tab_count,
+                  index: forloop.index
+                -%}
+              {%- endif -%}
+            {%- endif -%}
           {%- endif -%}
         {%- endfor -%}
       {%- endif -%}
@@ -75,19 +85,29 @@
         {%- for selected_product in selected_collection.products -%}
           {%- liquid
             assign hidden_product = false
+            assign excluded_product = false
+            assign product_type = selected_product.type | strip | downcase
             if selected_product.tags contains 'hide'
               assign hidden_product = true
             endif
+
+            if product_type == 'storytelling'
+              assign excluded_product = true
+            endif
           -%}
 
-          {%- if hidden_product == false and tab_products_count < tab_products_limit -%}
-            {%- assign tab_products_count = tab_products_count | plus: 1 -%}
-            {%- render 'product-grid-item',
-              product: selected_product,
-              animation_delay: forloop.index0 | times: 1,
-              animation_anchor: '#HomepageProductSlidersTab--' | append: section.id | append: '-' | append: rendered_tab_count,
-              index: forloop.index
-            -%}
+          {%- if hidden_product == false -%}
+            {%- if excluded_product == false -%}
+              {%- if tab_products_count < tab_products_limit -%}
+                {%- assign tab_products_count = tab_products_count | plus: 1 -%}
+                {%- render 'product-grid-item',
+                  product: selected_product,
+                  animation_delay: forloop.index0 | times: 1,
+                  animation_anchor: '#HomepageProductSlidersTab--' | append: section.id | append: '-' | append: rendered_tab_count,
+                  index: forloop.index
+                -%}
+              {%- endif -%}
+            {%- endif -%}
           {%- endif -%}
         {%- endfor -%}
       {%- endif -%}
