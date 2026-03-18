@@ -1,0 +1,143 @@
+.homepage-collection-hover {
+  overflow-x: clip;
+}
+
+.homepage-collection-hover__title {
+  margin: 0 0 2rem;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.homepage-collection-hover__mobile {
+  display: block;
+}
+
+.homepage-collection-hover__mobile-slider {
+  overflow-y: hidden;
+}
+
+.homepage-collection-hover__mobile-slider .grid-item {
+  width: min(78vw, 30rem);
+  margin-right: 1.6rem;
+}
+
+.homepage-collection-hover__mobile-slider .grid-item:last-child {
+  margin-right: 0;
+}
+
+.homepage-collection-hover__card {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.homepage-collection-hover__card-media {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 0.76;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.homepage-collection-hover__card-image,
+.homepage-collection-hover__preview-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.homepage-collection-hover__card-placeholder,
+.homepage-collection-hover__preview-placeholder {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.homepage-collection-hover__card-placeholder .placeholder-svg,
+.homepage-collection-hover__preview-placeholder .placeholder-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.homepage-collection-hover__desktop {
+  display: none;
+}
+
+@media only screen and (min-width: 960px) {
+  .homepage-collection-hover__mobile {
+    display: none;
+  }
+
+  .homepage-collection-hover__desktop {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(28rem, 36rem);
+    align-items: start;
+    gap: clamp(4rem, 9vw, 12rem);
+  }
+
+  .homepage-collection-hover__desktop-copy {
+    max-width: 47rem;
+    padding-top: 1.2rem;
+  }
+
+  .homepage-collection-hover__title {
+    margin-bottom: 2.2rem;
+    font-size: 1rem;
+  }
+
+  .homepage-collection-hover__links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: clamp(2rem, 4vw, 5rem);
+    row-gap: 0.8rem;
+    align-items: start;
+  }
+
+  .homepage-collection-hover__link {
+    display: block;
+    color: var(--text);
+    font-family: var(--FONT-STACK-HEADING);
+    font-size: clamp(2rem, 2.2vw, 3.4rem);
+    font-weight: 400;
+    line-height: 1.1;
+    text-decoration: none;
+    opacity: 0.58;
+    transition: opacity 0.2s ease;
+  }
+
+  .homepage-collection-hover__link:hover,
+  .homepage-collection-hover__link:focus-visible,
+  .homepage-collection-hover__link.is-selected {
+    opacity: 1;
+  }
+
+  .homepage-collection-hover__desktop-media {
+    position: relative;
+    width: 100%;
+    max-width: 36rem;
+    aspect-ratio: 0.83;
+    justify-self: end;
+  }
+
+  .homepage-collection-hover__preview {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.24s ease,
+      visibility 0.24s ease;
+  }
+
+  .homepage-collection-hover__preview.is-visible {
+    opacity: 1;
+    visibility: visible;
+  }
+}

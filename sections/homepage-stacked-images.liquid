@@ -1,0 +1,177 @@
+<!-- /sections/homepage-stacked-images.liquid -->
+{{ 'homepage-stacked-images.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign background_image = section.settings.background_image
+  assign background_image_mobile = section.settings.background_image_mobile
+  assign foreground_image = section.settings.foreground_image
+  assign foreground_image_mobile = section.settings.foreground_image_mobile
+  assign button_label = section.settings.button_label | strip
+  assign button_link = section.settings.button_link
+-%}
+
+{%- style -%}
+  #HomepageStackedImages--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+<section
+  id="HomepageStackedImages--{{ section.id }}"
+  class="homepage-stacked-images section-padding"
+  data-section-id="{{ section.id }}"
+  data-section-type="homepage-stacked-images"
+>
+  <div class="homepage-stacked-images__media">
+    <div class="homepage-stacked-images__background{% if background_image_mobile != blank %} homepage-stacked-images__background--has-mobile-image{% endif %}">
+      {%- if background_image != blank or background_image_mobile != blank -%}
+        {%- assign desktop_background = background_image | default: background_image_mobile -%}
+        {{
+          desktop_background
+          | image_url: width: 2400
+          | image_tag:
+            class: 'homepage-stacked-images__image homepage-stacked-images__image--background homepage-stacked-images__image--background-desktop',
+            loading: 'lazy',
+            sizes: '100vw',
+            widths: '375, 550, 750, 990, 1200, 1600, 2000, 2400'
+        }}
+
+        {%- if background_image_mobile != blank -%}
+          {{
+            background_image_mobile
+            | image_url: width: 1600
+            | image_tag:
+              class: 'homepage-stacked-images__image homepage-stacked-images__image--background homepage-stacked-images__image--background-mobile',
+              loading: 'lazy',
+              sizes: '100vw',
+              widths: '320, 375, 550, 750, 990, 1200, 1600'
+          }}
+        {%- endif -%}
+      {%- else -%}
+        <div class="homepage-stacked-images__placeholder homepage-stacked-images__placeholder--background">
+          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="homepage-stacked-images__foreground{% if foreground_image_mobile != blank %} homepage-stacked-images__foreground--has-mobile-image{% endif %}">
+      {%- if foreground_image != blank or foreground_image_mobile != blank -%}
+        {%- assign desktop_foreground = foreground_image | default: foreground_image_mobile -%}
+        {{
+          desktop_foreground
+          | image_url: width: 1600
+          | image_tag:
+            class: 'homepage-stacked-images__image homepage-stacked-images__image--foreground homepage-stacked-images__image--foreground-desktop',
+            loading: 'lazy',
+            sizes: '(min-width: 960px) 370px, 210px',
+            widths: '220, 320, 420, 560, 720, 900, 1200, 1600'
+        }}
+
+        {%- if foreground_image_mobile != blank -%}
+          {{
+            foreground_image_mobile
+            | image_url: width: 1200
+            | image_tag:
+              class: 'homepage-stacked-images__image homepage-stacked-images__image--foreground homepage-stacked-images__image--foreground-mobile',
+              loading: 'lazy',
+              sizes: '210px',
+              widths: '220, 320, 420, 560, 720, 900, 1200'
+          }}
+        {%- endif -%}
+      {%- else -%}
+        <div class="homepage-stacked-images__placeholder homepage-stacked-images__placeholder--foreground">
+          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+        </div>
+      {%- endif -%}
+
+      {%- if button_label != blank -%}
+        <a href="{{ button_link | default: '#' }}" class="homepage-stacked-images__button">
+          {{ button_label | escape }}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Homepage stacked images",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Background image"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Desktop background image"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_mobile",
+      "label": "Mobile background image"
+    },
+    {
+      "type": "header",
+      "content": "Foreground image"
+    },
+    {
+      "type": "image_picker",
+      "id": "foreground_image",
+      "label": "Desktop foreground image"
+    },
+    {
+      "type": "image_picker",
+      "id": "foreground_image_mobile",
+      "label": "Mobile foreground image"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "The explorer of beauty"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Homepage stacked images"
+    }
+  ],
+  "enabled_on": {
+    "templates": ["index"]
+  }
+}
+{% endschema %}
