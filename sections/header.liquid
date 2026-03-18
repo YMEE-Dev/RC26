@@ -1017,11 +1017,22 @@
 
       const logoLightUrl = logoLinks[0].dataset.logoLight;
       const logoDarkUrl = logoLinks[0].dataset.logoDark;
-      const forcedLightLogoMode = 'light';
+      const forcedDrawerLogoMode = 'dark';
+      const forcedTmenuLogoMode = 'light';
 
       const drawerIsOpen = () => drawerWrapper?.classList.contains('is-open');
       const tmenuIsOpen = () => tmenuIsActive || Boolean(document.querySelector(tmenuActiveSelector));
-      const shouldForceLightLogo = () => drawerIsOpen() || tmenuIsOpen();
+      const getForcedLogoMode = () => {
+        if (drawerIsOpen()) {
+          return forcedDrawerLogoMode;
+        }
+
+        if (tmenuIsOpen()) {
+          return forcedTmenuLogoMode;
+        }
+
+        return '';
+      };
 
       const setHeaderColors = (mode) => {
         const colorSet = colors[mode] || colors.light;
@@ -1057,16 +1068,19 @@
         if (resolved === currentMode) return;
         currentMode = resolved;
         setHeaderColors(currentMode);
-        if (!shouldForceLightLogo()) {
+        if (!getForcedLogoMode()) {
           setLogoSource(currentMode);
         }
       };
 
       const syncLogoWithHeaderState = () => {
-        if (shouldForceLightLogo()) {
-          setLogoSource(forcedLightLogoMode);
+        const forcedLogoMode = getForcedLogoMode();
+
+        if (forcedLogoMode) {
+          setLogoSource(forcedLogoMode);
           return;
         }
+
         setLogoSource(currentMode);
       };
 
