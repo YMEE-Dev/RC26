@@ -34,30 +34,61 @@
       <div class="supporting-menu__blocks">
         {%- for block in section.blocks -%}
           {%- liquid
+            assign block_type = block.type
             assign column_span = block.settings.column_span | default: 2 | plus: 0
             assign alignment = block.settings.alignment | default: 'left'
+            assign viewport_visibility = block.settings.viewport_visibility | default: 'show'
+            assign viewport_visibility_class = ''
             assign text_alignment = 'left'
+            assign mobile_text_alignment = blank
             assign justify_alignment = 'flex-start'
 
-            if alignment == 'right'
-              assign text_alignment = 'right'
-              assign justify_alignment = 'flex-end'
+            case alignment
+              when 'center'
+                assign text_alignment = 'center'
+                assign justify_alignment = 'center'
+              when 'right'
+                assign text_alignment = 'right'
+                assign justify_alignment = 'flex-end'
+            endcase
+
+            if block_type == 'text'
+              assign mobile_alignment = block.settings.mobile_alignment | default: alignment
+              assign mobile_text_alignment = 'left'
+
+              case mobile_alignment
+                when 'center'
+                  assign mobile_text_alignment = 'center'
+                when 'right'
+                  assign mobile_text_alignment = 'right'
+              endcase
             endif
+
+            case viewport_visibility
+              when 'hide_mobile'
+                assign viewport_visibility_class = ' supporting-menu__block--hide-mobile'
+              when 'hide_desktop'
+                assign viewport_visibility_class = ' supporting-menu__block--hide-desktop'
+            endcase
 
             capture block_style
               echo '--column-span: ' | append: column_span | append: ';'
               echo '--supporting-menu-text-align: ' | append: text_alignment | append: ';'
               echo '--supporting-menu-justify: ' | append: justify_alignment | append: ';'
+
+              if block_type == 'text'
+                echo '--supporting-menu-mobile-text-align: ' | append: mobile_text_alignment | append: ';'
+              endif
             endcapture
           -%}
 
-          {%- case block.type -%}
+          {%- case block_type -%}
             {%- when 'bottom_bar_link_list' -%}
               {%- assign linklist = linklists[block.settings.linklist] -%}
 
               {%- if linklist != blank -%}
                 <div
-                  class="supporting-menu__block supporting-menu__block--link-list"
+                  class="supporting-menu__block supporting-menu__block--link-list{{ viewport_visibility_class }}"
                   style="{{ block_style }}"
                   {{ block.shopify_attributes }}
                 >
@@ -84,7 +115,7 @@
                 endcapture
               -%}
               <div
-                class="supporting-menu__block supporting-menu__block--divider{{ inline_blocks }}"
+                class="supporting-menu__block supporting-menu__block--divider{{ inline_blocks }}{{ viewport_visibility_class }}"
                 style="{{ block_style }}"
                 {{ block.shopify_attributes }}
               >
@@ -96,7 +127,7 @@
             {%- when 'payment_logos' -%}
               {%- unless shop.enabled_payment_types == empty -%}
                 <div
-                  class="supporting-menu__block supporting-menu__block--payment"
+                  class="supporting-menu__block supporting-menu__block--payment{{ viewport_visibility_class }}"
                   style="{{ block_style }}"
                   {{ block.shopify_attributes }}
                 >
@@ -111,7 +142,7 @@
             {%- when 'text' -%}
               {%- if block.settings.text != blank -%}
                 <div
-                  class="supporting-menu__block supporting-menu__block--text"
+                  class="supporting-menu__block supporting-menu__block--text{{ viewport_visibility_class }}"
                   style="{{ block_style }}"
                   {{ block.shopify_attributes }}
                 >
@@ -132,7 +163,7 @@
                 -%}
 
                 <div
-                  class="supporting-menu__block supporting-menu__block--logo"
+                  class="supporting-menu__block supporting-menu__block--logo{{ viewport_visibility_class }}"
                   style="{{ block_style }}"
                   {{ block.shopify_attributes }}
                 >
@@ -149,7 +180,7 @@
 
             {%- when 'socials' -%}
               <div
-                class="supporting-menu__block supporting-menu__block--socials"
+                class="supporting-menu__block supporting-menu__block--socials{{ viewport_visibility_class }}"
                 style="{{ block_style }}"
                 {{ block.shopify_attributes }}
               >
@@ -198,6 +229,18 @@
   .supporting-menu__block {
     min-width: 0;
     text-align: var(--supporting-menu-text-align, left);
+  }
+
+  @media only screen and (max-width: 960px) {
+    .supporting-menu__block--hide-mobile {
+      display: none !important;
+    }
+  }
+
+  @media only screen and (min-width: 961px) {
+    .supporting-menu__block--hide-desktop {
+      display: none;
+    }
   }
 
   @media only screen and (min-width: 990px) {
@@ -333,7 +376,15 @@
     color: var(--link-hover);
   }
 
+  .supporting-menu__block--text {
+    text-align: var(--supporting-menu-text-align, left);
+  }
+
   @media only screen and (max-width: 749px) {
+    .supporting-menu__block--divider {
+      display: none;
+    }
+
     .supporting-menu__links,
     .supporting-menu__payment,
     .supporting-menu__block--socials .socials {
@@ -341,7 +392,7 @@
     }
 
     .supporting-menu__block--text {
-      text-align: left;
+      text-align: var(--supporting-menu-mobile-text-align, var(--supporting-menu-text-align, left));
     }
   }
 {% endstylesheet %}
@@ -404,10 +455,21 @@
           "label": "Desktop span",
           "default": "2",
           "options": [
-            { "value": "1", "label": "1" },
-            { "value": "2", "label": "2" }
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"}
           ],
           "info": "Based on the 8-column supporting menu grid"
+        },
+        {
+          "type": "select",
+          "id": "viewport_visibility",
+          "label": "Visibility",
+          "default": "show",
+          "options": [
+            {"value": "show", "label": "Show on all"},
+            {"value": "hide_mobile", "label": "Hide on mobile"},
+            {"value": "hide_desktop", "label": "Hide on desktop"}
+          ]
         }
       ]
     },
@@ -421,10 +483,21 @@
           "label": "Desktop span",
           "default": "1",
           "options": [
-            { "value": "1", "label": "1" },
-            { "value": "2", "label": "2" }
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"}
           ],
           "info": "Based on the 8-column supporting menu grid"
+        },
+        {
+          "type": "select",
+          "id": "viewport_visibility",
+          "label": "Visibility",
+          "default": "show",
+          "options": [
+            {"value": "show", "label": "Show on all"},
+            {"value": "hide_mobile", "label": "Hide on mobile"},
+            {"value": "hide_desktop", "label": "Hide on desktop"}
+          ]
         },
         {
           "type": "header",
@@ -468,10 +541,21 @@
           "label": "Desktop span",
           "default": "2",
           "options": [
-            { "value": "1", "label": "1" },
-            { "value": "2", "label": "2" }
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"}
           ],
           "info": "Based on the 8-column supporting menu grid"
+        },
+        {
+          "type": "select",
+          "id": "viewport_visibility",
+          "label": "Visibility",
+          "default": "show",
+          "options": [
+            {"value": "show", "label": "Show on all"},
+            {"value": "hide_mobile", "label": "Hide on mobile"},
+            {"value": "hide_desktop", "label": "Hide on desktop"}
+          ]
         }
       ]
     },
@@ -492,6 +576,7 @@
           "default": "left",
           "options": [
             {"value": "left", "label": "Left"},
+            {"value": "center", "label": "Center"},
             {"value": "right", "label": "Right"}
           ]
         },
@@ -501,10 +586,36 @@
           "label": "Desktop span",
           "default": "2",
           "options": [
-            { "value": "1", "label": "1" },
-            { "value": "2", "label": "2" }
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"}
           ],
           "info": "Based on the 8-column supporting menu grid"
+        },
+        {
+          "type": "select",
+          "id": "viewport_visibility",
+          "label": "Visibility",
+          "default": "show",
+          "options": [
+            {"value": "show", "label": "Show on all"},
+            {"value": "hide_mobile", "label": "Hide on mobile"},
+            {"value": "hide_desktop", "label": "Hide on desktop"}
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Mobile"
+        },
+        {
+          "type": "select",
+          "id": "mobile_alignment",
+          "label": "Alignment",
+          "default": "left",
+          "options": [
+            {"value": "left", "label": "Left"},
+            {"value": "center", "label": "Center"},
+            {"value": "right", "label": "Right"}
+          ]
         }
       ]
     },
@@ -533,10 +644,21 @@
           "label": "Desktop span",
           "default": "2",
           "options": [
-            { "value": "1", "label": "1" },
-            { "value": "2", "label": "2" }
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"}
           ],
           "info": "Based on the 8-column supporting menu grid"
+        },
+        {
+          "type": "select",
+          "id": "viewport_visibility",
+          "label": "Visibility",
+          "default": "show",
+          "options": [
+            {"value": "show", "label": "Show on all"},
+            {"value": "hide_mobile", "label": "Hide on mobile"},
+            {"value": "hide_desktop", "label": "Hide on desktop"}
+          ]
         }
       ]
     },
@@ -564,10 +686,21 @@
           "label": "Desktop span",
           "default": "2",
           "options": [
-            { "value": "1", "label": "1" },
-            { "value": "2", "label": "2" }
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"}
           ],
           "info": "Based on the 8-column supporting menu grid"
+        },
+        {
+          "type": "select",
+          "id": "viewport_visibility",
+          "label": "Visibility",
+          "default": "show",
+          "options": [
+            {"value": "show", "label": "Show on all"},
+            {"value": "hide_mobile", "label": "Hide on mobile"},
+            {"value": "hide_desktop", "label": "Hide on desktop"}
+          ]
         }
       ]
     }

@@ -75,9 +75,20 @@
               assign text = block.settings.text
               assign enable_accordion = block.settings.enable_accordion
               assign column_span = block.settings.column_span | default: 2 | plus: 0
+              assign mobile_column_span = block.settings.mobile_column_span | default: 1 | plus: 0
+              assign viewport_visibility = block.settings.viewport_visibility | default: 'show'
+              assign viewport_visibility_class = ''
+
+              case viewport_visibility
+                when 'hide_mobile'
+                  assign viewport_visibility_class = ' footer__block--hide-mobile'
+                when 'hide_desktop'
+                  assign viewport_visibility_class = ' footer__block--hide-desktop'
+              endcase
 
               capture block_style
                 echo '--column-span: ' | append: column_span | append: ';'
+                echo '--mobile-column-span: ' | append: mobile_column_span | append: ';'
               endcapture
 
               if block_type == 'linklist' or block_type == 'social' or block_type == 'text'
@@ -97,7 +108,7 @@
             {%- case block_type -%}
               {%- when 'linklist' -%}
                 <details
-                  class="footer__block footer__block--menu{% if enable_accordion %} accordion{% endif %}"
+                  class="footer__block footer__block--menu{{ viewport_visibility_class }}{% if enable_accordion %} accordion{% endif %}"
                   style="{{ block_style }}"
                   {{ block.shopify_attributes }}
                   data-collapsible
@@ -138,7 +149,7 @@
 
                 {%- if page == blank or page.empty? -%}
                   <details
-                    class="footer__block footer__block--page{% if enable_accordion %} accordion{% endif %}"
+                    class="footer__block footer__block--page{{ viewport_visibility_class }}{% if enable_accordion %} accordion{% endif %}"
                     style="{{ block_style }}"
                     {{ block.shopify_attributes }}
                     data-collapsible
@@ -166,7 +177,7 @@
                   </details>
                 {%- else -%}
                   <details
-                    class="footer__block footer__block--page{% if enable_accordion %} accordion{% endif %}"
+                    class="footer__block footer__block--page{{ viewport_visibility_class }}{% if enable_accordion %} accordion{% endif %}"
                     style="{{ block_style }}"
                     {{ block.shopify_attributes }}
                     data-collapsible
@@ -196,7 +207,7 @@
 
               {%- when 'social' -%}
                 <details
-                  class="footer__block footer__block--social{% if enable_accordion %} accordion{% endif %}"
+                  class="footer__block footer__block--social{{ viewport_visibility_class }}{% if enable_accordion %} accordion{% endif %}"
                   style="{{ block_style }}"
                   {{ block.shopify_attributes }}
                   data-collapsible
@@ -229,7 +240,7 @@
 
               {%- when 'text' -%}
                 <details
-                  class="footer__block footer__block--text{% if enable_accordion %} accordion{% endif %}"
+                  class="footer__block footer__block--text{{ viewport_visibility_class }}{% if enable_accordion %} accordion{% endif %}"
                   style="{{ block_style }}"
                   {{ block.shopify_attributes }}
                   data-collapsible
@@ -278,7 +289,7 @@
 
               {%- when 'country_switcher' -%}
                 <div
-                  class="footer__block footer__block--country-switcher"
+                  class="footer__block footer__block--country-switcher{{ viewport_visibility_class }}"
                   style="{{ block_style }}"
                   {{ block.shopify_attributes }}
                 >
@@ -296,7 +307,7 @@
 
               {%- when 'divider' -%}
                 <div
-                  class="footer__block footer__block--divider{{ inline_blocks }}"
+                  class="footer__block footer__block--divider{{ inline_blocks }}{{ viewport_visibility_class }}"
                   style="{{ block_style }}"
                   {{ block.shopify_attributes }}
                 >
@@ -313,7 +324,7 @@
 {% schema %}
 {
   "name": "Footer",
-  "max_blocks": 8,
+  "max_blocks": 9,
   "settings": [
     {
       "label": "Logo",
@@ -406,6 +417,27 @@
           "content": "Mobile"
         },
         {
+          "type": "select",
+          "id": "viewport_visibility",
+          "label": "Visibility",
+          "default": "show",
+          "options": [
+            {"value": "show", "label": "Show on all"},
+            {"value": "hide_mobile", "label": "Hide on mobile"},
+            {"value": "hide_desktop", "label": "Hide on desktop"}
+          ]
+        },
+        {
+          "type": "select",
+          "id": "mobile_column_span",
+          "label": "Columns",
+          "default": "1",
+          "options": [
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"}
+          ]
+        },
+        {
           "type": "checkbox",
           "id": "enable_accordion",
           "label": "Enable accordion",
@@ -480,6 +512,31 @@
           "step": 1,
           "default": 2,
           "info": "Based on the 8-column footer grid"
+        },
+        {
+          "type": "header",
+          "content": "Mobile"
+        },
+        {
+          "type": "select",
+          "id": "viewport_visibility",
+          "label": "Visibility",
+          "default": "show",
+          "options": [
+            {"value": "show", "label": "Show on all"},
+            {"value": "hide_mobile", "label": "Hide on mobile"},
+            {"value": "hide_desktop", "label": "Hide on desktop"}
+          ]
+        },
+        {
+          "type": "select",
+          "id": "mobile_column_span",
+          "label": "Columns",
+          "default": "1",
+          "options": [
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"}
+          ]
         }
       ]
     },
@@ -526,6 +583,27 @@
         {
           "type": "header",
           "content": "Mobile"
+        },
+        {
+          "type": "select",
+          "id": "viewport_visibility",
+          "label": "Visibility",
+          "default": "show",
+          "options": [
+            {"value": "show", "label": "Show on all"},
+            {"value": "hide_mobile", "label": "Hide on mobile"},
+            {"value": "hide_desktop", "label": "Hide on desktop"}
+          ]
+        },
+        {
+          "type": "select",
+          "id": "mobile_column_span",
+          "label": "Columns",
+          "default": "1",
+          "options": [
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"}
+          ]
         },
         {
           "type": "checkbox",
@@ -583,6 +661,27 @@
           "content": "Mobile"
         },
         {
+          "type": "select",
+          "id": "viewport_visibility",
+          "label": "Visibility",
+          "default": "show",
+          "options": [
+            {"value": "show", "label": "Show on all"},
+            {"value": "hide_mobile", "label": "Hide on mobile"},
+            {"value": "hide_desktop", "label": "Hide on desktop"}
+          ]
+        },
+        {
+          "type": "select",
+          "id": "mobile_column_span",
+          "label": "Columns",
+          "default": "1",
+          "options": [
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"}
+          ]
+        },
+        {
           "type": "checkbox",
           "id": "enable_accordion",
           "label": "Enable accordion",
@@ -620,6 +719,27 @@
           "content": "Mobile"
         },
         {
+          "type": "select",
+          "id": "viewport_visibility",
+          "label": "Visibility",
+          "default": "show",
+          "options": [
+            {"value": "show", "label": "Show on all"},
+            {"value": "hide_mobile", "label": "Hide on mobile"},
+            {"value": "hide_desktop", "label": "Hide on desktop"}
+          ]
+        },
+        {
+          "type": "select",
+          "id": "mobile_column_span",
+          "label": "Columns",
+          "default": "1",
+          "options": [
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"}
+          ]
+        },
+        {
           "type": "checkbox",
           "id": "enable_accordion",
           "label": "Enable accordion",
@@ -651,6 +771,27 @@
         {
           "type": "header",
           "content": "Mobile"
+        },
+        {
+          "type": "select",
+          "id": "viewport_visibility",
+          "label": "Visibility",
+          "default": "show",
+          "options": [
+            {"value": "show", "label": "Show on all"},
+            {"value": "hide_mobile", "label": "Hide on mobile"},
+            {"value": "hide_desktop", "label": "Hide on desktop"}
+          ]
+        },
+        {
+          "type": "select",
+          "id": "mobile_column_span",
+          "label": "Columns",
+          "default": "1",
+          "options": [
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"}
+          ]
         },
         {
           "type": "range",
