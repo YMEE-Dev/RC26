@@ -65,7 +65,7 @@
                   {%- if block.settings.value != blank or block.settings.link != blank -%}
                     {%- if block.settings.link != blank -%}
                      
-                        <span class="personal-assistance__item-value">{{ block.settings.value | default: block.settings.link_title }}</span>
+                        <span class="personal-assistance__item-value-container">{{ block.settings.value | default: block.settings.link_title }}</span>
                     
                     {%- else -%}
                       <span class="personal-assistance__item-value">{{ block.settings.value }}</span>
@@ -370,6 +370,7 @@ a.personal-assistance__item-value:hover {
     aspect-ratio: 362 / 231;
     min-height: auto;
   }
+  .personal-assistance__item-value-container { display: none }
 }
 {% endstylesheet %}
 
