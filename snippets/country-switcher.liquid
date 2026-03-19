@@ -103,7 +103,7 @@
               {%- for country in localization.available_countries -%}
                 <li class="popout-list__item{% if country.iso_code == localization.country.iso_code %} is-active{% endif %}">
                   <a
-                    class="popout-list__option"
+                    class="popout-list__option navlink"
                     href="#"
                     {% if country.iso_code == localization.country.iso_code %}
                       aria-current="true"
@@ -320,19 +320,13 @@
   .country-switcher__list {
     --max-width: 280px;
     margin-top: 14px;
-    bottom: auto;
-    top: 100%;
+    left: -14px;
   }
 
   .country-switcher__list .popout-list__option {
     gap: 12px;
     min-width: 180px;
-    padding: 10px 16px;
-    padding-left: 0;
-    font-size: 14px;
-    letter-spacing: 0.84px;
-    line-height: 1.4;
-    text-transform: uppercase;
+    padding: 10px 14px;
   }
 
   .country-switcher__list .popout-list__option span {

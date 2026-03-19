@@ -31,7 +31,12 @@
           aria-haspopup="dialog"
           aria-controls="FooterNewsletterModal--{{ section.id }}"
         >
-          {{ trigger_label | escape }}
+          <span class="footer-newsletter__trigger-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
+              <path d="M4 5.25C2.89062 5.25 2 6.1836 2 7.3047V17.6875C2 18.8086 2.89062 19.75 4 19.75H21C22.1094 19.75 23 18.8086 23 17.6875V7.3047C23 6.1836 22.1094 5.25 21 5.25H4ZM4 6.25H21C21.1465 6.25 21.289 6.28613 21.414 6.34375L13.1486 13.9923C12.7667 14.3458 12.2579 14.3458 11.8751 13.9923L3.59385 6.34375C3.71787 6.28809 3.85547 6.25 4 6.25ZM3.01562 7.17188L8.88288 12.5939L3.12512 18.1954C3.04895 18.045 3.00012 17.8751 3.00012 17.6876V7.30483C3.00012 7.25893 3.01074 7.21582 3.01562 7.17188ZM21.9844 7.17969C21.9893 7.22168 22 7.26172 22 7.30469V17.6874C22 17.871 21.9561 18.04 21.8828 18.1874L16.1406 12.5859L21.9844 7.17969ZM15.4141 13.2577L21.0314 18.7499H21.0001H4.00012H3.97669L9.61719 13.2654L11.1953 14.7264C11.9375 15.4119 13.0859 15.4129 13.8281 14.7264L15.4141 13.2577Z" fill="currentColor"/>
+            </svg>
+          </span>
+          <span class="footer-newsletter__trigger-text">{{ trigger_label | escape }}</span>
         </button>
       {%- endif -%}
     </div>
@@ -92,6 +97,16 @@
   }
 
   .footer-newsletter__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .footer-newsletter__trigger-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
   }
 
