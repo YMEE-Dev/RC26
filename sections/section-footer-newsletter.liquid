@@ -1,0 +1,275 @@
+<!-- /sections/section-footer-newsletter.liquid -->
+
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign trigger_label = section.settings.trigger_label | strip
+  assign modal_title = section.settings.modal_title | strip
+  assign modal_text = section.settings.modal_text
+-%}
+
+{%- style -%}
+  #FooterNewsletter--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    background: {{ section.settings.background_color }};
+  }
+{%- endstyle -%}
+
+<popup-component class="footer-newsletter-popup">
+  <section
+    id="FooterNewsletter--{{ section.id }}"
+    class="footer-newsletter section-padding {{ color_scheme }}"
+    data-section-id="{{ section.id }}"
+    data-section-type="footer-newsletter"
+  >
+    <div class="footer-newsletter__inner wrapper--full-padded">
+      {%- if trigger_label != blank -%}
+        <button
+          type="button"
+          class="btn btn--secondary btn--outline footer-newsletter__trigger"
+          data-popup-open
+          aria-haspopup="dialog"
+          aria-controls="FooterNewsletterModal--{{ section.id }}"
+        >
+          {{ trigger_label | escape }}
+        </button>
+      {%- endif -%}
+    </div>
+  </section>
+
+  <dialog
+    id="FooterNewsletterModal--{{ section.id }}"
+    class="footer-newsletter__modal modal__overlay modal__overlay--default"
+    aria-modal="true"
+    aria-labelledby="FooterNewsletterModalTitle--{{ section.id }}"
+    inert
+    data-scroll-lock-required
+    data-cookie-name="footer-newsletter-{{ section.id }}"
+    data-cookie-value="closed"
+  >
+    <form method="dialog">
+      <button class="visually-hidden" aria-label="{{ 'general.accessibility.close' | t }}"></button>
+    </form>
+
+    <div
+      class="footer-newsletter__modal-body modal__body modal--default modal--newsletter modal--no-image"
+      data-modal-body
+      data-scroll-lock-scrollable
+    >
+      <div class="modal-section">
+        <div class="modal-wrapper">
+          <div class="modal__text">
+            <div class="modal__inner">
+              {%- if modal_title != blank -%}
+                <h2 id="FooterNewsletterModalTitle--{{ section.id }}" class="modal__title h3">
+                  {{ modal_title | escape }}
+                </h2>
+              {%- endif -%}
+
+              {%- if modal_text != blank -%}
+                <div class="modal__description rte">{{ modal_text }}</div>
+              {%- endif -%}
+
+              {%- render 'newsletter-form', settings_context: section -%}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button data-popup-close class="close" title="{{ 'general.accessibility.close' | t }}">
+        {%- render 'icon-cancel' -%}
+      </button>
+    </div>
+  </dialog>
+</popup-component>
+
+{% stylesheet %}
+  .footer-newsletter__inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gutter);
+  }
+
+  .footer-newsletter__trigger {
+    flex-shrink: 0;
+  }
+
+  .footer-newsletter__modal .modal-wrapper {
+    justify-content: center;
+  }
+
+  .footer-newsletter__modal .modal__text {
+    width: 100%;
+    max-width: 42rem;
+  }
+
+  .footer-newsletter__modal .newsletter-form {
+    max-width: 100%;
+  }
+
+  @media only screen and (max-width: 749px) {
+    .footer-newsletter__inner {
+      gap: 0;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Footer newsletter",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Trigger"
+    },
+    {
+      "type": "text",
+      "id": "trigger_label",
+      "label": "Trigger button label",
+      "default": "Join newsletter"
+    },
+    {
+      "type": "header",
+      "content": "Modal"
+    },
+    {
+      "type": "text",
+      "id": "modal_title",
+      "label": "Modal heading",
+      "default": "Newsletter"
+    },
+    {
+      "type": "richtext",
+      "id": "modal_text",
+      "label": "Modal text",
+      "default": "<p>Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Form"
+    },
+    {
+      "type": "paragraph",
+      "content": "Subscribers are under 'Accepts Marketing' in your [customer admin](/admin/customers)."
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Submit button text",
+      "default": "Join"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrow",
+      "label": "Show arrow on submit button",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "terms",
+      "label": "Show reCAPTCHA terms",
+      "default": true,
+      "info": "Recommended if your online store preferences have spam protection enabled."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_name",
+      "label": "Show name field",
+      "default": false
+    },
+    {
+      "type": "header",
+      "visible_if": "{{ section.settings.show_name }}",
+      "content": "Submit button"
+    },
+    {
+      "type": "select",
+      "id": "button_type",
+      "visible_if": "{{ section.settings.show_name }}",
+      "label": "Color",
+      "default": "btn--secondary",
+      "options": [
+        {"value": "btn--black", "label": "Black"},
+        {"value": "btn--white", "label": "White"},
+        {"value": "btn--primary", "label": "Primary"},
+        {"value": "btn--secondary", "label": "Secondary"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "visible_if": "{{ section.settings.show_name }}",
+      "label": "Size",
+      "default": "",
+      "options": [
+        {"label": "Small", "value": "btn--small"},
+        {"label": "Medium", "value": ""},
+        {"label": "Large", "value": "btn--large"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "visible_if": "{{ section.settings.show_name }}",
+      "label": "Style",
+      "default": "btn--solid",
+      "options": [
+        {"label": "Solid", "value": "btn--solid"},
+        {"label": "Outline", "value": "btn--outline"},
+        {"label": "Text", "value": "btn--text"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Top",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 30
+    }
+  ],
+  "presets": [
+    {
+      "name": "Footer newsletter",
+      "category": "Layout"
+    }
+  ],
+  "enabled_on": {
+    "groups": ["footer"]
+  }
+}
+{% endschema %}
