@@ -3,8 +3,8 @@
 {%- liquid
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign trigger_label = section.settings.trigger_label | strip
-  assign modal_title = section.settings.modal_title | strip
-  assign modal_text = section.settings.modal_text
+  assign form_title = section.settings.form_title | strip
+  assign heading_text = section.settings.heading_text
 -%}
 
 {%- style -%}
@@ -65,24 +65,24 @@
         <div class="modal-wrapper">
           <div class="modal__text">
             <div class="modal__inner">
-              {%- if modal_title != blank -%}
-                <h2 id="FooterNewsletterModalTitle--{{ section.id }}" class="modal__title h3">
-                  {{ modal_title | escape }}
+              {%- if form_title != blank -%}
+                <h2 id="FooterNewsletterModalTitle--{{ section.id }}" class="modal__title navlink">
+                  {{ form_title | escape }}
                 </h2>
               {%- endif -%}
 
-              {%- if modal_text != blank -%}
-                <div class="modal__description rte">{{ modal_text }}</div>
+              {%- if heading_text != blank -%}
+                <div class="modal__description rte body">{{ heading_text }}</div>
               {%- endif -%}
 
-              {%- render 'newsletter-form', settings_context: section -%}
+              {%- render 'footer-newsletter-form', section: section -%}
             </div>
           </div>
         </div>
       </div>
 
       <button data-popup-close class="close" title="{{ 'general.accessibility.close' | t }}">
-        {%- render 'icon-cancel' -%}
+        {%- render 'icon-close' -%}
       </button>
     </div>
   </dialog>
@@ -110,22 +110,162 @@
     flex-shrink: 0;
   }
 
+  .footer-newsletter__modal .modal--default {
+    width: 100%;
+    max-width: 575px;
+  }
+
   .footer-newsletter__modal .modal-wrapper {
     justify-content: center;
   }
 
   .footer-newsletter__modal .modal__text {
     width: 100%;
-    max-width: 42rem;
+    max-width: 72rem;
   }
 
-  .footer-newsletter__modal .newsletter-form {
-    max-width: 100%;
+  .footer-newsletter__modal .modal__inner {
+    padding: 40px;
+  }
+
+  .footer-newsletter__modal .modal__title {
+    margin: 0 0 40px;
+    text-transform: uppercase;
+    text-align: left;
+  }
+
+  .footer-newsletter__modal .modal__description {
+    margin-bottom: 80px;
+    text-align: left;
+  }
+
+  .footer-newsletter__modal .modal__description p {
+    margin: 0;
+  }
+
+  .footer-newsletter-form {
+    width: 100%;
+    max-width: 62rem;
+  }
+
+  .footer-newsletter__modal-body select.field,
+  .footer-newsletter__modal-body input.field {
+    margin-top: 15px;
+    padding-top: 0px;
+  }
+
+  .footer-newsletter-form__fields {
+    display: flex;
+    flex-direction: column;
+    gap: 52px;
+  }
+
+  .footer-newsletter-form__group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .footer-newsletter-form__eyebrow {
+    margin: 0;
+    padding: 0;
+    padding-bottom: 10px;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  .footer-newsletter-form__field::placeholder {
+    text-transform: uppercase;
+  }
+
+  .footer-newsletter-form__field--select {
+    color: var(--text);
+  }
+
+  .footer-newsletter-form__consent {
+    max-width: 58rem;
+    margin-top: 4px;
+  }
+
+  .footer-newsletter-form__consent input[type='checkbox'] + label {
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .footer-newsletter-form__consent input[type='checkbox'] + label::before {
+    width: 12px;
+    height: 12px;
+    margin-right: 0;
+    border-color: currentColor;
+    border-radius: 50%;
+    margin-top: 4px;
+  }
+
+  .footer-newsletter-form__consent-copy,
+  .footer-newsletter-form__consent-copy p {
+    margin: 0;
+    text-align: left;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px;
+  }
+
+  .footer-newsletter-form__policy,
+  .footer-newsletter-form__policy p {
+    text-align: left;
+    margin: 0;
+    margin-top: 20px;
+  }
+
+  .footer-newsletter__modal .close {
+    top: 42px;
+    right: 42px;
+  }
+
+  .footer-newsletter__modal .close svg {
+    width: 28px;
+    height: 28px;
   }
 
   @media only screen and (max-width: 749px) {
     .footer-newsletter__inner {
       gap: 0;
+    }
+
+    .footer-newsletter__modal .modal__text {
+      max-width: 100%;
+    }
+
+    .footer-newsletter-form__fields {
+      gap: 36px;
+    }
+
+    .footer-newsletter-form__group {
+      gap: 24px;
+    }
+
+    .footer-newsletter-form__field {
+      padding-bottom: 16px;
+      font-size: 1.2rem;
+    }
+
+    .footer-newsletter-form__consent input[type='checkbox'] + label {
+      gap: 16px;
+    }
+
+    .footer-newsletter-form__consent-copy,
+    .footer-newsletter-form__consent-copy p {
+      font-size: 1rem;
+    }
+
+    .footer-newsletter-form__submit {
+      min-height: 62px;
+    }
+
+    .footer-newsletter__modal .close {
+      top: 24px;
+      right: 16px;
     }
   }
 {% endstylesheet %}
@@ -151,90 +291,105 @@
     },
     {
       "type": "text",
-      "id": "modal_title",
-      "label": "Modal heading",
-      "default": "Newsletter"
+      "id": "form_title",
+      "label": "Form title",
+      "default": "KEEP IN TOUCH"
     },
     {
       "type": "richtext",
-      "id": "modal_text",
-      "label": "Modal text",
-      "default": "<p>Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.</p>"
+      "id": "heading_text",
+      "label": "Heading text",
+      "default": "<p>Subscribe now to be the first to know about our latest collections and future releases, discover collaborations and events</p>"
     },
     {
       "type": "header",
       "content": "Form"
     },
     {
-      "type": "paragraph",
-      "content": "Subscribers are under 'Accepts Marketing' in your [customer admin](/admin/customers)."
+      "type": "text",
+      "id": "required_fields_label",
+      "label": "Required fields label",
+      "default": "*REQUIRED FIELDS"
     },
     {
       "type": "text",
       "id": "button_text",
       "label": "Submit button text",
-      "default": "Join"
+      "default": "SIGN UP"
     },
     {
-      "type": "checkbox",
-      "id": "show_arrow",
-      "label": "Show arrow on submit button",
-      "default": false
+      "type": "richtext",
+      "id": "consent_label",
+      "label": "Consent label",
+      "default": "<p>I Confirm that I have read, understood and accepted your privacy information, that I am over 16, and I agree to receive this newsletter.</p>"
     },
     {
-      "type": "checkbox",
-      "id": "terms",
-      "label": "Show reCAPTCHA terms",
-      "default": true,
-      "info": "Recommended if your online store preferences have spam protection enabled."
-    },
-    {
-      "type": "checkbox",
-      "id": "show_name",
-      "label": "Show name field",
-      "default": false
+      "type": "richtext",
+      "id": "policy_text",
+      "label": "Policy text",
+      "default": "<p>Your personal data will be used by roberto coin s.p.a. to provide you with the newsletter service you have expressly requested. your data are safe with roberto coin s.p.a. please read the privacy policy, and the cookie policy for further information.</p>"
     },
     {
       "type": "header",
-      "visible_if": "{{ section.settings.show_name }}",
-      "content": "Submit button"
+      "content": "Mailchimp"
     },
     {
-      "type": "select",
-      "id": "button_type",
-      "visible_if": "{{ section.settings.show_name }}",
-      "label": "Color",
-      "default": "btn--secondary",
-      "options": [
-        {"value": "btn--black", "label": "Black"},
-        {"value": "btn--white", "label": "White"},
-        {"value": "btn--primary", "label": "Primary"},
-        {"value": "btn--secondary", "label": "Secondary"}
-      ]
+      "type": "url",
+      "id": "mailchimp_action_url",
+      "label": "Action URL",
+      "info": "Paste the Mailchimp form action URL from your hosted or embedded form."
     },
     {
-      "type": "select",
-      "id": "button_size",
-      "visible_if": "{{ section.settings.show_name }}",
-      "label": "Size",
-      "default": "",
-      "options": [
-        {"label": "Small", "value": "btn--small"},
-        {"label": "Medium", "value": ""},
-        {"label": "Large", "value": "btn--large"}
-      ]
+      "type": "text",
+      "id": "mailchimp_user_id",
+      "label": "User ID",
+      "info": "The hidden 'u' value from Mailchimp."
     },
     {
-      "type": "select",
-      "id": "button_style",
-      "visible_if": "{{ section.settings.show_name }}",
-      "label": "Style",
-      "default": "btn--solid",
-      "options": [
-        {"label": "Solid", "value": "btn--solid"},
-        {"label": "Outline", "value": "btn--outline"},
-        {"label": "Text", "value": "btn--text"}
-      ]
+      "type": "text",
+      "id": "mailchimp_audience_id",
+      "label": "Embed ID / Audience ID",
+      "info": "The hidden 'id' value from Mailchimp."
+    },
+    {
+      "type": "text",
+      "id": "mailchimp_tags",
+      "label": "Tags",
+      "info": "Optional Mailchimp tags hidden input value."
+    },
+    {
+      "type": "header",
+      "content": "Mailchimp field names"
+    },
+    {
+      "type": "text",
+      "id": "mailchimp_first_name_field",
+      "label": "First name field name",
+      "default": "FNAME"
+    },
+    {
+      "type": "text",
+      "id": "mailchimp_last_name_field",
+      "label": "Last name field name",
+      "default": "LNAME"
+    },
+    {
+      "type": "text",
+      "id": "mailchimp_email_field",
+      "label": "Email field name",
+      "default": "EMAIL"
+    },
+    {
+      "type": "text",
+      "id": "mailchimp_language_field",
+      "label": "Language field name",
+      "default": "LANGUAGE"
+    },
+    {
+      "type": "text",
+      "id": "mailchimp_consent_field",
+      "label": "Consent field name",
+      "default": "CONSENT"
     },
     {
       "type": "header",
