@@ -20,6 +20,10 @@
     <div class="prestige-service__background">
       {%- if section.settings.background_image != blank -%}
         {{ section.settings.background_image | image_url: width: 2000 | image_tag: loading: 'lazy' }}
+
+        {%- if section.settings.background_image_mob != blank -%}
+          {{ section.settings.background_image_mob | image_url: width: 2000 | image_tag: loading: 'lazy', class: 'prestige-service__background-mobile' }}
+        {% endif %}
       {%- else -%}
         <div class="prestige-service__placeholder">
           {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }} 
@@ -422,6 +426,12 @@
       "type": "image_picker",
       "id": "background_image",
       "label": "Background image"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_mob",
+      "label": "Background image (mobile)",
+      "info": "leave blank if not needed"
     },
     {
       "type": "header",
