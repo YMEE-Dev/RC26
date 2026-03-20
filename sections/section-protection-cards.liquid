@@ -22,37 +22,83 @@
     {%- endif -%}
 
     {%- if section.blocks.size > 0 -%}
-      <div class="protection-cards__grid">
-        {%- for block in section.blocks -%}
-          {%- case block.type -%}
-            {%- when 'card' -%}
-              <div class="protection-card" {{ block.shopify_attributes }}>
-                {%- if block.settings.image != blank -%}
-                  <div class="protection-card__image">
-                    {{ block.settings.image | image_url: width: 600 | image_tag: loading: 'lazy' }}
-                  </div>
-                {%- else -%}
-                  <div class="protection-card__placeholder">
-                    {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                  </div>
-                {%- endif -%}
+      <div class="protection-cards__carousel-container grid-outer">
+        <grid-slider>
+          <div
+            class="protection-cards__grid grid grid--slider grid--mobile-slider"
+            data-grid-slider
+            style="--column-count: 3;"
+          >
+            {%- for block in section.blocks -%}
+              {%- case block.type -%}
+                {%- when 'card' -%}
+                  <div class="grid-item protection-card" data-grid-item {{ block.shopify_attributes }}>
+                    {%- if block.settings.image != blank -%}
+                      <div class="protection-card__image">
+                        {{ block.settings.image | image_url: width: 600 | image_tag: loading: 'lazy' }}
+                      </div>
+                    {%- else -%}
+                      <div class="protection-card__placeholder">
+                        {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                      </div>
+                    {%- endif -%}
 
-                <div class="protection-card__content">
-                  {%- if block.settings.title != blank -%}
-                    <h3 class="protection-card__title">{{ block.settings.title }}</h3>
-                  {%- endif -%}
+                    <div class="protection-card__content">
+                      {%- if block.settings.title != blank -%}
+                        <h3 class="protection-card__title">{{ block.settings.title }}</h3>
+                      {%- endif -%}
 
-                  {%- if block.settings.description != blank -%}
-                    <p class="protection-card__description">{{ block.settings.description }}</p>
-                  {%- endif -%}
-                </div>
-              </div>
-          {%- endcase -%}
-        {%- endfor -%}
+                      {%- if block.settings.description != blank -%}
+                        <p class="protection-card__description">{{ block.settings.description }}</p>
+                      {%- endif -%}
+                    </div>
+                  </div>
+              {%- endcase -%}
+            {%- endfor -%}
+          </div>
+        </grid-slider>
       </div>
     {%- endif -%}
   </div>
 </section>
+
+<script>
+  (function () {
+    const sectionId = '{{ section.id }}';
+
+    function initProtectionSlider() {
+      const section = document.querySelector('[data-section-id="' + sectionId + '"]');
+      if (!section) return;
+
+      const gridSlider = section.querySelector('grid-slider');
+      if (gridSlider) {
+        gridSlider.dispatchEvent(new CustomEvent('theme:grid-slider:init'));
+      }
+    }
+
+    function runInit() {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initProtectionSlider);
+      } else {
+        initProtectionSlider();
+      }
+    }
+
+    runInit();
+
+    document.addEventListener('shopify:section:load', function (event) {
+      const loadedSection = event.target?.querySelector?.('[data-section-id]') || event.target;
+
+      const isOurSection =
+        (loadedSection && loadedSection.dataset?.sectionId === sectionId) ||
+        (event.detail && String(event.detail.sectionId) === String(sectionId));
+
+      if (isOurSection) {
+        initProtectionSlider();
+      }
+    });
+  })();
+</script>
 
 {% stylesheet %}
   .protection-cards {
@@ -80,13 +126,11 @@
     padding: 0 var(--outer);
   }
 
-
-
   .protection-cards__heading {
     color: #000;
     text-align: center;
     margin: 0 0 40px;
-    font-family:var(--FONT-STACK-HEADING);
+    font-family: var(--FONT-STACK-HEADING);
     font-style: normal;
     font-weight: 500;
   }
@@ -134,8 +178,24 @@
   }
 
   .protection-cards__grid {
+    --column-count: 3;
+  }
+
+  @media (max-width: 990px) {
+    .protection-cards__grid {
+      --column-count: 2;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .protection-cards__grid {
+      --column-count: 1;
+    }
+  }
+
+  /* .protection-cards__grid {
     display: grid;
-    grid-template-columns: 2fr 2fr 2fr;     
+    grid-template-columns: 2fr 2fr 2fr;
     gap: 80px;
     width: 100%;
   }
@@ -147,7 +207,6 @@
     }
   }
 
-
   @media (max-width: 768px) {
     .protection-cards__grid {
       gap: 40px !important;
@@ -158,7 +217,7 @@
       grid-template-columns: 1fr;
       gap: 80px;
     }
-  }
+  } */
 
   .protection-card {
     display: flex;
@@ -176,7 +235,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #F5F5F5;
+    background: #f5f5f5;
     overflow: hidden;
   }
 
@@ -187,8 +246,9 @@
   }
   @media (max-width: 768px) {
     .protection-card__image {
-      height: 318px !important;
-      aspect-ratio: auto !important;
+      height: auto !important;
+      aspect-ratio: 79 / 62 !important;
+      margin-bottom: 20px;
     }
   }
   .protection-card__placeholder {
@@ -198,8 +258,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #F5F5F5;
-
+    background: #f5f5f5;
   }
 
   .protection-card__placeholder .placeholder-svg {
@@ -234,6 +293,41 @@
     font-style: normal;
     font-weight: 400;
     line-height: 22px; /* 157.143% */
+  }
+
+  @media (min-width: 990px) {
+    .grid--slider .grid-item.protection-card {
+      flex: unset;
+    }
+  }
+
+  @media (min-width: 750px) {
+    .grid--slider .grid-item.protection-card:last-child {
+      margin-right: 0;
+    }
+  }
+
+  .grid--slider .grid-item.protection-card {
+    margin-right: 80px;
+    max-width: 33.33%;
+  }
+  .protection-cards__grid.grid.grid--slider {
+    padding-inline: 0;
+  }
+
+  @media (max-width: 990px) {
+    .grid--slider .grid-item.protection-card {
+      margin-right: 40px;
+      max-width: 60%;
+    }
+  }
+
+  @media (max-width: 749px) {
+    .grid--slider .grid-item.protection-card {
+      margin-right: 20px;
+      max-width: 80%;
+      width: 80%;
+    }
   }
 {% endstylesheet %}
 
@@ -284,10 +378,10 @@
       "label": "Heading size",
       "default": "heading-large",
       "options": [
-        { "value": "heading-small", "label": "Small" },
-        { "value": "heading-medium", "label": "Medium" },
-        { "value": "heading-large", "label": "Large" },
-        { "value": "heading-x-large", "label": "Extra large" }
+        {"value": "heading-small", "label": "Small"},
+        {"value": "heading-medium", "label": "Medium"},
+        {"value": "heading-large", "label": "Large"},
+        {"value": "heading-x-large", "label": "Extra large"}
       ]
     },
     {
@@ -300,11 +394,10 @@
       "label": "Width",
       "default": "wrapper",
       "options": [
-        { "value": "wrapper--full-padded", "label": "Full width padded" },
-        { "value": "wrapper", "label": "Normal" },
-        { "value": "wrapper--narrow", "label": "Narrow" },
-        { "value": "wrapper--custom", "label": "Custom (max-width: 1232px)" }
-
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"},
+        {"value": "wrapper--narrow", "label": "Narrow"},
+        {"value": "wrapper--custom", "label": "Custom (max-width: 1232px)"}
       ]
     },
     {
