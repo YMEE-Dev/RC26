@@ -72,12 +72,18 @@
       slidesPerView: 1,
       spaceBetween: 80,
       loop: false,
-      smooth: true,
+      freeMode: {
+        enabled: true,
+        momentum: true,
+        momentumRatio: 0.5,
+        momentumVelocityRatio: 0.5
+      },
       mousewheel: {
         enabled: true,
         forceToAxis: true,
         releaseOnEdges: true,
-        sensitivity: 1
+        sensitivity: 0.5,
+        thresholdDelta: 15
       },
       on: {
         afterInit() {
