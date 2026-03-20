@@ -469,14 +469,14 @@
       @media only screen and (min-width: 750px) and (max-width: 989px) {
 
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: calc(100dvh - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 100px));
+          height: calc(100dvh - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 60px) - var(--pdp-dropdown-height, 70px));
         }
       }
 
       @media only screen and (max-width: 749px) {
 
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: calc(100dvh - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 100px));
+          height: calc(100dvh - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 60px) - var(--pdp-dropdown-height, 70px));
         }
       }
 
@@ -1039,10 +1039,9 @@
       }
 
       @media only screen and (max-width: 989px) {
-        /* Mobile: gallery + sticky bar + dropdown = 100dvh */
-        /* Subtract header-height because .pdp-embla--mobile has padding-top: var(--header-height) */
+        /* Mobile: gallery + sticky bar = 100dvh minus header and fixed dropdown space */
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: calc(100dvh - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 130px));
+          height: calc(100dvh - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 60px) - var(--pdp-dropdown-height, 70px));
         }
 
         #MainProduct--{{ section.id }} .product__sticky-bar {
@@ -1140,6 +1139,7 @@
         #MainProduct--{{ section.id }} .product__custom-drawers-row {
           grid-area: custom-drawers;
           min-width: 0;
+          margin-top: 70px;
           margin-bottom: 20px;
         }
         #MainProduct--{{ section.id }} .product-accordions-container {
@@ -3384,22 +3384,14 @@
       var dropdown = sectionEl.querySelector('[data-ymee-variant-dropdown]');
       if (!stickyBar) return;
 
-      // Calculate total space including margins
-      var stickyRect = stickyBar.getBoundingClientRect();
-      var total = stickyRect.height;
+      var stickyBarHeight = stickyBar.getBoundingClientRect().height;
+      sectionEl.style.setProperty('--pdp-sticky-bar-height', stickyBarHeight + 'px');
 
+      // Dropdown is always fixed on mobile — reserve its space via a separate variable
       if (dropdown) {
-        var dropdownRect = dropdown.getBoundingClientRect();
-        // Get computed style for margins
-        var dropdownStyles = window.getComputedStyle(dropdown);
-        var dropdownMarginBottom = parseFloat(dropdownStyles.marginBottom) || 0;
-        // Space from top of sticky bar to bottom of dropdown margin
-        var fullHeight = dropdownRect.bottom + dropdownMarginBottom - stickyRect.top;
-        total = fullHeight;
-      }
-
-      if (total > 0) {
-        sectionEl.style.setProperty('--pdp-sticky-bar-height', total + 'px');
+        var dropdownHeight = dropdown.getBoundingClientRect().height;
+        // 20px = bottom offset of the fixed dropdown
+        sectionEl.style.setProperty('--pdp-dropdown-height', dropdownHeight + 20 + 'px');
       }
     }
 
@@ -3453,91 +3445,5 @@
       flowerBtn.style.visibility = 'hidden';
       flowerBtn.style.opacity = '0';
     }
-
-    // Dropdown: normal flow initially, fixed when bottom reaches viewport bottom (with placeholder to prevent shift)
-    var dropdown = document.querySelector('[data-ymee-variant-dropdown]');
-    if (!dropdown) return;
-
-    // Create placeholder to prevent layout shift when fixed
-    var placeholder = document.createElement('div');
-    placeholder.className = 'ymee-variant-dropdown__placeholder';
-    dropdown.parentNode.insertBefore(placeholder, dropdown);
-
-    var isSticky = false;
-    var placeholderHeight = 0;
-    var triggerY = null; // absolute scrollY where sticky kicks in
-    var hasScrolled = false;
-
-    function measure() {
-      // Must only be called when dropdown is in normal flow (not sticky)
-      var rect = dropdown.getBoundingClientRect();
-      var cs = window.getComputedStyle(dropdown);
-      var mt = parseFloat(cs.marginTop) || 0;
-      var mb = parseFloat(cs.marginBottom) || 0;
-      placeholderHeight = rect.height + mt + mb;
-      placeholder.style.height = placeholderHeight + 'px';
-      // Trigger: when the dropdown bottom + margin would go past the viewport bottom
-      triggerY = window.scrollY + rect.bottom + mb - window.innerHeight;
-      // Clamp to at least 1 so it never fires at scrollY 0
-      if (triggerY < 1) triggerY = 1;
-    }
-
-    function stick() {
-      if (isSticky) return;
-      isSticky = true;
-      // Activate placeholder BEFORE changing position to avoid layout jump
-      placeholder.classList.add('is-active');
-      dropdown.classList.add('is-sticky');
-    }
-
-    function unstick() {
-      if (!isSticky) return;
-      isSticky = false;
-      dropdown.classList.remove('is-sticky');
-      placeholder.classList.remove('is-active');
-      // Re-measure now that dropdown is back in flow
-      requestAnimationFrame(function () {
-        measure();
-      });
-    }
-
-    function onScroll() {
-      if (triggerY === null) return;
-      if (!hasScrolled) {
-        if (window.scrollY < 1) return;
-        hasScrolled = true;
-      }
-      if (window.scrollY >= triggerY) {
-        stick();
-      } else {
-        unstick();
-      }
-    }
-
-    function init() {
-      measure();
-    }
-
-    if (document.readyState === 'complete') {
-      init();
-    } else {
-      window.addEventListener('load', init, {once: true});
-    }
-
-    window.addEventListener('scroll', onScroll, {passive: true});
-    window.addEventListener(
-      'resize',
-      function () {
-        if (isSticky) {
-          // Temporarily unstick to re-measure in normal flow
-          dropdown.classList.remove('is-sticky');
-          placeholder.classList.remove('is-active');
-          isSticky = false;
-        }
-        measure();
-        onScroll();
-      },
-      {passive: true}
-    );
   })();
 </script>
