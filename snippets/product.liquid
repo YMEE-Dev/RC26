@@ -3366,6 +3366,7 @@
     var isMobile = window.matchMedia && window.matchMedia('(max-width: 989px)').matches;
 
     function updateStickyBarHeight() {
+      if (!isMobile) return;
       var stickyBar = sectionEl.querySelector('.product__sticky-bar');
       var dropdown = sectionEl.querySelector('[data-ymee-variant-dropdown]');
       if (!stickyBar) return;
