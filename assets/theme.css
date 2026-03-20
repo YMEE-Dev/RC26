@@ -5858,6 +5858,22 @@ button {
   }
 }
 
+.btn-hover--instant .btn--outline::after,
+.btn-hover--instant .btn--solid::after {
+  display: none;
+}
+
+@media (hover: hover) {
+  .btn-hover--instant .btn--outline:hover,
+  .btn-hover--instant .btn--outline .shopify-payment-button__button--unbranded:hover,
+  .btn-hover--instant .btn--solid:hover,
+  .btn-hover--instant .btn--solid .shopify-payment-button__button--unbranded:hover {
+    background-color: var(--btn-bg-hover);
+    border-color: var(--btn-border-hover);
+    color: var(--btn-text-hover);
+  }
+}
+
 .btn--half {
   margin: 0;
   min-width: 50%;
