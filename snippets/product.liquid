@@ -3432,3 +3432,44 @@
     }
   })();
 </script>
+
+<script>
+  (function () {
+    if (!window.matchMedia || !window.matchMedia('(max-width: 989px)').matches) return;
+
+    var hamburger = document.querySelector('.header__mobile__hamburger');
+    var buttons = hamburger ? [hamburger.closest('.header__mobile__button')] : [];
+    if (!buttons.length || !buttons[0]) return;
+
+    var threshold = window.innerHeight / 2;
+    var hidden = false;
+
+    function setHidden(hide) {
+      if (hide === hidden) return;
+      hidden = hide;
+      buttons.forEach(function (btn) {
+        btn.style.visibility = hide ? 'hidden' : '';
+        btn.style.opacity = hide ? '0' : '';
+      });
+    }
+
+    // Hide on page load
+    setHidden(true);
+
+    function onScroll() {
+      setHidden(window.scrollY < threshold);
+    }
+
+    window.addEventListener('scroll', onScroll, {passive: true});
+
+    // Update threshold on resize
+    window.addEventListener(
+      'resize',
+      function () {
+        threshold = window.innerHeight / 2;
+        onScroll();
+      },
+      {passive: true}
+    );
+  })();
+</script>
