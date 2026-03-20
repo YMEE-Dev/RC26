@@ -3464,38 +3464,58 @@
     dropdown.parentNode.insertBefore(placeholder, dropdown);
 
     var isSticky = false;
-    var triggerOffset = null;
+    var placeholderHeight = 0;
+    var triggerY = null; // absolute scrollY where sticky kicks in
     var hasScrolled = false;
 
-    function computeTrigger() {
-      // Measure in normal flow — include margin-bottom so placeholder holds exact same space
+    function measure() {
+      // Must only be called when dropdown is in normal flow (not sticky)
       var rect = dropdown.getBoundingClientRect();
-      var marginBottom = parseFloat(window.getComputedStyle(dropdown).marginBottom) || 0;
-      placeholder.style.height = rect.height + marginBottom + 'px';
-      // Trigger when dropdown bottom + margin reaches viewport bottom
-      triggerOffset = window.scrollY + rect.bottom + marginBottom - window.innerHeight;
+      var cs = window.getComputedStyle(dropdown);
+      var mt = parseFloat(cs.marginTop) || 0;
+      var mb = parseFloat(cs.marginBottom) || 0;
+      placeholderHeight = rect.height + mt + mb;
+      placeholder.style.height = placeholderHeight + 'px';
+      // Trigger: when the dropdown bottom + margin would go past the viewport bottom
+      triggerY = window.scrollY + rect.bottom + mb - window.innerHeight;
+      // Clamp to at least 1 so it never fires at scrollY 0
+      if (triggerY < 1) triggerY = 1;
+    }
+
+    function stick() {
+      if (isSticky) return;
+      isSticky = true;
+      // Activate placeholder BEFORE changing position to avoid layout jump
+      placeholder.classList.add('is-active');
+      dropdown.classList.add('is-sticky');
+    }
+
+    function unstick() {
+      if (!isSticky) return;
+      isSticky = false;
+      dropdown.classList.remove('is-sticky');
+      placeholder.classList.remove('is-active');
+      // Re-measure now that dropdown is back in flow
+      requestAnimationFrame(function () {
+        measure();
+      });
     }
 
     function onScroll() {
-      if (triggerOffset === null) return;
-      // Never auto-stick on page load — require actual scroll
-      if (!hasScrolled && window.scrollY === 0) return;
-      hasScrolled = true;
-      var shouldStick = window.scrollY >= triggerOffset;
-      if (shouldStick && !isSticky) {
-        isSticky = true;
-        dropdown.classList.add('is-sticky');
-        placeholder.classList.add('is-active');
-      } else if (!shouldStick && isSticky) {
-        isSticky = false;
-        dropdown.classList.remove('is-sticky');
-        placeholder.classList.remove('is-active');
+      if (triggerY === null) return;
+      if (!hasScrolled) {
+        if (window.scrollY < 1) return;
+        hasScrolled = true;
+      }
+      if (window.scrollY >= triggerY) {
+        stick();
+      } else {
+        unstick();
       }
     }
 
     function init() {
-      computeTrigger();
-      // Do NOT call onScroll() here — avoids sticky on page load
+      measure();
     }
 
     if (document.readyState === 'complete') {
@@ -3508,7 +3528,13 @@
     window.addEventListener(
       'resize',
       function () {
-        computeTrigger();
+        if (isSticky) {
+          // Temporarily unstick to re-measure in normal flow
+          dropdown.classList.remove('is-sticky');
+          placeholder.classList.remove('is-active');
+          isSticky = false;
+        }
+        measure();
         onScroll();
       },
       {passive: true}
