@@ -48,7 +48,13 @@
       aria-haspopup="listbox"
       aria-expanded="false"
     >
-      <svg class="ymee-variant-dropdown__toggle-bg" viewBox="0 0 362 50" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="none">
+      <svg
+        class="ymee-variant-dropdown__toggle-bg"
+        viewBox="0 0 362 50"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+        preserveAspectRatio="none"
+      >
         <defs>
           <mask id="ymee-toggle-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="362" height="50">
             <path d="M326.761 50C339.354 50 349.39 34.7756 358.149 28.529L361.5 26.1286V23.882L358.149 21.4731C349.381 15.2245 339.345 0 326.761 0L34.7301 0C22.1376 0 12.1019 15.2244 3.34241 21.471L0 23.8799V26.1265L3.34241 28.5269C12.1104 34.7734 22.1461 49.9979 34.7301 49.9979H326.761V50Z" fill="white"/>
@@ -94,8 +100,12 @@
           aria-selected="{% if variant == selected_variant %}true{% else %}false{% endif %}"
           data-variant-id="{{ variant.id }}"
           data-option1="{{ variant.option1 | escape }}"
-          {%- if variant.option2 %} data-option2="{{ variant.option2 | escape }}"{% endif %}
-          {%- if variant.option3 %} data-option3="{{ variant.option3 | escape }}"{% endif %}
+          {%- if variant.option2 %}
+            data-option2="{{ variant.option2 | escape }}"
+          {% endif %}
+          {%- if variant.option3 %}
+            data-option3="{{ variant.option3 | escape }}"
+          {% endif %}
           data-size-value="{{ ymee_size_value | escape }}"
         >
           <span class="ymee-variant-dropdown__size">{{ ymee_size_value | escape }}</span>
@@ -145,13 +155,19 @@
 
         <button type="button" class="ymee-variant-dropdown__footer-atc" data-ymee-footer-atc hidden>
           <span class="btn__text">
-           {%- render 'icon-add2cart' -%}
+            {%- render 'icon-add2cart' -%}
             {{ 'products.product.add_to_cart' | t }}
           </span>
         </button>
 
         {%- if sizing_link != '#' -%}
-          <a href="{{ sizing_link }}" class="ymee-variant-dropdown__sizing-link" data-ymee-sizing-help target="_blank" rel="noopener">
+          <a
+            href="{{ sizing_link }}"
+            class="ymee-variant-dropdown__sizing-link"
+            data-ymee-sizing-help
+            target="_blank"
+            rel="noopener"
+          >
             {%- render 'icon-tape' -%}
             {{ sizing_link_text }}
           </a>
@@ -163,6 +179,7 @@
   <script>
     window.ymeeChooseSizeText = {{ 'products.product.choose_size' | t | json }};
     window.ymeeSizePrefixText = {{ 'products.product.size_prefix' | t | json }};
+    window.ymeeAddToCartText = {{ 'products.product.add_to_cart' | t | json }};
   </script>
   <script type="application/json" data-product-json>
     {{ product | json }}
