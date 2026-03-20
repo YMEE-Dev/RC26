@@ -465,14 +465,14 @@
       @media only screen and (min-width: 750px) and (max-width: 989px) {
 
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: calc(100dvh - var(--pdp-sticky-bar-height, 100px));
+          height: calc(100dvh - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 100px));
         }
       }
 
       @media only screen and (max-width: 749px) {
 
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: calc(100dvh - var(--pdp-sticky-bar-height, 100px));
+          height: calc(100dvh - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 100px));
         }
       }
 
@@ -1035,8 +1035,14 @@
       }
 
       @media only screen and (max-width: 989px) {
+        /* Mobile: gallery + sticky bar + dropdown = 100dvh */
+        /* Subtract header-height because .pdp-embla--mobile has padding-top: var(--header-height) */
+        #MainProduct--{{ section.id }} .pdp-embla__viewport {
+          height: calc(100dvh - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 130px));
+        }
+
         #MainProduct--{{ section.id }} .product__sticky-bar {
-          padding: 20px;
+          padding: 12px 20px;
         }
 
         #MainProduct--{{ section.id }} .product__content-columns .ymee-color-picker {
@@ -3374,19 +3380,20 @@
       var dropdown = sectionEl.querySelector('[data-ymee-variant-dropdown]');
       if (!stickyBar) return;
 
-      var stickyHeight = stickyBar.offsetHeight;
-      var dropdownHeight = isMobile && dropdown ? dropdown.offsetHeight : 0;
+      // Calculate total space including margins
+      var stickyRect = stickyBar.getBoundingClientRect();
+      var total = stickyRect.height;
 
-      // On mobile the gallery has padding-top: var(--header-height), so the
-      // header eats into the gallery from the top. Include it in the total so
-      // the viewport calc leaves room for header + sticky bar + dropdown + margin.
-      var headerHeight = 0;
-      if (isMobile) {
-        var headerEl = document.querySelector('header.theme__header');
-        if (headerEl) headerHeight = headerEl.offsetHeight;
+      if (dropdown) {
+        var dropdownRect = dropdown.getBoundingClientRect();
+        // Get computed style for margins
+        var dropdownStyles = window.getComputedStyle(dropdown);
+        var dropdownMarginBottom = parseFloat(dropdownStyles.marginBottom) || 0;
+        // Space from top of sticky bar to bottom of dropdown margin
+        var fullHeight = dropdownRect.bottom + dropdownMarginBottom - stickyRect.top;
+        total = fullHeight;
       }
 
-      var total = stickyHeight + dropdownHeight + headerHeight + 20; // +20px for dropdown margin-bottom
       if (total > 0) {
         sectionEl.style.setProperty('--pdp-sticky-bar-height', total + 'px');
       }
@@ -3407,12 +3414,13 @@
       updateStickyBarHeight();
     }
 
-    // Watch for size changes (e.g., when variant changes affect button layout)
+    // Watch for size changes
     var resizeObserver = new ResizeObserver(function () {
       updateStickyBarHeight();
     });
 
     var stickyBar = sectionEl.querySelector('.product__sticky-bar');
+    var dropdown = sectionEl.querySelector('[data-ymee-variant-dropdown]');
     if (stickyBar) {
       resizeObserver.observe(stickyBar);
     }
@@ -3423,54 +3431,80 @@
       resizeObserver.observe(stickyBarInner);
     }
 
-    // Watch the dropdown toggle for height changes on mobile
-    var dropdown = sectionEl.querySelector('[data-ymee-variant-dropdown]');
+    // Watch the dropdown for height changes
     if (dropdown) {
       resizeObserver.observe(dropdown);
-    }
-
-    // Watch the header for height changes on mobile
-    var headerEl = document.querySelector('header.theme__header');
-    if (headerEl) {
-      resizeObserver.observe(headerEl);
     }
   })();
 </script>
 
 <script>
   (function () {
-    if (!window.matchMedia || !window.matchMedia('(max-width: 989px)').matches) return;
+    if (!window.matchMedia || !window.matchMedia('(max-width: 1024px)').matches) return;
 
+    // Always hide the flower (hamburger button) on mobile PDP
     var hamburger = document.querySelector('.header__mobile__hamburger');
-    var buttons = hamburger ? [hamburger.closest('.header__mobile__button')] : [];
-    if (!buttons.length || !buttons[0]) return;
-
-    var threshold = window.innerHeight / 2;
-    var hidden = false;
-
-    function setHidden(hide) {
-      if (hide === hidden) return;
-      hidden = hide;
-      buttons.forEach(function (btn) {
-        btn.style.visibility = hide ? 'hidden' : '';
-        btn.style.opacity = hide ? '0' : '';
-      });
+    var flowerBtn = hamburger ? hamburger.closest('.header__mobile__button') : null;
+    if (flowerBtn) {
+      flowerBtn.style.visibility = 'hidden';
+      flowerBtn.style.opacity = '0';
     }
 
-    // Hide on page load
-    setHidden(true);
+    // Dropdown: normal flow initially, fixed when bottom reaches viewport bottom (with placeholder to prevent shift)
+    var dropdown = document.querySelector('[data-ymee-variant-dropdown]');
+    if (!dropdown) return;
+
+    // Create placeholder to prevent layout shift when fixed
+    var placeholder = document.createElement('div');
+    placeholder.className = 'ymee-variant-dropdown__placeholder';
+    dropdown.parentNode.insertBefore(placeholder, dropdown);
+
+    var isSticky = false;
+    var triggerOffset = null;
+    var hasScrolled = false;
+
+    function computeTrigger() {
+      // Measure in normal flow — include margin-bottom so placeholder holds exact same space
+      var rect = dropdown.getBoundingClientRect();
+      var marginBottom = parseFloat(window.getComputedStyle(dropdown).marginBottom) || 0;
+      placeholder.style.height = rect.height + marginBottom + 'px';
+      // Trigger when dropdown bottom + margin reaches viewport bottom
+      triggerOffset = window.scrollY + rect.bottom + marginBottom - window.innerHeight;
+    }
 
     function onScroll() {
-      setHidden(window.scrollY < threshold);
+      if (triggerOffset === null) return;
+      // Never auto-stick on page load — require actual scroll
+      if (!hasScrolled && window.scrollY === 0) return;
+      hasScrolled = true;
+      var shouldStick = window.scrollY >= triggerOffset;
+      if (shouldStick && !isSticky) {
+        isSticky = true;
+        dropdown.classList.add('is-sticky');
+        placeholder.classList.add('is-active');
+      } else if (!shouldStick && isSticky) {
+        isSticky = false;
+        dropdown.classList.remove('is-sticky');
+        placeholder.classList.remove('is-active');
+      }
+    }
+
+    function init() {
+      computeTrigger();
+      // Do NOT call onScroll() here — avoids sticky on page load
+    }
+
+    if (document.readyState === 'complete') {
+      init();
+    } else {
+      window.addEventListener('load', init, {once: true});
     }
 
     window.addEventListener('scroll', onScroll, {passive: true});
-
-    // Update threshold on resize
     window.addEventListener(
       'resize',
       function () {
-        threshold = window.innerHeight / 2;
+        computeTrigger();
         onScroll();
       },
       {passive: true}
