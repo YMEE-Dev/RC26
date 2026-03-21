@@ -1,0 +1,284 @@
+/* ── Collection Floating Bar ── */
+/* Mobile-only floating filter/sort bar fixed to bottom of viewport */
+
+.collection-floating-bar {
+  display: none;
+}
+
+@media only screen and (max-width: 960px) {
+  /* ── Hide the original filters wrapper on mobile ── */
+  .popout_filters-wrapper {
+    display: none !important;
+  }
+
+  .collection-floating-bar {
+    display: block;
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 0 20px;
+    transition:
+      opacity 300ms ease,
+      transform 300ms ease;
+  }
+
+  .collection-floating-bar.is-hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+  }
+
+  .collection-floating-bar__inner {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    height: 50px;
+  }
+
+  .collection-floating-bar__blur {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    -webkit-clip-path: url(#cfb-blur-clip);
+    clip-path: url(#cfb-blur-clip);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+
+  .collection-floating-bar__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: visible;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.08));
+  }
+
+  /* ── Shared button reset ── */
+  .collection-floating-bar__filter,
+  .collection-floating-bar__sort,
+  .collection-floating-bar__menu {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    font-family: var(--BTN-FONT-STACK);
+    font-size: var(--BTN-FONT-SIZE);
+    font-weight: var(--BTN-FONT-WEIGHT);
+    letter-spacing: var(--BTN-LETTER-SPACING);
+    text-transform: var(--BTN-UPPERCASE);
+    color: var(--COLOR-TEXT, #000);
+    line-height: 1;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ── Filter button (left segment: 0–130 of 362 ≈ 35.9%) ── */
+  .collection-floating-bar__filter {
+    flex: 0 0 36%;
+    gap: 8px;
+  }
+
+  .collection-floating-bar__filter svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .collection-floating-bar__filter span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--COLOR-TEXT, #000);
+    font-size: var(--BTN-FONT-SIZE);
+    font-style: var(--BTN-FONT-STYLE);
+    font-weight: var(--BTN-FONT-WEIGHT);
+    line-height: 1.25;
+    letter-spacing: var(--BTN-LETTER-SPACING);
+    text-transform: var(--BTN-UPPERCASE);
+  }
+
+  /* ── Sort button (middle segment: 130–286 of 362 ≈ 43.1%) ── */
+  .collection-floating-bar__sort {
+    flex: 0 0 44%;
+    gap: 4px;
+    overflow: hidden;
+  }
+
+  .collection-floating-bar__sort-label {
+    flex-shrink: 0;
+  }
+
+  .collection-floating-bar__sort-value {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ── Sort slide-out sidebar ── */
+  .collection-floating-bar__sort-sidebar {
+    position: fixed;
+    top: 0;
+    left: 100%;
+    z-index: 6100;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    max-width: var(--DRAWER-WIDTH);
+    border-left: 1px solid #e5e5e5;
+    background: var(--bg, var(--COLOR-BG));
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.6s ease,
+      transform 0.6s ease,
+      visibility 0.6s;
+    overflow: hidden;
+  }
+
+  .collection-floating-bar__sort-sidebar.expanded {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(-100%);
+  }
+
+  .collection-floating-bar__sort-sidebar__head {
+    position: relative;
+    width: 100%;
+    padding: 24px calc(var(--inner) + 24px) 24px var(--inner);
+  }
+
+  .collection-floating-bar__sort-sidebar__head h3 {
+    font-family: var(--FONT-STACK-BODY);
+    font-weight: var(--FONT-WEIGHT-BODY-BOLD);
+    font-style: var(--FONT-STYLE-BODY);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-size: var(--font-body-medium);
+    line-height: 1;
+    margin: 0 0 -3px;
+  }
+
+  .collection-floating-bar__sort-sidebar__close {
+    --icon-size: 24px;
+    position: absolute;
+    top: 50%;
+    right: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    color: var(--link);
+    background: transparent;
+    border-radius: var(--RADIUS);
+    font-size: 0;
+    text-decoration: none;
+    transform: translate3d(0, -50%, 0);
+    transition: color 0.3s ease;
+  }
+
+  .collection-floating-bar__sort-sidebar__close .icon {
+    display: block;
+    fill: currentcolor;
+    pointer-events: none;
+    will-change: transform;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.22, 1);
+  }
+
+  .collection-floating-bar__sort-sidebar__body {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 0 var(--inner);
+  }
+
+  .collection-floating-bar__sort-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .collection-floating-bar__sort-item {
+    position: relative;
+    font-size: var(--font-body-small);
+    padding: 0;
+    margin: 5px 0 0;
+    text-transform: uppercase;
+  }
+
+  .collection-floating-bar__sort-item a {
+    --link: var(--text);
+    --link-hover: var(--text-hover);
+    display: flex;
+    align-items: center;
+    padding-left: calc(1em + 10px);
+    position: relative;
+    min-height: 12px;
+    text-decoration: none;
+    color: var(--link);
+  }
+
+  .collection-floating-bar__sort-item a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    width: 1em;
+    height: 1em;
+    border: 1px solid var(--text-light);
+    background: var(--COLOR-BG);
+  }
+
+  .collection-floating-bar__sort-item.is-active a::after {
+    background: var(--accent);
+    box-shadow: inset 0 0 0 2px var(--COLOR-BG);
+  }
+
+  /* ── Sort overlay ── */
+  .collection-floating-bar__sort-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 6000;
+    background: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.6s ease,
+      visibility 0.6s;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  .collection-floating-bar__sort-overlay.expanded {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* ── Menu button (right segment: 286–362 of 362 ≈ 21%) ── */
+  .collection-floating-bar__menu {
+    flex: 0 0 20%;
+    color: var(--COLOR-TEXT, #000);
+    padding-right: 10px;
+  }
+
+  .collection-floating-bar__menu svg {
+    width: 18px;
+    height: 14px;
+  }
+}
