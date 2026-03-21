@@ -1179,6 +1179,25 @@
     true
   );
 
+  /* ── Form-only wrapper: wire up icon click (hamburger) ─────────── */
+  function initFormOnlyWrappers(scope) {
+    (scope || document).querySelectorAll("[data-ymee-variant-dropdown-form-only]").forEach(function (root) {
+      if (root.dataset.ymeeFormOnlyBound === "true") return;
+      root.dataset.ymeeFormOnlyBound = "true";
+
+      var toggleIcon = root.querySelector(".ymee-variant-dropdown__toggle-icon");
+      if (toggleIcon) {
+        toggleIcon.addEventListener("click", function (e) {
+          if (!isMobileViewport()) return;
+          e.preventDefault();
+          e.stopPropagation();
+          var hamburger = document.querySelector('.header__mobile__hamburger[data-drawer-toggle="hamburger"]');
+          if (hamburger) hamburger.click();
+        });
+      }
+    });
+  }
+
   /* ── Reinit for dropdown (toggle/menu/sheet handlers) ────────────── */
   var reinitQueued = false;
   function scheduleReinit() {
@@ -1188,6 +1207,7 @@
       reinitQueued = false;
       init(document);
       initColorPickers(document);
+      initFormOnlyWrappers(document);
     });
   }
 
@@ -1203,17 +1223,20 @@
     document.addEventListener("DOMContentLoaded", function () {
       init(document);
       initColorPickers(document);
+      initFormOnlyWrappers(document);
       observeProductInfo();
     });
   } else {
     init(document);
     initColorPickers(document);
+    initFormOnlyWrappers(document);
     observeProductInfo();
   }
 
   document.addEventListener("shopify:section:load", function (e) {
     init(e.target);
     initColorPickers(e.target);
+    initFormOnlyWrappers(e.target);
     observeProductInfo();
   });
 })();

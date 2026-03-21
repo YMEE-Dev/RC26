@@ -1141,8 +1141,6 @@
           grid-area: custom-drawers;
           min-width: 0;
           margin-bottom: 20px;
-        }
-        #MainProduct--{{ section.id }}:has([data-ymee-variant-dropdown]) .product__custom-drawers-row {
           margin-top: 70px;
         }
         #MainProduct--{{ section.id }} .product-accordions-container {
@@ -3193,10 +3191,8 @@
     {%- render 'cart-bar', product: product -%}
   {%- endif -%}
 
-  {%- unless product.has_only_default_variant -%}
-    <link type="text/css" href="{{ 'ymee-variant-dropdown.css' | asset_url }}" rel="stylesheet">
-    <script src="{{ 'ymee-variant-dropdown.js' | asset_url }}" defer="defer"></script>
-  {%- endunless -%}
+  <link type="text/css" href="{{ 'ymee-variant-dropdown.css' | asset_url }}" rel="stylesheet">
+  <script src="{{ 'ymee-variant-dropdown.js' | asset_url }}" defer="defer"></script>
 
   <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
   {%- if product_sticky_enable -%}
@@ -3384,7 +3380,9 @@
     function updateStickyBarHeight() {
       if (!isMobile) return;
       var stickyBar = sectionEl.querySelector('.product__sticky-bar');
-      var dropdown = sectionEl.querySelector('[data-ymee-variant-dropdown]');
+      var dropdown =
+        sectionEl.querySelector('[data-ymee-variant-dropdown]') ||
+        sectionEl.querySelector('[data-ymee-variant-dropdown-form-only]');
       if (!stickyBar) return;
 
       var stickyBarHeight = stickyBar.getBoundingClientRect().height;
@@ -3419,7 +3417,9 @@
     });
 
     var stickyBar = sectionEl.querySelector('.product__sticky-bar');
-    var dropdown = sectionEl.querySelector('[data-ymee-variant-dropdown]');
+    var dropdown =
+      sectionEl.querySelector('[data-ymee-variant-dropdown]') ||
+      sectionEl.querySelector('[data-ymee-variant-dropdown-form-only]');
     if (stickyBar) {
       resizeObserver.observe(stickyBar);
     }
@@ -3451,7 +3451,9 @@
 
     // Smooth hide dropdown when footer enters viewport, show when it leaves
     function initFooterObserver() {
-      var dropdown = document.querySelector('[data-ymee-variant-dropdown]');
+      var dropdown =
+        document.querySelector('[data-ymee-variant-dropdown]') ||
+        document.querySelector('[data-ymee-variant-dropdown-form-only]');
       var footer = document.querySelector('.site-footer-wrapper');
       if (!dropdown || !footer || !('IntersectionObserver' in window)) return;
       var observer = new IntersectionObserver(
