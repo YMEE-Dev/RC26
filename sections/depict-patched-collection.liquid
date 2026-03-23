@@ -9,6 +9,7 @@
 <!-- /sections/collections.liquid -->
 
 {{ 'custom-collection.css' | asset_url | stylesheet_tag }}
+{{ 'collection-floating-bar.css' | asset_url | stylesheet_tag }}
 
 {%- liquid
   assign enable_infinity_scroll = settings.enable_infinity_scroll
@@ -264,6 +265,8 @@
       </nav>
     {%- endif -%}
 
+    {%- render 'collection-floating-bar' -%}
+
     <div class="collection__products">
       {%- if enable_filters -%}
         <div class="{{ collection_sidebar_class }}" id="filter-groups" data-collection-sidebar>
@@ -321,23 +324,22 @@
                 assign added_images_index = ''
                 assign items_on_row_remaining = columns_desktop
 
-
-                assign depict_page_size = "50"
+                assign depict_page_size = '50'
                 if paginate.page_size
-                    assign depict_page_size = paginate.page_size
+                  assign depict_page_size = paginate.page_size
                 endif
 
-                assign depict_pagination_pages = "1"
+                assign depict_pagination_pages = '1'
                 if paginate.pages
-                    assign depict_pagination_pages = paginate.pages
+                  assign depict_pagination_pages = paginate.pages
                 endif
 
-                assign depict_current_page = "0"
+                assign depict_current_page = '0'
                 if paginate.current_page
-                    comment
+                  comment
                     make depict_current_page 0-indexed because that makes it much easier in the typescript side
-                    endcomment
-                    assign depict_current_page = paginate.current_page | minus: 1
+                  endcomment
+                  assign depict_current_page = paginate.current_page | minus: 1
                 endif
 
                 assign depict_data_paginate = '{"page_size": ' | append: depict_page_size | append: ', "pages": ' | append: depict_pagination_pages | append: ', "current_page": ' | append: depict_current_page | append: '}'
@@ -386,23 +388,22 @@
 
             {%- else -%}
               {%- liquid
-
-                assign depict_page_size = "50"
+                assign depict_page_size = '50'
                 if paginate.page_size
-                    assign depict_page_size = paginate.page_size
+                  assign depict_page_size = paginate.page_size
                 endif
 
-                assign depict_pagination_pages = "1"
+                assign depict_pagination_pages = '1'
                 if paginate.pages
-                    assign depict_pagination_pages = paginate.pages
+                  assign depict_pagination_pages = paginate.pages
                 endif
 
-                assign depict_current_page = "0"
+                assign depict_current_page = '0'
                 if paginate.current_page
-                    comment
+                  comment
                     make depict_current_page 0-indexed because that makes it much easier in the typescript side
-                    endcomment
-                    assign depict_current_page = paginate.current_page | minus: 1
+                  endcomment
+                  assign depict_current_page = paginate.current_page | minus: 1
                 endif
 
                 assign depict_data_paginate = '{"page_size": ' | append: depict_page_size | append: ', "pages": ' | append: depict_pagination_pages | append: ', "current_page": ' | append: depict_current_page | append: '}'
@@ -531,7 +532,7 @@
           filterItems(component, activeFilter);
         });
 
-        observer.observe(productsGrid, { childList: true, subtree: true });
+        observer.observe(productsGrid, {childList: true, subtree: true});
       };
 
       const initAll = (root) => {
@@ -584,6 +585,8 @@
     <script src="{{ 'collection-filters-form.js' | asset_url }}" defer="defer"></script>
   {%- endif -%}
 
+  <script src="{{ 'collection-floating-bar.js' | asset_url }}" defer="defer"></script>
+
   {%- if settings.quickview_enable -%}
     <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
   {%- endif -%}
@@ -619,9 +622,9 @@
       "label": "Filter layout",
       "default": "inline-open",
       "options": [
-        { "label": "Slide out", "value": "slide-out" },
-        { "label": "Inline (closed)", "value": "inline-closed" },
-        { "label": "Inline (open)", "value": "inline-open" }
+        {"label": "Slide out", "value": "slide-out"},
+        {"label": "Inline (closed)", "value": "inline-closed"},
+        {"label": "Inline (open)", "value": "inline-open"}
       ]
     },
     {
@@ -752,12 +755,12 @@
           "label": "Heading size",
           "default": "heading-large",
           "options": [
-            { "value": "heading-mini", "label": "Mini" },
-            { "value": "heading-x-small", "label": "Extra small" },
-            { "value": "heading-small", "label": "Small" },
-            { "value": "heading-medium", "label": "Medium" },
-            { "value": "heading-large", "label": "Large" },
-            { "value": "heading-x-large", "label": "Extra large" }
+            {"value": "heading-mini", "label": "Mini"},
+            {"value": "heading-x-small", "label": "Extra small"},
+            {"value": "heading-small", "label": "Small"},
+            {"value": "heading-medium", "label": "Medium"},
+            {"value": "heading-large", "label": "Large"},
+            {"value": "heading-x-large", "label": "Extra large"}
           ]
         },
         {
@@ -787,10 +790,10 @@
           "label": "Color",
           "default": "btn--primary",
           "options": [
-            { "value": "btn--black", "label": "Black" },
-            { "value": "btn--white", "label": "White" },
-            { "value": "btn--primary", "label": "Primary" },
-            { "value": "btn--secondary", "label": "Secondary" }
+            {"value": "btn--black", "label": "Black"},
+            {"value": "btn--white", "label": "White"},
+            {"value": "btn--primary", "label": "Primary"},
+            {"value": "btn--secondary", "label": "Secondary"}
           ]
         },
         {
@@ -799,9 +802,9 @@
           "label": "Size",
           "default": "",
           "options": [
-            { "label": "Small", "value": "btn--small" },
-            { "label": "Medium", "value": "" },
-            { "label": "Large", "value": "btn--large" }
+            {"label": "Small", "value": "btn--small"},
+            {"label": "Medium", "value": ""},
+            {"label": "Large", "value": "btn--large"}
           ]
         },
         {
@@ -810,9 +813,9 @@
           "label": "Style",
           "default": "btn--outline",
           "options": [
-            { "label": "Solid", "value": "btn--solid" },
-            { "label": "Outline", "value": "btn--outline" },
-            { "label": "Text", "value": "btn--text" }
+            {"label": "Solid", "value": "btn--solid"},
+            {"label": "Outline", "value": "btn--outline"},
+            {"label": "Text", "value": "btn--text"}
           ]
         },
         {
@@ -842,8 +845,8 @@
           "label": "Overlay type",
           "default": "disabled",
           "options": [
-            { "value": "disabled", "label": "Disabled" },
-            { "value": "opacity", "label": "Opacity overlay" }
+            {"value": "disabled", "label": "Disabled"},
+            {"value": "opacity", "label": "Opacity overlay"}
           ]
         },
         {
@@ -856,13 +859,13 @@
           "label": "Heading SEO tag",
           "default": "automatic",
           "options": [
-            { "value": "automatic", "label": "Automatic" },
-            { "value": "h1", "label": "H1" },
-            { "value": "h2", "label": "H2" },
-            { "value": "h3", "label": "H3" },
-            { "value": "h4", "label": "H4" },
-            { "value": "h5", "label": "H5" },
-            { "value": "h6", "label": "H6" }
+            {"value": "automatic", "label": "Automatic"},
+            {"value": "h1", "label": "H1"},
+            {"value": "h2", "label": "H2"},
+            {"value": "h3", "label": "H3"},
+            {"value": "h4", "label": "H4"},
+            {"value": "h5", "label": "H5"},
+            {"value": "h6", "label": "H6"}
           ]
         }
       ]
