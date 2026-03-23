@@ -202,6 +202,13 @@ side-drawer.side-drawer--from-bottom.is-closing .drawer__inner {
     -webkit-overflow-scrolling: touch;
     max-height: 100vh;
     height: 100%;
+    position: relative;
+  }
+
+  /* Ensure scrolling works when body is locked */
+  body[data-scroll-locked] side-drawer .drawer__content-wrapper {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
