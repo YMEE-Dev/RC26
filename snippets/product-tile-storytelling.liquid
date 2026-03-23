@@ -12,16 +12,23 @@
   assign modal_media = product.media[1]
   assign modal_image = blank
   assign look_slider = ''
-
-  assign has_video = false
-  for media in product.media
-    if media.media_type == 'video'
-      assign has_video = true
-    endif
-  endfor
+  assign first_media_is_video = false
+  assign modal_media_is_video = false
 
   if modal_media == blank
     assign modal_media = first_media
+  endif
+
+  if first_media != blank
+    if first_media.media_type == 'video' or first_media.media_type == 'external_video'
+      assign first_media_is_video = true
+    endif
+  endif
+
+  if modal_media != blank
+    if modal_media.media_type == 'video' or modal_media.media_type == 'external_video'
+      assign modal_media_is_video = true
+    endif
   endif
 
   if modal_media != blank
@@ -76,20 +83,19 @@
     data-storytelling-modal-trigger
     data-storytelling-modal-target="{{ modal_id }}"
   >
-    {%- if has_video and first_media.media_type == 'video' -%}
-      <video
-        class="custom-autoplay-video"
-        autoplay="1"
-        muted
-        loop
-        playsinline
-        poster="{{ first_media.preview_image | image_url: width: 2048 }}"
-      >
-        {% for source in first_media.sources %}
-          <source src="{{ source.url }}" type="{{ source.mime_type }}">
-        {% endfor %}
-        Your browser does not support the video tag.
-      </video>
+    {%- if first_media_is_video -%}
+      {%- liquid
+        case first_media.media_type
+          when 'video'
+            echo first_media | media_tag: image_size: '2048x', class: 'custom-autoplay-video', autoplay: true, loop: true, controls: false, preload: 'none', muted: true
+          when 'external_video'
+            if first_media.host == 'youtube'
+              echo first_media | external_video_url: autoplay: true, playsinline: true, loop: true, playlist: first_media.external_id, controls: false, mute: true, showinfo: false | external_video_tag: class: 'custom-autoplay-video', loading: 'lazy', data-host: first_media.host
+            else
+              echo first_media | external_video_url: autoplay: true, playsinline: true, loop: true, controls: false, muted: true | external_video_tag: class: 'custom-autoplay-video', data-host: first_media.host
+            endif
+        endcase
+      -%}
     {%- else -%}
       {%- liquid
         if pdp_mode and modal_image != blank
@@ -132,20 +138,19 @@
     <div class="storytelling-modal__inner">
       <look-component class="look">
         <div class="storytelling-look__image">
-          {%- if modal_media != blank and modal_media.media_type == 'video' -%}
-            <video
-              class="storytelling custom-autoplay-video"
-              autoplay="1"
-              muted
-              loop
-              playsinline
-              poster="{{ modal_media.preview_image | image_url: width: 2048 }}"
-            >
-              {% for source in modal_media.sources %}
-                <source src="{{ source.url }}" type="{{ source.mime_type }}">
-              {% endfor %}
-              Your browser does not support the video tag.
-            </video>
+          {%- if modal_media_is_video -%}
+            {%- liquid
+              case modal_media.media_type
+                when 'video'
+                  echo modal_media | media_tag: image_size: '2048x', class: 'storytelling custom-autoplay-video', autoplay: true, loop: true, controls: false, preload: 'none', muted: true
+                when 'external_video'
+                  if modal_media.host == 'youtube'
+                    echo modal_media | external_video_url: autoplay: true, playsinline: true, loop: true, playlist: modal_media.external_id, controls: false, mute: true, showinfo: false | external_video_tag: class: 'storytelling custom-autoplay-video', loading: 'lazy', data-host: modal_media.host
+                  else
+                    echo modal_media | external_video_url: autoplay: true, playsinline: true, loop: true, controls: false, muted: true | external_video_tag: class: 'storytelling custom-autoplay-video', data-host: modal_media.host
+                  endif
+              endcase
+            -%}
           {%- else -%}
             {%- if modal_image -%}
               {% comment %}
@@ -213,6 +218,7 @@
     if (window.__storytellingModalInitialized) return;
     window.__storytellingModalInitialized = true;
     const sliderProgressBindings = new WeakMap();
+    const sliderSnapBindings = new WeakMap();
 
     const getModalByTrigger = (trigger) => {
       const modalId = trigger.getAttribute('data-storytelling-modal-target');
@@ -310,6 +316,88 @@
       });
     };
 
+    const getNearestCenteredSlide = (slider) => {
+      if (!slider) return null;
+
+      const slides = Array.from(slider.querySelectorAll('[data-grid-item]'));
+      if (!slides.length) return null;
+
+      const sliderCenter = slider.scrollLeft + slider.clientWidth / 2;
+      let nearestSlide = slides[0];
+      let nearestDistance = Math.abs(sliderCenter - (nearestSlide.offsetLeft + nearestSlide.clientWidth / 2));
+
+      slides.forEach((slide) => {
+        const slideCenter = slide.offsetLeft + slide.clientWidth / 2;
+        const distance = Math.abs(sliderCenter - slideCenter);
+
+        if (distance < nearestDistance) {
+          nearestSlide = slide;
+          nearestDistance = distance;
+        }
+      });
+
+      return nearestSlide;
+    };
+
+    const getCenteredScrollLeft = (slider, slide) => {
+      if (!slider || !slide) return 0;
+
+      const maxScrollLeft = Math.max(slider.scrollWidth - slider.clientWidth, 0);
+      const centeredScrollLeft = slide.offsetLeft - slider.clientWidth / 2 + slide.clientWidth / 2;
+
+      return Math.max(0, Math.min(centeredScrollLeft, maxScrollLeft));
+    };
+
+    const bindSliderSnap = (slider) => {
+      if (!slider) return;
+
+      const existingBinding = sliderSnapBindings.get(slider);
+      if (existingBinding) return;
+
+      const gridSlider = slider.closest('grid-slider');
+      let snapTimer = null;
+
+      const snapToNearestSlide = () => {
+        const nearestSlide = getNearestCenteredSlide(slider);
+        if (!nearestSlide) return;
+
+        const targetLeft = getCenteredScrollLeft(slider, nearestSlide);
+        if (Math.abs(slider.scrollLeft - targetLeft) < 2) return;
+
+        if (gridSlider && typeof gridSlider.goToSlide === 'function') {
+          gridSlider.goToSlide(nearestSlide);
+          return;
+        }
+
+        slider.scrollTo({
+          left: targetLeft,
+          top: 0,
+          behavior: 'smooth',
+        });
+      };
+
+      const queueSnap = () => {
+        window.clearTimeout(snapTimer);
+        snapTimer = window.setTimeout(snapToNearestSlide, 140);
+      };
+
+      slider.addEventListener('scroll', queueSnap, {passive: true});
+
+      sliderSnapBindings.set(slider, {
+        queueSnap,
+        snapToNearestSlide,
+      });
+    };
+
+    const initModalSliderSnap = (modal) => {
+      if (!modal) return;
+
+      const sliders = modal.querySelectorAll('.storytelling-modal__slider-shell [data-grid-slider]');
+      if (!sliders.length) return;
+
+      sliders.forEach((slider) => bindSliderSnap(slider));
+    };
+
     const onModalClosed = (modal) => {
       if (!modal) return;
 
@@ -384,6 +472,7 @@
         requestAnimationFrame(() => {
           refreshModalSliders(modal);
           initModalSliderProgress(modal);
+          initModalSliderSnap(modal);
         });
       });
 
