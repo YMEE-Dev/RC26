@@ -1,0 +1,159 @@
+<!-- /sections/blog-occasion-style.liquid -->
+{%- liquid
+  assign featured_article = blank
+
+  if section.settings.featured_article != blank
+    assign featured_article = articles[section.settings.featured_article]
+  endif
+
+  if featured_article == blank
+    if article != blank
+      assign featured_article = article
+    endif
+  endif
+
+  if featured_article == blank
+    assign featured_article = blog.articles.first
+  endif
+-%}
+
+{{ 'blog-occasion.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  #BlogOccasion--{{ section.id }} {
+    --occasion-top-padding: {{ section.settings.padding_top }}px;
+    --occasion-bottom-padding: {{ section.settings.padding_bottom }}px;
+    --occasion-content-max-width: {{ section.settings.content_max_width }}px;
+    --occasion-content-gap: {{ section.settings.content_gap }}px;
+    --occasion-title-max-width: {{ section.settings.title_max_width }}px;
+    --occasion-media-height-mobile: {{ section.settings.image_height_mobile }}vh;
+  }
+{%- endstyle -%}
+
+<section
+  id="BlogOccasion--{{ section.id }}"
+  class="blog-occasion"
+  data-section-id="{{ section.id }}"
+  data-section-type="blog-occasion-style"
+>
+  {%- if featured_article != blank -%}
+    <div class="blog-occasion__top">
+      <h2 class="h2 blog-occasion__title">{{ featured_article.title }}</h2>
+      <p class="body blog-occasion__date">
+        <time datetime="{{ featured_article.published_at | date: '%Y-%m-%d' }}">
+          {{ featured_article.published_at | date: '%B %-d, %Y' }}
+        </time>
+      </p>
+    </div>
+
+    {%- if featured_article.image != blank -%}
+      {%- liquid
+        assign featured_image_alt = featured_article.image.alt
+        if featured_image_alt == blank
+          assign featured_image_alt = featured_article.title
+        endif
+      -%}
+      <div class="blog-occasion__media">
+        {{
+          featured_article.image
+          | image_url: width: 2800
+          | image_tag:
+            alt: featured_image_alt,
+            widths: '750, 1100, 1500, 2000, 2400, 2800',
+            sizes: '100vw',
+            loading: 'eager',
+            class: 'blog-occasion__image'
+        }}
+      </div>
+    {%- endif -%}
+
+    {%- if featured_article.content != blank -%}
+      <div class="blog-occasion__content-wrapper">
+        <div class="blog-occasion__content body rte">
+          {{ featured_article.content }}
+        </div>
+      </div>
+    {%- endif -%}
+  {%- else -%}
+    <div class="blog-occasion__empty h4">{{ 'blogs.article.no_articles' | t }}</div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Blog occasion style",
+  "settings": [
+    {
+      "type": "article",
+      "id": "featured_article",
+      "label": "Featured blog post",
+      "info": "Optional. If empty, current article or latest post is used."
+    },
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "min": 700,
+      "max": 1500,
+      "step": 20,
+      "unit": "px",
+      "label": "Content max width",
+      "default": 1100
+    },
+    {
+      "type": "range",
+      "id": "title_max_width",
+      "min": 500,
+      "max": 1400,
+      "step": 20,
+      "unit": "px",
+      "label": "Title max width",
+      "default": 980
+    },
+    {
+      "type": "range",
+      "id": "content_gap",
+      "min": 10,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "label": "Title and date spacing",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "image_height_mobile",
+      "min": 30,
+      "max": 70,
+      "step": 1,
+      "unit": "%",
+      "label": "Image height on mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blog occasion style"
+    }
+  ]
+}
+{% endschema %}

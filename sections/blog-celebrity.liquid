@@ -7,6 +7,12 @@
   endif
 
   if featured_article == blank
+    if article != blank
+      assign featured_article = article
+    endif
+  endif
+
+  if featured_article == blank
     assign featured_article = blog.articles.first
   endif
 -%}
