@@ -3,6 +3,7 @@
 
   Accepts:
   - block: {Object} Block object
+  - settings_context: {Object} Section or block-like object with `id` and `settings`
   - show_discount_message: {String} Discount message text (Optional)
   - success_text: {String} Success message text (Optional)
   - small_newsletter: {Boolean} Set true to hide the form
@@ -14,7 +15,17 @@
 <script src="{{ 'newsletter.js' | asset_url }}" defer="defer"></script>
 
 {%- liquid
-  assign unique = block.id | default: section.id
+  assign settings_object = blank
+  assign unique = section.id
+
+  if block != blank
+    assign settings_object = block.settings
+    assign unique = block.id
+  elsif settings_context != blank
+    assign settings_object = settings_context.settings
+    assign unique = settings_context.id
+  endif
+
   assign form_class = 'newsletter-form'
   if small_newsletter
     assign form_class = form_class | append: ' hidden'
@@ -32,20 +43,20 @@
   assign placeholder_field = placeholder | default: placeholder_default
 
   assign input_group = true
-  assign show_name = block.settings.show_name
+  assign show_name = settings_object.show_name
   if show_name
     assign input_group = false
   endif
   assign form_id = 'Newsletter--' | append: unique
   assign field_id = 'email-input-' | append: unique
   assign button_id = 'subscribe-button-' | append: unique
-  assign button_type = block.settings.button_type
-  assign button_size = block.settings.button_size
-  assign button_style = block.settings.button_style
+  assign button_type = settings_object.button_type
+  assign button_size = settings_object.button_size
+  assign button_style = settings_object.button_style
   assign button_text_default = 'general.newsletter_form.submit' | t
-  assign button_text = block.settings.button_text | default: button_text_default
+  assign button_text = settings_object.button_text | default: button_text_default
 
-  if button_style == 'btn--text' and block.settings.show_arrow
+  if button_style == 'btn--text' and settings_object.show_arrow
     assign button_style = button_style | append: ' btn--text-no-underline'
   endif
 
@@ -68,9 +79,9 @@
   endcapture
 -%}
 
-{%- if block -%}
-  {%- unless block.settings.color.alpha == 0.0 or block.settings.color == blank -%}
-    {%- assign text_color = block.settings.color -%}
+{%- if settings_object != blank -%}
+  {%- unless settings_object.color.alpha == 0.0 or settings_object.color == blank -%}
+    {%- assign text_color = settings_object.color -%}
 
     {%- capture style -%}
       --text: {{ text_color }};
@@ -85,7 +96,7 @@
   <button type="submit" class="{{ button_class }}" name="commit" id="{{ button_id }}">
     <span>{{ button_text }}</span>
 
-    {%- if block.settings.show_arrow or small_newsletter -%}
+    {%- if settings_object.show_arrow or small_newsletter -%}
       {%- render 'icon-nav-arrow-right' -%}
     {%- endif -%}
   </button>
@@ -173,7 +184,7 @@
     {%- else -%}
     {%- endunless -%}
 
-    {%- if block.settings.terms -%}
+    {%- if settings_object.terms -%}
       <div class="form__legal">
         {{ 'shopify.online_store.spam_detection.disclaimer_html' | t }}
       </div>
