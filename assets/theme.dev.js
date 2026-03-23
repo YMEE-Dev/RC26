@@ -3293,7 +3293,10 @@
 
       const gap = parseInt(window.getComputedStyle(slide).marginRight) || 0;
       const slideWidth = slide.offsetWidth + gap;
-      const targetPosition = slide.offsetLeft;
+      const isStorytellingModal = Boolean(this.slider.closest(".storytelling-modal"));
+      const targetPosition = isStorytellingModal
+        ? slide.offsetLeft - this.slider.clientWidth / 2 + slide.clientWidth / 2
+        : slide.offsetLeft;
       const direction = this.velX > 0 ? 1 : -1;
       const slidesToScroll = Math.floor(Math.abs(this.velX) / 100) || 1;
 
@@ -3498,9 +3501,14 @@
         goToSlide(slide) {
           if (!slide) return;
 
+          const isStorytellingModal = Boolean(this.closest(".storytelling-modal"));
+          const left = isStorytellingModal
+            ? slide.offsetLeft - this.slider.clientWidth / 2 + slide.clientWidth / 2
+            : slide.offsetLeft;
+
           this.slider.scrollTo({
             top: 0,
-            left: slide.offsetLeft,
+            left,
             behavior: "smooth",
           });
         }
