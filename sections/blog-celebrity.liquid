@@ -61,6 +61,14 @@
         }}
       </div>
     {%- endif -%}
+
+    {%- if featured_article.content != blank -%}
+      <div class="blog-celebrity__content-wrapper">
+        <div class="blog-celebrity__content body rte">
+          {{ featured_article.content }}
+        </div>
+      </div>
+    {%- endif -%}
   {%- else -%}
     <div class="blog-celebrity__empty h4">{{ 'blogs.article.no_articles' | t }}</div>
   {%- endif -%}

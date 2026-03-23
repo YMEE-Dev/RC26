@@ -12,7 +12,7 @@
   align-items: center;
   gap: var(--celebrity-content-gap);
   text-align: center;
-  min-height: calc(100vh - var(--celebrity-media-height-desktop));
+  min-height: 0;
 }
 
 .blog-celebrity__title {
@@ -32,15 +32,15 @@
   max-width: 100vw;
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
-  height: var(--celebrity-media-height-desktop);
+  margin-top: 100px;
+  height: auto;
   overflow: hidden;
 }
 
 .blog-celebrity__image {
   width: 100vw;
   max-width: none;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
   display: block;
 }
 
@@ -51,14 +51,45 @@
   text-align: center;
 }
 
+.blog-celebrity__content-wrapper {
+  width: min(100% - 48px, var(--celebrity-content-max-width));
+  margin: 100px auto 100px;
+}
+
+.blog-celebrity__content {
+  width: min(100%, 500px);
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.blog-celebrity__content p {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 750px) {
+  .blog-celebrity__top {
+    min-height: 0;
+  }
+}
+
 @media (max-width: 749px) {
   .blog-celebrity__top {
     width: min(100% - 32px, var(--celebrity-content-max-width));
-    min-height: auto;
     gap: 16px;
   }
 
   .blog-celebrity__media {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 40px;
     height: var(--celebrity-media-height-mobile);
+  }
+
+  .blog-celebrity__image {
+    width: 100%;
   }
 }
