@@ -359,6 +359,7 @@
 
       #MainProduct--{{ section.id }} .product__content-columns__aside .product__submit__buttons button[type="submit"] {
         margin-top: 0px;
+        min-height: 50px;
       }
 
       #MainProduct--{{ section.id }} .product__page {
@@ -378,6 +379,10 @@
 
       #MainProduct--{{ section.id }} .product__images .pdp-embla .image-wrapper--cover img {
         object-fit: contain;
+      }
+
+      #MainProduct--{{ section.id }} .product__images .pdp-embla.pdp-embla--mobile .image-wrapper--cover img {
+        object-fit: cover;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item:not([data-pair-role='secondary']) .image-wrapper--cover {
@@ -465,14 +470,14 @@
       @media only screen and (min-width: 750px) and (max-width: 989px) {
 
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: calc(100dvh - var(--pdp-sticky-bar-height, 100px));
+          height: calc(100dvh - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 60px) - var(--pdp-dropdown-height, 70px));
         }
       }
 
       @media only screen and (max-width: 749px) {
 
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: calc(100dvh - var(--pdp-sticky-bar-height, 100px));
+          height: calc(100dvh - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 60px) - var(--pdp-dropdown-height, 70px));
         }
       }
 
@@ -1035,8 +1040,13 @@
       }
 
       @media only screen and (max-width: 989px) {
+        /* Mobile: gallery + sticky bar = 100dvh minus header and fixed dropdown space */
+        #MainProduct--{{ section.id }} .pdp-embla__viewport {
+          height: calc(100dvh - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 60px) - var(--pdp-dropdown-height, 70px));
+        }
+
         #MainProduct--{{ section.id }} .product__sticky-bar {
-          padding: 20px;
+          padding: 12px 20px;
         }
 
         #MainProduct--{{ section.id }} .product__content-columns .ymee-color-picker {
@@ -1131,6 +1141,9 @@
           grid-area: custom-drawers;
           min-width: 0;
           margin-bottom: 20px;
+        }
+        #MainProduct--{{ section.id }}:has([data-ymee-variant-dropdown]) .product__custom-drawers-row {
+          margin-top: 70px;
         }
         #MainProduct--{{ section.id }} .product-accordions-container {
           grid-area: accordions;
@@ -3064,6 +3077,7 @@
                         .product__custom-drawer .link-with-icon {
                           width: 100%;
                           justify-content: flex-start;
+                          margin-bottom: 0;
                         }
 
                         .product__ruby-signature {
@@ -3071,14 +3085,16 @@
                           margin-bottom: 20px;
                         }
 
-                        .product__custom-drawers-row-ee {
+                         {
+                        }
+                        -ee {
                           display: flex;
                           flex-direction: column;
                         }
 
                         @media only screen and (max-width: 749px) {
                           .product__custom-drawers-row {
-                            gap: 10px;
+                            gap: 20px;
                             overflow: hidden;
                             scrollbar-width: none;
                             overflow-x: auto;
@@ -3371,21 +3387,14 @@
       var dropdown = sectionEl.querySelector('[data-ymee-variant-dropdown]');
       if (!stickyBar) return;
 
-      var stickyHeight = stickyBar.offsetHeight;
-      var dropdownHeight = isMobile && dropdown ? dropdown.offsetHeight : 0;
+      var stickyBarHeight = stickyBar.getBoundingClientRect().height;
+      sectionEl.style.setProperty('--pdp-sticky-bar-height', stickyBarHeight + 'px');
 
-      // On mobile the gallery has padding-top: var(--header-height), so the
-      // header eats into the gallery from the top. Include it in the total so
-      // the viewport calc leaves room for header + sticky bar + dropdown + margin.
-      var headerHeight = 0;
-      if (isMobile) {
-        var headerEl = document.querySelector('header.theme__header');
-        if (headerEl) headerHeight = headerEl.offsetHeight;
-      }
-
-      var total = stickyHeight + dropdownHeight + headerHeight + 20; // +20px for dropdown margin-bottom
-      if (total > 0) {
-        sectionEl.style.setProperty('--pdp-sticky-bar-height', total + 'px');
+      // Dropdown is always fixed on mobile — reserve its space via a separate variable
+      if (dropdown) {
+        var dropdownHeight = dropdown.getBoundingClientRect().height;
+        // 20px = bottom offset of the fixed dropdown
+        sectionEl.style.setProperty('--pdp-dropdown-height', dropdownHeight + 20 + 'px');
       }
     }
 
@@ -3404,12 +3413,13 @@
       updateStickyBarHeight();
     }
 
-    // Watch for size changes (e.g., when variant changes affect button layout)
+    // Watch for size changes
     var resizeObserver = new ResizeObserver(function () {
       updateStickyBarHeight();
     });
 
     var stickyBar = sectionEl.querySelector('.product__sticky-bar');
+    var dropdown = sectionEl.querySelector('[data-ymee-variant-dropdown]');
     if (stickyBar) {
       resizeObserver.observe(stickyBar);
     }
@@ -3420,57 +3430,48 @@
       resizeObserver.observe(stickyBarInner);
     }
 
-    // Watch the dropdown toggle for height changes on mobile
-    var dropdown = sectionEl.querySelector('[data-ymee-variant-dropdown]');
+    // Watch the dropdown for height changes
     if (dropdown) {
       resizeObserver.observe(dropdown);
-    }
-
-    // Watch the header for height changes on mobile
-    var headerEl = document.querySelector('header.theme__header');
-    if (headerEl) {
-      resizeObserver.observe(headerEl);
     }
   })();
 </script>
 
 <script>
   (function () {
-    if (!window.matchMedia || !window.matchMedia('(max-width: 989px)').matches) return;
+    if (!window.matchMedia || !window.matchMedia('(max-width: 1024px)').matches) return;
 
+    // Always hide the flower (hamburger button) on mobile PDP
     var hamburger = document.querySelector('.header__mobile__hamburger');
-    var buttons = hamburger ? [hamburger.closest('.header__mobile__button')] : [];
-    if (!buttons.length || !buttons[0]) return;
-
-    var threshold = window.innerHeight / 2;
-    var hidden = false;
-
-    function setHidden(hide) {
-      if (hide === hidden) return;
-      hidden = hide;
-      buttons.forEach(function (btn) {
-        btn.style.visibility = hide ? 'hidden' : '';
-        btn.style.opacity = hide ? '0' : '';
-      });
+    var flowerBtn = hamburger ? hamburger.closest('.header__mobile__button') : null;
+    if (flowerBtn) {
+      flowerBtn.style.visibility = 'hidden';
+      flowerBtn.style.opacity = '0';
     }
 
-    // Hide on page load
-    setHidden(true);
-
-    function onScroll() {
-      setHidden(window.scrollY < threshold);
+    // Smooth hide dropdown when footer enters viewport, show when it leaves
+    function initFooterObserver() {
+      var dropdown = document.querySelector('[data-ymee-variant-dropdown]');
+      var footer = document.querySelector('.site-footer-wrapper');
+      if (!dropdown || !footer || !('IntersectionObserver' in window)) return;
+      var observer = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              dropdown.classList.add('is-hidden');
+            } else {
+              dropdown.classList.remove('is-hidden');
+            }
+          });
+        },
+        {threshold: 0, rootMargin: '80px 0px 0px 0px'}
+      );
+      observer.observe(footer);
     }
-
-    window.addEventListener('scroll', onScroll, {passive: true});
-
-    // Update threshold on resize
-    window.addEventListener(
-      'resize',
-      function () {
-        threshold = window.innerHeight / 2;
-        onScroll();
-      },
-      {passive: true}
-    );
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initFooterObserver);
+    } else {
+      initFooterObserver();
+    }
   })();
 </script>

@@ -42,6 +42,9 @@
 
       if block.type == 'product_list_tab'
         assign tab_heading = block.settings.tab_heading | strip
+        if block.settings.view_all_url != blank
+          assign view_all_url = block.settings.view_all_url
+        endif
       endif
 
       if block.type == 'product_list_tab' and tab_heading == blank
@@ -271,6 +274,11 @@
           "type": "product_list",
           "id": "product_list",
           "label": "Products"
+        },
+        {
+          "type": "url",
+          "id": "view_all_url",
+          "label": "View all link"
         }
       ]
     },

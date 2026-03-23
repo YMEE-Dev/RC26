@@ -341,8 +341,27 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
 @media screen and (max-width: 1024px) {
   .ymee-variant-dropdown {
     border: none;
-    margin: 0 0 20px 0;
-    position: relative;
+    margin: 0;
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 0 20px;
+    -webkit-transition:
+      opacity 300ms ease,
+      -webkit-transform 300ms ease;
+    transition:
+      opacity 300ms ease,
+      transform 300ms ease;
+    will-change: opacity, transform;
+  }
+
+  .ymee-variant-dropdown.is-hidden {
+    opacity: 0 !important;
+    -webkit-transform: translateY(20px);
+    transform: translateY(20px);
+    pointer-events: none !important;
   }
 
   .ymee-variant-dropdown__toggle {
@@ -471,19 +490,25 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
 
   /* ── Icon: transparent overlay on the white rect ── */
   .ymee-variant-dropdown__toggle-icon {
+    display: -webkit-flex;
     display: flex;
+    -webkit-align-items: center;
     align-items: center;
+    -webkit-justify-content: center;
+    justify-content: center;
     flex: 0 0 76px;
     background: transparent;
     color: #000;
     position: relative;
     z-index: 1;
-    padding-left: 20px;
+    padding: 0 10px 0 0;
   }
 
   .ymee-variant-dropdown__toggle-icon svg {
+    display: block;
     width: 18px;
-    height: 12px;
+    height: 14px;
+    margin: auto;
   }
 
   .ymee-variant-dropdown__menu {
@@ -848,7 +873,7 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  padding: 20px 20px 30px 20px;
+  padding: 20px;
   flex: 0 0 auto;
 }
 
