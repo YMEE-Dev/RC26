@@ -49,8 +49,8 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
 .ymee-color-picker__legend {
   display: flex;
   align-items: flex-end;
-    justify-content: space-between;
-    gap: 10px;
+  justify-content: space-between;
+  gap: 10px;
   margin-bottom: 0px;
   padding-bottom: 0px;
   position: relative;
@@ -64,7 +64,9 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   text-align: center;
   visibility: hidden;
   opacity: 0;
-  transition: opacity 300ms ease, visibility 300ms ease;
+  transition:
+    opacity 300ms ease,
+    visibility 300ms ease;
   will-change: opacity, visibility;
   flex: 0 0 calc((100% - (var(--color-count) - 1) * 10px) / var(--color-count));
   max-width: calc((100% - (var(--color-count) - 1) * 10px) / var(--color-count));
@@ -113,7 +115,7 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   padding: 0px;
   transition: opacity 180ms ease;
   flex: 0 0 calc((100% - (var(--color-count) - 1) * 10px) / var(--color-count));
-    max-width: calc((100% - (var(--color-count) - 1) * 10px) / var(--color-count));
+  max-width: calc((100% - (var(--color-count) - 1) * 10px) / var(--color-count));
 }
 
 .ymee-color-picker__item.is-unavailable {
@@ -183,13 +185,13 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   justify-content: center;
   gap: 8px;
   transition:
-  background 180ms ease,
-  color 180ms ease;
+    background 180ms ease,
+    color 180ms ease;
 }
 
 .ymee-variant-dropdown__toggle:hover {
   border-color: var(--btn-border, #000);
-  background-color: #27574D;
+  background-color: #27574d;
   color: #fff;
 }
 
@@ -199,12 +201,19 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
 
 .ymee-variant-dropdown__placeholder[data-ymee-variant-dropdown-placeholder] {
   display: inline-block;
-  font-size: inherit;
-  font-weight: inherit;
-  line-height: inherit;
-  letter-spacing: inherit;
-  text-transform: inherit;
-  color: inherit;
+  color: var(--ffffff, #fff);
+  font-family: var(--FONT-STACK-BODY);
+  font-size: var(--BTN-FONT-SIZE);
+  font-style: var(--FONT-STYLE-BODY);
+  line-height: var(--BTN-LINE-HEIGHT);
+  letter-spacing: var(--BTN-LETTER-SPACING);
+  text-transform: var(--BTN-UPPERCASE);
+}
+
+@media only screen and (max-width: 1024px) {
+  .ymee-variant-dropdown__placeholder[data-ymee-variant-dropdown-placeholder] {
+    font-weight: 600;
+  }
 }
 
 .ymee-variant-dropdown__toggle::after {
@@ -212,12 +221,14 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
 }
 
 .ymee-variant-dropdown__menu {
-  border-top: 1px solid #E5E5E5;
+  border-top: 1px solid #d9d9d9;
   padding: 0;
   margin: 0;
   opacity: 0;
   transform: translateY(100%);
-  transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1), transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    opacity 300ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
   visibility: hidden;
 }
@@ -231,7 +242,7 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
     width: 100%;
     z-index: 5;
     background: #fff;
-    border: 1px solid #E5E5E5;
+    border: 1px solid #d9d9d9;
     border-bottom: none;
     max-height: 420px;
     overflow: auto;
@@ -280,8 +291,8 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
     visibility: hidden;
     pointer-events: none;
     transition:
-        opacity 180ms ease,
-        visibility 180ms ease;
+      opacity 180ms ease,
+      visibility 180ms ease;
   }
 
   .ymee-variant-dropdown__option:hover .ymee-variant-dropdown__submit,
@@ -293,8 +304,8 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   }
 
   .ymee-variant-dropdown__option:hover .ymee-variant-dropdown__accelerated,
-        .ymee-variant-dropdown__option:focus-within .ymee-variant-dropdown__accelerated,
-        .ymee-variant-dropdown__option.is-selected .ymee-variant-dropdown__accelerated {
+  .ymee-variant-dropdown__option:focus-within .ymee-variant-dropdown__accelerated,
+  .ymee-variant-dropdown__option.is-selected .ymee-variant-dropdown__accelerated {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
@@ -306,8 +317,8 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
     top: 50%;
     transform: translateY(-50%);
     transition:
-        opacity 180ms ease,
-        visibility 180ms ease;
+      opacity 180ms ease,
+      visibility 180ms ease;
   }
 
   .ymee-variant-dropdown__option:hover .ymee-variant-dropdown__note,
@@ -317,41 +328,229 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   }
 }
 
+/* ── Toggle icon + bg SVG: hidden on desktop ── */
+.ymee-variant-dropdown__toggle-icon,
+.ymee-variant-dropdown__toggle-bg {
+  display: none;
+}
+
+.ymee-variant-dropdown__toggle-label {
+  display: contents;
+}
+
 @media screen and (max-width: 1024px) {
   .ymee-variant-dropdown {
     border: none;
     margin: 0;
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 0 20px;
+    -webkit-transition:
+      opacity 300ms ease,
+      -webkit-transform 300ms ease;
+    transition:
+      opacity 300ms ease,
+      transform 300ms ease;
+    will-change: opacity, transform;
+  }
+
+  .ymee-variant-dropdown.is-hidden {
+    opacity: 0 !important;
+    -webkit-transform: translateY(20px);
+    transform: translateY(20px);
+    pointer-events: none !important;
   }
 
   .ymee-variant-dropdown__toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+    position: relative;
+    isolation: isolate;
+    height: 50px;
+    z-index: 7;
+  }
+
+  .ymee-variant-dropdown__toggle:hover {
+    background: none;
+  }
+
+  /* ── Inline SVG background (shape + colors + stroke + shadow) ── */
+  .ymee-variant-dropdown__toggle-bg {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: visible;
+    filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.05));
+  }
+
+  /* ── Floating mobile ATC bar ── */
+  .ymee-variant-dropdown__mobile-atc {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    padding: 8px 20px;
+    background: #fff;
+    border-top: 1px solid #d9d9d9;
+    transform: translateY(100%);
+    opacity: 0;
+    transition:
+      transform 250ms cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  .ymee-variant-dropdown__mobile-atc:not([hidden]) {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+    display: block;
+  }
+
+  .ymee-variant-dropdown__mobile-atc[hidden] {
+    display: block !important;
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .ymee-variant-dropdown__mobile-atc-btn {
+    display: block;
+    width: 100%;
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 14px 20px;
+    font-family: var(--FONT-STACK-BODY);
+    font-size: var(--BTN-FONT-SIZE);
+    font-weight: var(--BTN-FONT-WEIGHT);
+    letter-spacing: var(--BTN-LETTER-SPACING);
+    text-transform: uppercase;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  /* ── Label: transparent overlay on the black rect ── */
+  .ymee-variant-dropdown__toggle-label {
+    display: flex;
+    align-items: center;
     justify-content: center;
+    flex: 1 1 auto;
+    background: transparent;
+    color: #fff;
+    padding: 12px 24px 12px 32px;
+    font-size: var(--BTN-FONT-SIZE);
+    font-weight: var(--BTN-FONT-WEIGHT);
+    line-height: var(--BTN-LINE-HEIGHT);
+    letter-spacing: var(--BTN-LETTER-SPACING);
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+  }
+
+  .ymee-variant-dropdown__toggle-label-text {
+    display: contents;
+  }
+
+  .ymee-variant-dropdown__label-atc {
+    display: none;
+    flex-shrink: 0;
+    background: #fff;
+    color: #000;
+    border: none;
+    padding: 6px 14px;
+    font-family: var(--FONT-STACK-BODY);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: var(--BTN-LETTER-SPACING);
+    text-transform: uppercase;
+    cursor: pointer;
+    line-height: 1.2;
+    white-space: nowrap;
+    border-radius: 2px;
+  }
+
+  .ymee-variant-dropdown__label-atc:not([hidden]) {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* ── Icon: transparent overlay on the white rect ── */
+  .ymee-variant-dropdown__toggle-icon {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    flex: 0 0 76px;
+    background: transparent;
+    color: #000;
+    position: relative;
+    z-index: 1;
+    padding: 0 10px 0 0;
+  }
+
+  .ymee-variant-dropdown__toggle-icon svg {
+    display: block;
+    width: 18px;
+    height: 14px;
+    margin: auto;
   }
 
   .ymee-variant-dropdown__menu {
-    opacity: 0;
-    transform: translateY(12px);
-    transition: opacity 260ms ease, transform 260ms ease;
-    pointer-events: none;
-    visibility: visible;
-  }
-
-  html.ymee-variant-sheet-open .ymee-variant-dropdown__menu {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
     pointer-events: auto;
+    visibility: visible;
   }
 
   .ymee-variant-dropdown__option {
     padding-right: 15px;
-    background: #f9f9f9 !important;
+    background: #fff !important;
   }
 
   .ymee-variant-dropdown__option.is-selected {
-    background: #fff !important;
+    background: #f9f9f9 !important;
   }
 
   .ymee-variant-dropdown__option .ymee-variant-dropdown__submit {
     display: none !important;
+  }
+
+  /* Checkmark for selected option in mobile sheet */
+  .ymee-variant-sheet .ymee-variant-dropdown__option.is-selected .ymee-variant-dropdown__right::after {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 12px;
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNyIgaGVpZ2h0PSIxMyIgdmlld0JveD0iMCAwIDE3IDEzIiBmaWxsPSJub25lIj4KICA8cGF0aCBkPSJNMS4yODAzMyA2LjcxOTdDMC45ODc0MzggNi40MjY4IDAuNTEyNTU4IDYuNDI2OCAwLjIxOTY2OCA2LjcxOTdDLTAuMDczMjIyNSA3LjAxMjYgLTAuMDczMjIyNSA3LjQ4NzQgMC4yMTk2NjggNy43ODAzTDQuNzE5NjcgMTIuMjgwM0M1LjAxMjU2IDEyLjU3MzIgNS40ODc0NCAxMi41NzMyIDUuNzgwMzMgMTIuMjgwM0wxNi43ODAzIDEuMjgwMzNDMTcuMDczMiAwLjk4NzQzOCAxNy4wNzMyIDAuNTEyNTU4IDE2Ljc4MDMgMC4yMTk2NjhDMTYuNDg3NCAtMC4wNzMyMjI1IDE2LjAxMjYgLTAuMDczMjIyNSAxNS43MTk3IDAuMjE5NjY4TDUuMjUgMTAuNjg5M0wxLjI4MDMzIDYuNzE5N1oiIGZpbGw9IiMyMTIxMjEiLz4KPC9zdmc+");
+    background-repeat: no-repeat;
+    background-size: contain;
+    flex-shrink: 0;
+  }
+
+  /* Hide note when checkmark is visible (size selected) */
+  .ymee-variant-sheet .ymee-variant-dropdown__option.is-selected .ymee-variant-dropdown__note {
+    display: none;
+  }
+
+  /* Hide checkmark when NOTIFY ME button is visible (OOS) */
+  .ymee-variant-sheet .ymee-variant-dropdown__option.is-oos.is-selected .ymee-variant-dropdown__right::after {
+    display: none;
   }
 }
 
@@ -360,9 +559,8 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
-  padding: 0 12px;
-  border-bottom: 1px solid #E5E5E5;
-  cursor: pointer;
+  padding: 0 20px;
+  border-bottom: 1px solid #d9d9d9;
   min-height: 45px;
   background-color: #fff;
 }
@@ -381,7 +579,7 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
 .ymee-variant-dropdown__size {
   color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-BODY);
-  font-size: var( --BTN-FONT-SIZE);
+  font-size: var(--BTN-FONT-SIZE);
   font-style: var(--FONT-STYLE-BODY);
   font-weight: var(--FONT-WEIGHT-BODY);
   line-height: var(--LINE-HEIGHT-CAPTION);
@@ -402,7 +600,7 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   cursor: pointer;
   color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-BODY);
-  font-size: var( --BTN-FONT-SIZE);
+  font-size: var(--BTN-FONT-SIZE);
   font-style: var(--FONT-STYLE-BODY);
   font-weight: var(--FONT-WEIGHT-BODY);
   line-height: var(--LINE-HEIGHT-CAPTION);
@@ -410,7 +608,9 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   text-transform: var(--BTN-UPPERCASE);
 }
 .ymee-variant-dropdown__action[data-action="notify"]:hover {
-  text-shadow: .25px 0 .1px,-.25px 0 .1px;
+  text-shadow:
+    0.25px 0 0.1px,
+    -0.25px 0 0.1px;
 }
 
 .ymee-variant-dropdown__option .ymee-variant-dropdown__note {
@@ -460,7 +660,7 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   gap: 10px;
   color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-BODY);
-  font-size: var( --BTN-FONT-SIZE);
+  font-size: var(--BTN-FONT-SIZE);
   font-style: var(--FONT-STYLE-BODY);
   font-weight: 600;
   line-height: var(--LINE-HEIGHT-CAPTION);
@@ -492,9 +692,57 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
 
 .ymee-variant-dropdown__footer {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+}
+
+.ymee-variant-dropdown__footer-atc {
+  display: none;
+  width: 100%;
+  background: var(--btn-bg, #000);
+  color: var(--btn-text, #fff);
+  border: 1px solid var(--btn-border, #000);
+  padding: 12px 20px;
+  text-align: center;
+  font: inherit;
+  font-size: var(--BTN-FONT-SIZE);
+  font-weight: var(--BTN-FONT-WEIGHT);
+  line-height: var(--BTN-LINE-HEIGHT);
+  letter-spacing: var(--BTN-LETTER-SPACING);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    color 180ms ease;
+}
+
+.ymee-variant-dropdown__footer-atc:not([hidden]) {
+  display: block;
+}
+
+.ymee-variant-dropdown__footer-atc:hover {
+  background-color: #27574d;
+  border-color: #27574d;
+}
+
+.ymee-variant-dropdown__footer-atc:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ymee-variant-dropdown__footer-atc .btn__text {
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 20px;
+  gap: 8px;
+}
+
+.ymee-variant-dropdown__footer-atc .btn__icon {
+  width: 17px;
+  height: 19px;
+  flex-shrink: 0;
 }
 
 .ymee-variant-dropdown__sizing-link {
@@ -514,16 +762,10 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
 .ymee-variant-dropdown__sizing-link {
   color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-BODY);
-  font-size: var( --BTN-FONT-SIZE);
+  font-size: var(--BTN-FONT-SIZE);
   font-style: var(--FONT-STYLE-BODY);
   font-weight: var(--FONT-WEIGHT-BODY);
   line-height: var(--LINE-HEIGHT-CAPTION);
-}
-
-@media only screen and (max-width: 749px) {
-  .ymee-variant-dropdown__sizing-link {
-    color: #fff;
-  }
 }
 
 .ymee-variant-dropdown__sizing-link svg {
@@ -535,10 +777,13 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
 .ymee-variant-sheet-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
   z-index: 9998;
   opacity: 0;
   transition: opacity 240ms ease;
+  box-sizing: border-box;
 }
 
 .ymee-variant-sheet-backdrop[hidden] {
@@ -550,8 +795,8 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   left: 0;
   right: 0;
   bottom: 0;
-  background: #000;
-  color: #fff;
+  background: #fff;
+  color: var(--COLOR-TEXT, #000);
   z-index: 9999;
   max-height: min(80vh, 640px);
   overflow: hidden;
@@ -559,6 +804,12 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   flex-direction: column;
   transform: translateY(100%);
   transition: transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.ymee-variant-sheet .ymee-variant-dropdown__footer {
+  display: none;
 }
 
 .ymee-variant-sheet[hidden] {
@@ -569,94 +820,107 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px;
+  padding: 15px 20px;
+  background: #f9f9f9;
+  flex: 0 0 auto;
 }
 
 .ymee-variant-sheet__title {
-  color: #fff;
-  font: inherit;
-  font-size: var(--BTN-FONT-SIZE);
-  font-weight: var(--BTN-FONT-WEIGHT);
-  line-height: var(--BTN-LINE-HEIGHT);
-  letter-spacing: var(--BTN-LETTER-SPACING);
+  color: var(--COLOR-TEXT, #000);
+  font-family: var(--FONT-STACK-BODY);
+  font-size: var(--BTN-FONT-SIZE, 12px);
+  font-weight: 600;
+  line-height: var(--LINE-HEIGHT-CAPTION, 18px);
+  letter-spacing: var(--BTN-LETTER-SPACING, 0.06em);
   text-transform: uppercase;
 }
 
 .ymee-variant-sheet__close {
-  display: flex;
   border: 0;
   background: transparent;
-  font: inherit;
   cursor: pointer;
-}
-
-.ymee-variant-sheet__close svg path {
-  stroke: #fff;
-  stroke-width: 1px;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .ymee-variant-sheet__body {
-  padding: 0 12px 12px;
   overflow: auto;
+  overflow-x: hidden;
   flex: 1 1 auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+}
+
+.ymee-variant-sheet__body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ymee-variant-sheet__body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ymee-variant-sheet__body::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.25);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 .ymee-variant-sheet__footer {
-  background: #f9f9f9;
-  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
   flex: 0 0 auto;
 }
 
-.ymee-variant-sheet__footer-actions {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  gap: 1rem;
-  overflow: hidden;
+.ymee-variant-sheet__footer[hidden] {
+  display: none;
 }
 
 .ymee-variant-sheet__footer-add {
-   flex: 1 0 auto;
-  width: auto;
-  max-height: 46px;
-  white-space: nowrap;
-  position: relative;
-  z-index: 6;
   width: 100%;
   background: var(--btn-bg, #000);
   color: var(--btn-text, #fff);
   border: 1px solid var(--btn-border, #000);
-  padding: 12px 20px;
+  padding: 14px 20px;
   text-align: center;
   font: inherit;
   font-size: var(--BTN-FONT-SIZE);
-  font-weight: var(--BTN-FONT-WEIGHT);
+  font-weight: 600;
   line-height: var(--BTN-LINE-HEIGHT);
   letter-spacing: var(--BTN-LETTER-SPACING);
   text-transform: uppercase;
   cursor: pointer;
   transition:
-  background 180ms ease,
-  color 180ms ease;
+    background 180ms ease,
+    color 180ms ease;
 }
+
 .ymee-variant-sheet__footer-add .btn__text {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .ymee-variant-sheet__footer-add:hover {
   border-color: var(--btn-border, #000);
-  background-color: #27574D;
+  background-color: #27574d;
   color: #fff;
 }
 
 .ymee-variant-sheet__footer-add .btn__icon {
   width: 17px;
   height: 19px;
-  margin-right: 8px;
   flex-shrink: 0;
+}
+
+.ymee-variant-sheet__footer-add[hidden] {
+  display: none;
 }
 
 .ymee-variant-sheet__footer-add:disabled {
@@ -664,26 +928,24 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   cursor: not-allowed;
 }
 
-.ymee-variant-sheet__footer-accelerated-slot {
-  flex: 0 0 auto;
-  min-width: 120px;
+.ymee-variant-sheet__footer-sizing-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  color: var(--COLOR-TEXT, #000);
+  font-family: var(--FONT-STACK-BODY);
+  font-size: var(--BTN-FONT-SIZE, 12px);
+  font-weight: var(--FONT-WEIGHT-BODY, 400);
+  line-height: var(--LINE-HEIGHT-CAPTION, 18px);
 }
 
-.ymee-variant-sheet__footer-accelerated-slot .shopify-payment-button__button {
-  height: 44px;
-  border-radius: 0;
-}
-
-@media screen and (max-width: 1024px) {
-  .ymee-variant-sheet__body {
-    padding: 0;
-    overflow-x: hidden;
-  }
-}
-
-html.ymee-variant-sheet-open,
-html.ymee-variant-sheet-open body {
-  overflow: hidden;
+.ymee-variant-sheet__footer-sizing-link svg {
+  width: 18px;
+  height: 13px;
+  flex-shrink: 0;
 }
 
 html.ymee-variant-sheet-open .ymee-variant-sheet {
@@ -692,6 +954,11 @@ html.ymee-variant-sheet-open .ymee-variant-sheet {
 
 html.ymee-variant-sheet-open .ymee-variant-sheet-backdrop {
   opacity: 1;
+}
+
+html.ymee-variant-sheet-open,
+html.ymee-variant-sheet-open body {
+  overflow: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {

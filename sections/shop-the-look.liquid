@@ -1,0 +1,77 @@
+{{ 'custom-collection.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign tile_product = section.settings.storytelling_product
+-%}
+
+<section
+  class="shop-the-look"
+  id="ShopTheLook--{{ section.id }}"
+  style="--PT: {{ section.settings.padding_top }}px; --PB: {{ section.settings.padding_bottom }}px;"
+  data-section-id="{{ section.id }}"
+  data-section-type="shop-the-look"
+>
+  {%- if tile_product != blank -%}
+    {%- render 'product-tile-storytelling', product: tile_product, index: tile_product.id, pdp_mode: true -%}
+  {%- else -%}
+    {%- if request.design_mode -%}
+      <div class="shop-the-look__placeholder">
+        <p>{{ 'home_page.onboarding.no_content' | t }}</p>
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+</section>
+
+{% stylesheet %}
+  .shop-the-look {
+    padding-top: var(--PT);
+    padding-bottom: var(--PB);
+  }
+
+  .shop-the-look__placeholder {
+    padding: 40px;
+    text-align: center;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Shop the look custom",
+  "settings": [
+    {
+      "type": "product",
+      "id": "storytelling_product",
+      "label": "Storytelling product"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shop the look"
+    }
+  ]
+}
+{% endschema %}

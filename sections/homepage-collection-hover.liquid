@@ -1,0 +1,277 @@
+<!-- /sections/homepage-collection-hover.liquid -->
+{{ 'homepage-collection-hover.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign section_title = section.settings.title | strip
+  assign placeholder_title = 'Collection title'
+  assign first_block_id = ''
+  assign active_block_id = ''
+
+  for block in section.blocks
+    assign unique = 'HomepageCollectionHoverImage--' | append: section.id | append: '-' | append: block.id
+    assign collection = collections[block.settings.collection]
+
+    if first_block_id == blank
+      assign first_block_id = unique
+    endif
+
+    if active_block_id == blank and collection != blank
+      assign active_block_id = unique
+    endif
+  endfor
+
+  if active_block_id == blank
+    assign active_block_id = first_block_id
+  endif
+-%}
+
+{%- style -%}
+  #HomepageCollectionHover--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+<section
+  id="HomepageCollectionHover--{{ section.id }}"
+  class="homepage-collection-hover section-padding {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="homepage-collection-hover"
+>
+  <div class="homepage-collection-hover__wrapper">
+    <div class="homepage-collection-hover__mobile">
+      {%- if section_title != blank -%}
+        <h2 class="homepage-collection-hover__title title">{{ section_title | escape }}</h2>
+      {%- endif -%}
+
+      <div class="homepage-collection-hover__mobile-slider grid grid--mobile-slider">
+        {%- if section.blocks.size > 0 -%}
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign collection = collections[block.settings.collection]
+              assign title = block.settings.title | strip | default: collection.title | default: placeholder_title
+              assign image = block.settings.image | default: collection.image | default: collection.products.first.featured_media.preview_image
+              assign collection_url = collection.url | default: '#'
+            -%}
+
+            <div class="grid-item">
+              <a href="{{ collection_url }}" class="homepage-collection-hover__card">
+                <div class="homepage-collection-hover__card-media">
+                  {%- if image != blank -%}
+                    {{
+                      image
+                      | image_url: width: 1200
+                      | image_tag:
+                        class: 'homepage-collection-hover__card-image',
+                        loading: 'lazy',
+                        sizes: '(max-width: 959px) 78vw, 1px',
+                        widths: '320, 375, 550, 750, 990, 1200'
+                    }}
+                  {%- else -%}
+                    <div class="homepage-collection-hover__card-placeholder">
+                      {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                    </div>
+                  {%- endif -%}
+                </div>
+
+                <h4 class="homepage-collection-hover__card-title">{{ title | escape }}</h4>
+              </a>
+            </div>
+          {%- endfor -%}
+        {%- else -%}
+          {%- for i in (1..2) -%}
+            <div class="grid-item">
+              <a href="#" class="homepage-collection-hover__card">
+                <div class="homepage-collection-hover__card-media">
+                  <div class="homepage-collection-hover__card-placeholder">
+                    {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                  </div>
+                </div>
+
+                <h4 class="homepage-collection-hover__card-title">{{ placeholder_title }}</h4>
+              </a>
+            </div>
+          {%- endfor -%}
+        {%- endif -%}
+      </div>
+    </div>
+
+    <collections-hover class="homepage-collection-hover__desktop">
+      <div class="homepage-collection-hover__desktop-copy">
+        {%- if section_title != blank -%}
+          <h2 class="homepage-collection-hover__title title">{{ section_title | escape }}</h2>
+        {%- endif -%}
+
+        <div class="homepage-collection-hover__links">
+          {%- if section.blocks.size > 0 -%}
+            {%- for block in section.blocks -%}
+              {%- liquid
+                assign unique = 'HomepageCollectionHoverImage--' | append: section.id | append: '-' | append: block.id
+                assign collection = collections[block.settings.collection]
+                assign title = block.settings.title | strip | default: collection.title | default: placeholder_title
+                assign collection_url = collection.url | default: '#'
+              -%}
+
+              <a
+                href="{{ collection_url }}"
+                class="homepage-collection-hover__link h4{% if unique == active_block_id %} is-selected{% endif %}"
+                data-hover-target="{{ unique }}"
+              >
+                {{- title | escape -}}
+              </a>
+            {%- endfor -%}
+          {%- else -%}
+            {%- for i in (1..8) -%}
+              <h4 class="homepage-collection-hover__link{% if forloop.first %} is-selected{% endif %}">
+                {{ placeholder_title }}
+              </h4>
+            {%- endfor -%}
+          {%- endif -%}
+        </div>
+      </div>
+
+      <div class="homepage-collection-hover__desktop-media">
+        {%- if section.blocks.size > 0 -%}
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign unique = 'HomepageCollectionHoverImage--' | append: section.id | append: '-' | append: block.id
+              assign collection = collections[block.settings.collection]
+              assign image = block.settings.image | default: collection.image | default: collection.products.first.featured_media.preview_image
+            -%}
+
+            <div
+              id="{{ unique }}"
+              class="homepage-collection-hover__preview{% if unique == active_block_id %} is-visible{% endif %}"
+              data-collection-image
+              {{ block.shopify_attributes }}
+            >
+              {%- if image != blank -%}
+                {{
+                  image
+                  | image_url: width: 1600
+                  | image_tag:
+                    class: 'homepage-collection-hover__preview-image',
+                    loading: 'lazy',
+                    sizes: '(min-width: 960px) 34vw, 1px',
+                    widths: '375, 550, 750, 990, 1200, 1400, 1600'
+                }}
+              {%- else -%}
+                <div class="homepage-collection-hover__preview-placeholder">
+                  {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                </div>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        {%- else -%}
+          <div class="homepage-collection-hover__preview is-visible">
+            <div class="homepage-collection-hover__preview-placeholder">
+              {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg' }}
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+    </collections-hover>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Homepage collection hover",
+  "max_blocks": 20,
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Discover our collections"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        {"value": "wrapper--full", "label": "Full width"},
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"}
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Top",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 48
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title override"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image override"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Homepage collection hover",
+      "blocks": [
+        {
+          "type": "collection"
+        },
+        {
+          "type": "collection"
+        },
+        {
+          "type": "collection"
+        }
+      ]
+    }
+  ],
+  "enabled_on": {
+    "templates": ["index"]
+  }
+}
+{% endschema %}

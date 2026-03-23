@@ -1,0 +1,361 @@
+{% doc %}
+  Renders a country and language switcher with inline localization popouts.
+
+  @param {string} unique - Unique id for form controls
+  @param {string} [label] - Eyebrow label shown above the switcher
+  @param {boolean} [show_locale_selector] - Show language selector when multiple languages exist
+  @param {boolean} [show_locale_code] - Show language ISO code instead of name
+  @param {boolean} [show_globe_icon] - Show globe icon in the language selector
+  @param {boolean} [show_country_selector] - Show country selector when multiple countries exist
+  @param {boolean} [show_country_flag] - Show country flag in the selector
+  @param {boolean} [show_country_name] - Show country name instead of only currency
+
+  @example
+  {% render 'country-switcher', unique: block.id, label: 'Country', show_locale_selector: true, show_country_selector: true %}
+{% enddoc %}
+
+{%- liquid
+  assign unique = unique | default: 'country-switcher'
+  assign label = label | default: 'Country'
+  assign show_locale_selector = show_locale_selector | default: true
+  assign show_locale_code = show_locale_code | default: false
+  assign show_globe_icon = show_globe_icon | default: false
+  assign show_country_selector = show_country_selector | default: true
+  assign show_country_flag = show_country_flag | default: true
+  assign show_country_name = show_country_name | default: true
+  assign languages = false
+  assign countries = false
+  assign show_change_on_country = false
+  assign show_change_on_language = false
+  assign form_id = 'country-switcher-form-' | append: unique
+
+  if show_locale_selector and localization.available_languages.size > 1
+    assign languages = true
+  endif
+
+  if show_country_selector and localization.available_countries.size > 1
+    assign countries = true
+  endif
+
+  if languages
+    assign show_change_on_language = true
+  elsif countries
+    assign show_change_on_country = true
+  endif
+-%}
+
+{%- if languages or countries -%}
+  {%- form 'localization', class: 'country-switcher', id: form_id -%}
+    {%- if label != blank -%}
+      <p class="country-switcher__label label-all-caps">{{ label | escape }}</p>
+    {%- endif -%}
+
+    <div class="country-switcher__panel">
+      {%- if countries -%}
+        {%- capture current_currency -%}
+          {{- localization.country.currency.iso_code }}
+          {{ localization.country.currency.symbol -}}
+        {%- endcapture -%}
+
+        <div class="country-switcher__holder country-switcher__holder--country">
+          <h2 class="visually-hidden" id="country-heading-{{ unique }}">
+            {{ 'layout.footer.currency' | t }}
+          </h2>
+
+          <popout-select class="popout country-switcher__popout" submit>
+            <button
+              type="button"
+              class="popout__toggle country-switcher__toggle"
+              aria-expanded="false"
+              aria-controls="country-list-{{ unique }}"
+              aria-describedby="country-heading-{{ unique }}"
+              data-popout-toggle
+            >
+              <span class="popout__toggle__text country-switcher__toggle-text" data-popout-toggle-text>
+                {%- if show_country_flag -%}
+                  {{
+                    localization.country
+                    | image_url: width: 40
+                    | image_tag: loading: 'lazy', class: 'country-switcher__flag'
+                  }}
+                {%- endif -%}
+
+                <span class="country-switcher__value navlink">
+                  {%- if show_country_name -%}
+                    {{ localization.country.name }}
+                  {%- else -%}
+                    {{ current_currency }}
+                  {%- endif -%}
+                </span>
+
+                {%- if show_change_on_country -%}
+                  <span class="country-switcher__action caption">Change</span>
+                {%- endif -%}
+              </span>
+            </button>
+
+            <ul
+              id="country-list-{{ unique }}"
+              class="popout-list country-switcher__list"
+              data-popout-list
+              data-scroll-lock-scrollable
+            >
+              {%- for country in localization.available_countries -%}
+                <li class="popout-list__item{% if country.iso_code == localization.country.iso_code %} is-active{% endif %}">
+                  <a
+                    class="popout-list__option navlink"
+                    href="#"
+                    {% if country.iso_code == localization.country.iso_code %}
+                      aria-current="true"
+                    {% endif %}
+                    data-value="{{ country.iso_code }}"
+                    data-popout-option
+                  >
+                    {%- if show_country_flag -%}
+                      {{
+                        country
+                        | image_url: width: 40
+                        | image_tag: loading: 'lazy', class: 'country-switcher__flag country-switcher__flag--option'
+                      }}
+                    {%- endif -%}
+
+                    <span>
+                      {%- if show_country_name -%}
+                        {{ country.name }}
+                      {%- else -%}
+                        {{ country.currency.iso_code }}
+                        {{ country.currency.symbol }}
+                      {%- endif -%}
+                    </span>
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+
+            <input
+              type="hidden"
+              name="country_code"
+              id="CountrySelector-{{ unique }}"
+              value="{{ localization.country.iso_code }}"
+              data-popout-input
+            >
+          </popout-select>
+        </div>
+      {%- endif -%}
+
+      {%- if countries and languages -%}
+        <span class="country-switcher__separator" aria-hidden="true">|</span>
+      {%- endif -%}
+
+      {%- if languages -%}
+        <div class="country-switcher__holder country-switcher__holder--language">
+          <h2 class="visually-hidden" id="lang-heading-{{ unique }}">
+            {{ 'layout.footer.language' | t }}
+          </h2>
+
+          <popout-select class="popout country-switcher__popout" submit>
+            <button
+              type="button"
+              class="popout__toggle country-switcher__toggle"
+              aria-expanded="false"
+              aria-controls="lang-list-{{ unique }}"
+              aria-describedby="lang-heading-{{ unique }}"
+              data-popout-toggle
+            >
+              <span class="popout__toggle__text country-switcher__toggle-text" data-popout-toggle-text>
+                {%- if show_globe_icon -%}
+                  <span class="country-switcher__icon-globe">
+                    {%- render 'icon-globe' -%}
+                  </span>
+                {%- endif -%}
+
+                <span class="country-switcher__value">
+                  {%- if show_locale_code -%}
+                    {{ localization.language.iso_code }}
+                  {%- else -%}
+                    {{ localization.language.endonym_name }}
+                  {%- endif -%}
+                </span>
+
+                {%- if show_change_on_language -%}
+                  <span class="country-switcher__action">Change</span>
+                {%- endif -%}
+              </span>
+            </button>
+
+            <ul
+              id="lang-list-{{ unique }}"
+              class="popout-list country-switcher__list{% if show_locale_code %} popout-list--code{% endif %}"
+              data-popout-list
+              data-scroll-lock-scrollable
+            >
+              {%- for language in localization.available_languages -%}
+                <li class="popout-list__item{% if language.iso_code == localization.language.iso_code %} is-active{% endif %}">
+                  <a
+                    class="popout-list__option"
+                    href="#"
+                    hreflang="{{ language.iso_code }}"
+                    lang="{{ language.iso_code }}"
+                    {% if language.iso_code == localization.language.iso_code %}
+                      aria-current="true"
+                    {% endif %}
+                    data-value="{{ language.iso_code }}"
+                    data-popout-option
+                  >
+                    <span>
+                      {%- if show_locale_code -%}
+                        {{ language.iso_code }}
+                      {%- else -%}
+                        {{ language.endonym_name }}
+                      {%- endif -%}
+                    </span>
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+
+            <input
+              type="hidden"
+              name="locale_code"
+              id="LocaleSelector-{{ unique }}"
+              value="{{ localization.language.iso_code }}"
+              data-popout-input
+            >
+          </popout-select>
+        </div>
+      {%- endif -%}
+    </div>
+  {%- endform -%}
+{%- endif -%}
+
+{% stylesheet %}
+  .country-switcher {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .country-switcher__label {
+    margin: 0 0 20px;
+    color: #a0a0a0;
+  }
+
+  .country-switcher__panel {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: 10px;
+    row-gap: 8px;
+  }
+
+  .country-switcher__holder {
+    position: relative;
+    min-width: 0;
+  }
+
+  .country-switcher__popout {
+    display: block;
+  }
+
+  .country-switcher__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-size: 0;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .country-switcher__toggle:hover,
+  .country-switcher__toggle:focus-visible {
+    opacity: 0.75;
+  }
+
+  .country-switcher__toggle-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .country-switcher__flag {
+    display: block;
+    width: 20px;
+    min-width: 20px;
+    height: auto;
+  }
+
+  .country-switcher__icon-globe {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .country-switcher__icon-globe .icon {
+    --icon-size: 14px;
+  }
+
+  .country-switcher__value {
+    margin-left: 12px;
+  }
+
+  .country-switcher__separator {
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .country-switcher__action {
+    margin-left: 18px;
+
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    text-transform: none;
+  }
+
+  .country-switcher__list {
+    --max-width: 280px;
+    margin-top: 14px;
+    left: -14px;
+  }
+
+  .country-switcher__list .popout-list__option {
+    gap: 12px;
+    min-width: 180px;
+    padding: 10px 14px;
+  }
+
+  .country-switcher__list .popout-list__option span {
+    letter-spacing: inherit;
+    text-transform: inherit;
+  }
+
+  .country-switcher__list .popout-list__item.is-active .popout-list__option span {
+    border-bottom-width: 1px;
+  }
+
+  @media only screen and (max-width: 749px) {
+    .country-switcher {
+      margin-bottom: 80px;
+    }
+    .country-switcher__label {
+      text-align: center;
+    }
+    .country-switcher__panel {
+      justify-content: center;
+    }
+
+    .country-switcher__separator {
+      font-size: 15px;
+      letter-spacing: 1.5px;
+    }
+
+    .country-switcher__list {
+      --max-width: calc(100vw - 48px);
+    }
+  }
+{% endstylesheet %}

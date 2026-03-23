@@ -1,0 +1,315 @@
+<!-- /sections/gift-guide-slider.liquid -->
+{{ 'gift-guide-slider.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'gift-guide-slider.js' | asset_url }}" defer="defer"></script>
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+-%}
+
+{%- style -%}
+  #GiftGuideSlider--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    --bg-color: {{ section.settings.background_color }};
+    overflow: hidden;
+  }
+{%- endstyle -%}
+
+<section
+  id="GiftGuideSlider--{{ section.id }}"
+  class="gift-guide-slider section-padding {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="gift-guide-slider"
+  style="background-color: var(--bg-color);"
+>
+  <div class="gift-guide-slider__wrapper {{ section.settings.width }}">
+    <div class="gift-guide-slider__header">
+      <div class="gift-guide-slider__header-content">
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+            {%- when 'subheading' -%}
+              <p class="gift-guide-slider__subheading title" {{ block.shopify_attributes }}>
+                {{ block.settings.text | upcase }}
+              </p>
+            {%- when 'heading' -%}
+              <h2 class="gift-guide-slider__heading {{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
+                {{ block.settings.text }}
+              </h2>
+          {%- endcase -%}
+        {%- endfor -%}
+      </div>
+
+      <div class="gift-guide-slider__header-button">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'button' -%}
+            <a
+              href="{{ block.settings.link | default: '#' }}"
+              class="gift-guide-slider__button"
+              {{ block.shopify_attributes }}
+            >
+              {{ block.settings.text | upcase }}
+            </a>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+
+    {%- assign gift_card_blocks = section.blocks | where: 'type', 'gift_card' -%}
+    {%- if gift_card_blocks.size > 0 -%}
+      <div class="gift-guide-slider__carousel-container">
+        <div class="swiper gift-guide-slider__swiper">
+          <div class="swiper-wrapper">
+            {%- for block in gift_card_blocks -%}
+              <div class="swiper-slide" {{ block.shopify_attributes }}>
+                {%- if block.settings.url != blank -%}
+                  <a
+                    href="{{ block.settings.url }}"
+                    class="gift-guide-slider__card gift-guide-slider__card--link"
+                    aria-label="{{ block.settings.heading | default: block.settings.subheading | escape }}"
+                  >
+                    {%- if block.settings.image != blank -%}
+                      <div class="gift-guide-slider__card-image">
+                        {{ block.settings.image | image_url: width: 800 | image_tag: loading: 'lazy' }}
+                      </div>
+                    {%- else -%}
+                      <div class="gift-guide-slider__card-placeholder">
+                        {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                      </div>
+                    {%- endif -%}
+
+                    <div class="gift-guide-slider__card-content">
+                      {%- if block.settings.subheading != blank -%}
+                        <p class="gift-guide-slider__card-subheading navlink">
+                          {{ block.settings.subheading | upcase }}
+                        </p>
+                      {%- endif -%}
+                      {%- if block.settings.heading != blank -%}
+                        <h3 class="gift-guide-slider__card-heading">{{ block.settings.heading }}</h3>
+                      {%- endif -%}
+                    </div>
+                  </a>
+                {%- else -%}
+                  <div class="gift-guide-slider__card">
+                    {%- if block.settings.image != blank -%}
+                      <div class="gift-guide-slider__card-image">
+                        {{ block.settings.image | image_url: width: 800 | image_tag: loading: 'lazy' }}
+                      </div>
+                    {%- else -%}
+                      <div class="gift-guide-slider__card-placeholder">
+                        {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                      </div>
+                    {%- endif -%}
+
+                    <div class="gift-guide-slider__card-content">
+                      {%- if block.settings.subheading != blank -%}
+                        <p class="gift-guide-slider__card-subheading navlink">
+                          {{ block.settings.subheading | upcase }}
+                        </p>
+                      {%- endif -%}
+                      {%- if block.settings.heading != blank -%}
+                        <h3 class="gift-guide-slider__card-heading">{{ block.settings.heading }}</h3>
+                      {%- endif -%}
+                    </div>
+                  </div>
+                {%- endif -%}
+              </div>
+            {%- endfor -%}
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Gift guide slider",
+  "tag": "section",
+  "class": "section-gift-guide-slider",
+  "blocks": [
+    {
+      "type": "subheading",
+      "name": "Subheading",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Gift guide"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "name": "Heading",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Find the perfect gift"
+        },
+        {
+          "type": "select",
+          "id": "heading_size",
+          "label": "Heading size",
+          "default": "heading-large",
+          "options": [
+            {"value": "heading-small", "label": "Small"},
+            {"value": "heading-medium", "label": "Medium"},
+            {"value": "heading-large", "label": "Large"},
+            {"value": "heading-x-large", "label": "Extra large"}
+          ]
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "name": "Button",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Button text",
+          "default": "Shop the guide"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Button link"
+        }
+      ]
+    },
+    {
+      "type": "gift_card",
+      "name": "Gift card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "For her"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Signature pieces"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Card link"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"},
+        {"value": "wrapper--narrow", "label": "Narrow"},
+        {"value": "wrapper--custom", "label": "Custom (max-width: 1232px)"}
+      ]
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#F9F9F9"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 60
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Gift guide slider",
+      "category": "Store",
+      "blocks": [
+        {
+          "type": "subheading",
+          "settings": {
+            "text": "Gift guide"
+          }
+        },
+        {
+          "type": "heading",
+          "settings": {
+            "text": "Find the perfect gift"
+          }
+        },
+        {
+          "type": "button",
+          "settings": {
+            "text": "Shop the guide"
+          }
+        },
+        {
+          "type": "gift_card",
+          "settings": {
+            "subheading": "For her",
+            "heading": "Signature pieces"
+          }
+        },
+        {
+          "type": "gift_card",
+          "settings": {
+            "subheading": "For him",
+            "heading": "Refined classics"
+          }
+        },
+        {
+          "type": "gift_card",
+          "settings": {
+            "subheading": "Under $500",
+            "heading": "Thoughtful gifts"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "aside", "footer"]
+  }
+}
+{% endschema %}
