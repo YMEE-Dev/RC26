@@ -1157,7 +1157,6 @@
         var variantIdInput = sectionRoot.querySelector('input[name="id"][form="' + cssEscape(productFormId) + '"]');
         if (variantIdInput && String(variantIdInput.value) !== String(matchedVariant.id)) {
           variantIdInput.value = matchedVariant.id;
-          variantIdInput.dispatchEvent(new Event("change", { bubbles: true }));
         }
         var variantIdInForm = sectionRoot.querySelector('product-form input[name="id"].product-variant-id');
         if (variantIdInForm && String(variantIdInForm.value) !== String(matchedVariant.id)) {
@@ -1168,8 +1167,12 @@
           var hasModelSlide = !!productImagesEl.querySelector('[data-embla-slide][data-media-type="model"]');
           if (!hasModelSlide) {
             var mediaId = sectionId + "-" + matchedVariant.featured_media.id;
+            // Dispatch media select event with preventScroll flag
             productImagesEl.dispatchEvent(
-              new CustomEvent("theme:media:select", { bubbles: true, detail: { id: mediaId } })
+              new CustomEvent("theme:media:select", {
+                bubbles: true,
+                detail: { id: mediaId, preventFocus: true, preventScroll: true },
+              })
             );
           }
         }
