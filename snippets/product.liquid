@@ -166,15 +166,11 @@
       --PB: {{ section.settings.padding_bottom }}px;
 
       --swatch-size: var(--swatch-size-product);
-      --pdp-sticky-bar-height: 100px;
+      --pdp-sticky-bar-height: 100px; /* fallback, will be overridden on mobile */
       --bg-color: #f9f9f9;
     }
 
     {%- if template.name == 'product' and featured_product == false -%}
-
-      body.template-product .header__desktop__upper {
-        overflow-x: hidden;
-      }
 
       body.template-product header-component.js__header__stuck .theme__header::after {
         content: "";
@@ -214,16 +210,32 @@
         margin: 0;
       }
 
-      @media (max-width: 767px) {
-        #MainProduct--{{ section.id }} .product__content {
-          margin: 20px 0 0;
-        }
+      #MainProduct--{{ section.id }} .product__title-price {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--inner);
+      }
 
-        product-info.index-product .product__content {
-          margin-top: 16px;
-          padding-left: var(--inner);
-          padding-right: var(--inner);
-        }
+      #MainProduct--{{ section.id }} .product__title-price .product__title {
+        font-family: var(--FONT-STACK-BODY);
+        font-style: var(--FONT-STYLE-BODY);
+        font-weight: var(--FONT-WEIGHT-BODY);
+        font-size: var(--FONT-TITLE);
+        line-height: var(--LINE-HEIGHT-TITLE);
+        letter-spacing: var(--LETTER-SPACING-NAV);
+        text-transform: uppercase;
+        color: var(--COLOR-TEXT-DARK);
+      }
+
+      #MainProduct--{{ section.id }} .product__title-price .price-item,
+      #MainProduct--{{ section.id }} .product__description {
+        font-family: var(--FONT-STACK-BODY);
+        font-style: var(--FONT-STYLE-BODY);
+        font-weight: var(--FONT-WEIGHT-BODY);
+        font-size: var(--FONT-SIZE-BASE);
+        line-height: var(--LINE-HEIGHT-BODY);
+        color: var(--COLOR-TEXT-DARK);
       }
 
       @media (min-width: 990px) {
@@ -240,13 +252,14 @@
           margin: 0 auto;
           padding: 0;
           width: 100%;
+          max-width: min(var(--content-max), 1200px);
         }
 
         #MainProduct--{{ section.id }} .product__sticky-bar {
           position: relative;
           top: auto;
           z-index: 6;
-          border-top: 1px solid var(--border);
+          border-top: 1px solid #E5E5E5;
           margin: 0;
           width: 100%;
         }
@@ -273,13 +286,6 @@
           align-items: start;
         }
 
-        #MainProduct--{{ section.id }} .product__title-price {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: var(--inner);
-        }
-
         #MainProduct--{{ section.id }} .product__title-price .block-padding {
           margin: 0;
         }
@@ -295,37 +301,27 @@
 
         #MainProduct--{{ section.id }} .product__title-price .product__title {
           margin: 0;
-          font-family: var(--FONT-STACK-BODY);
-          font-style: var(--FONT-STYLE-BODY);
-          font-weight: var(--FONT-WEIGHT-BODY);
-          font-size: var(--FONT-TITLE);
-          line-height: var(--LINE-HEIGHT-TITLE);
-          letter-spacing: var(--LETTER-SPACING-NAV);
-          text-transform: uppercase;
           max-width: 40ch;
-          color: var(--COLOR-TEXT-DARK);
         }
 
-        #MainProduct--{{ section.id }} .product__title-price .price-item,
-        #MainProduct--{{ section.id }} .product__description {
-          font-family: var(--FONT-STACK-BODY);
-          font-style: var(--FONT-STYLE-BODY);
-          font-weight: var(--FONT-WEIGHT-BODY);
-          font-size: var(--FONT-SIZE-BASE);
-          line-height: var(--LINE-HEIGHT-BODY);
-          color: var(--COLOR-TEXT-DARK);
-        }
-        
         #MainProduct--{{ section.id }} .product__description {
           max-width: 80%;
           margin-bottom: 65px;
         }
 
         #MainProduct--{{ section.id }} .product__content-columns__aside {
+          position: -webkit-sticky;
           position: sticky;
-          top: calc(var(--header-height, 0px) + var(--announcement-height, 0px));
+          top: var(--sticky-top, calc(var(--header-height, 0px) + var(--announcement-height, 0px)));
           align-self: start;
+          height: max-content;
+          overflow: visible;
           z-index: 9;
+          transition: top 0.3s ease;
+        }
+
+        body.template-product:not(.header-scroll-hide) #MainProduct--{{ section.id }} {
+          --sticky-top: calc(var(--header-height, 0px)*2 + var(--announcement-height, 0px));
         }
 
         #MainProduct--{{ section.id }} .product__content-columns__aside .product__block--buttons {
@@ -339,22 +335,6 @@
         }
       }
 
-      @media (max-width: 767px) {
-         #MainProduct--{{ section.id }} .product__sticky-bar {
-          padding-top: 20px;
-          padding-left: var(--inner);
-          padding-right: var(--inner);
-        }
-      }
-
-      @media (max-width: 767px) {
-         #MainProduct--{{ section.id }} .product__sticky-bar {
-          padding-top: 20px;
-          padding-left: var(--inner);
-          padding-right: var(--inner);
-        }
-      }
-
       #MainProduct--{{ section.id }} .product__content-columns__aside .product__text .product__heading {
         font-size: var(--font-body-small);
         font-family: var(--FONT-STACK-BODY);
@@ -364,8 +344,13 @@
         text-transform: uppercase;
       }
 
+      #MainProduct--{{ section.id }} .product__content-columns__aside .divider {
+        border-color: #E5E5E5;
+      }
+
       #MainProduct--{{ section.id }} .product__content-columns__aside .link-with-icon__text {
         letter-spacing: var(--LETTER-SPACING-NAV);
+        text-align: left;
       }
 
       #MainProduct--{{ section.id }} .product__content-columns__aside .product__submit__buttons button[type="submit"] {
@@ -376,25 +361,19 @@
         display: flex;
         flex-direction: column;
         width: 100%;
-        align-items: stretch; 
+        align-items: stretch;
       }
 
       #MainProduct--{{ section.id }} .product__images {
         position: relative;
       }
 
-      /* #MainProduct--{{ section.id }} .product__images .image-wrapper--cover {
+      #MainProduct--{{ section.id }} .product__images .pdp-embla .image-wrapper--cover {
         background-color: var(--bg-color);
-      } */
-
-      #MainProduct--{{ section.id }} .product__images .image-wrapper--cover {
-        background-color: #F9F9F9;
-        mix-blend-mode: multiply;
       }
 
-      #MainProduct--{{ section.id }} .product__images .image-wrapper--cover img {
+      #MainProduct--{{ section.id }} .product__images .pdp-embla .image-wrapper--cover img {
         object-fit: contain;
-        mix-blend-mode: multiply;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item:not([data-pair-role='secondary']) .image-wrapper--cover {
@@ -412,6 +391,10 @@
         object-position: center;
         margin: var(--header-height) 0 0;
         mix-blend-mode: multiply;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla img {
@@ -474,6 +457,20 @@
         }
       }
 
+      @media only screen and (min-width: 750px) and (max-width: 989px) {
+
+        #MainProduct--{{ section.id }} .pdp-embla__viewport {
+          height: calc(100dvh - var(--pdp-sticky-bar-height, 100px));
+        }
+      }
+
+      @media only screen and (max-width: 749px) {
+
+        #MainProduct--{{ section.id }} .pdp-embla__viewport {
+          height: calc(100dvh - var(--pdp-sticky-bar-height, 100px));
+        }
+      }
+
       #MainProduct--{{ section.id }} .pdp-embla__progress {
         position: absolute;
         left: 0;
@@ -520,11 +517,18 @@
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide {
         flex: 0 0 50%;
         box-sizing: border-box;
-        transition: flex-basis 500ms ease;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop.pdp-embla--transitioning .pdp-embla__slide:first-child {
+        transition: flex-basis 300ms cubic-bezier(.4,0,.2,1);
       }
 
       #MainProduct--{{ section.id }} .pdp-embla--desktop:not(.pdp-embla--started) .pdp-embla__slide:first-child {
         flex: 0 0 100%;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-media-type="model"] {
+        flex: 0 0 100% !important;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__viewport {
@@ -564,7 +568,6 @@
         }
 
         #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__pair__item[data-pair-role='secondary'] img {
-          text-indent: -100vw;
           overflow: hidden;
         }
       }
@@ -587,6 +590,19 @@
         width: 45px;
         height: 45px;
         object-fit: cover;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-thumbs--desktop .product__thumb__link .icon-media-model {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 22px;
+        height: 22px;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-thumbs--desktop .product__thumb__link[data-media-type="model"] img {
+        display: none;
       }
 
       #MainProduct--{{ section.id }} .pdp-thumbs--desktop .product__thumb__link--pair img {
@@ -623,9 +639,24 @@
         height: 100%;
       }
 
+      #MainProduct--{{ section.id }} .pdp-embla__slide[data-media-type="model"] .product__slide {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--bg-color);
+       }
+
       @media only screen and (max-width: 749px) {
         #MainProduct--{{ section.id }} .pdp-embla__slide .product__slide {
           width: 100%;
+          height: 100%;
+        }
+
+        #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media {
+          aspect-ratio: unset;
+          min-height: 0;
+          height: 100%;
+          align-items: center;
         }
       }
 
@@ -635,22 +666,40 @@
         align-items: flex-end;
         justify-content: center;
         position: relative;
-        /* mix-blend-mode: multiply; */
-        background-color: #F9F9F9;
+        background-color: var(--bg-color);
+        aspect-ratio: 1 / 1;
+        min-height: 400px;
+        width: 100%;
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .shopify-model-viewer-ui {
-        mix-blend-mode: multiply;
-        background-color: #F9F9F9;
+        background-color: var(--bg-color);
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .shopify-model-viewer-ui__controls-overlay,
-      #MainProduct--{{ section.id }} .pdp-embla__slide .shopify-model-viewer-ui__controls-area,
-      #MainProduct--{{ section.id }} .pdp-embla__slide .shopify-model-viewer-ui__button {
+      #MainProduct--{{ section.id }} .pdp-embla__slide .shopify-model-viewer-ui__controls-area {
         display: none !important;
       }
 
+      .customContextGrid[data-tag="MaterialConfiguratorPlugin"],
+      .customContextGrid[data-tag="VariationConfiguratorPlugin"],
+      .webgi-loading-bar,
+      .webgi-popup,
+      .webgi-loading-screen,
+      [class*="AssetManagerLoadingBar"],
+      [class*="AssetManagerBasicPopup"],
+      [class*="LoadingScreen"],
+      [class*="ijewel"][class*="watermark"],
+      [class*="ijewel"][class*="logo"],
+      [class*="ijewel"][class*="badge"],
+      .tippy-box[data-theme*="webgi"] {
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media > model-viewer,
+      #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media > .webgi-container,
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media > video,
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media > iframe {
         width: 100%;
@@ -659,10 +708,54 @@
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media > model-viewer {
         display: block;
-        margin: auto;
         pointer-events: auto;
+        position: absolute;
+        inset: 0;
+        margin: auto;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla__slide .product__media.deferred-media > .webgi-container {
+        display: block;
+        position: relative;
+        pointer-events: auto;
+        width: 100%;
+        height: 100%;
+        background-color: var(--bg-color);
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla__slide .webgi-container canvas {
+        width: 100% !important;
+        height: 100% !important;
+        display: block;
+      }
+
+      .webgi-loader {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--bg-color);
+        transition: opacity 0.4s ease;
+      }
+      .webgi-loader--done {
         opacity: 0;
-        transition: opacity 200ms ease;
+        pointer-events: none;
+      }
+      .webgi-spinner {
+        width: 50px !important;
+        height: 50px !important;
+        opacity: 0.4;
+        animation: webgi-pulse 1.4s ease-in-out infinite;
+        display: block;
+        left: 50% !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%) !important;
+      }
+      @keyframes webgi-pulse {
+        0%, 100% { opacity: 0.2; transform: scale(0.95); }
+        50% { opacity: 0.5; transform: scale(1.05); }
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide model-viewer::part(default-progress-bar) {
@@ -698,15 +791,13 @@
       }
 
       #MainProduct--{{ section.id }} .pdp-embla--mobile .image-wrapper--cover {
-        background-color: #F9F9F9;
-        mix-blend-mode: multiply;
+        background-color: var(--bg-color);
       }
 
       #MainProduct--{{ section.id }} .pdp-embla__slide .product__photo {
         height: 100%;
         padding-top: 0;
-        background-color: #F9F9F9;
-        mix-blend-mode: multiply;
+        background-color: var(--bg-color);
       }
 
       #MainProduct--{{ section.id }} .pdp-embla .media--hidden,
@@ -741,8 +832,13 @@
         color: inherit;
       }
 
+      #MainProduct--{{ section.id }} .pdp-embla__arrow .icon {
+        stroke: currentColor;
+      }
+
       #MainProduct--{{ section.id }} .pdp-embla__arrow:disabled {
         opacity: 0.3;
+        pointer-events: none;
         cursor: default;
       }
 
@@ -786,6 +882,25 @@
         max-height: calc(100vh - (var(--inner) * 2));
         overflow: auto;
         box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+        position: relative;
+        --thumb-frame-top: 0px;
+        --thumb-frame-height: 0px;
+        --thumb-frame-opacity: 0;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-thumbs--desktop .product__thumbs__holder::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: var(--thumb-frame-top);
+        height: var(--thumb-frame-height);
+        border: 1px solid #000;
+        pointer-events: none;
+        opacity: var(--thumb-frame-opacity);
+        transition: top 0.35s cubic-bezier(0.4, 0, 0.2, 1), height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+        box-sizing: border-box;
+        z-index: 3;
       }
 
       @media (min-width: 990px) {
@@ -801,21 +916,6 @@
         padding: 0;
       }
 
-      #MainProduct--{{ section.id }} .product__thumb.is-active:not(.prev-active):not(.single-active) {
-        transform: translateY(0.5px);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      #MainProduct--{{ section.id }} .product__thumb.is-active.prev-active {
-        transform: translateY(-0.5px);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      #MainProduct--{{ section.id }} .product__thumb.is-active.single-active:last-child {
-        transform: translateY(0);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
       #MainProduct--{{ section.id }} .product__thumb::after {
         content: none;
       }
@@ -829,21 +929,24 @@
         border: 0;
       }
 
-      #MainProduct--{{ section.id }} .product__thumb__link::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border: 1px solid transparent;
-        pointer-events: none;
-        z-index: 2;
-        transition: border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
       #MainProduct--{{ section.id }} .product__thumb__link img {
         display: block;
         width: 45px;
         height: 45px;
         object-fit: cover;
+      }
+
+      #MainProduct--{{ section.id }} .product__thumb__link .icon-media-model {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 22px;
+        height: 22px;
+      }
+
+      #MainProduct--{{ section.id }} .product__thumb__link[data-media-type="model"] img {
+        display: none;
       }
 
       #MainProduct--{{ section.id }} .product__thumb.is-active {
@@ -855,31 +958,18 @@
         z-index: 1;
       }
 
-      #MainProduct--{{ section.id }} .product__thumb.is-active .product__thumb__link::after {
-        border-color: #000;
-      }
-
-      #MainProduct--{{ section.id }} .product__thumb.is-active:not(.prev-active):not(.single-active):not(:last-child) .product__thumb__link::after {
-        border-bottom-color: transparent;
-      }
-
-      #MainProduct--{{ section.id }} .product__thumb.is-active.prev-active .product__thumb__link::after {
-        border-top-color: transparent;
-        border-bottom-color: #000;
-      }
-
-      #MainProduct--{{ section.id }} .product__thumb.is-active.single-active .product__thumb__link::after {
-        border-color: #000;
-      }
-      
-      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart] {
+      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart],
+      #MainProduct--{{ section.id }} .product__submit__buttons .btn[data-popup-open],
+      #MainProduct--{{ section.id }} .product__collection-link {
         font-size: var(--BTN-FONT-SIZE);
         font-weight: var(--BTN-FONT-WEIGHT);
         line-height: var(--BTN-LINE-HEIGHT);
         letter-spacing: var(--BTN-LETTER-SPACING);
         text-transform: uppercase;
       }
-      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart]:hover {
+      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart]:hover,
+      #MainProduct--{{ section.id }} .product__submit__buttons .btn[data-popup-open]:hover,
+      #MainProduct--{{ section.id }} .product__collection-link:hover {
         border-color: var(--btn-border);
         background-color: #27574D;
         color: #fff;
@@ -894,24 +984,185 @@
         transition: fill 0.3s ease;
       }
 
-      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart]:hover .btn__icon path {
+      #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart]:hover .btn__icon path,
+      #MainProduct--{{ section.id }} .product__submit__buttons .btn[data-popup-open]:hover .btn__icon path {
         fill: #fff;
       }
 
-      @media only screen and (max-width: 749px) {
+      @media only screen and (min-width: 990px) and (max-width: 1200px) {
+        #MainProduct--{{ section.id }} {
+          overflow-x: hidden;
+        }
+        #MainProduct--{{ section.id }} .product__sticky-bar__inner {
+          max-width: min(var(--content-max), 1200px);
+          padding-left: 20px;
+          padding-right: 20px;
+          grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+        }
+        #MainProduct--{{ section.id }} .product__content-columns {
+          grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+          padding-left: 20px;
+          padding-right: 20px;
+          max-width: min(var(--content-max), 1200px);
+          margin: 0 auto;
+          box-sizing: border-box;
+        }
+        #MainProduct--{{ section.id }} .product__content-columns__main,
+        #MainProduct--{{ section.id }} .product__content-columns__aside {
+          min-width: 0;
+        }
+        #MainProduct--{{ section.id }} .form__width {
+          max-width: min(var(--content-max), 1200px);
+        }
         #MainProduct--{{ section.id }} .pdp-embla__arrows {
-          display: none;
+          right: auto;
+        }
+      }
+
+      @media only screen and (min-width: 990px) and (max-width: 1063px) {
+        #MainProduct--{{ section.id }} .product__content-columns__aside .product__block--buttons.has-ymee-color-picker {
+          margin-top: calc(var(--pdp-sticky-bar-height, 100px) * -1 - 40px);
+        }
+      }
+
+      @media only screen and (max-width: 989px) {
+        #MainProduct--{{ section.id }} .product__sticky-bar {
+          padding: 20px;
         }
 
-        #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: 80vh;
+        #MainProduct--{{ section.id }} .product__content-columns {
+          display: grid;
+          grid-template-columns: 1fr;
+          grid-template-areas:
+            "description"
+            "buttons"
+            "custom-drawers"
+            "accordions"
+            "custom-drawers-ecom"
+            "ruby-signature"
+            "collection";
+          gap: 0px;
+        }
+
+        /* flatten wrappers so children participate in same grid */
+        #MainProduct--{{ section.id }} .product__content-columns__main,
+        #MainProduct--{{ section.id }} .product__content-columns__aside {
+          display: contents;
+        }
+
+        /* IMPORTANT: aside sticky must be disabled on mobile */
+        #MainProduct--{{ section.id }} .product__content-columns__aside {
+          position: static;
+          top: auto;
+          z-index: auto;
+        }
+
+        /* map real blocks to areas */
+        #MainProduct--{{ section.id }} .product__description {
+          grid-area: description;
+          margin-bottom: 40px;
+        }
+        #MainProduct--{{ section.id }} .product__block--buttons {
+          grid-area: buttons;
+        }
+        #MainProduct--{{ section.id }} .product__custom-drawers-row {
+          grid-area: custom-drawers;
+          margin-bottom: 0;
+        }
+        #MainProduct--{{ section.id }} .product-accordions-container {
+          grid-area: accordions;
+          margin: 80px 0;
+        }
+        #MainProduct--{{ section.id }} .product__custom-drawers-row-ee {
+          grid-area: custom-drawers-ecom;
+        }
+        #MainProduct--{{ section.id }} .product__ruby-signature {
+          grid-area: ruby-signature;
+          margin: 40px 0 80px 0;
+        }
+        #MainProduct--{{ section.id }} .product__collection-section {
+          grid-area: collection;
+          margin-top: 0;
+          margin-bottom: 40px;
+        }
+        #MainProduct--{{ section.id }} .product__collection-section .product__collection-image {
+          margin-bottom: 80px;
+        }
+
+        #MainProduct--{{ section.id }} .product__content {
+          margin: 0;
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+
+        /* Hide variant-selects on mobile only when YMEE dropdown is active */
+        #MainProduct--{{ section.id }}[data-ymee-variant-dropdown-enabled="true"] .product__content-columns__main .product__form__holder {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border: 0;
+        }
+
+        product-info.index-product .product__content {
+          margin-top: 16px;
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+
+      }
+
+      @media only screen and (min-width: 750px) and (max-width: 989px) {
+
+      }
+
+      @media only screen and (max-width: 749px) {
+
+        #MainProduct--{{ section.id }} .pdp-embla__arrows {
+          display: none;
         }
 
         #MainProduct--{{ section.id }} .pdp-embla__progress {
           display: block;
         }
+
+        #MainProduct--{{ section.id }} .product__sticky-bar .product__title__wrapper {
+          padding-right: 0;
+          text-align: center;
+        }
+
+        #MainProduct--{{ section.id }} .product__sticky-bar .product__price__wrap {
+          justify-content: center;
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price > .product__block,
+        #MainProduct--{{ section.id }} .product__title-price .shop-pay-terms {
+          margin: 0;
+        }
       }
-    {%- endif -%}
+
+      @media only screen and (min-width: 990px) and (max-width: 1450px) {
+        #MainProduct--{{ section.id }} .product__custom-drawers-row {
+          flex-direction: column;
+          gap: 0;
+        }
+      }
+      @media only screen and (max-width: 350px) {
+        #MainProduct--{{ section.id }} .product__custom-drawers-row {
+          flex-direction: column;
+        }
+      }
+
+      {%- endif -%}
   {%- endstyle -%}
 
   <{{ wrapper_tag }} class="product__wrapper {{ product_wrapper_modifier }}" data-product>
@@ -994,11 +1245,11 @@
                       carousel.progressBar.style.left = '0%';
                       return;
                     }
-                    
+
                     // Calculate scroll progress
                     var scrollProgress = carousel.embla.scrollProgress();
                     var clampedProgress = Math.max(0, Math.min(1, scrollProgress));
-                    
+
                     // Update progress bar
                     carousel.progressBar.style.width = (clampedProgress * 100) + '%';
                     carousel.progressBar.style.left = '0%';
@@ -1075,11 +1326,21 @@
 
                     var isDesktopCarousel = carouselEl.classList.contains('pdp-embla--desktop');
 
+                    var allSlides = carouselEl.querySelectorAll('[data-embla-slide]');
+                    var firstSlideIsModel = allSlides.length > 0 && allSlides[0].getAttribute('data-media-type') === 'model';
+                    var hasIntroStage = isDesktopCarousel && allSlides.length > 1 && !firstSlideIsModel;
+                    var carouselStarted = false;
+                    var introTransitioning = false;
+
                     var emblaOptions = {
                       loop: false,
                       containScroll: 'trimSnaps',
                       slidesToScroll: 1,
                       watchDrag: function (emblaApi, event) {
+                        // Disable drag in intro state — slide 1 is 100% and Embla snap points are wrong
+                        if (hasIntroStage && !carouselStarted) return false;
+                        if (introTransitioning) return false;
+
                         var target = event && event.target;
                         if (!target || !target.closest) return true;
                         var isTouch = false;
@@ -1104,21 +1365,68 @@
                     }
 
                     var embla = window.EmblaCarousel(viewport, emblaOptions);
-
                     var prevBtn = carouselEl.querySelector('[data-embla-prev]');
                     var nextBtn = carouselEl.querySelector('[data-embla-next]');
                     var progressBar = carouselEl.querySelector('[data-embla-progress-bar]');
-                    var hasIntroStage = isDesktopCarousel && carouselEl.querySelectorAll('[data-embla-slide]').length > 0;
-                    var carouselStarted = false;
 
-                    function setCarouselStarted(started) {
+                    function setCarouselStarted(started, targetIndex) {
                       if (!hasIntroStage) return;
+                      var wasStarted = carouselStarted;
                       carouselStarted = !!started;
+                      if (carouselStarted === wasStarted) return;
+                      introTransitioning = true;
+                      carouselEl.classList.add('pdp-embla--transitioning');
                       if (carouselStarted) {
                         carouselEl.classList.add('pdp-embla--started');
                       } else {
                         carouselEl.classList.remove('pdp-embla--started');
                       }
+                      if (typeof targetIndex === 'number') {
+                        embla.scrollTo(targetIndex, true);
+                      }
+                      updateArrows();
+
+                      var firstSlide = carouselEl.querySelector('[data-embla-slide]');
+                      var done = false;
+                      function finishTransition() {
+                        if (done) return;
+                        done = true;
+                        if (firstSlide) firstSlide.removeEventListener('transitionend', onTransitionEnd);
+                        embla.reInit();
+                        if (typeof targetIndex === 'number') {
+                          embla.scrollTo(targetIndex, true);
+                        }
+                        introTransitioning = false;
+                        carouselEl.classList.remove('pdp-embla--transitioning');
+                        updateArrows();
+                        updateDesktopThumbs();
+                      }
+                      function onTransitionEnd(e) {
+                        if (e.propertyName === 'flex-basis') finishTransition();
+                      }
+                      if (firstSlide) firstSlide.addEventListener('transitionend', onTransitionEnd);
+                      // Fallback in case transitionend doesn't fire
+                      setTimeout(finishTransition, 350);
+                    }
+
+                    // Detect swipe/drag on the viewport for intro stage transitions
+                    if (hasIntroStage) {
+                      var introSwipeStartX = 0;
+                      viewport.addEventListener('pointerdown', function (e) {
+                        introSwipeStartX = e.clientX;
+                      });
+                      viewport.addEventListener('pointerup', function (e) {
+                        if (introTransitioning) return;
+                        var diff = introSwipeStartX - e.clientX;
+                        // Swipe left (intro → started)
+                        if (!carouselStarted && diff > 30) {
+                          setCarouselStarted(true, 0);
+                        }
+                        // Swipe right at index 0 (started → intro)
+                        if (carouselStarted && diff < -30 && embla.selectedScrollSnap() === 0) {
+                          setCarouselStarted(false, 0);
+                        }
+                      });
                     }
 
                     setCarouselStarted(carouselStarted);
@@ -1128,16 +1436,46 @@
                       var canPrev = embla.canScrollPrev();
                       var canNext = embla.canScrollNext();
 
+                      if (hasIntroStage && carouselStarted && selectedIndex === 0) {
+                        canPrev = true;
+                      }
+
+                      // Disable next if at the last slide or last unique snap position
+                      if (isDesktopCarousel) {
+                        var slideCount = carouselEl.querySelectorAll('[data-embla-slide]').length;
+                        if (selectedIndex >= slideCount - 1) {
+                          canNext = false;
+                        } else if (canNext) {
+                          var snaps = embla.scrollSnapList();
+                          var currentSnap = snaps[selectedIndex];
+                          var lastSnap = snaps[snaps.length - 1];
+                          if (Math.abs(currentSnap - lastSnap) < 0.001) {
+                            canNext = false;
+                          }
+                        }
+                      }
+
                       if (prevBtn) prevBtn.disabled = !canPrev;
                       if (nextBtn) nextBtn.disabled = !canNext;
                     }
 
                     prevBtn && prevBtn.addEventListener('click', function (e) {
                       e.preventDefault();
-                      if (hasIntroStage && carouselStarted && embla.selectedScrollSnap() === 1) {
-                        setCarouselStarted(false);
-                        updateArrows();
-                        embla.scrollPrev();
+                      if (introTransitioning) return;
+                      var idx = embla.selectedScrollSnap();
+                      if (hasIntroStage && carouselStarted && idx === 0) {
+                        setCarouselStarted(false, 0);
+                        return;
+                      }
+                      // Skip merged snaps (trimSnaps can merge last few snaps to same position)
+                      if (isDesktopCarousel && idx > 0) {
+                        var snaps = embla.scrollSnapList();
+                        var currentPos = snaps[idx];
+                        var target = idx - 1;
+                        while (target > 0 && Math.abs(snaps[target] - currentPos) < 0.001) {
+                          target--;
+                        }
+                        embla.scrollTo(target);
                         return;
                       }
                       embla.scrollPrev();
@@ -1145,15 +1483,67 @@
 
                     nextBtn && nextBtn.addEventListener('click', function (e) {
                       e.preventDefault();
+                      if (introTransitioning) return;
                       if (hasIntroStage && !carouselStarted && embla.selectedScrollSnap() === 0) {
-                        setCarouselStarted(true);
-                        updateArrows();
+                        setCarouselStarted(true, 0);
                         return;
                       }
                       embla.scrollNext();
                     });
 
-                    var carousel = { el: carouselEl, embla: embla, prevBtn: prevBtn, nextBtn: nextBtn, progressBar: progressBar, updateArrows: updateArrows };
+                    var carousel = { el: carouselEl, embla: embla, prevBtn: prevBtn, nextBtn: nextBtn, progressBar: progressBar, updateArrows: updateArrows, setCarouselStarted: setCarouselStarted };
+
+                    var thumbUpdatePending = false;
+                    function updateDesktopThumbs() {
+                      if (!isDesktopCarousel) return;
+                      if (thumbUpdatePending) return;
+                      thumbUpdatePending = true;
+                      requestAnimationFrame(function () {
+                        thumbUpdatePending = false;
+                        var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
+                        var thumbsHolder = productImagesEl.querySelector('.pdp-thumbs--desktop .product__thumbs__holder');
+                        var currentIndex = embla.selectedScrollSnap();
+                        var slideEls = carouselEl.querySelectorAll('[data-embla-slide]');
+                        var isModelSlide = slideEls[currentIndex] && slideEls[currentIndex].getAttribute('data-media-type') === 'model';
+                        var isNextModelSlide = slideEls[currentIndex + 1] && slideEls[currentIndex + 1].getAttribute('data-media-type') === 'model';
+                        var effectiveSlidesPerView = (hasIntroStage && !carouselStarted) || isModelSlide || isNextModelSlide ? 1 : 2;
+                        var activeCount = 0;
+
+                        thumbs.forEach(function(thumb) {
+                          thumb.classList.remove('is-active', 'prev-active', 'single-active');
+                        });
+
+                        if (thumbs[currentIndex]) {
+                          thumbs[currentIndex].classList.add('is-active');
+                          activeCount++;
+                        }
+
+                        for (var i = 1; i < effectiveSlidesPerView; i++) {
+                          if (thumbs[currentIndex + i]) {
+                            thumbs[currentIndex + i].classList.add('is-active', 'prev-active');
+                            activeCount++;
+                          }
+                        }
+
+                        if (activeCount === 1 && thumbs[currentIndex]) {
+                          thumbs[currentIndex].classList.add('single-active');
+                        }
+
+                        if (thumbsHolder) {
+                          if (activeCount > 0 && thumbs[currentIndex]) {
+                            var firstThumb = thumbs[currentIndex];
+                            var lastThumb = thumbs[currentIndex + activeCount - 1] || firstThumb;
+                            var frameTop = firstThumb.offsetTop;
+                            var frameHeight = (lastThumb.offsetTop + lastThumb.offsetHeight) - frameTop;
+                            thumbsHolder.style.setProperty('--thumb-frame-top', frameTop + 'px');
+                            thumbsHolder.style.setProperty('--thumb-frame-height', frameHeight + 'px');
+                            thumbsHolder.style.setProperty('--thumb-frame-opacity', '1');
+                          } else {
+                            thumbsHolder.style.setProperty('--thumb-frame-opacity', '0');
+                          }
+                        }
+                      });
+                    }
 
                     embla.on('select', function () {
                       var activeCarousel = getActiveCarousel();
@@ -1172,47 +1562,7 @@
                       loadDeferredMediaByIndex(activeCarousel, index);
                       updateArrows();
                       updateProgressByIndex(activeCarousel, index);
-                      
-                      // Force update thumbnails after select to ensure active states are correct
-                      setTimeout(function() {
-                        if (isDesktopCarousel) {
-                          var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
-                          var slideNodes = embla.slideNodes();
-                          var slidesInView = [];
-                          
-                          // Determine which slides are visible based on scroll position
-                          var scrollProgress = embla.scrollProgress();
-                          var containerSize = embla.containerNode().offsetWidth;
-                          var slideSize = slideNodes.length > 0 ? slideNodes[0].offsetWidth : 0;
-                          var slidesPerView = Math.ceil(containerSize / slideSize);
-                          
-                          // Calculate visible slides based on current index and slides per view
-                          for (var i = 0; i < slidesPerView; i++) {
-                            if (index + i < slideNodes.length) {
-                              slidesInView.push(index + i);
-                            }
-                          }
-                          
-                          // Update thumbnail states
-                          thumbs.forEach(function(thumb) {
-                            thumb.classList.remove('is-active', 'prev-active', 'single-active');
-                          });
-                          
-                          slidesInView.forEach(function(slideIndex, idx) {
-                            if (thumbs[slideIndex]) {
-                              thumbs[slideIndex].classList.add('is-active');
-                              if (idx > 0) {
-                                thumbs[slideIndex].classList.add('prev-active');
-                              }
-                            }
-                          });
-                          
-                          if (slidesInView.length === 1 && thumbs[slidesInView[0]]) {
-                            thumbs[slidesInView[0]].classList.add('single-active');
-                          }
-                        }
-                      }, 50);
-                      
+
                       if (!isDesktopCarousel) {
                         var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--mobile .product__thumb');
                         thumbs.forEach(function(thumb) {
@@ -1222,34 +1572,7 @@
                           thumbs[index].classList.add('is-active');
                         }
                       } else {
-                        var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
-                        thumbs.forEach(function(thumb) {
-                          thumb.classList.remove('is-active', 'prev-active', 'single-active');
-                        });
-                        
-                        var currentIndex = index;
-                        var activeCount = 0;
-                        
-                        if (thumbs[currentIndex]) {
-                          thumbs[currentIndex].classList.add('is-active');
-                          activeCount++;
-                        }
-                        
-                        var slideSize = embla.slideNodes().length > 0 ? embla.slideNodes()[0].offsetWidth : 0;
-                        var containerSize = embla.containerNode().offsetWidth;
-                        var slidesPerView = Math.ceil(containerSize / slideSize);
-                        
-                        for (var i = 1; i < slidesPerView; i++) {
-                          if (thumbs[currentIndex + i]) {
-                            thumbs[currentIndex + i].classList.add('is-active', 'prev-active');
-                            activeCount++;
-                          }
-                        }
-                        
-                        // Add single-active class if only one thumb is active
-                        if (activeCount === 1 && thumbs[currentIndex]) {
-                          thumbs[currentIndex].classList.add('single-active');
-                        }
+                        updateDesktopThumbs();
                       }
                     });
 
@@ -1264,92 +1587,36 @@
                       }
                     });
 
-                    embla.on('slidesinview', function (emblaApi, event) {
-                      if (isDesktopCarousel) {
-                        var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
-                        thumbs.forEach(function(thumb) {
-                          thumb.classList.remove('is-active', 'prev-active', 'single-active');
-                        });
-                        
-                        var visibleIndexes = event.detail.slidesInView || [];
-                        
-                        visibleIndexes.forEach(function(slideIndex, index) {
-                          if (thumbs[slideIndex]) {
-                            thumbs[slideIndex].classList.add('is-active');
-                            if (index > 0) {
-                              thumbs[slideIndex].classList.add('prev-active');
-                            }
-                          }
-                        });
-                        
-                        // Add single-active class if only one thumb is active
-                        if (visibleIndexes.length === 1 && thumbs[visibleIndexes[0]]) {
-                          thumbs[visibleIndexes[0]].classList.add('single-active');
-                        }
+                    // Disable WebGI canvas pointer events during carousel drag to prevent
+                    // the 3D orbit controls from fighting Embla and causing lag
+                    embla.on('pointerDown', function () {
+                      var webgiCanvases = carouselEl.querySelectorAll('.webgi-container canvas');
+                      webgiCanvases.forEach(function (c) { c.style.pointerEvents = 'none'; });
+                    });
+                    embla.on('pointerUp', function () {
+                      var webgiCanvases = carouselEl.querySelectorAll('.webgi-container canvas');
+                      webgiCanvases.forEach(function (c) { c.style.pointerEvents = ''; });
+                    });
+
+                    // WebGI edge zone swipe: scroll carousel when user swipes on 3D model edges
+                    carouselEl.addEventListener('webgi:edge:swipe', function (e) {
+                      if (!e.detail) return;
+                      if (e.detail.direction === 'next') {
+                        embla.scrollNext();
+                      } else {
+                        embla.scrollPrev();
                       }
                     });
 
-                    if (isDesktopCarousel) {
-                      var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
-                      thumbs.forEach(function(thumb) {
-                        thumb.classList.remove('is-active', 'prev-active', 'single-active');
-                      });
-                      
-                      var currentIndex = embla.selectedScrollSnap();
-                      var activeCount = 0;
-                      
-                      if (thumbs[currentIndex]) {
-                        thumbs[currentIndex].classList.add('is-active');
-                        activeCount++;
-                      }
-                      
-                      var slideSize = embla.slideNodes().length > 0 ? embla.slideNodes()[0].offsetWidth : 0;
-                      var containerSize = embla.containerNode().offsetWidth;
-                      var slidesPerView = Math.ceil(containerSize / slideSize);
-                      
-                      for (var i = 1; i < slidesPerView; i++) {
-                        if (thumbs[currentIndex + i]) {
-                          thumbs[currentIndex + i].classList.add('is-active', 'prev-active');
-                          activeCount++;
-                        }
-                      }
-                      
-                      // Add single-active class if only one thumb is active
-                      if (activeCount === 1 && thumbs[currentIndex]) {
-                        thumbs[currentIndex].classList.add('single-active');
-                      }
-                    }
+                    // Initial desktop thumb setup
+                    updateDesktopThumbs();
 
                     embla.on('reInit', function () {
                       var activeCarousel = getActiveCarousel();
                       if (!activeCarousel || activeCarousel.el !== carouselEl) return;
                       updateArrows();
                       updateProgressByIndex(activeCarousel, embla.selectedScrollSnap());
-                      
-                      // Update thumbnails for desktop based on visible slides
-                      if (isDesktopCarousel) {
-                        var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
-                        thumbs.forEach(function(thumb) {
-                          thumb.classList.remove('is-active');
-                        });
-                        
-                        // Get currently selected slide as fallback
-                        var currentIndex = embla.selectedScrollSnap();
-                        if (thumbs[currentIndex]) {
-                          thumbs[currentIndex].classList.add('is-active');
-                        }
-                        
-                        // Check nearby slides that might be visible
-                        var slideSize = embla.slideNodes().length > 0 ? embla.slideNodes()[0].offsetWidth : 0;
-                        var containerSize = embla.containerNode().offsetWidth;
-                        var slidesPerView = Math.ceil(containerSize / slideSize);
-                        
-                        for (var i = 1; i < slidesPerView; i++) {
-                          if (thumbs[currentIndex + i]) {
-                            thumbs[currentIndex + i].classList.add('is-active');
-                          }
-                        }
-                      }
+                      updateDesktopThumbs();
                     });
 
                     updateArrows();
@@ -1366,41 +1633,51 @@
 
                   productImagesEl.addEventListener('theme:media:select', function (e) {
                     if (!e || !e.detail || !e.detail.id) return;
+                    if (productImagesEl.querySelector('[data-embla-slide][data-media-type="model"]')) return;
                     var activeCarousel = getActiveCarousel();
                     if (!activeCarousel) return;
-                    
+
                     var isDesktop = activeCarousel.el.classList.contains('pdp-embla--desktop');
                     var isStarted = activeCarousel.el.classList.contains('pdp-embla--started');
                     var currentIndex = activeCarousel.embla.selectedScrollSnap();
                     var targetIndex = findIndexByMediaId(activeCarousel, e.detail.id);
-                    
-                    if (isDesktop && !isStarted && currentIndex === 0) {
-                      if (targetIndex === 1) {
-                        activeCarousel.el.classList.add('pdp-embla--started');
-                        activeCarousel.updateArrows && activeCarousel.updateArrows();
-                        setActiveMediaByIndex(activeCarousel, 1);
-                        loadDeferredMediaByIndex(activeCarousel, 1);
-                        updateProgressByIndex(activeCarousel, 1);
-                        return;
-                      }
-                    }
-                    
-                    if (isDesktop && isStarted && targetIndex === 0) {
-                      activeCarousel.el.classList.remove('pdp-embla--started');
-                      activeCarousel.embla.scrollTo(0, true);
-                      activeCarousel.updateArrows && activeCarousel.updateArrows();
-                      setActiveMediaByIndex(activeCarousel, 0);
-                      loadDeferredMediaByIndex(activeCarousel, 0);
-                      updateProgressByIndex(activeCarousel, 0);
-                      return;
-                    }
-                    
+
                     if (targetIndex < 0) return;
-                    activeCarousel.embla.scrollTo(targetIndex);
+
                     setActiveMediaByIndex(activeCarousel, targetIndex);
                     loadDeferredMediaByIndex(activeCarousel, targetIndex);
-                    activeCarousel.updateArrows && activeCarousel.updateArrows();
                     updateProgressByIndex(activeCarousel, targetIndex);
+
+                    var carouselHasIntroStage = activeCarousel.el.classList.contains('pdp-embla--desktop') &&
+                      activeCarousel.el.querySelectorAll('[data-embla-slide]').length > 1 &&
+                      (activeCarousel.el.querySelector('[data-embla-slide]') &&
+                       activeCarousel.el.querySelector('[data-embla-slide]').getAttribute('data-media-type') !== 'model');
+
+                    if (carouselHasIntroStage && isDesktop && !isStarted && targetIndex >= 1) {
+                      // Intro → started: ensure clicked slide is visible in 2-slide view
+                      var scrollTarget = Math.max(0, targetIndex - 1);
+                      activeCarousel.setCarouselStarted(true, scrollTarget);
+                      return;
+                    }
+
+                    if (carouselHasIntroStage && isDesktop && isStarted && targetIndex === 0) {
+                      // Started → intro: smooth scroll to 0 first, then expand slide 1
+                      if (currentIndex > 0) {
+                        activeCarousel.embla.scrollTo(0);
+                        var onSettle = function () {
+                          activeCarousel.embla.off('settle', onSettle);
+                          activeCarousel.setCarouselStarted(false, 0);
+                        };
+                        activeCarousel.embla.on('settle', onSettle);
+                      } else {
+                        activeCarousel.setCarouselStarted(false, 0);
+                      }
+                      return;
+                    }
+
+                    // Normal smooth scroll
+                    activeCarousel.embla.scrollTo(targetIndex);
+                    activeCarousel.updateArrows && activeCarousel.updateArrows();
                   });
 
                   var active = productImagesEl.getAttribute('data-active-media');
@@ -1422,30 +1699,38 @@
                         loadDeferredMediaByIndex(carousel, startIndex);
                         carousel.updateArrows && carousel.updateArrows();
                         updateProgressByIndex(carousel, startIndex);
-                        
+
                         // Update thumbnails based on carousel type
                         if (carousel.el.classList.contains('pdp-embla--desktop')) {
-                          // Desktop: Update thumbnails based on visible slides
                           var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
                           thumbs.forEach(function(thumb) {
-                            thumb.classList.remove('is-active');
+                            thumb.classList.remove('is-active', 'prev-active', 'single-active');
                           });
-                          
-                          // Get currently selected slide as fallback
+
                           var currentIndex = carousel.embla.selectedScrollSnap();
+                          // On load, intro state is active (slide 1 at 100%) so only 1 slide is visually shown
+                          var hasIntro = carousel.el.querySelectorAll('[data-embla-slide]').length > 1;
+                          var isStarted = carousel.el.classList.contains('pdp-embla--started');
+                          var slideEls = carousel.el.querySelectorAll('[data-embla-slide]');
+                          var isModelSlide = slideEls[currentIndex] && slideEls[currentIndex].getAttribute('data-media-type') === 'model';
+                          var isNextModelSlide = slideEls[currentIndex + 1] && slideEls[currentIndex + 1].getAttribute('data-media-type') === 'model';
+                          var effectiveSlidesPerView = (hasIntro && !isStarted) || isModelSlide || isNextModelSlide ? 1 : 2;
+                          var activeCount = 0;
+
                           if (thumbs[currentIndex]) {
                             thumbs[currentIndex].classList.add('is-active');
+                            activeCount++;
                           }
-                          
-                          // Check nearby slides that might be visible
-                          var slideSize = carousel.embla.slideNodes().length > 0 ? carousel.embla.slideNodes()[0].offsetWidth : 0;
-                          var containerSize = carousel.embla.containerNode().offsetWidth;
-                          var slidesPerView = Math.ceil(containerSize / slideSize);
-                          
-                          for (var i = 1; i < slidesPerView; i++) {
+
+                          for (var i = 1; i < effectiveSlidesPerView; i++) {
                             if (thumbs[currentIndex + i]) {
-                              thumbs[currentIndex + i].classList.add('is-active');
+                              thumbs[currentIndex + i].classList.add('is-active', 'prev-active');
+                              activeCount++;
                             }
+                          }
+
+                          if (activeCount === 1 && thumbs[currentIndex]) {
+                            thumbs[currentIndex].classList.add('single-active');
                           }
                         } else {
                           // Mobile: Update single thumbnail based on selected index
@@ -1495,7 +1780,7 @@
                 <div class="pdp-embla__viewport" data-embla-viewport>
                   <div class="pdp-embla__container">
                     {%- for media in ordered_media -%}
-                      <div class="pdp-embla__slide" data-embla-slide>
+                      <div class="pdp-embla__slide" data-embla-slide data-media-type="{{ media.media_type }}">
                         {%- render 'media',
                           media: media,
                           featured_media: featured_media,
@@ -1511,10 +1796,10 @@
 
                 <div class="pdp-embla__arrows" aria-label="{{ 'general.accessibility.controls' | t | escape }}">
                   <button type="button" class="pdp-embla__arrow" data-embla-prev aria-label="{{ 'general.accessibility.previous' | t | escape }}">
-                    {%- render 'icon-nav-arrow-left' -%}
+                    <svg aria-hidden="true" focusable="false" role="presentation" width="25px" height="25px" stroke-width="1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M15 6l-6 6 6 6" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                   </button>
                   <button type="button" class="pdp-embla__arrow" data-embla-next aria-label="{{ 'general.accessibility.next' | t | escape }}">
-                    {%- render 'icon-nav-arrow-right' -%}
+                    <svg aria-hidden="true" focusable="false" role="presentation" width="25px" height="25px" stroke-width="1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M9 6l6 6-6 6" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                   </button>
                 </div>
 
@@ -1530,7 +1815,7 @@
                     {%- if media_count > 0 -%}
                       {%- assign intro_media = ordered_media[0] -%}
                       {%- assign intro_next_media = ordered_media[1] -%}
-                      <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="single" data-primary-media-id="{{ section.id }}-{{ intro_media.id }}">
+                      <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="single" data-primary-media-id="{{ section.id }}-{{ intro_media.id }}" data-media-type="{{ intro_media.media_type }}">
                         <div class="pdp-embla__pair">
                           <div class="pdp-embla__pair__item">
                             {%- render 'media',
@@ -1546,7 +1831,7 @@
                       </div>
 
                       {%- if intro_next_media != blank -%}
-                        <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="single" data-primary-media-id="{{ section.id }}-{{ intro_next_media.id }}">
+                        <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="single" data-primary-media-id="{{ section.id }}-{{ intro_next_media.id }}" data-media-type="{{ intro_next_media.media_type }}">
                           <div class="pdp-embla__pair">
                             <div class="pdp-embla__pair__item">
                               {%- render 'media',
@@ -1564,7 +1849,7 @@
 
                       {%- if media_count > 2 -%}
                         {%- for media in ordered_media offset: 2 -%}
-                          <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="single" data-primary-media-id="{{ section.id }}-{{ media.id }}">
+                          <div class="pdp-embla__slide" data-embla-slide data-gallery-layout="single" data-primary-media-id="{{ section.id }}-{{ media.id }}" data-media-type="{{ media.media_type }}">
                             <div class="pdp-embla__pair">
                               <div class="pdp-embla__pair__item">
                                 {%- render 'media',
@@ -1586,10 +1871,10 @@
 
                 <div class="pdp-embla__arrows" aria-label="{{ 'general.accessibility.controls' | t | escape }}">
                   <button type="button" class="pdp-embla__arrow" data-embla-prev aria-label="{{ 'general.accessibility.previous' | t | escape }}">
-                    {%- render 'icon-nav-arrow-left' -%}
+                    <svg aria-hidden="true" focusable="false" role="presentation" width="25px" height="25px" stroke-width="1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M15 6l-6 6 6 6" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                   </button>
                   <button type="button" class="pdp-embla__arrow" data-embla-next aria-label="{{ 'general.accessibility.next' | t | escape }}">
-                    {%- render 'icon-nav-arrow-right' -%}
+                    <svg aria-hidden="true" focusable="false" role="presentation" width="25px" height="25px" stroke-width="1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000"><path d="M9 6l6 6-6 6" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                   </button>
                 </div>
 
@@ -1608,6 +1893,7 @@
                           href="{{ media.preview_image.src | image_url }}"
                           aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
                           data-media-id="{{ section.id }}-{{ media.id }}"
+                          data-media-type="{{ media.media_type }}"
                           data-thumb-link
                         >
                           {%- liquid
@@ -1635,6 +1921,7 @@
                           class="product__thumb__link"
                           href="{{ media.preview_image.src | image_url }}"
                           data-media-id="{{ section.id }}-{{ media.id }}"
+                          data-media-type="{{ media.media_type }}"
                           data-thumb-link
                         >
                           {%- liquid
@@ -1688,6 +1975,7 @@
                           href="{{ media.preview_image.src | image_url }}"
                           aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
                           data-media-id="{{ section.id }}-{{ media.id }}"
+                          data-media-type="{{ media.media_type }}"
                           data-thumb-link
                         >
                           {%- liquid
@@ -1897,6 +2185,7 @@
                     -%}
                   {%- endif -%}
 
+              <div class="product-accordions-container">
               {%- for block in section.blocks -%}
                 {%- if title_block != blank and block.id == title_block.id -%}
                   {%- continue -%}
@@ -1988,7 +2277,9 @@
                       product: product,
                       product_form_id: product_form_id,
                       preorder: preorder,
-                      onboarding_product: onboarding_product
+                      onboarding_product: onboarding_product,
+                      ring_sizing_link: block.settings.ring_sizing_link,
+                      bracelet_sizing_link: block.settings.bracelet_sizing_link
                     -%}
 
                   {%- when 'description' -%}
@@ -2434,6 +2725,9 @@
                     </div>
                 {%- endcase -%}
               {%- endfor -%}
+              </div>
+
+              {%- render 'product-collection-section', product: product -%}
 
                 </div>
 
@@ -2446,7 +2740,9 @@
                         product: product,
                         product_form_id: product_form_id,
                         preorder: preorder,
-                        onboarding_product: onboarding_product
+                        onboarding_product: onboarding_product,
+                        ring_sizing_link: buttons_block.settings.ring_sizing_link,
+                        bracelet_sizing_link: buttons_block.settings.bracelet_sizing_link
                       -%}
                     {%- endif -%}
 
@@ -2460,14 +2756,14 @@
                     <div class="product__block product__custom-drawers-row">
                       <div class="product__custom-drawer">
                         {% render 'link-with-icon',
-                          text: 'Ask your concierge',
+                          text: 'Ask our concierge',
                           drawer_open: 'ask-concierge',
                           icon: 'icon-ask-our-concierge',
                           icon_position: 'left',
                           content_alignment: 'right'
                         %}
                       </div>
-                      
+
                       <div class="product__custom-drawer">
                         {% render 'link-with-icon',
                           text: 'Send a hint',
@@ -2487,45 +2783,105 @@
                         margin-bottom: 50px;
                         margin-top: 30px;
                       }
-                      
+
                       .product__custom-drawer {
                         flex: 0 0 auto;
                       }
-                      
+
                       .product__custom-drawer .link-with-icon {
                         width: 100%;
                         justify-content: flex-start;
                       }
+
+                      .product__ruby-signature {
+                        margin-top: 50px;
+                        margin-bottom: 20px;
+                      }
+
+                      .product__custom-drawers-row-ee {
+                        display: flex;
+                        flex-direction: column;
+                      }
+
+                      @media only screen and (max-width: 749px) {
+                        .product__custom-drawers-row {
+                          gap: 10px;
+                          overflow: hidden;
+                          scrollbar-width: none;
+                          overflow-x: auto;
+                          margin: 20px 0;
+                        }
+
+                        .product__custom-drawers-row-ee {
+                          display: grid;
+                          grid-template-columns: 1fr 1fr;
+                          grid-template-areas:
+                            "block1 block3"
+                            "block2 block4";
+                          gap: 10px;
+                        }
+
+                        .product__custom-drawers-row-ee > .product__block:nth-child(1) { grid-area: block1; }
+                        .product__custom-drawers-row-ee > .product__block:nth-child(2) { grid-area: block2; }
+                        .product__custom-drawers-row-ee > .product__block:nth-child(3) { grid-area: block3; }
+                        .product__custom-drawers-row-ee > .product__block:nth-child(4) { grid-area: block4; }
+
+                        .product__custom-drawers-row-ee .link-with-icon--icon-right {
+                          margin-bottom: 0;
+                        }
+
+                        .product__custom-drawers-row-ee .link-with-icon--icon-right .link-with-icon__row {
+                          flex-direction: row;
+                          justify-content: flex-start;
+                        }
+
+                      }
+ 
                     </style>
 
-                    <div class="product__block product__text text-left">
-                      <p class="product__heading">
-                        {{ 'products.product.ecommerce_experience' | t }}
-                      </p>
-                    </div>
+                    <div class="product__custom-drawers-ee">
+                      <div class="product__block product__text text-left">
+                        <p class="product__heading">
+                          {{ 'products.product.ecommerce_experience' | t }}
+                        </p>
+                      </div>
 
-                    <div class="divider-holder block-padding">
-                      <hr class="divider">
-                    </div>
+                      <div class="divider-holder block-padding">
+                        <hr class="divider">
+                      </div>
 
-                    {%- for block in side_drawer_blocks -%}
-                      {%- liquid
-                        assign drawer_id = block.settings.drawer_id | strip | handleize
-                        if drawer_id == blank
-                          assign drawer_id = block.id
-                        endif
-                      -%}
+                      <div class="product__custom-drawers-row-ee">
+                      {%- for block in side_drawer_blocks -%}
+                        {%- liquid
+                          assign drawer_id = block.settings.drawer_id | strip | handleize
+                          if drawer_id == blank
+                            assign drawer_id = block.id
+                          endif
+                        -%}
 
-                      <div class="product__block" {{ block.shopify_attributes }}>
+                        <div class="product__block" {{ block.shopify_attributes }}>
+                          {% render 'link-with-icon',
+                            text: block.settings.trigger_text,
+                            drawer_open: drawer_id,
+                            icon: block.settings.trigger_icon,
+                            icon_position: block.settings.trigger_icon_position,
+                            content_alignment: block.settings.trigger_alignment
+                          %}
+                        </div>
+                      {%- endfor -%}
+                      </div>
+
+                      <div class="product__block product__custom-drawer product__ruby-signature">
                         {% render 'link-with-icon',
-                          text: block.settings.trigger_text,
-                          drawer_open: drawer_id,
-                          icon: block.settings.trigger_icon,
-                          icon_position: block.settings.trigger_icon_position,
-                          content_alignment: block.settings.trigger_alignment
+                          text: 'The Ruby — Roberto Coin''s Signature',
+                          drawer_open: 'ruby-signature',
+                          icon: 'icon-ruby-signature',
+                          icon_position: 'left',
+                          content_alignment: 'left',
+                          hero_image: 'https://cdn.shopify.com/s/files/1/0969/2990/7075/files/ruby-section.jpg?v=1772007648'
                         %}
                       </div>
-                    {%- endfor -%}
+                    </div>
                   </div>
 
                 {%- endif -%}
@@ -2565,11 +2921,11 @@
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         const desktopThumbs = document.querySelector('#MainProduct--{{ section.id }} .product__thumbs.pdp-thumbs--desktop');
-        
+
         if (desktopThumbs) {
           let lastScrollY = window.scrollY;
           let ticking = false;
-          
+
           function updateThumbsVisibility() {
             const scrollY = window.scrollY;
             const windowHeight = window.innerHeight;
@@ -2577,7 +2933,7 @@
             const scrollThreshold = documentHeight - windowHeight - 200; // 200px from bottom
             const isScrollingDown = scrollY > lastScrollY;
             const isScrollingUp = scrollY < lastScrollY;
-            
+
             // Hide when scrolling down near bottom, show when scrolling up or not near bottom
             if (isScrollingDown && scrollY > scrollThreshold) {
               desktopThumbs.style.opacity = '0';
@@ -2588,18 +2944,18 @@
               desktopThumbs.style.pointerEvents = 'auto';
               desktopThumbs.style.transition = 'opacity 0.3s ease-in-out';
             }
-            
+
             lastScrollY = scrollY;
             ticking = false;
           }
-          
+
           function requestTick() {
             if (!ticking) {
               window.requestAnimationFrame(updateThumbsVisibility);
               ticking = true;
             }
           }
-          
+
           window.addEventListener('scroll', requestTick, { passive: true });
         }
       });
@@ -2700,3 +3056,66 @@
   </div>
   <span class="underlay drawer__underlay" data-drawer-underlay></span>
 </side-drawer>
+
+<side-drawer
+  class="drawer"
+  data-drawer="ruby-signature"
+  id="side-drawer-ruby-signature"
+  data-drawer-size="fullscreen"
+  data-drawer-direction="right-to-left"
+>
+  <div class="drawer__inner" data-drawer-inner>
+    <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+      {% render 'icon-close' %}
+    </button>
+
+    <div class="drawer__body">
+      {% render 'drawer-ruby-signature' %}
+    </div>
+  </div>
+  <span class="underlay drawer__underlay" data-drawer-underlay></span>
+</side-drawer>
+
+<script>
+  (function() {
+    var isMobile = window.innerWidth <= 749 || navigator.maxTouchPoints > 0;
+    if (!isMobile) return;
+
+    var sectionId = '{{ section.id }}';
+    var sectionEl = document.getElementById('MainProduct--' + sectionId);
+    if (!sectionEl) return;
+
+    function updateStickyBarHeight() {
+      var stickyBar = sectionEl.querySelector('.product__sticky-bar');
+      if (!stickyBar) return;
+
+      var height = stickyBar.offsetHeight;
+      if (height > 0) {
+        sectionEl.style.setProperty('--pdp-sticky-bar-height', height + 'px');
+      }
+    }
+
+    // Initial measurement
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', updateStickyBarHeight);
+    } else {
+      updateStickyBarHeight();
+    }
+
+    // Watch for size changes (e.g., when variant changes affect button layout)
+    var resizeObserver = new ResizeObserver(function() {
+      updateStickyBarHeight();
+    });
+
+    var stickyBar = sectionEl.querySelector('.product__sticky-bar');
+    if (stickyBar) {
+      resizeObserver.observe(stickyBar);
+    }
+
+    // Also watch the inner content since buttons might change
+    var stickyBarInner = sectionEl.querySelector('.product__sticky-bar__inner');
+    if (stickyBarInner) {
+      resizeObserver.observe(stickyBarInner);
+    }
+  })();
+</script>

@@ -248,25 +248,13 @@
       --BTN-PRIMARY-TEXT: {{ scheme.settings.btn_primary_text }};
       --BTN-PRIMARY-BORDER: {{ scheme.settings.btn_primary_border }};
       --BTN-PRIMARY-BORDER-A70: {{ scheme.settings.btn_primary_border | color_modify: 'alpha', 0.7 }};
-
-      {% assign btn_primary_brightness = scheme.settings.btn_primary_bg | color_brightness %}
-      {% if btn_primary_brightness <= 65 %}
-        --BTN-PRIMARY-BG-BRIGHTER: {{ scheme.settings.btn_primary_bg | color_lighten: 5 }};
-      {% else %}
-        --BTN-PRIMARY-BG-BRIGHTER: {{ scheme.settings.btn_primary_bg | color_darken: 5 }};
-      {% endif %}
+      --BTN-PRIMARY-BG-BRIGHTER: {{ scheme.settings.btn_primary_hover | default: '#397E70' }};
 
       --BTN-SECONDARY-BG: {{ scheme.settings.btn_secondary_bg }};
       --BTN-SECONDARY-TEXT: {{ scheme.settings.btn_secondary_text }};
       --BTN-SECONDARY-BORDER: {{ scheme.settings.btn_secondary_border }};
       --BTN-SECONDARY-BORDER-A70: {{ scheme.settings.btn_secondary_border | color_modify: 'alpha', 0.7 }};
-
-      {% assign btn_secondary_brightness = scheme.settings.btn_secondary_bg | color_brightness %}
-      {% if btn_secondary_brightness <= 65 %}
-        --BTN-SECONDARY-BG-BRIGHTER: {{ scheme.settings.btn_secondary_bg | color_lighten: 5 }};
-      {% else %}
-        --BTN-SECONDARY-BG-BRIGHTER: {{ scheme.settings.btn_secondary_bg | color_darken: 5 }};
-      {% endif %}
+      --BTN-SECONDARY-BG-BRIGHTER: {{ scheme.settings.btn_secondary_hover | default: '#000000' }};
 
       {% comment %}
         Create an appropriate poster background color
@@ -535,7 +523,7 @@
     {%- endif -%}
 
     {%- comment -%} Drawers {%- endcomment -%}
-    --DRAWER-WIDTH: 380px;
+    --DRAWER-WIDTH: 560px;
 
     {%- comment -%} Icon Variables {%- endcomment -%}
     --ICON-STROKE-WIDTH: {{ settings.icon_style }}px;
@@ -638,6 +626,8 @@
 {%- unless settings.type_btn_font.system? -%}
   <link rel="preload" as="font" href="{{ settings.type_btn_font | font_url }}" type="font/woff2" crossorigin>
 {%- endunless -%}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 
 {{ 'theme.css' | asset_url | stylesheet_tag }}
 
@@ -761,6 +751,8 @@
 {%- if template.name == 'product' -%}
   <link rel="stylesheet" href="{{ 'side-drawer.css' | asset_url }}">
   <script src="{{ 'side-drawer.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'webgi-loader.js' | asset_url }}" defer="defer"></script>
+  <link rel="preload" href="https://releases.ijewel3d.com/webgi/runtime/viewer-0.9.19.js" as="script" crossorigin>
 {%- endif -%}
 {%- if request.design_mode -%}
   <script

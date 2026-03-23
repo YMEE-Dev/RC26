@@ -1,0 +1,407 @@
+<!-- /sections/section-store-locator.liquid -->
+{{ 'store-locator.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+-%}
+
+{%- style -%}
+  #StoreLocator--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    --bg-color: {{ section.settings.background_color }};
+    /* padding-inline:  var(--outer); */
+    overflow: hidden;
+  }
+{%- endstyle -%}
+
+<section
+  id="StoreLocator--{{ section.id }}"
+  class="store-locator section-padding {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="store-locator"
+  data-enable-fetch="{{ section.settings.enable_fetch_from_app }}"
+  style="background-color: var(--bg-color);"
+>
+  <div class="store-locator__wrapper {{ section.settings.width }}">
+    <div class="store-locator__header">
+      <div class="store-locator__header-content">
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+            {%- when 'subheading' -%}
+              <p class="store-locator__subheading" {{ block.shopify_attributes }}>
+                {{ block.settings.text | upcase }}
+              </p>
+            
+            {%- when 'heading' -%}
+              <h2 class="store-locator__heading {{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
+                {{ block.settings.text }}
+              </h2>
+          {%- endcase -%}
+        {%- endfor -%}
+      </div>
+      
+      <div class="store-locator__header-button">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'button' -%}
+            <a
+              href="{{ block.settings.link | default: '#' }}"
+              class="store-locator__button"
+              {{ block.shopify_attributes }}
+            >
+              {{ block.settings.text | upcase }}
+            </a>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+
+    {%- assign location_blocks = section.blocks | where: 'type', 'location_card' -%}
+    {%- if location_blocks.size > 0 -%}
+      <div class="store-locator__carousel-container">
+        <div class="swiper store-locator__swiper">
+          <div class="swiper-wrapper">
+            {%- for block in location_blocks -%}
+              <div class="swiper-slide" {{ block.shopify_attributes }}>
+                <div class="store-locator__card">
+                  {%- if block.settings.image != blank -%}
+                    <div class="store-locator__card-image">
+                      {{ block.settings.image | image_url: width: 800 | image_tag: loading: 'lazy' }}
+                    </div>
+                  {%- else -%}
+                    <div class="store-locator__card-placeholder">
+                      {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                    </div>
+                  {%- endif -%}
+
+                  <div class="store-locator__card-content">
+                    {%- if block.settings.subheading != blank -%}
+                      <p class="store-locator__card-subheading">{{ block.settings.subheading | upcase }}</p>
+                    {%- endif -%}
+                    {%- if block.settings.heading != blank -%}
+                      <h3 class="store-locator__card-heading">{{ block.settings.heading }}</h3>
+                    {%- endif -%}
+                  </div>
+                </div>
+              </div>
+            {%- endfor -%}
+          </div>
+          
+          <!-- Navigation buttons -->
+          {% comment %} <div class="swiper-button-prev store-locator__nav-prev"></div>
+          <div class="swiper-button-next store-locator__nav-next"></div> {% endcomment %}
+        </div>
+      </div>
+    {%- endif -%}
+
+    <!-- Loading state for app fetch -->
+    <div class="store-locator__loading" id="storeLocatorLoading--{{ section.id }}" style="display: none;">
+      <div class="spinner"></div>
+      <p>Loading boutiques...</p>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function() {
+    const sectionId = '{{ section.id }}';
+    const swiperInstances = window.__storeLocatorSwipers || {};
+    window.__storeLocatorSwipers = swiperInstances;
+
+    function initStoreLocatorSection() {
+      const section = document.querySelector('[data-section-id="' + sectionId + '"]');
+      if (!section) return;
+
+      const enableFetch = section.dataset.enableFetch === 'true';
+
+      function initSwiper() {
+        if (typeof Swiper === 'undefined') return;
+        var el = document.querySelector('#StoreLocator--' + sectionId + ' .store-locator__swiper');
+        if (!el) return;
+
+        if (swiperInstances[sectionId]) {
+          swiperInstances[sectionId].destroy(true, true);
+          delete swiperInstances[sectionId];
+        }
+
+        swiperInstances[sectionId] = new Swiper(el, {
+          slidesPerView: 1,
+          spaceBetween: 80,
+          loop: false,
+          smooth: true,
+          breakpoints: {
+            640: { slidesPerView: 2, spaceBetween: 80 },
+            990: { slidesPerView: 2.7, spaceBetween: 80 },
+            1200: { slidesPerView: 2.7, spaceBetween: 80 }
+          }
+        });
+      }
+
+      function renderLocations(locations) {
+        const swiperWrapper = section.querySelector('.swiper-wrapper');
+        if (!swiperWrapper) return;
+        swiperWrapper.innerHTML = '';
+
+        locations.forEach(location => {
+          const slide = document.createElement('div');
+          slide.className = 'swiper-slide';
+          slide.innerHTML = `
+            <div class="store-locator__card">
+              ${location.image 
+                ? `<div class="store-locator__card-image"><img src="${location.image}" alt="${location.name}" loading="lazy"></div>`
+                : `<div class="store-locator__card-placeholder"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 525.5 525.5"><path d="M375 262.7L262.7 375 150.4 262.7l112.3-112.3z"/></svg></div>`
+              }
+              <div class="store-locator__card-content">
+                ${location.subheading ? `<p class="store-locator__card-subheading">${location.subheading.toUpperCase()}</p>` : ''}
+                ${location.name ? `<h3 class="store-locator__card-heading">${location.name}</h3>` : ''}
+              </div>
+            </div>
+          `;
+          swiperWrapper.appendChild(slide);
+        });
+      }
+
+      if (enableFetch) {
+        const loading = document.getElementById('storeLocatorLoading--' + sectionId);
+        const carousel = section.querySelector('.store-locator__carousel-container');
+        loading.style.display = 'flex';
+        if (carousel) carousel.style.display = 'none';
+
+        fetch('/apps/store-locator/locations')
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.locations && data.locations.length > 0) renderLocations(data.locations);
+            loading.style.display = 'none';
+            if (carousel) carousel.style.display = 'block';
+            initSwiper();
+          })
+          .catch(function(err) {
+            console.error('Error fetching locations:', err);
+            loading.style.display = 'none';
+            if (carousel) carousel.style.display = 'block';
+            initSwiper();
+          });
+      } else {
+        initSwiper();
+      }
+    }
+
+    function runInit() {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initStoreLocatorSection);
+      } else {
+        initStoreLocatorSection();
+      }
+    }
+
+    runInit();
+
+    document.addEventListener('shopify:section:load', function(event) {
+      const loadedSection = event.target?.querySelector?.('[data-section-id]') || event.target;
+      const isOurSection = (loadedSection && loadedSection.dataset?.sectionId === sectionId) ||
+        (event.detail && String(event.detail.sectionId) === String(sectionId));
+      if (isOurSection) {
+        initStoreLocatorSection();
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Store locator",
+  "tag": "section",
+  "class": "section-store-locator",
+  "blocks": [
+    {
+      "type": "subheading",
+      "name": "Subheading",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Store Locator"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "name": "Heading",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Find a Boutique"
+        },
+        {
+          "type": "select",
+          "id": "heading_size",
+          "label": "Heading size",
+          "default": "heading-large",
+          "options": [
+            { "value": "heading-small", "label": "Small" },
+            { "value": "heading-medium", "label": "Medium" },
+            { "value": "heading-large", "label": "Large" },
+            { "value": "heading-x-large", "label": "Extra large" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "name": "Button",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Button text",
+          "default": "Find the nearest"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Button link"
+        }
+      ]
+    },
+    {
+      "type": "location_card",
+      "name": "Location card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "Roberto Coin"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Venice"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Normal" },
+        { "value": "wrapper--narrow", "label": "Narrow" },
+        { "value": "wrapper--custom", "label": "Custom (max-width: 1232px)" }  
+      ]
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#F9F9F9"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 60
+    },
+    {
+      "type": "header",
+      "content": "App Integration"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_fetch_from_app",
+      "label": "Enable fetch from app",
+      "info": "Fetch locations dynamically from an app/API instead of using static blocks",
+      "default": false
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Store locator",
+      "category": "Store",
+      "blocks": [
+        {
+          "type": "subheading",
+          "settings": {
+            "text": "Store Locator"
+          }
+        },
+        {
+          "type": "heading",
+          "settings": {
+            "text": "Find a Boutique"
+          }
+        },
+        {
+          "type": "button",
+          "settings": {
+            "text": "Find the nearest"
+          }
+        },
+        {
+          "type": "location_card",
+          "settings": {
+            "subheading": "Roberto Coin",
+            "heading": "Venice"
+          }
+        },
+        {
+          "type": "location_card",
+          "settings": {
+            "subheading": "Roberto Coin",
+            "heading": "Rome"
+          }
+        },
+        {
+          "type": "location_card",
+          "settings": {
+            "subheading": "Roberto Coin",
+            "heading": "Florence"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "aside", "footer"]
+  }
+}
+{% endschema %}

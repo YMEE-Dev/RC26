@@ -1,0 +1,553 @@
+<!-- /sections/section-blog-listing.liquid -->
+{{ 'blog-listing.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  comment
+    Blog is from the URL (e.g. /blogs/celebrity). On a blog template, Shopify exposes the global `blog` object.
+  endcomment
+  assign blog_links = section.blocks | where: 'type', 'blog_link'
+  assign articles_per_page = section.settings.articles_per_page | default: 9
+-%}
+
+{%- style -%}
+#BlogListing--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    --grid-cols: {{ section.settings.columns }};
+
+    /* padding-inline:  var(--outer); */
+  }
+#shopify-section-{{ section.id }} .blog-listing-section-wrapper__inner {
+  border-bottom: 1px solid #e5e5e5; 
+}
+#shopify-section-{{ section.id }} .blog-listing-section {
+  background-color: #F9F9F9;
+}
+{%- endstyle -%}
+<section class="blog-listing-section-wrapper">
+  <div class="blog-listing-section-wrapper__inner">
+    <div class="blog-listing__bar {{ section.settings.width }}" >
+      <a href="/blogs/all" class="blog-listing__view-all main-blog__filter-tag {% if blog.handle == 'all' %}main-blog__filter-tag--active{% endif %}">
+        {{ section.settings.view_all_text | default: 'View all' | upcase }}
+      </a>
+      {%- if blog_links.size > 0 -%}
+        <nav class="blog-listing__nav" id="blogNav" aria-label="Blog categories"></nav>
+      {%- endif -%}
+    </div>
+  </div>
+  
+</section>
+<section
+  id="BlogListing--{{ section.id }}"
+  class="blog-listing-section section-padding {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="blog-listing"
+>
+  <div class="blog-listing__wrapper {{ section.settings.width }}">
+ 
+
+    {%- if blog != blank -%}
+      {%- paginate blog.articles by articles_per_page -%}
+        <div class="blog-listing__grid">
+          <div class="blog-loading" id="blogLoading">
+            <div class="spinner"></div>
+          </div>
+        </div>
+
+        <div class="custom-js-pagination" data-total-pages="0" data-current-page="1"></div>
+       
+      {%- endpaginate -%}
+    {%- else -%}
+      <p class="blog-listing__empty">{{ section.settings.empty_message | default: 'Add this section to a blog template to show articles (e.g. from /blogs/celebrity).' }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+<script>
+  /* -----------------------------
+  CUSTOM PAGINATION CLASS
+  ----------------------------- */
+  class CustomPagination {
+    constructor(container, options = {}) {
+      this.container = container;
+      this.currentPage = parseInt(container.dataset.currentPage) || 1;
+      this.totalPages = parseInt(container.dataset.totalPages) || 1;
+      this.onPageChange = options.onPageChange || (() => {});
+      
+      this.render();
+    }
+
+    setPage(page) {
+      if (page < 1 || page > this.totalPages) return;
+      this.currentPage = page;
+      this.container.dataset.currentPage = page;
+      this.render();
+      this.onPageChange(page);
+    }
+
+    setTotalPages(total) {
+      this.totalPages = total;
+      this.container.dataset.totalPages = total;
+      this.render();
+    }
+
+    render() {
+      if (this.totalPages <= 1) {
+        this.container.innerHTML = '';
+        return;
+      }
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'custom-js-pagination__container';
+
+      // Previous button
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'custom-js-pagination__link custom-js-pagination__prev';
+      prevBtn.innerHTML = '<span>PREV</span>';
+      prevBtn.disabled = this.currentPage === 1;
+      prevBtn.addEventListener('click', () => this.setPage(this.currentPage - 1));
+      wrapper.appendChild(prevBtn);
+
+      // Numbers
+      const numbers = document.createElement('div');
+      numbers.className = 'custom-js-pagination__numbers';
+      
+      const pageNumbers = this.getPageNumbers();
+      pageNumbers.forEach((num) => {
+        if (num === '...') {
+          const ellipsis = document.createElement('span');
+          ellipsis.className = 'custom-js-pagination__ellipsis';
+          ellipsis.textContent = '...';
+          numbers.appendChild(ellipsis);
+        } else {
+          const btn = document.createElement('button');
+          btn.className = 'custom-js-pagination__number';
+          if (num === this.currentPage) {
+            btn.classList.add('custom-js-pagination__number--current');
+          }
+          btn.textContent = num;
+          btn.addEventListener('click', () => this.setPage(num));
+          numbers.appendChild(btn);
+        }
+      });
+      
+      wrapper.appendChild(numbers);
+
+      // Next button
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'custom-js-pagination__link custom-js-pagination__next';
+      nextBtn.innerHTML = '<span>NEXT</span>';
+      nextBtn.disabled = this.currentPage === this.totalPages;
+      nextBtn.addEventListener('click', () => this.setPage(this.currentPage + 1));
+      wrapper.appendChild(nextBtn);
+
+      this.container.innerHTML = '';
+      this.container.appendChild(wrapper);
+    }
+
+    getPageNumbers() {
+      const pages = [];
+      const showMax = 5;
+
+      if (this.totalPages <= showMax) {
+        for (let i = 1; i <= this.totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        if (this.currentPage <= 3) {
+          for (let i = 1; i <= 4; i++) pages.push(i);
+          pages.push('...');
+          pages.push(this.totalPages);
+        } else if (this.currentPage >= this.totalPages - 2) {
+          pages.push(1);
+          pages.push('...');
+          for (let i = this.totalPages - 3; i <= this.totalPages; i++) pages.push(i);
+        } else {
+          pages.push(1);
+          pages.push('...');
+          pages.push(this.currentPage - 1);
+          pages.push(this.currentPage);
+          pages.push(this.currentPage + 1);
+          pages.push('...');
+          pages.push(this.totalPages);
+        }
+      }
+
+      return pages;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const STOREFRONT_TOKEN = "{{ shop.metaobjects.storefront_access_token.value }}";
+    const SHOP_DOMAIN = "{{ shop.domain }}";
+      /* -----------------------------
+  NAVIGATION (Blogs)
+  ----------------------------- */
+    const query = `
+    {
+      blogs(first: 50) {
+        nodes {
+          handle
+          title
+        }
+      }
+    }
+    `;
+    
+    fetch(`https://${SHOP_DOMAIN}/api/2026-01/graphql.json`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": STOREFRONT_TOKEN
+      },
+      body: JSON.stringify({ query })
+    })
+    .then(res => res.json())
+    .then(data => {
+      const blogs = data.data.blogs.nodes
+        .filter(blog => !'{{ section.settings.tag_to_exclude }}'.includes(blog.handle))
+        .sort((a, b) => a.title.localeCompare(b.title));
+      const nav = document.getElementById("blogNav");
+      const dropdown = document.getElementById("blogDropdown");
+    
+      blogs.forEach(blog => {
+        
+        // Create nav link
+        const link = document.createElement("a");
+        link.href = `/blogs/${blog.handle}`;
+        link.className = "main-blog__filter-tag";
+        if (blog.handle === "{{ blog.handle }}") {
+          link.classList.add('main-blog__filter-tag--active');
+        }
+        link.textContent = blog.title.toUpperCase();
+        nav.appendChild(link);
+      });
+      
+      // Add dropdown change event
+      dropdown.addEventListener('change', function() {
+        if (this.value) {
+          window.location.href = this.value;
+        }
+      });
+    });
+
+      /* -----------------------------
+  ARTICLES (All Blogs) 
+  ----------------------------- */
+  
+  // Get current blog handle from URL
+  const currentPath = window.location.pathname;
+  const blogMatch = currentPath.match(/\/blogs\/([^\/]+)/);
+  const currentBlogHandle = blogMatch ? blogMatch[1] : 'all';
+  const isAllBlogs = currentBlogHandle === 'all';
+
+  // Build GraphQL query based on blog
+  const articleQuery = isAllBlogs 
+    ? `{
+        articles(first: 250, sortKey: PUBLISHED_AT, reverse: true) {
+          nodes {
+            title
+            handle
+            excerpt
+            tags
+            image {
+              url
+              altText
+            }
+            blog {
+              handle
+            }
+          }
+        }
+      }`
+    : `{
+        blog(handle: "${currentBlogHandle}") {
+          articles(first: 250, sortKey: PUBLISHED_AT, reverse: true) {
+            nodes {
+              title
+              handle
+              excerpt
+              tags
+              image {
+                url
+                altText
+              }
+              blog {
+                handle
+              }
+            }
+          }
+        }
+      }`;
+
+  let allArticles = [];
+  let currentPage = 1;
+  const articlesPerPage = 9;
+
+  // Function to capitalize first letter of each word
+  function capitalizeTitle(str) {
+    return str
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  function renderArticles(page) {
+    const grid = document.querySelector(".blog-listing__grid");
+    grid.innerHTML = '';
+    
+    const startIndex = (page - 1) * articlesPerPage + 1; // +1 to skip first article
+    const endIndex = startIndex + articlesPerPage;
+    const articlesToShow = allArticles.slice(startIndex, endIndex);
+
+    articlesToShow.forEach((article) => {
+      const image = article.image?.url || "";
+      const tag = article.tags[0] || "";
+      const url = `/blogs/${article.blog.handle}/${article.handle}`;
+      const title = capitalizeTitle(article.title);
+      const html = `
+        <article class="blog-listing__card">
+          <a href="${url}" class="blog-listing__card-link">
+
+            <div class="blog-listing__card-media">
+              ${image 
+                ? `<img src="${image}" alt="${article.title}" width="1000" height="1000">`
+                : `<div class="placeholder">No Image</div>`
+              }
+            </div>
+
+            <div class="blog-listing__card-body">
+              ${article.blog.handle ? `<p class="blog-listing__card-tag">#${article.blog.handle.toUpperCase()}</p>` : ""}
+              <h2 class="blog-listing__card-title heading-x-large">${title}</h2>
+              <p class="blog-listing__card-excerpt">${article.excerpt || ""}</p>
+            </div>
+
+          </a>
+        </article>
+      `;
+
+      grid.insertAdjacentHTML("beforeend", html);
+    });
+
+    // Removed auto-scroll to prevent unwanted scrolling when changing categories
+  }
+
+  fetch(`https://${SHOP_DOMAIN}/api/2026-01/graphql.json`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Shopify-Storefront-Access-Token": STOREFRONT_TOKEN
+    },
+    body: JSON.stringify({ query: articleQuery })
+  })
+  .then(res => res.json())
+  .then(data => {
+    // Get articles based on query type
+    if (isAllBlogs) {
+      allArticles = data.data.articles.nodes;
+    } else {
+      allArticles = data.data.blog?.articles?.nodes || [];
+    }
+    
+    const grid = document.querySelector(".blog-listing__grid");
+    const loader = document.getElementById("blogLoading");
+    loader.remove();
+
+    // Calculate total pages (excluding first article)
+    const totalArticles = allArticles.length - 1; // -1 to exclude first article
+    const totalPages = Math.ceil(totalArticles / articlesPerPage);
+
+    // Render first page
+    renderArticles(1);
+
+    // Initialize pagination
+    const paginationEl = document.querySelector(".custom-js-pagination");
+    if (paginationEl && totalPages > 1) {
+      const pagination = new CustomPagination(paginationEl, {
+        onPageChange: (page) => {
+          currentPage = page;
+          renderArticles(page);
+        }
+      });
+      pagination.setTotalPages(totalPages);
+      pagination.setPage(1);
+    }
+  });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Blog listing",
+  "tag": "section",
+  "class": "section-blog-listing",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Filter bar"
+    },
+    {
+      "type": "text",
+      "id": "tag_to_exclude",
+      "label": "Tag to exclude",
+      "default": "all, uncategorized, default-blog",
+      "info": "Enter tags to exclude from the navigation, separated by commas."
+    },
+    {
+      "type": "text",
+      "id": "view_all_text",
+      "label": "View all label",
+      "default": "View all"
+    },
+    {
+      "type": "article_list",
+      "id": "featured_articles",
+      "label": "Featured articles",
+      "limit": 12
+    },
+
+    {
+      "type": "header",
+      "content": "Blog grid"
+    },
+    {
+      "type": "range",
+      "id": "articles_per_page",
+      "min": 6,
+      "max": 24,
+      "step": 3,
+      "label": "Articles per page",
+      "default": 9,
+      "info": "Articles are from the current blog (e.g. /blogs/celebrity). Add this section to a blog template."
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "min": 2,
+      "max": 4, 
+      "step": 1,
+      "label": "Columns (desktop)",
+      "default": 3
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tag",
+      "label": "Show category tag",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_excerpt",
+      "label": "Show excerpt",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "excerpt_words",
+      "min": 10,
+      "max": 40,
+      "step": 2,
+      "label": "Excerpt length",
+      "default": 20
+    },
+    {
+      "type": "select",
+      "id": "title_font_size",
+      "label": "Title size",
+      "default": "heading-small",
+      "options": [
+        { "value": "heading-mini", "label": "Mini" },
+        { "value": "heading-x-small", "label": "Extra small" },
+        { "value": "heading-small", "label": "Small" },
+        { "value": "heading-medium", "label": "Medium" },
+        { "value": "heading-large", "label": "Large" },
+        { "value": "heading-x-large", "label": "Extra large" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Normal" },
+        { "value": "wrapper--wide", "label": "Wide" },
+        { "value": "wrapper--narrow", "label": "Narrow" },
+        { "value": "wrapper--custom", "label": "Custom (max-width: 1232px)" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 40
+    },
+    {
+      "type": "text",
+      "id": "empty_message",
+      "label": "Empty message",
+      "default": "Add this section to a blog template to show articles (e.g. from /blogs/celebrity)."
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "blog_link",
+      "name": "Blog link",
+      "settings": [
+        {
+          "type": "blog",
+          "id": "blog",
+          "label": "Blog"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "info": "Leave blank to use the blog title (e.g. Celebrity, Culture)."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blog listing",
+      "category": "Blog",
+      "blocks": [
+        { "type": "blog_link", "settings": { "label": "Celebrity" } },
+        { "type": "blog_link", "settings": { "label": "Culture" } },
+        { "type": "blog_link", "settings": { "label": "Style" } },
+        { "type": "blog_link", "settings": { "label": "Travel" } }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "aside", "footer"]
+  }
+}
+{% endschema %}

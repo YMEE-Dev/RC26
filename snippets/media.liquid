@@ -119,20 +119,29 @@
         </button>
 
         <template>
-          {%- liquid
-            case media.media_type
-              when 'model'
-                echo media | model_viewer_tag: image_size: image_size, toggleable: true, data-model-id: media.id
-              when 'video'
-                echo media | media_tag: image_size: image_size, class: 'media-video', autoplay: true, loop: enable_video_looping, controls: true, preload: 'none'
-              when 'external_video'
-                if media.host == 'youtube'
-                  echo media | external_video_url: autoplay: true, playsinline: true, loop: enable_video_looping, playlist: media.external_id | external_video_tag: loading: 'lazy', data-host: media.host
-                else
-                  echo media | external_video_url: autoplay: true, playsinline: true, loop: enable_video_looping | external_video_tag: loading: 'lazy', data-host: media.host
-                endif
-            endcase
-          -%}
+          {%- if media.media_type == 'model' -%}
+            {%- assign glb_source = media.sources | where: 'format', 'glb' | first -%}
+            <div
+              class="webgi-container"
+              data-webgi-src="{{ glb_source.url }}"
+              data-model-id="{{ media.id }}"
+              data-section-id="{{ sectionkey }}"
+              style="width: 100%; height: 100%; position: relative;"
+            ></div>
+          {%- else -%}
+            {%- liquid
+              case media.media_type
+                when 'video'
+                  echo media | media_tag: image_size: image_size, class: 'media-video', autoplay: true, loop: enable_video_looping, controls: true, preload: 'none'
+                when 'external_video'
+                  if media.host == 'youtube'
+                    echo media | external_video_url: autoplay: true, playsinline: true, loop: enable_video_looping, playlist: media.external_id | external_video_tag: loading: 'lazy', data-host: media.host
+                  else
+                    echo media | external_video_url: autoplay: true, playsinline: true, loop: enable_video_looping | external_video_tag: loading: 'lazy', data-host: media.host
+                  endif
+              endcase
+            -%}
+          {%- endif -%}
         </template>
 
     {%- if media.media_type == 'model' -%}

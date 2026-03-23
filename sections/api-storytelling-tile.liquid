@@ -1,0 +1,56 @@
+{% comment %}
+  API section: renders a storytelling tile for a storytelling product.
+
+  Usage (section rendering API — call on the STORYTELLING product's page):
+  GET /products/{storytelling-handle}?section_id=api-storytelling-tile&target_id={current-product-id}
+
+  `product` in this context IS the storytelling product.
+  `target_id` is the ID of the product we want to check is in ste_products.
+{% endcomment %}
+
+{%- liquid
+  assign debug_ste_count = 0
+  assign debug_ste_ids_str = ''
+
+  assign st_type = product.type | downcase
+  if st_type == 'storytelling' or st_type contains 'storytelling'
+    assign ste_prods = product.metafields.custom.ste_products.value
+    if ste_prods != blank
+      assign debug_ste_count = ste_prods.size
+      assign ste_ids = ste_prods | map: 'id'
+      for sid in ste_ids
+        assign sid_str = sid | append: ''
+        assign debug_ste_ids_str = debug_ste_ids_str | append: sid_str | append: ','
+      endfor
+    endif
+  endif
+-%}
+
+{% comment %}
+<!-- [api-storytelling-tile DEBUG]
+  product: {{ product.title | json }} (type: {{ product.type }}, handle: {{ product.handle }})
+  ste_products count: {{ debug_ste_count }}
+  ste_ids: [{{ debug_ste_ids_str }}]
+-->
+{% endcomment %}
+
+{%- if debug_ste_count > 0 -%}
+  <div
+    data-storytelling-match="true"
+    data-storytelling-handle="{{ product.handle }}"
+    data-storytelling-created="{{ product.created_at | date: '%s' }}"
+    data-storytelling-ste-ids="{{ debug_ste_ids_str }}"
+  >
+    {{ 'custom-collection.css' | asset_url | stylesheet_tag }}
+    {%- render 'product-tile-storytelling', product: product, index: product.id, pdp_mode: true -%}
+  </div>
+{%- else -%}
+  <div data-storytelling-match="false"></div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "API Storytelling Tile",
+  "settings": []
+}
+{% endschema %}

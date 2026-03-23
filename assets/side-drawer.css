@@ -27,12 +27,12 @@ side-drawer .drawer__inner {
   position: fixed;
   top: 0;
   left: 100vw;
-  z-index: 6001;
+  z-index: 6002;
   display: flex;
   flex-direction: column;
   height: 100%;
   width: 100%;
-  border-left: 1px solid var(--border);
+  border-left: 1px solid #e5e5e5;
   background: var(--bg);
   transition: transform 0.3s ease;
 }
@@ -40,7 +40,7 @@ side-drawer .drawer__inner {
 side-drawer.side-drawer--from-right .drawer__inner {
   left: 100vw;
   right: auto;
-  border-left: 1px solid var(--border);
+  border-left: 1px solid #e5e5e5;
   border-right: 0;
 }
 
@@ -48,7 +48,7 @@ side-drawer.side-drawer--from-left .drawer__inner {
   left: auto;
   right: 100vw;
   border-left: 0;
-  border-right: 1px solid var(--border);
+  border-right: 1px solid #e5e5e5;
 }
 
 side-drawer.side-drawer--from-bottom .drawer__inner {
@@ -60,7 +60,7 @@ side-drawer.side-drawer--from-bottom .drawer__inner {
   height: var(--side-drawer-height, 60vh);
   border-left: 0;
   border-right: 0;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid #e5e5e5;
 }
 
 side-drawer.side-drawer--from-right.is-open .drawer__inner {
@@ -193,7 +193,6 @@ side-drawer.side-drawer--from-bottom.is-closing .drawer__inner {
   }
 }
 
-
 side-drawer .drawer__close {
   position: absolute;
   top: 40px;
@@ -271,11 +270,11 @@ side-drawer .drawer-content__title--nav {
   margin-bottom: 10px;
   color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-BODY);
-  font-size: var(--font-body-x-small);
+  font-size: var(--FONT-SIZE-CAPTION);
   font-style: var(--FONT-STYLE-BODY);
   font-weight: var(--FONT-WEIGHT-BODY);
   line-height: 20px;
-  letter-spacing: 1.2px;
+  letter-spacing: var(--LETTER-SPACING-NAV);
   text-transform: uppercase;
 }
 
@@ -288,6 +287,10 @@ side-drawer .drawer-content__description {
   font-weight: var(--FONT-WEIGHT-BODY);
   line-height: var(--LINE-HEIGHT-BODY);
   letter-spacing: var(--LETTER-SPACING-BODY);
+}
+
+side-drawer .drawer-content__description p {
+  margin-bottom: 1rem;
 }
 
 side-drawer .drawer__section {
@@ -341,7 +344,7 @@ side-drawer .drawer__link {
   padding: 12px 0;
   text-decoration: none;
   color: var(--COLOR-TEXT);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid #e5e5e5;
   transition: opacity 0.2s ease;
   font-family: var(--FONT-STACK-BODY);
   font-size: var(--font-body-medium);
@@ -381,25 +384,30 @@ side-drawer .drawer__link-content {
 side-drawer .drawer__link-text {
   color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-BODY);
-  font-size: var(--FONT-SIZE-LABEL);
+  font-size: var(--BTN-FONT-SIZE);
   font-style: var(--FONT-STYLE-BODY);
-  font-weight: var(--FONT-WEIGHT-BODY-BOLD);
-  line-height: var(--LINE-HEIGHT-LABEL);
-  letter-spacing: var(--LETTER-SPACING-BODY);
-  text-transform: var(--BTN-UPPERCASE);
-}
-
-side-drawer .drawer__link-value {
-  color: var(--text-a50);
-  font-family: var(--FONT-STACK-NAV);
-  font-size: var(--FONT-SIZE-NAV);
-  font-style: var(--FONT-STYLE-NAV);
-  font-weight: var(--FONT-WEIGHT-NAV);
-  line-height: var(--LINE-HEIGHT-NAV);
+  font-weight: 600;
+  line-height: var(--LINE-HEIGHT-CAPTION);
   letter-spacing: var(--LETTER-SPACING-NAV);
   text-transform: var(--BTN-UPPERCASE);
 }
 
+side-drawer .drawer__link-value {
+  color: var(--COLOR-TEXT-A50);
+  font-family: var(--FONT-STACK-NAV);
+  font-size: var(--FONT-SIZE-NAV);
+  font-style: var(--FONT-STYLE-NAV);
+  font-weight: var(--FONT-WEIGHT-NAV);
+  line-height: var(--LINE-HEIGHT-CAPTION);
+  letter-spacing: var(--LETTER-SPACING-NAV);
+  text-transform: var(--BTN-UPPERCASE);
+}
+
+@media (max-width: 767px) {
+  side-drawer .drawer-concierge .drawer__link-value {
+    display: none;
+  }
+}
 
 side-drawer .drawer__button {
   color: var(--COLOR-TEXT);
@@ -431,7 +439,7 @@ side-drawer .form-section__title {
   font-weight: var(--FONT-WEIGHT-BODY-BOLD);
   text-transform: var(--BTN-UPPERCASE);
   letter-spacing: var(--LETTER-SPACING-BODY);
-  color: var(--text-a50);
+  color: var(--COLOR-TEXT-A50);
 }
 
 side-drawer .form-field__label {
@@ -440,13 +448,13 @@ side-drawer .form-field__label {
   font-weight: var(--FONT-WEIGHT-BODY-BOLD);
   text-transform: var(--BTN-UPPERCASE);
   letter-spacing: var(--LETTER-SPACING-BODY);
-  color: var(--text-a50);
+  color: var(--COLOR-TEXT-A50);
 }
 
 side-drawer .form-field__input {
   padding: 12px 16px;
   border: none;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid #e5e5e5;
   border-radius: 0;
   font-family: var(--FONT-STACK-BODY);
   font-size: var(--FONT-SIZE-INPUT-TEXT);
@@ -464,7 +472,7 @@ side-drawer .form-field__input:focus {
 
 side-drawer .form-field__textarea {
   padding: 12px 16px;
-  border: 1px solid var(--border);
+  border: 1px solid #e5e5e5;
   border-radius: var(--RADIUS);
   font-family: var(--FONT-STACK-BODY);
   font-size: var(--FONT-SIZE-INPUT-TEXT);
@@ -504,7 +512,6 @@ side-drawer .form__status--success {
   color: var(--COLOR-SUCCESS);
   border: 1px solid var(--COLOR-SUCCESS);
 }
-
 
 side-drawer .hint-form__status {
   margin: 0;
@@ -577,7 +584,7 @@ side-drawer .btn--primary:hover {
 side-drawer .btn--secondary {
   background-color: transparent;
   color: var(--COLOR-TEXT);
-  border: 1px solid var(--border);
+  border: 1px solid #e5e5e5;
 }
 
 side-drawer .btn--secondary:hover {
@@ -598,22 +605,25 @@ side-drawer .drawer-content__accordions {
 }
 
 side-drawer .accordion {
-  border-bottom: 1px solid #D6D6D6;
+  border-bottom: 1px solid #e5e5e5;
   border-top: none;
 }
 
 side-drawer .accordion__title {
   padding: 13px 0px;
   cursor: pointer;
-  font-size: var(--font-body-small);
+  color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-BODY);
+  font-size: var(--FONT-SIZE-CAPTION);
   font-style: var(--FONT-STYLE-BODY);
   font-weight: var(--FONT-WEIGHT-BODY);
-  letter-spacing: var(--LETTER-SPACING-BODY);
+  letter-spacing: var(--LETTER-SPACING-NAV);
+  line-height: var(--LINE-HEIGHT-BODY);
   text-transform: uppercase;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
 }
 
 side-drawer .accordion__title::after {
@@ -624,40 +634,90 @@ side-drawer .accordion__title .accordion-icon-wrapper {
   margin-left: auto;
   display: flex;
   align-items: center;
+  position: relative;
+  width: 12px;
+  height: 12px;
 }
 
 side-drawer .accordion__title .accordion-icon-wrapper .icon {
-  width: 18px;
-  height: 18px;
-  left: auto;
-  right: 0;
-  transition: transform 0.3s ease;
+  width: 12px;
+  height: 12px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+side-drawer .accordion__title .accordion-icon-wrapper .icon path {
+  stroke-width: 2px;
 }
 
 side-drawer .accordion[open] .accordion-icon-wrapper .icon-plus {
-  display: none;
+  opacity: 0;
+  transform: scale(0.8);
 }
 
 side-drawer .accordion[open] .accordion-icon-wrapper .icon-minus {
-  display: block;
+  opacity: 1;
+  transform: scale(1);
 }
 
 side-drawer .accordion:not([open]) .accordion-icon-wrapper .icon-plus {
-  display: block;
+  opacity: 1;
+  transform: scale(1);
 }
 
 side-drawer .accordion:not([open]) .accordion-icon-wrapper .icon-minus {
-  display: none;
+  opacity: 0;
+  transform: scale(0.8);
 }
 
 side-drawer .accordion__content {
   color: var(--COLOR-TEXT);
-  font-size: var(--font-body-small);
+  font-size: var(--FONT-SIZE-BASE);
   font-family: var(--FONT-STACK-BODY);
   font-style: var(--FONT-STYLE-BODY);
   font-weight: var(--FONT-WEIGHT-BODY);
   letter-spacing: var(--LETTER-SPACING-BODY);
-  text-transform: uppercase;
+}
+
+/* Smooth accordion animations for drawer */
+side-drawer [data-collapsible-body] {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+  transition: height 0.3s ease;
+}
+
+side-drawer [data-collapsible-content] {
+  display: grid;
+  grid-template-columns: 100%;
+}
+
+side-drawer [data-collapsible][open="false"] [data-collapsible-content] {
+  animation: fadeOut 0.3s ease-in;
+}
+
+side-drawer [data-collapsible][open="true"] [data-collapsible-content] {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 @media (max-width: 768px) {
@@ -665,7 +725,7 @@ side-drawer .accordion__content {
     max-width: 100%;
     width: calc(100% + 32px);
   }
-  
+
   side-drawer .btn {
     padding: 14px 20px;
     font-size: 14px;
@@ -682,7 +742,9 @@ side-drawer.drawer-overlay {
   z-index: 999;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
 }
 
 side-drawer.drawer-overlay[aria-hidden="false"] {
@@ -700,7 +762,9 @@ side-drawer .drawer__underlay {
   z-index: 6000;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
 }
 
 side-drawer.is-open .drawer__underlay,
@@ -709,22 +773,25 @@ side-drawer[aria-hidden="false"] .drawer__underlay {
   visibility: visible;
 }
 
-
 @media only screen and (max-width: 749px) {
   side-drawer .drawer__content-wrapper {
     padding: 20px;
   }
-  
+
   side-drawer .drawer__close {
     top: 20px;
     right: 20px;
   }
 }
- 
-@media only screen and (max-width: 479px) { }
- 
-@media only screen and (min-width: 750px) and (max-width: 989px) { }
- 
-@media only screen and (min-width: 990px) { }
- 
-@media only screen and (min-width: 1400px) { }
+
+@media only screen and (max-width: 479px) {
+}
+
+@media only screen and (min-width: 750px) and (max-width: 989px) {
+}
+
+@media only screen and (min-width: 990px) {
+}
+
+@media only screen and (min-width: 1400px) {
+}

@@ -1,0 +1,139 @@
+{% doc %}
+  Renders "The Ruby" fullscreen drawer layout matching the reference design.
+  Supports optional overrides from shop.metafields.info.ruby_signature_info.
+{% enddoc %}
+
+{%- liquid
+  assign ruby_content = nil
+  assign default_image_url = 'https://cdn.shopify.com/s/files/1/0969/2990/7075/files/Jasmine_Ruby_2.png?v=1772635832'
+  assign ruby_title = 'The Ruby'
+  assign ruby_description_fallback = '<p>Roberto Coin chose the ruby as the hidden signature of his creations. Inspired by ancient cultures, where the ruby symbolized protection, vitality and passion, he transformed it into a discreet talisman worn close to the skin.</p><p>Set inside every jewel, the ruby is not meant to be seen — but to be felt. A quiet symbol of strength, courage and enduring beauty that connects each creation to its wearer.</p>'
+
+  if shop.metafields.info.ruby_signature_info != blank
+    assign ruby_content = shop.metafields.info.ruby_signature_info.value
+  endif
+-%}
+
+<div class="drawer-ruby-signature">
+  <div class="drawer-ruby-signature__media">
+    {%- if ruby_content != blank and ruby_content.image != blank -%}
+      {{ ruby_content.image | image_url: width: 1800 | image_tag: loading: 'lazy', widths: '700,900,1200,1600,1800' }}
+    {%- else -%}
+      <img src="{{ default_image_url }}" alt="Ruby signature detail" loading="lazy" width="1800" height="1800">
+    {%- endif -%}
+  </div>
+
+  <div class="drawer-ruby-signature__content">
+    <h2 class="drawer-ruby-signature__title">
+      {%- if ruby_content != blank and ruby_content.title != blank -%}
+        {{ ruby_content.title }}
+      {%- else -%}
+        {{ ruby_title }}
+      {%- endif -%}
+    </h2>
+
+    <div class="drawer-ruby-signature__description">
+      {%- if ruby_content != blank and ruby_content.description != blank -%}
+        {{ ruby_content.description | metafield_tag }}
+      {%- else -%}
+        {{ ruby_description_fallback }}
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .drawer-ruby-signature {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    min-height: 100vh;
+    background: #FFF;
+  }
+
+  .drawer-ruby-signature__media {
+    min-height: 100%;
+  }
+
+  .drawer-ruby-signature__media img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .drawer-ruby-signature__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 480px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 60px 50px;
+  }
+
+  .drawer-ruby-signature__title {
+    color: var(--COLOR-TEXT);
+    font-family: var(--FONT-STACK-HEADING);
+    font-size: var(--font-display-s);
+    font-style: var(--FONT-STYLE-HEADING);
+    font-weight: var(--FONT-WEIGHT-HEADING);
+    line-height: var(--LINE-HEIGHT-DISPLAY-S);
+    letter-spacing: var(--LETTER-SPACING-HEADING);
+    text-transform: var(--FONT-UPPERCASE-HEADING);
+    margin: 0 0 20px;
+  }
+
+  .drawer-ruby-signature__description {
+    color: var(--COLOR-TEXT);
+    font-family: var(--FONT-STACK-BODY);
+    font-size: var(--font-body-medium);
+    font-style: var(--FONT-STYLE-BODY);
+    font-weight: var(--FONT-WEIGHT-BODY);
+    line-height: var(--LINE-HEIGHT-BODY);
+    letter-spacing: var(--LETTER-SPACING-BODY);
+  }
+
+  .drawer-ruby-signature__description p {
+    margin: 0 0 20px;
+  }
+
+  .drawer-ruby-signature__description p:last-child {
+    margin-bottom: 0;
+  }
+
+  @media only screen and (max-width: 1023px) {
+    .drawer-ruby-signature {
+      grid-template-columns: 1fr;
+    }
+
+    .drawer-ruby-signature__media {
+      min-height: 46vh;
+    }
+
+    .drawer-ruby-signature__content {
+      max-width: none;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .drawer-ruby-signature__title {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    /* Move close button to bottom center for ruby signature drawer */
+    #side-drawer-ruby-signature .drawer__close {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      top: auto;
+      right: auto;
+      background-color: transparent;
+    }
+    #side-drawer-ruby-signature .drawer__close:hover {
+      background-color: transparent;
+    }
+  }
+{% endstylesheet %}
