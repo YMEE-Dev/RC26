@@ -25,8 +25,8 @@
 >
   {%- if featured_article != blank -%}
     <div class="blog-celebrity__top">
-      <h1 class="blog-celebrity__title h1">{{ featured_article.title }}</h1>
-      <p class="blog-celebrity__date">
+      <h2 class="blog-celebrity__title h2">{{ featured_article.title }}</h2>
+      <p class="blog-celebrity__date body">
         <time datetime="{{ featured_article.published_at | date: '%Y-%m-%d' }}">
           {{ featured_article.published_at | date: '%B %-d, %Y' }}
         </time>
@@ -38,8 +38,8 @@
         {{
           featured_article.image
           | image_url: width: 2800
-          | image_tag:
-            alt: featured_article.image.alt | default: featured_article.title,
+          | image_tag: alt: featured_article.image.alt
+          | default: featured_article.title,
             widths: '750, 1100, 1500, 2000, 2400, 2800',
             sizes: '100vw',
             loading: 'eager',
