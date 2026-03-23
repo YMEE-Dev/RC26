@@ -145,7 +145,7 @@
 
 <product-info
   id="MainProduct--{{ section.id }}"
-  class="index-product section-padding {{ color_scheme }}"
+  class="index-product section-padding {{ color_scheme }} pdp-dropdown-inline"
   data-section="{{ section.id }}"
   data-section-id="{{ section.id }}"
   data-product-handle="{{ product.handle }}"
@@ -336,6 +336,49 @@
         #MainProduct--{{ section.id }} .product__content-columns__aside .product__block--buttons.has-ymee-color-picker {
           margin-top: calc(var(--pdp-sticky-bar-height, 100px) * -1 - 26px);
           background: transparent;
+        }
+
+        /* ── Desktop dropdown-slide animation (scrollTop === 0) ── */
+        /* Before JS: dropdown hidden (opacity:0). After JS measures (pdp-dropdown-measured):
+           dropdown appears at computed position via transform, title-price shrinks.
+           On scroll: class removed, everything animates back to default. */
+
+        body.template-product {
+          overflow-x: hidden;
+        }
+
+        #MainProduct--{{ section.id }} .product__title-price {
+          overflow: hidden;
+        }
+
+        /* Dropdown gets opacity + transform transitions always so the fade-in is smooth */
+        #MainProduct--{{ section.id }} .product__content-columns__aside .ymee-variant-dropdown,
+        #MainProduct--{{ section.id }} .product__content-columns__aside .ymee-variant-dropdown--form-only {
+          transition: transform 0.5s cubic-bezier(.4,0,.2,1),
+                      opacity 0.3s ease;
+        }
+
+        /* Before JS measures: hide dropdown so it doesn't flash at wrong size/position */
+        #MainProduct--{{ section.id }}.pdp-dropdown-inline:not(.pdp-dropdown-measured) .product__content-columns__aside .ymee-variant-dropdown,
+        #MainProduct--{{ section.id }}.pdp-dropdown-inline:not(.pdp-dropdown-measured) .product__content-columns__aside .ymee-variant-dropdown--form-only {
+          opacity: 0;
+          transition: none;
+        }
+
+        /* After JS measures: title-price gets transition for smooth scroll animation */
+        #MainProduct--{{ section.id }}.pdp-dropdown-measured .product__title-price {
+          transition: max-width 0.5s cubic-bezier(.4,0,.2,1);
+        }
+
+        /* Inline state (scrollTop === 0) */
+        #MainProduct--{{ section.id }}.pdp-dropdown-measured.pdp-dropdown-inline .product__title-price {
+          max-width: var(--pdp-title-inline-width, 100%);
+        }
+
+        #MainProduct--{{ section.id }}.pdp-dropdown-measured.pdp-dropdown-inline .product__content-columns__aside .ymee-variant-dropdown,
+        #MainProduct--{{ section.id }}.pdp-dropdown-measured.pdp-dropdown-inline .product__content-columns__aside .ymee-variant-dropdown--form-only {
+          transform: var(--pdp-dd-transform, none);
+          z-index: 10;
         }
       }
 
@@ -1011,10 +1054,10 @@
           max-width: min(var(--content-max), 1200px);
           padding-left: 20px;
           padding-right: 20px;
-          grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+          grid-template-columns: 7fr 3fr;
         }
         #MainProduct--{{ section.id }} .product__content-columns {
-          grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+          grid-template-columns: 7fr 3fr;
           padding-left: 20px;
           padding-right: 20px;
           max-width: min(var(--content-max), 1200px);
@@ -1141,8 +1184,6 @@
           grid-area: custom-drawers;
           min-width: 0;
           margin-bottom: 20px;
-        }
-        #MainProduct--{{ section.id }}:has([data-ymee-variant-dropdown]) .product__custom-drawers-row {
           margin-top: 70px;
         }
         #MainProduct--{{ section.id }} .product-accordions-container {
@@ -3193,10 +3234,8 @@
     {%- render 'cart-bar', product: product -%}
   {%- endif -%}
 
-  {%- unless product.has_only_default_variant -%}
-    <link type="text/css" href="{{ 'ymee-variant-dropdown.css' | asset_url }}" rel="stylesheet">
-    <script src="{{ 'ymee-variant-dropdown.js' | asset_url }}" defer="defer"></script>
-  {%- endunless -%}
+  <link type="text/css" href="{{ 'ymee-variant-dropdown.css' | asset_url }}" rel="stylesheet">
+  <script src="{{ 'ymee-variant-dropdown.js' | asset_url }}" defer="defer"></script>
 
   <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
   {%- if product_sticky_enable -%}
@@ -3384,7 +3423,9 @@
     function updateStickyBarHeight() {
       if (!isMobile) return;
       var stickyBar = sectionEl.querySelector('.product__sticky-bar');
-      var dropdown = sectionEl.querySelector('[data-ymee-variant-dropdown]');
+      var dropdown =
+        sectionEl.querySelector('[data-ymee-variant-dropdown]') ||
+        sectionEl.querySelector('[data-ymee-variant-dropdown-form-only]');
       if (!stickyBar) return;
 
       var stickyBarHeight = stickyBar.getBoundingClientRect().height;
@@ -3419,7 +3460,9 @@
     });
 
     var stickyBar = sectionEl.querySelector('.product__sticky-bar');
-    var dropdown = sectionEl.querySelector('[data-ymee-variant-dropdown]');
+    var dropdown =
+      sectionEl.querySelector('[data-ymee-variant-dropdown]') ||
+      sectionEl.querySelector('[data-ymee-variant-dropdown-form-only]');
     if (stickyBar) {
       resizeObserver.observe(stickyBar);
     }
@@ -3451,7 +3494,9 @@
 
     // Smooth hide dropdown when footer enters viewport, show when it leaves
     function initFooterObserver() {
-      var dropdown = document.querySelector('[data-ymee-variant-dropdown]');
+      var dropdown =
+        document.querySelector('[data-ymee-variant-dropdown]') ||
+        document.querySelector('[data-ymee-variant-dropdown-form-only]');
       var footer = document.querySelector('.site-footer-wrapper');
       if (!dropdown || !footer || !('IntersectionObserver' in window)) return;
       var observer = new IntersectionObserver(
@@ -3472,6 +3517,176 @@
       document.addEventListener('DOMContentLoaded', initFooterObserver);
     } else {
       initFooterObserver();
+    }
+  })();
+</script>
+
+<script>
+  /* ── Desktop dropdown-slide animation ──
+     Class pdp-dropdown-inline is ON by default (added in Liquid).
+     JS measures the layout and sets CSS vars, then removes the class on scroll.
+     No grid changes. Title-price shrinks via max-width. Dropdown slides via transform.
+     Dropdown & color picker keep their original size. */
+  (function () {
+    var desktopMQ = window.matchMedia ? window.matchMedia('(min-width: 990px)') : null;
+    if (!desktopMQ) return;
+
+    var sectionEl = document.getElementById('MainProduct--{{ section.id }}');
+    if (!sectionEl) return;
+
+    var CLS = 'pdp-dropdown-inline';
+    var CLS_M = 'pdp-dropdown-measured';
+    var THRESHOLD = 5;
+    var GAP = 12;
+    var GRID_GAP = 50;
+    var isDesktop = desktopMQ.matches;
+    var ticking = false;
+    var measured = false;
+    var resizeTimer;
+
+    /* Cached DOM refs (set once in measure) */
+    var titlePrice = null;
+    var stickyInner = null;
+
+    function stripClasses() {
+      sectionEl.classList.remove(CLS);
+      sectionEl.classList.remove(CLS_M);
+    }
+
+    if (!isDesktop) stripClasses();
+
+    function measure() {
+      var buttonsBlock = sectionEl.querySelector('.product__content-columns__aside .product__block--buttons');
+      if (!buttonsBlock) return false;
+
+      var colorPicker = buttonsBlock.querySelector('[data-ymee-color-picker]');
+      var dropdown =
+        buttonsBlock.querySelector('[data-ymee-variant-dropdown]') ||
+        buttonsBlock.querySelector('[data-ymee-variant-dropdown-form-only]');
+      if (!dropdown) return false;
+
+      /* Cache stable DOM refs */
+      if (!titlePrice) titlePrice = sectionEl.querySelector('.product__title-price');
+      if (!stickyInner) stickyInner = sectionEl.querySelector('.product__sticky-bar__inner');
+
+      /* Disable transitions for instant measurement */
+      var els = [titlePrice, dropdown].filter(Boolean);
+      els.forEach(function (el) {
+        el.style.transition = 'none';
+      });
+
+      /* Measure in default (stacked) state */
+      sectionEl.classList.remove(CLS);
+      sectionEl.classList.remove(CLS_M);
+      void sectionEl.offsetHeight;
+
+      var ddRect = dropdown.getBoundingClientRect();
+
+      if (colorPicker) {
+        var pickerOpts = colorPicker.querySelector('.ymee-color-picker__options') || colorPicker;
+        var optsRect = pickerOpts.getBoundingClientRect();
+
+        /* Dropdown slides LEFT: right edge aligns with picker left edge - gap */
+        var tx = optsRect.left - GAP - ddRect.width - ddRect.left;
+        var ty = optsRect.top + optsRect.height / 2 - (ddRect.top + ddRect.height / 2);
+
+        sectionEl.style.setProperty(
+          '--pdp-dd-transform',
+          'translate(' + Math.round(tx) + 'px,' + Math.round(ty) + 'px)'
+        );
+
+        /* Shrink title-price so it doesn't overlap the transformed dropdown */
+        if (stickyInner && titlePrice) {
+          var availableForTitle = ddRect.left + tx - stickyInner.getBoundingClientRect().left - GRID_GAP;
+          sectionEl.style.setProperty('--pdp-title-inline-width', Math.max(Math.round(availableForTitle), 100) + 'px');
+        }
+      } else {
+        /* No color picker — slide dropdown up to sticky bar area */
+        var stickyBar = sectionEl.querySelector('.product__sticky-bar');
+        if (stickyBar) {
+          var barRect = stickyBar.getBoundingClientRect();
+          sectionEl.style.setProperty(
+            '--pdp-dd-transform',
+            'translateY(' + Math.round(barRect.top + barRect.height / 2 - (ddRect.top + ddRect.height / 2)) + 'px)'
+          );
+        }
+        sectionEl.style.setProperty('--pdp-title-inline-width', '100%');
+      }
+
+      /* Switch to transform-based phase and restore inline if at top */
+      sectionEl.classList.add(CLS_M);
+      if (window.scrollY <= THRESHOLD) sectionEl.classList.add(CLS);
+      void sectionEl.offsetHeight;
+      els.forEach(function (el) {
+        el.style.transition = '';
+      });
+
+      measured = true;
+      return true;
+    }
+
+    function update() {
+      ticking = false;
+      if (!isDesktop) {
+        stripClasses();
+        return;
+      }
+      if (!measured) measure();
+      if (window.scrollY <= THRESHOLD) {
+        sectionEl.classList.add(CLS);
+      } else {
+        sectionEl.classList.remove(CLS);
+      }
+    }
+
+    function onScroll() {
+      if (!ticking) {
+        window.requestAnimationFrame(update);
+        ticking = true;
+      }
+    }
+
+    function recalc() {
+      if (!isDesktop) return;
+      measured = false;
+      measure();
+    }
+
+    function init() {
+      if (!isDesktop) {
+        stripClasses();
+        return;
+      }
+      if (!measure()) {
+        var attempts = 0;
+        var interval = setInterval(function () {
+          if (measure() || ++attempts > 30) {
+            clearInterval(interval);
+            update();
+          }
+        }, 150);
+      }
+      window.addEventListener('scroll', onScroll, {passive: true});
+      window.addEventListener(
+        'resize',
+        function () {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(recalc, 150);
+        },
+        {passive: true}
+      );
+    }
+
+    desktopMQ.addEventListener('change', function (e) {
+      isDesktop = e.matches;
+      if (!isDesktop) stripClasses();
+      else recalc();
+    });
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
     }
   })();
 </script>

@@ -968,6 +968,160 @@ html.ymee-variant-sheet-open body {
   }
 }
 
+/* ── Form-only variant (no size dropdown, just product-form in the pill) ── */
+.ymee-variant-dropdown--form-only {
+  border: none;
+  margin: 0;
+}
+
+.ymee-variant-dropdown__toggle--form-only {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: default;
+}
+
+.ymee-variant-dropdown__toggle--form-only:hover {
+  background: none;
+}
+
+.ymee-variant-dropdown__toggle-label--form-only {
+  display: contents;
+}
+
+@media screen and (max-width: 1024px) {
+  .ymee-variant-dropdown--form-only .ymee-variant-dropdown__toggle--form-only {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+    position: relative;
+    isolation: isolate;
+    height: 50px;
+    z-index: 7;
+  }
+
+  .ymee-variant-dropdown__toggle-label--form-only {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 auto;
+    background: transparent;
+    color: #fff;
+    padding: 0;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .ymee-variant-dropdown__toggle-label--form-only product-form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .ymee-variant-dropdown__toggle-label--form-only .product__submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ymee-variant-dropdown__toggle-label--form-only .product__submit__buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .ymee-variant-dropdown__toggle-label--form-only .product__submit__item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .ymee-variant-dropdown__toggle-label--form-only .product__submit__item .btn {
+    background: transparent;
+    border: none;
+    color: #fff;
+    padding: 0 24px 0 32px;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    font-size: var(--BTN-FONT-SIZE);
+    font-weight: var(--BTN-FONT-WEIGHT);
+    line-height: var(--BTN-LINE-HEIGHT);
+    letter-spacing: var(--BTN-LETTER-SPACING);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ymee-variant-dropdown__toggle-label--form-only .product__submit__item .btn:hover {
+    background: transparent;
+    color: #fff;
+  }
+
+  .ymee-variant-dropdown__toggle-label--form-only .product__submit__item .btn .btn__text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .ymee-variant-dropdown__toggle-label--form-only .product__submit__item .btn .btn__icon {
+    width: 17px;
+    height: 19px;
+    flex-shrink: 0;
+  }
+
+  .ymee-variant-dropdown__toggle-label--form-only .product__submit__item .btn .btn__icon path {
+    fill: #fff;
+  }
+
+  .ymee-variant-dropdown__toggle-label--form-only .product__form__errors,
+  .ymee-variant-dropdown__toggle-label--form-only .product__submit--spb .product__submit__item:not(:first-child),
+  .ymee-variant-dropdown__toggle-label--form-only .product-soldout-notification,
+  .ymee-variant-dropdown__toggle-label--form-only .quantity,
+  .ymee-variant-dropdown__toggle-label--form-only input[type="hidden"][name="quantity"] {
+    display: none;
+  }
+}
+
+/* Desktop: form-only wrapper is transparent, product-form renders normally */
+@media screen and (min-width: 1025px) {
+  .ymee-variant-dropdown--form-only {
+    position: relative;
+    margin: 0 0 16px;
+  }
+
+  .ymee-variant-dropdown--form-only .ymee-variant-dropdown__toggle-bg,
+  .ymee-variant-dropdown--form-only .ymee-variant-dropdown__toggle-icon {
+    display: none !important;
+  }
+
+  .ymee-variant-dropdown__toggle--form-only {
+    display: block;
+    width: 100%;
+    padding: 0;
+    text-align: left;
+  }
+
+  .ymee-variant-dropdown__toggle-label--form-only {
+    display: contents;
+  }
+}
+
 .pdp-embla__slide--filtered-out,
 .product__slide--filtered-out {
   display: none !important;

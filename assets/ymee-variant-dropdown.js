@@ -1157,7 +1157,6 @@
         var variantIdInput = sectionRoot.querySelector('input[name="id"][form="' + cssEscape(productFormId) + '"]');
         if (variantIdInput && String(variantIdInput.value) !== String(matchedVariant.id)) {
           variantIdInput.value = matchedVariant.id;
-          variantIdInput.dispatchEvent(new Event("change", { bubbles: true }));
         }
         var variantIdInForm = sectionRoot.querySelector('product-form input[name="id"].product-variant-id');
         if (variantIdInForm && String(variantIdInForm.value) !== String(matchedVariant.id)) {
@@ -1168,8 +1167,12 @@
           var hasModelSlide = !!productImagesEl.querySelector('[data-embla-slide][data-media-type="model"]');
           if (!hasModelSlide) {
             var mediaId = sectionId + "-" + matchedVariant.featured_media.id;
+            // Dispatch media select event with preventScroll flag
             productImagesEl.dispatchEvent(
-              new CustomEvent("theme:media:select", { bubbles: true, detail: { id: mediaId } })
+              new CustomEvent("theme:media:select", {
+                bubbles: true,
+                detail: { id: mediaId, preventFocus: true, preventScroll: true },
+              })
             );
           }
         }
@@ -1178,6 +1181,25 @@
     },
     true
   );
+
+  /* ── Form-only wrapper: wire up icon click (hamburger) ─────────── */
+  function initFormOnlyWrappers(scope) {
+    (scope || document).querySelectorAll("[data-ymee-variant-dropdown-form-only]").forEach(function (root) {
+      if (root.dataset.ymeeFormOnlyBound === "true") return;
+      root.dataset.ymeeFormOnlyBound = "true";
+
+      var toggleIcon = root.querySelector(".ymee-variant-dropdown__toggle-icon");
+      if (toggleIcon) {
+        toggleIcon.addEventListener("click", function (e) {
+          if (!isMobileViewport()) return;
+          e.preventDefault();
+          e.stopPropagation();
+          var hamburger = document.querySelector('.header__mobile__hamburger[data-drawer-toggle="hamburger"]');
+          if (hamburger) hamburger.click();
+        });
+      }
+    });
+  }
 
   /* ── Reinit for dropdown (toggle/menu/sheet handlers) ────────────── */
   var reinitQueued = false;
@@ -1188,6 +1210,7 @@
       reinitQueued = false;
       init(document);
       initColorPickers(document);
+      initFormOnlyWrappers(document);
     });
   }
 
@@ -1203,17 +1226,20 @@
     document.addEventListener("DOMContentLoaded", function () {
       init(document);
       initColorPickers(document);
+      initFormOnlyWrappers(document);
       observeProductInfo();
     });
   } else {
     init(document);
     initColorPickers(document);
+    initFormOnlyWrappers(document);
     observeProductInfo();
   }
 
   document.addEventListener("shopify:section:load", function (e) {
     init(e.target);
     initColorPickers(e.target);
+    initFormOnlyWrappers(e.target);
     observeProductInfo();
   });
 })();

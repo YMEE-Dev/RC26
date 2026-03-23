@@ -1,6 +1,7 @@
 <!-- /sections/collections.liquid -->
 
 {{ 'custom-collection.css' | asset_url | stylesheet_tag }}
+{{ 'collection-floating-bar.css' | asset_url | stylesheet_tag }}
 
 {%- liquid
   assign enable_infinity_scroll = settings.enable_infinity_scroll
@@ -233,7 +234,10 @@
     {%- endif -%}
 
     {%- if enable_sort or enable_filters -%}
-      <nav class="collection__nav {{ align_classes }}{% if is_media_only_collection_template %} collection__nav--media-only{% endif %}" data-collection-nav>
+      <nav
+        class="collection__nav {{ align_classes }}{% if is_media_only_collection_template %} collection__nav--media-only{% endif %}"
+        data-collection-nav
+      >
         <div class="availability_filter-wrapper" data-availability-filter>
           <a
             href="{{ collection.url | split: '-' | first }}"
@@ -317,6 +321,8 @@
         </div>
       </nav>
     {%- endif -%}
+
+    {%- render 'collection-floating-bar' -%}
 
     <div class="collection__products">
       {%- if enable_filters -%}
@@ -655,6 +661,8 @@
     <script src="{{ 'collection.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'collection-filters-form.js' | asset_url }}" defer="defer"></script>
   {%- endif -%}
+
+  <script src="{{ 'collection-floating-bar.js' | asset_url }}" defer="defer"></script>
 
   {%- if settings.quickview_enable -%}
     <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
