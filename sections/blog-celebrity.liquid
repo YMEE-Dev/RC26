@@ -1,0 +1,136 @@
+<!-- /sections/blog-celebrity.liquid -->
+{%- liquid
+  assign featured_article = blog.articles.first
+-%}
+
+{{ 'blog-celebrity.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  #BlogCelebrity--{{ section.id }} {
+    --celebrity-top-padding: {{ section.settings.padding_top }}px;
+    --celebrity-bottom-padding: {{ section.settings.padding_bottom }}px;
+    --celebrity-content-max-width: {{ section.settings.content_max_width }}px;
+    --celebrity-content-gap: {{ section.settings.content_gap }}px;
+    --celebrity-title-max-width: {{ section.settings.title_max_width }}px;
+    --celebrity-media-height-desktop: {{ section.settings.image_height_desktop }}vh;
+    --celebrity-media-height-mobile: {{ section.settings.image_height_mobile }}vh;
+  }
+{%- endstyle -%}
+
+<section
+  id="BlogCelebrity--{{ section.id }}"
+  class="blog-celebrity"
+  data-section-id="{{ section.id }}"
+  data-section-type="blog-celebrity"
+>
+  {%- if featured_article != blank -%}
+    <div class="blog-celebrity__top">
+      <h1 class="blog-celebrity__title h1">{{ featured_article.title }}</h1>
+      <p class="blog-celebrity__date">
+        <time datetime="{{ featured_article.published_at | date: '%Y-%m-%d' }}">
+          {{ featured_article.published_at | date: '%B %-d, %Y' }}
+        </time>
+      </p>
+    </div>
+
+    {%- if featured_article.image != blank -%}
+      <div class="blog-celebrity__media">
+        {{
+          featured_article.image
+          | image_url: width: 2800
+          | image_tag:
+            alt: featured_article.image.alt | default: featured_article.title,
+            widths: '750, 1100, 1500, 2000, 2400, 2800',
+            sizes: '100vw',
+            loading: 'eager',
+            class: 'blog-celebrity__image'
+        }}
+      </div>
+    {%- endif -%}
+  {%- else -%}
+    <div class="blog-celebrity__empty h4">{{ 'blogs.article.no_articles' | t }}</div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Blog celebrity",
+  "settings": [
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "min": 700,
+      "max": 1500,
+      "step": 20,
+      "unit": "px",
+      "label": "Content max width",
+      "default": 1100
+    },
+    {
+      "type": "range",
+      "id": "title_max_width",
+      "min": 500,
+      "max": 1400,
+      "step": 20,
+      "unit": "px",
+      "label": "Title max width",
+      "default": 980
+    },
+    {
+      "type": "range",
+      "id": "content_gap",
+      "min": 10,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "label": "Title and date spacing",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "image_height_desktop",
+      "min": 35,
+      "max": 80,
+      "step": 1,
+      "unit": "%",
+      "label": "Image height on desktop",
+      "default": 58
+    },
+    {
+      "type": "range",
+      "id": "image_height_mobile",
+      "min": 30,
+      "max": 70,
+      "step": 1,
+      "unit": "%",
+      "label": "Image height on mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blog celebrity"
+    }
+  ]
+}
+{% endschema %}
