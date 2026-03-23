@@ -3,8 +3,6 @@
 {%- liquid
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign trigger_label = section.settings.trigger_label | strip
-  assign form_title = section.settings.form_title | strip
-  assign heading_text = section.settings.heading_text
 -%}
 
 {%- style -%}
@@ -65,16 +63,6 @@
         <div class="modal-wrapper">
           <div class="modal__text">
             <div class="modal__inner">
-              {%- if form_title != blank -%}
-                <h2 id="FooterNewsletterModalTitle--{{ section.id }}" class="modal__title navlink">
-                  {{ form_title | escape }}
-                </h2>
-              {%- endif -%}
-
-              {%- if heading_text != blank -%}
-                <div class="modal__description rte body">{{ heading_text }}</div>
-              {%- endif -%}
-
               {%- render 'footer-newsletter-form', section: section -%}
             </div>
           </div>
