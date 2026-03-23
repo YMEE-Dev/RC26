@@ -501,7 +501,7 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
     color: #000;
     position: relative;
     z-index: 1;
-    padding: 0 10px 0 0;
+    padding: 0;
   }
 
   .ymee-variant-dropdown__toggle-icon svg {
@@ -1032,6 +1032,11 @@ html.ymee-variant-sheet-open body {
     padding: 0;
   }
 
+  .ymee-variant-dropdown__toggle-label--form-only .product__submit form {
+    max-height: 48px;
+    margin: 1px 0;
+  }
+
   .ymee-variant-dropdown__toggle-label--form-only .product__submit__buttons {
     display: flex;
     align-items: center;
@@ -1087,6 +1092,12 @@ html.ymee-variant-sheet-open body {
 
   .ymee-variant-dropdown__toggle-label--form-only .product__submit__item .btn .btn__icon path {
     fill: #fff;
+  }
+
+  /* Change black rect to green when button is active/loading */
+  .ymee-variant-dropdown__toggle--form-only:has(.btn:active) .ymee-variant-dropdown__toggle-bg rect[fill="black"],
+  .ymee-variant-dropdown__toggle--form-only:has(.btn.is-loading) .ymee-variant-dropdown__toggle-bg rect[fill="black"] {
+    fill: #27574d;
   }
 
   .ymee-variant-dropdown__toggle-label--form-only .product__form__errors,
