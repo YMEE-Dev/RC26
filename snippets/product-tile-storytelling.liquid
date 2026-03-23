@@ -109,7 +109,7 @@
     {% comment %} <div class="grid-media__text-container">{{ product.title }}</div> {% endcomment %}
     <button
       type="button"
-      class="btn btn--solid btn--black btn--ar product-shop-the-look"
+      class="btn btn--solid btn--primary product-shop-the-look"
       data-shopify-title="{{ product.title | strip_html }}"
       data-storytelling-modal-trigger
       data-storytelling-modal-target="{{ modal_id }}"
@@ -202,7 +202,7 @@
         data-storytelling-modal-close
         aria-label="{{ 'general.accessibility.close' | t }}"
       >
-        {%- render 'icon-cancel' -%}
+        {%- render 'icon-close' -%}
       </button>
     </div>
   </dialog>
@@ -278,7 +278,7 @@
 
       const update = () => updateSliderProgress(slider, progressTrack, progressThumb);
       const onScroll = () => update();
-      slider.addEventListener('scroll', onScroll, { passive: true });
+      slider.addEventListener('scroll', onScroll, {passive: true});
       let resizeObserver = null;
       let onResize = null;
 
@@ -292,7 +292,7 @@
         document.addEventListener('theme:resize:width', onResize);
       }
 
-      sliderProgressBindings.set(slider, { update, resizeObserver, onResize });
+      sliderProgressBindings.set(slider, {update, resizeObserver, onResize});
       update();
     };
 
@@ -318,10 +318,10 @@
 
       if (window.theme && typeof window.theme.hasOpenModals === 'function') {
         if (!window.theme.hasOpenModals()) {
-          document.dispatchEvent(new CustomEvent('theme:scroll:unlock', { bubbles: true }));
+          document.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
         }
       } else {
-        document.dispatchEvent(new CustomEvent('theme:scroll:unlock', { bubbles: true }));
+        document.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
       }
 
       const triggers = getTriggersByModalId(modal.id);
@@ -364,7 +364,7 @@
 
       const openModalElement = document.querySelector('[data-storytelling-modal][open]');
       if (openModalElement && openModalElement !== modal) {
-        closeModal(openModalElement, { restoreFocus: false });
+        closeModal(openModalElement, {restoreFocus: false});
       }
 
       if (typeof modal.showModal === 'function') {
@@ -375,7 +375,7 @@
         modal.setAttribute('open', '');
       }
 
-      document.dispatchEvent(new CustomEvent('theme:scroll:lock', { bubbles: true }));
+      document.dispatchEvent(new CustomEvent('theme:scroll:lock', {bubbles: true}));
       getTriggersByModalId(modal.id).forEach((modalTrigger) => {
         modalTrigger.setAttribute('aria-expanded', 'true');
       });
