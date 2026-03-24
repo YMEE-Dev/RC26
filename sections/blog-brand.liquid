@@ -50,18 +50,61 @@
           {{
             section.settings.video
             | video_tag:
-              autoplay: false,
-              loop: false,
-              controls: true,
-              muted: false,
+              autoplay: true,
+              loop: true,
+              controls: false,
+              muted: true,
               playsinline: true,
-              class: 'blog-brand__video'
+              class: 'blog-brand__video blog-brand__video--inline'
           }}
         {%- else -%}
-          <video class="blog-brand__video" controls playsinline>
+          <video class="blog-brand__video blog-brand__video--inline" autoplay loop muted playsinline>
             <source src="{{ section.settings.video_url }}">
           </video>
         {%- endif -%}
+
+        <button
+          type="button"
+          class="blog-brand__sound-trigger"
+          data-brand-video-open
+          aria-label="Play with sound"
+        >
+          <span class="blog-brand__sound-icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+              <path d="M11.2 10.2H7.8V17.8H11.2L16.5 22V6L11.2 10.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              <path d="M20.1 11.2L23.4 14.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M23.4 11.2L20.1 14.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span>PLAY WITH SOUND</span>
+        </button>
+      </div>
+
+      <div class="blog-brand__video-modal" data-brand-video-modal hidden>
+        <div class="blog-brand__video-modal-backdrop" data-brand-video-close></div>
+        <div class="blog-brand__video-modal-dialog" role="dialog" aria-modal="true" aria-label="Brand video">
+          <button type="button" class="blog-brand__video-modal-close" data-brand-video-close aria-label="Close">
+            &times;
+          </button>
+          <div class="blog-brand__video-modal-player">
+            {%- if section.settings.video != blank -%}
+              {{
+                section.settings.video
+                | video_tag:
+                  autoplay: false,
+                  loop: false,
+                  controls: true,
+                  muted: false,
+                  playsinline: true,
+                  class: 'blog-brand__video blog-brand__video--modal'
+              }}
+            {%- else -%}
+              <video class="blog-brand__video blog-brand__video--modal" controls playsinline>
+                <source src="{{ section.settings.video_url }}">
+              </video>
+            {%- endif -%}
+          </div>
+        </div>
       </div>
     {%- endif -%}
 
@@ -112,12 +155,84 @@
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
     margin-top: 100px;
+    position: relative;
   }
 
   .blog-brand__video {
     width: 100%;
     height: auto;
     display: block;
+  }
+
+  .blog-brand__sound-trigger {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    padding: 0;
+    font-family: Inter, sans-serif;
+    font-size: 12px;
+    line-height: 20px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+  }
+
+  .blog-brand__sound-icon {
+    width: 66px;
+    height: 66px;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .blog-brand__video-modal[hidden] {
+    display: none;
+  }
+
+  .blog-brand__video-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .blog-brand__video-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.78);
+  }
+
+  .blog-brand__video-modal-dialog {
+    position: relative;
+    z-index: 1;
+    width: min(100% - 40px, 1100px);
+  }
+
+  .blog-brand__video-modal-player {
+    background: #000;
+  }
+
+  .blog-brand__video-modal-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    font-size: 32px;
+    line-height: 1;
+    cursor: pointer;
   }
 
   .blog-brand__content-wrapper {
@@ -165,8 +280,61 @@
       height: 100%;
       object-fit: cover;
     }
+
+    .blog-brand__sound-trigger {
+      top: 12px;
+      left: 12px;
+      gap: 10px;
+      font-size: 11px;
+    }
+
+    .blog-brand__sound-icon {
+      width: 50px;
+      height: 50px;
+    }
   }
 {% endstylesheet %}
+
+{% javascript %}
+  (() => {
+    const root = document.getElementById('BlogBrand--{{ section.id }}');
+    if (!root) return;
+
+    const openBtn = root.querySelector('[data-brand-video-open]');
+    const modal = root.querySelector('[data-brand-video-modal]');
+    if (!openBtn || !modal) return;
+
+    const inlineVideo = root.querySelector('.blog-brand__video--inline');
+    const modalVideo = modal.querySelector('.blog-brand__video--modal');
+    const closeEls = modal.querySelectorAll('[data-brand-video-close]');
+
+    const closeModal = () => {
+      modal.hidden = true;
+      document.body.style.overflow = '';
+      if (modalVideo) {
+        modalVideo.pause();
+        modalVideo.currentTime = 0;
+      }
+      if (inlineVideo) inlineVideo.play().catch(() => {});
+    };
+
+    openBtn.addEventListener('click', () => {
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      if (inlineVideo) inlineVideo.pause();
+      if (modalVideo) {
+        modalVideo.muted = false;
+        modalVideo.play().catch(() => {});
+      }
+    });
+
+    closeEls.forEach((el) => el.addEventListener('click', closeModal));
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !modal.hidden) closeModal();
+    });
+  })();
+{% endjavascript %}
 
 {% schema %}
 {
