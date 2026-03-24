@@ -1,0 +1,258 @@
+<!-- /sections/blog-brand.liquid -->
+{%- liquid
+  assign featured_article = blank
+
+  if section.settings.featured_article != blank
+    assign featured_article = articles[section.settings.featured_article]
+  endif
+
+  if featured_article == blank
+    if article != blank
+      assign featured_article = article
+    endif
+  endif
+
+  if featured_article == blank
+    assign featured_article = blog.articles.first
+  endif
+-%}
+
+{%- style -%}
+  #BlogBrand--{{ section.id }} {
+    --brand-top-padding: {{ section.settings.padding_top }}px;
+    --brand-bottom-padding: {{ section.settings.padding_bottom }}px;
+    --brand-content-max-width: {{ section.settings.content_max_width }}px;
+    --brand-content-gap: {{ section.settings.content_gap }}px;
+    --brand-title-max-width: {{ section.settings.title_max_width }}px;
+    --brand-media-height-mobile: {{ section.settings.video_height_mobile }}vh;
+  }
+{%- endstyle -%}
+
+<section
+  id="BlogBrand--{{ section.id }}"
+  class="blog-brand"
+  data-section-id="{{ section.id }}"
+  data-section-type="blog-brand"
+>
+  {%- if featured_article != blank -%}
+    <div class="blog-brand__top">
+      <h2 class="h2 blog-brand__title">{{ featured_article.title }}</h2>
+      <p class="body blog-brand__date">
+        <time datetime="{{ featured_article.published_at | date: '%Y-%m-%d' }}">
+          {{ featured_article.published_at | date: '%B %-d, %Y' }}
+        </time>
+      </p>
+    </div>
+
+    {%- if section.settings.video != blank or section.settings.video_url != blank -%}
+      <div class="blog-brand__media">
+        {%- if section.settings.video != blank -%}
+          {{
+            section.settings.video
+            | video_tag:
+              autoplay: false,
+              loop: false,
+              controls: true,
+              muted: false,
+              playsinline: true,
+              class: 'blog-brand__video'
+          }}
+        {%- else -%}
+          <video class="blog-brand__video" controls playsinline>
+            <source src="{{ section.settings.video_url }}">
+          </video>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if featured_article.content != blank -%}
+      <div class="blog-brand__content-wrapper">
+        <div class="blog-brand__content body rte">
+          {{ featured_article.content }}
+        </div>
+      </div>
+    {%- endif -%}
+  {%- else -%}
+    <div class="blog-brand__empty h4">{{ 'blogs.article.no_articles' | t }}</div>
+  {%- endif -%}
+</section>
+
+{% stylesheet %}
+  .blog-brand {
+    padding-top: var(--brand-top-padding);
+    padding-bottom: var(--brand-bottom-padding);
+  }
+
+  .blog-brand__top {
+    width: min(100% - 48px, var(--brand-content-max-width));
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--brand-content-gap);
+    text-align: center;
+  }
+
+  .blog-brand__title {
+    max-width: var(--brand-title-max-width);
+    margin: 0;
+    font-size: 40px;
+    line-height: 48px;
+  }
+
+  .blog-brand__date {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  .blog-brand__media {
+    width: 100vw;
+    max-width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    margin-top: 100px;
+  }
+
+  .blog-brand__video {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .blog-brand__content-wrapper {
+    width: min(100% - 48px, var(--brand-content-max-width));
+    margin: 100px auto 100px;
+  }
+
+  .blog-brand__content {
+    width: min(100%, 500px);
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  .blog-brand__content p {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .blog-brand__empty {
+    width: min(100% - 48px, var(--brand-content-max-width));
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  @media (max-width: 749px) {
+    .blog-brand__top {
+      width: min(100% - 32px, var(--brand-content-max-width));
+      gap: 16px;
+    }
+
+    .blog-brand__media {
+      width: 100%;
+      max-width: 100%;
+      margin-left: 0;
+      margin-right: 0;
+      margin-top: 40px;
+      height: var(--brand-media-height-mobile);
+      overflow: hidden;
+    }
+
+    .blog-brand__video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Blog Brand",
+  "settings": [
+    {
+      "type": "article",
+      "id": "featured_article",
+      "label": "Featured blog post",
+      "info": "Optional. If empty, current article or latest post is used."
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Video"
+    },
+    {
+      "type": "url",
+      "id": "video_url",
+      "label": "Video URL (fallback)"
+    },
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "min": 700,
+      "max": 1500,
+      "step": 20,
+      "unit": "px",
+      "label": "Content max width",
+      "default": 1100
+    },
+    {
+      "type": "range",
+      "id": "title_max_width",
+      "min": 500,
+      "max": 1400,
+      "step": 20,
+      "unit": "px",
+      "label": "Title max width",
+      "default": 980
+    },
+    {
+      "type": "range",
+      "id": "content_gap",
+      "min": 10,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "label": "Title and date spacing",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "video_height_mobile",
+      "min": 30,
+      "max": 70,
+      "step": 1,
+      "unit": "%",
+      "label": "Video height on mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blog Brand"
+    }
+  ]
+}
+{% endschema %}
