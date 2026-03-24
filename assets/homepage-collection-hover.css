@@ -95,7 +95,66 @@
   display: none;
 }
 
-@media only screen and (min-width: 960px) {
+@media only screen and (min-width: 750px) and (max-width: 1219px) {
+  .homepage-collection-hover__mobile-slider {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-start;
+    gap: 0;
+    margin-left: var(--outer-offset);
+    margin-right: var(--outer-offset);
+    padding-left: var(--outer);
+    padding-right: 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: var(--outer);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .homepage-collection-hover__mobile-slider::-webkit-scrollbar {
+    display: none;
+  }
+
+  .homepage-collection-hover__mobile-slider.is-enabled {
+    cursor: grab;
+  }
+
+  .homepage-collection-hover__mobile-slider.is-dragging:active {
+    cursor: grabbing;
+  }
+
+  .homepage-collection-hover__mobile-slider.is-dragging a {
+    pointer-events: none;
+  }
+
+  .homepage-collection-hover__mobile-slider.is-scrolling {
+    scroll-snap-type: none;
+  }
+
+  body.grid-compact.has-line-design .homepage-collection-hover__mobile-slider {
+    padding-left: 1px;
+  }
+
+  body.grid-classic.has-line-design .homepage-collection-hover__mobile-slider {
+    padding-left: var(--outer);
+  }
+
+  .homepage-collection-hover__mobile-slider::after {
+    content: "";
+    min-height: 1px;
+    display: block;
+    position: relative;
+    padding-right: var(--outer);
+  }
+
+  .homepage-collection-hover__mobile-slider .grid-item {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+}
+
+@media only screen and (min-width: 1220px) {
   .homepage-collection-hover__mobile {
     display: none;
   }
@@ -112,6 +171,9 @@
     grid-column: 2 / span 2;
     width: 100%;
     max-width: none;
+    display: flex;
+    flex-direction: column;
+    align-self: center;
   }
 
   .homepage-collection-hover__title {
@@ -146,7 +208,7 @@
     grid-column: 5 / span 2;
     width: 100%;
     max-width: none;
-    aspect-ratio: 67 / 70;
+    aspect-ratio: 1;
     justify-self: stretch;
   }
 
@@ -164,5 +226,17 @@
   .homepage-collection-hover__preview.is-visible {
     opacity: 1;
     visibility: visible;
+  }
+}
+
+@media only screen and (min-width: 1220px) and (max-width: 1440px) {
+  .homepage-collection-hover__links {
+    row-gap: 0;
+  }
+  .homepage-collection-hover__title {
+    font-size: 12px;
+  }
+  .homepage-collection-hover__link {
+    font-size: 22px;
   }
 }
