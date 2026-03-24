@@ -12,6 +12,7 @@
   assign modal_media = product.media[1]
   assign modal_image = blank
   assign look_slider = ''
+  assign storytelling_slide_count = 0
   assign first_media_is_video = false
   assign modal_media_is_video = false
 
@@ -59,18 +60,47 @@
 -%}
 
 {%- for storytelling_product in storytelling_products -%}
-  {%- capture look_slider -%}
-  {{ look_slider }}
+  {%- if storytelling_product == blank -%}
+    {%- continue -%}
+  {%- endif -%}
 
-  <div class="look__slide look__slide--{{ forloop.index0 }}" data-slide="{{ forloop.index0 }}" data-grid-item >
-    {%- if storytelling_product != blank -%}
-      {%- render 'product-grid-item', product: storytelling_product, index: forloop.index, show_product_card: true, disable_image_hover: true -%}
-    {%- else -%}
-      {%- assign placeholder = 'product-' | append: forloop.index -%}
-      {%- render 'onboarding-product-grid-item', title: 'Product Title', show_product_card: true, placeholder: placeholder, index: forloop.index, animation_delay: forloop.index0 -%}
-    {%- endif -%}
-  </div>
-{%- endcapture -%}
+  {%- liquid
+    assign storytelling_product_image = storytelling_product.featured_media.preview_image
+
+    if storytelling_product_image == blank
+      assign storytelling_product_image = storytelling_product.media | where: 'media_type', 'image' | first
+    endif
+
+    assign storytelling_slide_count = storytelling_slide_count | plus: 1
+  -%}
+
+  {%- capture look_slider -%}
+    {{ look_slider }}
+
+    <div class="swiper-slide storytelling-modal__product-slide" data-storytelling-product-slide>
+      <a href="{{ storytelling_product.url }}" class="storytelling-product-card">
+        <div class="storytelling-product-card__image">
+          {%- if storytelling_product_image != blank -%}
+            {{
+              storytelling_product_image
+              | image_url: width: 1200
+              | image_tag:
+                alt: storytelling_product.title,
+                loading: 'lazy',
+                widths: '480, 720, 960, 1200'
+            }}
+          {%- else -%}
+            {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg storytelling-product-card__placeholder' }}
+          {%- endif -%}
+        </div>
+
+        <div class="storytelling-product-card__content">
+          <p class="storytelling-product-card__title navlink">{{ storytelling_product.title | strip_html | escape }}</p>
+          <p class="storytelling-product-card__price price">{{ storytelling_product.price | money }}</p>
+        </div>
+      </a>
+    </div>
+  {%- endcapture -%}
 {% endfor %}
 
 <grid-item
@@ -178,23 +208,19 @@
 
           <div class="look__content" data-popup-content data-scroll-lock-scrollable>
             <div class="storytelling-modal__slider-shell">
-              <grid-slider data-arrow-position-middle>
-                <div
-                  class="grid--slider look__slider look__slider--grid"
-                  data-grid-slider
-                  data-slider-mobile="{{ product.id }}"
-                  data-arrow-position-middle
-                  data-scroll-lock-scrollable
-                  {% if request.design_mode %}
-                    data-block-scroll
-                  {% endif %}
-                >
+              <div
+                class="swiper storytelling-modal__swiper"
+                data-storytelling-swiper
+                data-storytelling-swiper-id="{{ modal_id }}"
+              >
+                <div class="swiper-wrapper">
                   {{ look_slider }}
                 </div>
-              </grid-slider>
-
-              <div class="storytelling-modal__slider-progress" data-storytelling-slider-progress aria-hidden="true">
-                <span class="storytelling-modal__slider-progress-thumb" data-storytelling-slider-progress-thumb></span>
+                <div
+                  class="swiper-pagination storytelling-modal__slider-progress{% if storytelling_slide_count <= 1 %} is-hidden{% endif %}"
+                  data-storytelling-swiper-pagination
+                  aria-hidden="true"
+                ></div>
               </div>
             </div>
           </div>
@@ -217,8 +243,8 @@
   (() => {
     if (window.__storytellingModalInitialized) return;
     window.__storytellingModalInitialized = true;
-    const sliderProgressBindings = new WeakMap();
-    const sliderSnapBindings = new WeakMap();
+    const swiperInstances = window.__storytellingModalSwipers || new WeakMap();
+    window.__storytellingModalSwipers = swiperInstances;
 
     const getModalByTrigger = (trigger) => {
       const modalId = trigger.getAttribute('data-storytelling-modal-target');
@@ -231,171 +257,44 @@
       return Array.from(document.querySelectorAll(`[data-storytelling-modal-target="${modalId}"]`));
     };
 
-    const refreshModalSliders = (modal) => {
+    const initModalSwiper = (modal) => {
       if (!modal) return;
+      if (typeof Swiper === 'undefined') return;
 
-      const gridSliders = modal.querySelectorAll('grid-slider');
-      if (!gridSliders.length) return;
+      const swiperElement = modal.querySelector('[data-storytelling-swiper]');
+      const paginationElement = modal.querySelector('[data-storytelling-swiper-pagination]');
+      if (!swiperElement || !paginationElement) return;
+      if (!swiperElement.querySelector('.swiper-slide')) return;
 
-      gridSliders.forEach((gridSlider) => {
-        if (typeof gridSlider.toggleSlider === 'function') {
-          gridSlider.toggleSlider();
+      let swiper = swiperInstances.get(modal);
+
+      if (swiper && !swiper.destroyed) {
+        swiper.update();
+        if (swiper.pagination && typeof swiper.pagination.update === 'function') {
+          swiper.pagination.update();
         }
-
-        if (typeof gridSlider.positionArrows === 'function') {
-          gridSlider.positionArrows();
-        }
-      });
-    };
-
-    const updateSliderProgress = (slider, progressTrack, progressThumb) => {
-      if (!slider || !progressTrack || !progressThumb) return;
-
-      const maxScroll = Math.max(slider.scrollWidth - slider.clientWidth, 0);
-      if (maxScroll <= 0) {
-        progressTrack.classList.add('is-hidden');
-        progressThumb.style.width = '100%';
-        progressThumb.style.transform = 'translateX(0)';
         return;
       }
 
-      const trackWidth = progressTrack.clientWidth;
-      if (!trackWidth) return;
-
-      progressTrack.classList.remove('is-hidden');
-
-      const thumbWidth = Math.max((slider.clientWidth / slider.scrollWidth) * trackWidth, 18);
-      const maxOffset = Math.max(trackWidth - thumbWidth, 0);
-      const scrollProgress = slider.scrollLeft / maxScroll;
-      const offset = maxOffset * scrollProgress;
-
-      progressThumb.style.width = `${thumbWidth}px`;
-      progressThumb.style.transform = `translateX(${offset}px)`;
-    };
-
-    const bindSliderProgress = (slider, progressTrack, progressThumb) => {
-      if (!slider || !progressTrack || !progressThumb) return;
-
-      const existingBinding = sliderProgressBindings.get(slider);
-      if (existingBinding) {
-        existingBinding.update();
-        return;
-      }
-
-      const update = () => updateSliderProgress(slider, progressTrack, progressThumb);
-      const onScroll = () => update();
-      slider.addEventListener('scroll', onScroll, {passive: true});
-      let resizeObserver = null;
-      let onResize = null;
-
-      if ('ResizeObserver' in window) {
-        resizeObserver = new ResizeObserver(() => update());
-        resizeObserver.observe(slider);
-        resizeObserver.observe(progressTrack);
-      } else {
-        onResize = () => requestAnimationFrame(update);
-        window.addEventListener('resize', onResize);
-        document.addEventListener('theme:resize:width', onResize);
-      }
-
-      sliderProgressBindings.set(slider, {update, resizeObserver, onResize});
-      update();
-    };
-
-    const initModalSliderProgress = (modal) => {
-      if (!modal) return;
-
-      const sliderShells = modal.querySelectorAll('.storytelling-modal__slider-shell');
-      if (!sliderShells.length) return;
-
-      sliderShells.forEach((sliderShell) => {
-        const slider = sliderShell.querySelector('[data-grid-slider]');
-        const progressTrack = sliderShell.querySelector('[data-storytelling-slider-progress]');
-        const progressThumb = sliderShell.querySelector('[data-storytelling-slider-progress-thumb]');
-        bindSliderProgress(slider, progressTrack, progressThumb);
-      });
-    };
-
-    const getNearestCenteredSlide = (slider) => {
-      if (!slider) return null;
-
-      const slides = Array.from(slider.querySelectorAll('[data-grid-item]'));
-      if (!slides.length) return null;
-
-      const sliderCenter = slider.scrollLeft + slider.clientWidth / 2;
-      let nearestSlide = slides[0];
-      let nearestDistance = Math.abs(sliderCenter - (nearestSlide.offsetLeft + nearestSlide.clientWidth / 2));
-
-      slides.forEach((slide) => {
-        const slideCenter = slide.offsetLeft + slide.clientWidth / 2;
-        const distance = Math.abs(sliderCenter - slideCenter);
-
-        if (distance < nearestDistance) {
-          nearestSlide = slide;
-          nearestDistance = distance;
-        }
+      swiper = new Swiper(swiperElement, {
+        slidesPerView: 1,
+        spaceBetween: 0,
+        loop: false,
+        watchOverflow: true,
+        observer: true,
+        observeParents: true,
+        a11y: true,
+        keyboard: {
+          enabled: true,
+          onlyInViewport: false,
+        },
+        pagination: {
+          el: paginationElement,
+          type: 'progressbar',
+        },
       });
 
-      return nearestSlide;
-    };
-
-    const getCenteredScrollLeft = (slider, slide) => {
-      if (!slider || !slide) return 0;
-
-      const maxScrollLeft = Math.max(slider.scrollWidth - slider.clientWidth, 0);
-      const centeredScrollLeft = slide.offsetLeft - slider.clientWidth / 2 + slide.clientWidth / 2;
-
-      return Math.max(0, Math.min(centeredScrollLeft, maxScrollLeft));
-    };
-
-    const bindSliderSnap = (slider) => {
-      if (!slider) return;
-
-      const existingBinding = sliderSnapBindings.get(slider);
-      if (existingBinding) return;
-
-      const gridSlider = slider.closest('grid-slider');
-      let snapTimer = null;
-
-      const snapToNearestSlide = () => {
-        const nearestSlide = getNearestCenteredSlide(slider);
-        if (!nearestSlide) return;
-
-        const targetLeft = getCenteredScrollLeft(slider, nearestSlide);
-        if (Math.abs(slider.scrollLeft - targetLeft) < 2) return;
-
-        if (gridSlider && typeof gridSlider.goToSlide === 'function') {
-          gridSlider.goToSlide(nearestSlide);
-          return;
-        }
-
-        slider.scrollTo({
-          left: targetLeft,
-          top: 0,
-          behavior: 'smooth',
-        });
-      };
-
-      const queueSnap = () => {
-        window.clearTimeout(snapTimer);
-        snapTimer = window.setTimeout(snapToNearestSlide, 140);
-      };
-
-      slider.addEventListener('scroll', queueSnap, {passive: true});
-
-      sliderSnapBindings.set(slider, {
-        queueSnap,
-        snapToNearestSlide,
-      });
-    };
-
-    const initModalSliderSnap = (modal) => {
-      if (!modal) return;
-
-      const sliders = modal.querySelectorAll('.storytelling-modal__slider-shell [data-grid-slider]');
-      if (!sliders.length) return;
-
-      sliders.forEach((slider) => bindSliderSnap(slider));
+      swiperInstances.set(modal, swiper);
     };
 
     const onModalClosed = (modal) => {
@@ -470,9 +369,7 @@
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          refreshModalSliders(modal);
-          initModalSliderProgress(modal);
-          initModalSliderSnap(modal);
+          initModalSwiper(modal);
         });
       });
 
@@ -533,5 +430,16 @@
       },
       true
     );
+
+    document.addEventListener('shopify:section:load', (event) => {
+      const target = event.target;
+      if (!target || !target.querySelectorAll) return;
+
+      target.querySelectorAll('[data-storytelling-modal][open]').forEach((modal) => {
+        requestAnimationFrame(() => {
+          initModalSwiper(modal);
+        });
+      });
+    });
   })();
 {% endjavascript %}
