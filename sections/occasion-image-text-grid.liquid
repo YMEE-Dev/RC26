@@ -35,7 +35,7 @@
     data-section-id="{{ section.id }}"
     data-section-type="occasion-image-text-grid"
   >
-    <div class="occasion-image-text-grid__inner">
+    <div class="occasion-image-text-grid__inner {{ section.settings.width }}">
       {%- for block in section.blocks -%}
         {%- liquid
           assign has_image = false
@@ -82,13 +82,10 @@
   .occasion-image-text-grid {
     padding-top: var(--occasion-grid-pt);
     padding-bottom: var(--occasion-grid-pb);
-    background: #ff0000;
   }
 
   .occasion-image-text-grid__inner {
-    width: min(100% - 48px, 1200px);
-    margin-left: auto;
-    margin-right: auto;
+    width: 100%;
     display: grid;
     grid-template-columns: repeat(var(--occasion-grid-columns), minmax(0, 1fr));
     gap: 40px;
@@ -120,7 +117,6 @@
 
   @media (max-width: 749px) {
     .occasion-image-text-grid__inner {
-      width: min(100% - 32px, 1200px);
       grid-template-columns: 1fr;
       gap: 28px;
     }
@@ -132,6 +128,17 @@
   "name": "Occasion Image Grid",
   "max_blocks": 3,
   "settings": [
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        {"value": "wrapper--full", "label": "Full width"},
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"}
+      ]
+    },
     {
       "type": "range",
       "id": "padding_top",
