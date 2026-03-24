@@ -1,0 +1,271 @@
+<!-- /sections/brand-story-combo.liquid -->
+{%- liquid
+  assign has_any_content = false
+
+  if section.settings.top_heading != blank or section.settings.top_text != blank or section.settings.top_image != blank
+    assign has_any_content = true
+  endif
+  if section.settings.full_image != blank
+    assign has_any_content = true
+  endif
+  if section.settings.center_text != blank
+    assign has_any_content = true
+  endif
+  if section.settings.two_image_left != blank or section.settings.two_image_right != blank
+    assign has_any_content = true
+  endif
+-%}
+
+{%- if has_any_content -%}
+  {%- style -%}
+    #BrandStoryCombo--{{ section.id }} {
+      --brand-combo-pt: {{ section.settings.padding_top }}px;
+      --brand-combo-pb: {{ section.settings.padding_bottom }}px;
+      --brand-combo-gap: {{ section.settings.section_gap }}px;
+    }
+  {%- endstyle -%}
+
+  <section
+    id="BrandStoryCombo--{{ section.id }}"
+    class="brand-story-combo"
+    data-section-id="{{ section.id }}"
+    data-section-type="brand-story-combo"
+  >
+    <div class="brand-story-combo__inner {{ section.settings.width }}">
+      {%- if section.settings.top_heading != blank or section.settings.top_text != blank or section.settings.top_image != blank -%}
+        <div class="brand-story-combo__split">
+          <div class="brand-story-combo__split-copy">
+            {%- if section.settings.top_heading != blank -%}
+              <h3 class="brand-story-combo__heading h3">{{ section.settings.top_heading }}</h3>
+            {%- endif -%}
+            {%- if section.settings.top_text != blank -%}
+              <div class="brand-story-combo__text body rte">{{ section.settings.top_text }}</div>
+            {%- endif -%}
+          </div>
+
+          {%- if section.settings.top_image != blank -%}
+            <div class="brand-story-combo__split-media">
+              {{
+                section.settings.top_image
+                | image_url: width: 1200
+                | image_tag:
+                  class: 'brand-story-combo__image',
+                  widths: '375, 550, 750, 900, 1100, 1200',
+                  sizes: '(min-width: 990px) 40vw, 100vw',
+                  loading: 'lazy'
+              }}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.full_image != blank -%}
+        <div class="brand-story-combo__full-image-wrap">
+          {{
+            section.settings.full_image
+            | image_url: width: 2200
+            | image_tag:
+              class: 'brand-story-combo__full-image',
+              widths: '750, 1100, 1500, 1800, 2200',
+              sizes: '(min-width: 990px) 1200px, calc(100vw - 32px)',
+              loading: 'lazy'
+          }}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.center_text != blank -%}
+        <div class="brand-story-combo__center-text body rte">
+          {{ section.settings.center_text }}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.two_image_left != blank or section.settings.two_image_right != blank -%}
+        <div class="brand-story-combo__two-images">
+          {%- if section.settings.two_image_left != blank -%}
+            <div class="brand-story-combo__two-image-item">
+              {{
+                section.settings.two_image_left
+                | image_url: width: 1200
+                | image_tag:
+                  class: 'brand-story-combo__image',
+                  widths: '375, 550, 750, 900, 1100, 1200',
+                  sizes: '(min-width: 990px) 50vw, 100vw',
+                  loading: 'lazy'
+              }}
+            </div>
+          {%- endif -%}
+
+          {%- if section.settings.two_image_right != blank -%}
+            <div class="brand-story-combo__two-image-item">
+              {{
+                section.settings.two_image_right
+                | image_url: width: 1200
+                | image_tag:
+                  class: 'brand-story-combo__image',
+                  widths: '375, 550, 750, 900, 1100, 1200',
+                  sizes: '(min-width: 990px) 50vw, 100vw',
+                  loading: 'lazy'
+              }}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </section>
+{%- endif -%}
+
+{% stylesheet %}
+  .brand-story-combo {
+    padding-top: var(--brand-combo-pt);
+    padding-bottom: var(--brand-combo-pb);
+  }
+
+  .brand-story-combo__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--brand-combo-gap);
+  }
+
+  .brand-story-combo__split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 56px;
+    align-items: center;
+  }
+
+  .brand-story-combo__split-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .brand-story-combo__heading {
+    margin: 0;
+  }
+
+  .brand-story-combo__text p,
+  .brand-story-combo__center-text p {
+    margin: 0;
+  }
+
+  .brand-story-combo__image,
+  .brand-story-combo__full-image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .brand-story-combo__center-text {
+    width: min(100%, 700px);
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  .brand-story-combo__two-images {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 40px;
+  }
+
+  @media (max-width: 989px) {
+    .brand-story-combo__split {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+
+    .brand-story-combo__two-images {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Brand Story Combo",
+  "settings": [
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        {"value": "wrapper--full", "label": "Full width"},
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"}
+      ]
+    },
+    {
+      "type": "text",
+      "id": "top_heading",
+      "label": "Top heading"
+    },
+    {
+      "type": "richtext",
+      "id": "top_text",
+      "label": "Top text"
+    },
+    {
+      "type": "image_picker",
+      "id": "top_image",
+      "label": "Top image"
+    },
+    {
+      "type": "image_picker",
+      "id": "full_image",
+      "label": "Single full image"
+    },
+    {
+      "type": "richtext",
+      "id": "center_text",
+      "label": "Centered text"
+    },
+    {
+      "type": "image_picker",
+      "id": "two_image_left",
+      "label": "Two-up image left"
+    },
+    {
+      "type": "image_picker",
+      "id": "two_image_right",
+      "label": "Two-up image right"
+    },
+    {
+      "type": "range",
+      "id": "section_gap",
+      "min": 20,
+      "max": 140,
+      "step": 2,
+      "unit": "px",
+      "label": "Section gap",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Brand Story Combo"
+    }
+  ]
+}
+{% endschema %}
