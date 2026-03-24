@@ -7932,6 +7932,13 @@ body:has([data-header-transparent]) .header__mobile__bottom {
   transition-property: all;
 }
 
+@media only screen and (min-width: 749px) and (max-width: 960px) {
+  .header__mobile .header__logo {
+    animation: all 1s cubic-bezier(0.7, 0, 0.3, 1);
+    animation-fill-mode: forwards;
+  }
+}
+
 body.header-scroll-hide .header__mobile__left,
 body.header-scroll-hide .header__desktop__bar__c {
   transform: translateX(-200%);
@@ -7947,10 +7954,8 @@ body.header-scroll-hide .header__desktop__bar__r {
   transform: translateX(200%);
 }
 
-@media only screen and (max-width: 749px) {
-  body:has(.drawer--header.is-open) .header__mobile__left,
-  body:has(.drawer--header.is-open) .header__mobile .header__logo,
-  body:has(.drawer--header.is-open) .header__mobile__right {
+@media only screen and (max-width: 960px) {
+  body:has(.drawer--header.is-open) .header__mobile .header__logo {
     transform: none !important;
   }
 
@@ -7958,6 +7963,7 @@ body.header-scroll-hide .header__desktop__bar__r {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+    display: none;
   }
 }
 
@@ -9494,7 +9500,6 @@ html.supports-touch ticker-bar[data-slide]:not([paused]) .ticker--animated {
   left: auto;
   right: 100%;
   border-left: 0;
-  border-right: 1px solid var(--border);
   box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.06),
     0 3px 12px rgba(0, 0, 0, 0.02);
