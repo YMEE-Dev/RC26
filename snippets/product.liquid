@@ -290,6 +290,10 @@
           align-items: start;
         }
 
+        #MainProduct--{{ section.id }} .product__title-price {
+          flex-direction: row;
+        }
+
         #MainProduct--{{ section.id }} .product__title-price .block-padding {
           margin: 0;
         }
@@ -348,7 +352,6 @@
 
         #MainProduct--{{ section.id }} .product__title-price {
           overflow: hidden;
-          will-change: max-width;
         }
 
         /* Before JS measures: hide dropdown to avoid flash at wrong position */
@@ -357,10 +360,9 @@
           opacity: 0;
         }
 
-        /* After JS measures: all three animate together with identical easing */
+        /* After JS measures: picker and dropdown animate; title-price snaps (no reflow lag) */
         #MainProduct--{{ section.id }}.pdp-dropdown-measured .product__title-price {
           max-width: var(--pdp-title-default-width, 100%);
-          transition: max-width 0.5s cubic-bezier(.4,0,.2,1);
         }
 
         #MainProduct--{{ section.id }}.pdp-dropdown-measured .product__content-columns__aside [data-ymee-color-picker] {
