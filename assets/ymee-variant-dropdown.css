@@ -502,13 +502,14 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
     position: relative;
     z-index: 1;
     padding: 0;
+    margin-right: 5px;
   }
 
   .ymee-variant-dropdown__toggle-icon svg {
     display: block;
-    width: 18px;
-    height: 14px;
-    margin: auto;
+    width: 25px;
+    height: 25px;
+    aspect-ratio: 1 / 1;
   }
 
   .ymee-variant-dropdown__menu {
@@ -529,6 +530,18 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
 
   .ymee-variant-dropdown__option .ymee-variant-dropdown__submit {
     display: none !important;
+  }
+
+  .ymee-variant-dropdown__toggle:hover,
+  .ymee-variant-dropdown__toggle:active {
+    background-color: transparent;
+    border-color: transparent;
+  }
+
+  .ymee-variant-dropdown__footer-atc:hover,
+  .ymee-variant-dropdown__footer-atc:active {
+    background-color: transparent;
+    border-color: transparent;
   }
 
   /* Checkmark for selected option in mobile sheet */
@@ -1092,12 +1105,6 @@ html.ymee-variant-sheet-open body {
 
   .ymee-variant-dropdown__toggle-label--form-only .product__submit__item .btn .btn__icon path {
     fill: #fff;
-  }
-
-  /* Change black rect to green when button is active/loading */
-  .ymee-variant-dropdown__toggle--form-only:has(.btn:active) .ymee-variant-dropdown__toggle-bg rect[fill="black"],
-  .ymee-variant-dropdown__toggle--form-only:has(.btn.is-loading) .ymee-variant-dropdown__toggle-bg rect[fill="black"] {
-    fill: #27574d;
   }
 
   .ymee-variant-dropdown__toggle-label--form-only .product__form__errors,

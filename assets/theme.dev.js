@@ -1667,6 +1667,16 @@
         this.showCannotAddMoreInCart = true;
       }
 
+      if (maxInventoryReached === "true") {
+        if (this.cartDrawer) {
+          document.dispatchEvent(new CustomEvent("theme:product:added", { bubbles: true }));
+        }
+        if (button) {
+          button.disabled = false;
+        }
+        return;
+      }
+
       this.addToCart(formData, button);
     }
 

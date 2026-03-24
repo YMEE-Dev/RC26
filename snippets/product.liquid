@@ -290,6 +290,10 @@
           align-items: start;
         }
 
+        #MainProduct--{{ section.id }} .product__title-price {
+          flex-direction: row;
+        }
+
         #MainProduct--{{ section.id }} .product__title-price .block-padding {
           margin: 0;
         }
@@ -339,9 +343,8 @@
         }
 
         /* ── Desktop dropdown-slide animation (scrollTop === 0) ── */
-        /* Before JS: dropdown hidden (opacity:0). After JS measures (pdp-dropdown-measured):
-           dropdown appears at computed position via transform, title-price shrinks.
-           On scroll: class removed, everything animates back to default. */
+        /* Inline: color picker shifts LEFT, dropdown moves UP to sit right of it.
+           Title-price shrinks to give room. On scroll: all animate back to default. */
 
         body.template-product {
           overflow-x: hidden;
@@ -351,28 +354,34 @@
           overflow: hidden;
         }
 
-        /* Dropdown gets opacity + transform transitions always so the fade-in is smooth */
-        #MainProduct--{{ section.id }} .product__content-columns__aside .ymee-variant-dropdown,
-        #MainProduct--{{ section.id }} .product__content-columns__aside .ymee-variant-dropdown--form-only {
-          transition: transform 0.5s cubic-bezier(.4,0,.2,1),
-                      opacity 0.3s ease;
-        }
-
-        /* Before JS measures: hide dropdown so it doesn't flash at wrong size/position */
+        /* Before JS measures: hide dropdown to avoid flash at wrong position */
         #MainProduct--{{ section.id }}.pdp-dropdown-inline:not(.pdp-dropdown-measured) .product__content-columns__aside .ymee-variant-dropdown,
         #MainProduct--{{ section.id }}.pdp-dropdown-inline:not(.pdp-dropdown-measured) .product__content-columns__aside .ymee-variant-dropdown--form-only {
           opacity: 0;
-          transition: none;
         }
 
-        /* After JS measures: title-price gets transition for smooth scroll animation */
+        /* After JS measures: picker and dropdown animate; title-price snaps (no reflow lag) */
         #MainProduct--{{ section.id }}.pdp-dropdown-measured .product__title-price {
-          transition: max-width 0.5s cubic-bezier(.4,0,.2,1);
+          max-width: var(--pdp-title-default-width, 100%);
+        }
+
+        #MainProduct--{{ section.id }}.pdp-dropdown-measured .product__content-columns__aside [data-ymee-color-picker] {
+          transition: transform 0.5s cubic-bezier(.4,0,.2,1);
+        }
+
+        #MainProduct--{{ section.id }}.pdp-dropdown-measured .product__content-columns__aside .ymee-variant-dropdown,
+        #MainProduct--{{ section.id }}.pdp-dropdown-measured .product__content-columns__aside .ymee-variant-dropdown--form-only {
+          transition: transform 0.5s cubic-bezier(.4,0,.2,1),
+                      opacity 0.3s ease;
         }
 
         /* Inline state (scrollTop === 0) */
         #MainProduct--{{ section.id }}.pdp-dropdown-measured.pdp-dropdown-inline .product__title-price {
           max-width: var(--pdp-title-inline-width, 100%);
+        }
+
+        #MainProduct--{{ section.id }}.pdp-dropdown-measured.pdp-dropdown-inline .product__content-columns__aside [data-ymee-color-picker] {
+          transform: var(--pdp-cp-transform, none);
         }
 
         #MainProduct--{{ section.id }}.pdp-dropdown-measured.pdp-dropdown-inline .product__content-columns__aside .ymee-variant-dropdown,
@@ -1030,6 +1039,16 @@
         border-color: var(--btn-border);
         background-color: #27574D;
         color: #fff;
+      }
+
+      @media only screen and (max-width: 1024px) {
+        #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart]:hover,
+        #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn[data-add-to-cart]:active,
+        #MainProduct--{{ section.id }} .product__submit__buttons .btn[data-popup-open]:hover,
+        #MainProduct--{{ section.id }} .product__submit__buttons .btn[data-popup-open]:active {
+          background-color: transparent;
+          border-color: transparent;
+        }
       }
 
       #MainProduct--{{ section.id }} .product__submit__buttons > .product__submit__item > .btn [data-add-to-cart-text] {
@@ -3565,20 +3584,24 @@
         buttonsBlock.querySelector('[data-ymee-variant-dropdown-form-only]');
       if (!dropdown) return false;
 
-      /* Cache stable DOM refs */
       if (!titlePrice) titlePrice = sectionEl.querySelector('.product__title-price');
       if (!stickyInner) stickyInner = sectionEl.querySelector('.product__sticky-bar__inner');
 
-      /* Disable transitions for instant measurement */
-      var els = [titlePrice, dropdown].filter(Boolean);
+      /* Disable transitions, measure in default (stacked) state */
+      var els = [titlePrice, colorPicker, dropdown].filter(Boolean);
       els.forEach(function (el) {
         el.style.transition = 'none';
       });
-
-      /* Measure in default (stacked) state */
       sectionEl.classList.remove(CLS);
       sectionEl.classList.remove(CLS_M);
       void sectionEl.offsetHeight;
+
+      if (titlePrice) {
+        sectionEl.style.setProperty(
+          '--pdp-title-default-width',
+          Math.round(titlePrice.getBoundingClientRect().width) + 'px'
+        );
+      }
 
       var ddRect = dropdown.getBoundingClientRect();
 
@@ -3586,22 +3609,23 @@
         var pickerOpts = colorPicker.querySelector('.ymee-color-picker__options') || colorPicker;
         var optsRect = pickerOpts.getBoundingClientRect();
 
-        /* Dropdown slides LEFT: right edge aligns with picker left edge - gap */
-        var tx = optsRect.left - GAP - ddRect.width - ddRect.left;
-        var ty = optsRect.top + optsRect.height / 2 - (ddRect.top + ddRect.height / 2);
+        /* Color picker shifts LEFT so its right edge + GAP = dropdown's left edge.
+           Dropdown moves UP only to align vertically with the picker. */
+        var pickerTx = ddRect.left - GAP - optsRect.width - optsRect.left;
+        sectionEl.style.setProperty('--pdp-cp-transform', 'translateX(' + Math.round(pickerTx) + 'px)');
 
-        sectionEl.style.setProperty(
-          '--pdp-dd-transform',
-          'translate(' + Math.round(tx) + 'px,' + Math.round(ty) + 'px)'
-        );
+        var ddTy = optsRect.top + optsRect.height / 2 - (ddRect.top + ddRect.height / 2);
+        sectionEl.style.setProperty('--pdp-dd-transform', 'translateY(' + Math.round(ddTy) + 'px)');
 
-        /* Shrink title-price so it doesn't overlap the transformed dropdown */
+        /* Shrink title-price to not overlap the inline row */
         if (stickyInner && titlePrice) {
-          var availableForTitle = ddRect.left + tx - stickyInner.getBoundingClientRect().left - GRID_GAP;
-          sectionEl.style.setProperty('--pdp-title-inline-width', Math.max(Math.round(availableForTitle), 100) + 'px');
+          var inlineRowLeft = optsRect.left + pickerTx;
+          var availableForTitle = Math.max(inlineRowLeft - stickyInner.getBoundingClientRect().left - GRID_GAP, 100);
+          sectionEl.style.setProperty('--pdp-title-inline-width', Math.round(availableForTitle) + 'px');
         }
       } else {
         /* No color picker — slide dropdown up to sticky bar area */
+        sectionEl.style.removeProperty('--pdp-cp-transform');
         var stickyBar = sectionEl.querySelector('.product__sticky-bar');
         if (stickyBar) {
           var barRect = stickyBar.getBoundingClientRect();
@@ -3613,7 +3637,6 @@
         sectionEl.style.setProperty('--pdp-title-inline-width', '100%');
       }
 
-      /* Switch to transform-based phase and restore inline if at top */
       sectionEl.classList.add(CLS_M);
       if (window.scrollY <= THRESHOLD) sectionEl.classList.add(CLS);
       void sectionEl.offsetHeight;
