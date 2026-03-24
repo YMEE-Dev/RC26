@@ -181,17 +181,24 @@
     gap: 14px;
     cursor: pointer;
     padding: 0 8px;
-    min-height: 40px;
+    height: 40px;
     font-family: Inter, sans-serif;
     font-size: 12px;
     line-height: 20px;
     font-weight: 600;
     letter-spacing: 0.1em;
+    z-index: 3;
+    pointer-events: auto;
   }
 
   .blog-brand__sound-icon {
-    width: 66px;
-    height: 66px;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px;
+    min-height: 40px;
+    max-width: 40px;
+    max-height: 40px;
+    flex: 0 0 40px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -199,8 +206,8 @@
   }
 
   .blog-brand__sound-icon svg {
-    width: 100%;
-    height: 100%;
+    width: 40px;
+    height: 40px;
   }
 
   .blog-brand__sound-icon circle,
@@ -228,7 +235,9 @@
   .blog-brand__video-modal-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.78);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 
   .blog-brand__video-modal-dialog {
@@ -307,55 +316,65 @@
     }
 
     .blog-brand__sound-icon {
-      width: 50px;
-      height: 50px;
+      width: 40px !important;
+      height: 40px !important;
     }
   }
 {% endstylesheet %}
 
 {% javascript %}
   (() => {
-    const root = document.getElementById('BlogBrand--{{ section.id }}');
-    if (!root) return;
+    const initBrandVideo = (root) => {
+      const openBtn = root.querySelector('[data-brand-video-open]');
+      const modal = root.querySelector('[data-brand-video-modal]');
+      if (!openBtn || !modal) return;
 
-    const openBtn = root.querySelector('[data-brand-video-open]');
-    const modal = root.querySelector('[data-brand-video-modal]');
-    if (!openBtn || !modal) return;
+      const inlineVideo = root.querySelector('.blog-brand__video--inline');
+      const modalVideo = modal.querySelector('.blog-brand__video--modal');
+      const closeEls = modal.querySelectorAll('[data-brand-video-close]');
 
-    const inlineVideo = root.querySelector('.blog-brand__video--inline');
-    const modalVideo = modal.querySelector('.blog-brand__video--modal');
-    const closeEls = modal.querySelectorAll('[data-brand-video-close]');
+      const closeModal = () => {
+        modal.hidden = true;
+        document.body.style.overflow = '';
+        if (modalVideo) {
+          modalVideo.pause();
+          modalVideo.currentTime = 0;
+        }
+        if (inlineVideo) inlineVideo.play().catch(() => {});
+      };
 
-    const closeModal = () => {
-      modal.hidden = true;
-      document.body.style.overflow = '';
-      if (modalVideo) {
-        modalVideo.pause();
-        modalVideo.currentTime = 0;
+      openBtn.addEventListener('click', () => {
+        modal.hidden = false;
+        document.body.style.overflow = 'hidden';
+        if (inlineVideo) inlineVideo.pause();
+        if (modalVideo) {
+          modalVideo.muted = false;
+          modalVideo.play().catch(() => {});
+        }
+      });
+
+      closeEls.forEach((el) => el.addEventListener('click', closeModal));
+
+      if (inlineVideo) {
+        inlineVideo.muted = true;
+        inlineVideo.play().catch(() => {});
       }
-      if (inlineVideo) inlineVideo.play().catch(() => {});
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !modal.hidden) closeModal();
+      });
     };
 
-    openBtn.addEventListener('click', () => {
-      modal.hidden = false;
-      document.body.style.overflow = 'hidden';
-      if (inlineVideo) inlineVideo.pause();
-      if (modalVideo) {
-        modalVideo.muted = false;
-        modalVideo.play().catch(() => {});
-      }
-    });
+    const initAllBrandVideos = () => {
+      const roots = document.querySelectorAll('[data-section-type="blog-brand"]');
+      roots.forEach((root) => initBrandVideo(root));
+    };
 
-    closeEls.forEach((el) => el.addEventListener('click', closeModal));
-
-    if (inlineVideo) {
-      inlineVideo.muted = true;
-      inlineVideo.play().catch(() => {});
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAllBrandVideos, { once: true });
+    } else {
+      initAllBrandVideos();
     }
-
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && !modal.hidden) closeModal();
-    });
   })();
 {% endjavascript %}
 
