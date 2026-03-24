@@ -257,6 +257,28 @@
       return Array.from(document.querySelectorAll(`[data-storytelling-modal-target="${modalId}"]`));
     };
 
+    const updateStorytellingProgress = (swiper) => {
+      if (!swiper || swiper.destroyed) return;
+
+      const progressTrack = swiper.pagination && swiper.pagination.el;
+      const progressFill = progressTrack && progressTrack.querySelector('.swiper-pagination-progressbar-fill');
+      if (!progressTrack || !progressFill) return;
+
+      const slidesCount = swiper.slides ? swiper.slides.length : 0;
+      if (slidesCount <= 1) return;
+
+      const trackWidth = progressTrack.clientWidth;
+      if (!trackWidth) return;
+
+      const thumbWidth = Math.max(trackWidth / slidesCount, 36);
+      const maxOffset = Math.max(trackWidth - thumbWidth, 0);
+      const clampedProgress = Math.max(0, Math.min(1, swiper.progress || 0));
+      const offset = maxOffset * clampedProgress;
+
+      progressFill.style.width = `${thumbWidth}px`;
+      progressFill.style.transform = `translate3d(${offset}px, 0, 0)`;
+    };
+
     const initModalSwiper = (modal) => {
       if (!modal) return;
       if (typeof Swiper === 'undefined') return;
@@ -273,6 +295,9 @@
         if (swiper.pagination && typeof swiper.pagination.update === 'function') {
           swiper.pagination.update();
         }
+        requestAnimationFrame(() => {
+          updateStorytellingProgress(swiper);
+        });
         return;
       }
 
@@ -291,6 +316,28 @@
         pagination: {
           el: paginationElement,
           type: 'progressbar',
+        },
+        on: {
+          afterInit(instance) {
+            requestAnimationFrame(() => {
+              updateStorytellingProgress(instance);
+            });
+          },
+          progress(instance) {
+            requestAnimationFrame(() => {
+              updateStorytellingProgress(instance);
+            });
+          },
+          resize(instance) {
+            requestAnimationFrame(() => {
+              updateStorytellingProgress(instance);
+            });
+          },
+          update(instance) {
+            requestAnimationFrame(() => {
+              updateStorytellingProgress(instance);
+            });
+          },
         },
       });
 
