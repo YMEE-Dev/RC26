@@ -13,7 +13,7 @@
   }
 {%- endstyle -%}
 
-<popup-component class="footer-newsletter-popup">
+<footer-newsletter-drawer class="footer-newsletter-popup">
   <section
     id="FooterNewsletter--{{ section.id }}"
     class="footer-newsletter section-padding {{ color_scheme }}"
@@ -25,9 +25,9 @@
         <button
           type="button"
           class="btn btn--secondary btn--outline footer-newsletter__trigger"
-          data-popup-open
-          aria-haspopup="dialog"
-          aria-controls="FooterNewsletterModal--{{ section.id }}"
+          data-newsletter-drawer-open
+          aria-expanded="false"
+          aria-controls="FooterNewsletterDrawer--{{ section.id }}"
         >
           <span class="footer-newsletter__trigger-icon" aria-hidden="true">
             <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
@@ -40,41 +40,29 @@
     </div>
   </section>
 
-  <dialog
-    id="FooterNewsletterModal--{{ section.id }}"
-    class="footer-newsletter__modal modal__overlay modal__overlay--default"
-    aria-modal="true"
-    aria-labelledby="FooterNewsletterModalTitle--{{ section.id }}"
-    inert
-    data-scroll-lock-required
-    data-cookie-name="footer-newsletter-{{ section.id }}"
-    data-cookie-value="closed"
+  <div
+    id="FooterNewsletterDrawer--{{ section.id }}"
+    class="collection__sidebar__slide-out footer-newsletter__drawer"
+    data-newsletter-drawer
   >
-    <form method="dialog">
-      <button class="visually-hidden" aria-label="{{ 'general.accessibility.close' | t }}"></button>
-    </form>
-
-    <div
-      class="footer-newsletter__modal-body modal__body modal--default modal--newsletter modal--no-image"
-      data-modal-body
-      data-scroll-lock-scrollable
-    >
-      <div class="modal-section">
-        <div class="modal-wrapper">
-          <div class="modal__text">
-            <div class="modal__inner">
-              {%- render 'footer-newsletter-form', section: section -%}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <button data-popup-close class="close" title="{{ 'general.accessibility.close' | t }}">
+    <div class="collection__sidebar__head">
+      <button
+        type="button"
+        class="collection__sidebar__close"
+        data-newsletter-drawer-close
+        aria-label="{{ 'general.accessibility.close' | t }}"
+      >
         {%- render 'icon-close' -%}
       </button>
     </div>
-  </dialog>
-</popup-component>
+
+    <div class="footer-newsletter__drawer-body" data-scroll-lock-scrollable>
+      {%- render 'footer-newsletter-form', section: section -%}
+    </div>
+  </div>
+
+  <div class="underlay" data-newsletter-drawer-close></div>
+</footer-newsletter-drawer>
 
 {% stylesheet %}
   .footer-newsletter__inner {
@@ -98,37 +86,18 @@
     flex-shrink: 0;
   }
 
-  .footer-newsletter__modal .modal--default {
-    width: 100%;
-    max-width: 575px;
+  /*
+   * --duration is only defined inside .collection__products so we set it
+   * here to match the collection filter slide-out timing exactly.
+   */
+  .footer-newsletter__drawer {
+    --duration: 0.6s;
   }
 
-  .footer-newsletter__modal .modal-wrapper {
-    justify-content: center;
-  }
-
-  .footer-newsletter__modal .modal__text {
-    width: 100%;
-    max-width: 72rem;
-  }
-
-  .footer-newsletter__modal .modal__inner {
-    padding: 40px;
-  }
-
-  .footer-newsletter__modal .modal__title {
-    margin: 0 0 40px;
-    text-transform: uppercase;
-    text-align: left;
-  }
-
-  .footer-newsletter__modal .modal__description {
-    margin-bottom: 80px;
-    text-align: left;
-  }
-
-  .footer-newsletter__modal .modal__description p {
-    margin: 0;
+  .footer-newsletter__drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 var(--inner) var(--inner);
   }
 
   .footer-newsletter-form {
@@ -136,8 +105,8 @@
     max-width: 62rem;
   }
 
-  .footer-newsletter__modal-body select.field,
-  .footer-newsletter__modal-body input.field {
+  .footer-newsletter__drawer .footer-newsletter-form select.field,
+  .footer-newsletter__drawer .footer-newsletter-form input.field {
     margin-top: 15px;
     padding-top: 0px;
   }
@@ -206,28 +175,13 @@
     margin-top: 20px;
   }
 
-  .footer-newsletter__modal .close {
-    top: 42px;
-    right: 42px;
-  }
-
-  .footer-newsletter__modal .close svg {
-    width: 28px;
-    height: 28px;
-  }
-
   @media only screen and (max-width: 749px) {
-    .footer-newsletter__modal .modal--default {
-      max-height: 100vh;
-      overflow: scroll;
+    .footer-newsletter__drawer {
+      max-width: 100%;
     }
 
     .footer-newsletter__inner {
       gap: 0;
-    }
-
-    .footer-newsletter__modal .modal__text {
-      max-width: 100%;
     }
 
     .footer-newsletter-form__fields {
@@ -255,13 +209,68 @@
     .footer-newsletter-form__submit {
       min-height: 62px;
     }
-
-    .footer-newsletter__modal .close {
-      top: 24px;
-      right: 16px;
-    }
   }
 {% endstylesheet %}
+
+{% javascript %}
+  class FooterNewsletterDrawer extends HTMLElement {
+    connectedCallback() {
+      this.drawer = this.querySelector('[data-newsletter-drawer]');
+      this.trigger = this.querySelector('[data-newsletter-drawer-open]');
+      this.scrollableEl = this.querySelector('[data-scroll-lock-scrollable]');
+
+      this.trigger?.addEventListener('click', () => this.open());
+
+      this.querySelectorAll('[data-newsletter-drawer-close]').forEach((el) => {
+        el.addEventListener('click', () => this.close());
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.drawer.classList.contains('expanded')) {
+          this.close();
+        }
+      });
+    }
+
+    open() {
+      this.trigger.setAttribute('aria-expanded', 'true');
+
+      const removeExpanding = () => {
+        this.drawer.classList.remove('expanding');
+        this.drawer.removeEventListener('transitionend', removeExpanding);
+      };
+      const addExpanding = () => {
+        this.drawer.classList.add('expanding');
+        this.drawer.removeEventListener('transitionstart', addExpanding);
+      };
+      this.drawer.addEventListener('transitionstart', addExpanding);
+      this.drawer.addEventListener('transitionend', removeExpanding);
+      this.drawer.classList.add('expanded');
+
+      window.dispatchEvent(new CustomEvent('theme:scroll:lock', {detail: this.scrollableEl}));
+
+      if (window.theme?.a11y?.trapFocus) {
+        window.theme.a11y.trapFocus(this.drawer);
+      }
+    }
+
+    close() {
+      this.trigger.setAttribute('aria-expanded', 'false');
+      this.drawer.classList.remove('expanded');
+      window.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
+
+      if (window.theme?.a11y?.removeTrapFocus) {
+        window.theme.a11y.removeTrapFocus();
+      }
+
+      this.trigger?.focus();
+    }
+  }
+
+  if (!customElements.get('footer-newsletter-drawer')) {
+    customElements.define('footer-newsletter-drawer', FooterNewsletterDrawer);
+  }
+{% endjavascript %}
 
 {% schema %}
 {
