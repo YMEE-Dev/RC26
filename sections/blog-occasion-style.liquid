@@ -46,24 +46,41 @@
       </p>
     </div>
 
-    {%- if featured_article.image != blank -%}
-      {%- liquid
-        assign featured_image_alt = featured_article.image.alt
-        if featured_image_alt == blank
-          assign featured_image_alt = featured_article.title
-        endif
-      -%}
+    {%- if section.settings.video != blank or section.settings.video_url != blank or featured_article.image != blank -%}
       <div class="blog-occasion__media" data-blog-fade data-blog-fade-delay="0.18">
-        {{
-          featured_article.image
-          | image_url: width: 2800
-          | image_tag:
-            alt: featured_image_alt,
-            widths: '750, 1100, 1500, 2000, 2400, 2800',
-            sizes: '100vw',
-            loading: 'eager',
-            class: 'blog-occasion__image'
-        }}
+        {%- if section.settings.video != blank -%}
+          {{
+            section.settings.video
+            | video_tag:
+              autoplay: true,
+              loop: true,
+              controls: false,
+              muted: true,
+              playsinline: true,
+              class: 'blog-occasion__video'
+          }}
+        {%- elsif section.settings.video_url != blank -%}
+          <video class="blog-occasion__video" autoplay loop muted playsinline>
+            <source src="{{ section.settings.video_url }}">
+          </video>
+        {%- elsif featured_article.image != blank -%}
+          {%- liquid
+            assign featured_image_alt = featured_article.image.alt
+            if featured_image_alt == blank
+              assign featured_image_alt = featured_article.title
+            endif
+          -%}
+          {{
+            featured_article.image
+            | image_url: width: 2800
+            | image_tag:
+              alt: featured_image_alt,
+              widths: '750, 1100, 1500, 2000, 2400, 2800',
+              sizes: '100vw',
+              loading: 'eager',
+              class: 'blog-occasion__image'
+          }}
+        {%- endif -%}
       </div>
     {%- endif -%}
 
@@ -200,6 +217,16 @@
       "unit": "px",
       "label": "Title and date spacing",
       "default": 28
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Top video"
+    },
+    {
+      "type": "url",
+      "id": "video_url",
+      "label": "Top video URL (fallback)"
     },
     {
       "type": "range",
