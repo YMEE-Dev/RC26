@@ -203,14 +203,20 @@
             assign sub_collection_title = sublink.title
             assign sub_collection_handle_separator = sub_collection_handle | append: ',' | prepend: ','
             assign sub_collection = collections[sub_collection_handle]
+            assign is_active_sub_collection_link = false
 
             if sublink.object.handle contains sub_collection_handle_separator
               continue
             endif
+
+            if sub_collection.handle == collection.handle
+              assign is_active_sub_collection_link = true
+              assign has_active_subcollection_link = true
+            endif
           -%}
 
           <a
-            class="subcollection_links-link navlink{% if sub_collection.handle == collection.handle %} is-active{% endif %}"
+            class="subcollection_links-link navlink{% if is_active_sub_collection_link %} is-active{% endif %}"
             href="{{ sub_collection.url }}"
           >
             {{- sub_collection_title -}}
@@ -237,6 +243,7 @@
       <nav
         class="collection__nav {{ align_classes }}{% if is_media_only_collection_template %} collection__nav--media-only{% endif %}"
         data-collection-nav
+        data-has-active-subcollection-link="{{ has_active_subcollection_link }}"
       >
         <div class="availability_filter-wrapper" data-availability-filter>
           <a

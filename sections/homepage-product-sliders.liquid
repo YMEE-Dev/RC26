@@ -157,6 +157,8 @@
   --bg-color: {{ section.settings.background_color }};
   --PT: {{ section.settings.padding_top }}px;
   --PB: {{ section.settings.padding_bottom }}px;
+  --homepage-product-sliders-head-direction: {{ section.settings.header_direction }};
+  --homepage-product-sliders-tabs-justify: {% if section.settings.header_direction == 'row-reverse' %}flex-start{% else %}flex-end{% endif %};
 {%- endcapture -%}
 
 <section
@@ -217,6 +219,16 @@
       "step": 1,
       "label": "Product limit",
       "default": 4
+    },
+    {
+      "type": "select",
+      "id": "header_direction",
+      "label": "Header direction",
+      "default": "row",
+      "options": [
+        { "value": "row", "label": "Title left" },
+        { "value": "row-reverse", "label": "Title right" }
+      ]
     },
     {
       "type": "header",

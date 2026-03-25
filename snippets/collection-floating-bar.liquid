@@ -6,6 +6,16 @@
   {% render 'collection-floating-bar' %}
 {% enddoc %}
 
+{%- assign sort_options = search.sort_options | default: collection.sort_options -%}
+{%- assign sort_options = sort_options | reject: 'value', 'created-ascending' | reject: 'value', 'created-descending' -%}
+{%- assign sort_by = search.sort_by | default: collection.sort_by -%}
+{%- assign currently_selected = sort_options | where: 'value', sort_by | first -%}
+
+{%- if currently_selected == blank and sort_options.size > 0 -%}
+  {%- assign currently_selected = sort_options.first -%}
+  {%- assign sort_by = currently_selected.value -%}
+{%- endif -%}
+
 <svg width="0" height="0" style="position:absolute">
   <defs>
     <clipPath id="cfb-blur-clip" clipPathUnits="objectBoundingBox">
@@ -63,9 +73,6 @@
     >
       <span class="collection-floating-bar__sort-label">{{ 'collections.general.sort' | t }}:</span>
       <span class="collection-floating-bar__sort-value" data-collection-floating-bar-sort-value>
-        {%- assign sort_by = search.sort_by | default: collection.sort_by -%}
-        {%- assign sort_options = search.sort_options | default: collection.sort_options -%}
-        {%- assign currently_selected = sort_options | where: 'value', sort_by | first -%}
         {{- currently_selected.name -}}
       </span>
     </button>
@@ -96,8 +103,6 @@
       </a>
     </div>
     <div class="collection-floating-bar__sort-sidebar__body">
-      {%- assign sort_options = search.sort_options | default: collection.sort_options -%}
-      {%- assign sort_by = search.sort_by | default: collection.sort_by -%}
       <ul class="collection-floating-bar__sort-list">
         {%- for option in sort_options -%}
           <li class="collection-floating-bar__sort-item{% if sort_by == option.value %} is-active{% endif %}">
