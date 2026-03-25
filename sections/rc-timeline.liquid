@@ -31,7 +31,7 @@
   data-section-id="{{ section.id }}"
 >
   <div class="page-shell">
-    <main>
+    <div class="rc-story__content">
       <section class="hero" id="{{ section_id }}-top">
 
         {%- liquid
@@ -181,7 +181,7 @@
         </div>
         <div class="timeline-markers" data-timeline-markers></div>
       </section>
-    </main>
+    </div>
 
     <nav class="section-nav section-nav--fixed" aria-label="Page sections">
       <div class="section-nav__shape">
@@ -202,8 +202,13 @@
           <a class="section-nav__tab" data-idx="2" data-section="{{ ruby_id }}" href="#{{ ruby_id }}">{{ section.settings.section_nav_ruby }}</a>
           <a class="section-nav__tab" data-idx="3" data-section="{{ timeline_id }}" href="#{{ timeline_id }}">{{ section.settings.section_nav_timeline }}</a>
         </div>
-        <div class="section-nav__mobile" aria-hidden="true">
-          <div class="section-nav__mobile-dropdown" aria-hidden="true">
+        <div class="section-nav__mobile">
+          <div
+            id="{{ section_id }}-mobile-nav"
+            class="section-nav__mobile-dropdown"
+            aria-hidden="true"
+            hidden
+          >
             <a class="section-nav__mobile-link" href="#{{ history_id }}" data-section="{{ history_id }}" data-idx="0">{{ section.settings.section_nav_history }}</a>
             <a class="section-nav__mobile-link" href="#{{ creator_id }}" data-section="{{ creator_id }}" data-idx="1">{{ section.settings.section_nav_creator }}</a>
             <a class="section-nav__mobile-link" href="#{{ ruby_id }}" data-section="{{ ruby_id }}" data-idx="2">{{ section.settings.section_nav_ruby }}</a>
@@ -228,10 +233,21 @@
               </defs>
             </g>
           </svg>
-          <div class="section-nav__mobile-main">
+          <button
+            class="section-nav__mobile-main"
+            type="button"
+            aria-controls="{{ section_id }}-mobile-nav"
+            aria-expanded="false"
+          >
             <span class="section-nav__mobile-label">{{ section.settings.section_nav_history | upcase }}</span>
-          </div>
-          <button class="section-nav__mobile-flower-trigger" type="button" aria-label="Open section navigation">
+          </button>
+          <button
+            class="section-nav__mobile-flower-trigger"
+            type="button"
+            aria-label="Open section navigation"
+            aria-controls="{{ section_id }}-mobile-nav"
+            aria-expanded="false"
+          >
             <svg class="section-nav__mobile-flower section-nav__mobile-flower--back" width="1064" height="1023" viewBox="0 0 1064 1023" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
               <path d="M437.088 574.435C385.654 610.527 357.613 623.346 309.691 623.346C248.91 623.346 184.619 586.072 137.883 516.159C184.619 446.247 248.91 408.973 309.691 408.973C357.613 408.973 385.654 421.792 437.088 457.931L441.785 448.612L410.232 421.792C329.571 353.062 290.996 334.378 254.794 334.378C162.46 334.378 88.8217 445.064 24.5301 490.522L-0.000266461 507.976L-0.000267178 524.295L24.5301 541.797C87.6355 587.254 162.46 697.941 254.794 697.941C291.044 697.941 329.619 679.304 410.232 610.527L441.785 583.754L437.088 574.435ZM557.462 24.4552L539.907 -2.06387e-09L523.537 -7.13866e-07L506.029 24.4552C459.293 89.6846 349.404 161.915 349.404 254.012C349.404 290.15 368.099 328.56 437.04 408.973L463.943 440.429L473.29 435.746C437.04 384.471 424.229 356.515 424.229 309.923C424.229 248.146 462.804 184.099 531.746 138.642C600.735 184.099 639.262 248.194 639.262 309.923C639.262 356.515 626.404 384.471 590.154 435.746L599.501 440.429L626.356 408.973C695.298 328.56 714.04 290.15 714.04 254.012C714.04 161.962 603.012 88.5494 557.415 24.4552M626.404 614.027L599.548 582.571L590.201 587.207C626.451 638.482 639.309 666.438 639.309 713.03C639.309 774.759 600.735 838.853 531.793 884.311C462.852 838.853 424.277 774.759 424.277 713.03C424.277 666.438 437.135 638.482 473.337 587.207L463.99 582.571L437.088 614.027C368.146 694.44 349.452 732.897 349.452 768.988C349.452 861.038 459.34 933.268 506.076 998.545L523.585 1023L539.954 1023L557.51 998.545C603.107 934.451 714.134 861.038 714.134 768.988C714.134 732.85 695.44 694.393 626.451 614.027M1063.54 508.023L1039.01 490.569C974.717 445.112 901.078 334.425 808.745 334.425C772.543 334.425 733.968 353.062 653.307 421.839L621.754 448.659L626.451 457.978C677.884 421.839 705.926 409.02 752.662 409.02C814.581 409.02 878.873 447.477 924.47 516.207C878.873 584.936 814.581 623.393 752.662 623.393C705.926 623.393 677.884 610.574 626.451 574.483L621.754 583.801L653.307 610.574C733.968 679.351 772.543 697.988 808.745 697.988C901.078 697.988 973.531 588.484 1039.01 541.844L1063.54 524.343L1063.54 508.023Z" fill="#27574D"/>
             </svg>
@@ -252,54 +268,6 @@
     <script type="application/json" data-timeline-data>
       [
         {% for block in section.blocks %}
-          {% assign year_key = block.settings.year | default: '' | strip | downcase %}
-          {% assign fallback_timeline_asset_1 = '' %}
-          {% assign fallback_timeline_asset_2 = '' %}
-          {% assign fallback_timeline_asset_3 = '' %}
-          {% case year_key %}
-            {% when '1977' %}
-              {% assign fallback_timeline_asset_1 = 'rc-timeline-1977.png' %}
-            {% when '1984' %}
-              {% assign fallback_timeline_asset_1 = 'rc-timeline-1984-1.avif' %}
-              {% assign fallback_timeline_asset_2 = 'rc-timeline-1984-2.png' %}
-            {% when '1986' %}
-              {% assign fallback_timeline_asset_1 = 'rc-timeline-1984-1.avif' %}
-              {% assign fallback_timeline_asset_2 = 'rc-timeline-1986-2.jpg' %}
-            {% when '1996' %}
-              {% assign fallback_timeline_asset_1 = 'rc-timeline-1996-1.jpg' %}
-              {% assign fallback_timeline_asset_2 = 'rc-timeline-1996-2.jpg' %}
-              {% assign fallback_timeline_asset_3 = 'rc-timeline-1996-3.webp' %}
-            {% when '2000' %}
-              {% assign fallback_timeline_asset_1 = 'rc-timeline-2000.jpg' %}
-            {% when '2003' %}
-              {% assign fallback_timeline_asset_1 = 'rc-timeline-2003.jpg' %}
-            {% when '2006' %}
-              {% assign fallback_timeline_asset_1 = 'rc-timeline-2007.png' %}
-            {% when '2007' %}
-              {% assign fallback_timeline_asset_1 = 'rc-timeline-2007.png' %}
-            {% when '2008' %}
-              {% assign fallback_timeline_asset_1 = 'rc-timeline-2008.png' %}
-            {% when '2013' %}
-              {% assign fallback_timeline_asset_1 = 'rc-timeline-2013.png' %}
-            {% when '2014' %}
-              {% assign fallback_timeline_asset_1 = 'rc-timeline-2014-1.webp' %}
-              {% assign fallback_timeline_asset_2 = 'rc-timeline-2014-2.webp' %}
-              {% assign fallback_timeline_asset_3 = 'rc-timeline-2014-3.jpg' %}
-            {% when '2018' %}
-              {% assign fallback_timeline_asset_1 = 'rc-timeline-2018-1.jpg' %}
-              {% assign fallback_timeline_asset_2 = 'rc-timeline-2018-2.jpg' %}
-            {% when '2021' %}
-              {% assign fallback_timeline_asset_1 = 'rc-timeline-2021-1.jpg' %}
-              {% assign fallback_timeline_asset_2 = 'rc-timeline-2021-2.jpg' %}
-              {% assign fallback_timeline_asset_3 = 'rc-timeline-2021-3.jpg' %}
-            {% when '2022' %}
-              {% assign fallback_timeline_asset_1 = 'rc-timeline-2022-1.jpg' %}
-              {% assign fallback_timeline_asset_2 = 'rc-timeline-2022-2.png' %}
-            {% when '2025' %}
-              {% assign fallback_timeline_asset_1 = 'rc-timeline-2025.png' %}
-            {% when 'today' %}
-              {% assign fallback_timeline_asset_1 = 'rc-timeline-2025.png' %}
-          {% endcase %}
           {
             "id": {{ block.id | json }},
             "year": {{ block.settings.year | default: '1977' | json }},
@@ -310,8 +278,7 @@
             "media": [
               {
                 "label": {{ block.settings.media_1_label | default: 'Media 1' | json }},
-                "image": {% if block.settings.media_1_image != blank %}{{ block.settings.media_1_image | image_url: width: 2200 | json }}{% elsif block.settings.timeline_image != blank %}{{ block.settings.timeline_image | image_url: width: 2200 | json }}{% elsif section.settings.use_year_fallback_images and fallback_timeline_asset_1 != blank %}{{ fallback_timeline_asset_1 | asset_url | json }}{% else %}null{% endif %},
-                "image_source": {% if block.settings.media_1_image != blank %}"custom"{% elsif block.settings.timeline_image != blank %}"custom"{% elsif section.settings.use_year_fallback_images and fallback_timeline_asset_1 != blank %}"fallback"{% else %}"none"{% endif %},
+                "image": {% if block.settings.media_1_image != blank %}{{ block.settings.media_1_image | image_url: width: 1600 | json }}{% elsif block.settings.timeline_image != blank %}{{ block.settings.timeline_image | image_url: width: 1600 | json }}{% else %}null{% endif %},
                 "fill": {{ block.settings.media_1_fill | default: 'linear-gradient(135deg, #5f5a71 0%, #241f29 65%, #0d0d12 100%)' | json }},
                 "x": {{ block.settings.media_1_x | default: 0 | json }},
                 "y": {{ block.settings.media_1_y | default: 18 | json }},
@@ -321,8 +288,7 @@
               },
               {
                 "label": {{ block.settings.media_2_label | default: 'Media 2' | json }},
-                "image": {% if block.settings.media_2_image != blank %}{{ block.settings.media_2_image | image_url: width: 2200 | json }}{% elsif section.settings.use_year_fallback_images and fallback_timeline_asset_2 != blank %}{{ fallback_timeline_asset_2 | asset_url | json }}{% else %}null{% endif %},
-                "image_source": {% if block.settings.media_2_image != blank %}"custom"{% elsif section.settings.use_year_fallback_images and fallback_timeline_asset_2 != blank %}"fallback"{% else %}"none"{% endif %},
+                "image": {% if block.settings.media_2_image != blank %}{{ block.settings.media_2_image | image_url: width: 1600 | json }}{% else %}null{% endif %},
                 "fill": {{ block.settings.media_2_fill | default: 'linear-gradient(180deg, #d8d8d5 0%, #8f8e88 50%, #4e4d4a 100%)' | json }},
                 "x": {{ block.settings.media_2_x | default: 43 | json }},
                 "y": {{ block.settings.media_2_y | default: 0 | json }},
@@ -332,8 +298,7 @@
               },
               {
                 "label": {{ block.settings.media_3_label | default: 'Media 3' | json }},
-                "image": {% if block.settings.media_3_image != blank %}{{ block.settings.media_3_image | image_url: width: 2200 | json }}{% elsif section.settings.use_year_fallback_images and fallback_timeline_asset_3 != blank %}{{ fallback_timeline_asset_3 | asset_url | json }}{% else %}null{% endif %},
-                "image_source": {% if block.settings.media_3_image != blank %}"custom"{% elsif section.settings.use_year_fallback_images and fallback_timeline_asset_3 != blank %}"fallback"{% else %}"none"{% endif %},
+                "image": {% if block.settings.media_3_image != blank %}{{ block.settings.media_3_image | image_url: width: 1600 | json }}{% else %}null{% endif %},
                 "fill": {{ block.settings.media_3_fill | default: 'linear-gradient(135deg, #ceb78c 0%, #89683f 50%, #20150f 100%)' | json }},
                 "x": {{ block.settings.media_3_x | default: 74 | json }},
                 "y": {{ block.settings.media_3_y | default: 8 | json }},
@@ -415,8 +380,7 @@
     { "type": "text", "id": "year_rail_aria_label", "label": "Year rail aria label", "default": "Timeline years" },
     { "type": "range", "id": "panel_height", "label": "Panel height", "min": 55, "max": 95, "step": 1, "unit": "vh", "default": 76 },
     { "type": "range", "id": "year_size", "label": "Year size", "min": 24, "max": 80, "step": 1, "unit": "px", "default": 40 },
-    { "type": "range", "id": "caption_size", "label": "Caption size", "min": 10, "max": 22, "step": 1, "unit": "px", "default": 16 },
-    { "type": "checkbox", "id": "use_year_fallback_images", "label": "Use automatic year fallback images", "default": false }
+    { "type": "range", "id": "caption_size", "label": "Caption size", "min": 10, "max": 22, "step": 1, "unit": "px", "default": 16 }
   ],
   "blocks": [
     {
