@@ -7,6 +7,13 @@
 
 .homepage-product-sliders .tab-content {
   background: var(--bg-color);
+  padding-top: 40px;
+}
+
+@media only screen and (max-width: 959px) {
+  .homepage-product-sliders .tab-content {
+    padding-top: 0;
+  }
 }
 
 .homepage-product-sliders .grid__heading-holder {
@@ -15,7 +22,19 @@
   max-width: min(var(--content-max), 1200px);
   position: absolute;
   top: -26px;
+  left: 50%;
   width: 100%;
+  transform: translateX(-50%);
+}
+
+@media only screen and (max-width: 959px) {
+  .homepage-product-sliders .grid__heading-holder {
+    position: static;
+    transform: none;
+    padding: 0;
+    margin: 0;
+    max-width: none;
+  }
 }
 
 .homepage-product-sliders .homepage-product-sliders__head {
