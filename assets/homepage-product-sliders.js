@@ -97,6 +97,15 @@
     });
   };
 
+  const syncSelectedTabs = (section) => {
+    section.querySelectorAll('.tab-link-item').forEach((item) => {
+      const trigger = item.querySelector('.tab-link[data-tab]');
+      const isSelected = Boolean(trigger && trigger.classList.contains('current'));
+
+      item.classList.toggle('selected', isSelected);
+    });
+  };
+
   const bindSection = (section) => {
     if (!section || initializedSections.has(section)) {
       return;
@@ -106,6 +115,7 @@
     activeSections.add(section);
 
     const initProgress = () => {
+      syncSelectedTabs(section);
       initProgressForSection(section);
     };
 
