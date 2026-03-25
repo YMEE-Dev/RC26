@@ -1,5 +1,5 @@
 {% doc %}
-  Renders the footer newsletter Mailchimp form.
+  Renders the footer newsletter Mailchimp form, including the modal title and description.
 
   @param {object} section - Footer newsletter section object
 
@@ -18,131 +18,198 @@
   assign email_field = section.settings.mailchimp_email_field | default: 'EMAIL' | strip
   assign language_field = section.settings.mailchimp_language_field | default: 'LANGUAGE' | strip
   assign consent_field = section.settings.mailchimp_consent_field | default: 'CONSENT' | strip
-  assign current_language = localization.language.iso_code | default: request.locale.iso_code | upcase
   assign consent_copy = section.settings.consent_label
   assign policy_copy = section.settings.policy_text
+  assign form_title = section.settings.form_title | strip
+  assign heading_text = section.settings.heading_text
 -%}
 
-<form
-  id="{{ form_id }}"
-  class="footer-newsletter-form"
-  method="post"
-  action="{{ action_url }}"
-  accept-charset="UTF-8"
->
-  <input type="hidden" name="u" value="{{ user_id }}">
-  <input type="hidden" name="id" value="{{ audience_id }}">
+{%- if action_url != blank -%}
+  <script src="{{ 'mailchimp-subscribe.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
 
-  {%- if tags != blank -%}
-    <input type="hidden" name="tags" value="{{ tags }}">
+<div data-footer-newsletter-wrapper>
+  {%- if form_title != blank -%}
+    <h2 id="FooterNewsletterModalTitle--{{ section.id }}" class="modal__title navlink footer-newsletter-form__title">
+      {{ form_title | escape }}
+    </h2>
   {%- endif -%}
 
-  <div class="footer-newsletter-form__fields">
-    <div class="footer-newsletter-form__group">
-      {%- if section.settings.required_fields_label != blank -%}
-        <p class="footer-newsletter-form__eyebrow navlink">{{ section.settings.required_fields_label | escape }}</p>
-      {%- endif -%}
+  {%- if heading_text != blank -%}
+    <div class="modal__description rte body footer-newsletter-form__description">{{ heading_text }}</div>
+  {%- endif -%}
 
-      <label class="visually-hidden" for="FooterNewsletterFirstName--{{ section.id }}"> First name </label>
-      <input
-        id="FooterNewsletterFirstName--{{ section.id }}"
-        class="footer-newsletter-form__field field"
-        type="text"
-        name="{{ first_name_field }}"
-        placeholder="Name"
-        value="{% if customer %}{{ customer.first_name | escape }}{% endif %}"
-        required
-      >
-
-      <label class="visually-hidden" for="FooterNewsletterLastName--{{ section.id }}"> Last name </label>
-      <input
-        id="FooterNewsletterLastName--{{ section.id }}"
-        class="footer-newsletter-form__field field"
-        type="text"
-        name="{{ last_name_field }}"
-        placeholder="Surname"
-        value="{% if customer %}{{ customer.last_name | escape }}{% endif %}"
-        required
-      >
-
-      <label class="visually-hidden" for="FooterNewsletterEmail--{{ section.id }}"> Email </label>
-      <input
-        id="FooterNewsletterEmail--{{ section.id }}"
-        class="footer-newsletter-form__field field"
-        type="email"
-        name="{{ email_field }}"
-        placeholder="E-mail"
-        value="{% if customer %}{{ customer.email | escape }}{% endif %}"
-        autocorrect="off"
-        autocapitalize="off"
-        required
-      >
+  <form
+    id="{{ form_id }}"
+    class="footer-newsletter-form"
+    method="post"
+    action="{{ action_url }}"
+    accept-charset="UTF-8"
+    data-footer-newsletter-form
+  >
+    <input type="hidden" name="u" value="{{ user_id }}">
+    <input type="hidden" name="id" value="{{ audience_id }}">
+    {%- if tags != blank -%}
+      <input type="hidden" name="tags" value="{{ tags }}">
+    {%- endif -%}
+    {%- comment -%}Mailchimp bot-trap: must be present and kept empty — bots that fill it are rejected{%- endcomment -%}
+    <div aria-hidden="true" style="position:absolute;left:-5000px;">
+      <input type="text" name="b_{{ user_id }}_{{ audience_id }}" tabindex="-1" value="" autocomplete="off">
     </div>
 
-    <div class="footer-newsletter-form__group footer-newsletter-form__group--language">
-      <p class="footer-newsletter-form__eyebrow navlink">I WANT TO RECEIVE EMAILS IN</p>
-
-      <label class="visually-hidden" for="FooterNewsletterLanguage--{{ section.id }}"> Language </label>
-      <select
-        id="FooterNewsletterLanguage--{{ section.id }}"
-        class="footer-newsletter-form__field footer-newsletter-form__field--select field"
-        name="{{ language_field }}"
-        required
-      >
-        {%- if localization.available_languages.size > 0 -%}
-          {%- for language in localization.available_languages -%}
-            <option
-              value="{{ language.iso_code | upcase }}"
-              {% if language.iso_code == localization.language.iso_code %}
-                selected
-              {% endif %}
-            >
-              {{ language.endonym_name }}
-            </option>
-          {%- endfor -%}
-        {%- else -%}
-          <option value="{{ current_language }}" selected>{{ current_language }}</option>
+    <div class="footer-newsletter-form__fields">
+      <div class="footer-newsletter-form__group">
+        {%- if section.settings.required_fields_label != blank -%}
+          <p class="footer-newsletter-form__eyebrow navlink">{{ section.settings.required_fields_label | escape }}</p>
         {%- endif -%}
-      </select>
-    </div>
 
-    <div class="footer-newsletter-form__consent checkbox">
-      <input
-        id="FooterNewsletterConsent--{{ section.id }}"
-        type="checkbox"
-        name="{{ consent_field }}"
-        value="true"
-        required
-      >
-      <label for="FooterNewsletterConsent--{{ section.id }}">
-        <span class="footer-newsletter-form__consent-copy rte body">
-          {%- if consent_copy != blank -%}
-            {{ consent_copy }}
+        <label class="visually-hidden" for="FooterNewsletterFirstName--{{ section.id }}"> First name </label>
+        <input
+          id="FooterNewsletterFirstName--{{ section.id }}"
+          class="footer-newsletter-form__field field"
+          type="text"
+          name="{{ first_name_field }}"
+          placeholder="Name"
+          value="{% if customer %}{{ customer.first_name | escape }}{% endif %}"
+          required
+        >
+
+        <label class="visually-hidden" for="FooterNewsletterLastName--{{ section.id }}"> Last name </label>
+        <input
+          id="FooterNewsletterLastName--{{ section.id }}"
+          class="footer-newsletter-form__field field"
+          type="text"
+          name="{{ last_name_field }}"
+          placeholder="Surname"
+          value="{% if customer %}{{ customer.last_name | escape }}{% endif %}"
+          required
+        >
+
+        <label class="visually-hidden" for="FooterNewsletterEmail--{{ section.id }}"> Email </label>
+        <input
+          id="FooterNewsletterEmail--{{ section.id }}"
+          class="footer-newsletter-form__field field"
+          type="email"
+          name="{{ email_field }}"
+          placeholder="E-mail"
+          value="{% if customer %}{{ customer.email | escape }}{% endif %}"
+          autocorrect="off"
+          autocapitalize="off"
+          required
+        >
+      </div>
+
+      <div class="footer-newsletter-form__group footer-newsletter-form__group--language">
+        <p class="footer-newsletter-form__eyebrow navlink">I WANT TO RECEIVE EMAILS IN</p>
+
+        <label class="visually-hidden" for="FooterNewsletterLanguage--{{ section.id }}"> Language </label>
+        <select
+          id="FooterNewsletterLanguage--{{ section.id }}"
+          class="footer-newsletter-form__field footer-newsletter-form__field--select field"
+          name="{{ language_field }}"
+          required
+        >
+          <option value="English">English</option>
+          <option value="Italian">Italiano</option>
+          <option value="Japanese">日本語</option>
+        </select>
+      </div>
+
+      <div class="footer-newsletter-form__consent checkbox">
+        <input
+          id="FooterNewsletterConsent--{{ section.id }}"
+          type="checkbox"
+          name="{{ consent_field }}"
+          value="true"
+          required
+        >
+        <label for="FooterNewsletterConsent--{{ section.id }}">
+          <span class="footer-newsletter-form__consent-copy rte body">
+            {%- if consent_copy != blank -%}
+              {{ consent_copy }}
+            {%- else -%}
+              <p>
+                I confirm that I have read, understood and accepted your privacy information, that I am over 16, and I
+                agree to receive this newsletter.
+              </p>
+            {%- endif -%}
+          </span>
+        </label>
+      </div>
+
+      <div>
+        <p class="footer-newsletter-form__error" data-footer-newsletter-error hidden></p>
+
+        <button type="submit" class="footer-newsletter-form__submit btn btn--primary btn--solid btn--full">
+          {{ section.settings.button_text | default: 'SIGN UP' | escape }}
+        </button>
+
+        <div class="footer-newsletter-form__policy rte legal">
+          {%- if policy_copy != blank -%}
+            {{ policy_copy }}
           {%- else -%}
             <p>
-              I confirm that I have read, understood and accepted your privacy information, that I am over 16, and I
-              agree to receive this newsletter.
+              Your personal data will be used to provide you with the newsletter service you have expressly requested.
+              Please read the privacy policy and cookie policy for further information.
             </p>
           {%- endif -%}
-        </span>
-      </label>
-    </div>
-
-    <div>
-      <button type="submit" class="footer-newsletter-form__submit btn btn--primary btn--solid btn--full">
-        {{ section.settings.button_text | default: 'SIGN UP' | escape }}
-      </button>
-
-      <div class="footer-newsletter-form__policy rte legal">
-        {%- if policy_copy != blank -%}
-          {{ policy_copy }}
-        {%- else -%}
-          <p>
-            Your personal data will be used to provide you with the newsletter service you have expressly requested.
-            Please read the privacy policy and cookie policy for further information.
-          </p>
-        {%- endif -%}
+        </div>
       </div>
     </div>
+  </form>
+
+  <div class="footer-newsletter-form__thank-you" data-footer-newsletter-success aria-hidden="true" hidden>
+    <span class="footer-newsletter-form__thank-you-icon">
+      {%- render 'icon-check-circle-green' -%}
+    </span>
+    <h2 class="footer-newsletter-form__thank-you-title">Thank you for subscribing</h2>
+    <p class="footer-newsletter-form__thank-you-body">Thank you for joining the world of Roberto Coin.</p>
+    <p class="footer-newsletter-form__thank-you-body">
+      Please check your inbox — you will soon receive news, inspirations and exclusive updates from our Maison.
+    </p>
   </div>
-</form>
+</div>
+
+{% stylesheet %}
+  .footer-newsletter-form__field:user-invalid {
+    border-color: #c0392b;
+    color: #c0392b;
+  }
+
+  .footer-newsletter-form__field:user-invalid::placeholder {
+    color: #c0392b;
+  }
+
+  .footer-newsletter-form__consent input[type='checkbox']:user-invalid + label::before {
+    border-color: #c0392b;
+  }
+
+  .footer-newsletter-form__thank-you {
+    display: none;
+  }
+
+  [data-footer-newsletter-wrapper].is-success .footer-newsletter-form,
+  [data-footer-newsletter-wrapper].is-success .footer-newsletter-form__title,
+  [data-footer-newsletter-wrapper].is-success .footer-newsletter-form__description {
+    display: none;
+  }
+
+  [data-footer-newsletter-wrapper].is-success .footer-newsletter-form__thank-you {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .footer-newsletter-form__thank-you-icon .icon-check-circle {
+    width: 64px;
+    height: 64px;
+    stroke: currentColor;
+  }
+
+  .footer-newsletter-form__thank-you-icon .icon-check-circle path {
+    stroke: currentColor;
+  }
+{% endstylesheet %}

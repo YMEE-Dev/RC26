@@ -190,6 +190,25 @@ side-drawer.side-drawer--from-bottom.is-closing .drawer__inner {
   side-drawer .drawer__inner {
     border-left: none;
     border-right: none;
+    overflow-y: hidden;
+  }
+
+  side-drawer.side-drawer--from-bottom .drawer__inner {
+    overflow-y: hidden;
+  }
+
+  side-drawer .drawer__content-wrapper {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: 100vh;
+    height: 100%;
+    position: relative;
+  }
+
+  /* Ensure scrolling works when body is locked */
+  body[data-scroll-locked] side-drawer .drawer__content-wrapper {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -647,7 +666,9 @@ side-drawer .accordion__title .accordion-icon-wrapper .icon {
   position: absolute;
   left: 0;
   top: 0;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 side-drawer .accordion__title .accordion-icon-wrapper .icon path {
