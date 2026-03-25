@@ -93,14 +93,14 @@
                 section.settings.video
                 | video_tag:
                   autoplay: false,
-                  loop: false,
-                  controls: true,
+                  loop: true,
+                  controls: false,
                   muted: false,
                   playsinline: true,
                   class: 'blog-brand__video blog-brand__video--modal'
               }}
             {%- else -%}
-              <video class="blog-brand__video blog-brand__video--modal" controls playsinline>
+              <video class="blog-brand__video blog-brand__video--modal" playsinline>
                 <source src="{{ section.settings.video_url }}">
               </video>
             {%- endif -%}
@@ -243,11 +243,16 @@
   .blog-brand__video-modal-dialog {
     position: relative;
     z-index: 1;
-    width: min(100% - 40px, 1100px);
+    width: calc(100vw - 200px);
+    max-width: calc(100vw - 200px);
+    height: calc(100vh - 200px);
+    max-height: calc(100vh - 200px);
   }
 
   .blog-brand__video-modal-player {
     background: #000;
+    width: 100%;
+    height: 100%;
   }
 
   .blog-brand__video-modal-close {
@@ -260,6 +265,12 @@
     font-size: 32px;
     line-height: 1;
     cursor: pointer;
+  }
+
+  .blog-brand__video--modal {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .blog-brand__content-wrapper {
@@ -289,9 +300,9 @@
   .brand-fade-js [data-brand-fade] {
     opacity: 0;
     transform: translate3d(0, 22px, 0);
-    transition: opacity 1s ease;
+    transition: opacity 1.2s ease;
     transition-property: opacity, transform;
-    transition-duration: 1s, 1s;
+    transition-duration: 1.2s, 1.2s;
     transition-timing-function: ease, cubic-bezier(0.22, 1, 0.36, 1);
     transition-delay: var(--brand-fade-delay, 0s);
     will-change: opacity, transform;
@@ -342,6 +353,13 @@
     .blog-brand__sound-icon {
       width: 40px !important;
       height: 40px !important;
+    }
+
+    .blog-brand__video-modal-dialog {
+      width: calc(100vw - 32px);
+      max-width: calc(100vw - 32px);
+      height: calc(100vh - 96px);
+      max-height: calc(100vh - 96px);
     }
   }
 {% endstylesheet %}
