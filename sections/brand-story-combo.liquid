@@ -36,15 +36,15 @@
         <div class="brand-story-combo__split">
           <div class="brand-story-combo__split-copy">
             {%- if section.settings.top_heading != blank -%}
-              <h3 class="brand-story-combo__heading h3">{{ section.settings.top_heading }}</h3>
+              <h3 class="brand-story-combo__heading h3" data-brand-fade>{{ section.settings.top_heading }}</h3>
             {%- endif -%}
             {%- if section.settings.top_text != blank -%}
-              <div class="brand-story-combo__text body rte">{{ section.settings.top_text }}</div>
+              <div class="brand-story-combo__text body rte" data-brand-fade>{{ section.settings.top_text }}</div>
             {%- endif -%}
           </div>
 
           {%- if section.settings.top_image != blank -%}
-            <div class="brand-story-combo__split-media">
+            <div class="brand-story-combo__split-media" data-brand-fade>
               {{
                 section.settings.top_image
                 | image_url: width: 1200
@@ -60,7 +60,7 @@
       {%- endif -%}
 
       {%- if section.settings.full_image != blank -%}
-        <div class="brand-story-combo__full-image-wrap">
+        <div class="brand-story-combo__full-image-wrap" data-brand-fade>
           {{
             section.settings.full_image
             | image_url: width: 2200
@@ -74,7 +74,7 @@
       {%- endif -%}
 
       {%- if section.settings.center_text != blank -%}
-        <div class="brand-story-combo__center-text body rte">
+        <div class="brand-story-combo__center-text body rte" data-brand-fade>
           {{ section.settings.center_text }}
         </div>
       {%- endif -%}
@@ -82,7 +82,7 @@
       {%- if section.settings.two_image_left != blank or section.settings.two_image_right != blank -%}
         <div class="brand-story-combo__two-images">
           {%- if section.settings.two_image_left != blank -%}
-            <div class="brand-story-combo__two-image-item">
+            <div class="brand-story-combo__two-image-item" data-brand-fade>
               {{
                 section.settings.two_image_left
                 | image_url: width: 1200
@@ -96,7 +96,7 @@
           {%- endif -%}
 
           {%- if section.settings.two_image_right != blank -%}
-            <div class="brand-story-combo__two-image-item">
+            <div class="brand-story-combo__two-image-item" data-brand-fade>
               {{
                 section.settings.two_image_right
                 | image_url: width: 1200

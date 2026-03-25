@@ -22,7 +22,7 @@
   >
     <div class="brand-split-row__inner {{ section.settings.width }}{% if section.settings.layout == 'image-right' %} brand-split-row__inner--image-right{% endif %}">
       {%- if section.settings.image != blank -%}
-        <div class="brand-split-row__media">
+        <div class="brand-split-row__media" data-brand-fade>
           {{
             section.settings.image
             | image_url: width: 1600
@@ -36,7 +36,7 @@
       {%- endif -%}
 
       {%- if section.settings.text != blank -%}
-        <div class="brand-split-row__copy body rte">
+        <div class="brand-split-row__copy body rte" data-brand-fade>
           {{ section.settings.text }}
         </div>
       {%- endif -%}
