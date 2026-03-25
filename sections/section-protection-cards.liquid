@@ -2,6 +2,12 @@
 {%- liquid
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign mobile_layout = section.settings.mobile_layout
+  assign button_style_value = section.settings.button_style | default: 'primary'
+  assign button_style_classes = 'btn--primary btn--solid'
+
+  if button_style_value contains 'secondary' or button_style_value contains 'outline'
+    assign button_style_classes = 'btn--outline btn--secondary'
+  endif
 -%}
 
 {%- style -%}
@@ -17,6 +23,7 @@
   id="ProtectionCards--{{ section.id }}"
   class="protection-cards section-padding {{ color_scheme }}"
   data-section-id="{{ section.id }}"
+  data-progress-enabled="{{ section.settings.show_progress_bar }}"
   data-section-type="protection-cards"
   style="background-color: var(--bg-color);"
 >
@@ -45,7 +52,7 @@
 
                     <div class="protection-card__content">
                       {%- if block.settings.title != blank -%}
-                        <h3 class="protection-card__title">{{ block.settings.title }}</h3>
+                        <h4 class="protection-card__title">{{ block.settings.title }}</h4>
                       {%- endif -%}
 
                       {%- if block.settings.description != blank -%}
@@ -64,7 +71,7 @@
       <div class="protection-cards__actions">
         <a
           href="{{ section.settings.button_link | default: '#' }}"
-          class="btn btn--solid btn--primary protection-cards__button"
+          class="btn {{ button_style_classes }} protection-cards__button"
         >
           {{ section.settings.button_text | escape }}
         </a>
@@ -243,6 +250,7 @@
   }
   @media (max-width: 959px) {
     .protection-card__image {
+      margin-bottom: 20px;
       height: 318px !important;
       aspect-ratio: auto !important;
     }
@@ -279,6 +287,13 @@
     line-height: 36px; /* 112.5% */
   }
 
+  @media (max-width: 959px) {
+    .protection-card__title {
+      white-space: nowrap;
+      margin: 0 0 20px;
+    }
+  }
+
   .protection-card__description {
     color: var(--000000, #000);
     text-align: center;
@@ -303,7 +318,7 @@
 
   @media (max-width: 959px) {
     .protection-cards__actions {
-      margin-top: 32px;
+      margin-top: 0;
     }
 
     .protection-cards__button {
@@ -362,8 +377,21 @@
     const setupProgress = (section) => {
       const container = section.querySelector('.protection-cards__slider-shell');
       const slider = section.querySelector('.protection-cards__grid.grid--mobile-slider');
+      const progressEnabled = section.dataset.progressEnabled === 'true';
 
       if (!container) {
+        return;
+      }
+
+      if (!progressEnabled) {
+        container.classList.remove('has-related-slider-progress');
+
+        const existingProgress = container.querySelector('[data-related-slider-progress]');
+
+        if (existingProgress) {
+          existingProgress.remove();
+        }
+
         return;
       }
 
@@ -590,6 +618,12 @@
       ]
     },
     {
+      "type": "checkbox",
+      "id": "show_progress_bar",
+      "label": "Show mobile progress bar",
+      "default": true
+    },
+    {
       "type": "header",
       "content": "Button"
     },
@@ -598,6 +632,16 @@
       "id": "button_text",
       "label": "Button text",
       "default": "Discover more"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "default": "primary",
+      "options": [
+        {"value": "primary", "label": "Primary"},
+        {"value": "secondary", "label": "Secondary"}
+      ]
     },
     {
       "type": "url",

@@ -69,8 +69,8 @@
     }
 
     swiperInstances[sectionId] = new Swiper(swiperElement, {
-      slidesPerView: 1,
-      spaceBetween: 80,
+      slidesPerView: 'auto',
+      spaceBetween: 20,
       loop: false,
       freeMode: {
         enabled: true,
@@ -109,6 +109,7 @@
         }
       },
       breakpoints: {
+        750: { slidesPerView: 1, spaceBetween: 80 },
         960: { slidesPerView: 2.7, spaceBetween: 80 },
         1200: { slidesPerView: 2.7, spaceBetween: 80 }
       }
