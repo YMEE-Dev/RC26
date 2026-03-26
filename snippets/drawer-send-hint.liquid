@@ -4,7 +4,7 @@
 
 <div class="drawer-hint drawer__content-wrapper">
   <h3 class="drawer__title drawer-content__title">{{ 'products.product.send_hint_title' | t }}</h3>
-  
+
   <div class="drawer__content drawer-content__main">
     {% form 'contact', class: 'hint-form', id: 'hint-form' %}
       {% if form.posted_successfully? %}
@@ -14,99 +14,120 @@
           <div class="hint-form__status hint-form__status--error">{{ form.errors | default_errors }}</div>
         {% endif %}
 
-        <input type="hidden" name="contact[subject]" value="{{ 'products.product.hint_subject' | t: product: product.title }}">
+        <input
+          type="hidden"
+          name="contact[subject]"
+          value="{{ 'products.product.hint_subject' | t: product: product.title }}"
+        >
         <input type="hidden" name="contact[product_title]" value="{{ product.title }}">
         <input type="hidden" name="contact[product_url]" value="{{ shop.url }}{{ product.url }}">
         {% if product.selected_or_first_available_variant %}
-          <input type="hidden" name="contact[product_variant]" value="{{ product.selected_or_first_available_variant.title }}">
-          <input type="hidden" name="contact[product_price]" value="{{ product.selected_or_first_available_variant.price | money }}">
+          <input
+            type="hidden"
+            name="contact[product_variant]"
+            value="{{ product.selected_or_first_available_variant.title }}"
+          >
+          <input
+            type="hidden"
+            name="contact[product_price]"
+            value="{{ product.selected_or_first_available_variant.price | money }}"
+          >
           {% if product.selected_or_first_available_variant.featured_image %}
-            <input type="hidden" name="contact[product_image]" value="{{ product.selected_or_first_available_variant.featured_image | image_url: width: 600 }}">
+            <input
+              type="hidden"
+              name="contact[product_image]"
+              value="{{ product.selected_or_first_available_variant.featured_image | image_url: width: 600 }}"
+            >
           {% endif %}
         {% endif %}
         <input type="hidden" id="hint-message-content" name="contact[body]" value="">
-        <input class="hint-form__honeypot" type="text" name="contact[company]" value="" tabindex="-1" autocomplete="off" aria-hidden="true">
-      
-      <div class="form-section">
-        <h4 class="form-section__title">Recipient</h4>
-        <div class="form-field">
-          <label for="hint-recipient-name" class="form-field__label">
-            {{ 'products.product.recipient_name' | t }}
-          </label>
-          <input 
-            type="text" 
-            id="hint-recipient-name" 
-            name="contact[recipient_name]" 
-            class="form-field__input"
-            placeholder=""
-            required
-          >
-        </div>
-        
-        <div class="form-field">
-          <label for="hint-recipient-email" class="form-field__label">
-            {{ 'products.product.recipient_email' | t }}
-          </label>
-          <input
-            type="email"
-            id="hint-recipient-email"
-            name="contact[recipient_email]"
-            class="form-field__input"
-            placeholder=""
-            required
-          >
-        </div>
-      </div>
+        <input
+          class="hint-form__honeypot"
+          type="text"
+          name="contact[company]"
+          value=""
+          tabindex="-1"
+          autocomplete="off"
+          aria-hidden="true"
+        >
 
-      <div class="form-section">
-        <h4 class="form-section__title">{{ 'products.product.your_name' | t }}</h4>
-        <div class="form-field">
-          <label for="hint-your-name" class="form-field__label">
-            {{ 'contact.form.name' | t }}
-          </label>
-          <input
-            type="text"
-            id="hint-your-name"
-            name="contact[sender_name]"
-            class="form-field__input"
-            placeholder=""
-            required
-          >
-        </div>
-        <div class="form-field">
-          <label for="hint-your-email" class="form-field__label">
-            {{ 'contact.form.email' | t }}
-          </label>
-          <input
-            type="email"
-            id="hint-your-email"
-            name="contact[email]"
-            class="form-field__input"
-            value="{{ customer.email }}"
-            required
-          >
-        </div>
-      </div>
-      
-      <div class="hint-product-preview">
-        {% if product.featured_image %}
-          <a class="hint-product-image" href="{{ product.url }}">
-            {{ product.featured_image | image_url: width: 200, height: 200 | image_tag: alt: product.title }}
-          </a>
-        {% endif %}
-      </div>
+        <div class="hint-form__fields">
+          <div class="form-section">
+            <h4 class="form-section__title">{{ 'products.product.recipient_section_title' | t }}</h4>
+            <div class="form-field">
+              <input
+                type="text"
+                id="hint-recipient-name"
+                name="contact[recipient_name]"
+                class="form-field__input"
+                placeholder="{{ 'products.product.recipient_name' | t }}"
+                required
+              >
+            </div>
+            <div class="form-field">
+              <input
+                type="email"
+                id="hint-recipient-email"
+                name="contact[recipient_email]"
+                class="form-field__input"
+                placeholder="{{ 'products.product.recipient_email' | t }}"
+                required
+              >
+            </div>
+          </div>
 
-      <div class="hint-message-preview">
-        <p class="hint-message-preview__text">
-          DEAR <span id="recipient-name-display">NAME</span>,
-          LOOKS LIKE <span id="sender-name-display">NAME</span> REALLY LOVES THIS PIECE AND WE THOUGHT YOU'D WANT TO KNOW.
-        </p>
-      </div>
-      
-      <button type="submit" class="btn btn--primary btn--full">
-        <img src="{{ 'icon-send-hint.svg' | asset_url }}" alt="" class="btn__icon" width="20" height="20">
-        {{ 'products.product.send_hint' | t }}
-      </button>
+          <div class="form-section">
+            <h4 class="form-section__title">{{ 'products.product.your_name' | t | upcase }}</h4>
+            <div class="form-field">
+              <input
+                type="text"
+                id="hint-your-name"
+                name="contact[sender_name]"
+                class="form-field__input"
+                placeholder="{{ 'contact.form.name' | t }}"
+                required
+              >
+            </div>
+            <div class="form-field">
+              <input
+                type="email"
+                id="hint-your-email"
+                name="contact[email]"
+                class="form-field__input"
+                placeholder="{{ 'contact.form.email' | t }}"
+                value="{{ customer.email }}"
+                required
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="hint-preview-card">
+          {% if product.featured_image %}
+            <div class="hint-preview-card__image">
+              {{ product.featured_image | image_url: width: 600 | image_tag: alt: product.title }}
+            </div>
+          {% endif %}
+
+          <div class="hint-preview-card__message">
+            <p class="hint-preview-card__text">
+              DEAR <span id="recipient-name-display">NAME</span>,<br>
+              LOOKS LIKE <span id="sender-name-display">NAME</span> REALLY LOVES THIS PIECE<br>
+              AND WE THOUGHT YOU'D WANT TO KNOW.
+            </p>
+          </div>
+
+          <button type="submit" class="hint-form__submit">
+            <img
+              src="{{ 'icon-send-hint.svg' | asset_url }}"
+              alt=""
+              class="btn__icon hint-form__submit-icon"
+              width="20"
+              height="20"
+            >
+            {{ 'products.product.send_hint' | t }}
+          </button>
+        </div>
       {% endif %}
     {% endform %}
   </div>
@@ -138,8 +159,8 @@
     const productUrl = {{ shop.url | append: product.url | json }};
 
     function buildMessage(recipientName, senderName) {
-      const safeRecipient = (recipientName || 'Name1').toUpperCase();
-      const safeSender = (senderName || 'Name2').toUpperCase();
+      const safeRecipient = (recipientName || 'NAME').toUpperCase();
+      const safeSender = (senderName || 'NAME').toUpperCase();
 
       let message = messageTemplate
         .replace(/\{\{\s*recipient\s*\}\}/g, safeRecipient)
@@ -161,8 +182,8 @@
       const recipientName = recipientInput.value.trim();
       const senderName = senderInput.value.trim();
 
-      recipientDisplay.textContent = recipientName ? recipientName.toUpperCase() : 'Name1';
-      senderDisplay.textContent = senderName ? senderName.toUpperCase() : 'Name2';
+      recipientDisplay.textContent = recipientName ? recipientName.toUpperCase() : 'NAME';
+      senderDisplay.textContent = senderName ? senderName.toUpperCase() : 'NAME';
       messageInput.value = buildMessage(recipientName, senderName);
     }
 
@@ -182,86 +203,191 @@
 </script>
 
 {% stylesheet %}
+  #side-drawer-send-hint .drawer__body {
+    background-color: #fff;
+  }
+
   .drawer-hint {
-    padding: 20px;
-  }
-  
-  .hint-product-preview {
-    display: flex;
-    gap: 20px;
-    padding: 20px;
-    background-color: var(--bg);
-    border-radius: 8px;
-    margin-bottom: 30px;
-  }
-  
-  .hint-product-image {
-    flex-shrink: 0;
-    width: 100px;
-    height: 100px;
-  }
-  
-  .hint-product-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 4px;
-  }
-  
-  .hint-product-info {
+    padding: 40px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    height: 100%;
   }
-  
-  .hint-product-title {
-    margin: 0 0 8px;
-    font-size: var(--font-body-large);
-    font-weight: var(--FONT-WEIGHT-HEADING);
-    line-height: 1.4;
+
+  .drawer-hint .drawer-content__title {
+    color: #000;
+    font-family: var(--FONT-STACK-NAV);
+    font-size: var(--FONT-SIZE-NAV);
+    font-style: normal;
+    font-weight: var(--FONT-WEIGHT-NAV);
+    line-height: var(--LINE-HEIGHT-NAV);
+    letter-spacing: var(--LETTER-SPACING-NAV);
+    text-transform: uppercase;
+    margin-bottom: 0;
   }
-  
-  .hint-product-price {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--accent);
+
+  .drawer-hint .drawer-content__main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 
   .hint-form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    flex: 1;
   }
-  
-  .hint-message-preview {
-    padding: 20px;
-    background-color: var(--bg);
-    border-radius: 8px;
-    margin: 10px 0;
+
+  .hint-form__fields {
+    flex: 0 0 auto;
+    margin: 40px 0;
   }
-  
-  .hint-message-preview p {
+
+  .hint-form .form-section {
+    margin-bottom: 20px;
+  }
+
+  .hint-form .form-section__title {
+    margin: 0 0 4px;
+    color: #000;
+    font-family: var(--FONT-STACK-NAV);
+    font-size: var(--FONT-SIZE-NAV);
+    font-style: normal;
+    font-weight: var(--FONT-WEIGHT-NAV);
+    line-height: var(--LINE-HEIGHT-NAV);
+    letter-spacing: var(--LETTER-SPACING-NAV);
+    text-transform: uppercase;
+  }
+
+  .hint-form .form-field {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hint-form .form-field__input {
+    padding: 10px 0;
+    border: none;
+    border-bottom: 1px solid #e5e5e5;
+    border-radius: 0;
+    color: var(--000000, #000);
+    font-family: var(--FONT-STACK-BODY);
+    font-size: var(--FONT-SIZE-INPUT-LABEL);
+    font-style: normal;
+    font-weight: var(--FONT-WEIGHT-BODY);
+    line-height: var(--LINE-HEIGHT-INPUT-LABEL);
+    background-color: transparent;
+    transition: border-color 0.2s ease;
+    width: 100%;
+  }
+
+  .hint-form .form-field__input::placeholder {
+    color: var(--COLOR-TEXT);
+    opacity: 1;
+  }
+
+  .hint-form .form-field__input:focus {
+    outline: none;
+    border-bottom-color: var(--COLOR-TEXT);
+  }
+
+  .hint-preview-card {
+    margin-top: auto;
+    background-color: #f5f5f5;
+    margin-left: -40px;
+    margin-right: -40px;
+    margin-bottom: -40px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid #e5e5e5;
+  }
+
+  .hint-preview-card__image {
+    width: 100%;
+  }
+
+  .hint-preview-card__image img {
+    max-width: 400px;
+    max-height: 400px;
+    aspect-ratio: 1/1;
+    display: block;
+    object-fit: cover;
+    mix-blend-mode: multiply;
+    margin: 0 auto;
+  }
+
+  .hint-preview-card__message {
+    width: 100%;
+    padding: 0 0 25px;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .hint-preview-card__text {
     margin: 0;
-    font-size: var(--font-body-medium);
-    line-height: 1.6;
+    color: #000;
+    font-family: var(--FONT-STACK-NAV);
+    font-size: var(--FONT-SIZE-NAV);
+    font-style: normal;
+    font-weight: var(--FONT-WEIGHT-NAV);
+    line-height: var(--LINE-HEIGHT-NAV);
+    letter-spacing: var(--LETTER-SPACING-NAV);
+    text-transform: uppercase;
+  }
+
+  .hint-form__submit {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto 30px auto;
+    background: var(--btn-bg, #000);
+    color: var(--btn-text, #fff);
+    border: 1px solid var(--btn-border, #000);
+    border-radius: 0;
+    padding: 12px 20px;
     text-align: center;
-    letter-spacing: 0.5px;
+    font-size: var(--BTN-FONT-SIZE);
+    font-weight: var(--BTN-FONT-WEIGHT);
+    line-height: var(--BTN-LINE-HEIGHT);
+    letter-spacing: var(--BTN-LETTER-SPACING);
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 180ms ease, color 180ms ease;
   }
-  
-  #recipient-name-display,
-  #sender-name-display {
-    font-weight: var(--FONT-WEIGHT-BODY-BOLD);
+
+  .hint-form__submit:hover {
+    border-color: var(--btn-border, #000);
+    background-color: #27574d;
+    color: #fff;
   }
-  
-  @media (max-width: 768px) {
-    .hint-product-preview {
-      flex-direction: column;
-      text-align: center;
+
+  .hint-form__submit-icon {
+    width: 25px;
+    height: 25px;
+    filter: invert(1);
+    transition: filter 0.25s ease-out;
+  }
+
+  @media (max-width: 749px) {
+    .drawer-hint {
+      padding: 20px;
     }
-    
-    .hint-product-image {
-      align-self: center;
+
+    .hint-preview-card {
+      margin-left: -20px;
+      margin-right: -20px;
+      margin-bottom: -20px;
+    }
+
+    .hint-preview-card__message {
+      padding: 20px 20px 16px;
+    }
+
+    .hint-form__submit {
+      max-width: calc(100% - 40px);
     }
   }
 {% endstylesheet %}
