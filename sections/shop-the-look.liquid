@@ -5,7 +5,7 @@
 -%}
 
 <section
-  class="shop-the-look"
+  class="shop-the-look {{ section.settings.width }}"
   id="ShopTheLook--{{ section.id }}"
   style="--PT: {{ section.settings.padding_top }}px; --PB: {{ section.settings.padding_bottom }}px;"
   data-section-id="{{ section.id }}"
@@ -31,6 +31,10 @@
   .shop-the-look__placeholder {
     padding: 40px;
     text-align: center;
+  }
+  .shop-the-look .product-storytelling.full_bleed .grid-media__media-wrapper {
+    width: 100%;
+    margin: 0;
   }
 {% endstylesheet %}
 
@@ -66,12 +70,27 @@
       "unit": "px",
       "label": "Bottom",
       "default": 0
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        {"value": "wrapper--full", "label": "Full width"},
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"}
+      ]
     }
   ],
   "presets": [
     {
-      "name": "Shop the look"
+      "name": "Shop the look custom",
+      "category": "Blog"
     }
-  ]
+  ],
+  "enabled_on": {
+    "templates": ["article"]
+  }
 }
 {% endschema %}
