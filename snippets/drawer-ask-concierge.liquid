@@ -4,12 +4,63 @@
 
 <div class="drawer-concierge drawer__content-wrapper">
   {% comment %} <h3 class="drawer__title">{{ 'products.product.ask_concierge_title' | t }}</h3> {% endcomment %}
-  
+
+  <div class="drawer-concierge__video-panel" id="drawer-video-panel" aria-hidden="true">
+    <div class="drawer-concierge__video-header">
+      <button class="drawer-concierge__back-btn" id="drawer-video-back" aria-label="Back">
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <span class="drawer-concierge__video-title">BOOK A VIDEO APPOINTMENT</span>
+      <button class="drawer-concierge__close-btn" id="drawer-video-close" aria-label="Close">
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="drawer-concierge__calendly">
+      <!-- Calendly inline widget begin -->
+      <div
+        class="calendly-inline-widget"
+        data-url="https://calendly.com/annalisa-ymee?hide_event_type_details=1&hide_landing_page_details=1&hide_gdpr_banner=1&primary_color=000000&text_color=000000&background_color=ffffff&branding=false"
+        style="min-width:320px;height:700px;"
+      ></div>
+      <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+      <!-- Calendly inline widget end -->
+    </div>
+  </div>
+
   <div class="drawer__content drawer-content__main">
     <div class="drawer__image">
-      <img src="https://cdn.shopify.com/s/files/1/0969/2990/7075/files/roberto-concierge_header_V2.jpg?v=1771364672" alt="Roberto Coin Concierge" loading="lazy" width="600" height="400">
+      <img
+        src="https://cdn.shopify.com/s/files/1/0969/2990/7075/files/roberto-concierge_header_V2.jpg?v=1771364672"
+        alt="Roberto Coin Concierge"
+        loading="lazy"
+        width="600"
+        height="400"
+      >
     </div>
-    
+
     <div class="drawer__section">
       <div class="drawer__opening-hours">
         <p class="drawer-content__title--nav">OPENING HOURS</p>
@@ -27,7 +78,7 @@
           <span class="drawer__link-value">+39 0444 202 202</span>
         </div>
       </a>
-      
+
       <a href="#" class="drawer__link" data-drawer-open="video-appointment">
         <span class="drawer__link-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -39,7 +90,7 @@
           <span class="drawer__link-text">BOOK A VIDEO APPOINTMENT</span>
         </div>
       </a>
-      
+
       <a href="mailto:CONCIERGE@ROBERTOCOIN.COM" class="drawer__link">
         <span class="drawer__link-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -58,7 +109,7 @@
 
 {% stylesheet %}
   .drawer-concierge .drawer__image {
-    margin-top: 30px;
+    margin-top: 50px;
   }
 
   .drawer-concierge .drawer__section {
@@ -69,4 +120,132 @@
   .drawer-concierge .drawer__opening-hours {
     margin-bottom: 30px;
   }
+
+  .drawer-concierge {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .drawer-concierge__video-panel {
+    padding: 0 40px;
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .drawer-concierge__video-panel.is-open {
+    transform: translateX(0);
+  }
+
+  .drawer-concierge__video-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 0px;
+    border-bottom: 1px solid #e5e5e5;
+    flex-shrink: 0;
+    margin-bottom: 50px;
+  }
+
+  .drawer-concierge__back-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    color: #1a1a1a;
+    flex-shrink: 0;
+  }
+
+  .drawer-concierge__back-btn:hover,
+  .drawer-concierge__close-btn:hover {
+    opacity: 0.6;
+  }
+
+  .drawer-concierge__close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    color: #1a1a1a;
+    flex-shrink: 0;
+  }
+
+  .drawer-concierge__video-title {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+    text-align: center;
+    flex: 1;
+  }
+
+  .drawer-concierge__calendly {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .drawer-concierge__calendly .calendly-inline-widget {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 600px;
+    border-radius: 0;
+    overflow: hidden;
+  }
+
+  .drawer-concierge__calendly iframe {
+    border: none !important;
+    border-radius: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
 {% endstylesheet %}
+
+<script>
+  (function () {
+    var videoTrigger = document.querySelector('[data-drawer-open="video-appointment"]');
+    var videoPanel = document.getElementById('drawer-video-panel');
+    var backBtn = document.getElementById('drawer-video-back');
+    var closeBtn = document.getElementById('drawer-video-close');
+
+    if (!videoTrigger || !videoPanel || !backBtn || !closeBtn) return;
+
+    // Ensure video panel is hidden when drawer opens
+    var sideDrawer = videoPanel.closest('side-drawer');
+    if (sideDrawer) {
+      sideDrawer.addEventListener('theme:drawer:open', function () {
+        videoPanel.classList.remove('is-open');
+        videoPanel.setAttribute('aria-hidden', 'true');
+      });
+    }
+
+    videoTrigger.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      videoPanel.classList.add('is-open');
+      videoPanel.setAttribute('aria-hidden', 'false');
+    });
+
+    backBtn.addEventListener('click', function () {
+      videoPanel.classList.remove('is-open');
+      videoPanel.setAttribute('aria-hidden', 'true');
+    });
+
+    closeBtn.addEventListener('click', function () {
+      // Find and close the side-drawer
+      var sideDrawer = videoPanel.closest('side-drawer');
+      if (sideDrawer) {
+        sideDrawer.dispatchEvent(new CustomEvent('theme:drawer:close', {bubbles: true}));
+      }
+    });
+  })();
+</script>
