@@ -1,6 +1,8 @@
 <!-- /sections/blog-brand.liquid -->
 {%- liquid
   assign featured_article = blank
+  assign resolved_video = section.settings.video
+  assign resolved_video_url = section.settings.video_url | strip
 
   if section.settings.featured_article != blank
     assign featured_article = articles[section.settings.featured_article]
@@ -14,6 +16,22 @@
 
   if featured_article == blank
     assign featured_article = blog.articles.first
+  endif
+
+  if featured_article != blank
+    if resolved_video == blank and featured_article.metafields.custom.top_video.value != blank
+      assign resolved_video = featured_article.metafields.custom.top_video.value
+    endif
+    if resolved_video == blank and featured_article.metafields.custom.video.value != blank
+      assign resolved_video = featured_article.metafields.custom.video.value
+    endif
+
+    if resolved_video_url == blank and featured_article.metafields.custom.top_video_url.value != blank
+      assign resolved_video_url = featured_article.metafields.custom.top_video_url.value | strip
+    endif
+    if resolved_video_url == blank and featured_article.metafields.custom.video_url.value != blank
+      assign resolved_video_url = featured_article.metafields.custom.video_url.value | strip
+    endif
   endif
 -%}
 
@@ -44,11 +62,11 @@
       </p>
     </div>
 
-    {%- if section.settings.video != blank or section.settings.video_url != blank -%}
+    {%- if resolved_video != blank or resolved_video_url != blank -%}
       <div class="blog-brand__media" data-brand-fade data-brand-fade-delay="0.6">
-        {%- if section.settings.video != blank -%}
+        {%- if resolved_video != blank -%}
           {{
-            section.settings.video
+            resolved_video
             | video_tag:
               autoplay: true,
               loop: true,
@@ -59,7 +77,7 @@
           }}
         {%- else -%}
           <video class="blog-brand__video blog-brand__video--inline" autoplay loop muted playsinline>
-            <source src="{{ section.settings.video_url }}">
+            <source src="{{ resolved_video_url }}">
           </video>
         {%- endif -%}
 
@@ -88,9 +106,9 @@
             &times;
           </button>
           <div class="blog-brand__video-modal-player">
-            {%- if section.settings.video != blank -%}
+            {%- if resolved_video != blank -%}
               {{
-                section.settings.video
+                resolved_video
                 | video_tag:
                   autoplay: false,
                   loop: true,
@@ -101,7 +119,7 @@
               }}
             {%- else -%}
               <video class="blog-brand__video blog-brand__video--modal" playsinline>
-                <source src="{{ section.settings.video_url }}">
+                <source src="{{ resolved_video_url }}">
               </video>
             {%- endif -%}
           </div>

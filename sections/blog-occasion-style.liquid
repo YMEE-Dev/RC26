@@ -2,6 +2,8 @@
 {%- liquid
   assign featured_article = blank
   assign has_top_video = false
+  assign resolved_video = section.settings.video
+  assign resolved_video_url = section.settings.video_url | strip
 
   if section.settings.featured_article != blank
     assign featured_article = articles[section.settings.featured_article]
@@ -17,7 +19,23 @@
     assign featured_article = blog.articles.first
   endif
 
-  if section.settings.video != blank or section.settings.video_url != blank
+  if featured_article != blank
+    if resolved_video == blank and featured_article.metafields.custom.top_video.value != blank
+      assign resolved_video = featured_article.metafields.custom.top_video.value
+    endif
+    if resolved_video == blank and featured_article.metafields.custom.video.value != blank
+      assign resolved_video = featured_article.metafields.custom.video.value
+    endif
+
+    if resolved_video_url == blank and featured_article.metafields.custom.top_video_url.value != blank
+      assign resolved_video_url = featured_article.metafields.custom.top_video_url.value | strip
+    endif
+    if resolved_video_url == blank and featured_article.metafields.custom.video_url.value != blank
+      assign resolved_video_url = featured_article.metafields.custom.video_url.value | strip
+    endif
+  endif
+
+  if resolved_video != blank or resolved_video_url != blank
     assign has_top_video = true
   endif
 -%}
@@ -53,9 +71,9 @@
 
     {%- if section.settings.video != blank or section.settings.video_url != blank or featured_article.image != blank -%}
       <div class="blog-occasion__media" data-blog-fade data-blog-fade-delay="0.6">
-        {%- if section.settings.video != blank -%}
+        {%- if resolved_video != blank -%}
           {{
-            section.settings.video
+            resolved_video
             | video_tag:
               autoplay: true,
               loop: true,
@@ -64,9 +82,9 @@
               playsinline: true,
               class: 'blog-occasion__video'
           }}
-        {%- elsif section.settings.video_url != blank -%}
+        {%- elsif resolved_video_url != blank -%}
           <video class="blog-occasion__video" autoplay loop muted playsinline>
-            <source src="{{ section.settings.video_url }}">
+            <source src="{{ resolved_video_url }}">
           </video>
         {%- elsif featured_article.image != blank -%}
           {%- liquid
@@ -113,9 +131,9 @@
           <div class="blog-occasion__video-modal-dialog" role="dialog" aria-modal="true" aria-label="Occasion video">
             <button type="button" class="blog-occasion__video-modal-close" data-occasion-video-close aria-label="Close"></button>
             <div class="blog-occasion__video-modal-player">
-              {%- if section.settings.video != blank -%}
+              {%- if resolved_video != blank -%}
                 {{
-                  section.settings.video
+                  resolved_video
                   | video_tag:
                     autoplay: false,
                     loop: true,
@@ -126,7 +144,7 @@
                 }}
               {%- else -%}
                 <video class="blog-occasion__video blog-occasion__video--modal" playsinline>
-                  <source src="{{ section.settings.video_url }}">
+                  <source src="{{ resolved_video_url }}">
                 </video>
               {%- endif -%}
             </div>
