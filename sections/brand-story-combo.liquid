@@ -1,7 +1,21 @@
 <!-- /sections/brand-story-combo.liquid -->
 {%- liquid
   assign has_any_content = false
-  if section.settings.top_heading != blank or section.settings.top_text != blank or section.settings.top_image != blank
+  assign resolved_top_heading = section.settings.top_heading
+
+  if resolved_top_heading == blank and article != blank
+    if article.metafields.custom.story_top_heading.value != blank
+      assign resolved_top_heading = article.metafields.custom.story_top_heading.value
+    endif
+    if resolved_top_heading == blank and article.metafields.custom.top_heading.value != blank
+      assign resolved_top_heading = article.metafields.custom.top_heading.value
+    endif
+    if resolved_top_heading == blank and article.metafields.custom.heading.value != blank
+      assign resolved_top_heading = article.metafields.custom.heading.value
+    endif
+  endif
+
+  if resolved_top_heading != blank or section.settings.top_text != blank or section.settings.top_image != blank
     assign has_any_content = true
   endif
 -%}
@@ -23,8 +37,8 @@
     <div class="brand-story-combo__inner {{ section.settings.width }}">
       <div class="brand-story-combo__split">
         <div class="brand-story-combo__split-copy">
-          {%- if section.settings.top_heading != blank -%}
-            <h3 class="brand-story-combo__heading h3" data-brand-fade>{{ section.settings.top_heading | escape | newline_to_br }}</h3>
+          {%- if resolved_top_heading != blank -%}
+            <h3 class="brand-story-combo__heading h3" data-brand-fade>{{ resolved_top_heading | escape | newline_to_br }}</h3>
           {%- endif -%}
           {%- if section.settings.top_text != blank -%}
             <div class="brand-story-combo__text body rte" data-brand-fade>{{ section.settings.top_text }}</div>

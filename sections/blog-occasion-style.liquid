@@ -55,7 +55,7 @@
 
 <section
   id="BlogOccasion--{{ section.id }}"
-  class="blog-occasion"
+  class="blog-occasion{% if featured_article.content != blank %} blog-occasion--has-content{% endif %}"
   data-section-id="{{ section.id }}"
   data-section-type="blog-occasion-style"
 >
@@ -69,7 +69,7 @@
       </p>
     </div>
 
-    {%- if section.settings.video != blank or section.settings.video_url != blank or featured_article.image != blank -%}
+    {%- if resolved_video != blank or resolved_video_url != blank or featured_article.image != blank -%}
       <div class="blog-occasion__media" data-blog-fade data-blog-fade-delay="0.6">
         {%- if resolved_video != blank -%}
           {{

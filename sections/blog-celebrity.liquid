@@ -56,7 +56,7 @@
 
 <section
   id="BlogCelebrity--{{ section.id }}"
-  class="blog-celebrity"
+  class="blog-celebrity{% if featured_article.content != blank %} blog-celebrity--has-content{% endif %}"
   data-section-id="{{ section.id }}"
   data-section-type="blog-celebrity"
 >
@@ -70,7 +70,7 @@
       </p>
     </div>
 
-    {%- if section.settings.video != blank or section.settings.video_url != blank or featured_article.image != blank -%}
+    {%- if resolved_video != blank or resolved_video_url != blank or featured_article.image != blank -%}
       <div class="blog-celebrity__media" data-blog-fade data-blog-fade-delay="0.6">
         {%- if resolved_video != blank -%}
           {{
