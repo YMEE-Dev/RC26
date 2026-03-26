@@ -1,6 +1,7 @@
 <!-- /sections/blog-occasion-style.liquid -->
 {%- liquid
   assign featured_article = blank
+  assign has_top_video = false
 
   if section.settings.featured_article != blank
     assign featured_article = articles[section.settings.featured_article]
@@ -14,6 +15,10 @@
 
   if featured_article == blank
     assign featured_article = blog.articles.first
+  endif
+
+  if section.settings.video != blank or section.settings.video_url != blank
+    assign has_top_video = true
   endif
 -%}
 
@@ -37,9 +42,9 @@
   data-section-type="blog-occasion-style"
 >
   {%- if featured_article != blank -%}
-    <div class="blog-occasion__top" data-blog-fade data-blog-fade-delay="0.08">
-      <h2 class="h2 blog-occasion__title">{{ featured_article.title }}</h2>
-      <p class="body blog-occasion__date">
+    <div class="blog-occasion__top">
+      <h2 class="h2 blog-occasion__title" data-blog-fade data-blog-fade-delay="0">{{ featured_article.title }}</h2>
+      <p class="body blog-occasion__date" data-blog-fade data-blog-fade-delay="0.3">
         <time datetime="{{ featured_article.published_at | date: '%Y-%m-%d' }}">
           {{ featured_article.published_at | date: '%B %-d, %Y' }}
         </time>
@@ -47,7 +52,7 @@
     </div>
 
     {%- if section.settings.video != blank or section.settings.video_url != blank or featured_article.image != blank -%}
-      <div class="blog-occasion__media" data-blog-fade data-blog-fade-delay="0.18">
+      <div class="blog-occasion__media" data-blog-fade data-blog-fade-delay="0.6">
         {%- if section.settings.video != blank -%}
           {{
             section.settings.video
@@ -81,11 +86,57 @@
               class: 'blog-occasion__image'
           }}
         {%- endif -%}
+
+        {%- if has_top_video -%}
+          <button
+            type="button"
+            class="blog-occasion__sound-trigger"
+            data-occasion-video-open
+            aria-label="Play with sound"
+          >
+            <span class="blog-occasion__sound-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 43.52 43.52" fill="none">
+                <circle cx="21.76" cy="21.76" r="21.26" />
+                <line x1="27.18" y1="17.88" x2="34.16" y2="24.87" />
+                <line x1="34.16" y1="17.88" x2="27.18" y2="24.87" />
+                <polygon points="11.47 17.21 11.47 26.31 18.41 26.31 23.99 31.89 23.99 11.63 18.41 17.21 11.47 17.21" />
+              </svg>
+            </span>
+            <span>PLAY WITH SOUND</span>
+          </button>
+        {%- endif -%}
       </div>
+
+      {%- if has_top_video -%}
+        <div class="blog-occasion__video-modal" data-occasion-video-modal hidden>
+          <div class="blog-occasion__video-modal-backdrop" data-occasion-video-close></div>
+          <div class="blog-occasion__video-modal-dialog" role="dialog" aria-modal="true" aria-label="Occasion video">
+            <button type="button" class="blog-occasion__video-modal-close" data-occasion-video-close aria-label="Close"></button>
+            <div class="blog-occasion__video-modal-player">
+              {%- if section.settings.video != blank -%}
+                {{
+                  section.settings.video
+                  | video_tag:
+                    autoplay: false,
+                    loop: true,
+                    controls: false,
+                    muted: false,
+                    playsinline: true,
+                    class: 'blog-occasion__video blog-occasion__video--modal'
+                }}
+              {%- else -%}
+                <video class="blog-occasion__video blog-occasion__video--modal" playsinline>
+                  <source src="{{ section.settings.video_url }}">
+                </video>
+              {%- endif -%}
+            </div>
+          </div>
+        </div>
+      {%- endif -%}
     {%- endif -%}
 
     {%- if featured_article.content != blank -%}
-      <div class="blog-occasion__content-wrapper" data-blog-fade data-blog-fade-delay="0.26">
+      <div class="blog-occasion__content-wrapper" data-blog-fade data-blog-fade-delay="0.9">
         <div class="blog-occasion__content body rte">
           {{ featured_article.content }}
         </div>
@@ -97,25 +148,22 @@
 </section>
 
 {% stylesheet %}
-  .blog-fade-js [data-blog-fade] {
+  [data-blog-fade].blog-fade-init {
     opacity: 0;
-    transform: translate3d(0, 22px, 0);
-    transition-property: opacity, transform;
-    transition-duration: 1.2s, 1.2s;
-    transition-timing-function: ease, cubic-bezier(0.22, 1, 0.36, 1);
+    transition-property: opacity;
+    transition-duration: 2s;
+    transition-timing-function: ease;
     transition-delay: var(--blog-fade-delay, 0s);
-    will-change: opacity, transform;
+    will-change: opacity;
   }
 
-  .blog-fade-js [data-blog-fade].blog-fade-visible {
+  [data-blog-fade].blog-fade-init.blog-fade-visible {
     opacity: 1;
-    transform: translate3d(0, 0, 0);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .blog-fade-js [data-blog-fade] {
+    [data-blog-fade].blog-fade-init {
       opacity: 1;
-      transform: none;
       transition: none;
     }
   }
@@ -124,57 +172,91 @@
 {% javascript %}
   (() => {
     const initBlogFade = () => {
-      document.documentElement.classList.add('blog-fade-js');
-
       const roots = document.querySelectorAll('[data-section-type="blog-occasion-style"]');
       roots.forEach((root) => {
-        const targets = root.querySelectorAll('[data-blog-fade]:not(.blog-fade-observed)');
+        const targets = root.querySelectorAll('[data-blog-fade]');
         if (!targets.length) return;
 
-        if (!('IntersectionObserver' in window)) {
-          targets.forEach((el) => el.classList.add('blog-fade-visible'));
-          return;
-        }
-
-        if (!window.__blogFadeObserver) {
-          window.__blogFadeObserver = new IntersectionObserver(
-            (entries, obs) => {
-              entries.forEach((entry) => {
-                if (!entry.isIntersecting) return;
-                entry.target.classList.add('blog-fade-visible');
-                obs.unobserve(entry.target);
-              });
-            },
-            { threshold: 0.12 }
-          );
-        }
-
         targets.forEach((el) => {
+          if (el.dataset.blogFadeReady == 'true') return;
+          el.dataset.blogFadeReady = 'true';
           const delay = el.getAttribute('data-blog-fade-delay');
           if (delay) el.style.setProperty('--blog-fade-delay', `${delay}s`);
-          el.classList.add('blog-fade-observed');
-          window.__blogFadeObserver.observe(el);
+          el.classList.add('blog-fade-init');
+          requestAnimationFrame(() => el.classList.add('blog-fade-visible'));
+        });
+      });
+    };
+
+    const initOccasionVideo = () => {
+      const roots = document.querySelectorAll('[data-section-type="blog-occasion-style"]');
+      roots.forEach((root) => {
+        const openBtn = root.querySelector('[data-occasion-video-open]');
+        const modal = root.querySelector('[data-occasion-video-modal]');
+        if (!openBtn || !modal || modal.dataset.ready === 'true') return;
+        modal.dataset.ready = 'true';
+
+        const inlineVideo = root.querySelector('.blog-occasion__video:not(.blog-occasion__video--modal)');
+        const modalVideo = modal.querySelector('.blog-occasion__video--modal');
+        const closeEls = modal.querySelectorAll('[data-occasion-video-close]');
+        const modalTransitionMs = 400;
+
+        const closeModal = () => {
+          if (modal.hidden || modal.classList.contains('is-closing')) return;
+          modal.classList.remove('is-open');
+          modal.classList.add('is-closing');
+          document.body.style.overflow = '';
+          window.clearTimeout(modal._closeTimer);
+          modal._closeTimer = window.setTimeout(() => {
+            modal.hidden = true;
+            modal.classList.remove('is-closing');
+            if (modalVideo) {
+              modalVideo.pause();
+              modalVideo.currentTime = 0;
+            }
+            if (inlineVideo) inlineVideo.play().catch(() => {});
+          }, modalTransitionMs);
+        };
+
+        openBtn.addEventListener('click', () => {
+          window.clearTimeout(modal._closeTimer);
+          modal.hidden = false;
+          modal.classList.remove('is-closing');
+          requestAnimationFrame(() => modal.classList.add('is-open'));
+          document.body.style.overflow = 'hidden';
+          if (inlineVideo) inlineVideo.pause();
+          if (modalVideo) {
+            modalVideo.muted = false;
+            modalVideo.play().catch(() => {});
+          }
         });
 
-        requestAnimationFrame(() => {
-          targets.forEach((el) => {
-            const rect = el.getBoundingClientRect();
-            if (rect.top < window.innerHeight * 0.92 && rect.bottom > 0) {
-              el.classList.add('blog-fade-visible');
-              window.__blogFadeObserver.unobserve(el);
-            }
-          });
+        closeEls.forEach((el) => el.addEventListener('click', closeModal));
+        modal.addEventListener('click', (event) => {
+          const clickedInsidePlayer = event.target.closest('.blog-occasion__video-modal-player');
+          const clickedCloseButton = event.target.closest('.blog-occasion__video-modal-close');
+          if (!clickedInsidePlayer && !clickedCloseButton) closeModal();
+        });
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && !modal.hidden) closeModal();
         });
       });
     };
 
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initBlogFade, { once: true });
+      document.addEventListener('DOMContentLoaded', () => {
+        initBlogFade();
+        initOccasionVideo();
+      }, { once: true });
     } else {
       initBlogFade();
+      initOccasionVideo();
     }
 
-    document.addEventListener('shopify:section:load', initBlogFade);
+    document.addEventListener('shopify:section:load', () => {
+      initBlogFade();
+      initOccasionVideo();
+    });
   })();
 {% endjavascript %}
 
