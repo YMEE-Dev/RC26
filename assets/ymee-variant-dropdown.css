@@ -391,6 +391,7 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
     position: absolute;
     inset: 0;
     height: 100%;
+    width: 100%;
     pointer-events: none;
     z-index: 0;
     overflow: visible;
@@ -506,7 +507,7 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
     position: relative;
     z-index: 1;
     padding: 0;
-    margin-right: 5px;
+    transform: translateX(-5px);
   }
 
   .ymee-variant-dropdown__toggle-icon svg {
@@ -568,6 +569,12 @@ product-info:has([data-ymee-variant-dropdown]) product-form.ymee-hidden-form,
   /* Hide checkmark when NOTIFY ME button is visible (OOS) */
   .ymee-variant-sheet .ymee-variant-dropdown__option.is-oos.is-selected .ymee-variant-dropdown__right::after {
     display: none;
+  }
+}
+
+@media only screen and (min-width: 750px) and (max-width: 989px) {
+  .ymee-variant-dropdown__toggle-icon {
+    transform: translateX(-7px);
   }
 }
 

@@ -43,6 +43,7 @@
 
   .collection-floating-bar__blur {
     position: absolute;
+    width: 100%;
     inset: 0;
     z-index: 0;
     -webkit-clip-path: url(#cfb-blur-clip);
@@ -55,6 +56,7 @@
     position: absolute;
     inset: 0;
     height: 100%;
+    width: 100%;
     pointer-events: none;
     z-index: 1;
     overflow: visible;
@@ -284,11 +286,17 @@
   .collection-floating-bar__menu {
     flex: 0 0 76px;
     color: var(--COLOR-TEXT, #000);
-    margin-right: 5px;
+    transform: translateX(-5px);
   }
 
   .collection-floating-bar__menu svg {
     width: 25px;
     height: 25px;
+  }
+}
+
+@media only screen and (min-width: 750px) and (max-width: 989px) {
+  .collection-floating-bar__menu {
+    transform: translateX(-7px);
   }
 }
