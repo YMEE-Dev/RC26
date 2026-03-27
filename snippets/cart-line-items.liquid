@@ -52,8 +52,8 @@
               </a>
             </h4>
 
-            {% comment %} <div class="cart__item__meta body-x-small">
-              {%- assign properties_html = '' -%}
+            <div class="cart__item__meta body-x-small">
+              {% comment %} {%- assign properties_html = '' -%}
               {%- assign property_size = line_item.properties | size -%}
 
               {%- if property_size > 0 -%}
@@ -92,31 +92,41 @@
                     {%- endif -%}
                   {%- endif -%}
                 {%- endfor -%}
-              {%- endif -%}
+              {%- endif -%} {% endcomment %}
 
               {%- unless line_item.product.has_only_default_variant -%}
                 {%- for option in line_item.options_with_values -%}
-                  <p class="cart__item__selected-options">
-                    <strong>{{ option.name }}:</strong>
+                    <p class="cart__item__selected-options caption">
+                      <strong>{{ option.name }}:</strong>
 
-                    <span>{{ option.value }}</span>
-                  </p>
+                      <span>{{ option.value }}</span>
+                    </p>
                 {%- endfor -%}
               {%- endunless -%}
 
-              {%- if line_item.selling_plan_allocation -%}
+              {% comment %} {%- if line_item.selling_plan_allocation -%}
                 <p class="cart__item__selling-plan">
                   <span>{{ line_item.selling_plan_allocation.selling_plan.name }}</span>
                 </p>
-              {%- endif -%}
+              {%- endif -%} {% endcomment %}
 
-              {%- if properties_html != '' -%}
+              {% comment %} {%- if properties_html != '' -%}
                 {{ properties_html }}
-              {%- endif -%}
-            </div> {% endcomment %}
+              {%- endif -%} {% endcomment %}
+            </div>
           </div>
+        </div>
 
-          <div class="cart__price-and-quantity-wrapper">
+        <div class="cart__item__content__right">
+          <a class="caption cart__item__remove "
+            href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
+            data-item-remove
+            data-id="{{ line_item.key }}"
+            title="{{ 'cart.general.remove' | t }}">
+              {{- 'cart.general.remove' | t -}}
+          </a>
+        </div>
+                  <div class="cart__price-and-quantity-wrapper">
             <p class="cart__price">
               {%- liquid
                 assign discounted = false
@@ -251,18 +261,9 @@
               </div>
             </quantity-input>
           </div>
-        </div>
-
-        <div class="cart__item__content__right">
-          <a class="caption cart__item__remove "
-            href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
-            data-item-remove
-            data-id="{{ line_item.key }}"
-            title="{{ 'cart.general.remove' | t }}">
-              {{- 'cart.general.remove' | t -}}
-          </a>
-        </div>
       </div>
+
+
 
       {%- if line_item.original_price > line_item.final_price -%}
         {%- for discount in line_item.line_level_discount_allocations -%}

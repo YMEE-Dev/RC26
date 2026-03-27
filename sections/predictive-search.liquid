@@ -39,8 +39,29 @@
 -%}
 
 {%- style -%}
+  @media only screen and (max-width: 960px) {
+    header-search-popdown,
+    #predictive-search-results {
+      --text: #fff;
+      --text-light: #fff;
+      --COLOR-HEADER-LINK: #fff;
+      --link: #fff;
+      --link-opposite: #000000;
+    }
+  }
   .predictive-search__products__list {
     --COLUMNS: 4;
+  }
+
+  #predictive-search-results .btn--outline.btn--secondary {
+    --btn-border-hover: #000;
+    --btn-bg-hover: #000;
+    --btn-text-hover: #fff;
+  }
+
+  #predictive-search-results .btn--outline.btn--secondary::after {
+    background-color: #000;
+    opacity: 1;
   }
 {%- endstyle -%}
 
@@ -65,7 +86,7 @@
               data-aos-duration="{{ animation_duration }}"
               data-aos-anchor="{{ animation_anchor }}"
             >
-              <p class="predictive-search__heading">{{ 'general.search.suggestions' | t }}</p>
+              <p class="predictive-search__heading label">{{ 'general.search.suggestions' | t }}</p>
 
               {%- if query_count > 0 -%}
                 {%- for query in predictive_search.resources.queries -%}
@@ -200,7 +221,7 @@
         data-aos-anchor="{{ animation_anchor }}"
       >
         <button
-          class="btn btn--outline btn--primary"
+          class="btn btn--outline btn--secondary"
           tabindex="-1"
           role="option"
           aria-selected="false"
@@ -208,7 +229,6 @@
           <span data-predictive-search-search-for-text>
             {{- 'general.search.search_for' | t: terms: predictive_search.terms -}}
           </span>
-          {%- render 'icon-nav-arrow-right' -%}
         </button>
       </div>
 

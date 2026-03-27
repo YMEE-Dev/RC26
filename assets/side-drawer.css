@@ -1,6 +1,6 @@
 /* Side Drawer Common Styles */
 :root {
-  --side-drawer-width: 480px;
+  --side-drawer-width: 400px;
 }
 
 side-drawer {
@@ -182,7 +182,7 @@ side-drawer.side-drawer--from-bottom.is-closing .drawer__inner {
 
 @media only screen and (min-width: 480px) {
   side-drawer .drawer__inner {
-    max-width: var(--side-drawer-width, 480px);
+    max-width: var(--side-drawer-width, 400px);
   }
 }
 
@@ -190,6 +190,25 @@ side-drawer.side-drawer--from-bottom.is-closing .drawer__inner {
   side-drawer .drawer__inner {
     border-left: none;
     border-right: none;
+    overflow-y: hidden;
+  }
+
+  side-drawer.side-drawer--from-bottom .drawer__inner {
+    overflow-y: hidden;
+  }
+
+  side-drawer .drawer__content-wrapper {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: 100vh;
+    height: 100%;
+    position: relative;
+  }
+
+  /* Ensure scrolling works when body is locked */
+  body[data-scroll-locked] side-drawer .drawer__content-wrapper {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -206,11 +225,12 @@ side-drawer .drawer__close {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: background-color 0.2s ease;
+  outline: none;
 }
 
-side-drawer .drawer__close:hover {
-  background-color: var(--bg-accent);
+side-drawer .drawer__close:focus-visible {
+  outline: 2px solid var(--COLOR-TEXT);
+  outline-offset: 2px;
 }
 
 side-drawer .drawer__close svg {
@@ -221,14 +241,15 @@ side-drawer .drawer__close svg {
 
 side-drawer .drawer__content-wrapper {
   padding: 40px;
-  height: 100%;
+  flex: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 side-drawer .drawer-content__main {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  min-height: 100%;
 }
 
 side-drawer .drawer-content__link {
@@ -258,7 +279,7 @@ side-drawer .drawer-content__title {
   margin-bottom: 15px;
   color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-HEADING);
-  font-size: var(--font-display-s);
+  font-size: var(--FONT-DISPLAY-S);
   font-style: var(--FONT-STYLE-HEADING);
   font-weight: var(--FONT-WEIGHT-HEADING);
   line-height: var(--LINE-HEIGHT-DISPLAY-S);
@@ -282,7 +303,7 @@ side-drawer .drawer-content__description {
   margin-bottom: 20px;
   color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-BODY);
-  font-size: var(--font-body-medium);
+  font-size: var(--FONT-SIZE-BASE);
   font-style: var(--FONT-STYLE-BODY);
   font-weight: var(--FONT-WEIGHT-BODY);
   line-height: var(--LINE-HEIGHT-BODY);
@@ -347,7 +368,7 @@ side-drawer .drawer__link {
   border-bottom: 1px solid #e5e5e5;
   transition: opacity 0.2s ease;
   font-family: var(--FONT-STACK-BODY);
-  font-size: var(--font-body-medium);
+  font-size: var(--FONT-SIZE-BASE);
   font-weight: var(--FONT-WEIGHT-BODY);
   line-height: var(--LINE-HEIGHT-BODY);
 }
@@ -403,6 +424,12 @@ side-drawer .drawer__link-value {
   text-transform: var(--BTN-UPPERCASE);
 }
 
+@media (max-width: 767px) {
+  side-drawer .drawer-concierge .drawer__link-value {
+    display: none;
+  }
+}
+
 side-drawer .drawer__button {
   color: var(--COLOR-TEXT);
   text-align: center;
@@ -420,6 +447,8 @@ side-drawer .form-field {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin: 0;
+  max-width: 100%;
 }
 
 side-drawer .form-section {
@@ -618,6 +647,7 @@ side-drawer .accordion__title {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
 }
 
 side-drawer .accordion__title::after {
@@ -628,14 +658,20 @@ side-drawer .accordion__title .accordion-icon-wrapper {
   margin-left: auto;
   display: flex;
   align-items: center;
+  position: relative;
+  width: 12px;
+  height: 12px;
 }
 
 side-drawer .accordion__title .accordion-icon-wrapper .icon {
   width: 12px;
   height: 12px;
-  left: auto;
-  right: 0;
-  transition: transform 0.3s ease;
+  position: absolute;
+  left: 0;
+  top: 0;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 side-drawer .accordion__title .accordion-icon-wrapper .icon path {
@@ -643,19 +679,23 @@ side-drawer .accordion__title .accordion-icon-wrapper .icon path {
 }
 
 side-drawer .accordion[open] .accordion-icon-wrapper .icon-plus {
-  display: none;
+  opacity: 0;
+  transform: scale(0.8);
 }
 
 side-drawer .accordion[open] .accordion-icon-wrapper .icon-minus {
-  display: block;
+  opacity: 1;
+  transform: scale(1);
 }
 
 side-drawer .accordion:not([open]) .accordion-icon-wrapper .icon-plus {
-  display: block;
+  opacity: 1;
+  transform: scale(1);
 }
 
 side-drawer .accordion:not([open]) .accordion-icon-wrapper .icon-minus {
-  display: none;
+  opacity: 0;
+  transform: scale(0.8);
 }
 
 side-drawer .accordion__content {
@@ -665,6 +705,45 @@ side-drawer .accordion__content {
   font-style: var(--FONT-STYLE-BODY);
   font-weight: var(--FONT-WEIGHT-BODY);
   letter-spacing: var(--LETTER-SPACING-BODY);
+}
+
+/* Smooth accordion animations for drawer */
+side-drawer [data-collapsible-body] {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+  transition: height 0.3s ease;
+}
+
+side-drawer [data-collapsible-content] {
+  display: grid;
+  grid-template-columns: 100%;
+}
+
+side-drawer [data-collapsible][open="false"] [data-collapsible-content] {
+  animation: fadeOut 0.3s ease-in;
+}
+
+side-drawer [data-collapsible][open="true"] [data-collapsible-content] {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 @media (max-width: 768px) {
@@ -726,12 +805,15 @@ side-drawer[aria-hidden="false"] .drawer__underlay {
   }
 
   side-drawer .drawer__close {
-    top: 20px;
-    right: 20px;
+    top: 40px;
+    right: 12px;
   }
 }
 
 @media only screen and (max-width: 479px) {
+  side-drawer .drawer__close {
+    top: 20px;
+  }
 }
 
 @media only screen and (min-width: 750px) and (max-width: 989px) {

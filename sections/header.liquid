@@ -216,6 +216,17 @@
     will-change: opacity, backdrop-filter;
   }
 
+  .theme__header.search-open .theme__header__scroll-blur,
+  .theme__header:has(.tmenu_item--root.tmenu_item_level_0.tmenu_item_active) .theme__header__scroll-blur,
+  body:has(header-drawer.drawer--header.is-open) .theme__header__scroll-blur,
+  body:has(side-drawer.is-open) .theme__header__scroll-blur,
+  body:has(.drawer.is-open) .theme__header__scroll-blur {
+    opacity: 0;
+    --header-scroll-reveal-blur: 0px;
+    -webkit-backdrop-filter: blur(0);
+    backdrop-filter: blur(0);
+  }
+
   {%- if logo_asset != blank -%}
     .header__logo__link {
       --logo-padding: {{ logo_padding }};
@@ -1008,11 +1019,22 @@
 
       const logoLightUrl = logoLinks[0].dataset.logoLight;
       const logoDarkUrl = logoLinks[0].dataset.logoDark;
-      const forcedLightLogoMode = 'light';
+      const forcedDrawerLogoMode = 'dark';
+      const forcedTmenuLogoMode = 'dark';
 
       const drawerIsOpen = () => drawerWrapper?.classList.contains('is-open');
       const tmenuIsOpen = () => tmenuIsActive || Boolean(document.querySelector(tmenuActiveSelector));
-      const shouldForceLightLogo = () => drawerIsOpen() || tmenuIsOpen();
+      const getForcedLogoMode = () => {
+        if (drawerIsOpen()) {
+          return forcedDrawerLogoMode;
+        }
+
+        if (tmenuIsOpen()) {
+          return forcedTmenuLogoMode;
+        }
+
+        return '';
+      };
 
       const setHeaderColors = (mode) => {
         const colorSet = colors[mode] || colors.light;
@@ -1048,16 +1070,19 @@
         if (resolved === currentMode) return;
         currentMode = resolved;
         setHeaderColors(currentMode);
-        if (!shouldForceLightLogo()) {
+        if (!getForcedLogoMode()) {
           setLogoSource(currentMode);
         }
       };
 
       const syncLogoWithHeaderState = () => {
-        if (shouldForceLightLogo()) {
-          setLogoSource(forcedLightLogoMode);
+        const forcedLogoMode = getForcedLogoMode();
+
+        if (forcedLogoMode) {
+          setLogoSource(forcedLogoMode);
           return;
         }
+
         setLogoSource(currentMode);
       };
 

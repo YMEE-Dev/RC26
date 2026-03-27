@@ -1667,6 +1667,16 @@
         this.showCannotAddMoreInCart = true;
       }
 
+      if (maxInventoryReached === "true") {
+        if (this.cartDrawer) {
+          document.dispatchEvent(new CustomEvent("theme:product:added", { bubbles: true }));
+        }
+        if (button) {
+          button.disabled = false;
+        }
+        return;
+      }
+
       this.addToCart(formData, button);
     }
 
@@ -3293,7 +3303,10 @@
 
       const gap = parseInt(window.getComputedStyle(slide).marginRight) || 0;
       const slideWidth = slide.offsetWidth + gap;
-      const targetPosition = slide.offsetLeft;
+      const isStorytellingModal = Boolean(this.slider.closest(".storytelling-modal"));
+      const targetPosition = isStorytellingModal
+        ? slide.offsetLeft - this.slider.clientWidth / 2 + slide.clientWidth / 2
+        : slide.offsetLeft;
       const direction = this.velX > 0 ? 1 : -1;
       const slidesToScroll = Math.floor(Math.abs(this.velX) / 100) || 1;
 
@@ -3498,9 +3511,14 @@
         goToSlide(slide) {
           if (!slide) return;
 
+          const isStorytellingModal = Boolean(this.closest(".storytelling-modal"));
+          const left = isStorytellingModal
+            ? slide.offsetLeft - this.slider.clientWidth / 2 + slide.clientWidth / 2
+            : slide.offsetLeft;
+
           this.slider.scrollTo({
             top: 0,
-            left: slide.offsetLeft,
+            left,
             behavior: "smooth",
           });
         }
@@ -3732,17 +3750,22 @@
         cartToggleEvent() {
           if (theme.settings.cartType !== "drawer") return;
 
-          this.querySelectorAll("[data-cart-toggle]")?.forEach((button) => {
-            button.addEventListener("click", (e) => {
-              const cartDrawer = document.querySelector("cart-drawer");
+          if (window.theme.cartToggleHandlerInitialized) return;
 
-              if (cartDrawer) {
-                e.preventDefault();
-                cartDrawer.dispatchEvent(new CustomEvent("theme:cart-drawer:show"));
-                window.a11y.lastElement = button;
-              }
-            });
+          document.addEventListener("click", (e) => {
+            const button = e.target.closest("[data-cart-toggle]");
+            if (!button) return;
+
+            const cartDrawer = document.querySelector("cart-drawer");
+
+            if (cartDrawer) {
+              e.preventDefault();
+              cartDrawer.dispatchEvent(new CustomEvent("theme:cart-drawer:show"));
+              window.a11y.lastElement = button;
+            }
           });
+
+          window.theme.cartToggleHandlerInitialized = true;
         }
 
         initSticky() {

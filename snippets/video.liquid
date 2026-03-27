@@ -6,11 +6,19 @@
     assign desktop_height = ''
   endif
   assign mobile_height = mobile_height | default: block_settings.mobile_height
-  assign video = block_settings.video
-  assign aspect_ratio = aspect_ratio | default: video.aspect_ratio
-  assign video_aspect_ratio = video_aspect_ratio | default: video.aspect_ratio | default: 1
+  assign media = block_settings.video
+  assign has_background_video = false
+  if media != blank
+    if media.media_type == 'video'
+      assign has_background_video = true
+    elsif media.sources != blank
+      assign has_background_video = true
+    endif
+  endif
+  assign aspect_ratio = aspect_ratio | default: media.aspect_ratio
+  assign media_aspect_ratio = video_aspect_ratio | default: media.aspect_ratio | default: 1
   assign video_popup = block_settings.video_popup | default: block_settings.video_popup_social
-  assign image_desktop = block_settings.image | default: video.preview_image
+  assign image_desktop = block_settings.image | default: media.preview_image | default: media
   assign image_mobile = block_settings.mobile_image
   assign text_color = block_settings.color
   assign overlay_type = block_settings.overlay_type
@@ -74,10 +82,10 @@
   <div class="hero__video frame__item">
 {%- endif -%}
 
-{%- if video != null -%}
+{%- if has_background_video -%}
   <div
     class="video-background {{ desktop_height }} {{ mobile_height }}"
-    style="--aspect-ratio: {{ video_aspect_ratio }};"
+    style="--aspect-ratio: {{ media_aspect_ratio }};"
   >
     <div class="video__poster">
       {{ video_poster }}
@@ -88,7 +96,7 @@
       data-video-id="{{ section.id }}-video-background"
     >
       <template data-video-template>
-        {{ video | video_tag: autoplay: true, image_size: '1085x', loop: true, muted: true, controls: false }}
+        {{ media | video_tag: autoplay: true, image_size: '1085x', loop: true, muted: true, controls: false }}
       </template>
     </video-background>
   </div>

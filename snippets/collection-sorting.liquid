@@ -11,10 +11,16 @@
 {% endcomment %}
 
 {%- assign sort_options = search.sort_options | default: collection.sort_options -%}
+{%- assign sort_options = sort_options | reject: 'value', 'created-ascending' | reject: 'value', 'created-descending' -%}
 {%- assign sort_by = search.sort_by | default: collection.sort_by -%}
 {%- assign sort_translation = 'collections.general.sort' | t -%}
 {%- assign currently_selected = sort_options | where: 'value', sort_by | first -%}
 {%- assign select_options = '' -%}
+
+{%- if currently_selected == blank and sort_options.size > 0 -%}
+  {%- assign currently_selected = sort_options.first -%}
+  {%- assign sort_by = currently_selected.value -%}
+{%- endif -%}
 
 <div class="popout--sort">
   <h2 class="visually-hidden" id="sort-heading">

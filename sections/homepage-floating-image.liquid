@@ -1,0 +1,240 @@
+<!-- /sections/homepage-floating-image.liquid -->
+{{ 'homepage-floating-image.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign section_title = section.settings.title | strip
+  assign section_eyebrow = section.settings.eyebrow | strip
+  assign image = section.settings.image
+  assign mobile_image = section.settings.mobile_image
+  assign desktop_image = image | default: mobile_image
+  assign button_label = section.settings.button_label | strip
+  assign button_link = section.settings.button_link
+  assign modal_image = section.settings.modal_image | default: desktop_image
+  assign modal_heading = section.settings.modal_heading | default: section_eyebrow | default: section_title
+  assign modal_text = section.settings.modal_text
+-%}
+
+<popup-component class="homepage-floating-image__popup">
+  <section
+    id="HomepageFloatingImage--{{ section.id }}"
+    class="homepage-floating-image"
+    data-section-id="{{ section.id }}"
+    data-section-type="homepage-floating-image"
+    style="
+      --homepage-floating-image-bg: {{ section.settings.background_color }};
+      --PT: {{ section.settings.padding_top }}px;
+      --PB: {{ section.settings.padding_bottom }}px;
+    "
+  >
+    <div class="homepage-floating-image__inner wrapper">
+      <div class="homepage-floating-image__media{% if mobile_image != blank %} homepage-floating-image__media--has-mobile-image{% endif %}">
+        {%- if desktop_image != blank -%}
+          {{
+            desktop_image
+            | image_url: width: 2400
+            | image_tag:
+              class: 'homepage-floating-image__image homepage-floating-image__image--desktop',
+              loading: 'lazy',
+              sizes: '(min-width: 1200px) 1200px, 100vw',
+              widths: '375, 550, 750, 990, 1200, 1600, 2000, 2400'
+          }}
+
+          {%- if mobile_image != blank -%}
+            {{
+              mobile_image
+              | image_url: width: 1500
+              | image_tag:
+                class: 'homepage-floating-image__image homepage-floating-image__image--mobile',
+                loading: 'lazy',
+                sizes: '(max-width: 959px) calc(100vw - 40px), 1px',
+                widths: '320, 375, 550, 750, 990, 1200, 1500'
+            }}
+          {%- endif -%}
+        {%- else -%}
+          <div class="homepage-floating-image__placeholder">
+            {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+          </div>
+        {%- endif -%}
+
+        <div class="homepage-floating-image__content">
+          <div class="homepage-floating-image__copy">
+            {%- if section_eyebrow != blank -%}
+              <p class="homepage-floating-image__eyebrow title">{{ section_eyebrow | escape }}</p>
+            {%- endif -%}
+
+            {%- if section_title != blank -%}
+              <h2 class="homepage-floating-image__title ">{{ section_title | escape }}</h2>
+            {%- endif -%}
+          </div>
+
+          {%- if button_label != blank -%}
+            <a
+              href="{{ button_link | default: '#' }}"
+              class="btn btn--outline btn--secondary homepage-floating-image__button"
+              data-popup-open
+            >
+              {{- button_label | escape -}}
+            </a>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <dialog
+    class="homepage-floating-image__modal modal__overlay modal__overlay--default"
+    aria-modal="true"
+    aria-labelledby="HomepageFloatingImageModalTitle--{{ section.id }}"
+    inert
+    data-scroll-lock-required
+  >
+    <form method="dialog">
+      <button class="visually-hidden" aria-label="{{ 'general.accessibility.close' | t }}"></button>
+    </form>
+
+    <div
+      class="homepage-floating-image__modal-body modal modal__body modal-wrapper--has-image"
+      data-modal-body
+      data-scroll-lock-scrollable
+    >
+      <button data-popup-close class="close" title="{{ 'general.accessibility.close' | t }}">
+        {%- render 'icon-close' -%}
+      </button>
+
+      <div class="homepage-floating-image__modal-layout">
+        <div class="homepage-floating-image__modal-media modal__image">
+          {%- if modal_image != blank -%}
+            {{
+              modal_image
+              | image_url: width: 2400
+              | image_tag:
+                class: 'homepage-floating-image__modal-image',
+                loading: 'lazy',
+                sizes: '(min-width: 960px) 50vw, 100vw',
+                widths: '375, 550, 750, 990, 1200, 1600, 2000, 2400'
+            }}
+          {%- else -%}
+            <div class="homepage-floating-image__modal-placeholder">
+              {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+            </div>
+          {%- endif -%}
+        </div>
+
+        <div class="homepage-floating-image__modal-text modal__text">
+          <div class="homepage-floating-image__modal-inner modal__inner">
+            {%- if modal_heading != blank -%}
+              <h2 id="HomepageFloatingImageModalTitle--{{ section.id }}" class="homepage-floating-image__modal-title">
+                {{ modal_heading | escape }}
+              </h2>
+            {%- endif -%}
+
+            {%- if modal_text != blank -%}
+              <div class="homepage-floating-image__modal-description rte">
+                {{ modal_text }}
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+</popup-component>
+
+{% schema %}
+{
+  "name": "Homepage floating image",
+  "settings": [
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#efefef"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "The Ruby"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Roberto Coin's Signature"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "Mobile image"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Discover more"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Modal"
+    },
+    {
+      "type": "image_picker",
+      "id": "modal_image",
+      "label": "Modal image"
+    },
+    {
+      "type": "text",
+      "id": "modal_heading",
+      "label": "Modal heading",
+      "default": "The Ruby"
+    },
+    {
+      "type": "richtext",
+      "id": "modal_text",
+      "label": "Modal text",
+      "default": "<p>Roberto Coin signs each one of his pieces with a small ruby casted inside the jewel, in direct contact with the skin of who wears it. This magical signature, surrounded by an antique halo of legend, represents the message of good wishes that Roberto Coin dedicates to his passionate clientele.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Homepage floating image"
+    }
+  ],
+  "enabled_on": {
+    "templates": ["index"]
+  }
+}
+{% endschema %}

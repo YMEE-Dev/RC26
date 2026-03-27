@@ -810,6 +810,15 @@
               </span>
             </div>
           {%- endif -%}
+
+          {%- if siblings_html != blank or has_colors -%}
+            <span class="product-item__swatches__count product-item__swatches__count--collection-mobile caption">
+              <span data-swatch-count>
+                {{- count }}
+                {{- count | pluralize: count_string_one, count_string_other -}}
+              </span>
+            </span>
+          {%- endif -%}
         </div>
 
         {%- comment -%} Recently viewed indicator {%- endcomment -%}

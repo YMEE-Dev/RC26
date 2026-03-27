@@ -1,0 +1,266 @@
+.homepage-product-sliders {
+  --bg-color: #f9f9f9;
+  background-color: var(--bg-color);
+  margin-top: var(--PT, 0px);
+  padding-bottom: var(--PB, 0px);
+}
+
+.homepage-product-sliders .tab-content {
+  background: var(--bg-color);
+  padding-top: 60px;
+}
+
+@media only screen and (max-width: 959px) {
+  .homepage-product-sliders .tab-content {
+    padding-top: 0;
+  }
+}
+
+.homepage-product-sliders .grid__heading-holder {
+  padding: 0;
+  margin: 0 auto;
+  max-width: min(var(--content-max), 1200px);
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  width: 100%;
+  transform: translateX(-50%);
+}
+
+@media only screen and (max-width: 959px) {
+  .homepage-product-sliders .grid__heading-holder {
+    position: static;
+    transform: none;
+    padding: 0;
+    margin: 0;
+    max-width: none;
+  }
+}
+
+.homepage-product-sliders .homepage-product-sliders__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-direction: var(--homepage-product-sliders-head-direction, row);
+  gap: 30px;
+}
+
+.homepage-product-sliders .homepage-product-sliders__title {
+  margin: 0;
+  color: #000;
+  flex: 0 0 auto;
+}
+
+.homepage-product-sliders .homepage-product-sliders__tabs-scroll {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.homepage-product-sliders .tabs {
+  display: flex;
+  align-items: start;
+  justify-content: var(--homepage-product-sliders-tabs-justify, flex-end);
+  gap: 30px;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.homepage-product-sliders .tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.homepage-product-sliders .tabs .tab-link-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+  margin: 0;
+  flex-shrink: 0;
+  height: 56px;
+}
+
+.homepage-product-sliders .tabs .tab-link {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.homepage-product-sliders .tabs .tab-link .homepage-product-sliders__tab-title {
+  padding: 0px 12px 10px;
+  display: inline-block;
+  line-height: normal;
+  color: #666666;
+  font-weight: 400;
+}
+
+.homepage-product-sliders .tabs .tab-link-item.selected .homepage-product-sliders__tab-title {
+  color: #000000;
+  font-weight: 600;
+  padding-bottom: 12px;
+}
+
+.homepage-product-sliders .tabs .tab-link-item .tab-link__view-all {
+  display: none;
+  color: #000000;
+  padding-top: 10px;
+  padding-bottom: 0;
+}
+
+.homepage-product-sliders .tabs .tab-link-item.selected {
+  --text: var(--text-dark);
+}
+
+.homepage-product-sliders .tabs .tab-link-item.selected .homepage-product-sliders__tab-title::after {
+  bottom: 0;
+  width: 100%;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .homepage-product-sliders .tabs .tab-link-item.selected .tab-link__view-all,
+  .homepage-product-sliders .tabs .tab-link-item:hover .tab-link__view-all {
+    display: inline-flex;
+    align-self: center;
+    font-weight: 400;
+  }
+}
+
+@media only screen and (max-width: 959px) {
+  .homepage-product-sliders .tabs .tab-link-item.selected .tab-link__view-all {
+    display: inline-flex;
+    align-self: center;
+    font-weight: 400;
+  }
+}
+
+.homepage-product-sliders grid-slider {
+  padding-bottom: 80px;
+}
+
+.homepage-product-sliders .related-slider-progress {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 1px;
+  background: rgba(17, 17, 17, 0.2);
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.homepage-product-sliders .slider__arrows {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.homepage-product-sliders .slider__button {
+  pointer-events: none;
+}
+
+.homepage-product-sliders .related-slider-progress.hidden {
+  display: none;
+}
+
+.homepage-product-sliders .related-slider-progress__line {
+  display: block;
+  width: var(--related-slider-progress, 0%);
+  height: 100%;
+  background: #111111;
+  transition: width 0.2s ease;
+}
+
+.homepage-product-sliders .tabs-wrapper,
+.homepage-product-sliders .tabs__head {
+  overflow: visible;
+}
+
+@media only screen and (min-width: 960px) {
+  .homepage-product-sliders .grid--slider {
+    --item-width: calc((100% - (var(--gap) * 3)) / 4);
+  }
+}
+
+@media only screen and (max-width: 959px) {
+  .homepage-product-sliders {
+    padding-top: calc(var(--PT, 0px) * 0.5);
+    padding-bottom: calc(var(--PB, 0px) * 0.5);
+    margin: 0;
+  }
+
+  .homepage-product-sliders .homepage-product-sliders__head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .homepage-product-sliders .tabs__head {
+    overflow: hidden;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+@media only screen and (max-width: 959px) {
+  .homepage-product-sliders {
+    padding-top: var(--PT-MOBILE, calc(var(--PT, 0px) * 0.5));
+    padding-bottom: calc(var(--PB, 0px) * 0.5);
+  }
+
+  .homepage-product-sliders .tabs-wrapper {
+    margin: 0;
+  }
+
+  .homepage-product-sliders .tabs__head {
+    padding-bottom: 40px;
+  }
+
+  .homepage-product-sliders .homepage-product-sliders__tabs-scroll {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .homepage-product-sliders .homepage-product-sliders__tabs-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .homepage-product-sliders .tabs {
+    width: max-content;
+    min-width: 100%;
+    gap: 25px;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+  }
+
+  .homepage-product-sliders .grid--mobile-slider .grid-item {
+    width: calc(100% - var(--outer));
+  }
+
+  .homepage-product-sliders .grid--mobile-slider .grid-item:only-child {
+    flex-basis: calc(100% - var(--outer));
+  }
+
+  .homepage-product-sliders grid-slider {
+    padding-bottom: 40px;
+  }
+  .homepage-product-sliders grid-slider .product-item__info {
+    padding-bottom: 0;
+  }
+  .homepage-product-sliders grid-slider .product-item__swatches-wrapper {
+    min-height: 0;
+  }
+
+  .homepage-product-sliders .related-slider-progress__line {
+    width: var(--related-slider-progress, 0%);
+  }
+}
