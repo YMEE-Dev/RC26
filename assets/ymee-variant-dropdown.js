@@ -370,6 +370,28 @@
     }
   }
 
+  function hasVariantAltMediaSystem(sectionRoot, sectionId) {
+    var productImagesEl =
+      sectionRoot.querySelector("product-images, .product__images") ||
+      document.querySelector(
+        "#MainProduct--" +
+          cssEscape(sectionId) +
+          " product-images, #MainProduct--" +
+          cssEscape(sectionId) +
+          " .product__images"
+      );
+
+    if (!productImagesEl) return false;
+
+    var hasVariantSystem = false;
+    productImagesEl.querySelectorAll("[data-media-kind]").forEach(function (el) {
+      var kind = (el.getAttribute("data-media-kind") || "").toLowerCase();
+      if (kind === "variant" || kind === "common") hasVariantSystem = true;
+    });
+
+    return hasVariantSystem;
+  }
+
   function getCurrentNonSizeOptions(sectionRoot, sizeOptionIndex) {
     var result = {};
 
@@ -1106,6 +1128,17 @@
 
       var hasDropdown = sectionRoot.querySelector("[data-ymee-variant-dropdown]");
       if (hasDropdown) return;
+
+      // Prevent tiny scroll jump on color-change variant updates for PDPs
+      // that do not use the alt-based variant/common gallery system.
+      if (!hasVariantAltMediaSystem(sectionRoot, sectionId)) {
+        var productInfoEl =
+          sectionRoot.closest("product-info") || sectionRoot.querySelector("product-info") || sectionRoot;
+        if (productInfoEl && productInfoEl.tagName === "PRODUCT-INFO") {
+          productInfoEl.setAttribute("data-variant-image-scroll", "false");
+          productInfoEl.variantImageScroll = false;
+        }
+      }
 
       // Set initial selected state for color picker items
       var checkedInput = picker.querySelector("[data-ymee-color-input]:checked");
