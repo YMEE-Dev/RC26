@@ -121,23 +121,69 @@
 
   function normalizeColorCode(value) {
     if (!value) return "";
-    var text = String(value).toLowerCase();
-    if (text.indexOf("yellow") !== -1 || text.indexOf("yg") !== -1) return "y";
-    if (text.indexOf("white") !== -1 || text.indexOf("wg") !== -1) return "w";
-    if (text.indexOf("rose") !== -1 || text.indexOf("rg") !== -1) return "r";
-
-    var tokenMatch = text.match(/(?:^|[^a-z])(y|w|r)(?:[^a-z]|$)/i);
-    return tokenMatch ? tokenMatch[1].toLowerCase() : "";
+    return String(value)
+      .toLowerCase()
+      .trim()
+      .replace(/[\s-]+/g, "_")
+      .replace(/[^a-z0-9_]/g, "");
   }
 
-  function getVariantColorCode(variant) {
-    if (!variant) return "";
-    var candidates = [variant.title, variant.option1, variant.option2, variant.option3];
-    for (var i = 0; i < candidates.length; i++) {
-      var code = normalizeColorCode(candidates[i]);
-      if (code) return code;
+  function colorsMatch(pickerColor, mediaColor) {
+    if (!pickerColor || !mediaColor) return false;
+    if (pickerColor === mediaColor) return true;
+    // "18kt_yellow_gold" ends with "_yellow_gold" → matches "yellow_gold"
+    if (pickerColor.length > mediaColor.length) {
+      return pickerColor.lastIndexOf("_" + mediaColor) === pickerColor.length - mediaColor.length - 1;
     }
-    return "";
+    // mediaColor longer than pickerColor — reverse check
+    if (mediaColor.length > pickerColor.length) {
+      return mediaColor.lastIndexOf("_" + pickerColor) === mediaColor.length - pickerColor.length - 1;
+    }
+    return false;
+  }
+
+  function getVariantColorCode(variant, sectionId) {
+    if (!variant || !sectionId) return "";
+    if (!variant.featured_media || !variant.featured_media.id) return "";
+    var productImagesEl = document.querySelector(
+      "#MainProduct--" +
+        cssEscape(sectionId) +
+        " product-images, #MainProduct--" +
+        cssEscape(sectionId) +
+        " .product__images"
+    );
+    if (!productImagesEl) return "";
+    var mediaId = sectionId + "-" + variant.featured_media.id;
+    var mediaEl = productImagesEl.querySelector('[data-media-id="' + cssEscape(mediaId) + '"]');
+    if (!mediaEl) return "";
+    var kind = (mediaEl.getAttribute("data-media-kind") || "").toLowerCase();
+    if (kind !== "variant") return "";
+    return (mediaEl.getAttribute("data-media-color") || "").toLowerCase();
+  }
+
+  function findVariantFromDOM(sectionRoot, sectionId) {
+    var productFormId = "product-form-" + sectionId;
+    var variantInput = sectionRoot.querySelector('input[name="id"][form="' + cssEscape(productFormId) + '"]');
+    if (!variantInput) variantInput = sectionRoot.querySelector('product-form input[name="id"]');
+    if (!variantInput || !variantInput.value) return null;
+    var pdEl = sectionRoot.querySelector("[data-product-json]");
+    if (!pdEl) return null;
+    try {
+      var pd = JSON.parse(pdEl.textContent || "{}");
+      if (!pd || !pd.variants) return null;
+      for (var i = 0; i < pd.variants.length; i++) {
+        if (String(pd.variants[i].id) === String(variantInput.value)) return pd.variants[i];
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function getColorFromPicker(sectionRoot) {
+    var picker = sectionRoot.querySelector("[data-ymee-color-picker]");
+    if (!picker) return "";
+    var checked = picker.querySelector("[data-ymee-color-input]:checked");
+    if (!checked) return "";
+    return normalizeColorCode(checked.value);
   }
 
   function applyGalleryFilter(sectionId, colorCode) {
@@ -150,75 +196,177 @@
     );
     if (!productImagesEl) return;
 
-    var visibleMediaIds = [];
+    // Check if any slide uses the variant:/common: alt text system
+    var hasVariantSystem = false;
+    productImagesEl.querySelectorAll("[data-media-kind]").forEach(function (el) {
+      var kind = (el.getAttribute("data-media-kind") || "").toLowerCase();
+      if (kind === "variant" || kind === "common") hasVariantSystem = true;
+    });
 
-    var slides = productImagesEl.querySelectorAll("[data-embla-slide]");
-    if (!slides.length) {
-      slides = productImagesEl.querySelectorAll("[data-slide]");
+    // If no variant/common system, preserve original behavior completely
+    if (!hasVariantSystem) return;
+
+    // If no color code, restore all slides and leave order as-is
+    if (!colorCode) {
+      productImagesEl.querySelectorAll(".pdp-embla__container").forEach(function (container) {
+        // Move any held-back slides back into the container
+        var holdingEl = container.nextElementSibling;
+        if (holdingEl && holdingEl.classList.contains("pdp-embla__filtered-hold")) {
+          while (holdingEl.firstChild) {
+            holdingEl.firstChild.classList.remove("pdp-embla__slide--filtered-out");
+            holdingEl.firstChild.classList.remove("product__slide--filtered-out");
+            container.appendChild(holdingEl.firstChild);
+          }
+        }
+      });
+      // Restore held-back thumbs
+      ["pdp-thumbs--desktop", "pdp-thumbs--mobile"].forEach(function (thumbClass) {
+        var thumbsHolder = productImagesEl.querySelector("." + thumbClass + " .product__thumbs__holder");
+        if (!thumbsHolder) return;
+        var holdingEl = thumbsHolder.nextElementSibling;
+        if (holdingEl && holdingEl.classList.contains("pdp-thumbs__filtered-hold")) {
+          while (holdingEl.firstChild) {
+            holdingEl.firstChild.classList.remove("pdp-thumb--filtered-out");
+            thumbsHolder.appendChild(holdingEl.firstChild);
+          }
+        }
+      });
+      return;
     }
 
-    slides.forEach(function (slide) {
+    // Process each carousel container (mobile + desktop)
+    productImagesEl.querySelectorAll(".pdp-embla__container").forEach(function (container) {
+      // Ensure holding element exists for hidden slides
+      var holdingEl = container.nextElementSibling;
+      if (!holdingEl || !holdingEl.classList.contains("pdp-embla__filtered-hold")) {
+        holdingEl = document.createElement("div");
+        holdingEl.className = "pdp-embla__filtered-hold";
+        holdingEl.style.display = "none";
+        container.parentNode.insertBefore(holdingEl, container.nextSibling);
+      }
+
+      // Gather all slides from both container and holding
+      var allSlides = Array.prototype.slice
+        .call(container.querySelectorAll("[data-embla-slide]"))
+        .concat(Array.prototype.slice.call(holdingEl.querySelectorAll("[data-embla-slide]")));
+      if (!allSlides.length) return;
+
+      var variantSlides = [];
+      var commonSlides = [];
+      var otherSlides = [];
+      var hiddenSlides = [];
+
+      allSlides.forEach(function (slide) {
+        var mediaEl = slide.querySelector("[data-media-kind]") || slide;
+        var kind = (mediaEl.getAttribute("data-media-kind") || "other").toLowerCase();
+        var color = (mediaEl.getAttribute("data-media-color") || "").toLowerCase();
+
+        if (kind === "variant") {
+          if (colorsMatch(colorCode, color)) {
+            variantSlides.push(slide);
+            slide.classList.remove("pdp-embla__slide--filtered-out");
+            slide.classList.remove("product__slide--filtered-out");
+          } else {
+            hiddenSlides.push(slide);
+            slide.classList.add("pdp-embla__slide--filtered-out");
+            slide.classList.add("product__slide--filtered-out");
+          }
+        } else if (kind === "common") {
+          commonSlides.push(slide);
+          slide.classList.remove("pdp-embla__slide--filtered-out");
+          slide.classList.remove("product__slide--filtered-out");
+        } else {
+          otherSlides.push(slide);
+          slide.classList.remove("pdp-embla__slide--filtered-out");
+          slide.classList.remove("product__slide--filtered-out");
+        }
+      });
+
+      // Put visible slides in the container, hidden slides in the holding element
+      var visibleSlides = variantSlides.concat(commonSlides).concat(otherSlides);
+      visibleSlides.forEach(function (slide) {
+        container.appendChild(slide);
+      });
+      hiddenSlides.forEach(function (slide) {
+        holdingEl.appendChild(slide);
+      });
+    });
+
+    // Collect visible media IDs for thumbnail filtering (use mobile as source of truth)
+    var visibleMediaIds = [];
+    var mobileContainer = productImagesEl.querySelector(".pdp-embla--mobile .pdp-embla__container");
+    var sourceSlides = mobileContainer
+      ? mobileContainer.querySelectorAll("[data-embla-slide]")
+      : productImagesEl.querySelectorAll(".pdp-embla__container [data-embla-slide]");
+
+    sourceSlides.forEach(function (slide) {
       var mediaEl = slide.querySelector("[data-media-id]") || slide;
-      var mediaId = mediaEl.getAttribute("data-media-id") || "";
-      var mediaKind = (mediaEl.getAttribute("data-media-kind") || "other").toLowerCase();
-      var mediaColor = (mediaEl.getAttribute("data-media-color") || "").toLowerCase();
-      var isVisible = true;
-
-      if (mediaKind === "still" && colorCode) {
-        isVisible = mediaColor === colorCode;
-      }
-
-      slide.classList.toggle("pdp-embla__slide--filtered-out", !isVisible);
-      slide.classList.toggle("product__slide--filtered-out", !isVisible);
-      if (isVisible && mediaId) {
-        visibleMediaIds.push(mediaId);
-      }
+      var mediaId = mediaEl.getAttribute("data-media-id") || slide.getAttribute("data-primary-media-id") || "";
+      if (mediaId) visibleMediaIds.push(mediaId);
     });
 
-    productImagesEl.querySelectorAll("[data-thumb-link], .product__thumb a").forEach(function (thumbLink) {
-      var thumbMediaId = thumbLink.getAttribute("data-media-id") || "";
-      var thumbItem = thumbLink.closest(".product__thumb");
-      if (!thumbItem) return;
+    // Filter and reorder thumbnails — move hidden thumbs out of the holder
+    ["pdp-thumbs--desktop", "pdp-thumbs--mobile"].forEach(function (thumbClass) {
+      var thumbsHolder = productImagesEl.querySelector("." + thumbClass + " .product__thumbs__holder");
+      if (!thumbsHolder) return;
 
-      var thumbVisible = !thumbMediaId || visibleMediaIds.indexOf(thumbMediaId) !== -1;
-      thumbItem.classList.toggle("pdp-thumb--filtered-out", !thumbVisible);
+      // Ensure holding element for hidden thumbs
+      var holdingEl = thumbsHolder.nextElementSibling;
+      if (!holdingEl || !holdingEl.classList.contains("pdp-thumbs__filtered-hold")) {
+        holdingEl = document.createElement("div");
+        holdingEl.className = "pdp-thumbs__filtered-hold";
+        holdingEl.style.display = "none";
+        thumbsHolder.parentNode.insertBefore(holdingEl, thumbsHolder.nextSibling);
+      }
+
+      // Collect all thumbs from holder and holding
+      var allThumbs = Array.prototype.slice
+        .call(thumbsHolder.querySelectorAll(".product__thumb"))
+        .concat(Array.prototype.slice.call(holdingEl.querySelectorAll(".product__thumb")));
+
+      var thumbMap = {};
+      allThumbs.forEach(function (thumb) {
+        var link = thumb.querySelector("[data-thumb-link], a[data-media-id]");
+        var mediaId = link ? link.getAttribute("data-media-id") || "" : "";
+        if (mediaId) thumbMap[mediaId] = thumb;
+      });
+
+      // Reorder visible thumbs into holder, matching visible media order
+      visibleMediaIds.forEach(function (mediaId) {
+        var thumb = thumbMap[mediaId];
+        if (thumb) {
+          thumb.classList.remove("pdp-thumb--filtered-out");
+          thumbsHolder.appendChild(thumb);
+        }
+      });
+
+      // Move hidden thumbs to holding element
+      allThumbs.forEach(function (thumb) {
+        var link = thumb.querySelector("[data-thumb-link], a[data-media-id]");
+        var thumbMediaId = link ? link.getAttribute("data-media-id") || "" : "";
+        if (thumbMediaId && visibleMediaIds.indexOf(thumbMediaId) === -1) {
+          thumb.classList.add("pdp-thumb--filtered-out");
+          holdingEl.appendChild(thumb);
+        }
+      });
     });
 
-    // ReInit Embla first so snap points reflect filtered slides
+    // Reset desktop carousel to intro stage and reinit all carousels
     productImagesEl.querySelectorAll(".pdp-embla").forEach(function (emblaRoot) {
+      if (emblaRoot._resetToIntro) {
+        emblaRoot._resetToIntro();
+      }
       if (emblaRoot._emblaInstance && typeof emblaRoot._emblaInstance.reInit === "function") {
         try {
           emblaRoot._emblaInstance.reInit();
+          emblaRoot._emblaInstance.scrollTo(0, true);
         } catch (e) {}
       }
     });
 
-    var activeMediaId = productImagesEl.getAttribute("data-active-media") || "";
-    if (visibleMediaIds.length && activeMediaId && visibleMediaIds.indexOf(activeMediaId) === -1) {
-      // Prefer first non-model visible media; fall back to visibleMediaIds[0]
-      var preferredId = visibleMediaIds[0];
-      var slides = productImagesEl.querySelectorAll("[data-embla-slide]");
-      for (var si = 0; si < visibleMediaIds.length; si++) {
-        var mid = visibleMediaIds[si];
-        var found = false;
-        slides.forEach(function (slide) {
-          if (found) return;
-          var mediaEl = slide.querySelector('[data-media-id="' + mid + '"]');
-          if (mediaEl && slide.getAttribute("data-media-type") !== "model") {
-            preferredId = mid;
-            found = true;
-          }
-        });
-        if (found) break;
-      }
-      var hasModelSlideP = !!productImagesEl.querySelector('[data-embla-slide][data-media-type="model"]');
-      if (!hasModelSlideP) {
-        productImagesEl.dispatchEvent(
-          new CustomEvent("theme:media:select", {
-            detail: { id: preferredId },
-          })
-        );
-      }
+    // Update active media to first visible slide
+    if (visibleMediaIds.length) {
+      productImagesEl.setAttribute("data-active-media", visibleMediaIds[0]);
     }
   }
 
@@ -782,7 +930,7 @@
           document.dispatchEvent(new CustomEvent("theme:variant:change", { detail: { variant: variant } }));
         }
 
-        var colorCode = getVariantColorCode(variant);
+        var colorCode = getColorFromPicker(sectionRoot);
         applyGalleryFilter(sectionId, colorCode);
       }
 
@@ -915,8 +1063,7 @@
             setSelectedVisual(optionEl);
             updatePlaceholder(optionEl, false);
 
-            var variant = variantById[String(lastSyncedId)];
-            var colorCode = getVariantColorCode(variant);
+            var colorCode = getColorFromPicker(sectionRoot);
             applyGalleryFilter(sectionId, colorCode);
           }
         }
@@ -937,6 +1084,12 @@
       if (initial) {
         setSelectedVisual(initial);
         updatePlaceholder(initial, false);
+      }
+
+      // Apply initial gallery filter based on selected color
+      var initColorCode = getColorFromPicker(sectionRoot);
+      if (initColorCode) {
+        applyGalleryFilter(sectionId, initColorCode);
       }
     });
   }
@@ -971,6 +1124,12 @@
             valueEl.setAttribute("hidden", "");
           }
         });
+      }
+
+      // Apply initial gallery filter for standalone mode
+      var initStandaloneColor = getColorFromPicker(sectionRoot);
+      if (initStandaloneColor) {
+        applyGalleryFilter(sectionId, initStandaloneColor);
       }
 
       var variantSelects = sectionRoot.querySelector('variant-selects[data-section="' + cssEscape(sectionId) + '"]');
@@ -1115,6 +1274,9 @@
             selectEl.dispatchEvent(new Event("change", { bubbles: true }));
           }
         }
+        // Apply gallery filter on color change
+        var galleryColorCode = normalizeColorCode(input.value);
+        applyGalleryFilter(sectionId, galleryColorCode);
         return;
       }
 
@@ -1177,6 +1339,10 @@
           }
         }
         document.dispatchEvent(new CustomEvent("theme:variant:change", { detail: { variant: matchedVariant } }));
+
+        // Apply gallery filter on color change
+        var standaloneGalleryColorCode = normalizeColorCode(input.value);
+        applyGalleryFilter(sectionId, standaloneGalleryColorCode);
       }
     },
     true
