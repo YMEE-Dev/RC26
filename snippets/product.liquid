@@ -1790,8 +1790,33 @@
 
                     updateArrows();
 
+                    // Expose a reset method so external code (gallery filter) can
+                    // recalculate hasIntroStage and reset the intro state without
+                    // destroying and recreating the carousel (avoids duplicate listeners).
+                    carousel.resetForGalleryFilter = function () {
+                      var freshSlides = carouselEl.querySelectorAll(
+                        '[data-embla-slide]:not(.pdp-embla__slide--filtered-out)'
+                      );
+                      var freshFirst = freshSlides[0];
+                      hasIntroStage =
+                        isDesktopCarousel &&
+                        freshSlides.length > 1 &&
+                        !!freshFirst &&
+                        freshFirst.getAttribute('data-media-type') !== 'model';
+                      carouselStarted = false;
+                      introTransitioning = false;
+                      carouselEl.classList.remove('pdp-embla--started', 'pdp-embla--transitioning');
+                      try {
+                        embla.reInit();
+                        embla.scrollTo(0, true);
+                      } catch (e) {}
+                      updateArrows();
+                      updateDesktopThumbs();
+                    };
+
                     if (carouselEl && carouselEl.dataset) carouselEl.dataset.emblaInitialized = 'true';
                     carouselEl._emblaInstance = embla;
+                    carouselEl._emblaCarousel = carousel;
                     return carousel;
                   }
 
