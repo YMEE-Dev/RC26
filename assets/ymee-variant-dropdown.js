@@ -140,8 +140,7 @@
     return "";
   }
 
-  // Pure DOM reorder — no Embla interaction. Returns ordered mediaIds or null if nothing to do.
-  function reorderGalleryDOM(sectionId, colorCode) {
+  function applyGalleryFilter(sectionId, colorCode) {
     var productImagesEl = document.querySelector(
       "#MainProduct--" +
         cssEscape(sectionId) +
@@ -149,109 +148,78 @@
         cssEscape(sectionId) +
         " .product__images"
     );
-    if (!productImagesEl) return null;
+    if (!productImagesEl) return;
 
-    // Use mobile container slides as canonical source (1 slide per media, flat structure)
-    var mobileContainer = productImagesEl.querySelector(".pdp-embla--mobile .pdp-embla__container");
-    var sourceSlides = mobileContainer
-      ? mobileContainer.querySelectorAll("[data-embla-slide]")
-      : productImagesEl.querySelectorAll(".pdp-embla__container [data-embla-slide]");
-    if (!sourceSlides.length) return null;
+    var visibleMediaIds = [];
 
-    // Determine visibility and kind for each slide
-    var variantIds = [];
-    var otherIds = [];
-    var hiddenIds = [];
+    var slides = productImagesEl.querySelectorAll("[data-embla-slide]");
+    if (!slides.length) {
+      slides = productImagesEl.querySelectorAll("[data-slide]");
+    }
 
-    sourceSlides.forEach(function (slide) {
+    slides.forEach(function (slide) {
       var mediaEl = slide.querySelector("[data-media-id]") || slide;
       var mediaId = mediaEl.getAttribute("data-media-id") || "";
       var mediaKind = (mediaEl.getAttribute("data-media-kind") || "other").toLowerCase();
       var mediaColor = (mediaEl.getAttribute("data-media-color") || "").toLowerCase();
       var isVisible = true;
 
-      if (colorCode) {
-        if (mediaKind === "variant") isVisible = mediaColor === colorCode;
-        else if (mediaKind === "still") isVisible = mediaColor === colorCode;
-        // common, model, other: always visible
+      if (mediaKind === "still" && colorCode) {
+        isVisible = mediaColor === colorCode;
       }
 
-      if (isVisible) {
-        if (mediaKind === "variant") variantIds.push(mediaId);
-        else otherIds.push(mediaId);
-      } else {
-        hiddenIds.push(mediaId);
+      slide.classList.toggle("pdp-embla__slide--filtered-out", !isVisible);
+      slide.classList.toggle("product__slide--filtered-out", !isVisible);
+      if (isVisible && mediaId) {
+        visibleMediaIds.push(mediaId);
       }
     });
 
-    var orderedIds = variantIds.concat(otherIds);
-    if (!orderedIds.length) return null;
+    productImagesEl.querySelectorAll("[data-thumb-link], .product__thumb a").forEach(function (thumbLink) {
+      var thumbMediaId = thumbLink.getAttribute("data-media-id") || "";
+      var thumbItem = thumbLink.closest(".product__thumb");
+      if (!thumbItem) return;
 
-    // Reorder slides in EACH container (mobile uses data-media-id on inner el;
-    // desktop uses data-primary-media-id on the outer slide — both have same sectionId-mediaId format)
-    productImagesEl.querySelectorAll(".pdp-embla__container").forEach(function (container) {
-      var slideMap = {};
-      container.querySelectorAll("[data-embla-slide]").forEach(function (slide) {
-        var mediaEl = slide.querySelector("[data-media-id]") || slide;
-        var id = mediaEl.getAttribute("data-media-id") || slide.getAttribute("data-primary-media-id") || "";
-        if (id) slideMap[id] = slide;
-      });
-      // Append visible slides in order (appendChild moves them)
-      orderedIds.forEach(function (id) {
-        if (slideMap[id]) container.appendChild(slideMap[id]);
-      });
-      // Hide filtered slides
-      hiddenIds.forEach(function (id) {
-        if (slideMap[id]) slideMap[id].classList.add("pdp-embla__slide--filtered-out");
-      });
-      orderedIds.forEach(function (id) {
-        if (slideMap[id]) slideMap[id].classList.remove("pdp-embla__slide--filtered-out");
-      });
+      var thumbVisible = !thumbMediaId || visibleMediaIds.indexOf(thumbMediaId) !== -1;
+      thumbItem.classList.toggle("pdp-thumb--filtered-out", !thumbVisible);
     });
 
-    // Reorder thumbs (both desktop + mobile) to match
-    ["pdp-thumbs--desktop", "pdp-thumbs--mobile"].forEach(function (cls) {
-      var holder = productImagesEl.querySelector("." + cls + " .product__thumbs__holder");
-      if (!holder) return;
-      var thumbMap = {};
-      holder.querySelectorAll(".product__thumb").forEach(function (thumb) {
-        var link = thumb.querySelector("[data-media-id]");
-        var id = link ? link.getAttribute("data-media-id") : "";
-        if (id) thumbMap[id] = thumb;
-      });
-      orderedIds.forEach(function (id) {
-        if (thumbMap[id]) {
-          thumbMap[id].classList.remove("pdp-thumb--filtered-out");
-          holder.appendChild(thumbMap[id]);
-          delete thumbMap[id];
-        }
-      });
-      Object.keys(thumbMap).forEach(function (id) {
-        thumbMap[id].classList.add("pdp-thumb--filtered-out");
-      });
-    });
-
-    // Update active media to first visible slide
-    productImagesEl.setAttribute("data-active-media", orderedIds[0]);
-
-    return { productImagesEl: productImagesEl, orderedIds: orderedIds };
-  }
-
-  function resetCarouselAfterFilter(productImagesEl) {
+    // ReInit Embla first so snap points reflect filtered slides
     productImagesEl.querySelectorAll(".pdp-embla").forEach(function (emblaRoot) {
-      var carouselObj = emblaRoot._emblaCarousel;
-      if (carouselObj && typeof carouselObj.resetForGalleryFilter === "function") {
+      if (emblaRoot._emblaInstance && typeof emblaRoot._emblaInstance.reInit === "function") {
         try {
-          carouselObj.resetForGalleryFilter();
+          emblaRoot._emblaInstance.reInit();
         } catch (e) {}
       }
     });
-  }
 
-  function applyGalleryFilter(sectionId, colorCode) {
-    var result = reorderGalleryDOM(sectionId, colorCode);
-    if (!result) return;
-    resetCarouselAfterFilter(result.productImagesEl);
+    var activeMediaId = productImagesEl.getAttribute("data-active-media") || "";
+    if (visibleMediaIds.length && activeMediaId && visibleMediaIds.indexOf(activeMediaId) === -1) {
+      // Prefer first non-model visible media; fall back to visibleMediaIds[0]
+      var preferredId = visibleMediaIds[0];
+      var slides = productImagesEl.querySelectorAll("[data-embla-slide]");
+      for (var si = 0; si < visibleMediaIds.length; si++) {
+        var mid = visibleMediaIds[si];
+        var found = false;
+        slides.forEach(function (slide) {
+          if (found) return;
+          var mediaEl = slide.querySelector('[data-media-id="' + mid + '"]');
+          if (mediaEl && slide.getAttribute("data-media-type") !== "model") {
+            preferredId = mid;
+            found = true;
+          }
+        });
+        if (found) break;
+      }
+      var hasModelSlideP = !!productImagesEl.querySelector('[data-embla-slide][data-media-type="model"]');
+      if (!hasModelSlideP) {
+        productImagesEl.dispatchEvent(
+          new CustomEvent("theme:media:select", {
+            detail: { id: preferredId },
+          })
+        );
+      }
+    }
   }
 
   function getCurrentNonSizeOptions(sectionRoot, sizeOptionIndex) {
@@ -970,45 +938,6 @@
         setSelectedVisual(initial);
         updatePlaceholder(initial, false);
       }
-
-      // Apply gallery filter on page load:
-      // 1. Reorder DOM immediately (before Embla is ready)
-      // 2. Wait for Embla to init, then reinit once with fresh DOM order
-      (function () {
-        var checkedInput = sectionRoot.querySelector("[data-ymee-color-input]:checked");
-        var initialColorCode = checkedInput ? normalizeColorCode(checkedInput.value) : "";
-        if (!initialColorCode) {
-          variantIdInput = getLiveVariantIdInput();
-          if (variantIdInput && variantIdInput.value) {
-            var iv = variantById[String(variantIdInput.value)];
-            if (iv) initialColorCode = getVariantColorCode(iv);
-          }
-        }
-        if (!initialColorCode) return;
-        var _colorCode = initialColorCode;
-        // Step 1: reorder DOM right away
-        var domResult = reorderGalleryDOM(sectionId, _colorCode);
-        if (!domResult) return;
-        // Step 2: wait for Embla to initialize, then reset exactly once
-        var _attempts = 0;
-        function waitForEmblaAndReset() {
-          _attempts++;
-          var roots = domResult.productImagesEl.querySelectorAll(".pdp-embla");
-          var emblaReady = false;
-          for (var i = 0; i < roots.length; i++) {
-            if (roots[i]._emblaCarousel && roots[i]._emblaCarousel.resetForGalleryFilter) {
-              emblaReady = true;
-              break;
-            }
-          }
-          if (emblaReady) {
-            resetCarouselAfterFilter(domResult.productImagesEl);
-          } else if (_attempts < 60) {
-            requestAnimationFrame(waitForEmblaAndReset);
-          }
-        }
-        requestAnimationFrame(waitForEmblaAndReset);
-      })();
     });
   }
 
@@ -1055,34 +984,6 @@
           formHolder.style.overflow = "hidden";
           formHolder.style.clip = "rect(0 0 0 0)";
           formHolder.style.clipPath = "inset(50%)";
-        }
-      }
-
-      // Apply gallery filter on page load using the initially selected color
-      if (checkedInput) {
-        var initialColorCode = normalizeColorCode(checkedInput.value);
-        if (initialColorCode) {
-          // Reorder DOM immediately, then wait for Embla and reset once
-          var _domResult = reorderGalleryDOM(sectionId, initialColorCode);
-          if (_domResult) {
-            var _attempts2 = 0;
-            (function waitForEmbla2() {
-              _attempts2++;
-              var roots = _domResult.productImagesEl.querySelectorAll(".pdp-embla");
-              var ready = false;
-              for (var i = 0; i < roots.length; i++) {
-                if (roots[i]._emblaCarousel && roots[i]._emblaCarousel.resetForGalleryFilter) {
-                  ready = true;
-                  break;
-                }
-              }
-              if (ready) {
-                resetCarouselAfterFilter(_domResult.productImagesEl);
-              } else if (_attempts2 < 60) {
-                requestAnimationFrame(waitForEmbla2);
-              }
-            })();
-          }
         }
       }
     });
@@ -1214,8 +1115,6 @@
             selectEl.dispatchEvent(new Event("change", { bubbles: true }));
           }
         }
-        var pickerColorCode = normalizeColorCode(input.value);
-        if (pickerColorCode) applyGalleryFilter(sectionId, pickerColorCode);
         return;
       }
 
@@ -1278,8 +1177,6 @@
           }
         }
         document.dispatchEvent(new CustomEvent("theme:variant:change", { detail: { variant: matchedVariant } }));
-        var matchedColorCode = getVariantColorCode(matchedVariant);
-        if (matchedColorCode) applyGalleryFilter(sectionId, matchedColorCode);
       }
     },
     true
