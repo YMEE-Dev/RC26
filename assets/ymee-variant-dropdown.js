@@ -472,24 +472,83 @@
       }
 
       function submitProductForm(variantId) {
-        var liveFormEl = getLiveFormEl();
-        if (!liveFormEl) return;
+        var attempt = 0;
+        var maxAttempts = 6;
 
-        var idInput = liveFormEl.querySelector('input[name="id"]');
-        if (idInput) {
-          idInput.disabled = false;
-          if (variantId) idInput.value = variantId;
+        function trySubmit() {
+          var liveFormEl = getLiveFormEl();
+          if (!liveFormEl) {
+            if (attempt < maxAttempts) {
+              attempt += 1;
+              requestAnimationFrame(trySubmit);
+            }
+            return;
+          }
+
+          var idInput = liveFormEl.querySelector('input[name="id"]');
+          if (idInput) {
+            idInput.disabled = false;
+            if (variantId) idInput.value = variantId;
+          }
+
+          // Ensure stale per-variant gating from previous selections does not block this add.
+          liveFormEl.setAttribute("data-max-inventory-reached", "false");
+          liveFormEl.setAttribute("data-error-message-position", "form");
+
+          // Dropdown ATC always adds one item; avoid posting quantity 0 (Shopify 422).
+          var qtyInput =
+            liveFormEl.querySelector('input[name="quantity"]') ||
+            sectionRoot.querySelector('[data-quantity-input][form="' + cssEscape(productFormId) + '"]');
+          if (qtyInput) {
+            var qtyVal = parseInt(qtyInput.value, 10);
+            if (isNaN(qtyVal) || qtyVal < 1) {
+              qtyInput.value = "1";
+              try {
+                qtyInput.dispatchEvent(new Event("change", { bubbles: true }));
+              } catch (e) {
+                /* no-op */
+              }
+            }
+          }
+
+          var submitBtn =
+            liveFormEl.querySelector('button[type="submit"][name="add"]') ||
+            liveFormEl.querySelector('button[type="submit"]');
+
+          if (submitBtn && submitBtn.classList.contains("is-loading")) {
+            if (attempt < maxAttempts) {
+              attempt += 1;
+              setTimeout(trySubmit, 120);
+            }
+            return;
+          }
+
+          if (submitBtn && submitBtn.disabled) {
+            submitBtn.disabled = false;
+          }
+
+          // Prefer native submit flow so product-form handlers run consistently.
+          if (typeof liveFormEl.requestSubmit === "function") {
+            try {
+              liveFormEl.requestSubmit(submitBtn || undefined);
+              return;
+            } catch (e) {
+              /* fall through */
+            }
+          }
+
+          if (submitBtn) {
+            submitBtn.click();
+            return;
+          }
+
+          if (attempt < maxAttempts) {
+            attempt += 1;
+            requestAnimationFrame(trySubmit);
+          }
         }
 
-        var submitBtn = liveFormEl.querySelector('button[type="submit"]');
-        if (submitBtn) submitBtn.disabled = false;
-
-        document.dispatchEvent(
-          new CustomEvent("theme:cart:add", {
-            detail: { button: submitBtn },
-            bubbles: false,
-          })
-        );
+        trySubmit();
       }
 
       function getLiveVariantIdInput() {
@@ -531,6 +590,73 @@
       var menuHomeParent = menu.parentElement;
       var menuHomeNext = menu.nextSibling;
       var escHandlerBound = false;
+      var cartStateRequestId = 0;
+
+      function updateOptionCartState(onDone) {
+        if (!productData || !productData.variants || !window.theme || !theme.routes || !theme.routes.cart_url) return;
+
+        cartStateRequestId += 1;
+        var requestId = cartStateRequestId;
+
+        fetch(theme.routes.cart_url + ".js", {
+          headers: {
+            Accept: "application/json",
+          },
+        })
+          .then(function (response) {
+            if (!response.ok) throw new Error("Unable to load cart state");
+            return response.json();
+          })
+          .then(function (cartData) {
+            if (requestId !== cartStateRequestId) return;
+
+            var cartQtyByVariantId = {};
+            var items = (cartData && cartData.items) || [];
+
+            items.forEach(function (item) {
+              var variantKey = String(item.variant_id || "");
+              if (!variantKey) return;
+              cartQtyByVariantId[variantKey] = (cartQtyByVariantId[variantKey] || 0) + Number(item.quantity || 0);
+            });
+
+            allOptions.forEach(function (optionEl) {
+              var variantId = String(optionEl.getAttribute("data-variant-id") || "");
+              var variant = variantById[variantId];
+              if (!variant || !variant.available) return;
+
+              var addBtn = optionEl.querySelector('.ymee-variant-dropdown__submit button[data-action="buy"]');
+              var labelEl = addBtn && addBtn.querySelector("[data-ymee-option-atc-label]");
+              if (!labelEl) return;
+
+              var cartQty = Number(cartQtyByVariantId[variantId] || 0);
+              var inventoryManagement = optionEl.getAttribute("data-inventory-management") || "";
+              var inventoryPolicy = optionEl.getAttribute("data-inventory-policy") || "";
+              var inventoryQuantity = Number(optionEl.getAttribute("data-inventory-quantity") || 0);
+              var isCartSoldOut =
+                inventoryManagement === "shopify" &&
+                inventoryPolicy === "deny" &&
+                inventoryQuantity >= 0 &&
+                cartQty >= inventoryQuantity;
+
+              optionEl.setAttribute("data-ymee-cart-soldout", isCartSoldOut ? "true" : "false");
+              if (addBtn) {
+                addBtn.setAttribute("aria-disabled", isCartSoldOut ? "true" : "false");
+              }
+
+              labelEl.textContent = isCartSoldOut
+                ? window.ymeeOutOfStockText || "Out of stock"
+                : window.ymeeAddToCartText || "Add to cart";
+            });
+
+            if (typeof onDone === "function") onDone();
+          })
+          .catch(function () {
+            if (typeof onDone === "function") onDone();
+            /* no-op */
+          });
+      }
+
+      root._ymeeUpdateOptionCartState = updateOptionCartState;
 
       function filterRowsByColor() {
         var nonSizeOpts = getCurrentNonSizeOptions(sectionRoot, sizeOptionIndex);
@@ -728,7 +854,11 @@
         if (isMobileViewport()) {
           // Update sheet footer ATC button
           if (sheetState.footerAddBtn) {
-            if (visualSelected && !visualSelected.classList.contains("is-oos")) {
+            if (
+              visualSelected &&
+              !visualSelected.classList.contains("is-oos") &&
+              visualSelected.getAttribute("data-ymee-cart-soldout") !== "true"
+            ) {
               sheetState.footerAddBtn.hidden = false;
               sheetState.footerAddBtn.disabled = false;
             } else {
@@ -864,12 +994,19 @@
             e.stopPropagation();
 
             var selected = getSelectedOptionEl();
-            if (selected) syncVariant(selected, { userSelected: true });
-            closeMenu();
+            updateOptionCartState(function () {
+              if (!selected || selected.getAttribute("data-ymee-cart-soldout") === "true") {
+                updateSheetFooterState();
+                return;
+              }
 
-            setTimeout(function () {
-              submitProductForm();
-            }, 0);
+              syncVariant(selected, { userSelected: true, skipVariantSelectorsSync: true });
+              closeMenu();
+
+              setTimeout(function () {
+                submitProductForm(selected ? selected.getAttribute("data-variant-id") : null);
+              }, 0);
+            });
           });
         }
 
@@ -887,6 +1024,7 @@
       function openMenu() {
         filterRowsByColor();
         updateColorPickerAvailability();
+        updateOptionCartState();
         if (isMobileViewport()) {
           openSheet();
         } else {
@@ -927,7 +1065,7 @@
         }
 
         variantSelects = getLiveVariantSelects();
-        if (variantSelects) {
+        if (variantSelects && !opts.skipVariantSelectorsSync) {
           var sizeVal = optionEl.getAttribute("data-size-value") || "";
           var sizeWrapper = variantSelects.querySelector(".selector-wrapper--size");
           if (sizeWrapper && sizeVal) {
@@ -988,13 +1126,22 @@
           if (addBtn) {
             e.preventDefault();
             e.stopPropagation();
-            var addVariantId = optionEl.getAttribute("data-variant-id");
-            syncVariant(optionEl, { userSelected: true });
-            closeMenu();
+            updateOptionCartState(function () {
+              if (optionEl.getAttribute("data-ymee-cart-soldout") === "true") {
+                if (isMobileViewport() && sheetState) {
+                  updateSheetFooterState();
+                }
+                return;
+              }
 
-            setTimeout(function () {
-              submitProductForm(addVariantId);
-            }, 0);
+              var addVariantId = optionEl.getAttribute("data-variant-id");
+              syncVariant(optionEl, { userSelected: true, skipVariantSelectorsSync: true });
+              closeMenu();
+
+              setTimeout(function () {
+                submitProductForm(addVariantId);
+              }, 0);
+            });
             return;
           }
 
@@ -1011,8 +1158,18 @@
           var action = actionBtn ? actionBtn.getAttribute("data-action") : null;
 
           if (action === "buy") {
-            closeMenu();
-            submitProductForm(optionEl.getAttribute("data-variant-id"));
+            updateOptionCartState(function () {
+              if (optionEl.getAttribute("data-ymee-cart-soldout") === "true") {
+                if (isMobileViewport() && sheetState) {
+                  updateSheetFooterState();
+                }
+                return;
+              }
+
+              syncVariant(optionEl, { userSelected: true, skipVariantSelectorsSync: true });
+              closeMenu();
+              submitProductForm(optionEl.getAttribute("data-variant-id"));
+            });
             return;
           }
 
@@ -1102,6 +1259,7 @@
 
       filterRowsByColor();
       updateColorPickerAvailability();
+      updateOptionCartState();
       var initial = getSelectedOptionEl();
       if (initial) {
         setSelectedVisual(initial);
@@ -1115,6 +1273,14 @@
       }
     });
   }
+
+  document.addEventListener("theme:product:add", function () {
+    scheduleReinit();
+  });
+
+  document.addEventListener("theme:cart:refresh", function () {
+    scheduleReinit();
+  });
 
   function initColorPickers(scope) {
     (scope || document).querySelectorAll("[data-ymee-color-picker]").forEach(function (picker) {
@@ -1421,6 +1587,14 @@
     });
   }
 
+  function refreshDropdownCartState(scope) {
+    (scope || document).querySelectorAll("[data-ymee-variant-dropdown]").forEach(function (root) {
+      if (typeof root._ymeeUpdateOptionCartState === "function") {
+        root._ymeeUpdateOptionCartState();
+      }
+    });
+  }
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", function () {
       init(document);
@@ -1440,5 +1614,19 @@
     initColorPickers(e.target);
     initFormOnlyWrappers(e.target);
     observeProductInfo();
+  });
+
+  document.addEventListener("theme:product:add", function () {
+    setTimeout(function () {
+      refreshDropdownCartState(document);
+    }, 0);
+  });
+
+  document.addEventListener("theme:cart:change", function () {
+    refreshDropdownCartState(document);
+  });
+
+  document.addEventListener("theme:cart:refresh", function () {
+    refreshDropdownCartState(document);
   });
 })();

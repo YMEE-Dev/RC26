@@ -86,11 +86,17 @@
       {%- for variant in product.variants -%}
         {%- liquid
           assign ymee_size_value = variant.options[ymee_size_option_index]
+          assign ymee_cart_qty = cart | item_count_for_variant: variant.id
+          assign ymee_is_cart_soldout = false
 
           assign ymee_is_limited = false
           if variant.available and variant.inventory_management == 'shopify' and variant.inventory_policy != 'continue'
             if variant.inventory_quantity > 0 and variant.inventory_quantity <= 1
               assign ymee_is_limited = true
+            endif
+
+            if ymee_cart_qty >= variant.inventory_quantity
+              assign ymee_is_cart_soldout = true
             endif
           endif
         -%}
@@ -99,6 +105,10 @@
           role="option"
           aria-selected="{% if variant == selected_variant %}true{% else %}false{% endif %}"
           data-variant-id="{{ variant.id }}"
+          data-ymee-cart-soldout="{% if ymee_is_cart_soldout %}true{% else %}false{% endif %}"
+          data-inventory-management="{{ variant.inventory_management | escape }}"
+          data-inventory-policy="{{ variant.inventory_policy | escape }}"
+          data-inventory-quantity="{{ variant.inventory_quantity }}"
           data-option1="{{ variant.option1 | escape }}"
           {%- if variant.option2 %}
             data-option2="{{ variant.option2 | escape }}"
@@ -119,7 +129,13 @@
               <div class="ymee-variant-dropdown__submit">
                 <button type="button" data-action="buy">
                   {%- render 'icon-add2cart' -%}
-                  {{ 'products.product.add_to_cart' | t }}
+                  <span data-ymee-option-atc-label>
+                    {% if ymee_is_cart_soldout %}
+                      {{ 'products.product.inventory_out_of_stock' | t }}
+                    {% else %}
+                      {{ 'products.product.add_to_cart' | t }}
+                    {% endif %}
+                  </span>
                 </button>
               </div>
               <div class="ymee-variant-dropdown__accelerated" data-ymee-accelerated-slot></div>
@@ -180,6 +196,7 @@
     window.ymeeChooseSizeText = {{ 'products.product.choose_size' | t | json }};
     window.ymeeSizePrefixText = {{ 'products.product.size_prefix' | t | json }};
     window.ymeeAddToCartText = {{ 'products.product.add_to_cart' | t | json }};
+    window.ymeeOutOfStockText = {{ 'products.product.inventory_out_of_stock' | t | json }};
   </script>
   <script type="application/json" data-product-json>
     {{ product | json }}
