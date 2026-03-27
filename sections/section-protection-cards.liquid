@@ -1,21 +1,12 @@
 <!-- /sections/section-protection-cards.liquid -->
 {%- liquid
   assign color_scheme = 'color-' | append: section.settings.color_scheme
-  assign mobile_layout = section.settings.mobile_layout
-  assign button_style_value = section.settings.button_style | default: 'primary'
-  assign button_style_classes = 'btn--primary btn--solid'
-
-  if button_style_value contains 'secondary' or button_style_value contains 'outline'
-    assign button_style_classes = 'btn--outline btn--secondary'
-  endif
 -%}
 
 {%- style -%}
   #ProtectionCards--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
-    --bg-color: {{ section.settings.background_color }};
-    --btn-border: #000000;
   }
 {%- endstyle -%}
 
@@ -23,9 +14,7 @@
   id="ProtectionCards--{{ section.id }}"
   class="protection-cards section-padding {{ color_scheme }}"
   data-section-id="{{ section.id }}"
-  data-progress-enabled="{{ section.settings.show_progress_bar }}"
   data-section-type="protection-cards"
-  style="background-color: var(--bg-color);"
 >
   <div class="protection-cards__wrapper {{ section.settings.width }}">
     {%- if section.settings.heading != blank -%}
@@ -33,13 +22,17 @@
     {%- endif -%}
 
     {%- if section.blocks.size > 0 -%}
-      <div class="protection-cards__slider-shell">
-        <div class="protection-cards__grid{% if mobile_layout == 'slider' %} grid--mobile-slider{% endif %}">
-          {%- for block in section.blocks -%}
-            {%- case block.type -%}
-              {%- when 'card' -%}
-                <div class="grid-item">
-                  <div class="protection-card" data-grid-item {{ block.shopify_attributes }}>
+      <div class="protection-cards__carousel-container grid-outer">
+        <grid-slider>
+          <div
+            class="protection-cards__grid grid grid--slider grid--mobile-slider"
+            data-grid-slider
+            style="--column-count: 3;"
+          >
+            {%- for block in section.blocks -%}
+              {%- case block.type -%}
+                {%- when 'card' -%}
+                  <div class="grid-item protection-card" data-grid-item {{ block.shopify_attributes }}>
                     {%- if block.settings.image != blank -%}
                       <div class="protection-card__image">
                         {{ block.settings.image | image_url: width: 600 | image_tag: loading: 'lazy' }}
@@ -52,7 +45,7 @@
 
                     <div class="protection-card__content">
                       {%- if block.settings.title != blank -%}
-                        <h4 class="protection-card__title">{{ block.settings.title }}</h4>
+                        <h3 class="protection-card__title">{{ block.settings.title }}</h3>
                       {%- endif -%}
 
                       {%- if block.settings.description != blank -%}
@@ -60,21 +53,10 @@
                       {%- endif -%}
                     </div>
                   </div>
-                </div>
-            {%- endcase -%}
-          {%- endfor -%}
-        </div>
-      </div>
-    {%- endif -%}
-
-    {%- if section.settings.button_text != blank -%}
-      <div class="protection-cards__actions">
-        <a
-          href="{{ section.settings.button_link | default: '#' }}"
-          class="btn {{ button_style_classes }} protection-cards__button"
-        >
-          {{ section.settings.button_text | escape }}
-        </a>
+              {%- endcase -%}
+            {%- endfor -%}
+          </div>
+        </grid-slider>
       </div>
     {%- endif -%}
   </div>
@@ -122,7 +104,6 @@
   .protection-cards {
     position: relative;
     width: 100%;
-    overflow-x: clip;
   }
 
   .protection-cards__wrapper {
@@ -131,6 +112,7 @@
   }
 
   .protection-cards__wrapper.wrapper {
+    max-width: 1440px;
     padding: 0 var(--outer);
   }
 
@@ -173,10 +155,7 @@
     line-height: 56px;
   }
 
-  @media (max-width: 959px) {
-    .protection-cards__wrapper.wrapper {
-      padding: 0;
-    }
+  @media (max-width: 767px) {
     .protection-cards__heading.heading-small {
       font-size: 20px;
       line-height: 28px;
@@ -216,66 +195,29 @@
 
   /* .protection-cards__grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: 2fr 2fr 2fr;
     gap: 80px;
     width: 100%;
   }
 
-  .protection-cards__slider-shell {
-    display: block;
-    position: relative;
-  }
-
-  .protection-cards__grid > .grid-item {
-    min-width: 0;
-  }
-
   @media (max-width: 1024px) {
     .protection-cards__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: 2fr 2fr;
       gap: 80px;
     }
   }
 
-  @media (max-width: 959px) {
+  @media (max-width: 768px) {
     .protection-cards__grid {
       gap: 40px !important;
     }
   }
-
-  @media (max-width: 959px) {
+  @media (max-width: 425px) {
     .protection-cards__grid {
       grid-template-columns: 1fr;
       gap: 80px;
     }
-  }
-
-  @media (max-width: 959px) {
-    .protection-cards__slider-shell.has-related-slider-progress {
-      padding-bottom: 20px;
-    }
-
-    .protection-cards__grid.grid--mobile-slider {
-      gap: 0 !important;
-      overflow-y: hidden;
-      display: flex;
-      width: 100%;
-      margin: 0;
-    }
-
-    .protection-cards__grid.grid--mobile-slider .grid-item {
-      width: min(78vw, 30rem);
-      margin-right: 1.6rem;
-    }
-
-    .protection-cards__grid.grid--mobile-slider .grid-item:last-child {
-      margin-right: 0;
-    }
-
-    .protection-cards__grid.grid--mobile-slider .protection-card {
-      width: 100%;
-    }
-  }
+  } */
 
   .protection-card {
     display: flex;
@@ -302,11 +244,11 @@
     height: 100%;
     object-fit: cover;
   }
-  @media (max-width: 959px) {
+  @media (max-width: 768px) {
     .protection-card__image {
+      height: auto !important;
+      aspect-ratio: 79 / 62 !important;
       margin-bottom: 20px;
-      height: 318px !important;
-      aspect-ratio: auto !important;
     }
   }
   .protection-card__placeholder {
@@ -341,13 +283,6 @@
     line-height: 36px; /* 112.5% */
   }
 
-  @media (max-width: 959px) {
-    .protection-card__title {
-      white-space: nowrap;
-      margin: 0 0 20px;
-    }
-  }
-
   .protection-card__description {
     color: var(--000000, #000);
     text-align: center;
@@ -360,238 +295,41 @@
     line-height: 22px; /* 157.143% */
   }
 
-  .protection-cards__actions {
-    display: flex;
-    justify-content: center;
-    margin-top: 48px;
-  }
-
-  .protection-cards__button {
-    min-width: 220px;
-  }
-
-  @media (max-width: 959px) {
-    .protection-cards__actions {
-      margin-top: 0;
-    }
-
-    .protection-cards__button {
-      width: 100%;
-      max-width: 320px;
-      justify-content: center;
+  @media (min-width: 990px) {
+    .grid--slider .grid-item.protection-card {
+      flex: unset;
     }
   }
 
-  .protection-cards__slider-shell .related-slider-progress {
-    position: absolute;
-    left: 50%;
-    bottom: 0;
-    transform: translateX(-50%);
-    width: 200px;
-    height: 1px;
-    background: rgba(17, 17, 17, 0.2);
-    z-index: 2;
-    overflow: hidden;
-    pointer-events: none;
-    margin: 20px 0;
+  @media (min-width: 750px) {
+    .grid--slider .grid-item.protection-card:last-child {
+      margin-right: 0;
+    }
   }
 
-  .protection-cards__slider-shell .related-slider-progress.hidden {
-    display: none;
+  .grid--slider .grid-item.protection-card {
+    margin-right: 80px;
+    max-width: 33.33%;
+  }
+  .protection-cards__grid.grid.grid--slider {
+    padding-inline: 0;
   }
 
-  .protection-cards__slider-shell .related-slider-progress__line {
-    display: block;
-    width: var(--related-slider-progress, 0%);
-    height: 100%;
-    background: #111111;
-    transition: width 0.2s ease;
+  @media (max-width: 990px) {
+    .grid--slider .grid-item.protection-card {
+      margin-right: 40px;
+      max-width: 60%;
+    }
+  }
+
+  @media (max-width: 749px) {
+    .grid--slider .grid-item.protection-card {
+      margin-right: 20px;
+      max-width: 80%;
+      width: 80%;
+    }
   }
 {% endstylesheet %}
-
-{% javascript %}
-  (() => {
-    const sectionSelector = '[data-section-type="protection-cards"]';
-    const initializedSections = new WeakSet();
-    const activeSections = new Set();
-
-    const ensureProgress = (container) => {
-      let progress = container.querySelector('[data-related-slider-progress]');
-
-      if (!progress) {
-        progress = document.createElement('div');
-        progress.className = 'related-slider-progress';
-        progress.setAttribute('data-related-slider-progress', '');
-        progress.innerHTML = '<span class="related-slider-progress__line"></span>';
-        container.append(progress);
-      }
-
-      return progress;
-    };
-
-    const setupProgress = (section) => {
-      const container = section.querySelector('.protection-cards__slider-shell');
-      const slider = section.querySelector('.protection-cards__grid.grid--mobile-slider');
-      const progressEnabled = section.dataset.progressEnabled === 'true';
-
-      if (!container) {
-        return;
-      }
-
-      if (!progressEnabled) {
-        container.classList.remove('has-related-slider-progress');
-
-        const existingProgress = container.querySelector('[data-related-slider-progress]');
-
-        if (existingProgress) {
-          existingProgress.remove();
-        }
-
-        return;
-      }
-
-      const progress = ensureProgress(container);
-
-      if (!slider) {
-        container.classList.remove('has-related-slider-progress');
-        progress.classList.add('hidden');
-        progress.style.setProperty('--related-slider-progress', '0%');
-        return;
-      }
-
-      const updateProgress = () => {
-        const isVisible = slider.clientWidth > 0;
-        const isScrollable = isVisible && slider.scrollWidth > slider.clientWidth + 1;
-        container.classList.toggle('has-related-slider-progress', isScrollable);
-        progress.classList.toggle('hidden', !isScrollable);
-
-        if (!isScrollable) {
-          progress.style.setProperty('--related-slider-progress', '0%');
-          return;
-        }
-
-        const progressPercent = ((slider.scrollLeft + slider.clientWidth) / slider.scrollWidth) * 100;
-        const safeProgress = Math.max(0, Math.min(100, progressPercent));
-        progress.style.setProperty('--related-slider-progress', `${safeProgress}%`);
-      };
-
-      if (!slider.hasAttribute('data-related-progress-bound')) {
-        slider.addEventListener(
-          'scroll',
-          () => {
-            requestAnimationFrame(updateProgress);
-          },
-          {passive: true}
-        );
-        slider.setAttribute('data-related-progress-bound', 'true');
-      }
-
-      if (!slider.hasAttribute('data-related-progress-observer-bound')) {
-        const observer = new MutationObserver(() => {
-          requestAnimationFrame(updateProgress);
-        });
-
-        observer.observe(slider, {childList: true, subtree: true});
-        slider.setAttribute('data-related-progress-observer-bound', 'true');
-      }
-
-      if (!slider.hasAttribute('data-related-progress-resize-bound') && window.ResizeObserver) {
-        const resizeObserver = new ResizeObserver(() => {
-          requestAnimationFrame(updateProgress);
-        });
-
-        resizeObserver.observe(slider);
-        slider.setAttribute('data-related-progress-resize-bound', 'true');
-      }
-
-      updateProgress();
-    };
-
-    const initSection = (section) => {
-      if (!section) {
-        return;
-      }
-
-      activeSections.add(section);
-
-      if (!initializedSections.has(section)) {
-        initializedSections.add(section);
-      }
-
-      setupProgress(section);
-    };
-
-    const initAllSections = (root) => {
-      if (root instanceof Element && root.matches(sectionSelector)) {
-        initSection(root);
-        return;
-      }
-
-      const scope = root instanceof Element ? root : document;
-      scope.querySelectorAll(sectionSelector).forEach((section) => {
-        initSection(section);
-      });
-    };
-
-    const refreshActiveSections = () => {
-      activeSections.forEach((section) => {
-        if (!document.body.contains(section)) {
-          activeSections.delete(section);
-          return;
-        }
-
-        setupProgress(section);
-      });
-    };
-
-    if (!window.__protectionCardsProgressInitialized) {
-      window.__protectionCardsProgressInitialized = true;
-
-      if (document.readyState === 'loading') {
-        document.addEventListener(
-          'DOMContentLoaded',
-          () => {
-            initAllSections();
-          },
-          {once: true}
-        );
-      } else {
-        initAllSections();
-      }
-
-      document.addEventListener('shopify:section:load', (event) => {
-        const container = event.target instanceof Element ? event.target : null;
-
-        if (!container) {
-          return;
-        }
-
-        initAllSections(container);
-      });
-
-      document.addEventListener('shopify:section:unload', (event) => {
-        const container = event.target instanceof Element ? event.target : null;
-
-        if (!container) {
-          return;
-        }
-
-        if (container.matches(sectionSelector)) {
-          activeSections.delete(container);
-        }
-
-        container.querySelectorAll(sectionSelector).forEach((section) => {
-          activeSections.delete(section);
-        });
-      });
-
-      document.addEventListener('theme:resize:width', refreshActiveSections);
-      window.addEventListener('resize', refreshActiveSections, {passive: true});
-    } else {
-      initAllSections();
-    }
-  })();
-{% endjavascript %}
 
 {% schema %}
 {
@@ -663,47 +401,6 @@
       ]
     },
     {
-      "type": "select",
-      "id": "mobile_layout",
-      "label": "Mobile card layout",
-      "default": "grid",
-      "options": [
-        {"value": "grid", "label": "Stacked"},
-        {"value": "slider", "label": "Slider"}
-      ]
-    },
-    {
-      "type": "checkbox",
-      "id": "show_progress_bar",
-      "label": "Show mobile progress bar",
-      "default": true
-    },
-    {
-      "type": "header",
-      "content": "Button"
-    },
-    {
-      "type": "text",
-      "id": "button_text",
-      "label": "Button text",
-      "default": "Discover more"
-    },
-    {
-      "type": "select",
-      "id": "button_style",
-      "label": "Button style",
-      "default": "primary",
-      "options": [
-        {"value": "primary", "label": "Primary"},
-        {"value": "secondary", "label": "Secondary"}
-      ]
-    },
-    {
-      "type": "url",
-      "id": "button_link",
-      "label": "Button link"
-    },
-    {
       "type": "range",
       "id": "padding_top",
       "min": 0,
@@ -728,12 +425,6 @@
       "id": "color_scheme",
       "default": "scheme_1",
       "label": "Color scheme"
-    },
-    {
-      "type": "color",
-      "id": "background_color",
-      "label": "Background color",
-      "default": "#FFFFFF"
     }
   ],
   "presets": [
