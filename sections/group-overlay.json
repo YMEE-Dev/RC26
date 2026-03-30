@@ -11,6 +11,30 @@
   "type": "aside",
   "name": "Overlay",
   "sections": {
+    "head-country-redirect": {
+      "type": "head-country-redirect",
+      "blocks": {
+        "country_redirect_rule_GYWTbJ": {
+          "type": "country_redirect_rule",
+          "settings": {
+            "enabled": true,
+            "site_name": "United States",
+            "country_codes": "IT",
+            "destination_url": "https://google.com"
+          }
+        }
+      },
+      "block_order": [
+        "country_redirect_rule_GYWTbJ"
+      ],
+      "settings": {
+        "enabled": true,
+        "color_scheme": "scheme-3",
+        "modal_heading": "Please visit your regional store",
+        "modal_body": "<p>We detected that you are browsing from a region with a dedicated store. Please continue on the correct regional site.</p>",
+        "redirect_button_label": "Continue to regional site"
+      }
+    },
     "cart-drawer": {
       "type": "cart-drawer",
       "blocks": {
@@ -96,6 +120,7 @@
     }
   },
   "order": [
+    "head-country-redirect",
     "cart-drawer"
   ]
 }

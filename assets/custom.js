@@ -33,6 +33,7 @@
   loadScriptOnce(dataset.homepageStackedImagesSrc || '', 'data-homepage-stacked-images-script');
   loadScriptOnce(dataset.homepageCollectionSpotlightSrc || '', 'data-homepage-collection-spotlight-script');
   loadScriptOnce(dataset.homepageCollectionHoverSrc || '', 'data-homepage-collection-hover-script');
+  loadScriptOnce(dataset.headCountryRedirectSrc || '', 'data-head-country-redirect-script');
 
 
   
