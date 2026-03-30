@@ -76,15 +76,28 @@
               assign enable_accordion = block.settings.enable_accordion
               assign column_span = block.settings.column_span | default: 2 | plus: 0
               assign mobile_column_span = block.settings.mobile_column_span | default: 1 | plus: 0
-              assign viewport_visibility = block.settings.viewport_visibility | default: 'show'
               assign viewport_visibility_class = ''
+              assign show_on_mobile = block.settings.show_on_mobile
+              assign show_on_tablet = block.settings.show_on_tablet
+              assign show_on_desktop = block.settings.show_on_desktop
 
-              case viewport_visibility
-                when 'hide_mobile'
-                  assign viewport_visibility_class = ' footer__block--hide-mobile'
-                when 'hide_desktop'
-                  assign viewport_visibility_class = ' footer__block--hide-desktop'
-              endcase
+              if show_on_mobile
+                assign viewport_visibility_class = viewport_visibility_class | append: ' footer__block--show-mobile'
+              else
+                assign viewport_visibility_class = viewport_visibility_class | append: ' footer__block--hide-mobile'
+              endif
+
+              if show_on_tablet
+                assign viewport_visibility_class = viewport_visibility_class | append: ' footer__block--show-tablet'
+              else
+                assign viewport_visibility_class = viewport_visibility_class | append: ' footer__block--hide-tablet'
+              endif
+
+              if show_on_desktop
+                assign viewport_visibility_class = viewport_visibility_class | append: ' footer__block--show-desktop'
+              else
+                assign viewport_visibility_class = viewport_visibility_class | append: ' footer__block--hide-desktop'
+              endif
 
               capture block_style
                 echo '--column-span: ' | append: column_span | append: ';'
@@ -108,7 +121,7 @@
             {%- case block_type -%}
               {%- when 'linklist' -%}
                 <details
-                  class="footer__block footer__block--menu{{ viewport_visibility_class }}{% if enable_accordion %} accordion{% endif %}"
+                  class="footer__block footer__block--menu {{ viewport_visibility_class }}{% if enable_accordion %} accordion{% endif %}"
                   style="{{ block_style }}"
                   {{ block.shopify_attributes }}
                   data-collapsible
@@ -149,7 +162,7 @@
 
                 {%- if page == blank or page.empty? -%}
                   <details
-                    class="footer__block footer__block--page{{ viewport_visibility_class }}{% if enable_accordion %} accordion{% endif %}"
+                    class="footer__block footer__block--page {{ viewport_visibility_class }}{% if enable_accordion %} accordion{% endif %}"
                     style="{{ block_style }}"
                     {{ block.shopify_attributes }}
                     data-collapsible
@@ -177,7 +190,7 @@
                   </details>
                 {%- else -%}
                   <details
-                    class="footer__block footer__block--page{{ viewport_visibility_class }}{% if enable_accordion %} accordion{% endif %}"
+                    class="footer__block footer__block--page {{ viewport_visibility_class }}{% if enable_accordion %} accordion{% endif %}"
                     style="{{ block_style }}"
                     {{ block.shopify_attributes }}
                     data-collapsible
@@ -207,7 +220,7 @@
 
               {%- when 'social' -%}
                 <details
-                  class="footer__block footer__block--social{{ viewport_visibility_class }}{% if enable_accordion %} accordion{% endif %}"
+                  class="footer__block footer__block--social {{ viewport_visibility_class }}{% if enable_accordion %} accordion{% endif %}"
                   style="{{ block_style }}"
                   {{ block.shopify_attributes }}
                   data-collapsible
@@ -240,7 +253,7 @@
 
               {%- when 'text' -%}
                 <details
-                  class="footer__block footer__block--text{{ viewport_visibility_class }}{% if enable_accordion %} accordion{% endif %}"
+                  class="footer__block footer__block--text {{ viewport_visibility_class }}{% if enable_accordion %} accordion{% endif %}"
                   style="{{ block_style }}"
                   {{ block.shopify_attributes }}
                   data-collapsible
@@ -289,7 +302,7 @@
 
               {%- when 'country_switcher' -%}
                 <div
-                  class="footer__block footer__block--country-switcher{{ viewport_visibility_class }}"
+                  class="footer__block footer__block--country-switcher {{ viewport_visibility_class }}"
                   style="{{ block_style }}"
                   {{ block.shopify_attributes }}
                 >
@@ -307,7 +320,7 @@
 
               {%- when 'divider' -%}
                 <div
-                  class="footer__block footer__block--divider{{ inline_blocks }}{{ viewport_visibility_class }}"
+                  class="footer__block footer__block--divider {{ inline_blocks }} {{ viewport_visibility_class }}"
                   style="{{ block_style }}"
                   {{ block.shopify_attributes }}
                 >
@@ -405,27 +418,38 @@
         {
           "type": "range",
           "id": "column_span",
-          "label": "Desktop span",
+          "label": "Tablet and desktop span",
           "min": 1,
           "max": 4,
           "step": 1,
           "default": 2,
-          "info": "Based on the 8-column footer grid"
+          "info": "Uses the 6-column tablet grid and the 8-column desktop grid"
         },
         {
           "type": "header",
-          "content": "Mobile"
+          "content": "Visibility"
         },
         {
-          "type": "select",
-          "id": "viewport_visibility",
-          "label": "Visibility",
-          "default": "show",
-          "options": [
-            {"value": "show", "label": "Show on all"},
-            {"value": "hide_mobile", "label": "Hide on mobile"},
-            {"value": "hide_desktop", "label": "Hide on desktop"}
-          ]
+          "type": "checkbox",
+          "id": "show_on_mobile",
+          "label": "Show on mobile",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_tablet",
+          "label": "Show on tablet",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_desktop",
+          "label": "Show on desktop",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Mobile layout"
         },
         {
           "type": "select",
@@ -506,27 +530,38 @@
         {
           "type": "range",
           "id": "column_span",
-          "label": "Desktop span",
+          "label": "Tablet and desktop span",
           "min": 1,
           "max": 4,
           "step": 1,
           "default": 2,
-          "info": "Based on the 8-column footer grid"
+          "info": "Uses the 6-column tablet grid and the 8-column desktop grid"
         },
         {
           "type": "header",
-          "content": "Mobile"
+          "content": "Visibility"
         },
         {
-          "type": "select",
-          "id": "viewport_visibility",
-          "label": "Visibility",
-          "default": "show",
-          "options": [
-            {"value": "show", "label": "Show on all"},
-            {"value": "hide_mobile", "label": "Hide on mobile"},
-            {"value": "hide_desktop", "label": "Hide on desktop"}
-          ]
+          "type": "checkbox",
+          "id": "show_on_mobile",
+          "label": "Show on mobile",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_tablet",
+          "label": "Show on tablet",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_desktop",
+          "label": "Show on desktop",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Mobile layout"
         },
         {
           "type": "select",
@@ -562,12 +597,12 @@
         {
           "type": "range",
           "id": "column_span",
-          "label": "Desktop span",
+          "label": "Tablet and desktop span",
           "min": 1,
           "max": 4,
           "step": 1,
           "default": 2,
-          "info": "Based on the 8-column footer grid"
+          "info": "Uses the 6-column tablet grid and the 8-column desktop grid"
         },
         {
           "type": "header",
@@ -582,18 +617,29 @@
         },
         {
           "type": "header",
-          "content": "Mobile"
+          "content": "Visibility"
         },
         {
-          "type": "select",
-          "id": "viewport_visibility",
-          "label": "Visibility",
-          "default": "show",
-          "options": [
-            {"value": "show", "label": "Show on all"},
-            {"value": "hide_mobile", "label": "Hide on mobile"},
-            {"value": "hide_desktop", "label": "Hide on desktop"}
-          ]
+          "type": "checkbox",
+          "id": "show_on_mobile",
+          "label": "Show on mobile",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_tablet",
+          "label": "Show on tablet",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_desktop",
+          "label": "Show on desktop",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Mobile layout"
         },
         {
           "type": "select",
@@ -649,27 +695,38 @@
         {
           "type": "range",
           "id": "column_span",
-          "label": "Desktop span",
+          "label": "Tablet and desktop span",
           "min": 1,
           "max": 4,
           "step": 1,
           "default": 2,
-          "info": "Based on the 8-column footer grid"
+          "info": "Uses the 6-column tablet grid and the 8-column desktop grid"
         },
         {
           "type": "header",
-          "content": "Mobile"
+          "content": "Visibility"
         },
         {
-          "type": "select",
-          "id": "viewport_visibility",
-          "label": "Visibility",
-          "default": "show",
-          "options": [
-            {"value": "show", "label": "Show on all"},
-            {"value": "hide_mobile", "label": "Hide on mobile"},
-            {"value": "hide_desktop", "label": "Hide on desktop"}
-          ]
+          "type": "checkbox",
+          "id": "show_on_mobile",
+          "label": "Show on mobile",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_tablet",
+          "label": "Show on tablet",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_desktop",
+          "label": "Show on desktop",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Mobile layout"
         },
         {
           "type": "select",
@@ -707,27 +764,38 @@
         {
           "type": "range",
           "id": "column_span",
-          "label": "Desktop span",
+          "label": "Tablet and desktop span",
           "min": 1,
           "max": 4,
           "step": 1,
           "default": 2,
-          "info": "Based on the 8-column footer grid"
+          "info": "Uses the 6-column tablet grid and the 8-column desktop grid"
         },
         {
           "type": "header",
-          "content": "Mobile"
+          "content": "Visibility"
         },
         {
-          "type": "select",
-          "id": "viewport_visibility",
-          "label": "Visibility",
-          "default": "show",
-          "options": [
-            {"value": "show", "label": "Show on all"},
-            {"value": "hide_mobile", "label": "Hide on mobile"},
-            {"value": "hide_desktop", "label": "Hide on desktop"}
-          ]
+          "type": "checkbox",
+          "id": "show_on_mobile",
+          "label": "Show on mobile",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_tablet",
+          "label": "Show on tablet",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_desktop",
+          "label": "Show on desktop",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Mobile layout"
         },
         {
           "type": "select",
@@ -761,27 +829,38 @@
         {
           "type": "range",
           "id": "column_span",
-          "label": "Desktop span",
+          "label": "Tablet and desktop span",
           "min": 1,
           "max": 4,
           "step": 1,
           "default": 1,
-          "info": "Based on the 8-column footer grid"
+          "info": "Uses the 6-column tablet grid and the 8-column desktop grid"
         },
         {
           "type": "header",
-          "content": "Mobile"
+          "content": "Visibility"
         },
         {
-          "type": "select",
-          "id": "viewport_visibility",
-          "label": "Visibility",
-          "default": "show",
-          "options": [
-            {"value": "show", "label": "Show on all"},
-            {"value": "hide_mobile", "label": "Hide on mobile"},
-            {"value": "hide_desktop", "label": "Hide on desktop"}
-          ]
+          "type": "checkbox",
+          "id": "show_on_mobile",
+          "label": "Show on mobile",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_tablet",
+          "label": "Show on tablet",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_desktop",
+          "label": "Show on desktop",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Mobile layout"
         },
         {
           "type": "select",

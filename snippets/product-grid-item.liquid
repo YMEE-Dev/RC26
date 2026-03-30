@@ -691,12 +691,10 @@
           {%- if double_img -%}
             {%- liquid
               assign skip_first_hover_slide = false
-              assign second_media_source = ''
-              assign second_media_name = ''
+              assign second_media_alt = ''
 
               if product.media.size > 1
-                assign second_media_source = product.media[1].src | default: product.media[1].preview_image.src | default: ''
-                assign second_media_name = second_media_source | split: '/' | last | split: '?' | first | downcase | strip
+                assign second_media_alt = product.media[1].alt | downcase | strip
               endif
             -%}
 
@@ -707,7 +705,7 @@
                     assign hover_slide_attr = ''
                     assign scale_class = ''
 
-                    if second_media_name contains 'wear' or second_media_name contains 'model'
+                    if second_media_alt contains 'common:model'
                       unless forloop.first
                         assign hover_slide_attr = ' data-hover-slide'
                       endunless

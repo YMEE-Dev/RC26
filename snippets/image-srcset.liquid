@@ -5,6 +5,7 @@
   *  widths {аrray} - An array of the image widths for srcset
   *  mobile {Boolean} - Set mobile sizes only
   *  desktop {Boolean} - Set desktop sizes only
+  *  allow_large_mobile {Boolean} - Allow mobile srcset widths above 1500px
 
   {% render 'image-srcset', image: image, widths: image_widths %}
 {%- endcomment -%}
@@ -20,7 +21,7 @@
       assign width = string_width | times: 1 | round
 
       if image_width >= width
-        if mobile and width >= 1500
+        if mobile and allow_large_mobile != true and width >= 1500
           continue
         endif
 
