@@ -96,15 +96,11 @@
 
               {%- unless line_item.product.has_only_default_variant -%}
                 {%- for option in line_item.options_with_values -%}
-                  {%- assign option_name = option.name | strip | downcase -%}
-
-                  {%- if option_name contains 'size' -%}
-                    <p class="cart__item__selected-options">
+                    <p class="cart__item__selected-options caption">
                       <strong>{{ option.name }}:</strong>
 
                       <span>{{ option.value }}</span>
                     </p>
-                  {%- endif -%}
                 {%- endfor -%}
               {%- endunless -%}
 
@@ -119,8 +115,18 @@
               {%- endif -%} {% endcomment %}
             </div>
           </div>
+        </div>
 
-          <div class="cart__price-and-quantity-wrapper">
+        <div class="cart__item__content__right">
+          <a class="caption cart__item__remove "
+            href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
+            data-item-remove
+            data-id="{{ line_item.key }}"
+            title="{{ 'cart.general.remove' | t }}">
+              {{- 'cart.general.remove' | t -}}
+          </a>
+        </div>
+                  <div class="cart__price-and-quantity-wrapper">
             <p class="cart__price">
               {%- liquid
                 assign discounted = false
@@ -255,18 +261,9 @@
               </div>
             </quantity-input>
           </div>
-        </div>
-
-        <div class="cart__item__content__right">
-          <a class="caption cart__item__remove "
-            href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
-            data-item-remove
-            data-id="{{ line_item.key }}"
-            title="{{ 'cart.general.remove' | t }}">
-              {{- 'cart.general.remove' | t -}}
-          </a>
-        </div>
       </div>
+
+
 
       {%- if line_item.original_price > line_item.final_price -%}
         {%- for discount in line_item.line_level_discount_allocations -%}

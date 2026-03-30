@@ -49,19 +49,35 @@
   assign media_alt_lower = media.alt | downcase
   assign media_kind = 'other'
 
-  if media_alt_lower contains 'model' or media.media_type != 'image'
+  if media.media_type != 'image'
+    assign media_kind = 'model'
+  elsif media_alt_lower contains 'common:'
+    assign media_kind = 'common'
+  elsif media_alt_lower contains 'variant:'
+    assign media_kind = 'variant'
+  elsif media_alt_lower contains 'model'
     assign media_kind = 'model'
   elsif media_alt_lower contains 'still life' or media_alt_lower contains 'still-life' or media_alt_lower contains 'still_life'
     assign media_kind = 'still'
   endif
 
   assign media_color = ''
-  if media_alt_lower contains 'variant--y' or media_alt_lower contains 'variant--yellow' or media_alt_lower contains ' color y'
-    assign media_color = 'y'
-  elsif media_alt_lower contains 'variant--w' or media_alt_lower contains 'variant--white' or media_alt_lower contains ' color w'
-    assign media_color = 'w'
-  elsif media_alt_lower contains 'variant--r' or media_alt_lower contains 'variant--rose' or media_alt_lower contains ' color r'
-    assign media_color = 'r'
+  if media_kind == 'variant'
+    assign media_color_parts = media_alt_lower | split: 'variant:'
+    if media_color_parts.size > 1
+      assign media_color_raw = media_color_parts[1] | split: ',' | first | strip
+      assign media_color_words = media_color_raw | split: ' '
+      assign media_color = media_color_words | join: '_'
+    endif
+  endif
+  if media_color == ''
+    if media_alt_lower contains 'variant--y' or media_alt_lower contains 'variant--yellow' or media_alt_lower contains ' color y'
+      assign media_color = 'yellow_gold'
+    elsif media_alt_lower contains 'variant--w' or media_alt_lower contains 'variant--white' or media_alt_lower contains ' color w'
+      assign media_color = 'white_gold'
+    elsif media_alt_lower contains 'variant--r' or media_alt_lower contains 'variant--rose' or media_alt_lower contains ' color r'
+      assign media_color = 'rose_gold'
+    endif
   endif
 -%}
 

@@ -103,8 +103,9 @@
   if brand_collection != blank
     assign display_title = brand_collection.title | default: display_title
     assign display_image = brand_collection.image
-    if brand_collection.description != blank
-      assign display_description = brand_collection.description
+    assign brand_collection_short_description = brand_collection.metafields.custom.collection_short_description.value
+    if brand_collection_short_description != blank
+      assign display_description = brand_collection_short_description
     endif
   endif
 -%}

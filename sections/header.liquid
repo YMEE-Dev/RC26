@@ -38,6 +38,8 @@
     assign transparent_header = true
   elsif template.name == 'product' and section.settings.transparent_product_page
     assign transparent_header = true
+  elsif template.name == 'blog' and section.settings.transparent_blog
+    assign transparent_header = true
   endif
 
   assign main_menu_linklist = section.settings.main_menu_linklist | default: 'main-menu'
@@ -1018,7 +1020,7 @@
       const logoLightUrl = logoLinks[0].dataset.logoLight;
       const logoDarkUrl = logoLinks[0].dataset.logoDark;
       const forcedDrawerLogoMode = 'dark';
-      const forcedTmenuLogoMode = 'light';
+      const forcedTmenuLogoMode = 'dark';
 
       const drawerIsOpen = () => drawerWrapper?.classList.contains('is-open');
       const tmenuIsOpen = () => tmenuIsActive || Boolean(document.querySelector(tmenuActiveSelector));
@@ -1585,6 +1587,12 @@
       "label": "Enable on Product pages",
       "info": "Stretch image size recommended. Desktop only",
       "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "transparent_blog",
+      "label": "Enable on Blog page",
+      "default": true
     },
     {
       "type": "image_picker",

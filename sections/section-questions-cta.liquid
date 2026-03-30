@@ -17,18 +17,32 @@
   data-section-type="questions-cta"
 >
   <div class="questions-cta__wrapper {{ section.settings.width }}">
-    <div 
-      class="questions-cta__container" 
+    <div
+      class="questions-cta__container"
       style="background-color: {{ section.settings.background_color }};"
     >
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+          {%- when 'heading' -%}
+            <h2
+              class="questions-cta__heading {{ block.settings.heading_size }} mobile-display"
+              {{ block.shopify_attributes }}
+            >
+              {{ block.settings.text }}
+            </h2>
+        {%- endcase -%}
+      {%- endfor -%}
       <div class="questions-cta__content">
         {%- for block in section.blocks -%}
           {%- case block.type -%}
             {%- when 'heading' -%}
-              <h2 class="questions-cta__heading {{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
+              <h2
+                class="questions-cta__heading {{ block.settings.heading_size }} desktop-display"
+                {{ block.shopify_attributes }}
+              >
                 {{ block.settings.text }}
               </h2>
-            
+
             {%- when 'button' -%}
               <div class="questions-cta__button-wrap" {{ block.shopify_attributes }}>
                 <a
@@ -71,7 +85,8 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     align-items: center;
-    gap: 100px;padding: 0 206px;
+    gap: 100px;
+    padding: 0 206px;
     border-radius: 4px;
     justify-content: center;
   }
@@ -112,7 +127,7 @@
   .questions-cta__heading.heading-large {
     color: var(--000000, #000);
 
-/* RC26/Display/S */
+    /* RC26/Display/S */
     font-family: var(--FONT-STACK-HEADING);
     font-size: 32px !important;
     font-style: normal;
@@ -153,7 +168,7 @@
 
   .questions-cta__button:hover {
     background-color: #000;
-    color: #FFF;
+    color: #fff;
   }
 
   .questions-cta__media {
@@ -191,17 +206,22 @@
     opacity: 0.3;
   }
 
+  .questions-cta__heading.mobile-display {
+    display: none;
+  }
+
   /* Mobile adjustments */
   @media (max-width: 990px) {
     .questions-cta__container {
       grid-template-columns: 1fr;
-      gap: 40px;
+      gap: 24px;
       padding: 40px 30px;
     }
 
     .questions-cta__content {
       text-align: center;
       align-items: center;
+      order: 2;
     }
 
     .questions-cta__heading {
@@ -214,18 +234,28 @@
     }
 
     .questions-cta__media {
-      order: -1;
+      order: 1;
     }
 
     .questions-cta__image,
     .questions-cta__placeholder {
       max-width: 300px;
     }
+
+    .questions-cta__heading {
+      text-align: center;
+    }
+    .questions-cta__heading.mobile-display {
+      display: block;
+    }
+    .questions-cta__heading.desktop-display {
+      display: none;
+    }
   }
 
   @media (max-width: 768px) {
     .questions-cta__container {
-      padding: 30px 20px;
+      padding: 40px 20px;
     }
 
     .questions-cta__heading {
@@ -262,10 +292,10 @@
           "label": "Heading size",
           "default": "heading-large",
           "options": [
-            { "value": "heading-small", "label": "Small" },
-            { "value": "heading-medium", "label": "Medium" },
-            { "value": "heading-large", "label": "Large" },
-            { "value": "heading-x-large", "label": "Extra large" }
+            {"value": "heading-small", "label": "Small"},
+            {"value": "heading-medium", "label": "Medium"},
+            {"value": "heading-large", "label": "Large"},
+            {"value": "heading-x-large", "label": "Extra large"}
           ]
         }
       ]
@@ -312,10 +342,10 @@
       "label": "Width",
       "default": "wrapper",
       "options": [
-        { "value": "wrapper--full-padded", "label": "Full width padded" },
-        { "value": "wrapper", "label": "Normal" },
-        { "value": "wrapper--narrow", "label": "Narrow" },
-        { "value": "wrapper--custom", "label": "Custom (max-width: 1232px)" }
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"},
+        {"value": "wrapper--narrow", "label": "Narrow"},
+        {"value": "wrapper--custom", "label": "Custom (max-width: 1232px)"}
       ]
     },
     {

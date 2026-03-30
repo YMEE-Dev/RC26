@@ -72,16 +72,36 @@
     font-size: 48px;
     line-height: 56px;
   }
-  #shopify-section-{{ section.id }} .swiper{
-    overflow:visible !important;
+  .store-locator__carousel-container .grid--slider .grid-item,
+  .store-locator__carousel-container .grid--mobile-slider .grid-item {
+    margin-right: var(--gap);
   }
-  .store-locator__button { 
+  /* Force multiple slides visible: ~35% desktop = 3 visible, ~45% mobile = 2 visible */
+  .store-locator__carousel-container .grid--slider .grid-item {
+    flex: 0 0 35%;
+    max-width: 35%;
+  }
+  /* Ensure 2–3 slides visible: override item width (35% = ~3 slides on desktop) */
+  .store-locator__carousel-container .grid--slider .grid-item {
+    flex: 0 0 var(--item-width);
+    max-width: var(--item-width);
+  }
+  /* Mobile (768px and below): 1.5 slides visible, reduced gap */
+  @media (max-width: 768px) {
+    .store-locator__carousel-container .grid--mobile-slider .grid-item {
+      width: calc(66.67% - (var(--gap, 16px) / 2)) !important;
+      flex: 0 0 calc(66.67% - (var(--gap, 16px) / 2)) !important;
+      max-width: calc(66.67% - (var(--gap, 16px) / 2)) !important;
+      min-width: 0;
+    }
+  }
+  .store-locator__button {
     display: inline-flex;
     padding: 14px 32px;
     justify-content: center;
     align-items: center;
     color: #000;
-    background-color: #FFF;
+    background-color: transparent;
     border: 1px solid #000;
     font-family: Inter;
     font-size: 12px;
@@ -106,6 +126,7 @@
     position: relative;
     margin: 0 auto;
     max-width: 1400px;
+    overflow: visible;
   }
 
   .store-locator__card {
@@ -174,56 +195,6 @@
     line-height: 36px; /* 112.5% */
   }
 
-  /* Swiper navigation buttons */
-  .store-locator__nav-prev,
-  .store-locator__nav-next {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 40px;
-    height: 40px;
-    background: #fff;
-    border: 1px solid #000;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 10;
-    transition: all 0.3s ease;
-  }
-
-  .store-locator__nav-prev:hover,
-  .store-locator__nav-next:hover {
-    background: #000;
-  }
-
-  .store-locator__nav-prev:after,
-  .store-locator__nav-next:after {
-    font-size: 16px;
-    font-weight: bold;
-    color: #000;
-  }
-
-  .store-locator__nav-prev:hover:after,
-  .store-locator__nav-next:hover:after {
-    color: #fff;
-  }
-
-  .store-locator__nav-prev {
-    left: 0;
-  }
-
-  .store-locator__nav-next {
-    right: 0;
-  }
-
-  .store-locator__nav-prev.swiper-button-disabled,
-  .store-locator__nav-next.swiper-button-disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
-
   /* Loading state */
   .store-locator__loading {
     display: flex;
@@ -254,6 +225,7 @@
     font-size: 14px;
     font-weight: 400;
   }
+  .store-locator__header-button.mobile-display { display: none; }
 
   /* Mobile adjustments */
   @media (max-width: 768px) {
@@ -278,18 +250,22 @@
       line-height: 36px;
     }
 
-    .store-locator__swiper {
-      padding: 0 40px;
+    .store-locator__carousel-container [data-grid-slider] {
+      gap: 0;
     }
 
-    .store-locator__nav-prev,
-    .store-locator__nav-next {
-      width: 32px;
-      height: 32px;
+    .store-locator__header-button.mobile-display { display: block; }
+    .store-locator__header-button.desktop-display { display: none; }
+    .store-locator__header-content {
+      width: 100%;
     }
-
-    .store-locator__nav-prev:after,
-    .store-locator__nav-next:after {
-      font-size: 14px;
+    .store-locator__subheading {
+      text-align: center;
+    }
+    .store-locator__heading {
+      text-align: center;
+    }
+    .store-locator__header-button {
+      margin-top: 20px;
     }
   }
