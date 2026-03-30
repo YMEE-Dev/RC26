@@ -1808,13 +1808,13 @@
 
                   productImagesEl.addEventListener('theme:media:select', function (e) {
                     if (!e || !e.detail || !e.detail.id) return;
-                    // When our gallery filter is active, skip carousel manipulation
-                    // to prevent undoing the filtered slide order and intro state.
-                    // The flag is set by applyGalleryFilter and auto-expires after 1.5s.
+                    // When our gallery filter is active, only allow user-initiated
+                    // thumb clicks through. Block programmatic scrolls from variant
+                    // change handlers (product-info updateMedia, etc.).
                     if (productImagesEl.getAttribute('data-gallery-filter-active') === 'true') {
-                      return;
+                      var fromThumb = e.target && (e.target.closest('product-thumbs') || e.target.tagName === 'PRODUCT-THUMBS');
+                      if (!fromThumb) return;
                     }
-                    if (productImagesEl.querySelector('[data-embla-slide][data-media-type="model"]')) return;
                     var activeCarousel = getActiveCarousel();
                     if (!activeCarousel) return;
 
