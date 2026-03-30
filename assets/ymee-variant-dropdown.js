@@ -252,6 +252,7 @@
         .concat(Array.prototype.slice.call(holdingEl.querySelectorAll("[data-embla-slide]")));
       if (!allSlides.length) return;
 
+      var modelSlides = [];
       var variantSlides = [];
       var commonSlides = [];
       var otherSlides = [];
@@ -261,8 +262,17 @@
         var mediaEl = slide.querySelector("[data-media-kind]") || slide;
         var kind = (mediaEl.getAttribute("data-media-kind") || "other").toLowerCase();
         var color = (mediaEl.getAttribute("data-media-color") || "").toLowerCase();
+        var mediaType = (
+          slide.getAttribute("data-media-type") ||
+          mediaEl.getAttribute("data-type") ||
+          ""
+        ).toLowerCase();
 
-        if (kind === "variant") {
+        if (mediaType === "model" || kind === "model") {
+          modelSlides.push(slide);
+          slide.classList.remove("pdp-embla__slide--filtered-out");
+          slide.classList.remove("product__slide--filtered-out");
+        } else if (kind === "variant") {
           if (colorsMatch(colorCode, color)) {
             variantSlides.push(slide);
             slide.classList.remove("pdp-embla__slide--filtered-out");
@@ -283,8 +293,8 @@
         }
       });
 
-      // Put visible slides in the container, hidden slides in the holding element
-      var visibleSlides = variantSlides.concat(commonSlides).concat(otherSlides);
+      // Put visible slides in the container: model first, then variant, common, other
+      var visibleSlides = modelSlides.concat(variantSlides).concat(commonSlides).concat(otherSlides);
       visibleSlides.forEach(function (slide) {
         container.appendChild(slide);
       });
