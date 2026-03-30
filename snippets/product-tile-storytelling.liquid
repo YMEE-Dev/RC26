@@ -7,10 +7,14 @@
 {% enddoc %}
 
 {%- liquid
-  assign first_image = product.media | where: 'media_type', 'image' | first
+  assign product_images = product.media | where: 'media_type', 'image'
+  assign first_image = product_images | first
+  assign second_image = product_images[1]
   assign first_media = product.media.first
   assign modal_media = product.media[1]
   assign modal_image = blank
+  assign desktop_trigger_image = blank
+  assign mobile_trigger_image = blank
   assign look_slider = ''
   assign storytelling_slide_count = 0
   assign first_media_is_video = false
@@ -39,6 +43,14 @@
       assign modal_image = modal_media.preview_image
     endif
   endif
+
+  if pdp_mode and modal_image != blank
+    assign desktop_trigger_image = modal_image
+  else
+    assign desktop_trigger_image = first_image
+  endif
+
+  assign mobile_trigger_image = second_image | default: modal_image | default: desktop_trigger_image
 
   assign cta_text = product.metafields.custom.ste_cta | default: 'Shop the look'
   assign storytelling_products = product.metafields.custom.ste_products.value
@@ -115,34 +127,55 @@
   >
     {%- if first_media_is_video -%}
       {%- liquid
+        assign trigger_video_classes = 'custom-autoplay-video'
+        if mobile_trigger_image != blank
+          assign trigger_video_classes = trigger_video_classes | append: ' storytelling-trigger-video storytelling-trigger-video--desktop'
+        endif
+      -%}
+      {%- liquid
         case first_media.media_type
           when 'video'
-            echo first_media | media_tag: image_size: '2048x', class: 'custom-autoplay-video', autoplay: true, loop: true, controls: false, preload: 'none', muted: true
+            echo first_media | media_tag: image_size: '2048x', class: trigger_video_classes, autoplay: true, loop: true, controls: false, preload: 'none', muted: true
           when 'external_video'
             if first_media.host == 'youtube'
-              echo first_media | external_video_url: autoplay: true, playsinline: true, loop: true, playlist: first_media.external_id, controls: false, mute: true, showinfo: false | external_video_tag: class: 'custom-autoplay-video', loading: 'lazy', data-host: first_media.host
+              echo first_media | external_video_url: autoplay: true, playsinline: true, loop: true, playlist: first_media.external_id, controls: false, mute: true, showinfo: false | external_video_tag: class: trigger_video_classes, loading: 'lazy', data-host: first_media.host
             else
-              echo first_media | external_video_url: autoplay: true, playsinline: true, loop: true, controls: false, muted: true | external_video_tag: class: 'custom-autoplay-video', data-host: first_media.host
+              echo first_media | external_video_url: autoplay: true, playsinline: true, loop: true, controls: false, muted: true | external_video_tag: class: trigger_video_classes, data-host: first_media.host
             endif
         endcase
       -%}
-    {%- else -%}
-      {%- liquid
-        if pdp_mode and modal_image != blank
-          assign trigger_image = modal_image
-        else
-          assign trigger_image = first_image
-        endif
-      -%}
-      {%- if trigger_image -%}
+      {%- if mobile_trigger_image != blank -%}
         {{
-          trigger_image
+          mobile_trigger_image
           | image_url: width: 2048
-          | image_tag: alt: product.title, loading: 'eager', fetchpriority: 'high'
+          | image_tag:
+            alt: product.title,
+            loading: 'eager',
+            fetchpriority: 'high',
+            class: 'storytelling-trigger-image storytelling-trigger-image--mobile'
         }}
       {%- endif -%}
+    {%- else -%}
+      {%- if desktop_trigger_image -%}
+        <picture class="storytelling-trigger-picture">
+          {%- if mobile_trigger_image != blank and mobile_trigger_image != desktop_trigger_image -%}
+            <source
+              media="(max-width: 960px)"
+              srcset="{{ mobile_trigger_image | image_url: width: 2048 }}"
+            >
+          {%- endif -%}
+          {{
+            desktop_trigger_image
+            | image_url: width: 2048
+            | image_tag:
+              alt: product.title,
+              loading: 'eager',
+              fetchpriority: 'high',
+              class: 'storytelling-trigger-image'
+          }}
+        </picture>
+      {%- endif -%}
     {%- endif -%}
-    {% comment %} <div class="grid-media__text-container">{{ product.title }}</div> {% endcomment %}
     <button
       type="button"
       class="btn btn--solid btn--primary product-shop-the-look"
@@ -183,15 +216,6 @@
             -%}
           {%- else -%}
             {%- if modal_image -%}
-              {% comment %}
-                {%- render 'image',
-                  image: modal_image,
-                  sizes: '(min-width: 750px) 50vw, 100vw',
-                  aspect_ratio: 1,
-                  modifier: 'storytelling-look__image-bg',
-                  placeholder: 'collection-1'
-                -%}
-              {% endcomment %}
               <img
                 class=""
                 src="{{ modal_image | image_url: width: 2048 }}"
@@ -224,17 +248,16 @@
               </div>
             </div>
           </div>
+          <button
+            type="button"
+            class="storytelling-modal__close"
+            data-storytelling-modal-close
+            aria-label="{{ 'general.accessibility.close' | t }}"
+          >
+            {%- render 'icon-close' -%}
+          </button>
         </div>
       </look-component>
-
-      <button
-        type="button"
-        class="storytelling-modal__close"
-        data-storytelling-modal-close
-        aria-label="{{ 'general.accessibility.close' | t }}"
-      >
-        {%- render 'icon-close' -%}
-      </button>
     </div>
   </dialog>
 </grid-item>
