@@ -208,6 +208,7 @@
 
     // If no color code, restore all slides and leave order as-is
     if (!colorCode) {
+      productImagesEl.removeAttribute("data-gallery-filter-active");
       productImagesEl.querySelectorAll(".pdp-embla__container").forEach(function (container) {
         // Move any held-back slides back into the container
         var holdingEl = container.nextElementSibling;
@@ -368,6 +369,23 @@
     if (visibleMediaIds.length) {
       productImagesEl.setAttribute("data-active-media", visibleMediaIds[0]);
     }
+
+    // Flag that our gallery filter is active — the theme:media:select handler
+    // in product.liquid checks this to skip carousel manipulation that would
+    // undo our filtering (scroll to featured_media, setCarouselStarted, etc.)
+    // The flag auto-expires after 1.5s so it only blocks the theme's async
+    // updateMedia dispatch and doesn't interfere with later user interactions.
+    productImagesEl.setAttribute("data-gallery-filter-active", "true");
+    setTimeout(function () {
+      productImagesEl.removeAttribute("data-gallery-filter-active");
+    }, 1500);
+  }
+
+  // Wrapper that applies the gallery filter. The data-gallery-filter-active
+  // flag set by applyGalleryFilter prevents the theme's theme:media:select
+  // handler from undoing our carousel state (scroll, intro stage, etc.).
+  function applyGalleryFilterDeferred(sectionId, colorCode) {
+    applyGalleryFilter(sectionId, colorCode);
   }
 
   function hasVariantAltMediaSystem(sectionRoot, sectionId) {
@@ -1091,7 +1109,12 @@
         }
 
         var colorCode = getColorFromPicker(sectionRoot);
-        applyGalleryFilter(sectionId, colorCode);
+        // Only apply filter if we have a valid color code — an empty colorCode
+        // would clear the existing filter (the picker may temporarily lose its
+        // checked state when the theme replaces variant-selects DOM).
+        if (colorCode) {
+          applyGalleryFilterDeferred(sectionId, colorCode);
+        }
       }
 
       var toggleIcon = toggle.querySelector(".ymee-variant-dropdown__toggle-icon");
@@ -1243,7 +1266,9 @@
             updatePlaceholder(optionEl, false);
 
             var colorCode = getColorFromPicker(sectionRoot);
-            applyGalleryFilter(sectionId, colorCode);
+            if (colorCode) {
+              applyGalleryFilterDeferred(sectionId, colorCode);
+            }
           }
         }
 
@@ -1269,7 +1294,7 @@
       // Apply initial gallery filter based on selected color
       var initColorCode = getColorFromPicker(sectionRoot);
       if (initColorCode) {
-        applyGalleryFilter(sectionId, initColorCode);
+        applyGalleryFilterDeferred(sectionId, initColorCode);
       }
     });
   }
@@ -1328,7 +1353,7 @@
       // Apply initial gallery filter for standalone mode
       var initStandaloneColor = getColorFromPicker(sectionRoot);
       if (initStandaloneColor) {
-        applyGalleryFilter(sectionId, initStandaloneColor);
+        applyGalleryFilterDeferred(sectionId, initStandaloneColor);
       }
 
       var variantSelects = sectionRoot.querySelector('variant-selects[data-section="' + cssEscape(sectionId) + '"]');
@@ -1475,7 +1500,7 @@
         }
         // Apply gallery filter on color change
         var galleryColorCode = normalizeColorCode(input.value);
-        applyGalleryFilter(sectionId, galleryColorCode);
+        applyGalleryFilterDeferred(sectionId, galleryColorCode);
         return;
       }
 
@@ -1541,7 +1566,7 @@
 
         // Apply gallery filter on color change
         var standaloneGalleryColorCode = normalizeColorCode(input.value);
-        applyGalleryFilter(sectionId, standaloneGalleryColorCode);
+        applyGalleryFilterDeferred(sectionId, standaloneGalleryColorCode);
       }
     },
     true

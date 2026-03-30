@@ -1792,7 +1792,7 @@
 
                     if (carouselEl && carouselEl.dataset) carouselEl.dataset.emblaInitialized = 'true';
                     carouselEl._emblaInstance = embla;
-                    carouselEl._resetToIntro = function() {
+                    carouselEl._resetToIntro = function () {
                       if (!hasIntroStage) return;
                       carouselStarted = false;
                       introTransitioning = false;
@@ -1808,6 +1808,12 @@
 
                   productImagesEl.addEventListener('theme:media:select', function (e) {
                     if (!e || !e.detail || !e.detail.id) return;
+                    // When our gallery filter is active, skip carousel manipulation
+                    // to prevent undoing the filtered slide order and intro state.
+                    // The flag is set by applyGalleryFilter and auto-expires after 1.5s.
+                    if (productImagesEl.getAttribute('data-gallery-filter-active') === 'true') {
+                      return;
+                    }
                     if (productImagesEl.querySelector('[data-embla-slide][data-media-type="model"]')) return;
                     var activeCarousel = getActiveCarousel();
                     if (!activeCarousel) return;
