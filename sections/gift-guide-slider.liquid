@@ -31,7 +31,7 @@
                 {{ block.settings.text | upcase }}
               </p>
             {%- when 'heading' -%}
-              <h2 class="gift-guide-slider__heading {{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
+              <h2 class="gift-guide-slider__heading" {{ block.shopify_attributes }}>
                 {{ block.settings.text }}
               </h2>
           {%- endcase -%}
@@ -149,18 +149,6 @@
           "id": "text",
           "label": "Text",
           "default": "Find the perfect gift"
-        },
-        {
-          "type": "select",
-          "id": "heading_size",
-          "label": "Heading size",
-          "default": "heading-large",
-          "options": [
-            {"value": "heading-small", "label": "Small"},
-            {"value": "heading-medium", "label": "Medium"},
-            {"value": "heading-large", "label": "Large"},
-            {"value": "heading-x-large", "label": "Extra large"}
-          ]
         }
       ]
     },
