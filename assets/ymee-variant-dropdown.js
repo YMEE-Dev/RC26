@@ -658,6 +658,7 @@
 
               optionEl.setAttribute("data-ymee-cart-soldout", isCartSoldOut ? "true" : "false");
               if (addBtn) {
+                addBtn.disabled = isCartSoldOut;
                 addBtn.setAttribute("aria-disabled", isCartSoldOut ? "true" : "false");
               }
 
@@ -1149,6 +1150,11 @@
           if (addBtn) {
             e.preventDefault();
             e.stopPropagation();
+
+            if (addBtn.disabled || addBtn.getAttribute("aria-disabled") === "true") {
+              return;
+            }
+
             updateOptionCartState(function () {
               if (optionEl.getAttribute("data-ymee-cart-soldout") === "true") {
                 if (isMobileViewport() && sheetState) {

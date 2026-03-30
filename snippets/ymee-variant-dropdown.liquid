@@ -127,7 +127,16 @@
                 </span>
               {%- endif -%}
               <div class="ymee-variant-dropdown__submit">
-                <button type="button" data-action="buy">
+                <button
+                  type="button"
+                  data-action="buy"
+                  {% if ymee_is_cart_soldout %}
+                    disabled
+                    aria-disabled="true"
+                  {% else %}
+                    aria-disabled="false"
+                  {% endif %}
+                >
                   {%- render 'icon-add2cart' -%}
                   <span data-ymee-option-atc-label>
                     {% if ymee_is_cart_soldout %}
