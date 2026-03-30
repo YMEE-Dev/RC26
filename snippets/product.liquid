@@ -1792,6 +1792,12 @@
 
                     if (carouselEl && carouselEl.dataset) carouselEl.dataset.emblaInitialized = 'true';
                     carouselEl._emblaInstance = embla;
+                    carouselEl._resetToIntro = function() {
+                      if (!hasIntroStage) return;
+                      carouselStarted = false;
+                      introTransitioning = false;
+                      carouselEl.classList.remove('pdp-embla--started', 'pdp-embla--transitioning');
+                    };
                     return carousel;
                   }
 
