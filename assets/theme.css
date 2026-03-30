@@ -20917,7 +20917,26 @@ body:has([data-header-transparent]) .main-content > .shopify-section:first-of-ty
   line-height: 17px;
   list-style: none outside none;
 }
+.widget__link {
+  display: block;
+  color: var(--link);
+  transition: color 0.3s ease;
+  padding: 6px 0;
+  overflow-wrap: break-word;
+  line-height: inherit;
+  font-weight: inherit;
+  line-height: 100%;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: 10%;
+  text-transform: uppercase;
+  text-align: left;
+}
 
+ul.widget__links li {
+  margin:0 0 10px;
+}
 .widget__link {
   display: block;
   color: var(--link);
@@ -25009,7 +25028,6 @@ map-component {
 
 @media only screen and (max-width: 749px) {
   .section-sidebar__aside {
-    display: none;
     padding: 0;
   }
 }
@@ -26764,8 +26782,8 @@ dialog.is-loading .loader {
 
 .accordion {
   display: block;
-  border-bottom: 1px solid var(--border);
-  border-top: 1px solid var(--border);
+  border-bottom: 1px solid #D9D9D9;
+  /* border-top: 1px solid var(--border); */
   margin-top: -1px;
   text-align: left;
   overflow-wrap: anywhere;
@@ -26778,6 +26796,22 @@ dialog.is-loading .loader {
   margin: 0;
 }
 
+.accordion__title {
+  padding: 13px 0px;
+  padding-right: 13px; 
+  cursor: pointer;
+  color: var(--COLOR-TEXT);
+  font-family: var(--FONT-STACK-BODY);
+  font-size: var(--FONT-SIZE-CAPTION);
+  font-style: var(--FONT-STYLE-BODY);
+  font-weight: var(--FONT-WEIGHT-BODY);
+  letter-spacing: var(--LETTER-SPACING-NAV);
+  line-height: var(--LINE-HEIGHT-BODY);
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 .accordion__title .icon__animated {
   --icon-min-height: calc(var(--FONT-SIZE-BASE) * 1.2);
   margin: 0 10px 0 0;
