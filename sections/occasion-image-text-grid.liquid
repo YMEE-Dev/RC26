@@ -140,10 +140,28 @@
     margin: 0;
   }
 
+  @media (min-width: 990px) {
+    .main-content--article-brand .occasion-image-text-grid__inner,
+    .main-content--article-celebrity .occasion-image-text-grid__inner,
+    .main-content--article-occasion-style .occasion-image-text-grid__inner {
+      width: min(100% - 48px, 1100px);
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
   @media (max-width: 749px) {
     .occasion-image-text-grid__inner {
       grid-template-columns: 1fr;
-      gap: 28px;
+      gap: 70px;
+    }
+
+    .main-content--article-brand .occasion-image-text-grid__inner,
+    .main-content--article-celebrity .occasion-image-text-grid__inner,
+    .main-content--article-occasion-style .occasion-image-text-grid__inner {
+      padding-left: 20px;
+      padding-right: 20px;
+      box-sizing: border-box;
     }
   }
 {% endstylesheet %}
