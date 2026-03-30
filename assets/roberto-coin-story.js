@@ -222,22 +222,14 @@
 
     const heroAltLayoutPresets = [
       [
-        { top: "14px", left: "5%", width: "152px", height: "220px" },
-        { top: "32px", right: "-4%", width: "258px", height: "362px" },
-        { bottom: "70px", left: "-6%", width: "438px", height: "326px" },
-        { bottom: "18px", right: "-2%", width: "314px", height: "206px" },
-      ],
-      [
-        { top: "56px", left: "18%", width: "124px", height: "208px" },
-        { top: "4px", right: "8%", width: "292px", height: "388px" },
-        { bottom: "108px", left: "-2%", width: "386px", height: "298px" },
-        { bottom: "0px", right: "-10%", width: "278px", height: "190px" },
-      ],
-      [
-        { top: "24px", left: "24%", width: "130px", height: "216px" },
-        { top: "16px", right: "-2%", width: "270px", height: "368px" },
-        { bottom: "84px", left: "-10%", width: "426px", height: "320px" },
-        { bottom: "12px", right: "-6%", width: "308px", height: "212px" },
+        // top-left
+        { top: "14px", left: "5%", width: "172px", height: "220px", scale: "100%" },
+        // top-right
+        { top: "30px", right: "-4%", width: "190px", height: "172px", scale: "40%" },
+        // bottom-left
+        { bottom: "0px", left: "0%", width: "190px", height: "226px", scale: "40%" },
+        // bottom-right
+        { bottom: "-50px", right: "0%", width: "214px", height: "206px", scale: "40%" },
       ],
     ];
 
@@ -291,14 +283,22 @@
 
         addManagedEvent(button, "click", () => {
           if (window.innerWidth <= 820) {
-            if (timelineRoot) {
-              const timelineTop = timelineRoot.getBoundingClientRect().top + window.scrollY;
-              const currentY = window.scrollY || window.pageYOffset;
-              if (currentY < timelineTop - 24) {
-                scrollToY(timelineTop - 12, 550);
+            const steps = [...section.querySelectorAll(".timeline-step")];
+            const targetStep = steps[index];
+            if (targetStep) {
+              const triggerLine = (window.innerHeight || document.documentElement.clientHeight) * 0.9;
+              const stepAbsoluteTop = targetStep.getBoundingClientRect().top + (window.scrollY || window.pageYOffset);
+              scrollToY(Math.max(0, stepAbsoluteTop - triggerLine + 1), 500);
+            } else {
+              if (timelineRoot) {
+                const timelineTop = timelineRoot.getBoundingClientRect().top + (window.scrollY || window.pageYOffset);
+                const currentY = window.scrollY || window.pageYOffset;
+                if (currentY < timelineTop - 24) {
+                  scrollToY(timelineTop - 12, 550);
+                }
               }
+              setActiveEntry(index);
             }
-            setActiveEntry(index);
             return;
           }
 
@@ -564,7 +564,7 @@
 
     function updateActiveEntryOnScroll() {
       if (window.innerWidth <= 820 && timelineEntries.length) {
-        const triggerLine = (window.innerHeight || document.documentElement.clientHeight) * 0.62;
+        const triggerLine = (window.innerHeight || document.documentElement.clientHeight) * 0.9;
 
         if (timelineRoot) {
           const timelineTop = timelineRoot.getBoundingClientRect().top;
@@ -1016,6 +1016,74 @@
       }, 6000);
     }
 
+    function initMobileSwipe() {
+      if (!timelineStage || !timelineEntries.length) {
+        return;
+      }
+
+      let touchStartX = 0;
+      let touchStartY = 0;
+      const SWIPE_THRESHOLD = 40;
+
+      function navigateToStep(newIndex) {
+        const steps = [...section.querySelectorAll(".timeline-step")];
+        const targetStep = steps[newIndex];
+        if (!targetStep) {
+          return;
+        }
+        const triggerLine = (window.innerHeight || document.documentElement.clientHeight) * 0.9;
+        const stepAbsoluteTop = targetStep.getBoundingClientRect().top + (window.scrollY || window.pageYOffset);
+        scrollToY(Math.max(0, stepAbsoluteTop - triggerLine + 1), 380);
+      }
+
+      const onTouchStart = (e) => {
+        if (window.innerWidth > 820) {
+          return;
+        }
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      };
+
+      const onTouchMove = (e) => {
+        if (window.innerWidth > 820) {
+          return;
+        }
+        const deltaX = e.touches[0].clientX - touchStartX;
+        const deltaY = e.touches[0].clientY - touchStartY;
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+          e.preventDefault();
+        }
+      };
+
+      const onTouchEnd = (e) => {
+        if (window.innerWidth > 820) {
+          return;
+        }
+        const deltaX = e.changedTouches[0].clientX - touchStartX;
+        const deltaY = e.changedTouches[0].clientY - touchStartY;
+
+        if (Math.abs(deltaX) < SWIPE_THRESHOLD || Math.abs(deltaY) > Math.abs(deltaX)) {
+          return;
+        }
+
+        const currentActive = Math.max(activeIndex, 0);
+        const newIndex =
+          deltaX < 0
+            ? Math.min(currentActive + 1, timelineEntries.length - 1)
+            : Math.max(currentActive - 1, 0);
+
+        if (newIndex === activeIndex) {
+          return;
+        }
+
+        navigateToStep(newIndex);
+      };
+
+      addManagedEvent(timelineStage, "touchstart", onTouchStart, { passive: true });
+      addManagedEvent(timelineStage, "touchmove", onTouchMove, { passive: false });
+      addManagedEvent(timelineStage, "touchend", onTouchEnd, { passive: true });
+    }
+
     function initSectionNav() {
       if (!sectionNavTabs.length) {
         return;
@@ -1117,6 +1185,7 @@
     initSectionNav();
     initHeroCollage();
     initHeroSlideshow();
+    initMobileSwipe();
 
     addManagedEvent(document, "shopify:block:select", (event) => {
       const selectedBlockId =
