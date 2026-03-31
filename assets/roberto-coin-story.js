@@ -219,6 +219,7 @@
     let mobileNavOpen = false;
     let heroSlideshowShowingAlt = false;
     let sectionNavIntroPlayed = false;
+    let lastScrollY = window.scrollY || window.pageYOffset;
 
     const heroAltLayoutPresets = [
       [
@@ -564,34 +565,46 @@
 
     function updateActiveEntryOnScroll() {
       if (window.innerWidth <= 820 && timelineEntries.length) {
-        const triggerLine = (window.innerHeight || document.documentElement.clientHeight) * 0.9;
-
-        if (timelineRoot) {
-          const timelineTop = timelineRoot.getBoundingClientRect().top;
-          if (timelineTop > triggerLine) {
-            setActiveEntry(-1);
-            return;
-          }
-        }
+        const triggerLine = (window.innerHeight || document.documentElement.clientHeight) * 0.75;
+        const currentScrollY = window.scrollY || window.pageYOffset;
+        const direction = currentScrollY > lastScrollY ? 1 : -1;
 
         const steps = [...section.querySelectorAll(".timeline-step")];
-        let nextIndex = 0;
-        let found = false;
-
-        steps.forEach((step, index) => {
-          const top = step.getBoundingClientRect().top;
-          if (top <= triggerLine) {
-            nextIndex = index;
-            found = true;
-          }
-        });
-
-        if (!found) {
-          setActiveEntry(0);
+        if (!steps.length) {
+          lastScrollY = currentScrollY;
           return;
         }
 
+        let foundIndex = -1;
+        steps.forEach((step, index) => {
+          if (step.getBoundingClientRect().top <= triggerLine) {
+            foundIndex = index;
+          }
+        });
+
+        if (foundIndex < 0) {
+          setActiveEntry(-1);
+          lastScrollY = currentScrollY;
+          return;
+        }
+
+        if (activeIndex < 0) {
+          setActiveEntry(0);
+          lastScrollY = currentScrollY;
+          return;
+        }
+
+        let nextIndex = activeIndex;
+        if (foundIndex > activeIndex) {
+          nextIndex = activeIndex + 1;
+        } else if (foundIndex < activeIndex) {
+          nextIndex = Math.max(0, activeIndex - 1);
+        } else if (direction !== 0) {
+          nextIndex = activeIndex;
+        }
+
         setActiveEntry(clamp(nextIndex, 0, timelineEntries.length - 1));
+        lastScrollY = currentScrollY;
         return;
       }
 

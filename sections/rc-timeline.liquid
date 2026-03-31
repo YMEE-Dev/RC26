@@ -155,9 +155,14 @@
       <section id="{{ ruby_id }}" class="ruby-section">
         <div
           class="ruby-section__inner"
-          {% if section.settings.ruby_image != blank %}
-            style="background-image: url('{{ section.settings.ruby_image | image_url: width: 2400 }}');"
-          {% endif %}
+          style="
+            {% if section.settings.ruby_image != blank %}
+              --ruby-image: url('{{ section.settings.ruby_image | image_url: width: 2400 }}');
+            {% endif %}
+            {% if section.settings.ruby_image_mobile != blank %}
+              --ruby-image-mobile: url('{{ section.settings.ruby_image_mobile | image_url: width: 1600 }}');
+            {% endif %}
+          "
         >
           <div class="ruby-section__content">
             <h2 class="ruby-section__title reveal-up">{{ section.settings.ruby_title }}</h2>
@@ -368,6 +373,7 @@
     { "type": "text", "id": "ruby_title", "label": "Ruby title", "default": "The Ruby" },
     { "type": "richtext", "id": "ruby_copy", "label": "Ruby copy", "default": "<p>Roberto Coin chose the ruby as the hidden signature of his creations.</p><p>Set inside every jewel, the ruby is not meant to be seen but to be felt.</p>" },
     { "type": "image_picker", "id": "ruby_image", "label": "Ruby image" },
+    { "type": "image_picker", "id": "ruby_image_mobile", "label": "Ruby image (mobile)" },
 
     { "type": "header", "content": "Bottom nav labels" },
     { "type": "text", "id": "section_nav_history", "label": "History label", "default": "History" },
