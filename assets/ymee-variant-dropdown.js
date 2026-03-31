@@ -1238,10 +1238,21 @@
             return;
           }
 
-          if (action === "notify") {
+          if (action === "notify" || action === "inquire") {
             closeMenu();
-            var notifyBtn = sectionRoot.querySelector("[data-popup-open]");
-            if (notifyBtn) notifyBtn.click();
+            var variantId = optionEl ? optionEl.getAttribute("data-variant-id") : "";
+            var pid = actionBtn ? actionBtn.getAttribute("data-product-id") || "" : "";
+            if (!pid && sectionRoot) {
+              var bisBtn = sectionRoot.querySelector("[data-bis-drawer-open]");
+              if (bisBtn) pid = bisBtn.getAttribute("data-product-id") || "";
+              if (!pid) {
+                var pf = sectionRoot.querySelector("product-form[data-product-id]");
+                if (pf) pid = pf.getAttribute("data-product-id") || "";
+              }
+            }
+            if (window.openBisDrawer) {
+              window.openBisDrawer(action, variantId, pid);
+            }
             return;
           }
 
@@ -1613,6 +1624,57 @@
     },
     true
   );
+
+  /* ── Dynamic notify button visibility ───────────────────────────── */
+  function updateNotifyButtonVisibility(variant) {
+    var sectionRoot = document.querySelector('[id^="MainProduct--"]');
+    if (!sectionRoot) return;
+
+    // Skip products with size dropdown — the dropdown handles notify internally
+    if (sectionRoot.querySelector("[data-ymee-variant-dropdown]")) return;
+
+    var notifyBtn = sectionRoot.querySelector("[data-bis-drawer-open]");
+    if (!notifyBtn) return;
+
+    // If no variant passed (e.g. DOMContentLoaded), read from hidden input + product JSON
+    if (!variant) {
+      var variantIdInput = sectionRoot.querySelector('input[name="id"]');
+      var productDataEl = sectionRoot.querySelector("[data-product-json]");
+      if (!variantIdInput || !productDataEl) return;
+      try {
+        var productData = JSON.parse(productDataEl.textContent);
+        variant = productData.variants.find(function (v) {
+          return String(v.id) === String(variantIdInput.value);
+        });
+      } catch (e) {
+        return;
+      }
+    }
+
+    if (!variant) return;
+
+    var isOutOfStock = !variant.available;
+
+    // Toggle notify button via display (CSS sets display:none by default)
+    notifyBtn.style.display = isOutOfStock ? "flex" : "none";
+    if (isOutOfStock) {
+      notifyBtn.setAttribute("data-variant-id", variant.id);
+    }
+
+    // Toggle Add to Cart disabled state
+    var addToCartBtn = sectionRoot.querySelector("[data-add-to-cart]");
+    if (addToCartBtn) {
+      addToCartBtn.disabled = isOutOfStock;
+    }
+  }
+
+  document.addEventListener("theme:variant:change", function (e) {
+    updateNotifyButtonVisibility(e.detail && e.detail.variant);
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    updateNotifyButtonVisibility(null);
+  });
 
   /* ── Form-only wrapper: wire up icon click (hamburger) ─────────── */
   function initFormOnlyWrappers(scope) {
