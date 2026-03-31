@@ -2678,7 +2678,7 @@
           countValue = "9+";
         }
 
-        this.innerText = countValue + " items";
+        this.innerText = countValue;
       }
     }
   }
@@ -3800,7 +3800,12 @@
           const stickyThreshold = typeof this.headerOffset === "number" ? this.headerOffset : 0;
           const shouldShowRevealBlur = this.isSticky && goingUp && !atTop && position > stickyThreshold;
 
-          if ((this.isCollectionTemplate && !this.isSpotlightCollectionTemplate) || this.isSearchTemplate || this.isBlogTemplate || this.isArticleTemplate) {
+          if (
+            (this.isCollectionTemplate && !this.isSpotlightCollectionTemplate) ||
+            this.isSearchTemplate ||
+            this.isBlogTemplate ||
+            this.isArticleTemplate
+          ) {
             if (atTop) {
               this.body.classList.remove("header-scroll-hide");
               this.resetHeaderLayerHide();
