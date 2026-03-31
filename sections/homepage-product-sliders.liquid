@@ -12,9 +12,14 @@
   assign columns_small = 2
   assign column_count = 4
   assign rendered_tab_count = 0
+  assign disable_image_hover = false
 
   if related_category_limit <= 4
     assign related_category_limit = 10
+  endif
+
+  if section.settings.enable_product_image_gallery == false
+    assign disable_image_hover = true
   endif
 -%}
 
@@ -76,7 +81,8 @@
                   product: selected_product,
                   animation_delay: forloop.index0 | times: 1,
                   animation_anchor: '#HomepageProductSlidersTab--' | append: section.id | append: '-' | append: rendered_tab_count,
-                  index: forloop.index
+                  index: forloop.index,
+                  disable_image_hover: disable_image_hover
                 -%}
               {%- endif -%}
             {%- endif -%}
@@ -107,7 +113,8 @@
                   product: selected_product,
                   animation_delay: forloop.index0 | times: 1,
                   animation_anchor: '#HomepageProductSlidersTab--' | append: section.id | append: '-' | append: rendered_tab_count,
-                  index: forloop.index
+                  index: forloop.index,
+                  disable_image_hover: disable_image_hover
                 -%}
               {%- endif -%}
             {%- endif -%}
@@ -235,6 +242,12 @@
         {"value": "row", "label": "Title left"},
         {"value": "row-reverse", "label": "Title right"}
       ]
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_product_image_gallery",
+      "label": "Enable product image gallery",
+      "default": true
     },
     {
       "type": "header",

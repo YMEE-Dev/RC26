@@ -13,6 +13,12 @@
   {% render 'search-product-item', product: product, animation_delay: animation_delay, animation_duration: animation_duration, animation_anchor: animation_anchor, product_item_classes: product_item_classes %}
 {% endcomment %}
 
+{%- capture cr_flags -%}{%- render 'collection-rules', product: product -%}{%- endcapture -%}
+{%- assign cr_hide_price = false -%}
+{%- if cr_flags contains 'hide_price' -%}
+  {%- assign cr_hide_price = true -%}
+{%- endif -%}
+
 {%- liquid
   assign current_variant = product.first_available_variant
   assign featured_image = product.featured_media
@@ -127,7 +133,9 @@
             {{ product.title | strip_html }}
           </p>
 
-          {%- render 'product-grid-price', product: product, current_variant: current_variant -%}
+          {%- unless cr_hide_price -%}
+            {%- render 'product-grid-price', product: product, current_variant: current_variant -%}
+          {%- endunless -%}
         </div>
       </div>
     </a>

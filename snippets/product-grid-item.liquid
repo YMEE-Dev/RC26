@@ -16,7 +16,24 @@
   {% render 'product-grid-item', product: product, index: index, sizes: image_sizes, attributes: '', modifier_class: '' %}
 {% endcomment %}
 
+{%- capture cr_flags -%}{%- render 'collection-rules', product: product -%}{%- endcapture -%}
 {%- liquid
+  assign cr_hide_price = false
+  assign cr_hide_atc = false
+  assign cr_show_inquire = false
+  if cr_flags contains 'hide_price'
+    assign cr_hide_price = true
+  endif
+  if cr_flags contains 'hide_atc'
+    assign cr_hide_atc = true
+  endif
+  if cr_flags contains 'show_inquire'
+    assign cr_show_inquire = true
+  endif
+  if product.tags contains 'bis-hidden'
+    assign cr_show_inquire = false
+  endif
+
   assign current_variant = product.first_available_variant
   assign product_url = product.url | within: collection | split: '?_pos' | first
   assign attributes = attributes | default: ''
@@ -534,34 +551,36 @@
   </div>
 
   {%- liquid
-    if settings.quickview_enable and current_variant
-      if siblings_html != blank and product.variants.size == 1
-        assign title_down = product.title | downcase
-        assign sibling = product.metafields.theme.sibling_color.value | default: product.metafields.theme.sibling_colour.value | default: product.metafields.theme.siblings_color.value | default: product.metafields.theme.siblings_colour.value | default: product.metafields.theme.siblings_colors.value | default: product.metafields.theme.siblings_colours.value
-        assign sibling_down = sibling | downcase
-        unless title_down contains sibling_down
-          assign sibling_property_value = sibling | strip_html | escape
-        endunless
-      endif
-
-      assign mobile_mini_button = false
-      if settings.quickview_hide_mobile == false and settings.quick_add_mobile_style == 'mini_button'
-        assign mobile_mini_button = true
-      endif
-
-      capture btn_style
-        if mobile_mini_button
-          echo 'quick-add__button--mini '
+    if cr_hide_atc == false
+      if settings.quickview_enable and current_variant
+        if siblings_html != blank and product.variants.size == 1
+          assign title_down = product.title | downcase
+          assign sibling = product.metafields.theme.sibling_color.value | default: product.metafields.theme.sibling_colour.value | default: product.metafields.theme.siblings_color.value | default: product.metafields.theme.siblings_colour.value | default: product.metafields.theme.siblings_colors.value | default: product.metafields.theme.siblings_colours.value
+          assign sibling_down = sibling | downcase
+          unless title_down contains sibling_down
+            assign sibling_property_value = sibling | strip_html | escape
+          endunless
         endif
-        echo 'btn btn--solid btn--small'
-      endcapture
 
-      assign holder_modifier = ''
-      if mobile_mini_button == false
-        assign holder_modifier = ' desktop'
+        assign mobile_mini_button = false
+        if settings.quickview_hide_mobile == false and settings.quick_add_mobile_style == 'mini_button'
+          assign mobile_mini_button = true
+        endif
+
+        capture btn_style
+          if mobile_mini_button
+            echo 'quick-add__button--mini '
+          endif
+          echo 'btn btn--solid btn--small'
+        endcapture
+
+        assign holder_modifier = ''
+        if mobile_mini_button == false
+          assign holder_modifier = ' desktop'
+        endif
+
+        render 'quick-add-product' product: product, holder_modifier: holder_modifier, btn_style: btn_style, sibling_property_value: sibling_property_value, mobile_mini_button: mobile_mini_button
       endif
-
-      render 'quick-add-product' product: product, holder_modifier: holder_modifier, btn_style: btn_style, sibling_property_value: sibling_property_value, mobile_mini_button: mobile_mini_button
     endif
   -%}
 {%- endcapture -%}
@@ -791,9 +810,11 @@
         </a>
 
         <div class="product-item__swatches-wrapper">
-          <div class="product-item__price" data-product-price>
-            {%- render 'product-grid-price', product: product, current_variant: current_variant -%}
-          </div>
+          {%- unless cr_hide_price -%}
+            <div class="product-item__price" data-product-price>
+              {%- render 'product-grid-price', product: product, current_variant: current_variant -%}
+            </div>
+          {%- endunless -%}
           {%- if siblings_html != blank -%}
             {{ siblings_html }}
           {%- elsif has_colors -%}
@@ -832,12 +853,28 @@
           </div>
         {% endif %}
 
-        {%- liquid
-          if product.available and settings.quickview_enable and settings.quickview_hide_mobile == false and settings.quick_add_mobile_style == 'button'
-            assign btn_style = 'btn btn--outline btn--small'
-            render 'quick-add-product', product: product, holder_modifier: ' mobile', btn_style: btn_style, sibling_property_value: sibling_property_value
-          endif
-        -%}
+        {%- comment -%}
+          Hide INQUIRE button on PLP
+          {%- if cr_show_inquire -%}
+            <div class="product-item__inquire">
+              <a
+                href="{{ product.url }}?bis_action=inquire"
+                class="btn btn--solid btn--small"
+              >
+                <span class="btn__text">{{ 'products.product.inquire' | t }}</span>
+              </a>
+            </div>
+          {%- elsif cr_hide_atc == false -%}
+        {%- endcomment -%}
+
+        {%- if cr_hide_atc == false -%}
+          {%- liquid
+            if product.available and settings.quickview_enable and settings.quickview_hide_mobile == false and settings.quick_add_mobile_style == 'button'
+              assign btn_style = 'btn btn--outline btn--small'
+              render 'quick-add-product', product: product, holder_modifier: ' mobile', btn_style: btn_style, sibling_property_value: sibling_property_value
+            endif
+          -%}
+        {%- endif -%}
       </div>
     </div>
   </grid-item>
