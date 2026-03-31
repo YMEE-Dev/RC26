@@ -383,9 +383,15 @@
       captionLineOne.textContent = lineOne;
       captionLineTwo.textContent = lineTwo;
 
-      timelineCaption.style.left = `${entry.captionX}%`;
-      timelineCaption.style.top = `${entry.captionY}%`;
-      timelineCaption.style.width = "24%";
+      if (window.innerWidth <= 820) {
+        timelineCaption.style.left = "";
+        timelineCaption.style.top = "";
+        timelineCaption.style.width = "";
+      } else {
+        timelineCaption.style.left = `${entry.captionX}%`;
+        timelineCaption.style.top = `${entry.captionY}%`;
+        timelineCaption.style.width = "24%";
+      }
 
       if (prefersReducedMotion.matches) {
         timelineCaption.classList.add("is-visible");
@@ -453,6 +459,7 @@
       if (!mediaLayout || !mediaCardTemplate) {
         return;
       }
+      const isMobile = window.innerWidth <= 820;
       const mediaItems = buildTimelineMediaLayout(entry);
 
       const existingLayers = [...mediaLayout.querySelectorAll(".media-layer")];
@@ -462,20 +469,27 @@
 
       existingLayers.slice(0, -1).forEach((layer) => layer.remove());
 
-      mediaItems.forEach((item, index) => {
+      // On mobile, reorder so the middle image (index 1) is first (hero)
+      const orderedItems = isMobile
+        ? [mediaItems[1], mediaItems[0], mediaItems[2]].filter(Boolean)
+        : mediaItems;
+
+      orderedItems.forEach((item, index) => {
         const card = mediaCardTemplate.content.firstElementChild.cloneNode(true);
         const art = card.querySelector(".media-art");
         const scaleFactor = Math.max(0.6, Math.min(1.8, Number(item.scale || 100) / 100));
 
-        if (index === 1) {
-          card.style.left = `calc(${item.x}% - 50px)`;
-          card.style.width = `calc((${item.w}% + 100px) * ${scaleFactor})`;
-        } else {
-          card.style.left = `${item.x}%`;
-          card.style.width = `calc(${item.w}% * ${scaleFactor})`;
+        if (!isMobile) {
+          if (index === 1) {
+            card.style.left = `calc(${item.x}% - 50px)`;
+            card.style.width = `calc((${item.w}% + 100px) * ${scaleFactor})`;
+          } else {
+            card.style.left = `${item.x}%`;
+            card.style.width = `calc(${item.w}% * ${scaleFactor})`;
+          }
+          card.style.top = `${item.y}%`;
+          card.style.height = `calc(${item.h}% * ${scaleFactor})`;
         }
-        card.style.top = `${item.y}%`;
-        card.style.height = `calc(${item.h}% * ${scaleFactor})`;
 
         if (item.image) {
           art.classList.add("has-image");
@@ -491,9 +505,15 @@
 
         if (prefersReducedMotion.matches) {
           card.style.opacity = "1";
-          card.style.transform = "translateY(0) scale(1)";
-          card.style.filter = "blur(0)";
-          card.style.clipPath = "inset(0 0 0 0)";
+          card.style.transform = "none";
+          card.style.filter = "none";
+          card.style.clipPath = "none";
+        } else if (isMobile) {
+          card.style.opacity = "0";
+          requestAnimationFrame(() => {
+            card.style.transitionDelay = `${index * 150}ms`;
+            card.style.opacity = "1";
+          });
         } else {
           card.style.opacity = "0";
           card.style.transform = "translateY(42px) scale(0.92)";
@@ -514,7 +534,7 @@
 
       if (currentLayer) {
         currentLayer.classList.add("is-exiting");
-        if (prefersReducedMotion.matches) {
+        if (prefersReducedMotion.matches || isMobile) {
           currentLayer.remove();
         } else {
           currentLayer.querySelectorAll(".media-card").forEach((card, index) => {
@@ -564,50 +584,6 @@
     }
 
     function updateActiveEntryOnScroll() {
-      if (window.innerWidth <= 820 && timelineEntries.length) {
-        const triggerLine = (window.innerHeight || document.documentElement.clientHeight) * 0.75;
-        const currentScrollY = window.scrollY || window.pageYOffset;
-        const direction = currentScrollY > lastScrollY ? 1 : -1;
-
-        const steps = [...section.querySelectorAll(".timeline-step")];
-        if (!steps.length) {
-          lastScrollY = currentScrollY;
-          return;
-        }
-
-        let foundIndex = -1;
-        steps.forEach((step, index) => {
-          if (step.getBoundingClientRect().top <= triggerLine) {
-            foundIndex = index;
-          }
-        });
-
-        if (foundIndex < 0) {
-          setActiveEntry(-1);
-          lastScrollY = currentScrollY;
-          return;
-        }
-
-        if (activeIndex < 0) {
-          setActiveEntry(0);
-          lastScrollY = currentScrollY;
-          return;
-        }
-
-        let nextIndex = activeIndex;
-        if (foundIndex > activeIndex) {
-          nextIndex = activeIndex + 1;
-        } else if (foundIndex < activeIndex) {
-          nextIndex = Math.max(0, activeIndex - 1);
-        } else if (direction !== 0) {
-          nextIndex = activeIndex;
-        }
-
-        setActiveEntry(clamp(nextIndex, 0, timelineEntries.length - 1));
-        lastScrollY = currentScrollY;
-        return;
-      }
-
       const triggerLine = window.innerHeight * 0.58;
       if (timelineRoot) {
         const timelineTop = timelineRoot.getBoundingClientRect().top;
@@ -674,6 +650,27 @@
 
     function updateHistoryRingRotation() {
       if (!historySection || !historyDrawingRing || !historyPhotoRing) {
+        return;
+      }
+
+      if (window.innerWidth <= 820) {
+        const rect = historySection.getBoundingClientRect();
+        const vh = window.innerHeight || document.documentElement.clientHeight;
+
+        // Mobile: simple crossfade from drawing -> photo as the section moves up the viewport.
+        const startPoint = vh * 0.65;
+        const endPoint = vh * 0.15;
+        let progress = (startPoint - rect.top) / (startPoint - endPoint);
+        progress = Math.max(0, Math.min(1, progress));
+
+        // Keep a subtle motion on mobile (no sticky/lock behavior).
+        const angleDelta = (historyRotateEnd - historyRotateStart) * 0.5;
+        const angle = historyRotateStart + angleDelta * progress;
+
+        historyDrawingRing.style.transform = `rotate(${angle.toFixed(2)}deg)`;
+        historyPhotoRing.style.transform = `rotate(${(angle + 2).toFixed(2)}deg) scale(${(1 + progress * 0.02).toFixed(3)})`;
+        historyDrawingRing.style.opacity = (1 - progress).toFixed(3);
+        historyPhotoRing.style.opacity = progress.toFixed(3);
         return;
       }
 
@@ -1030,71 +1027,7 @@
     }
 
     function initMobileSwipe() {
-      if (!timelineStage || !timelineEntries.length) {
-        return;
-      }
-
-      let touchStartX = 0;
-      let touchStartY = 0;
-      const SWIPE_THRESHOLD = 40;
-
-      function navigateToStep(newIndex) {
-        const steps = [...section.querySelectorAll(".timeline-step")];
-        const targetStep = steps[newIndex];
-        if (!targetStep) {
-          return;
-        }
-        const triggerLine = (window.innerHeight || document.documentElement.clientHeight) * 0.9;
-        const stepAbsoluteTop = targetStep.getBoundingClientRect().top + (window.scrollY || window.pageYOffset);
-        scrollToY(Math.max(0, stepAbsoluteTop - triggerLine + 1), 380);
-      }
-
-      const onTouchStart = (e) => {
-        if (window.innerWidth > 820) {
-          return;
-        }
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-      };
-
-      const onTouchMove = (e) => {
-        if (window.innerWidth > 820) {
-          return;
-        }
-        const deltaX = e.touches[0].clientX - touchStartX;
-        const deltaY = e.touches[0].clientY - touchStartY;
-        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
-          e.preventDefault();
-        }
-      };
-
-      const onTouchEnd = (e) => {
-        if (window.innerWidth > 820) {
-          return;
-        }
-        const deltaX = e.changedTouches[0].clientX - touchStartX;
-        const deltaY = e.changedTouches[0].clientY - touchStartY;
-
-        if (Math.abs(deltaX) < SWIPE_THRESHOLD || Math.abs(deltaY) > Math.abs(deltaX)) {
-          return;
-        }
-
-        const currentActive = Math.max(activeIndex, 0);
-        const newIndex =
-          deltaX < 0
-            ? Math.min(currentActive + 1, timelineEntries.length - 1)
-            : Math.max(currentActive - 1, 0);
-
-        if (newIndex === activeIndex) {
-          return;
-        }
-
-        navigateToStep(newIndex);
-      };
-
-      addManagedEvent(timelineStage, "touchstart", onTouchStart, { passive: true });
-      addManagedEvent(timelineStage, "touchmove", onTouchMove, { passive: false });
-      addManagedEvent(timelineStage, "touchend", onTouchEnd, { passive: true });
+      return;
     }
 
     function initSectionNav() {

@@ -1,4 +1,26 @@
 <!-- /sections/occasion-bottom-cta.liquid -->
+{%- liquid
+  assign resolved_cta_label = section.settings.button_label
+  assign resolved_cta_link = section.settings.button_link
+
+  assign cta_metafield_link = blank
+  if article != blank
+    if article.metafields.custom.cta_link.value != blank
+      assign cta_metafield_link = article.metafields.custom.cta_link.value
+    elsif article.metafields.custom.cta_button.value != blank
+      assign cta_metafield_link = article.metafields.custom.cta_button.value
+    endif
+  endif
+
+  if cta_metafield_link != blank
+    if cta_metafield_link.url != blank
+      assign resolved_cta_link = cta_metafield_link.url
+    endif
+    if cta_metafield_link.text != blank
+      assign resolved_cta_label = cta_metafield_link.text
+    endif
+  endif
+-%}
 {%- style -%}
   #OccasionBottomCta--{{ section.id }} {
     --occasion-bottom-cta-pt: {{ section.settings.padding_top }}px;
@@ -19,9 +41,9 @@
       </div>
     {%- endif -%}
 
-    {%- if section.settings.button_label != blank and section.settings.button_link != blank -%}
-      <a class="occasion-bottom-cta__button" href="{{ section.settings.button_link }}">
-        {{ section.settings.button_label }}
+    {%- if resolved_cta_label != blank and resolved_cta_link != blank -%}
+      <a class="occasion-bottom-cta__button" href="{{ resolved_cta_link }}">
+        {{ resolved_cta_label }}
       </a>
     {%- endif -%}
   </div>

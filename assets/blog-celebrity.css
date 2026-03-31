@@ -127,7 +127,7 @@
 .blog-celebrity__video-modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.9);
   opacity: 0;
   transition: opacity 0.4s ease;
 }
@@ -252,6 +252,11 @@
     object-fit: cover;
   }
 
+  .blog-celebrity__video.blog-celebrity__video--modal {
+    object-fit: contain !important;
+    object-position: center;
+  }
+
   .blog-celebrity__sound-trigger {
     top: 12px;
     left: 12px;
@@ -262,13 +267,19 @@
   .blog-celebrity__video-modal-dialog {
     width: calc(100vw - 32px);
     max-width: calc(100vw - 32px);
-    height: calc(100vh - 96px);
-    max-height: calc(100vh - 96px);
+    height: auto;
+    aspect-ratio: 16 / 9;
+    max-height: calc(100vh - 160px);
   }
 
   .blog-celebrity__video-modal-close {
     top: -40px;
     right: 0;
+  }
+
+  .blog-celebrity__video-modal-player,
+  .blog-celebrity__video--modal {
+    background: transparent;
   }
 
   .blog-celebrity__content-wrapper,

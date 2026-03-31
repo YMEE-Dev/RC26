@@ -265,15 +265,15 @@
     pointer-events: auto;
   }
 
-  .blog-brand__video-modal-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    will-change: opacity;
-    transform: translateZ(0);
-  }
+	  .blog-brand__video-modal-backdrop {
+	    position: absolute;
+	    inset: 0;
+	    background: rgba(0, 0, 0, 0.9);
+	    opacity: 0;
+	    transition: opacity 0.4s ease;
+	    will-change: opacity;
+	    transform: translateZ(0);
+	  }
 
   .blog-brand__video-modal.is-open .blog-brand__video-modal-backdrop {
     opacity: 1;
@@ -396,7 +396,7 @@
     }
   }
 
-  @media (max-width: 749px) {
+	  @media (max-width: 749px) {
     .blog-brand__top {
       width: min(100% - 32px, var(--brand-content-max-width));
       gap: 16px;
@@ -412,11 +412,16 @@
       overflow: hidden;
     }
 
-    .blog-brand__video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+	    .blog-brand__video {
+	      width: 100%;
+	      height: 100%;
+	      object-fit: cover;
+	    }
+
+	    .blog-brand__video.blog-brand__video--modal {
+	      object-fit: contain !important;
+	      object-position: center;
+	    }
 
     .blog-brand__sound-trigger {
       top: 12px;
@@ -430,17 +435,23 @@
       height: 40px !important;
     }
 
-    .blog-brand__video-modal-dialog {
-      width: calc(100vw - 32px);
-      max-width: calc(100vw - 32px);
-      height: calc(100vh - 96px);
-      max-height: calc(100vh - 96px);
-    }
+	    .blog-brand__video-modal-dialog {
+	      width: calc(100vw - 32px);
+	      max-width: calc(100vw - 32px);
+	      height: auto;
+	      aspect-ratio: 16 / 9;
+	      max-height: calc(100vh - 160px);
+	    }
 
-    .blog-brand__video-modal-close {
-      top: -40px;
-      right: 0;
-    }
+	    .blog-brand__video-modal-close {
+	      top: -40px;
+	      right: 0;
+	    }
+
+	    .blog-brand__video-modal-player,
+	    .blog-brand__video--modal {
+	      background: transparent;
+	    }
 
     .blog-brand__content-wrapper,
     .blog-brand__empty {
