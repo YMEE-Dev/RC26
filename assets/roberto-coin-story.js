@@ -228,7 +228,7 @@
         // top-right
         { top: "30px", right: "-4%", width: "190px", height: "172px", scale: "40%" },
         // bottom-left
-        { bottom: "0px", left: "0%", width: "190px", height: "226px", scale: "40%" },
+        { bottom: "0px", left: "0%", width: "190px", height: "200px", scale: "30%" },
         // bottom-right
         { bottom: "-50px", right: "0%", width: "214px", height: "206px", scale: "40%" },
       ],
