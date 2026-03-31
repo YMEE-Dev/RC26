@@ -1792,7 +1792,7 @@
 
                     if (carouselEl && carouselEl.dataset) carouselEl.dataset.emblaInitialized = 'true';
                     carouselEl._emblaInstance = embla;
-                    carouselEl._resetToIntro = function() {
+                    carouselEl._resetToIntro = function () {
                       if (!hasIntroStage) return;
                       carouselStarted = false;
                       introTransitioning = false;
@@ -1808,7 +1808,13 @@
 
                   productImagesEl.addEventListener('theme:media:select', function (e) {
                     if (!e || !e.detail || !e.detail.id) return;
-                    if (productImagesEl.querySelector('[data-embla-slide][data-media-type="model"]')) return;
+                    // When our gallery filter is active, only allow user-initiated
+                    // thumb clicks through. Block programmatic scrolls from variant
+                    // change handlers (product-info updateMedia, etc.).
+                    if (productImagesEl.getAttribute('data-gallery-filter-active') === 'true') {
+                      var fromThumb = e.target && (e.target.closest('product-thumbs') || e.target.tagName === 'PRODUCT-THUMBS');
+                      if (!fromThumb) return;
+                    }
                     var activeCarousel = getActiveCarousel();
                     if (!activeCarousel) return;
 

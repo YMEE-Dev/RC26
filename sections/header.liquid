@@ -38,6 +38,8 @@
     assign transparent_header = true
   elsif template.name == 'product' and section.settings.transparent_product_page
     assign transparent_header = true
+  elsif template.name == 'blog' and section.settings.transparent_blog
+    assign transparent_header = true
   endif
 
   assign main_menu_linklist = section.settings.main_menu_linklist | default: 'main-menu'
@@ -61,10 +63,10 @@
     assign use_transparent_logo_pdp = true
   endif
 
-  assign logo_width = '400'
+  assign logo_width = '800'
   assign logo_width_15x = logo_width | times: 1.5 | round
   assign logo_width_2x = logo_width | times: 2 | round
-  assign logo_width_mobile = '200'
+  assign logo_width_mobile = '360'
   assign logo_width_mobile_15x = logo_width_mobile | times: 1.5 | round
   assign logo_width_mobile_2x = logo_width_mobile | times: 2 | round
   assign logo_sizes = '(min-width: 750px) ' | append: logo_width | append: 'px, (min-width: ' | append: logo_width_mobile_2x | append: 'px) ' | append: logo_width_mobile | append: 'px, calc((100vw - 64px) * 0.5)'
@@ -1584,6 +1586,12 @@
       "label": "Enable on Product pages",
       "info": "Stretch image size recommended. Desktop only",
       "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "transparent_blog",
+      "label": "Enable on Blog page",
+      "default": true
     },
     {
       "type": "image_picker",

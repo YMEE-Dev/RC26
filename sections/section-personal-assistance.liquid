@@ -65,7 +65,7 @@
                   {%- if block.settings.value != blank or block.settings.link != blank -%}
                     {%- if block.settings.link != blank -%}
                      
-                        {{ block.settings.value | default: block.settings.link_title }}
+                        <span class="personal-assistance__item-value-container">{{ block.settings.value | default: block.settings.link_title }}</span>
                     
                     {%- else -%}
                       <span class="personal-assistance__item-value">{{ block.settings.value }}</span>
@@ -362,7 +362,15 @@ a.personal-assistance__item-value:hover {
   }
   .personal-assistance__content{
     max-width: 100% !important;
+    min-width: 100% !important;
   }
+}
+@media (max-width: 768px) {
+  .personal-assistance__media {
+    aspect-ratio: 362 / 231;
+    min-height: auto;
+  }
+  .personal-assistance__item-value-container { display: none }
 }
 {% endstylesheet %}
 

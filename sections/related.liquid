@@ -166,7 +166,12 @@
           capture related_products
             for related_product in current_collection.products
               assign hidden_product = false
+              assign product_type = related_product.type | strip | downcase
               if related_product.tags contains 'hide'
+                assign hidden_product = true
+              endif
+
+              if product_type == 'storytelling'
                 assign hidden_product = true
               endif
 
