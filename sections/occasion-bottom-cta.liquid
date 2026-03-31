@@ -28,26 +28,30 @@
   }
 {%- endstyle -%}
 
-<section
-  id="OccasionBottomCta--{{ section.id }}"
-  class="occasion-bottom-cta"
-  data-section-id="{{ section.id }}"
-  data-section-type="occasion-bottom-cta"
->
-  <div class="occasion-bottom-cta__inner wrapper" data-brand-fade>
-    {%- if section.settings.text != blank -%}
-      <div class="occasion-bottom-cta__text body rte">
-        {{ section.settings.text }}
-      </div>
-    {%- endif -%}
+	<section
+	  id="OccasionBottomCta--{{ section.id }}"
+	  class="occasion-bottom-cta"
+	  data-section-id="{{ section.id }}"
+	  data-section-type="occasion-bottom-cta"
+	>
+	  <div class="occasion-bottom-cta__inner wrapper" data-brand-fade>
+	    <div class="occasion-bottom-cta__text-wrap">
+	      {%- if section.settings.text != blank -%}
+	        <div class="occasion-bottom-cta__text body rte">
+	          {{ section.settings.text }}
+	        </div>
+	      {%- endif -%}
+	    </div>
 
-    {%- if resolved_cta_label != blank and resolved_cta_link != blank -%}
-      <a class="occasion-bottom-cta__button" href="{{ resolved_cta_link }}">
-        {{ resolved_cta_label }}
-      </a>
-    {%- endif -%}
-  </div>
-</section>
+	    <div class="occasion-bottom-cta__button-wrap">
+	      {%- if resolved_cta_label != blank and resolved_cta_link != blank -%}
+	        <a class="occasion-bottom-cta__button" href="{{ resolved_cta_link }}">
+	          {{ resolved_cta_label }}
+	        </a>
+	      {%- endif -%}
+	    </div>
+	  </div>
+	</section>
 
 {% stylesheet %}
   .occasion-bottom-cta {
@@ -55,17 +59,24 @@
     padding-bottom: 100px;
   }
 
-  .occasion-bottom-cta__inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 100px;
-  }
+	  .occasion-bottom-cta__inner {
+	    display: flex;
+	    flex-direction: column;
+	    align-items: center;
+	    gap: 100px;
+	  }
 
-  .occasion-bottom-cta__text {
-    text-align: center;
-    max-width: 700px;
-  }
+	  .occasion-bottom-cta__text-wrap,
+	  .occasion-bottom-cta__button-wrap {
+	    width: 100%;
+	    display: flex;
+	    justify-content: center;
+	  }
+
+	  .occasion-bottom-cta__text {
+	    text-align: center;
+	    max-width: 700px;
+	  }
 
   .occasion-bottom-cta__text p {
     margin-left: auto;
@@ -112,10 +123,18 @@
     }
   }
 
-  @media (max-width: 749px) {
-    .occasion-bottom-cta__button {
-      width: min(100%, 400px);
-    }
+	  @media (max-width: 749px) {
+	    .main-content--article-occasion-style .occasion-bottom-cta__inner {
+	      gap: 0;
+	    }
+
+	    .main-content--article-occasion-style .occasion-bottom-cta__button-wrap {
+	      margin-top: 60px;
+	    }
+
+	    .occasion-bottom-cta__button {
+	      width: min(100%, 400px);
+	    }
 
     .main-content--article-brand .occasion-bottom-cta__inner,
     .main-content--article-celebrity .occasion-bottom-cta__inner,

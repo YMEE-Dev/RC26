@@ -14,13 +14,13 @@
     }
   {%- endstyle -%}
 
-  <section
-    id="BrandSplitRow--{{ section.id }}"
-    class="brand-split-row"
-    data-section-id="{{ section.id }}"
-    data-section-type="brand-split-row"
-  >
-    <div class="brand-split-row__inner {{ section.settings.width }}{% if section.settings.layout == 'image-right' %} brand-split-row__inner--image-right{% endif %}">
+	  <section
+	    id="BrandSplitRow--{{ section.id }}"
+	    class="brand-split-row"
+	    data-section-id="{{ section.id }}"
+	    data-section-type="brand-split-row"
+	  >
+	    <div class="brand-split-row__inner {{ section.settings.width }}{% if section.settings.layout == 'image-right' %} brand-split-row__inner--image-right{% endif %}{% if section.settings.image == blank %} brand-split-row__inner--no-image{% endif %}">
       {%- if section.settings.image != blank -%}
         <div class="brand-split-row__media" data-brand-fade>
           {{
@@ -75,9 +75,21 @@
     margin: 0;
   }
 
-  .brand-split-row__copy {
-    padding-right: 40px;
-  }
+	  .brand-split-row__copy {
+	    padding-right: 40px;
+	  }
+
+	  .brand-split-row__inner--no-image {
+	    grid-template-columns: 1fr;
+	  }
+
+	  .brand-split-row__inner--no-image .brand-split-row__copy {
+	    padding-right: 0;
+	    max-width: 700px;
+	    margin-left: auto;
+	    margin-right: auto;
+	    text-align: center;
+	  }
 
   @media (min-width: 990px) {
     .main-content--article-brand .brand-split-row__inner {
