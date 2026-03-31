@@ -8,7 +8,8 @@
         this.dialog = this.querySelector('.head-country-redirect__dialog');
         this.scrollableEl = this.querySelector('[data-scroll-lock-scrollable]');
         this.ctaButton = this.querySelector('[data-country-redirect-cta]');
-        this.siteText = this.querySelector('[data-country-redirect-site]');
+        this.copy = this.querySelector('[data-country-redirect-copy]');
+        this.copyTemplate = this.copy ? this.copy.innerHTML : '';
         this.config = this.getConfig();
 
         if (!this.dialog || !this.config?.enabled) return;
@@ -25,7 +26,7 @@
 
         if (!matchedRule) return;
 
-        this.detectedCountry = detectedCountry || 'your current region';
+        this.detectedCountry = matchedRule.countryCode || detectedCountry || '';
         this.matchedRule = matchedRule;
         this.siteLabel = matchedRule.siteName || matchedRule.url.hostname;
 
@@ -103,6 +104,7 @@
           return {
             siteName: String(rule.siteName || '').trim(),
             url: parsedUrl,
+            countryCode,
           };
         } catch (error) {
           continue;
@@ -133,6 +135,7 @@
           return {
             siteName: String(rule.siteName || '').trim(),
             url: parsedUrl,
+            countryCode: this.getPrimaryCountryCode(rule),
           };
         } catch (error) {
           continue;
@@ -140,6 +143,33 @@
       }
 
       return null;
+    }
+
+    getPrimaryCountryCode(rule) {
+      return String(rule?.countryCodes || '')
+        .split(',')
+        .map((code) => code.trim().toUpperCase())
+        .find(Boolean) || '';
+    }
+
+    getCountryLabel(countryCode) {
+      if (!countryCode) {
+        return 'your region';
+      }
+
+      if (typeof Intl === 'undefined' || typeof Intl.DisplayNames !== 'function') {
+        return countryCode;
+      }
+
+      try {
+        const displayNames = new Intl.DisplayNames([document.documentElement.lang || 'en'], {
+          type: 'region',
+        });
+
+        return displayNames.of(countryCode) || countryCode;
+      } catch (error) {
+        return countryCode;
+      }
     }
 
     bindEvents() {
@@ -165,14 +195,16 @@
       this.ctaButton?.addEventListener('click', this.handleImmediateRedirect);
     }
 
+    escapeHtml(value) {
+      const span = document.createElement('span');
+      span.textContent = value;
+      return span.innerHTML;
+    }
+
     updateDynamicContent() {
-      if (this.siteText) {
-        this.siteText.textContent =
-          'You are navigating from ' +
-          this.detectedCountry +
-          '. Please continue on the dedicated ' +
-          this.siteLabel +
-          ' site for your region.';
+      if (this.copy && this.copyTemplate) {
+        const countryLabel = this.getCountryLabel(this.detectedCountry);
+        this.copy.innerHTML = this.copyTemplate.replace(/\[country\]/gi, this.escapeHtml(countryLabel));
       }
     }
 
