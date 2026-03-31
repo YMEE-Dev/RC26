@@ -380,6 +380,32 @@
       productImagesEl.setAttribute("data-active-media", visibleMediaIds[0]);
     }
 
+    // Install a capturing-phase listener that blocks non-thumb
+    // theme:media:select events while the filter is active.  This prevents
+    // product-images' built-in setActiveMedia handler from corrupting
+    // data-active-media / thumb is-active state when product-info fires
+    // updateMedia asynchronously after a variant change.
+    if (!productImagesEl._galleryFilterCapture) {
+      productImagesEl._galleryFilterCapture = true;
+      productImagesEl.addEventListener(
+        "theme:media:select",
+        function (e) {
+          if (productImagesEl.getAttribute("data-gallery-filter-active") !== "true") return;
+          var tgt = e.target;
+          var fromThumb =
+            tgt &&
+            (tgt.closest
+              ? tgt.closest("product-thumbs")
+              : tgt.tagName && tgt.tagName.toLowerCase() === "product-thumbs");
+          if (!fromThumb) {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+          }
+        },
+        true
+      );
+    }
+
     // Flag that our gallery filter is active — the theme:media:select handler
     // in product.liquid checks this to skip carousel manipulation that would
     // undo our filtering (scroll to featured_media, setCarouselStarted, etc.)
