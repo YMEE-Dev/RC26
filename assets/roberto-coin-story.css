@@ -922,6 +922,7 @@ body.has-rc-story {
   width: min(1232px, calc(100% - 48px));
   min-height: 700px;
   margin: 0 auto;
+  background-image: var(--ruby-image);
   background: linear-gradient(135deg, #7f0f22 0%, #4f0c1c 45%, #23070f 100%);
   background-position: center;
   background-size: cover;
@@ -1177,10 +1178,26 @@ body.has-rc-story {
   @media (max-width: 820px) {
     .year-rail button {
       opacity: 0;
+      display: none;
     }
 
     .year-rail button.is-active {
       opacity: 1;
+      display: block;
+    }
+
+    .timeline-stage.is-active .year-rail {
+      opacity: 1;
+    }
+
+    .year-rail button.is-active {
+      color: #ffffff;
+      font-size: 160px;
+      text-shadow: 0 0 12px rgba(0, 0, 0, 0.35);
+    }
+
+    .year-rail {
+      gap: 0;
     }
   }
 
@@ -1296,6 +1313,9 @@ body.has-rc-story {
     position: relative;
     display: flex;
     align-items: flex-end;
+    margin-top: -150px;
+    background-position: center -80px;
+    background-image: var(--ruby-image-mobile, var(--ruby-image));
   }
 
   .ruby-section__content {
