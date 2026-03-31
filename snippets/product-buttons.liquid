@@ -661,13 +661,21 @@
   }
 
   /* ── Coordinated button visibility (no size dropdown) ── */
-  /* Notify button hidden by default; JS toggles display directly */
-  .product__submit__item [data-add-to-cart]:disabled,
-  .product__submit__item [data-bis-drawer-open='notify'] {
+  /* Notify / Available Soon buttons hidden by default.
+     JS toggles the [data-notify-active] attribute on the container
+     to swap between ATC and Notify – independent of the theme's
+     transient disabled state on [data-add-to-cart]. */
+  .product__submit__item > .btn[data-bis-drawer-open='notify'],
+  .product__submit__item > .btn[data-bis-drawer-open='available_soon'] {
     display: none !important;
   }
 
-  .product__submit__item [data-add-to-cart]:disabled + [data-bis-drawer-open='notify'] {
+  .product__submit__item[data-notify-active] > .btn[data-bis-drawer-open='notify'],
+  .product__submit__item[data-notify-active] > .btn[data-bis-drawer-open='available_soon'] {
     display: flex !important;
+  }
+
+  .product__submit__item[data-notify-active] > [data-add-to-cart] {
+    display: none !important;
   }
 {% endstylesheet %}

@@ -1636,15 +1636,24 @@
     var notifyBtn = sectionRoot.querySelector("[data-bis-drawer-open]");
     if (!notifyBtn) return;
 
-    // If no variant passed (e.g. DOMContentLoaded), read from hidden input + product JSON
-    if (!variant) {
-      var variantIdInput = sectionRoot.querySelector('input[name="id"]');
+    // Always prefer the currently selected variant id from the product form.
+    // Color/option changes can emit intermediate variant events; reading the
+    // latest selected id avoids transient notify/add-to-cart flicker.
+    var selectedVariantId = "";
+    var primaryVariantIdInput = sectionRoot.querySelector('input[name="id"]');
+    if (primaryVariantIdInput && primaryVariantIdInput.value) {
+      selectedVariantId = String(primaryVariantIdInput.value);
+    }
+
+    // If no variant is provided, or provided variant is stale, resolve from
+    // current selected id + product JSON.
+    if (!variant || (selectedVariantId && String(variant.id) !== selectedVariantId)) {
       var productDataEl = sectionRoot.querySelector("[data-product-json]");
-      if (!variantIdInput || !productDataEl) return;
+      if (!productDataEl || !selectedVariantId) return;
       try {
         var productData = JSON.parse(productDataEl.textContent);
         variant = productData.variants.find(function (v) {
-          return String(v.id) === String(variantIdInput.value);
+          return String(v.id) === selectedVariantId;
         });
       } catch (e) {
         return;
@@ -1655,22 +1664,39 @@
 
     var isOutOfStock = !variant.available;
 
-    // Toggle notify button via display (CSS sets display:none by default)
-    notifyBtn.style.display = isOutOfStock ? "flex" : "none";
-    if (isOutOfStock) {
-      notifyBtn.setAttribute("data-variant-id", variant.id);
+    // Toggle visibility via a data attribute on the container.
+    // CSS rules key off [data-notify-active] to swap ATC ↔ Notify.
+    // This is immune to the theme's transient toggleSubmitButton()
+    // calls that briefly set disabled on ATC during variant changes.
+    var submitItem = notifyBtn.closest('.product__submit__item');
+    if (submitItem) {
+      if (isOutOfStock) {
+        submitItem.setAttribute('data-notify-active', '');
+      } else {
+        submitItem.removeAttribute('data-notify-active');
+      }
     }
 
-    // Toggle Add to Cart disabled state
-    var addToCartBtn = sectionRoot.querySelector("[data-add-to-cart]");
-    if (addToCartBtn) {
-      addToCartBtn.disabled = isOutOfStock;
+    if (isOutOfStock) {
+      notifyBtn.setAttribute("data-variant-id", variant.id);
     }
   }
 
   document.addEventListener("theme:variant:change", function (e) {
     updateNotifyButtonVisibility(e.detail && e.detail.variant);
   });
+
+  // Also subscribe to the theme's pub/sub variantChange event.  This fires
+  // AFTER product-info finishes its fetch + DOM updates (toggleSubmitButton,
+  // innerHTML replacements, etc.), so it corrects any state that the theme's
+  // built-in handler may have overwritten between our earlier
+  // theme:variant:change dispatch and the fetch response.
+  if (window.subscribe && window.theme && window.theme.PUB_SUB_EVENTS) {
+    window.subscribe(window.theme.PUB_SUB_EVENTS.variantChange, function (event) {
+      var variant = event && event.data && event.data.variant;
+      updateNotifyButtonVisibility(variant || null);
+    });
+  }
 
   document.addEventListener("DOMContentLoaded", function () {
     updateNotifyButtonVisibility(null);
