@@ -10,6 +10,8 @@
   *  desktop_height {Int} - A specific height of the image on desktop (Optional)
   *  mobile_height {Int} - A specific height of the image on mobile (Optional)
   *  sizes {String} - A set of media conditions (Optional)
+  *  sizes_desktop {String} - Desktop image size conditions (Optional)
+  *  sizes_mobile {String} - Mobile image size value (Optional)
   *  widths {Array} - An array of the image widths for srcset (Optional)
   *  width {Int} - The default image width (Optional)
   *  modifier {String} - Additional classes for the image container tag (Optional)
@@ -32,6 +34,9 @@
   assign image_width = image.width | at_most: 5760 | default: 5760
   assign width = width | default: image_width
   assign sizes = sizes | default: '100vw'
+  assign has_responsive_sizes = false
+  assign sizes_desktop = sizes_desktop | default: blank
+  assign sizes_mobile = sizes_mobile | default: blank
   assign modifier = modifier | default: ''
   assign widths_default = '180, 360, 540, 720, 900, 1080, 1296, 1512, 1728, 1950, 2100, 2260, 2450, 2700, 3000, 3350, 3750, 4100, 4450, 4800, 5150, 5500, 5760'
   assign widths = widths | default: widths_default
@@ -41,6 +46,115 @@
   assign fetchpriority = fetchpriority | default: null
   assign is_mixed_picture = false
   assign wrapper_tag = 'div'
+  assign mobile_source_image = image_mobile | default: image
+  assign desktop_source_image = image_desktop | default: image
+  assign desktop_cover_scale = 1
+  assign mobile_cover_scale = 1
+  assign mobile_height_size = blank
+  assign mobile_height_multiplier = blank
+
+  if sizes_desktop != blank or sizes_mobile != blank
+    assign has_responsive_sizes = true
+  endif
+
+  if desktop_source_image != blank and aspect_ratio != blank
+    if desktop_source_image.aspect_ratio > aspect_ratio
+      assign desktop_cover_scale = desktop_source_image.aspect_ratio | divided_by: aspect_ratio
+    endif
+  endif
+
+  if mobile_source_image != blank and aspect_ratio_mobile != blank
+    if mobile_source_image.aspect_ratio > aspect_ratio_mobile
+      assign mobile_cover_scale = mobile_source_image.aspect_ratio | divided_by: aspect_ratio_mobile
+    endif
+  endif
+
+  if sizes_desktop == blank
+    assign sizes_desktop = sizes
+  endif
+
+  if sizes_mobile == blank
+    assign sizes_mobile = sizes
+  endif
+
+  assign sizes_desktop_responsive = sizes_desktop
+  assign sizes_mobile_responsive = sizes_mobile
+  assign sizes_responsive = sizes
+
+  if desktop_cover_scale > 1
+    unless sizes_desktop_responsive contains ','
+      capture sizes_desktop_responsive
+        echo 'calc(' | append: sizes_desktop | append: ' * ' | append: desktop_cover_scale | append: ')'
+      endcapture
+    endunless
+  endif
+
+  if mobile_cover_scale > 1
+    unless sizes_mobile_responsive contains ','
+      capture sizes_mobile_responsive
+        echo 'calc(' | append: sizes_mobile | append: ' * ' | append: mobile_cover_scale | append: ')'
+      endcapture
+    endunless
+  endif
+
+  case mobile_height
+    when 'screen-height-full--mobile'
+      assign mobile_height_multiplier = 100
+    when 'screen-height-three-quarters--mobile'
+      assign mobile_height_multiplier = 75
+    when 'screen-height-two-thirds--mobile'
+      assign mobile_height_multiplier = 67
+    when 'screen-height-one-half--mobile'
+      assign mobile_height_multiplier = 50
+    when 'screen-height-one-third--mobile'
+      assign mobile_height_multiplier = 33
+    when 'seven-fifty-height-hero--mobile'
+      assign mobile_height_size = 750
+    when 'sixty-fifty-height-hero--mobile'
+      assign mobile_height_size = 650
+    when 'five-fifty-height-hero--mobile'
+      assign mobile_height_size = 550
+    when 'four-fifty-height-hero--mobile'
+      assign mobile_height_size = 450
+    when 'four-hundred-height-hero--mobile'
+      assign mobile_height_size = 400
+    when 'three-fifty-height-hero--mobile'
+      assign mobile_height_size = 350
+    when 'three-hundred-height-hero--mobile'
+      assign mobile_height_size = 300
+    when 'two-fifty-height-hero--mobile'
+      assign mobile_height_size = 250
+    when 'two-hundred-height-hero--mobile'
+      assign mobile_height_size = 200
+    when 'one-fifty-height-hero--mobile'
+      assign mobile_height_size = 150
+  endcase
+
+  if mobile_source_image != blank
+    if mobile_height_multiplier != blank
+      assign has_responsive_sizes = true
+      capture sizes_mobile_responsive
+        echo mobile_height_multiplier | times: mobile_source_image.aspect_ratio | round: 0 | append: 'vh'
+      endcapture
+    elsif mobile_height_size != blank
+      assign has_responsive_sizes = true
+      capture sizes_mobile_responsive
+        echo mobile_height_size | times: mobile_source_image.aspect_ratio | round: 0 | append: 'px'
+      endcapture
+    endif
+  endif
+
+  if has_responsive_sizes
+    capture sizes_responsive
+      if sizes_desktop contains '(min-width'
+        echo sizes_desktop_responsive
+      else
+        echo '(min-width: 750px) ' | append: sizes_desktop_responsive
+      endif
+
+      echo ', ' | append: sizes_mobile_responsive
+    endcapture
+  endif
 
   if settings.parallax_enable
     assign wrapper_tag = 'parallax-hero'
@@ -142,8 +256,8 @@
         {%- endstyle -%}
 
         <picture id="{{ id }}">
-          <source media="(min-width: 750px)" sizes="{{ sizes }}" srcset="{{ srcset_desktop }}">
-          <source media="(max-width: 749px)" sizes="{{ sizes }}" srcset="{{ srcset_mobile }}">
+          <source media="(min-width: 750px)" sizes="{{ sizes_desktop_responsive }}" srcset="{{ srcset_desktop }}">
+          <source media="(max-width: 749px)" sizes="{{ sizes_mobile_responsive }}" srcset="{{ srcset_mobile }}">
 
           {{
             image
@@ -152,7 +266,7 @@
               loading: loading,
               fetchpriority: fetchpriority,
               alt: alt,
-              sizes: sizes,
+              sizes: sizes_responsive,
               srcset: srcset_mobile,
               class: 'is-loading',
               style: 'object-position: var(--focal-point, center)'
@@ -167,7 +281,7 @@
           | image_tag:
             loading: loading,
             srcset: srcset,
-            sizes: sizes,
+            sizes: sizes_responsive,
             alt: alt,
             fetchpriority: fetchpriority,
             preload: preload,
