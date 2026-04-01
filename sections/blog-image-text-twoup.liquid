@@ -1,0 +1,244 @@
+<!-- /sections/blog-image-text-twoup.liquid -->
+{%- liquid
+  assign has_any_content = false
+  if section.settings.full_image != blank or section.settings.center_text != blank or section.settings.two_image_left != blank or section.settings.two_image_right != blank
+    assign has_any_content = true
+  endif
+-%}
+
+{%- if has_any_content -%}
+  {%- style -%}
+    #BlogImageTextTwoup--{{ section.id }} {
+      --twoup-pt: {{ section.settings.padding_top }}px;
+      --twoup-pb: {{ section.settings.padding_bottom }}px;
+      --twoup-gap: {{ section.settings.section_gap }}px;
+    }
+  {%- endstyle -%}
+
+  <section
+    id="BlogImageTextTwoup--{{ section.id }}"
+    class="blog-image-text-twoup"
+    data-section-id="{{ section.id }}"
+    data-section-type="blog-image-text-twoup"
+  >
+    <div class="blog-image-text-twoup__inner {{ section.settings.width }}">
+      {%- if section.settings.full_image != blank -%}
+        <div class="blog-image-text-twoup__full-image-wrap" data-brand-fade>
+          {{
+            section.settings.full_image
+            | image_url: width: 2200
+            | image_tag:
+              class: 'blog-image-text-twoup__full-image',
+              widths: '750, 1100, 1500, 1800, 2200',
+              sizes: '(min-width: 990px) 1200px, calc(100vw - 32px)',
+              loading: 'lazy'
+          }}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.center_text != blank -%}
+        <div class="blog-image-text-twoup__center-text body rte" data-brand-fade>
+          {{ section.settings.center_text }}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.two_image_left != blank or section.settings.two_image_right != blank -%}
+        <div class="blog-image-text-twoup__two-images">
+          {%- if section.settings.two_image_left != blank -%}
+            <div class="blog-image-text-twoup__two-image-item" data-brand-fade>
+              {{
+                section.settings.two_image_left
+                | image_url: width: 1200
+                | image_tag:
+                  class: 'blog-image-text-twoup__image',
+                  widths: '375, 550, 750, 900, 1100, 1200',
+                  sizes: '(min-width: 990px) 50vw, 100vw',
+                  loading: 'lazy'
+              }}
+            </div>
+          {%- endif -%}
+
+          {%- if section.settings.two_image_right != blank -%}
+            <div class="blog-image-text-twoup__two-image-item" data-brand-fade>
+              {{
+                section.settings.two_image_right
+                | image_url: width: 1200
+                | image_tag:
+                  class: 'blog-image-text-twoup__image',
+                  widths: '375, 550, 750, 900, 1100, 1200',
+                  sizes: '(min-width: 990px) 50vw, 100vw',
+                  loading: 'lazy'
+              }}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </section>
+{%- endif -%}
+
+{% stylesheet %}
+  .blog-image-text-twoup {
+    padding-top: var(--twoup-pt);
+    padding-bottom: var(--twoup-pb);
+  }
+
+  .blog-image-text-twoup__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--twoup-gap);
+  }
+
+  .blog-image-text-twoup__full-image,
+  .blog-image-text-twoup__image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .blog-image-text-twoup__full-image-wrap {
+    height: 200px;
+    overflow: hidden;
+  }
+
+  @media (min-width: 990px) {
+    .blog-image-text-twoup__full-image-wrap {
+      height: 500px;
+    }
+  }
+
+  .blog-image-text-twoup__full-image {
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .blog-image-text-twoup__center-text {
+    width: min(100%, 700px);
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  .blog-image-text-twoup__center-text p {
+    margin: 0;
+  }
+
+  .blog-image-text-twoup__two-images {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 40px;
+  }
+
+  @media (min-width: 990px) {
+    .main-content--article-brand .blog-image-text-twoup__inner {
+      width: min(100% - 48px, 1100px);
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+	  @media (max-width: 989px) {
+	    .blog-image-text-twoup__center-text {
+	      padding-top: 0;
+	      padding-bottom: 0;
+	    }
+
+	    .blog-image-text-twoup {
+	      /* Reduce space above and below the center text on mobile. */
+	      --twoup-gap: max(0px, calc(var(--twoup-gap) - 40px));
+	    }
+
+	    .blog-image-text-twoup__two-images {
+	      grid-template-columns: 1fr;
+	      gap: 24px;
+	    }
+
+    .main-content--article-brand .blog-image-text-twoup__inner {
+      padding-left: 20px;
+      padding-right: 20px;
+      box-sizing: border-box;
+    }
+
+	    .blog-image-text-twoup__center-text {
+	      width: 100%;
+	      text-align: center;
+	      margin-left: auto;
+	      margin-right: auto;
+	    }
+	  }
+	{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Image + Text + Two Images",
+  "settings": [
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        {"value": "wrapper--full", "label": "Full width"},
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"}
+      ]
+    },
+    {
+      "type": "image_picker",
+      "id": "full_image",
+      "label": "Full image"
+    },
+    {
+      "type": "richtext",
+      "id": "center_text",
+      "label": "Centered text"
+    },
+    {
+      "type": "image_picker",
+      "id": "two_image_left",
+      "label": "Two-up image left"
+    },
+    {
+      "type": "image_picker",
+      "id": "two_image_right",
+      "label": "Two-up image right"
+    },
+    {
+      "type": "range",
+      "id": "section_gap",
+      "min": 20,
+      "max": 140,
+      "step": 2,
+      "unit": "px",
+      "label": "Section gap",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image + Text + Two Images",
+      "category": "Blog"
+    }
+  ]
+}
+{% endschema %}
