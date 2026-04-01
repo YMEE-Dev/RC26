@@ -256,16 +256,10 @@
     text-decoration: none;
   }
 
-  .protection-card:has(.protection-card__overlay-link):hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-    transition: transform 0.2s ease, opacity 0.2s ease;
-  }
-
   .protection-card__image {
     width: 100%;
     margin-bottom: 40px;
-    /* aspect-ratio: 357/318; */
+    aspect-ratio: 357/318;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -277,7 +271,14 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
+
+  .protection-card:has(.protection-card__overlay-link):hover .protection-card__image img {
+    transform: scale(1.05);
+  }
+
   @media (max-width: 768px) {
     .protection-card__image {
       height: auto !important;
