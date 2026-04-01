@@ -130,6 +130,15 @@
     if accordion_brand_collection != blank
       assign accordion_collection_title = accordion_brand_collection.title | default: accordion_collection_title
     endif
+    assign accordion_collection_words = accordion_collection_title | split: ' '
+    assign accordion_collection_title = ''
+    for word in accordion_collection_words
+      assign capitalized_word = word | capitalize
+      assign accordion_collection_title = accordion_collection_title | append: capitalized_word
+      unless forloop.last
+        assign accordion_collection_title = accordion_collection_title | append: ' '
+      endunless
+    endfor
 
     assign accordion_category = product.type | downcase
 
