@@ -9,6 +9,7 @@
   assign has_video = false
   assign section_classes = 'blog-brand'
   assign modal_id = 'BlogBrandVideoModal--' | append: section.id
+  assign modal_title_id = modal_id | append: '-title'
   assign modal_label = 'Brand video'
 
   if section.settings.featured_article != blank
@@ -129,26 +130,25 @@
     {%- if has_video -%}
       <div class="blog-brand__media" data-brand-fade data-brand-fade-delay="0.6">
         {{ inline_video_markup }}
-        {% comment %}
-          <button
-            type="button"
-            class="blog-brand__sound-trigger"
-            data-brand-video-open
-            aria-controls="{{ modal_id }}"
-            aria-expanded="false"
-            aria-label="Play with sound"
-          >
-            <span class="blog-brand__sound-icon" aria-hidden="true">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 43.52 43.52" fill="none">
-                <circle cx="21.76" cy="21.76" r="21.26" />
-                <line x1="27.18" y1="17.88" x2="34.16" y2="24.87" />
-                <line x1="34.16" y1="17.88" x2="27.18" y2="24.87" />
-                <polygon points="11.47 17.21 11.47 26.31 18.41 26.31 23.99 31.89 23.99 11.63 18.41 17.21 11.47 17.21" />
-              </svg>
-            </span>
-            <span>PLAY WITH SOUND</span>
-          </button>
-        {% endcomment %}
+        <button
+          type="button"
+          class="blog-brand__sound-trigger"
+          data-brand-video-open
+          aria-controls="{{ modal_id }}"
+          aria-expanded="false"
+          aria-haspopup="dialog"
+          aria-label="Play with sound"
+        >
+          <span class="blog-brand__sound-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 43.52 43.52" fill="none">
+              <circle cx="21.76" cy="21.76" r="21.26" />
+              <line x1="27.18" y1="17.88" x2="34.16" y2="24.87" />
+              <line x1="34.16" y1="17.88" x2="27.18" y2="24.87" />
+              <polygon points="11.47 17.21 11.47 26.31 18.41 26.31 23.99 31.89 23.99 11.63 18.41 17.21 11.47 17.21" />
+            </svg>
+          </span>
+          <span>Play with sound</span>
+        </button>
       </div>
 
       <div
@@ -163,8 +163,10 @@
           class="blog-brand__video-modal-dialog"
           role="dialog"
           aria-modal="true"
-          aria-label="{{ modal_label | escape }}"
+          aria-labelledby="{{ modal_title_id }}"
+          tabindex="-1"
         >
+          <h3 id="{{ modal_title_id }}" class="visually-hidden">{{ modal_label | escape }}</h3>
           <button
             type="button"
             class="blog-brand__video-modal-close"
