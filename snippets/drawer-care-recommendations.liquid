@@ -1,7 +1,7 @@
 {% doc %}
   Renders care recommendations in a drawer with tabs driven by a metaobject list.
 
-  Metafield setup (same pattern as other drawers):
+  Metafield setup:
     - shop.metafields.info.care_recommendations  (type: list.metaobject_reference)
     - Each metaobject entry has:
         tab_label   (single_line_text)
@@ -9,7 +9,7 @@
         description (rich_text or multi_line_text)
         image       (file_reference → image)
 
-  Falls back to 4 hardcoded tabs when metafield is not configured.
+  Product- and collection-level metafields override shop-level.
 {% enddoc %}
 
 {%- liquid
@@ -24,26 +24,30 @@
 -%}
 
 <div class="drawer-care-recommendations drawer__content-wrapper">
-  <h2 class="drawer-care-recommendations__title drawer-content__title">
-    {{- 'products.product.care_recommendations_title' | t -}}
-  </h2>
+  <div class="care-header">
+    <h2 class="drawer-care-recommendations__title drawer-content__title">
+      {{- 'products.product.care_recommendations_title' | t -}}
+    </h2>
+
+    {%- if care_content != blank -%}
+      <div class="care-tabs" role="tablist" aria-label="{{ 'products.product.care_recommendations_title' | t }}">
+        {%- for tab in care_content -%}
+          <button
+            class="care-tabs__tab{% if forloop.first %} is-active{% endif %}"
+            role="tab"
+            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+            aria-controls="care-tab-panel-{{ forloop.index0 }}"
+            id="care-tab-{{ forloop.index0 }}"
+            data-care-tab="{{ forloop.index0 }}"
+          >
+            {{- tab.tab_label | default: tab.title -}}
+          </button>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
 
   {%- if care_content != blank -%}
-    <div class="care-tabs" role="tablist" aria-label="{{ 'products.product.care_recommendations_title' | t }}">
-      {%- for tab in care_content -%}
-        <button
-          class="care-tabs__tab{% if forloop.first %} is-active{% endif %}"
-          role="tab"
-          aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
-          aria-controls="care-tab-panel-{{ forloop.index0 }}"
-          id="care-tab-{{ forloop.index0 }}"
-          data-care-tab="{{ forloop.index0 }}"
-        >
-          {{- tab.tab_label | default: tab.title -}}
-        </button>
-      {%- endfor -%}
-    </div>
-
     <div class="care-tabs__panels">
       {%- for tab in care_content -%}
         <div
@@ -51,9 +55,9 @@
           id="care-tab-panel-{{ forloop.index0 }}"
           role="tabpanel"
           aria-labelledby="care-tab-{{ forloop.index0 }}"
-          {% unless forloop.first %}
+          {%- unless forloop.first %}
             hidden
-          {% endunless %}
+          {%- endunless %}
         >
           {%- if tab.title != blank -%}
             <h3 class="care-tabs__panel-heading">{{ tab.title }}</h3>
@@ -73,92 +77,6 @@
         </div>
       {%- endfor -%}
     </div>
-
-  {%- else -%}
-    {%- comment -%} Fallback: hardcoded 4 tabs {%- endcomment -%}
-    {%- assign fallback_tabs = 'every-day,cleaning,storage,stone-care' | split: ',' -%}
-    {%- assign fallback_labels = 'Every Day,Cleaning,Storage,Stone Care' | split: ',' -%}
-
-    <div class="care-tabs" role="tablist" aria-label="{{ 'products.product.care_recommendations_title' | t }}">
-      {%- for tab in fallback_tabs -%}
-        <button
-          class="care-tabs__tab{% if forloop.first %} is-active{% endif %}"
-          role="tab"
-          aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
-          aria-controls="care-tab-panel-{{ tab }}"
-          id="care-tab-{{ tab }}"
-          data-care-tab="{{ tab }}"
-        >
-          {{- fallback_labels[forloop.index0] -}}
-        </button>
-      {%- endfor -%}
-    </div>
-
-    <div class="care-tabs__panels">
-      {%- for tab in fallback_tabs -%}
-        <div
-          class="care-tabs__panel{% if forloop.first %} is-active{% endif %}"
-          id="care-tab-panel-{{ tab }}"
-          role="tabpanel"
-          aria-labelledby="care-tab-{{ tab }}"
-          {% unless forloop.first %}
-            hidden
-          {% endunless %}
-        >
-          {%- case tab -%}
-            {%- when 'every-day' -%}
-              <h3 class="care-tabs__panel-heading">Everyday Care</h3>
-              <div class="care-tabs__panel-body drawer-content__description">
-                <p>
-                  To preserve the beauty of your Roberto Coin jewel, avoid contact with perfumes, lotions, and household
-                  chemicals. Remove your jewelry before swimming, exercising, or sleeping.
-                </p>
-                <p>
-                  Store each piece separately to prevent scratching, and handle your jewel with care to maintain its
-                  brilliance over time.
-                </p>
-              </div>
-            {%- when 'cleaning' -%}
-              <h3 class="care-tabs__panel-heading">Professional Maintenance</h3>
-              <div class="care-tabs__panel-body drawer-content__description">
-                <p>
-                  To maintain the brilliance and value of your Roberto Coin creation, regular cleaning is essential. We
-                  recommend an annual visit to a Roberto Coin boutique, where our experts can carefully inspect, clean
-                  and restore your jewel's luminosity.
-                </p>
-                <p>
-                  If your piece features precious stones, professional handling is particularly important to ensure
-                  their integrity and secure setting over time.
-                </p>
-              </div>
-            {%- when 'storage' -%}
-              <h3 class="care-tabs__panel-heading">Proper Storage</h3>
-              <div class="care-tabs__panel-body drawer-content__description">
-                <p>
-                  Store your Roberto Coin jewelry in the original box or a soft pouch, away from direct sunlight and
-                  humidity. Keep pieces separated to avoid scratches.
-                </p>
-                <p>
-                  For long-term storage, consider a dry, temperature-controlled environment to protect metals and
-                  gemstones.
-                </p>
-              </div>
-            {%- when 'stone-care' -%}
-              <h3 class="care-tabs__panel-heading">Stone Care</h3>
-              <div class="care-tabs__panel-body drawer-content__description">
-                <p>
-                  Precious and semi-precious stones require special attention. Avoid exposing them to extreme
-                  temperatures or harsh chemicals. Clean gently with a soft, damp cloth.
-                </p>
-                <p>
-                  Some stones such as pearls, emeralds, and opals are particularly delicate — consult our specialists
-                  for guidance specific to your piece.
-                </p>
-              </div>
-          {%- endcase -%}
-        </div>
-      {%- endfor -%}
-    </div>
   {%- endif -%}
 </div>
 
@@ -167,6 +85,20 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    padding: 0;
+  }
+
+  side-drawer .drawer-care-recommendations.drawer__content-wrapper {
+    padding: 0;
+  }
+
+  .care-header {
+    background-color: #f9f9f9;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 40px 40px 0;
+    flex-shrink: 0;
   }
 
   .drawer-care-recommendations__title {
@@ -177,11 +109,11 @@
   .care-tabs {
     display: flex;
     border-bottom: 1px solid #e5e5e5;
-    gap: 0;
-    flex-shrink: 0;
-    margin-bottom: 30px;
+    margin: 0 -40px;
+    padding: 0 40px;
     overflow-x: auto;
     scrollbar-width: none;
+    justify-content: space-between;
   }
 
   .care-tabs::-webkit-scrollbar {
@@ -192,7 +124,7 @@
     background: none;
     border: none;
     border-bottom: 2px solid transparent;
-    padding: 14px 16px 12px;
+    padding: 0 0 10px 0;
     cursor: pointer;
     color: var(--COLOR-TEXT-A50, rgba(0, 0, 0, 0.4));
     font-family: var(--FONT-STACK-BODY);
@@ -219,12 +151,35 @@
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    padding: 30px 40px 40px;
+    background-color: #ffffff;
   }
 
   .care-tabs__panel {
     display: none;
     flex-direction: column;
-    height: 100%;
+    min-height: 100%;
+    scrollbar-width: none;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+
+  .care-tabs__panel::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .care-tabs__panel::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .care-tabs__panel::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+  }
+
+  .care-tabs__panel::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.3);
   }
 
   .care-tabs__panel.is-active {
@@ -244,7 +199,6 @@
   }
 
   .care-tabs__panel-body {
-    margin-bottom: 0;
     flex: 1;
   }
 
