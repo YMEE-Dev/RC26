@@ -1,0 +1,161 @@
+<!-- /sections/occasion-image-text-grid.liquid -->
+{{ 'occasion-image-text-grid.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign visible_items = 0
+  assign image_sizes = '(min-width: 1200px) 275px, (min-width: 750px) 25vw, calc(100vw - 32px)'
+  assign grid_layout_class = ''
+
+  for block in section.blocks
+    assign show_block = false
+
+    if block.settings.image != blank
+      assign show_block = true
+    endif
+
+    if show_block == false
+      if block.settings.text != blank
+        assign show_block = true
+      endif
+    endif
+
+    if show_block
+      assign visible_items = visible_items | plus: 1
+    endif
+  endfor
+
+  if visible_items == 1
+    assign image_sizes = '(min-width: 1200px) 825px, (min-width: 750px) 75vw, calc(100vw - 32px)'
+  elsif visible_items == 2
+    assign image_sizes = '(min-width: 1200px) 550px, (min-width: 750px) 50vw, calc(100vw - 32px)'
+  endif
+
+  if visible_items > 0
+    assign grid_layout_class = 'occasion-image-text-grid__inner--' | append: visible_items | append: '-items'
+  endif
+-%}
+
+{%- if visible_items > 0 -%}
+  {%- style -%}
+    #OccasionImageTextGrid--{{ section.id }} {
+      --occasion-grid-pt: {{ section.settings.padding_top }}px;
+      --occasion-grid-pb: {{ section.settings.padding_bottom }}px;
+    }
+  {%- endstyle -%}
+
+  <section
+    id="OccasionImageTextGrid--{{ section.id }}"
+    class="occasion-image-text-grid"
+    data-section-id="{{ section.id }}"
+    data-section-type="occasion-image-text-grid"
+  >
+    <div class="occasion-image-text-grid__inner {{ section.settings.width }} {{ grid_layout_class }}">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign has_image = false
+          assign has_text = false
+          assign show_block = false
+
+          if block.settings.image != blank
+            assign has_image = true
+            assign show_block = true
+          endif
+
+          if block.settings.text != blank
+            assign has_text = true
+            assign show_block = true
+          endif
+        -%}
+
+        {%- if show_block -%}
+          <article class="occasion-image-text-grid__item" data-brand-fade {{ block.shopify_attributes }}>
+            {%- if has_image -%}
+              <div class="occasion-image-text-grid__media">
+                {{
+                  block.settings.image
+                  | image_url: width: 1200
+                  | image_tag:
+                    class: 'occasion-image-text-grid__image',
+                    widths: '375, 550, 750, 900, 1100, 1200',
+                    sizes: image_sizes,
+                    loading: 'lazy'
+                }}
+              </div>
+            {%- endif -%}
+
+            {%- if has_text -%}
+              <div class="occasion-image-text-grid__text body rte">
+                {{ block.settings.text }}
+              </div>
+            {%- endif -%}
+          </article>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Image Text Grid",
+  "max_blocks": 3,
+  "settings": [
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        {"value": "wrapper--full", "label": "Full width"},
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"}
+      ]
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 40
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Image + text",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image Text Grid",
+      "category": "Blog",
+      "blocks": [{"type": "item"}, {"type": "item"}, {"type": "item"}]
+    }
+  ]
+}
+{% endschema %}

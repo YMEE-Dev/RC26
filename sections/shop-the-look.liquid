@@ -7,7 +7,7 @@
 <section
   class="shop-the-look {{ section.settings.width }}"
   id="ShopTheLook--{{ section.id }}"
-  style="--PT: {{ section.settings.padding_top }}px; --PB: {{ section.settings.padding_bottom }}px;"
+  style="--PT: {{ section.settings.padding_top }}px; --PB: {{ section.settings.padding_bottom }}px; --STL-WIDTH: {{ section.settings.section_width }}%"
   data-section-id="{{ section.id }}"
   data-section-type="shop-the-look"
 >
@@ -26,6 +26,7 @@
   .shop-the-look {
     padding-top: var(--PT);
     padding-bottom: var(--PB);
+    width: var(--STL-WIDTH);
   }
 
   .shop-the-look__placeholder {
@@ -70,6 +71,16 @@
       "unit": "px",
       "label": "Bottom",
       "default": 0
+    },
+    {
+      "type": "range",
+      "id": "section_width",
+      "min": 40,
+      "max": 100,
+      "step": 10,
+      "unit": "%",
+      "label": "Width",
+      "default": 100
     },
     {
       "type": "select",

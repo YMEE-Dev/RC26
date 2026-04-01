@@ -48,7 +48,7 @@
     <div class="collection__sidebar__head">
       <button
         type="button"
-        class="collection__sidebar__close"
+        class="collection__sidebar__close footer-newsletter__drawer-close"
         data-newsletter-drawer-close
         aria-label="{{ 'general.accessibility.close' | t }}"
       >
@@ -94,10 +94,31 @@
     --duration: 0.6s;
   }
 
+  .footer-newsletter__drawer-close {
+    top: 55px;
+    right: 15px;
+  }
+
   .footer-newsletter__drawer-body {
     flex: 1;
     overflow-y: auto;
     padding: 0 var(--inner) var(--inner);
+  }
+
+  .footer-newsletter__drawer-body .modal__description p {
+    margin: 0;
+    padding-bottom: 40px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px;
+  }
+
+  .footer-newsletter-form__title {
+    margin: 0;
+    padding: 0;
+    padding-bottom: 40px;
   }
 
   .footer-newsletter-form {
@@ -107,14 +128,16 @@
 
   .footer-newsletter__drawer .footer-newsletter-form select.field,
   .footer-newsletter__drawer .footer-newsletter-form input.field {
-    margin-top: 15px;
+    margin-top: 12px;
+    margin-bottom: 0;
     padding-top: 0px;
+    padding-bottom: 11px;
   }
 
   .footer-newsletter-form__fields {
     display: flex;
     flex-direction: column;
-    gap: 52px;
+    gap: 40px;
   }
 
   .footer-newsletter-form__group {
@@ -125,7 +148,7 @@
   .footer-newsletter-form__eyebrow {
     margin: 0;
     padding: 0;
-    padding-bottom: 10px;
+    padding-bottom: 0;
     text-align: left;
     text-transform: uppercase;
   }
@@ -175,6 +198,10 @@
     margin-top: 20px;
   }
 
+  .footer-newsletter-form__submit {
+    margin-top: 25px;
+  }
+
   @media only screen and (max-width: 749px) {
     .footer-newsletter__drawer {
       max-width: 100%;
@@ -182,32 +209,6 @@
 
     .footer-newsletter__inner {
       gap: 0;
-    }
-
-    .footer-newsletter-form__fields {
-      gap: 36px;
-    }
-
-    .footer-newsletter-form__group {
-      gap: 24px;
-    }
-
-    .footer-newsletter-form__field {
-      padding-bottom: 16px;
-      font-size: 1.2rem;
-    }
-
-    .footer-newsletter-form__consent input[type='checkbox'] + label {
-      gap: 16px;
-    }
-
-    .footer-newsletter-form__consent-copy,
-    .footer-newsletter-form__consent-copy p {
-      font-size: 1rem;
-    }
-
-    .footer-newsletter-form__submit {
-      min-height: 62px;
     }
   }
 {% endstylesheet %}
@@ -218,6 +219,7 @@
       this.drawer = this.querySelector('[data-newsletter-drawer]');
       this.trigger = this.querySelector('[data-newsletter-drawer-open]');
       this.scrollableEl = this.querySelector('[data-scroll-lock-scrollable]');
+      this.lastFocusedElement = null;
 
       this.trigger?.addEventListener('click', () => this.open());
 
@@ -232,8 +234,25 @@
       });
     }
 
+    focusWithoutScroll(element) {
+      if (!(element instanceof HTMLElement)) {
+        return;
+      }
+
+      const scrollX = window.scrollX;
+      const scrollY = window.scrollY;
+
+      try {
+        element.focus({preventScroll: true});
+      } catch (error) {
+        element.focus();
+        window.scrollTo(scrollX, scrollY);
+      }
+    }
+
     open() {
-      this.trigger.setAttribute('aria-expanded', 'true');
+      this.lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      this.trigger?.setAttribute('aria-expanded', 'true');
 
       const removeExpanding = () => {
         this.drawer.classList.remove('expanding');
@@ -255,7 +274,7 @@
     }
 
     close() {
-      this.trigger.setAttribute('aria-expanded', 'false');
+      this.trigger?.setAttribute('aria-expanded', 'false');
       this.drawer.classList.remove('expanded');
       window.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
 
@@ -263,7 +282,12 @@
         window.theme.a11y.removeTrapFocus();
       }
 
-      this.trigger?.focus();
+      const focusTarget =
+        this.lastFocusedElement instanceof HTMLElement && this.lastFocusedElement.isConnected
+          ? this.lastFocusedElement
+          : this.trigger;
+
+      this.focusWithoutScroll(focusTarget);
     }
   }
 

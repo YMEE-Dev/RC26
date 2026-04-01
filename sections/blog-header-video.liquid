@@ -1,0 +1,285 @@
+<!-- /sections/blog-header-video.liquid -->
+{{ 'blog-header-video.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign featured_article = blank
+  assign resolved_video = section.settings.video
+  assign resolved_video_url = section.settings.video_url | strip
+  assign has_article_content = false
+  assign has_video = false
+  assign section_classes = 'blog-brand'
+  assign modal_id = 'BlogBrandVideoModal--' | append: section.id
+  assign modal_title_id = modal_id | append: '-title'
+  assign modal_label = 'Brand video'
+
+  if section.settings.featured_article != blank
+    assign featured_article = articles[section.settings.featured_article]
+  endif
+
+  if featured_article == blank
+    if article != blank
+      assign featured_article = article
+    endif
+  endif
+
+  if featured_article == blank
+    if blog != blank
+      assign featured_article = blog.articles.first
+    endif
+  endif
+
+  if featured_article != blank
+    assign modal_label = featured_article.title | default: modal_label
+
+    if resolved_video == blank
+      if featured_article.metafields.custom.top_video.value != blank
+        assign resolved_video = featured_article.metafields.custom.top_video.value
+      elsif featured_article.metafields.custom.video.value != blank
+        assign resolved_video = featured_article.metafields.custom.video.value
+      endif
+    endif
+
+    if resolved_video_url == blank
+      if featured_article.metafields.custom.top_video_url.value != blank
+        assign resolved_video_url = featured_article.metafields.custom.top_video_url.value | strip
+      elsif featured_article.metafields.custom.video_url.value != blank
+        assign resolved_video_url = featured_article.metafields.custom.video_url.value | strip
+      endif
+    endif
+
+    if featured_article.content != blank
+      assign has_article_content = true
+      assign section_classes = section_classes | append: ' blog-brand--has-content'
+    endif
+  endif
+
+  if resolved_video != blank or resolved_video_url != blank
+    assign has_video = true
+  endif
+-%}
+
+{%- if has_video -%}
+  {%- capture inline_video_markup -%}
+    {%- if resolved_video != blank -%}
+      {{
+        resolved_video
+        | video_tag:
+          autoplay: true,
+          loop: true,
+          controls: false,
+          muted: true,
+          playsinline: true,
+          class: 'blog-brand__video blog-brand__video--inline'
+      }}
+    {%- else -%}
+      <video class="blog-brand__video blog-brand__video--inline" autoplay loop muted playsinline>
+        <source src="{{ resolved_video_url | escape }}">
+      </video>
+    {%- endif -%}
+  {%- endcapture -%}
+
+  {%- capture modal_video_markup -%}
+    {%- if resolved_video != blank -%}
+      {{
+        resolved_video
+        | video_tag:
+          autoplay: false,
+          loop: true,
+          controls: false,
+          muted: false,
+          playsinline: true,
+          class: 'blog-brand__video blog-brand__video--modal'
+      }}
+    {%- else -%}
+      <video class="blog-brand__video blog-brand__video--modal" playsinline>
+        <source src="{{ resolved_video_url | escape }}">
+      </video>
+    {%- endif -%}
+  {%- endcapture -%}
+{%- endif -%}
+
+{%- style -%}
+  #BlogBrand--{{ section.id }} {
+    --brand-top-padding: {{ section.settings.padding_top }}px;
+    --brand-bottom-padding: {{ section.settings.padding_bottom }}px;
+    --brand-content-max-width: {{ section.settings.content_max_width }}px;
+    --brand-content-gap: {{ section.settings.content_gap }}px;
+    --brand-title-max-width: {{ section.settings.title_max_width }}px;
+    --brand-media-height-mobile: {{ section.settings.video_height_mobile }}vh;
+  }
+{%- endstyle -%}
+
+<section
+  id="BlogBrand--{{ section.id }}"
+  class="{{ section_classes }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="blog-brand"
+>
+  {%- if featured_article != blank -%}
+    <div class="blog-brand__top">
+      <h2 class="h2 blog-brand__title" data-brand-fade data-brand-fade-delay="0">
+        {{ featured_article.title | escape }}
+      </h2>
+      <p class="body blog-brand__date" data-brand-fade data-brand-fade-delay="0.3">
+        <time datetime="{{ featured_article.published_at | date: '%Y-%m-%d' }}">
+          {{ featured_article.published_at | date: '%B %-d, %Y' }}
+        </time>
+      </p>
+    </div>
+
+    {%- if has_video -%}
+      <div class="blog-brand__media" data-brand-fade data-brand-fade-delay="0.6">
+        {{ inline_video_markup }}
+        <button
+          type="button"
+          class="blog-brand__sound-trigger"
+          data-brand-video-open
+          aria-controls="{{ modal_id }}"
+          aria-expanded="false"
+          aria-haspopup="dialog"
+          aria-label="Play with sound"
+        >
+          <span class="blog-brand__sound-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 43.52 43.52" fill="none">
+              <circle cx="21.76" cy="21.76" r="21.26" />
+              <line x1="27.18" y1="17.88" x2="34.16" y2="24.87" />
+              <line x1="34.16" y1="17.88" x2="27.18" y2="24.87" />
+              <polygon points="11.47 17.21 11.47 26.31 18.41 26.31 23.99 31.89 23.99 11.63 18.41 17.21 11.47 17.21" />
+            </svg>
+          </span>
+          <span>Play with sound</span>
+        </button>
+      </div>
+
+      <div
+        id="{{ modal_id }}"
+        class="blog-brand__video-modal"
+        data-brand-video-modal
+        aria-hidden="true"
+        hidden
+      >
+        <div class="blog-brand__video-modal-backdrop" data-brand-video-close></div>
+        <div
+          class="blog-brand__video-modal-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="{{ modal_title_id }}"
+          tabindex="-1"
+        >
+          <h3 id="{{ modal_title_id }}" class="visually-hidden">{{ modal_label | escape }}</h3>
+          <button
+            type="button"
+            class="blog-brand__video-modal-close"
+            data-brand-video-close
+            aria-label="Close"
+          >
+            &times;
+          </button>
+          <div class="blog-brand__video-modal-player">
+            {{ modal_video_markup }}
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if has_article_content -%}
+      <div class="blog-brand__content-wrapper" data-brand-fade data-brand-fade-delay="0.9">
+        <div class="blog-brand__content body rte">
+          {{ featured_article.content }}
+        </div>
+      </div>
+    {%- endif -%}
+  {%- else -%}
+    <div class="blog-brand__empty h4">{{ 'blogs.article.no_articles' | t }}</div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Blog Header and Video",
+  "settings": [
+    {
+      "type": "article",
+      "id": "featured_article",
+      "label": "Featured blog post",
+      "info": "Optional. If empty, current article or latest post is used."
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Video"
+    },
+    {
+      "type": "url",
+      "id": "video_url",
+      "label": "Video URL (fallback)"
+    },
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "min": 700,
+      "max": 1500,
+      "step": 20,
+      "unit": "px",
+      "label": "Content max width",
+      "default": 1100
+    },
+    {
+      "type": "range",
+      "id": "title_max_width",
+      "min": 500,
+      "max": 1400,
+      "step": 20,
+      "unit": "px",
+      "label": "Title max width",
+      "default": 980
+    },
+    {
+      "type": "range",
+      "id": "content_gap",
+      "min": 10,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "label": "Title and date spacing",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "video_height_mobile",
+      "min": 30,
+      "max": 70,
+      "step": 1,
+      "unit": "%",
+      "label": "Video height on mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blog Header and Video",
+      "category": "Blog"
+    }
+  ]
+}
+{% endschema %}

@@ -758,13 +758,20 @@
   data-homepage-collection-spotlight-src="{{ 'homepage-collection-spotlight.js' | asset_url }}"
   data-homepage-collection-hover-src="{{ 'homepage-collection-hover.js' | asset_url }}"
   data-head-country-redirect-src="{{ 'head-country-redirect.js' | asset_url }}"
+  data-blog-header-video-src="{{ 'blog-header-video.js' | asset_url }}"
+  data-gift-guide-slider-src="{{ 'gift-guide-slider.js' | asset_url }}"
+  data-timeline-src="{{ 'timeline.js' | asset_url }}"
+  data-social-videos-src="{{ 'social-videos.js' | asset_url }}"
+  data-rc-timeline-src="{{ 'rc-timeline.js' | asset_url }}"
 ></script>
 
 {%- if template.name == 'product' -%}
-  <link rel="stylesheet" href="{{ 'side-drawer.css' | asset_url }}">
-  <script src="{{ 'side-drawer.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'webgi-loader.js' | asset_url }}" defer="defer"></script>
   <link rel="preload" href="https://releases.ijewel3d.com/webgi/runtime/viewer-0.9.19.js" as="script" crossorigin>
+{%- endif -%}
+{%- if template.name == 'product' or template.suffix == 'concierge' -%}
+  <link rel="stylesheet" href="{{ 'side-drawer.css' | asset_url }}">
+  <script src="{{ 'side-drawer.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 {%- if request.design_mode -%}
   <script
