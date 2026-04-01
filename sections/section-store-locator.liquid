@@ -20,9 +20,6 @@
   #StoreLocator--{{ section.id }} .store-locator__carousel-container {
     overflow: visible;
   }
-  #StoreLocator--{{ section.id }} .grid--slider {
-    padding-left: 0;
-  }
   #StoreLocator--{{ section.id }} .slider__button  {
     display: none;
   }
@@ -66,7 +63,7 @@
               <p class="store-locator__subheading" {{ block.shopify_attributes }}>
                 {{ block.settings.text | upcase }}
               </p>
-            
+
             {%- when 'heading' -%}
               <h2 class="store-locator__heading {{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
                 {{ block.settings.text }}
@@ -74,9 +71,9 @@
           {%- endcase -%}
         {%- endfor -%}
       </div>
-      
+
       <div class="store-locator__header-button">
-        {%- for block in section.blocks -%} 
+        {%- for block in section.blocks -%}
           {%- if block.type == 'button' -%}
             <a
               href="{{ block.settings.link | default: '#' }}"
@@ -92,7 +89,7 @@
 
     {%- assign location_blocks = section.blocks | where: 'type', 'location_card' -%}
     {%- if location_blocks.size > 0 -%}
-      <div class="store-locator__carousel-container grid-outer">
+      <div class="store-locator__carousel-container grid-outer_">
         <grid-slider align-arrows>
           <div
             class="store-locator__grid grid grid--slider grid--mobile-slider"
@@ -137,7 +134,7 @@
 </section>
 
 <script>
-  (function() {
+  (function () {
     const sectionId = '{{ section.id }}';
 
     function initStoreLocatorSection() {
@@ -158,17 +155,23 @@
         if (!gridSlider) return;
         gridSlider.innerHTML = '';
 
-        locations.forEach(function(location) {
+        locations.forEach(function (location) {
           const item = document.createElement('div');
           item.className = 'grid-item store-locator__grid-item';
           item.setAttribute('data-grid-item', '');
-          item.innerHTML = '<div class="store-locator__card">' +
+          item.innerHTML =
+            '<div class="store-locator__card">' +
             (location.image
-              ? '<div class="store-locator__card-image"><img src="' + location.image + '" alt="' + (location.name || '') + '" loading="lazy"></div>'
-              : '<div class="store-locator__card-placeholder"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 525.5 525.5"><path d="M375 262.7L262.7 375 150.4 262.7l112.3-112.3z"/></svg></div>'
-            ) +
+              ? '<div class="store-locator__card-image"><img src="' +
+                location.image +
+                '" alt="' +
+                (location.name || '') +
+                '" loading="lazy"></div>'
+              : '<div class="store-locator__card-placeholder"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 525.5 525.5"><path d="M375 262.7L262.7 375 150.4 262.7l112.3-112.3z"/></svg></div>') +
             '<div class="store-locator__card-content">' +
-            (location.subheading ? '<p class="store-locator__card-subheading">' + location.subheading.toUpperCase() + '</p>' : '') +
+            (location.subheading
+              ? '<p class="store-locator__card-subheading">' + location.subheading.toUpperCase() + '</p>'
+              : '') +
             (location.name ? '<h3 class="store-locator__card-heading">' + location.name + '</h3>' : '') +
             '</div></div>';
           gridSlider.appendChild(item);
@@ -182,14 +185,16 @@
         if (carousel) carousel.style.display = 'none';
 
         fetch('/apps/store-locator/locations')
-          .then(function(res) { return res.json(); })
-          .then(function(data) {
+          .then(function (res) {
+            return res.json();
+          })
+          .then(function (data) {
             if (data && data.locations && data.locations.length > 0) renderLocations(data.locations);
             loading.style.display = 'none';
             if (carousel) carousel.style.display = 'block';
             initGridSlider();
           })
-          .catch(function(err) {
+          .catch(function (err) {
             console.error('Error fetching locations:', err);
             loading.style.display = 'none';
             if (carousel) carousel.style.display = 'block';
@@ -210,9 +215,10 @@
 
     runInit();
 
-    document.addEventListener('shopify:section:load', function(event) {
+    document.addEventListener('shopify:section:load', function (event) {
       const loadedSection = event.target?.querySelector?.('[data-section-id]') || event.target;
-      const isOurSection = (loadedSection && loadedSection.dataset?.sectionId === sectionId) ||
+      const isOurSection =
+        (loadedSection && loadedSection.dataset?.sectionId === sectionId) ||
         (event.detail && String(event.detail.sectionId) === String(sectionId));
       if (isOurSection) {
         initStoreLocatorSection();
@@ -257,10 +263,10 @@
           "label": "Heading size",
           "default": "heading-large",
           "options": [
-            { "value": "heading-small", "label": "Small" },
-            { "value": "heading-medium", "label": "Medium" },
-            { "value": "heading-large", "label": "Large" },
-            { "value": "heading-x-large", "label": "Extra large" }
+            {"value": "heading-small", "label": "Small"},
+            {"value": "heading-medium", "label": "Medium"},
+            {"value": "heading-large", "label": "Large"},
+            {"value": "heading-x-large", "label": "Extra large"}
           ]
         }
       ]
@@ -318,10 +324,10 @@
       "label": "Width",
       "default": "wrapper",
       "options": [
-        { "value": "wrapper--full-padded", "label": "Full width padded" },
-        { "value": "wrapper", "label": "Normal" },
-        { "value": "wrapper--narrow", "label": "Narrow" },
-        { "value": "wrapper--custom", "label": "Custom (max-width: 1232px)" }  
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"},
+        {"value": "wrapper--narrow", "label": "Narrow"},
+        {"value": "wrapper--custom", "label": "Custom (max-width: 1232px)"}
       ]
     },
     {
