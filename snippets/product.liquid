@@ -3133,7 +3133,7 @@
                           %}
                         </div>
 
-                        <div class="product__custom-drawer">
+                        {% comment %} <div class="product__custom-drawer">
                           {% render 'link-with-icon',
                             text: 'Care recommendations',
                             drawer_open: 'care-recommendations',
@@ -3141,7 +3141,7 @@
                             icon_position: 'left',
                             content_alignment: 'right'
                           %}
-                        </div>
+                        </div> {% endcomment %}
                       </div>
 
                       <style>
@@ -3389,6 +3389,8 @@
             {%- render 'drawer-2-years-warranty', block: block -%}
           {%- when 'drawer-14-days-free-returns' -%}
             {%- render 'drawer-14-days-free-returns', block: block -%}
+          {%- when 'drawer-care-recommendations' -%}
+            {%- render 'drawer-care-recommendations', block: block -%}
         {%- endcase -%}
       </div>
     </div>
