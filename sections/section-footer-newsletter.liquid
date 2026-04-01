@@ -219,6 +219,7 @@
       this.drawer = this.querySelector('[data-newsletter-drawer]');
       this.trigger = this.querySelector('[data-newsletter-drawer-open]');
       this.scrollableEl = this.querySelector('[data-scroll-lock-scrollable]');
+      this.lastFocusedElement = null;
 
       this.trigger?.addEventListener('click', () => this.open());
 
@@ -233,8 +234,25 @@
       });
     }
 
+    focusWithoutScroll(element) {
+      if (!(element instanceof HTMLElement)) {
+        return;
+      }
+
+      const scrollX = window.scrollX;
+      const scrollY = window.scrollY;
+
+      try {
+        element.focus({preventScroll: true});
+      } catch (error) {
+        element.focus();
+        window.scrollTo(scrollX, scrollY);
+      }
+    }
+
     open() {
-      this.trigger.setAttribute('aria-expanded', 'true');
+      this.lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      this.trigger?.setAttribute('aria-expanded', 'true');
 
       const removeExpanding = () => {
         this.drawer.classList.remove('expanding');
@@ -256,7 +274,7 @@
     }
 
     close() {
-      this.trigger.setAttribute('aria-expanded', 'false');
+      this.trigger?.setAttribute('aria-expanded', 'false');
       this.drawer.classList.remove('expanded');
       window.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
 
@@ -264,7 +282,12 @@
         window.theme.a11y.removeTrapFocus();
       }
 
-      this.trigger?.focus();
+      const focusTarget =
+        this.lastFocusedElement instanceof HTMLElement && this.lastFocusedElement.isConnected
+          ? this.lastFocusedElement
+          : this.trigger;
+
+      this.focusWithoutScroll(focusTarget);
     }
   }
 
