@@ -71,7 +71,7 @@
     </div>
 
     {%- if resolved_video != blank or resolved_video_url != blank or featured_article.image != blank -%}
-      <div class="blog-celebrity__media" data-blog-fade data-blog-fade-delay="0.6">
+      <div class="blog-celebrity__media{% if resolved_video != blank or resolved_video_url != blank %} blog-celebrity__media--video{% else %} blog-celebrity__media--image{% endif %}" data-blog-fade data-blog-fade-delay="0.6">
         {%- if resolved_video != blank -%}
           {{
             resolved_video
