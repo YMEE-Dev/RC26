@@ -126,6 +126,11 @@
                   {{ 'products.product.limited_availability' | t }}
                 </span>
               {%- endif -%}
+              {%- if cr_show_inquire -%}
+                <button type="button" class="ymee-variant-dropdown__action" data-action="inquire" data-variant-id="{{ variant.id }}" data-product-id="{{ product.id }}">
+                  {{ 'products.product.inquire' | t }}
+                </button>
+              {%- else -%}
               <div class="ymee-variant-dropdown__submit">
                 <button
                   type="button"
@@ -148,10 +153,17 @@
                 </button>
               </div>
               <div class="ymee-variant-dropdown__accelerated" data-ymee-accelerated-slot></div>
+              {%- endif -%}
             {%- else -%}
-              <button type="button" class="ymee-variant-dropdown__action" data-action="notify">
-                {{ 'general.newsletter_form.notify' | t }}
-              </button>
+              {%- if cr_show_inquire -%}
+                <button type="button" class="ymee-variant-dropdown__action" data-action="inquire" data-variant-id="{{ variant.id }}" data-product-id="{{ product.id }}">
+                  {{ 'products.product.inquire' | t }}
+                </button>
+              {%- else -%}
+                <button type="button" class="ymee-variant-dropdown__action" data-action="notify">
+                  {{ 'general.newsletter_form.notify' | t }}
+                </button>
+              {%- endif -%}
             {%- endif -%}
           </span>
         </div>
@@ -178,12 +190,20 @@
           endif
         -%}
 
-        <button type="button" class="ymee-variant-dropdown__footer-atc" data-ymee-footer-atc hidden>
-          <span class="btn__text">
-            {%- render 'icon-add2cart' -%}
-            {{ 'products.product.add_to_cart' | t }}
-          </span>
-        </button>
+        {%- if cr_show_inquire -%}
+          <button type="button" class="ymee-variant-dropdown__footer-atc" data-ymee-footer-atc data-action="inquire" data-variant-id="{{ selected_variant.id }}" data-product-id="{{ product.id }}" hidden>
+            <span class="btn__text">
+              {{ 'products.product.inquire' | t }}
+            </span>
+          </button>
+        {%- else -%}
+          <button type="button" class="ymee-variant-dropdown__footer-atc" data-ymee-footer-atc hidden>
+            <span class="btn__text">
+              {%- render 'icon-add2cart' -%}
+              {{ 'products.product.add_to_cart' | t }}
+            </span>
+          </button>
+        {%- endif -%}
 
         {%- if sizing_link != '#' -%}
           <a

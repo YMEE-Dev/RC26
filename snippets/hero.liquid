@@ -28,18 +28,18 @@
     assign text_underlay = true
   endif
 
-  capture sizes
+  capture sizes_desktop
     if section.settings.width == 'wrapper--full'
       if image_1 and image_2
-        echo '(min-width: 750px) 50vw, 100vw'
+        echo '50vw'
       else
         echo '100vw'
       endif
     else
       if image_1 and image_2
-        echo '(min-width: 990px) calc((100vw - 100px) / 2), (min-width: 750px) calc((100vw - 60px) / 2), calc(100vw - 32px)'
+        echo '(min-width: 990px) calc((100vw - 100px) / 2), (min-width: 750px) calc((100vw - 60px) / 2)'
       else
-        echo '(min-width: 990px) calc(100vw - 100px), (min-width: 750px) calc(100vw - 60px), calc(100vw - 32px)'
+        echo '(min-width: 990px) calc(100vw - 100px), (min-width: 750px) calc(100vw - 60px)'
       endif
     endif
   endcapture
@@ -121,7 +121,8 @@
           {%- render 'image-hero',
             image_desktop: image_1,
             image_mobile: mobile_image,
-            sizes: sizes,
+            sizes_desktop: sizes_desktop,
+            sizes_mobile: sizes_mobile,
             desktop_height: desktop_height,
             mobile_height: mobile_height
           -%}
@@ -133,7 +134,8 @@
           {%- render 'image-hero',
             image_desktop: image_2,
             image_mobile: mobile_image,
-            sizes: sizes,
+            sizes_desktop: sizes_desktop,
+            sizes_mobile: sizes_mobile,
             desktop_height: desktop_height,
             mobile_height: mobile_height,
             show_placeholder: show_placeholder

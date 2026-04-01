@@ -380,6 +380,32 @@
       productImagesEl.setAttribute("data-active-media", visibleMediaIds[0]);
     }
 
+    // Install a capturing-phase listener that blocks non-thumb
+    // theme:media:select events while the filter is active.  This prevents
+    // product-images' built-in setActiveMedia handler from corrupting
+    // data-active-media / thumb is-active state when product-info fires
+    // updateMedia asynchronously after a variant change.
+    if (!productImagesEl._galleryFilterCapture) {
+      productImagesEl._galleryFilterCapture = true;
+      productImagesEl.addEventListener(
+        "theme:media:select",
+        function (e) {
+          if (productImagesEl.getAttribute("data-gallery-filter-active") !== "true") return;
+          var tgt = e.target;
+          var fromThumb =
+            tgt &&
+            (tgt.closest
+              ? tgt.closest("product-thumbs")
+              : tgt.tagName && tgt.tagName.toLowerCase() === "product-thumbs");
+          if (!fromThumb) {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+          }
+        },
+        true
+      );
+    }
+
     // Flag that our gallery filter is active — the theme:media:select handler
     // in product.liquid checks this to skip carousel manipulation that would
     // undo our filtering (scroll to featured_media, setCarouselStarted, etc.)
@@ -1212,10 +1238,21 @@
             return;
           }
 
-          if (action === "notify") {
+          if (action === "notify" || action === "inquire") {
             closeMenu();
-            var notifyBtn = sectionRoot.querySelector("[data-popup-open]");
-            if (notifyBtn) notifyBtn.click();
+            var variantId = optionEl ? optionEl.getAttribute("data-variant-id") : "";
+            var pid = actionBtn ? actionBtn.getAttribute("data-product-id") || "" : "";
+            if (!pid && sectionRoot) {
+              var bisBtn = sectionRoot.querySelector("[data-bis-drawer-open]");
+              if (bisBtn) pid = bisBtn.getAttribute("data-product-id") || "";
+              if (!pid) {
+                var pf = sectionRoot.querySelector("product-form[data-product-id]");
+                if (pf) pid = pf.getAttribute("data-product-id") || "";
+              }
+            }
+            if (window.openBisDrawer) {
+              window.openBisDrawer(action, variantId, pid);
+            }
             return;
           }
 
@@ -1587,6 +1624,83 @@
     },
     true
   );
+
+  /* ── Dynamic notify button visibility ───────────────────────────── */
+  function updateNotifyButtonVisibility(variant) {
+    var sectionRoot = document.querySelector('[id^="MainProduct--"]');
+    if (!sectionRoot) return;
+
+    // Skip products with size dropdown — the dropdown handles notify internally
+    if (sectionRoot.querySelector("[data-ymee-variant-dropdown]")) return;
+
+    var notifyBtn = sectionRoot.querySelector("[data-bis-drawer-open]");
+    if (!notifyBtn) return;
+
+    // Always prefer the currently selected variant id from the product form.
+    // Color/option changes can emit intermediate variant events; reading the
+    // latest selected id avoids transient notify/add-to-cart flicker.
+    var selectedVariantId = "";
+    var primaryVariantIdInput = sectionRoot.querySelector('input[name="id"]');
+    if (primaryVariantIdInput && primaryVariantIdInput.value) {
+      selectedVariantId = String(primaryVariantIdInput.value);
+    }
+
+    // If no variant is provided, or provided variant is stale, resolve from
+    // current selected id + product JSON.
+    if (!variant || (selectedVariantId && String(variant.id) !== selectedVariantId)) {
+      var productDataEl = sectionRoot.querySelector("[data-product-json]");
+      if (!productDataEl || !selectedVariantId) return;
+      try {
+        var productData = JSON.parse(productDataEl.textContent);
+        variant = productData.variants.find(function (v) {
+          return String(v.id) === selectedVariantId;
+        });
+      } catch (e) {
+        return;
+      }
+    }
+
+    if (!variant) return;
+
+    var isOutOfStock = !variant.available;
+
+    // Toggle visibility via a data attribute on the container.
+    // CSS rules key off [data-notify-active] to swap ATC ↔ Notify.
+    // This is immune to the theme's transient toggleSubmitButton()
+    // calls that briefly set disabled on ATC during variant changes.
+    var submitItem = notifyBtn.closest('.product__submit__item');
+    if (submitItem) {
+      if (isOutOfStock) {
+        submitItem.setAttribute('data-notify-active', '');
+      } else {
+        submitItem.removeAttribute('data-notify-active');
+      }
+    }
+
+    if (isOutOfStock) {
+      notifyBtn.setAttribute("data-variant-id", variant.id);
+    }
+  }
+
+  document.addEventListener("theme:variant:change", function (e) {
+    updateNotifyButtonVisibility(e.detail && e.detail.variant);
+  });
+
+  // Also subscribe to the theme's pub/sub variantChange event.  This fires
+  // AFTER product-info finishes its fetch + DOM updates (toggleSubmitButton,
+  // innerHTML replacements, etc.), so it corrects any state that the theme's
+  // built-in handler may have overwritten between our earlier
+  // theme:variant:change dispatch and the fetch response.
+  if (window.subscribe && window.theme && window.theme.PUB_SUB_EVENTS) {
+    window.subscribe(window.theme.PUB_SUB_EVENTS.variantChange, function (event) {
+      var variant = event && event.data && event.data.variant;
+      updateNotifyButtonVisibility(variant || null);
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    updateNotifyButtonVisibility(null);
+  });
 
   /* ── Form-only wrapper: wire up icon click (hamburger) ─────────── */
   function initFormOnlyWrappers(scope) {

@@ -1812,7 +1812,8 @@
                     // thumb clicks through. Block programmatic scrolls from variant
                     // change handlers (product-info updateMedia, etc.).
                     if (productImagesEl.getAttribute('data-gallery-filter-active') === 'true') {
-                      var fromThumb = e.target && (e.target.closest('product-thumbs') || e.target.tagName === 'PRODUCT-THUMBS');
+                      var fromThumb =
+                        e.target && (e.target.closest('product-thumbs') || e.target.tagName === 'PRODUCT-THUMBS');
                       if (!fromThumb) return;
                     }
                     var activeCarousel = getActiveCarousel();
@@ -3409,7 +3410,7 @@
   class="drawer"
   data-drawer="send-hint"
   id="side-drawer-send-hint"
-  data-drawer-size="30%"
+  data-drawer-size="575px"
   data-drawer-direction="right-to-left"
 >
   <div class="drawer__inner" data-drawer-inner>
@@ -3423,6 +3424,42 @@
   </div>
   <span class="underlay drawer__underlay" data-drawer-underlay></span>
 </side-drawer>
+
+<side-drawer
+  class="drawer"
+  data-drawer="bis-form"
+  id="side-drawer-bis-form"
+  data-drawer-size="575px"
+  data-drawer-direction="right-to-left"
+>
+  <div class="drawer__inner" data-drawer-inner>
+    <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+      {% render 'icon-close' %}
+    </button>
+
+    <div class="drawer__body">
+      {% render 'drawer-bis-form', product: product, current_variant: current_variant %}
+    </div>
+  </div>
+  <span class="underlay drawer__underlay" data-drawer-underlay></span>
+</side-drawer>
+
+<script>
+  window.__bisDrawerTranslations = {
+    notify_title: {{ 'general.bis_form.notify_title' | t | json }},
+    notify_subtitle: {{ 'general.bis_form.notify_subtitle' | t | json }},
+    inquire_title: {{ 'general.bis_form.inquire_title' | t | json }},
+    inquire_subtitle: {{ 'general.bis_form.inquire_subtitle' | t | json }},
+    available_soon_title: {{ 'general.bis_form.available_soon_title' | t | json }},
+    available_soon_subtitle: {{ 'general.bis_form.available_soon_subtitle' | t | json }},
+    submit_notify: {{ 'general.bis_form.submit_notify' | t | json }},
+    submit_inquire: {{ 'general.bis_form.submit_inquire' | t | json }},
+    submit_available_soon: {{ 'general.bis_form.submit_available_soon' | t | json }},
+    success_title: {{ 'general.bis_form.success_title' | t | json }},
+    success_subtitle: {{ 'general.bis_form.success_subtitle' | t | json }}
+  };
+</script>
+<script src="{{ 'bis-drawer.js' | asset_url }}" defer="defer"></script>
 
 <side-drawer
   class="drawer"
