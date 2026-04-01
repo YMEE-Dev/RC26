@@ -38,7 +38,9 @@
       <div class="brand-story-combo__split">
         <div class="brand-story-combo__split-copy">
           {%- if resolved_top_heading != blank -%}
-            <h3 class="brand-story-combo__heading h3" data-brand-fade>{{ resolved_top_heading | escape | newline_to_br }}</h3>
+            <h3 class="brand-story-combo__heading h3" data-brand-fade>
+              {{ resolved_top_heading | escape | newline_to_br }}
+            </h3>
           {%- endif -%}
           {%- if section.settings.top_text != blank -%}
             <div class="brand-story-combo__text body rte" data-brand-fade>{{ section.settings.top_text }}</div>
@@ -108,36 +110,36 @@
     }
   }
 
-	  @media (max-width: 989px) {
-	    .brand-story-combo__split {
-	      grid-template-columns: 1fr;
-	      gap: 28px;
-	    }
+  @media (max-width: 989px) {
+    .brand-story-combo__split {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
 
-	    .main-content--article-brand .brand-story-combo__split-copy {
-	      grid-row: 2;
-	      width: 100%;
-	      max-width: 520px;
-	      margin-left: auto;
-	      margin-right: auto;
-	      text-align: center;
-	      align-items: center;
-	    }
+    .main-content--article-brand .brand-story-combo__split-copy {
+      grid-row: 2;
+      width: 100%;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+      align-items: center;
+    }
 
-	    .main-content--article-brand .brand-story-combo__split-media {
-	      grid-row: 1;
-	    }
+    .main-content--article-brand .brand-story-combo__split-media {
+      grid-row: 1;
+    }
 
-	    .main-content--article-brand .brand-story-combo__text {
-	      text-align: center;
-	    }
+    .main-content--article-brand .brand-story-combo__text {
+      text-align: center;
+    }
 
-	    .main-content--article-brand .brand-story-combo__inner {
-	      padding-left: 20px;
-	      padding-right: 20px;
-	      box-sizing: border-box;
-	    }
-	  }
+    .main-content--article-brand .brand-story-combo__inner {
+      padding-left: 20px;
+      padding-right: 20px;
+      box-sizing: border-box;
+    }
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -156,7 +158,7 @@
       ]
     },
     {
-      "type": "textarea",
+      "type": "richtext",
       "id": "top_heading",
       "label": "Top heading"
     },
