@@ -126,12 +126,7 @@
     data-storytelling-modal-target="{{ modal_id }}"
   >
     {%- if first_media_is_video -%}
-      {%- liquid
-        assign trigger_video_classes = 'custom-autoplay-video'
-        if mobile_trigger_image != blank
-          assign trigger_video_classes = trigger_video_classes | append: ' storytelling-trigger-video storytelling-trigger-video--desktop'
-        endif
-      -%}
+      {%- assign trigger_video_classes = 'custom-autoplay-video storytelling-trigger-video' -%}
       {%- liquid
         case first_media.media_type
           when 'video'
@@ -144,17 +139,6 @@
             endif
         endcase
       -%}
-      {%- if mobile_trigger_image != blank -%}
-        {{
-          mobile_trigger_image
-          | image_url: width: 2048
-          | image_tag:
-            alt: product.title,
-            loading: 'eager',
-            fetchpriority: 'high',
-            class: 'storytelling-trigger-image storytelling-trigger-image--mobile'
-        }}
-      {%- endif -%}
     {%- else -%}
       {%- if desktop_trigger_image -%}
         <picture class="storytelling-trigger-picture">

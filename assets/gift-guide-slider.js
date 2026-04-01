@@ -107,9 +107,9 @@
         },
       },
       breakpoints: {
-        0: { slidesPerView: 1.2, spaceBetween: 20 },
+        0: { slidesPerView: 1.15, spaceBetween: 20 },
         750: { slidesPerView: 1.8, spaceBetween: 20 },
-        960: { slidesPerView: 2.7, spaceBetween: 80 },
+        960: { slidesPerView: 2.7, spaceBetween: 20 },
         1200: { slidesPerView: 2.7, spaceBetween: 80 },
       },
     });
