@@ -1,0 +1,53 @@
+{% doc %}
+  Renders care recommendations information in a drawer.
+  This snippet uses metaobjects for content management.
+{% enddoc %}
+
+<div class="drawer-care-recommendations drawer__content-wrapper">
+  {%- comment -%}
+    Get care recommendations content from dedicated metafields
+  {%- endcomment -%}
+  {%- assign care_content = nil -%}
+
+  {%- if product and product.metafields.info.care_recommendations != blank -%}
+    {%- assign care_content = product.metafields.info.care_recommendations.value -%}
+  {%- elsif collection and collection.metafields.info.care_recommendations != blank -%}
+    {%- assign care_content = collection.metafields.info.care_recommendations.value -%}
+  {%- elsif shop.metafields.info.care_recommendations != blank -%}
+    {%- assign care_content = shop.metafields.info.care_recommendations.value -%}
+  {%- endif -%}
+
+  {%- if care_content != blank -%}
+    <div class="care-recommendations__content drawer-content__main">
+      <div class="care-recommendations__text-content">
+        {%- if care_content.title != blank -%}
+          <h2 class="care-recommendations__title drawer-content__title">{{ care_content.title }}</h2>
+        {%- endif -%}
+
+        {%- if care_content.description != blank -%}
+          <div class="care-recommendations__description drawer-content__description">
+            {{ care_content.description | metafield_tag }}
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- if care_content.image != blank -%}
+        <div class="care-recommendations__image drawer-content__image">
+          {{ care_content.image | image_url: width: 600 | image_tag }}
+        </div>
+      {%- endif -%}
+    </div>
+  {%- else -%}
+    <div class="care-recommendations__default">
+      <h2 class="drawer-content__title">{{ 'products.product.care_recommendations_title' | t }}</h2>
+      <p class="drawer-content__description">{{ 'products.product.care_recommendations_description' | t }}</p>
+    </div>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .drawer-care-recommendations .care-recommendations__image {
+    margin-bottom: 0px;
+    margin-top: auto;
+  }
+{% endstylesheet %}
