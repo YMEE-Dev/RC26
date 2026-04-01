@@ -50,6 +50,17 @@
     inert
   >
     <div class="head-country-redirect__body" data-scroll-lock-scrollable tabindex="-1">
+      {% if request.design_mode %}
+        <button
+          type="button"
+          class="head-country-redirect__close"
+          data-country-redirect-close
+          aria-label="{{ 'general.accessibility.close' | t }}"
+        >
+          {% render 'icon-close' %}
+        </button>
+      {% endif %}
+
       {%- if modal_heading != blank -%}
         <h2 id="HeadCountryRedirectTitle--{{ section.id }}" class="head-country-redirect__title title">
           {{ modal_heading | escape }}
@@ -80,7 +91,7 @@
         class="head-country-redirect__button btn btn--secondary btn--outline"
         data-country-redirect-cta
       >
-        <span class="head-country-redirect__button-icon" aria-hidden="true">
+        <span class="head-country-redirect__button-icon" data-country-redirect-flag aria-hidden="true">
           <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
             <path d="M19.6467 4.06688C20.4506 3.76268 21.2373 4.54936 20.9331 5.35333L14.878 21.355C14.5367 22.2571 13.2416 22.1986 12.9834 21.2693L10.9719 14.0281L3.73073 12.0166C2.80142 11.7584 2.74286 10.4633 3.64497 10.122L19.6467 4.06688ZM3.99776 11.0547L11.2389 13.0662C11.5762 13.1599 11.8401 13.4238 11.9338 13.7611L13.9453 21.0022L19.9995 5.00053L3.99776 11.0547Z" fill="currentColor"/>
           </svg>

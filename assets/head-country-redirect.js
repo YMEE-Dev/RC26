@@ -8,6 +8,8 @@
         this.dialog = this.querySelector('.head-country-redirect__dialog');
         this.scrollableEl = this.querySelector('[data-scroll-lock-scrollable]');
         this.ctaButton = this.querySelector('[data-country-redirect-cta]');
+        this.flagIcon = this.querySelector('[data-country-redirect-flag]');
+        this.closeButton = this.querySelector('[data-country-redirect-close]');
         this.copy = this.querySelector('[data-country-redirect-copy]');
         this.copyTemplate = this.copy ? this.copy.innerHTML : '';
         this.config = this.getConfig();
@@ -29,9 +31,11 @@
         this.detectedCountry = matchedRule.countryCode || detectedCountry || '';
         this.matchedRule = matchedRule;
         this.siteLabel = matchedRule.siteName || matchedRule.url.hostname;
+        this.allowClose = devMode;
 
         this.bindEvents();
         this.updateDynamicContent();
+        this.updateFlagIcon();
         this.open();
       };
 
@@ -53,6 +57,14 @@
 
       if (this.handleImmediateRedirect) {
         this.ctaButton?.removeEventListener('click', this.handleImmediateRedirect);
+      }
+
+      if (this.handleCloseClick) {
+        this.closeButton?.removeEventListener('click', this.handleCloseClick);
+      }
+
+      if (this.handleBackdropClose) {
+        this.dialog?.removeEventListener('click', this.handleBackdropClose);
       }
     }
 
@@ -177,22 +189,41 @@
       this.eventsBound = true;
 
       this.handleCancel = (event) => {
-        event.preventDefault();
+        if (!this.allowClose) {
+          event.preventDefault();
+        }
       };
 
       this.handleEscape = (event) => {
         if (event.key !== 'Escape') return;
-        event.preventDefault();
-        event.stopPropagation();
+        if (!this.allowClose) {
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+
+        this.close();
       };
 
       this.handleImmediateRedirect = () => {
         this.redirectNow();
       };
 
+      this.handleCloseClick = () => {
+        this.close();
+      };
+
+      this.handleBackdropClose = (event) => {
+        if (!this.allowClose) return;
+        if (event.target !== this.dialog) return;
+        this.close();
+      };
+
       this.dialog.addEventListener('cancel', this.handleCancel);
       document.addEventListener('keydown', this.handleEscape, true);
       this.ctaButton?.addEventListener('click', this.handleImmediateRedirect);
+      this.closeButton?.addEventListener('click', this.handleCloseClick);
+      this.dialog.addEventListener('click', this.handleBackdropClose);
     }
 
     escapeHtml(value) {
@@ -206,6 +237,48 @@
         const countryLabel = this.getCountryLabel(this.detectedCountry);
         this.copy.innerHTML = this.copyTemplate.replace(/\[country\]/gi, this.escapeHtml(countryLabel));
       }
+    }
+
+    getFlagUrl(countryCode) {
+      const normalizedCountryCode = String(countryCode || '')
+        .trim()
+        .toLowerCase();
+
+      if (!/^[a-z]{2}$/.test(normalizedCountryCode)) {
+        return '';
+      }
+
+      return `https://flagcdn.com/${normalizedCountryCode}.svg`;
+    }
+
+    updateFlagIcon() {
+      if (!this.flagIcon) return;
+
+      const flagUrl = this.getFlagUrl(this.detectedCountry);
+
+      if (!flagUrl) return;
+
+      const countryLabel = this.getCountryLabel(this.detectedCountry);
+      const flagImage = document.createElement('img');
+
+      flagImage.className = 'head-country-redirect__button-flag';
+      flagImage.src = flagUrl;
+      flagImage.alt = '';
+      flagImage.loading = 'eager';
+      flagImage.decoding = 'async';
+      flagImage.setAttribute('aria-hidden', 'true');
+
+      flagImage.addEventListener(
+        'error',
+        () => {
+          flagImage.remove();
+        },
+        { once: true }
+      );
+
+      this.flagIcon.innerHTML = '';
+      this.flagIcon.appendChild(flagImage);
+      this.flagIcon.setAttribute('title', countryLabel);
     }
 
     open() {
@@ -245,6 +318,31 @@
 
       this.hasRedirected = true;
       window.location.assign(this.matchedRule.url.toString());
+    }
+
+    close() {
+      if (!this.allowClose || !this.dialog) return;
+
+      document.dispatchEvent(
+        new CustomEvent('theme:scroll:unlock', {
+          bubbles: true,
+        })
+      );
+
+      if (window.theme?.a11y?.removeTrapFocus) {
+        window.theme.a11y.removeTrapFocus();
+      }
+
+      this.dialog.setAttribute('aria-hidden', 'true');
+      this.dialog.setAttribute('inert', '');
+
+      if (typeof this.dialog.close === 'function' && this.dialog.open) {
+        this.dialog.close();
+      } else {
+        this.dialog.removeAttribute('open');
+      }
+
+      delete this.dataset.fallbackOpen;
     }
   }
 
