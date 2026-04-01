@@ -1,53 +1,299 @@
 {% doc %}
-  Renders care recommendations information in a drawer.
-  This snippet uses metaobjects for content management.
+  Renders care recommendations in a drawer with tabs driven by a metaobject list.
+
+  Metafield setup (same pattern as other drawers):
+    - shop.metafields.info.care_recommendations  (type: list.metaobject_reference)
+    - Each metaobject entry has:
+        tab_label   (single_line_text)
+        title       (single_line_text)
+        description (rich_text or multi_line_text)
+        image       (file_reference → image)
+
+  Falls back to 4 hardcoded tabs when metafield is not configured.
 {% enddoc %}
 
-<div class="drawer-care-recommendations drawer__content-wrapper">
-  {%- comment -%}
-    Get care recommendations content from dedicated metafields
-  {%- endcomment -%}
-  {%- assign care_content = nil -%}
+{%- liquid
+  assign care_content = null
+  if product and product.metafields.info.care_recommendations != blank
+    assign care_content = product.metafields.info.care_recommendations.value
+  elsif collection and collection.metafields.info.care_recommendations != blank
+    assign care_content = collection.metafields.info.care_recommendations.value
+  elsif shop.metafields.info.care_recommendations != blank
+    assign care_content = shop.metafields.info.care_recommendations.value
+  endif
+-%}
 
-  {%- if product and product.metafields.info.care_recommendations != blank -%}
-    {%- assign care_content = product.metafields.info.care_recommendations.value -%}
-  {%- elsif collection and collection.metafields.info.care_recommendations != blank -%}
-    {%- assign care_content = collection.metafields.info.care_recommendations.value -%}
-  {%- elsif shop.metafields.info.care_recommendations != blank -%}
-    {%- assign care_content = shop.metafields.info.care_recommendations.value -%}
-  {%- endif -%}
+<div class="drawer-care-recommendations drawer__content-wrapper">
+  <h2 class="drawer-care-recommendations__title drawer-content__title">
+    {{- 'products.product.care_recommendations_title' | t -}}
+  </h2>
 
   {%- if care_content != blank -%}
-    <div class="care-recommendations__content drawer-content__main">
-      <div class="care-recommendations__text-content">
-        {%- if care_content.title != blank -%}
-          <h2 class="care-recommendations__title drawer-content__title">{{ care_content.title }}</h2>
-        {%- endif -%}
-
-        {%- if care_content.description != blank -%}
-          <div class="care-recommendations__description drawer-content__description">
-            {{ care_content.description | metafield_tag }}
-          </div>
-        {%- endif -%}
-      </div>
-
-      {%- if care_content.image != blank -%}
-        <div class="care-recommendations__image drawer-content__image">
-          {{ care_content.image | image_url: width: 600 | image_tag }}
-        </div>
-      {%- endif -%}
+    <div class="care-tabs" role="tablist" aria-label="{{ 'products.product.care_recommendations_title' | t }}">
+      {%- for tab in care_content -%}
+        <button
+          class="care-tabs__tab{% if forloop.first %} is-active{% endif %}"
+          role="tab"
+          aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+          aria-controls="care-tab-panel-{{ forloop.index0 }}"
+          id="care-tab-{{ forloop.index0 }}"
+          data-care-tab="{{ forloop.index0 }}"
+        >
+          {{- tab.tab_label | default: tab.title -}}
+        </button>
+      {%- endfor -%}
     </div>
+
+    <div class="care-tabs__panels">
+      {%- for tab in care_content -%}
+        <div
+          class="care-tabs__panel{% if forloop.first %} is-active{% endif %}"
+          id="care-tab-panel-{{ forloop.index0 }}"
+          role="tabpanel"
+          aria-labelledby="care-tab-{{ forloop.index0 }}"
+          {% unless forloop.first %}
+            hidden
+          {% endunless %}
+        >
+          {%- if tab.title != blank -%}
+            <h3 class="care-tabs__panel-heading">{{ tab.title }}</h3>
+          {%- endif -%}
+
+          {%- if tab.description != blank -%}
+            <div class="care-tabs__panel-body drawer-content__description">
+              {{ tab.description | metafield_tag }}
+            </div>
+          {%- endif -%}
+
+          {%- if tab.image != blank -%}
+            <div class="care-tabs__panel-image">
+              {{ tab.image | image_url: width: 600 | image_tag: loading: 'lazy' }}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+
   {%- else -%}
-    <div class="care-recommendations__default">
-      <h2 class="drawer-content__title">{{ 'products.product.care_recommendations_title' | t }}</h2>
-      <p class="drawer-content__description">{{ 'products.product.care_recommendations_description' | t }}</p>
+    {%- comment -%} Fallback: hardcoded 4 tabs {%- endcomment -%}
+    {%- assign fallback_tabs = 'every-day,cleaning,storage,stone-care' | split: ',' -%}
+    {%- assign fallback_labels = 'Every Day,Cleaning,Storage,Stone Care' | split: ',' -%}
+
+    <div class="care-tabs" role="tablist" aria-label="{{ 'products.product.care_recommendations_title' | t }}">
+      {%- for tab in fallback_tabs -%}
+        <button
+          class="care-tabs__tab{% if forloop.first %} is-active{% endif %}"
+          role="tab"
+          aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+          aria-controls="care-tab-panel-{{ tab }}"
+          id="care-tab-{{ tab }}"
+          data-care-tab="{{ tab }}"
+        >
+          {{- fallback_labels[forloop.index0] -}}
+        </button>
+      {%- endfor -%}
+    </div>
+
+    <div class="care-tabs__panels">
+      {%- for tab in fallback_tabs -%}
+        <div
+          class="care-tabs__panel{% if forloop.first %} is-active{% endif %}"
+          id="care-tab-panel-{{ tab }}"
+          role="tabpanel"
+          aria-labelledby="care-tab-{{ tab }}"
+          {% unless forloop.first %}
+            hidden
+          {% endunless %}
+        >
+          {%- case tab -%}
+            {%- when 'every-day' -%}
+              <h3 class="care-tabs__panel-heading">Everyday Care</h3>
+              <div class="care-tabs__panel-body drawer-content__description">
+                <p>
+                  To preserve the beauty of your Roberto Coin jewel, avoid contact with perfumes, lotions, and household
+                  chemicals. Remove your jewelry before swimming, exercising, or sleeping.
+                </p>
+                <p>
+                  Store each piece separately to prevent scratching, and handle your jewel with care to maintain its
+                  brilliance over time.
+                </p>
+              </div>
+            {%- when 'cleaning' -%}
+              <h3 class="care-tabs__panel-heading">Professional Maintenance</h3>
+              <div class="care-tabs__panel-body drawer-content__description">
+                <p>
+                  To maintain the brilliance and value of your Roberto Coin creation, regular cleaning is essential. We
+                  recommend an annual visit to a Roberto Coin boutique, where our experts can carefully inspect, clean
+                  and restore your jewel's luminosity.
+                </p>
+                <p>
+                  If your piece features precious stones, professional handling is particularly important to ensure
+                  their integrity and secure setting over time.
+                </p>
+              </div>
+            {%- when 'storage' -%}
+              <h3 class="care-tabs__panel-heading">Proper Storage</h3>
+              <div class="care-tabs__panel-body drawer-content__description">
+                <p>
+                  Store your Roberto Coin jewelry in the original box or a soft pouch, away from direct sunlight and
+                  humidity. Keep pieces separated to avoid scratches.
+                </p>
+                <p>
+                  For long-term storage, consider a dry, temperature-controlled environment to protect metals and
+                  gemstones.
+                </p>
+              </div>
+            {%- when 'stone-care' -%}
+              <h3 class="care-tabs__panel-heading">Stone Care</h3>
+              <div class="care-tabs__panel-body drawer-content__description">
+                <p>
+                  Precious and semi-precious stones require special attention. Avoid exposing them to extreme
+                  temperatures or harsh chemicals. Clean gently with a soft, damp cloth.
+                </p>
+                <p>
+                  Some stones such as pearls, emeralds, and opals are particularly delicate — consult our specialists
+                  for guidance specific to your piece.
+                </p>
+              </div>
+          {%- endcase -%}
+        </div>
+      {%- endfor -%}
     </div>
   {%- endif -%}
 </div>
 
 {% stylesheet %}
-  .drawer-care-recommendations .care-recommendations__image {
-    margin-bottom: 0px;
+  .drawer-care-recommendations {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .drawer-care-recommendations__title {
+    margin-bottom: 0;
+    padding-bottom: 20px;
+  }
+
+  .care-tabs {
+    display: flex;
+    border-bottom: 1px solid #e5e5e5;
+    gap: 0;
+    flex-shrink: 0;
+    margin-bottom: 30px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .care-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .care-tabs__tab {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 14px 16px 12px;
+    cursor: pointer;
+    color: var(--COLOR-TEXT-A50, rgba(0, 0, 0, 0.4));
+    font-family: var(--FONT-STACK-BODY);
+    font-size: var(--FONT-SIZE-CAPTION);
+    font-weight: var(--FONT-WEIGHT-BODY);
+    letter-spacing: var(--LETTER-SPACING-NAV);
+    text-transform: uppercase;
+    white-space: nowrap;
+    margin-bottom: -1px;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .care-tabs__tab.is-active,
+  .care-tabs__tab[aria-selected='true'] {
+    color: var(--COLOR-TEXT);
+    border-bottom-color: var(--COLOR-TEXT);
+  }
+
+  .care-tabs__tab:hover:not(.is-active) {
+    color: var(--COLOR-TEXT);
+  }
+
+  .care-tabs__panels {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .care-tabs__panel {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .care-tabs__panel.is-active {
+    display: flex;
+  }
+
+  .care-tabs__panel-heading {
+    font-family: var(--FONT-STACK-HEADING);
+    font-size: var(--font-display-s);
+    font-weight: var(--FONT-WEIGHT-HEADING);
+    font-style: var(--FONT-STYLE-HEADING);
+    line-height: var(--LINE-HEIGHT-DISPLAY-S);
+    letter-spacing: var(--LETTER-SPACING-HEADING);
+    text-transform: var(--FONT-UPPERCASE-HEADING);
+    color: var(--COLOR-TEXT);
+    margin-bottom: 20px;
+  }
+
+  .care-tabs__panel-body {
+    margin-bottom: 0;
+    flex: 1;
+  }
+
+  .care-tabs__panel-image {
     margin-top: auto;
+    padding-top: 30px;
+    width: 100%;
+  }
+
+  .care-tabs__panel-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    border-radius: var(--RADIUS, 0);
   }
 {% endstylesheet %}
+
+<script>
+  (function () {
+    var wrapper = document.querySelector('.drawer-care-recommendations');
+    if (!wrapper) return;
+
+    var tabs = wrapper.querySelectorAll('.care-tabs__tab');
+    var panels = wrapper.querySelectorAll('.care-tabs__panel');
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var target = tab.dataset.careTab;
+
+        tabs.forEach(function (t) {
+          t.classList.remove('is-active');
+          t.setAttribute('aria-selected', 'false');
+        });
+
+        panels.forEach(function (p) {
+          p.classList.remove('is-active');
+          p.hidden = true;
+        });
+
+        tab.classList.add('is-active');
+        tab.setAttribute('aria-selected', 'true');
+
+        var panel = wrapper.querySelector('#care-tab-panel-' + target);
+        if (panel) {
+          panel.classList.add('is-active');
+          panel.hidden = false;
+        }
+      });
+    });
+  })();
+</script>
