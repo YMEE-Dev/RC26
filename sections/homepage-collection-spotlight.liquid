@@ -8,6 +8,7 @@
   assign image = section.settings.image
   assign mobile_image = section.settings.mobile_image
   assign layout = section.settings.layout
+  assign mobile_layout = section.settings.mobile_layout
   assign show_recently_viewed_indicator = settings.show_recently_viewed_indicator
   assign sizes = '(min-width: 960px) 360px, calc(50vw - 30px)'
   assign rendered_products_count = 0
@@ -31,7 +32,7 @@
 
 <section
   id="HomepageCollectionSpotlight--{{ section.id }}"
-  class="homepage-collection-spotlight section-padding {{ color_scheme }}{% if layout == 'reversed' %} homepage-collection-spotlight--reversed{% endif %}"
+  class="homepage-collection-spotlight section-padding {{ color_scheme }}{% if layout == 'reversed' %} homepage-collection-spotlight--reversed{% endif %} {% if mobile_layout == 'reversed' %} homepage-collection-spotlight--mobile_reversed{% endif %}"
   data-section-id="{{ section.id }}"
   data-section-type="homepage-collection-spotlight"
   style="background-color: var(--bg-color);"
@@ -191,6 +192,16 @@
       "options": [
         {"value": "", "label": "Image left, content right"},
         {"value": "reversed", "label": "Content left, image right"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "mobile_layout",
+      "label": "Mobile layout",
+      "default": "",
+      "options": [
+        {"value": "", "label": "Image top, content bottom"},
+        {"value": "reversed", "label": "Content top, image bottom"}
       ]
     },
     {
