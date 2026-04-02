@@ -2,20 +2,79 @@
 {%- liquid
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign subheading_text = ''
+  assign featured_article = blank
+  assign banner_image = section.settings.image
+  assign banner_alt = section.settings.image_alt
+  assign description_text = ''
+  assign data_blog_handle = 'all'
+
+  if banner_image != blank and banner_image.value != blank
+    assign banner_image = banner_image.value
+  endif
+
   if blog != blank
+    assign featured_article = blog.articles.first
+    assign data_blog_handle = blog.handle | default: data_blog_handle
+
     if section.settings.subheading != blank
       assign subheading_text = section.settings.subheading
     else
       assign subheading_text = section.settings.subheading_prefix | append: blog.title
     endif
+  else
+    {%- assign latest_article = blank -%}
+    {%- for blog_kv in blogs -%}
+      {%- assign candidate_blog = blog_kv[1] -%}
+      {%- if candidate_blog != blank -%}
+        {%- assign candidate_article = candidate_blog.articles.first -%}
+        {%- if candidate_article != blank -%}
+          {%- if latest_article == blank -%}
+            {%- assign latest_article = candidate_article -%}
+          {%- elsif candidate_article.published_at > latest_article.published_at -%}
+            {%- assign latest_article = candidate_article -%}
+          {%- endif -%}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- assign featured_article = latest_article -%}
+  endif
+
+  if featured_article != blank
+    assign data_blog_handle = featured_article.blog.handle | default: data_blog_handle
+
+    if banner_image == blank
+      assign banner_image = featured_article.image
+    endif
+
+    if banner_alt == blank
+      assign banner_alt = featured_article.title
+    endif
+
+    if subheading_text == blank
+      if section.settings.subheading != blank
+        assign subheading_text = section.settings.subheading
+      else
+        assign subheading_text = section.settings.subheading_prefix | append: featured_article.blog.title
+      endif
+    endif
+
+    assign description_text = featured_article.excerpt_or_content | strip_html | strip | truncate: section.settings.description_length
   endif
 -%}
 
 {%- style -%}
   #NewMainBlogBanner--{{ section.id }} {
-    --PT: {{ section.settings.padding_top }}px;
+    --PT-BASE: {{ section.settings.padding_top }}px;
+    --PT: var(--PT-BASE);
     --PB: {{ section.settings.padding_bottom }}px;
   }
+
+  @media (min-width: 750px) and (max-width: 1024px) {
+    #NewMainBlogBanner--{{ section.id }} {
+      --PT: calc(var(--PT-BASE) + 100px);
+    }
+  }
+
   #NewMainBlogBanner--{{ section.id }}.new-main-blog-banner {
     --section-heading-font: var(--FONT-STACK-HEADING, 'Portrait LS', serif);
     --section-heading-style: var(--FONT-STYLE-HEADING, normal);
@@ -29,154 +88,61 @@
   class="new-main-blog-banner section-padding {{ color_scheme }}"
   data-section-id="{{ section.id }}"
   data-section-type="new-main-blog-banner"
-  data-blog-handle="{{ blog.handle | default: 'all' }}"
+  data-blog-handle="{{ data_blog_handle | escape }}"
 >
-  <div class="new-main-blog-banner__wrapper {{ section.settings.width }}" id="blogBannerContent">
-    <div class="blog-banner-loading">
-      <div class="spinner"></div>
-    </div>
+  <div class="new-main-blog-banner__wrapper {{ section.settings.width }}">
+    {%- if featured_article != blank -%}
+      <div class="new-main-blog-banner__media">
+        {%- if banner_image != blank -%}
+          <a href="{{ featured_article.url }}" class="new-main-blog-banner__media-link">
+            {%- if banner_image.width != blank -%}
+              {{
+                banner_image
+                | image_url: width: 2000
+                | image_tag:
+                  alt: banner_alt,
+                  width: 1000,
+                  height: 1000,
+                  loading: 'lazy'
+              }}
+            {%- else -%}
+              <img src="{{ banner_image | escape }}" alt="{{ banner_alt | escape }}" width="1000" height="1000" loading="lazy">
+            {%- endif -%}
+          </a>
+        {%- endif -%}
+      </div>
+
+      <div class="new-main-blog-banner__content">
+        <div class="new-main-blog-banner__text">
+          {%- if section.settings.show_subheading and subheading_text != blank -%}
+            <p class="new-main-blog-banner__subheading">{{ subheading_text | upcase }}</p>
+          {%- endif -%}
+
+          <h2 class="new-main-blog-banner__heading {{ section.settings.heading_font_size }}">
+            <a class="h2" href="{{ featured_article.url }}">{{ featured_article.title | escape }}</a>
+          </h2>
+
+          {%- if section.settings.show_description and description_text != blank -%}
+            <div class="new-main-blog-banner__description rte">
+              <p>{{ description_text }}</p>
+            </div>
+          {%- endif -%}
+        </div>
+
+        <div class="new-main-blog-banner__button-wrap">
+          <a
+            href="{{ featured_article.url }}"
+            class="btn {{ section.settings.button_style }} {{ section.settings.button_type }} {{ section.settings.button_size }} new-main-blog-banner__button"
+          >
+            {{ section.settings.button_text | default: 'Read story' | escape }}
+          </a>
+        </div>
+      </div>
+    {%- else -%}
+      <p class="new-main-blog-banner__empty">{{ section.settings.empty_message | default: 'No posts yet.' }}</p>
+    {%- endif -%}
   </div>
 </section>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const section = document.querySelector('[data-section-type="new-main-blog-banner"]');
-    const container = document.getElementById('blogBannerContent');
-    const STOREFRONT_TOKEN = "{{ shop.metaobjects.storefront_access_token.value }}";
-    const SHOP_DOMAIN = "{{ shop.domain }}";
-    
-    // Function to capitalize first letter of each word
-    function capitalizeTitle(str) {
-      return str
-        .toLowerCase()
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-    }
-    // Get current blog handle from URL
-    const currentPath = window.location.pathname;
-    const blogMatch = currentPath.match(/\/blogs\/([^\/]+)/);
-    const currentBlogHandle = blogMatch ? blogMatch[1] : 'all';
-    const isAllBlogs = currentBlogHandle === 'all';
-    const articleQuery = isAllBlogs 
-    ? `{
-        articles(first: 1, sortKey: PUBLISHED_AT, reverse: true) {
-          nodes {
-            title
-            handle
-            excerpt
-            tags
-            image {
-              url
-              altText
-            }
-            blog {
-              handle
-            }
-          }
-        }
-      }`
-    : `{
-        blog(handle: "${currentBlogHandle}") {
-          articles(first: 250, sortKey: PUBLISHED_AT, reverse: true) {
-            nodes {
-              title
-              handle
-              excerpt
-              tags
-              image {
-                url
-                altText
-              }
-              blog {
-                handle
-              }
-            }
-          }
-        }
-      }`;
-    fetch(`https://${SHOP_DOMAIN}/api/2026-01/graphql.json`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Shopify-Storefront-Access-Token": STOREFRONT_TOKEN
-      },
-      body: JSON.stringify({ query: articleQuery })
-    })
-    .then(res => res.json())
-    .then(data => {
-      let article;
-      
-      if (isAllBlogs) {
-        article = data.data.articles.nodes[0];
-      } else {
-        article = data.data.blog?.articles?.nodes[0];
-      }
-      
-      if (!article) {
-        container.innerHTML = '<p class="new-main-blog-banner__empty">{{ section.settings.empty_message | default: "No posts yet." }}</p>';
-        return;
-      }
-   
-      const articleUrl = `/blogs/${article.blog.handle}/${article.handle}`;
-      
-      // Check if custom image exists, otherwise use article image
-      const settingsImageUrl = '{{ section.settings.image | img_url: "master" }}';
-      const hasSettingsImage = '{{ section.settings.image }}' !== '';
-      const imageUrl = hasSettingsImage ? settingsImageUrl : (article.image?.url || '');
-      const imageAlt = '{{ section.settings.image_alt }}' || article.image?.altText || article.title;
-      
-      const subheading =  `LATEST IN #${article.blog.handle.toUpperCase()}`;
-      const showSubheading = {{ section.settings.show_subheading }};
-      const showDescription = {{ section.settings.show_description }};
-      
-      const buttonText = '{{ section.settings.button_text | default: "Read story" }}';
-      const buttonStyle = '{{ section.settings.button_style }}';
-      const buttonSize = '{{ section.settings.button_size }}';
-      const buttonType = '{{ section.settings.button_type }}';
-      
-      const excerpt = article.excerpt ;
-      const title = capitalizeTitle(article.title);
-      container.innerHTML = `
-        <div class="new-main-blog-banner__media">
-          ${imageUrl ? `
-            <a href="${articleUrl}" class="new-main-blog-banner__media-link">
-              <img src="${imageUrl}" alt="${imageAlt}" width="1000" height="1000">
-            </a>
-          ` : ''}
-        </div>
-        
-        <div class="new-main-blog-banner__content">
-          <div class="new-main-blog-banner__text">
-            ${showSubheading && subheading ? `
-              <p class="new-main-blog-banner__subheading">${subheading.toUpperCase()}</p>
-            ` : ''}
-            <h1 class="new-main-blog-banner__heading {{ section.settings.heading_font_size }}">
-              <a class="h1" href="${articleUrl}">${title}</a>
-            </h1>
-            ${showDescription && excerpt ? `
-              <div class="new-main-blog-banner__description rte">
-                ${excerpt}
-              </div>
-            ` : ''}
-          </div>
-          <div class="new-main-blog-banner__button-wrap">
-            <a
-              href="${articleUrl}"
-              class="btn new-main-blog-banner__button"
-            >
-              ${buttonText}
-            </a>
-          </div>
-        </div>
-      `;
-    })
-    .catch(err => {
-      console.error('Error loading blog banner:', err);
-      container.innerHTML = '<p class="new-main-blog-banner__empty">Error loading content.</p>';
-    });
-  });
-</script>
 
 {% stylesheet %}
   .blog-banner-loading {

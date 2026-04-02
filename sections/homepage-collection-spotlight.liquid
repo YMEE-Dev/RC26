@@ -12,6 +12,14 @@
   assign show_recently_viewed_indicator = settings.show_recently_viewed_indicator
   assign sizes = '(min-width: 960px) 360px, calc(50vw - 30px)'
   assign rendered_products_count = 0
+
+  if image != blank and image.value != blank
+    assign image = image.value
+  endif
+
+  if mobile_image != blank and mobile_image.value != blank
+    assign mobile_image = mobile_image.value
+  endif
 -%}
 
 {%- style -%}
@@ -107,26 +115,44 @@
       <div class="homepage-collection-spotlight__media{% if mobile_image != blank %} homepage-collection-spotlight__media--has-mobile-image{% endif %}">
         {%- if image != blank or mobile_image != blank -%}
           {%- assign desktop_image = image | default: mobile_image -%}
-          {{
-            desktop_image
-            | image_url: width: 2400
-            | image_tag:
-              class: 'homepage-collection-spotlight__image homepage-collection-spotlight__image--desktop',
-              loading: 'lazy',
-              sizes: '(min-width: 960px) 50vw, 100vw',
-              widths: '375, 550, 750, 990, 1200, 1600, 2000, 2400'
-          }}
+          {%- if desktop_image.width != blank -%}
+            {{
+              desktop_image
+              | image_url: width: 2400
+              | image_tag:
+                class: 'homepage-collection-spotlight__image homepage-collection-spotlight__image--desktop',
+                loading: 'lazy',
+                sizes: '(min-width: 960px) 50vw, 100vw',
+                widths: '375, 550, 750, 990, 1200, 1600, 2000, 2400'
+            }}
+          {%- else -%}
+            <img
+              class="homepage-collection-spotlight__image homepage-collection-spotlight__image--desktop"
+              src="{{ desktop_image | escape }}"
+              alt=""
+              loading="lazy"
+            >
+          {%- endif -%}
 
           {%- if mobile_image != blank -%}
-            {{
-              mobile_image
-              | image_url: width: 1500
-              | image_tag:
-                class: 'homepage-collection-spotlight__image homepage-collection-spotlight__image--mobile',
-                loading: 'lazy',
-                sizes: '100vw',
-                widths: '320, 375, 550, 750, 990, 1200, 1500'
-            }}
+            {%- if mobile_image.width != blank -%}
+              {{
+                mobile_image
+                | image_url: width: 1500
+                | image_tag:
+                  class: 'homepage-collection-spotlight__image homepage-collection-spotlight__image--mobile',
+                  loading: 'lazy',
+                  sizes: '100vw',
+                  widths: '320, 375, 550, 750, 990, 1200, 1500'
+              }}
+            {%- else -%}
+              <img
+                class="homepage-collection-spotlight__image homepage-collection-spotlight__image--mobile"
+                src="{{ mobile_image | escape }}"
+                alt=""
+                loading="lazy"
+              >
+            {%- endif -%}
           {%- endif -%}
         {%- else -%}
           <div class="homepage-collection-spotlight__placeholder">

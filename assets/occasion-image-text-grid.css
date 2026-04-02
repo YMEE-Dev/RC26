@@ -82,6 +82,29 @@
   }
 }
 
+@media (min-width: 750px) and (max-width: 1024px) {
+  .main-content--article-brand .occasion-image-text-grid__inner {
+    width: calc(100% - 60px);
+    max-width: none;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 0;
+    padding-right: 0;
+    box-sizing: border-box;
+  }
+
+  .occasion-image-text-grid__inner--3-items {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+
+  .occasion-image-text-grid__inner--3-items .occasion-image-text-grid__item:nth-child(1),
+  .occasion-image-text-grid__inner--3-items .occasion-image-text-grid__item:nth-child(2),
+  .occasion-image-text-grid__inner--3-items .occasion-image-text-grid__item:nth-child(3) {
+    grid-column: auto;
+  }
+}
+
 @media (max-width: 749px) {
   .main-content--article-brand .occasion-image-text-grid__inner,
   .main-content--article-celebrity .occasion-image-text-grid__inner,

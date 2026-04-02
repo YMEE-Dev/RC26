@@ -55,8 +55,13 @@
           assign has_image = false
           assign has_text = false
           assign show_block = false
+          assign resolved_image = block.settings.image
 
-          if block.settings.image != blank
+          if resolved_image != blank and resolved_image.value != blank
+            assign resolved_image = resolved_image.value
+          endif
+
+          if resolved_image != blank
             assign has_image = true
             assign show_block = true
           endif
@@ -71,15 +76,24 @@
           <article class="occasion-image-text-grid__item" data-brand-fade {{ block.shopify_attributes }}>
             {%- if has_image -%}
               <div class="occasion-image-text-grid__media">
-                {{
-                  block.settings.image
-                  | image_url: width: 1200
-                  | image_tag:
-                    class: 'occasion-image-text-grid__image',
-                    widths: '375, 550, 750, 900, 1100, 1200',
-                    sizes: image_sizes,
-                    loading: 'lazy'
-                }}
+                {%- if resolved_image.width != blank -%}
+                  {{
+                    resolved_image
+                    | image_url: width: 1200
+                    | image_tag:
+                      class: 'occasion-image-text-grid__image',
+                      widths: '375, 550, 750, 900, 1100, 1200',
+                      sizes: image_sizes,
+                      loading: 'lazy'
+                  }}
+                {%- else -%}
+                  <img
+                    class="occasion-image-text-grid__image"
+                    src="{{ resolved_image | escape }}"
+                    alt=""
+                    loading="lazy"
+                  >
+                {%- endif -%}
               </div>
             {%- endif -%}
 
