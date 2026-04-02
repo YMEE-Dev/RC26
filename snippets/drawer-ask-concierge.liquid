@@ -110,10 +110,6 @@
 </div>
 
 {% stylesheet %}
-  .drawer-concierge .drawer__image {
-    margin-top: 50px;
-  }
-
   .drawer-concierge .drawer__section {
     margin-bottom: 0;
   }
@@ -125,6 +121,12 @@
   .drawer-concierge {
     position: relative;
     overflow: hidden;
+  }
+
+  @media (min-width: 990px) {
+    side-drawer[data-drawer='ask-concierge'] .drawer__close {
+      right: 40px;
+    }
   }
 
   .drawer-concierge__video-panel {
@@ -179,6 +181,19 @@
     align-items: center;
     color: #1a1a1a;
     flex-shrink: 0;
+  }
+
+  side-drawer .drawer-concierge.drawer__content-wrapper .drawer-content__title {
+    font-family: var(--FONT-STACK-NAV);
+    font-size: var(--FONT-SIZE-NAV);
+    font-style: normal;
+    font-weight: var(--FONT-WEIGHT-NAV);
+    line-height: var(--LINE-HEIGHT-NAV);
+    letter-spacing: var(--LETTER-SPACING-NAV);
+    text-transform: uppercase;
+    padding: 0;
+    margin-top: 0;
+    margin-bottom: 40px;
   }
 
   .drawer-concierge__video-title {
