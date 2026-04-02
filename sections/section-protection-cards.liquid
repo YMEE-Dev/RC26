@@ -32,29 +32,59 @@
             {%- for block in section.blocks -%}
               {%- case block.type -%}
                 {%- when 'card' -%}
-                  <div class="grid-item protection-card" data-grid-item {{ block.shopify_attributes }}>
-                    {%- if forloop.first -%}
+                  {%- if template.suffix == 'concierge' -%}
+                    <div class="grid-item protection-card" data-grid-item {{ block.shopify_attributes }}>
+                      {%- if forloop.first -%}
+                        <a
+                          href="https://cdn.shopify.com/s/files/1/0969/2990/7075/files/00_Size-Guide-Bracelets_Rings_ENG_2026.pdf?v=1775035281"
+                          download
+                          target="_blank"
+                          class="protection-card__overlay-link"
+                          aria-label="{{ block.settings.title | escape }}"
+                        ></a>
+                      {%- elsif forloop.last -%}
+                        <button
+                          type="button"
+                          class="protection-card__overlay-link"
+                          data-drawer-open="ask-concierge"
+                          aria-label="{{ block.settings.title | escape }}"
+                        ></button>
+                      {%- else -%}
+                        <button
+                          type="button"
+                          class="protection-card__overlay-link"
+                          data-drawer-open="care-recommendations"
+                          aria-label="{{ block.settings.title | escape }}"
+                        ></button>
+                      {%- endif -%}
+                      {%- if block.settings.image != blank -%}
+                        <div class="protection-card__image">
+                          {{ block.settings.image | image_url: width: 600 | image_tag: loading: 'lazy' }}
+                        </div>
+                      {%- else -%}
+                        <div class="protection-card__placeholder">
+                          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                        </div>
+                      {%- endif -%}
+                      <div class="protection-card__content">
+                        {%- if block.settings.title != blank -%}
+                          <h3 class="protection-card__title">{{ block.settings.title }}</h3>
+                        {%- endif -%}
+                        {%- if block.settings.description != blank -%}
+                          <p class="protection-card__description">{{ block.settings.description }}</p>
+                        {%- endif -%}
+                      </div>
+                    </div>
+                  {%- else -%}
+                    {%- if block.settings.card_link != blank -%}
                       <a
-                        href="https://cdn.shopify.com/s/files/1/0969/2990/7075/files/00_Size-Guide-Bracelets_Rings_ENG_2026.pdf?v=1775035281"
-                        download
-                        target="_blank"
-                        class="protection-card__overlay-link"
-                        aria-label="{{ block.settings.title | escape }}"
-                      ></a>
-                    {%- elsif forloop.last -%}
-                      <button
-                        type="button"
-                        class="protection-card__overlay-link"
-                        data-drawer-open="ask-concierge"
-                        aria-label="{{ block.settings.title | escape }}"
-                      ></button>
+                        href="{{ block.settings.card_link }}"
+                        class="grid-item protection-card protection-card--linked"
+                        data-grid-item
+                        {{ block.shopify_attributes }}
+                      >
                     {%- else -%}
-                      <button
-                        type="button"
-                        class="protection-card__overlay-link"
-                        data-drawer-open="care-recommendations"
-                        aria-label="{{ block.settings.title | escape }}"
-                      ></button>
+                      <div class="grid-item protection-card" data-grid-item {{ block.shopify_attributes }}>
                     {%- endif -%}
                     {%- if block.settings.image != blank -%}
                       <div class="protection-card__image">
@@ -65,22 +95,32 @@
                         {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
                       </div>
                     {%- endif -%}
-
                     <div class="protection-card__content">
                       {%- if block.settings.title != blank -%}
                         <h3 class="protection-card__title">{{ block.settings.title }}</h3>
                       {%- endif -%}
-
                       {%- if block.settings.description != blank -%}
                         <p class="protection-card__description">{{ block.settings.description }}</p>
                       {%- endif -%}
                     </div>
-                  </div>
+                    {%- if block.settings.card_link != blank -%}
+                      </a>
+                    {%- else -%}
+                      </div>
+                    {%- endif -%}
+                  {%- endif -%}
               {%- endcase -%}
             {%- endfor -%}
           </div>
         </grid-slider>
       </div>
+      {%- if section.settings.button_label != blank and section.settings.button_link != blank -%}
+        <div class="protection-cards__button-wrapper" style="margin-top: {{ section.settings.button_margin_top }}px;">
+          <a href="{{ section.settings.button_link }}" class="btn btn--outline protection-cards__btn">
+            {{- section.settings.button_label -}}
+          </a>
+        </div>
+      {%- endif -%}
     {%- endif -%}
   </div>
 </section>
@@ -282,8 +322,29 @@
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  .protection-card--linked:hover .protection-card__image img,
   .protection-card:has(.protection-card__overlay-link):hover .protection-card__image img {
     transform: scale(1.05);
+  }
+
+  .protection-cards__button-wrapper {
+    display: flex;
+    justify-content: center;
+  }
+
+  .protection-cards__btn {
+    --btn-border: #000;
+    --btn-bg: #000;
+    --btn-text: #fff;
+    --btn-bg-hover: #27574d;
+    --btn-border-hover: #27574d;
+    --btn-text-hover: #fff;
+  }
+
+  @media (min-width: 990px) {
+    .protection-cards__btn {
+      min-width: 400px;
+    }
   }
 
   @media (max-width: 768px) {
@@ -312,29 +373,29 @@
   .protection-card__content {
     display: flex;
     flex-direction: column;
+    width: 100%;
   }
 
   .protection-card__title {
     margin: 0 0 20px;
-    color: var(--000000, #000);
+    color: var(--COLOR-TEXT);
     font-family: var(--FONT-STACK-HEADING);
+    font-style: var(--FONT-STYLE-HEADING);
+    font-weight: var(--FONT-WEIGHT-HEADING);
     text-align: center;
-    font-size: 32px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 36px; /* 112.5% */
+    font-size: var(--FONT-DISPLAY-S);
+    line-height: var(--LINE-HEIGHT-DISPLAY-S);
   }
 
   .protection-card__description {
-    color: var(--000000, #000);
+    color: var(--COLOR-TEXT);
     text-align: center;
     margin: 0;
-    /* RC26/Body */
-    font-family: Inter;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 22px; /* 157.143% */
+    font-family: var(--FONT-STACK-BODY);
+    font-size: var(--font-body-small);
+    font-style: var(--FONT-STYLE-BODY);
+    font-weight: var(--FONT-WEIGHT-BODY);
+    line-height: var(--LINE-HEIGHT-BODY);
   }
 
   @media (min-width: 990px) {
@@ -399,6 +460,12 @@
           "id": "description",
           "label": "Description",
           "default": "Card description text goes here"
+        },
+        {
+          "type": "url",
+          "id": "card_link",
+          "label": "Card link",
+          "info": "Makes the entire card clickable."
         }
       ]
     }
@@ -467,6 +534,30 @@
       "id": "color_scheme",
       "default": "scheme_1",
       "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "range",
+      "id": "button_margin_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Button margin top",
+      "default": 32
     }
   ],
   "presets": [

@@ -398,6 +398,7 @@
   {%- if product != blank -%}
     {%- render 'ymee-color-picker', product: product, current_variant: current_variant, section_id: section_id -%}
 
+    <div data-geo-buyform>
     {%- if cr_show_inquire -%}
       {%- if ymee_has_size -%}
         {%- render 'ymee-variant-dropdown',
@@ -572,6 +573,7 @@
         </div>
       {%- endunless -%}
     {%- endif -%}
+    </div>{%- comment -%} /data-geo-buyform {%- endcomment -%}
 
   {%- else -%}
     <div class="product-form">
