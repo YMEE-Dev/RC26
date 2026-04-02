@@ -33,28 +33,30 @@
               {%- case block.type -%}
                 {%- when 'card' -%}
                   <div class="grid-item protection-card" data-grid-item {{ block.shopify_attributes }}>
-                    {%- if forloop.first -%}
-                      <a
-                        href="https://cdn.shopify.com/s/files/1/0969/2990/7075/files/00_Size-Guide-Bracelets_Rings_ENG_2026.pdf?v=1775035281"
-                        download
-                        target="_blank"
-                        class="protection-card__overlay-link"
-                        aria-label="{{ block.settings.title | escape }}"
-                      ></a>
-                    {%- elsif forloop.last -%}
-                      <button
-                        type="button"
-                        class="protection-card__overlay-link"
-                        data-drawer-open="ask-concierge"
-                        aria-label="{{ block.settings.title | escape }}"
-                      ></button>
-                    {%- else -%}
-                      <button
-                        type="button"
-                        class="protection-card__overlay-link"
-                        data-drawer-open="care-recommendations"
-                        aria-label="{{ block.settings.title | escape }}"
-                      ></button>
+                    {%- if template.suffix == 'concierge' -%}
+                      {%- if forloop.first -%}
+                        <a
+                          href="https://cdn.shopify.com/s/files/1/0969/2990/7075/files/00_Size-Guide-Bracelets_Rings_ENG_2026.pdf?v=1775035281"
+                          download
+                          target="_blank"
+                          class="protection-card__overlay-link"
+                          aria-label="{{ block.settings.title | escape }}"
+                        ></a>
+                      {%- elsif forloop.last -%}
+                        <button
+                          type="button"
+                          class="protection-card__overlay-link"
+                          data-drawer-open="ask-concierge"
+                          aria-label="{{ block.settings.title | escape }}"
+                        ></button>
+                      {%- else -%}
+                        <button
+                          type="button"
+                          class="protection-card__overlay-link"
+                          data-drawer-open="care-recommendations"
+                          aria-label="{{ block.settings.title | escape }}"
+                        ></button>
+                      {%- endif -%}
                     {%- endif -%}
                     {%- if block.settings.image != blank -%}
                       <div class="protection-card__image">
