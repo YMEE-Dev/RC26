@@ -20,9 +20,11 @@
 <div class="drawer-bis drawer__content-wrapper" data-bis-drawer>
   {%- comment -%} ── FORM VIEW ── {%- endcomment -%}
   <div class="drawer-bis__form-view" data-bis-form-view>
-    <h3 class="drawer__title drawer-content__title" data-bis-title>
-      {{ 'general.bis_form.notify_title' | t }}
-    </h3>
+    <div class="bis-header">
+      <h3 class="drawer__title drawer-content__title" data-bis-title>
+        {{ 'general.bis_form.notify_title' | t }}
+      </h3>
+    </div>
 
     <div class="drawer__content drawer-content__main">
       <div class="drawer-bis__fields" data-scroll-lock-scrollable>
@@ -61,7 +63,9 @@
 
         {%- comment -%} ── Email section (all modes) ── {%- endcomment -%}
         <div class="form-section">
-          <h4 class="form-section__title drawer-bis__required-label" data-bis-required-label>*{{ 'general.bis_form.required_fields' | t }}</h4>
+          <h4 class="form-section__title drawer-bis__required-label" data-bis-required-label>
+            *{{ 'general.bis_form.required_fields' | t }}
+          </h4>
           <div class="form-field">
             <input
               type="email"
@@ -201,7 +205,7 @@
 
     #side-drawer-bis-form .drawer-bis {
       overflow: hidden;
-      padding: var(--drawer-padding) 0 0;
+      padding: 0;
     }
   }
 
@@ -209,10 +213,17 @@
   .drawer-bis {
     --drawer-padding-x: 40px;
     --drawer-padding: clamp(16px, 4vh, 40px);
-    padding: var(--drawer-padding) var(--drawer-padding-x);
+    padding: 0;
     display: flex;
     flex-direction: column;
     height: 100%;
+  }
+
+  /* ── Sticky grey header – mirrors .care-header ── */
+  .bis-header {
+    background-color: #f9f9f9;
+    padding: 40px 40px 20px;
+    flex-shrink: 0;
   }
 
   /* ── Form view layout ── */
@@ -235,7 +246,6 @@
     letter-spacing: var(--LETTER-SPACING-NAV);
     text-transform: uppercase;
     margin-bottom: 0;
-    padding: 0 var(--drawer-padding);
   }
 
   /* ── Main content area ── */
@@ -254,8 +264,9 @@
     overflow-y: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    margin: clamp(12px, 3vh, 40px) 0 clamp(8px, 2vh, 20px) 0;
-    padding: 0 var(--drawer-padding);
+    margin: 0;
+    padding: 30px 40px;
+    background-color: #ffffff;
   }
 
   .drawer-bis__fields::-webkit-scrollbar {
@@ -483,7 +494,9 @@
   }
 
   @keyframes bis-spin {
-    to { transform: rotate(360deg); }
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   /* ── Hidden form element (no visual) ── */
@@ -555,7 +568,23 @@
 
   @media (max-width: 574px) {
     .drawer-bis {
-      padding: var(--drawer-padding) 0 0;
+      padding: 0;
+    }
+
+    .bis-header {
+      padding: 20px 20px 20px;
+    }
+
+    .drawer-bis__fields {
+      padding: 30px 20px;
+    }
+
+    .drawer-bis__product-info {
+      margin: 0 20px;
+    }
+
+    .drawer-bis__submit {
+      margin: 0 20px clamp(10px, 2vh, 30px) 20px;
     }
   }
 {% endstylesheet %}
