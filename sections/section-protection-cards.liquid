@@ -115,7 +115,7 @@
         </grid-slider>
       </div>
       {%- if section.settings.button_label != blank and section.settings.button_link != blank -%}
-        <div class="protection-cards__button-wrapper">
+        <div class="protection-cards__button-wrapper" style="margin-top: {{ section.settings.button_margin_top }}px;">
           <a href="{{ section.settings.button_link }}" class="btn btn--outline protection-cards__btn">
             {{- section.settings.button_label -}}
           </a>
@@ -329,16 +329,30 @@
   .protection-cards__button-wrapper {
     display: flex;
     justify-content: center;
-    margin-top: 48px;
   }
 
   .protection-cards__btn {
     --btn-border: #000;
-    --btn-bg: transparent;
-    --btn-text: #000;
+    --btn-bg: #000;
+    --btn-text: #fff;
     --btn-bg-hover: #27574d;
     --btn-border-hover: #27574d;
     --btn-text-hover: #fff;
+  }
+
+  @media (min-width: 990px) {
+    .protection-cards__button-wrapper {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      pointer-events: none;
+    }
+
+    .protection-cards:hover .protection-cards__button-wrapper {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
   }
 
   @media (max-width: 768px) {
@@ -542,6 +556,16 @@
       "type": "url",
       "id": "button_link",
       "label": "Button link"
+    },
+    {
+      "type": "range",
+      "id": "button_margin_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Button margin top",
+      "default": 30
     }
   ],
   "presets": [
