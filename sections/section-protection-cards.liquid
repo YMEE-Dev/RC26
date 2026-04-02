@@ -322,7 +322,8 @@
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .protection-card:hover .protection-card__image img {
+  .protection-card--linked:hover .protection-card__image img,
+  .protection-card:has(.protection-card__overlay-link):hover .protection-card__image img {
     transform: scale(1.05);
   }
 
@@ -341,17 +342,8 @@
   }
 
   @media (min-width: 990px) {
-    .protection-cards__button-wrapper {
-      opacity: 0;
-      transform: translateY(8px);
-      transition: opacity 0.25s ease, transform 0.25s ease;
-      pointer-events: none;
-    }
-
-    .protection-cards:hover .protection-cards__button-wrapper {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
+    .protection-cards__btn {
+      min-width: 400px;
     }
   }
 
