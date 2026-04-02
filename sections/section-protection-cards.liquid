@@ -76,6 +76,12 @@
                       {%- if block.settings.description != blank -%}
                         <p class="protection-card__description">{{ block.settings.description }}</p>
                       {%- endif -%}
+
+                      {%- if block.settings.button_label != blank and block.settings.button_link != blank -%}
+                        <a href="{{ block.settings.button_link }}" class="protection-card__btn btn btn--outline">
+                          {{- block.settings.button_label -}}
+                        </a>
+                      {%- endif -%}
                     </div>
                   </div>
               {%- endcase -%}
@@ -284,8 +290,38 @@
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .protection-card:has(.protection-card__overlay-link):hover .protection-card__image img {
+  .protection-card:hover .protection-card__image img {
     transform: scale(1.05);
+  }
+
+  .protection-card__btn {
+    margin-top: 24px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+    --btn-border: #000;
+    --btn-bg: #000;
+    --btn-text: #fff;
+    --btn-bg-hover: #27574d;
+    --btn-border-hover: #27574d;
+    --btn-text-hover: #fff;
+  }
+
+  @media (max-width: 989px) {
+    .protection-card__btn {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+  }
+
+  @media (min-width: 990px) {
+    .protection-card:hover .protection-card__btn {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
   }
 
   @media (max-width: 768px) {
@@ -318,25 +354,24 @@
 
   .protection-card__title {
     margin: 0 0 20px;
-    color: var(--000000, #000);
+    color: var(--COLOR-TEXT);
     font-family: var(--FONT-STACK-HEADING);
+    font-style: var(--FONT-STYLE-HEADING);
+    font-weight: var(--FONT-WEIGHT-HEADING);
     text-align: center;
-    font-size: 32px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 36px; /* 112.5% */
+    font-size: var(--FONT-DISPLAY-S);
+    line-height: var(--LINE-HEIGHT-DISPLAY-S);
   }
 
   .protection-card__description {
-    color: var(--000000, #000);
+    color: var(--COLOR-TEXT);
     text-align: center;
     margin: 0;
-    /* RC26/Body */
-    font-family: Inter;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 22px; /* 157.143% */
+    font-family: var(--FONT-STACK-BODY);
+    font-size: var(--font-body-small);
+    font-style: var(--FONT-STYLE-BODY);
+    font-weight: var(--FONT-WEIGHT-BODY);
+    line-height: var(--LINE-HEIGHT-BODY);
   }
 
   @media (min-width: 990px) {
@@ -401,6 +436,20 @@
           "id": "description",
           "label": "Description",
           "default": "Card description text goes here"
+        },
+        {
+          "type": "header",
+          "content": "Button"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
         }
       ]
     }
