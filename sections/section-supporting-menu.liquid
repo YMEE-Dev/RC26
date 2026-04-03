@@ -66,6 +66,18 @@
               endcase
             endif
 
+            if block_type == 'legal'
+              assign mobile_alignment = block.settings.mobile_alignment | default: alignment
+              assign mobile_text_alignment = 'left'
+
+              case mobile_alignment
+                when 'center'
+                  assign mobile_text_alignment = 'center'
+                when 'right'
+                  assign mobile_text_alignment = 'right'
+              endcase
+            endif
+
             if show_on_mobile
               assign viewport_visibility_class = viewport_visibility_class | append: ' supporting-menu__block--show-mobile'
             else
@@ -90,6 +102,10 @@
               echo '--supporting-menu-justify: ' | append: justify_alignment | append: ';'
 
               if block_type == 'text'
+                echo '--supporting-menu-mobile-text-align: ' | append: mobile_text_alignment | append: ';'
+              endif
+
+              if block_type == 'legal'
                 echo '--supporting-menu-mobile-text-align: ' | append: mobile_text_alignment | append: ';'
               endif
             endcapture
@@ -165,6 +181,25 @@
                 </div>
               {%- endif -%}
 
+            {%- when 'legal' -%}
+              {%- if block.settings.trigger_text != blank and block.settings.accordion_text != blank -%}
+                <div
+                  class="supporting-menu__block supporting-menu__block--legal {{ viewport_visibility_class }}"
+                  style="{{ block_style }}"
+                  {{ block.shopify_attributes }}
+                >
+                  <button
+                    type="button"
+                    class="supporting-menu__legal-trigger legal"
+                    data-legal-trigger
+                    aria-expanded="false"
+                    aria-controls="SupportingMenuLegalPanel--{{ section.id }}--{{ block.id }}"
+                  >
+                    {{ block.settings.trigger_text | escape }}
+                  </button>
+                </div>
+              {%- endif -%}
+
             {%- when 'logo' -%}
               {%- if block.settings.image != blank -%}
                 {%- liquid
@@ -202,6 +237,38 @@
           {%- endcase -%}
         {%- endfor -%}
       </div>
+
+      {%- capture legal_panels -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'legal' and block.settings.trigger_text != blank and block.settings.accordion_text != blank -%}
+            {%- liquid
+              assign panel_text_color = block.settings.accordion_text_color
+
+              capture panel_style
+                if panel_text_color != blank and panel_text_color != 'rgba(0,0,0,0)'
+                  echo '--supporting-menu-legal-color: ' | append: panel_text_color | append: ';'
+                endif
+              endcapture
+            -%}
+
+            <div
+              id="SupportingMenuLegalPanel--{{ section.id }}--{{ block.id }}"
+              class="supporting-menu__legal-panel rte legal"
+              data-legal-panel
+              hidden
+              style="{{ panel_style }}"
+            >
+              {{ block.settings.accordion_text }}
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endcapture -%}
+
+      {%- if legal_panels != blank -%}
+        <div class="supporting-menu__legal-accordion" data-legal-accordion-container hidden>
+          {{ legal_panels }}
+        </div>
+      {%- endif -%}
     {%- endif -%}
   </div>
 </section>
@@ -404,6 +471,67 @@
     text-align: var(--supporting-menu-text-align, left);
   }
 
+  .supporting-menu__block--legal {
+    text-align: var(--supporting-menu-text-align, left);
+  }
+
+  .supporting-menu__legal-trigger {
+    color: var(--link);
+    cursor: pointer;
+    text-align: inherit;
+  }
+
+  .supporting-menu__legal-trigger:hover {
+    color: var(--link-hover);
+  }
+
+  .supporting-menu__legal-trigger:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  .supporting-menu__legal-accordion {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    overflow: hidden;
+    height: 0;
+    background: #f9f9f9;
+    transition: height 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: height;
+  }
+
+  .supporting-menu__legal-panel {
+    grid-column: 1 / -1;
+    padding: 48px 0 20px;
+    color: var(--supporting-menu-legal-color, var(--text));
+    text-align: center;
+  }
+
+  .supporting-menu__legal-panel a {
+    color: currentColor;
+    opacity: 1;
+    display: inline;
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .supporting-menu__legal-panel a::after {
+    content: none;
+  }
+
+  @media only screen and (min-width: 1221px) {
+    .supporting-menu__legal-accordion {
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: var(--gutter);
+    }
+
+    .supporting-menu__legal-panel {
+      grid-column: 2 / span 6;
+    }
+  }
+
   @media only screen and (max-width: 767px) {
     .supporting-menu__block--divider {
       display: none;
@@ -418,8 +546,201 @@
     .supporting-menu__block--text {
       text-align: var(--supporting-menu-mobile-text-align, var(--supporting-menu-text-align, left));
     }
+
+    .supporting-menu__block--legal {
+      text-align: var(--supporting-menu-mobile-text-align, var(--supporting-menu-text-align, left));
+    }
+
+    .supporting-menu__legal-panel {
+      padding: 20px 0 0;
+    }
   }
 {% endstylesheet %}
+
+{% javascript %}
+  (() => {
+    const initSupportingMenuLegalAccordion = (section) => {
+      if (!section || section.dataset.legalAccordionInitialized === 'true') {
+        return;
+      }
+
+      const container = section.querySelector('[data-legal-accordion-container]');
+      const triggers = Array.from(section.querySelectorAll('[data-legal-trigger]'));
+      const panels = Array.from(section.querySelectorAll('[data-legal-panel]'));
+
+      if (!container || triggers.length === 0 || panels.length === 0) {
+        return;
+      }
+
+      section.dataset.legalAccordionInitialized = 'true';
+
+      let activePanel = null;
+      let followExpansionFrame = null;
+
+      const setExpandedTrigger = (activeTrigger = null) => {
+        triggers.forEach((trigger) => {
+          trigger.setAttribute('aria-expanded', trigger === activeTrigger ? 'true' : 'false');
+        });
+      };
+
+      const getContainerHeight = () => container.getBoundingClientRect().height;
+
+      const finishOpenState = () => {
+        if (!container.classList.contains('is-open')) {
+          return;
+        }
+
+        container.style.height = 'auto';
+      };
+
+      const finishClosedState = () => {
+        if (activePanel) {
+          activePanel.hidden = true;
+          activePanel.classList.remove('is-active');
+          activePanel = null;
+        }
+
+        container.hidden = true;
+        container.style.height = '0px';
+      };
+
+      const stopFollowingExpansion = () => {
+        if (followExpansionFrame) {
+          cancelAnimationFrame(followExpansionFrame);
+          followExpansionFrame = null;
+        }
+      };
+
+      const transitionContainerTo = (targetHeight) => {
+        const startHeight = getContainerHeight();
+        const nextHeight = typeof targetHeight === 'number' ? `${targetHeight}px` : targetHeight;
+
+        container.style.height = `${startHeight}px`;
+        container.offsetHeight;
+        container.style.height = nextHeight;
+      };
+
+      const shouldFollowExpansion = (trigger) => {
+        if (!trigger) {
+          return false;
+        }
+
+        const triggerRect = trigger.getBoundingClientRect();
+        const spaceBelowTrigger = window.innerHeight - triggerRect.bottom;
+
+        return spaceBelowTrigger <= 120;
+      };
+
+      const followExpansion = (lastHeight) => {
+        const nextHeight = getContainerHeight();
+        const delta = nextHeight - lastHeight;
+
+        if (delta > 0) {
+          window.scrollBy(0, delta);
+        }
+
+        followExpansionFrame = requestAnimationFrame(() => {
+          followExpansion(nextHeight);
+        });
+      };
+
+      const openPanel = (trigger, panel) => {
+        if (!panel) {
+          return;
+        }
+
+        const previousPanel = activePanel;
+        const currentHeight = container.hidden ? 0 : getContainerHeight();
+        const followWhileOpening = shouldFollowExpansion(trigger);
+
+        setExpandedTrigger(trigger);
+        container.hidden = false;
+        container.classList.add('is-open');
+
+        if (previousPanel && previousPanel !== panel) {
+          previousPanel.classList.remove('is-active');
+          previousPanel.hidden = true;
+        }
+
+        panel.hidden = false;
+        activePanel = panel;
+
+        container.style.height = `${currentHeight}px`;
+
+        requestAnimationFrame(() => {
+          panel.classList.add('is-active');
+          transitionContainerTo(panel.offsetHeight);
+
+          if (followWhileOpening) {
+            stopFollowingExpansion();
+            followExpansion(currentHeight);
+          }
+        });
+      };
+
+      const closePanel = () => {
+        if (container.hidden || !activePanel) {
+          setExpandedTrigger();
+          return;
+        }
+
+        setExpandedTrigger();
+        stopFollowingExpansion();
+        container.style.height = `${getContainerHeight()}px`;
+        container.classList.remove('is-open');
+
+        requestAnimationFrame(() => {
+          if (activePanel) {
+            activePanel.classList.remove('is-active');
+          }
+
+          transitionContainerTo(0);
+        });
+      };
+
+      triggers.forEach((trigger) => {
+        trigger.addEventListener('click', () => {
+          const isExpanded = trigger.getAttribute('aria-expanded') == 'true';
+          const panelId = trigger.getAttribute('aria-controls');
+          const panel = panelId ? document.getElementById(panelId) : null;
+
+          if (isExpanded) {
+            closePanel();
+            return;
+          }
+
+          if (panel && section.contains(panel)) {
+            openPanel(trigger, panel);
+          }
+        });
+      });
+
+      container.addEventListener('transitionend', (event) => {
+        if (event.propertyName !== 'height') {
+          return;
+        }
+
+        if (container.classList.contains('is-open')) {
+          stopFollowingExpansion();
+          finishOpenState();
+        } else {
+          stopFollowingExpansion();
+          finishClosedState();
+        }
+      });
+    };
+
+    document.querySelectorAll('[data-section-type="supporting-menu"]').forEach((section) => {
+      initSupportingMenuLegalAccordion(section);
+    });
+
+    document.addEventListener('shopify:section:load', (event) => {
+      if (event.target && event.target.matches('[data-section-type="supporting-menu"]')) {
+        initSupportingMenuLegalAccordion(event.target);
+      }
+    });
+  })();
+{% endjavascript %}
 
 {% schema %}
 {
@@ -625,6 +946,89 @@
           "id": "text",
           "label": "Text",
           "default": "<p>Add supporting footer text here.</p>"
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Alignment",
+          "default": "left",
+          "options": [
+            {"value": "left", "label": "Left"},
+            {"value": "center", "label": "Center"},
+            {"value": "right", "label": "Right"}
+          ]
+        },
+        {
+          "type": "select",
+          "id": "column_span",
+          "label": "Tablet and desktop span",
+          "default": "2",
+          "options": [
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"}
+          ],
+          "info": "Uses the 6-column tablet grid and the 8-column desktop grid"
+        },
+        {
+          "type": "header",
+          "content": "Visibility"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_mobile",
+          "label": "Show on mobile",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_tablet",
+          "label": "Show on tablet",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_desktop",
+          "label": "Show on desktop",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Mobile"
+        },
+        {
+          "type": "select",
+          "id": "mobile_alignment",
+          "label": "Alignment",
+          "default": "left",
+          "options": [
+            {"value": "left", "label": "Left"},
+            {"value": "center", "label": "Center"},
+            {"value": "right", "label": "Right"}
+          ]
+        }
+      ]
+    },
+    {
+      "type": "legal",
+      "name": "Legal",
+      "settings": [
+        {
+          "type": "text",
+          "id": "trigger_text",
+          "label": "Trigger text",
+          "default": "Legal"
+        },
+        {
+          "type": "richtext",
+          "id": "accordion_text",
+          "label": "Accordion text",
+          "default": "<p>Add legal content here.</p>"
+        },
+        {
+          "type": "color",
+          "id": "accordion_text_color",
+          "label": "Accordion text color",
+          "default": "#121212"
         },
         {
           "type": "select",

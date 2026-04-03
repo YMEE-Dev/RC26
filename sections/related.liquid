@@ -166,16 +166,17 @@
           capture related_products
             for related_product in current_collection.products
               assign hidden_product = false
+              assign excluded_product = false
               assign product_type = related_product.type | strip | downcase
               if related_product.tags contains 'hide'
                 assign hidden_product = true
               endif
 
               if product_type == 'storytelling'
-                assign hidden_product = true
+                assign excluded_product = true
               endif
 
-              if related_product.id != product.id and hidden_product == false and related_count < related_category_limit
+              if related_product.id != product.id and hidden_product == false and excluded_product == false and related_count < related_category_limit
                 assign related_count = related_count | plus: 1
                 render 'product-grid-item', product: related_product, animation_delay: forloop.index0 | times: 1, animation_anchor: '#RelatedProductsCollection--' | append: section.id, index: forloop.index
               endif
@@ -202,11 +203,17 @@
           capture category_products
             for category_product in current_category_collection.products
               assign hidden_product = false
+              assign excluded_product = false
+              assign product_type = category_product.type | strip | downcase
               if category_product.tags contains 'hide'
                 assign hidden_product = true
               endif
 
-              if category_product.id != product.id and hidden_product == false and category_count < related_category_limit
+              if product_type == 'storytelling'
+                assign excluded_product = true
+              endif
+
+              if category_product.id != product.id and hidden_product == false and excluded_product == false and category_count < related_category_limit
                 assign category_count = category_count | plus: 1
                 render 'product-grid-item', product: category_product, animation_delay: forloop.index0 | times: 1, animation_anchor: '#RelatedProductsCategory--' | append: section.id, index: forloop.index
               endif

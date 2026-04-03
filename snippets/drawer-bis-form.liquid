@@ -20,9 +20,11 @@
 <div class="drawer-bis drawer__content-wrapper" data-bis-drawer>
   {%- comment -%} ── FORM VIEW ── {%- endcomment -%}
   <div class="drawer-bis__form-view" data-bis-form-view>
-    <h3 class="drawer__title drawer-content__title" data-bis-title>
-      {{ 'general.bis_form.notify_title' | t }}
-    </h3>
+    <div class="bis-header">
+      <h3 class="drawer__title drawer-content__title" data-bis-title>
+        {{ 'general.bis_form.notify_title' | t }}
+      </h3>
+    </div>
 
     <div class="drawer__content drawer-content__main">
       <div class="drawer-bis__fields" data-scroll-lock-scrollable>
@@ -61,7 +63,9 @@
 
         {%- comment -%} ── Email section (all modes) ── {%- endcomment -%}
         <div class="form-section">
-          <h4 class="form-section__title drawer-bis__required-label" data-bis-required-label>*{{ 'general.bis_form.required_fields' | t }}</h4>
+          <h4 class="form-section__title drawer-bis__required-label" data-bis-required-label>
+            *{{ 'general.bis_form.required_fields' | t }}
+          </h4>
           <div class="form-field">
             <input
               type="email"
@@ -87,7 +91,7 @@
                 form="bis-drawer-form"
                 class="form-field__input"
                 placeholder="{{ 'general.bis_form.message_placeholder' | t }}"
-                rows="3"
+                rows="2"
               ></textarea>
             </div>
           </div>
@@ -101,7 +105,7 @@
         <div class="drawer-bis__error" data-bis-error style="display:none"></div>
       </div>
 
-      {%- comment -%} ── Product card + submit (pinned bottom, like hint preview card) ── {%- endcomment -%}
+      {%- comment -%} ── Product card (hidden in inquire mode) ── {%- endcomment -%}
       <div class="drawer-bis__preview" data-bis-product-card>
         <div class="drawer-bis__product-image" data-bis-product-image>
           {%- if product_image -%}
@@ -115,7 +119,10 @@
             {%- if variant_title != blank -%}{{ variant_title }}{%- endif -%}
           </p>
         </div>
+      </div>
 
+      {%- comment -%} ── Submit footer (always visible) ── {%- endcomment -%}
+      <div class="drawer-bis__footer">
         <form class="drawer-bis__form-el" id="bis-drawer-form" data-bis-form novalidate>
           <input type="hidden" name="product_id" value="{{ product.id }}" data-bis-product-id>
           <input type="hidden" name="variant_id" value="{{ current_variant.id }}" data-bis-variant-id>
@@ -201,18 +208,28 @@
 
     #side-drawer-bis-form .drawer-bis {
       overflow: hidden;
-      padding: var(--drawer-padding) 0 0;
+      padding: 0;
     }
   }
 
   /* ── Drawer wrapper ── */
+  side-drawer .drawer-bis.drawer__content-wrapper {
+    padding: 0;
+  }
+
   .drawer-bis {
     --drawer-padding-x: 40px;
     --drawer-padding: clamp(16px, 4vh, 40px);
-    padding: var(--drawer-padding) var(--drawer-padding-x);
+    padding: 0;
     display: flex;
     flex-direction: column;
     height: 100%;
+  }
+
+  /* ── Sticky grey header – mirrors .care-header ── */
+  .bis-header {
+    padding: 40px 40px 20px;
+    flex-shrink: 0;
   }
 
   /* ── Form view layout ── */
@@ -235,7 +252,6 @@
     letter-spacing: var(--LETTER-SPACING-NAV);
     text-transform: uppercase;
     margin-bottom: 0;
-    padding: 0 var(--drawer-padding);
   }
 
   /* ── Main content area ── */
@@ -254,8 +270,9 @@
     overflow-y: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    margin: clamp(12px, 3vh, 40px) 0 clamp(8px, 2vh, 20px) 0;
-    padding: 0 var(--drawer-padding);
+    margin: 0;
+    padding: 30px 40px;
+    background-color: #ffffff;
   }
 
   .drawer-bis__fields::-webkit-scrollbar {
@@ -268,12 +285,20 @@
     font-weight: var(--FONT-WEIGHT-BODY);
     line-height: 1.6;
     color: var(--COLOR-TEXT);
-    margin: 0 0 clamp(8px, 2vh, 20px);
+    margin: 0;
+  }
+
+  side-drawer[data-drawer='bis-form'] .drawer-bis__subtitle {
+    margin: 0 0 50px;
   }
 
   /* ── Form sections ── */
   .drawer-bis .form-section {
-    margin-bottom: clamp(8px, 2vh, 20px);
+    margin-bottom: 0;
+  }
+
+  .drawer-bis__fields .drawer-bis__inquire-fields {
+    margin-top: 50px;
   }
 
   .drawer-bis .form-section__title {
@@ -329,7 +354,7 @@
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    margin-top: clamp(8px, 2vh, 20px);
+    margin-top: 30px;
     font-family: var(--FONT-STACK-BODY);
     font-size: 13px;
     font-weight: var(--FONT-WEIGHT-BODY);
@@ -375,15 +400,25 @@
     margin-top: 8px;
   }
 
-  /* ── Preview card (product image + info + submit, pinned bottom) ── */
+  /* ── Preview card (product image + info, hidden in inquire mode) ── */
   .drawer-bis__preview {
     flex: 1;
     min-height: 0;
     background-color: #f5f5f5;
-    padding: 0 0 var(--drawer-padding) 0;
+    padding: 0;
     display: flex;
     flex-direction: column;
     border-top: 1px solid #e5e5e5;
+  }
+
+  /* ── Submit footer (always visible, pinned bottom) ── */
+  .drawer-bis__footer {
+    flex-shrink: 0;
+    padding: 0 0 var(--drawer-padding) 0;
+  }
+
+  side-drawer[data-drawer='bis-form'] .drawer-bis__footer {
+    background-color: #f5f5f5;
   }
 
   .drawer-bis__product-image {
@@ -439,12 +474,13 @@
 
   /* ── Submit button ── */
   .drawer-bis__submit {
-    margin: 0 var(--drawer-padding) clamp(10px, 2vh, 30px) var(--drawer-padding);
+    margin: var(--drawer-padding) var(--drawer-padding) 0 var(--drawer-padding);
+    width: calc(100% - var(--drawer-padding) * 2);
     background: var(--btn-bg, #000);
     color: var(--btn-text, #fff);
     border: 1px solid var(--btn-border, #000);
     border-radius: 0;
-    padding: 12px 20px;
+    padding: 16px 20px;
     text-align: center;
     font-size: var(--BTN-FONT-SIZE);
     font-weight: var(--BTN-FONT-WEIGHT);
@@ -483,7 +519,9 @@
   }
 
   @keyframes bis-spin {
-    to { transform: rotate(360deg); }
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   /* ── Hidden form element (no visual) ── */
@@ -555,7 +593,23 @@
 
   @media (max-width: 574px) {
     .drawer-bis {
-      padding: var(--drawer-padding) 0 0;
+      padding: 0;
+    }
+
+    .bis-header {
+      padding: 20px 20px 20px;
+    }
+
+    .drawer-bis__fields {
+      padding: 30px 20px;
+    }
+
+    .drawer-bis__product-info {
+      margin: 0 20px;
+    }
+
+    .drawer-bis__submit {
+      margin: var(--drawer-padding) 20px 0 20px;
     }
   }
 {% endstylesheet %}

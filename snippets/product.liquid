@@ -3132,6 +3132,16 @@
                             content_alignment: 'right'
                           %}
                         </div>
+
+                        {% comment %} <div class="product__custom-drawer">
+                              {% render 'link-with-icon',
+                                text: 'Care recommendations',
+                                drawer_open: 'care-recommendations',
+                                icon: 'icon-care-recommendations',
+                                icon_position: 'left',
+                                content_alignment: 'right'
+                              %}
+                        </div> {% endcomment %}
                       </div>
 
                       <style>
@@ -3174,7 +3184,7 @@
                             margin: 20px 0;
                           }
 
-                          {% comment %} .product__custom-drawers-row-ee {
+                          .product__custom-drawers-row-ee {
                             display: grid;
                             grid-template-columns: 1fr 1fr;
                             grid-template-areas:
@@ -3194,7 +3204,7 @@
                           }
                           .product__custom-drawers-row-ee > .product__block:nth-child(4) {
                             grid-area: block4;
-                          } {% endcomment %}
+                          }
 
                           .product__custom-drawers-row-ee .link-with-icon--icon-right {
                             margin-bottom: 0;
@@ -3379,6 +3389,8 @@
             {%- render 'drawer-2-years-warranty', block: block -%}
           {%- when 'drawer-14-days-free-returns' -%}
             {%- render 'drawer-14-days-free-returns', block: block -%}
+          {%- when 'drawer-care-recommendations' -%}
+            {%- render 'drawer-care-recommendations', block: block -%}
         {%- endcase -%}
       </div>
     </div>
@@ -3578,6 +3590,8 @@
      No grid changes. Title-price shrinks via max-width. Dropdown slides via transform.
      Dropdown & color picker keep their original size. */
   (function () {
+    if (document.documentElement.hasAttribute('data-geo-hidden')) return;
+
     var desktopMQ = window.matchMedia ? window.matchMedia('(min-width: 990px)') : null;
     if (!desktopMQ) return;
 
@@ -3741,6 +3755,20 @@
       document.addEventListener('DOMContentLoaded', init);
     } else {
       init();
+    }
+
+    /* Strip animation if geo-hide resolves async (first visit) */
+    if (window.MutationObserver) {
+      var geoObserver = new MutationObserver(function (mutations) {
+        for (var i = 0; i < mutations.length; i++) {
+          if (document.documentElement.hasAttribute('data-geo-hidden')) {
+            stripClasses();
+            geoObserver.disconnect();
+            return;
+          }
+        }
+      });
+      geoObserver.observe(document.documentElement, {attributes: true, attributeFilter: ['data-geo-hidden']});
     }
   })();
 </script>

@@ -5,6 +5,7 @@
 
     {{ content_for_header }}
     {% include 'pagefly-app-header' %}
+    {%- render 'geo-country-hide' -%}
   </head>
 
   <body
@@ -76,6 +77,25 @@
 
         <div class="drawer__body">
           {% render 'drawer-ask-concierge' %}
+        </div>
+      </div>
+      <span class="underlay drawer__underlay" data-drawer-underlay></span>
+    </side-drawer>
+
+    <side-drawer
+      class="drawer"
+      data-drawer="care-recommendations"
+      id="side-drawer-care-recommendations"
+      data-drawer-size="575px"
+      data-drawer-direction="right-to-left"
+    >
+      <div class="drawer__inner" data-drawer-inner>
+        <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+          {% render 'icon-close' %}
+        </button>
+
+        <div class="drawer__body">
+          {% render 'drawer-care-recommendations' %}
         </div>
       </div>
       <span class="underlay drawer__underlay" data-drawer-underlay></span>
