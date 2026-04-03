@@ -126,6 +126,12 @@
       var config = MODES[mode] || MODES.notify;
       currentMode = mode;
 
+      // Stamp mode as class on root for CSS targeting
+      Object.keys(MODES).forEach(function (m) {
+        drawer.classList.remove("bis-mode--" + m);
+      });
+      drawer.classList.add("bis-mode--" + mode);
+
       // Update form type
       if (formTypeInput) formTypeInput.value = mode;
 
@@ -136,7 +142,7 @@
       // Update title & subtitle
       if (titleEl) titleEl.textContent = getTranslation(config.titleKey);
       if (subtitleEl) {
-        subtitleEl.textContent = getTranslation(config.subtitleKey);
+        subtitleEl.innerHTML = getTranslation(config.subtitleKey);
         subtitleEl.style.display = "";
       }
 
