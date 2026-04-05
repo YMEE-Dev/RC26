@@ -187,15 +187,19 @@
       showFormView();
     }
 
+    function setSubmitting(isSubmitting) {
+      if (!submitBtn) return;
+      submitBtn.disabled = isSubmitting;
+      submitBtn.classList.toggle("is-loading", isSubmitting);
+    }
+
     function resetForm() {
       if (form) form.reset();
       if (errorEl) {
         errorEl.style.display = "none";
         errorEl.textContent = "";
       }
-      if (submitBtn) submitBtn.disabled = false;
-      if (loader) loader.style.display = "none";
-      if (submitText) submitText.style.display = "";
+      setSubmitting(false);
     }
 
     function showFormView() {
@@ -249,10 +253,8 @@
           }
         }
 
-        // Show loader
-        if (submitBtn) submitBtn.disabled = true;
-        if (submitText) submitText.style.display = "none";
-        if (loader) loader.style.display = "";
+        // Show loader while preserving button height
+        setSubmitting(true);
         if (errorEl) errorEl.style.display = "none";
 
         // Collect form data
@@ -329,9 +331,7 @@
                 errorEl.textContent = (data && data.message) || "Something went wrong. Please try again.";
                 errorEl.style.display = "";
               }
-              if (submitBtn) submitBtn.disabled = false;
-              if (submitText) submitText.style.display = "";
-              if (loader) loader.style.display = "none";
+              setSubmitting(false);
             }
           },
         });
@@ -383,9 +383,7 @@
             errorEl.textContent = "Something went wrong. Please try again.";
             errorEl.style.display = "";
           }
-          if (submitBtn) submitBtn.disabled = false;
-          if (submitText) submitText.style.display = "";
-          if (loader) loader.style.display = "none";
+          setSubmitting(false);
         });
     }
 

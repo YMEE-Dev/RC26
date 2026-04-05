@@ -140,10 +140,10 @@
         <span class="drawer-bis__submit-text" data-bis-submit-text>
           {{ 'general.bis_form.submit_notify' | t }}
         </span>
-        <span class="drawer-bis__submit-loader" style="display:none" data-bis-loader>
-          <svg height="18" width="18" class="svg-loader">
+        <span class="drawer-bis__submit-loader" aria-hidden="true" data-bis-loader>
+          <svg height="18" width="18" class="svg-loader" viewBox="0 0 18 18">
             <circle r="7" cx="9" cy="9" />
-            <circle stroke-dasharray="87.96 87.96" r="7" cx="9" cy="9" />
+            <circle r="7" cx="9" cy="9" />
           </svg>
         </span>
       </button>
@@ -163,7 +163,7 @@
         {{ 'general.bis_form.success_title' | t }}
       </h2>
       <p class="drawer-bis__success-subtitle" data-bis-success-subtitle>
-        {{ 'general.bis_form.success_subtitle' | t | escape }}
+        {{ 'general.bis_form.success_subtitle' | t }}
       </p>
     </div>
   </div>
@@ -483,7 +483,9 @@
   }
 
   .drawer-bis__submit {
+    position: relative;
     width: 100%;
+    min-height: 52px;
     background: var(--btn-bg, #000);
     color: var(--btn-text, #fff);
     border: 1px solid var(--btn-border, #000);
@@ -503,6 +505,31 @@
     transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
   }
 
+  .drawer-bis__submit-text {
+    transition: opacity 180ms ease;
+  }
+
+  .drawer-bis__submit-loader {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 180ms ease, visibility 180ms ease;
+  }
+
+  .drawer-bis__submit.is-loading .drawer-bis__submit-text {
+    opacity: 0;
+  }
+
+  .drawer-bis__submit.is-loading .drawer-bis__submit-loader {
+    opacity: 1;
+    visibility: visible;
+  }
+
   .drawer-bis__submit:hover {
     background-color: #27574d;
     border-color: #27574d;
@@ -515,13 +542,23 @@
   }
 
   /* ── Loader spinner ── */
+  .drawer-bis__submit .svg-loader {
+    display: block;
+  }
+
   .drawer-bis__submit .svg-loader circle {
     fill: none;
     stroke: currentColor;
     stroke-width: 1.5;
   }
 
+  .drawer-bis__submit .svg-loader circle:first-child {
+    opacity: 0.25;
+  }
+
   .drawer-bis__submit .svg-loader circle:last-child {
+    stroke-linecap: round;
+    stroke-dasharray: 18 44;
     animation: bis-spin 0.8s linear infinite;
     transform-origin: center;
   }
