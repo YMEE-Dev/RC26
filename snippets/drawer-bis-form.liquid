@@ -152,15 +152,6 @@
 
   {%- comment -%} ── SUCCESS VIEW ── {%- endcomment -%}
   <div class="drawer-bis__success-view" data-bis-success-view style="display:none">
-    <button
-      type="button"
-      class="drawer-bis__close drawer-bis__close--success"
-      data-drawer-close
-      aria-label="{{ 'general.accessibility.close' | t }}"
-    >
-      {%- render 'icon-close' -%}
-    </button>
-
     <div class="drawer-bis__success-content">
       <div class="drawer-bis__success-icon">
         <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -172,7 +163,7 @@
         {{ 'general.bis_form.success_title' | t }}
       </h2>
       <p class="drawer-bis__success-subtitle" data-bis-success-subtitle>
-        {{ 'general.bis_form.success_subtitle' | t }}
+        {{ 'general.bis_form.success_subtitle' | t | escape }}
       </p>
     </div>
   </div>
@@ -579,24 +570,24 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
   }
 
-  .drawer-bis__success-icon {
-    margin-bottom: 8px;
+  .drawer-bis__success-icon svg {
+    width: clamp(64px, 8vw, 90px);
+    height: clamp(64px, 8vw, 90px);
   }
 
   .drawer-bis__success-title {
     color: #000;
-    font-family: var(--FONT-STACK-NAV);
-    font-size: clamp(20px, 2.5vw, 26px);
+    font-family: var(--FONT-STACK-HEADING);
+    font-size: var(--FONT-DISPLAY-S);
     font-style: normal;
-    font-weight: var(--FONT-WEIGHT-NAV);
-    line-height: 1.35;
-    letter-spacing: var(--LETTER-SPACING-NAV);
+    font-weight: var(--FONT-WEIGHT-NAV-BOLD);
+    line-height: var(--LINE-HEIGHT-DISPLAY-S);
     text-transform: none;
     margin: 0;
-    max-width: 280px;
+    text-wrap: balance;
   }
 
   .drawer-bis__success-subtitle {
