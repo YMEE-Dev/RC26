@@ -72,7 +72,7 @@
         {%- endfor -%}
       </div>
 
-      <div class="store-locator__header-button">
+      <div class="store-locator__header-button desktop-display">
         {%- for block in section.blocks -%}
           {%- if block.type == 'button' -%}
             <a
@@ -124,6 +124,20 @@
         </grid-slider>
       </div>
     {%- endif -%}
+
+    <div class="store-locator__header-button mobile-display">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'button' -%}
+          <a
+            href="{{ block.settings.link | default: '#' }}"
+            class="store-locator__button"
+            {{ block.shopify_attributes }}
+          >
+            {{ block.settings.text | upcase }}
+          </a>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
 
     <!-- Loading state for app fetch -->
     <div class="store-locator__loading" id="storeLocatorLoading--{{ section.id }}" style="display: none;">
