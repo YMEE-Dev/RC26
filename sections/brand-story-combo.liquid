@@ -3,6 +3,7 @@
   assign has_any_content = false
   assign resolved_top_heading = section.settings.top_heading
   assign resolved_top_image = section.settings.top_image
+  assign resolved_caption_text = section.settings.caption_text
 
   if resolved_top_image != blank and resolved_top_image.value != blank
     assign resolved_top_image = resolved_top_image.value
@@ -20,7 +21,7 @@
     endif
   endif
 
-  if resolved_top_heading != blank or section.settings.top_text != blank or section.settings.top_image != blank
+  if resolved_top_heading != blank or section.settings.top_text != blank or section.settings.top_image != blank or resolved_caption_text != blank
     assign has_any_content = true
   endif
 -%}
@@ -72,6 +73,10 @@
                 loading="lazy"
               >
             {%- endif -%}
+
+            {%- if resolved_caption_text != blank -%}
+              <p class="brand-story-combo__caption caption">{{ resolved_caption_text | escape }}</p>
+            {%- endif -%}
           </div>
         {%- endif -%}
       </div>
@@ -114,6 +119,13 @@
     width: 100%;
     height: auto;
     display: block;
+  }
+
+  .brand-story-combo__caption {
+    margin: 16px 0 0;
+    opacity: 0.7;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
   @media (min-width: 990px) {
@@ -221,6 +233,12 @@
       "type": "image_picker",
       "id": "top_image",
       "label": "Top image"
+    },
+    {
+      "type": "text",
+      "id": "caption_text",
+      "label": "Image caption",
+      "default": ""
     },
     {
       "type": "range",
