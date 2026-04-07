@@ -50,16 +50,15 @@
     inert
   >
     <div class="head-country-redirect__body" data-scroll-lock-scrollable tabindex="-1">
-      {% if request.design_mode %}
-        <button
-          type="button"
-          class="head-country-redirect__close"
-          data-country-redirect-close
-          aria-label="{{ 'general.accessibility.close' | t }}"
-        >
-          {% render 'icon-close' %}
-        </button>
-      {% endif %}
+      <button
+        type="button"
+        class="head-country-redirect__close"
+        data-country-redirect-close
+        aria-label="{{ 'general.accessibility.close' | t }}"
+        hidden
+      >
+        {% render 'icon-close' %}
+      </button>
 
       {%- if modal_heading != blank -%}
         <h2 id="HeadCountryRedirectTitle--{{ section.id }}" class="head-country-redirect__title title">
