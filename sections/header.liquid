@@ -805,21 +805,70 @@
     /* Scroll animation for header visibility is handled in assets/theme.dev.js */
 
     /* Menu images + overlay */
-    let currentImage = null;
+    const initCollectionLabelMirroring = () => {
+      const collectionLists = selectAll('ul.tmenu_submenu_type_automatic.tmenu_submenu');
+      if (!collectionLists.length) return;
+
+      const replaceCollectionPlaceholder = (element, value, datasetKey) => {
+        if (!element) return;
+
+        const sourceValue = element.dataset[datasetKey] || element.textContent;
+        element.dataset[datasetKey] = sourceValue;
+        element.textContent = sourceValue.includes('[collection]')
+          ? sourceValue.replaceAll('[collection]', value)
+          : value;
+      };
+
+      collectionLists.forEach((list) => {
+        const links = selectAll(
+          ':scope > li:not(.tmenu_item_mobile) > .tmenu_item_link:not([tmenu-disabled-link])',
+          list
+        );
+        if (links.length < 2) return;
+
+        const firstLink = links[0];
+        const lastLink = links[links.length - 1];
+        const firstLabelElement = firstLink.querySelector('.tmenu_item_text');
+        const lastLabelElement = lastLink.querySelector('.tmenu_item_text');
+        const firstLabel = (firstLabelElement ? firstLabelElement.textContent : firstLink.textContent).trim();
+        if (!firstLabel) return;
+
+        replaceCollectionPlaceholder(lastLabelElement || lastLink, firstLabel, 'collectionTemplateText');
+
+        const lastTitle = lastLink.dataset.collectionTemplateTitle || lastLink.getAttribute('title') || '';
+        lastLink.dataset.collectionTemplateTitle = lastTitle;
+        lastLink.setAttribute(
+          'title',
+          lastTitle.includes('[collection]') ? lastTitle.replaceAll('[collection]', firstLabel) : firstLabel
+        );
+      });
+    };
 
     const initMenuImages = () => {
-      const images = selectAll('.tmenu_collection--above > img');
+      const images = selectAll(
+        '.tmenu_nav .tmenu_item_level_0.tmenu_item_has_child .tmenu_submenu--desktop .tmenu_item_has_child .tmenu_collection--above > img'
+      );
       if (!images.length) return;
-      if (!currentImage || images.includes(currentImage) === false) {
-        currentImage = images[0];
-      }
-      images.forEach((img) => {
-        if (img === currentImage) {
-          img.classList.remove('hide-menu-image');
-        } else {
-          img.classList.add('hide-menu-image');
+      const defaultImage = images[0];
+      const lastCollectionLink = document.querySelector(
+        '.tmenu_nav .tmenu_item_level_0.tmenu_item_has_child .tmenu_submenu--desktop .tmenu_item_has_child:has(.tmenu_collection--above) li:last-child a'
+      );
+
+      const resetToDefaultImage = () => {
+        images.forEach((img) => {
+          if (img === defaultImage) {
+            img.classList.remove('hide-menu-image');
+          } else {
+            img.classList.add('hide-menu-image');
+          }
+        });
+
+        if (lastCollectionLink) {
+          lastCollectionLink.classList.remove('mild-hide');
         }
-      });
+      };
+
+      resetToDefaultImage();
 
       // DISCLAMER: find links that should trigger image changes - these are right-aligned links in mega menu collections
       const links = selectAll(
@@ -838,16 +887,30 @@
         if (match) {
           images.forEach((img) => img.classList.add('hide-menu-image'));
           match.classList.remove('hide-menu-image');
-          currentImage = match;
-        } else if (currentImage) {
-          // keep last shown image visible when there's no match for the hovered link
-          currentImage.classList.remove('hide-menu-image');
+          if (lastCollectionLink) {
+            lastCollectionLink.classList.add('mild-hide');
+          }
+        } else {
+          resetToDefaultImage();
         }
       };
 
+      const linksContainer = links[0].closest('.tmenu_submenu');
+      if (linksContainer && linksContainer.dataset.menuImageResetBound !== 'true') {
+        linksContainer.dataset.menuImageResetBound = 'true';
+        linksContainer.addEventListener('mouseleave', resetToDefaultImage);
+        linksContainer.addEventListener('focusout', (event) => {
+          if (linksContainer.contains(event.relatedTarget)) return;
+          resetToDefaultImage();
+        });
+      }
+
       links.forEach((link) => {
-        link.addEventListener('mouseenter', () => showImageForTitle(link.textContent));
-        link.addEventListener('focus', () => showImageForTitle(link.textContent));
+        const linkText = link.querySelector('.tmenu_item_text') || link;
+        if (linkText.dataset.menuImageBound === 'true') return;
+        linkText.dataset.menuImageBound = 'true';
+        linkText.addEventListener('mouseenter', () => showImageForTitle(link.textContent));
+        linkText.addEventListener('focus', () => showImageForTitle(link.textContent));
       });
     };
 
@@ -858,6 +921,7 @@
     let tmenuScrollLocked = false;
 
     const applyMenuOpenStyles = () => {
+      initCollectionLabelMirroring();
       initMenuImages();
     };
 

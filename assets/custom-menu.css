@@ -142,8 +142,9 @@
   .tmenu_submenu_type_mega
   .tmenu_item_layout_block
   .tmenu_submenu
-  > .tmenu_item:not(:has(img)):hover
-  .tmenu_item_link:not([tmenu-disabled-link]) {
+  > .tmenu_item:not(:has(img))
+  .tmenu_item_link:not([tmenu-disabled-link])
+  .tmenu_item_text:hover {
   opacity: 0.6 !important;
 }
 
@@ -202,6 +203,14 @@ header[data-header-desktop] {
   pointer-events: none;
   width: 0 !important;
   height: 0 !important;
+}
+
+.tmenu_nav .tmenu_item_level_0.tmenu_item_has_child .tmenu_submenu--desktop .tmenu_item_has_child:has(.tmenu_collection--above) li:last-child a {
+  transition: opacity 250ms cubic-bezier(0.75, 0, 0.25, 1) !important;
+}
+
+.tmenu_nav .tmenu_item_level_0.tmenu_item_has_child .tmenu_submenu--desktop .tmenu_item_has_child:has(.tmenu_collection--above) li:last-child a.mild-hide {
+  opacity: 0.35 !important;
 }
 
 .tmenu_nav.menu-has-active .tmenu_item:not(.tmenu_item_active) {
@@ -470,6 +479,7 @@ body:has(header-drawer.drawer--header.is-open) .theme__header {
     [tmenu-disabled-link]
     span {
     opacity: 0.4;
+    font-size: 11px !important;
   }
 
   /* Vertical offset for active root items (negative margin equivalent) */

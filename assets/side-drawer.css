@@ -10,7 +10,7 @@ side-drawer {
   bottom: 0;
   left: 0;
   width: 100%;
-  z-index: 6000;
+  z-index: 6002;
   pointer-events: none;
 }
 
@@ -815,11 +815,27 @@ side-drawer[aria-hidden="false"] .drawer__underlay {
   }
 }
 
-@media only screen and (min-width: 750px) and (max-width: 989px) {
-}
-
-@media only screen and (min-width: 990px) {
-}
-
-@media only screen and (min-width: 1400px) {
+/* Concierge specific styles */
+@media only screen and (max-width: 749px) {
+  body#concierge .prestige-heading {
+    font-size: 30px;
+    line-height: 38px;
+    text-wrap: balance;
+  }
+  body#concierge .prestige-button {
+    text-wrap: balance;
+    white-space: nowrap;
+  }
+  body#concierge .personal-assistance__heading.heading-large,
+  body#concierge .protection-cards__heading.heading-large,
+  body#concierge .sticky-scroll__heading.heading-large,
+  body#concierge .store-locator__heading.heading-large,
+  body#concierge .questions-cta__heading.heading-large {
+    font-size: 36px;
+    line-height: 44px;
+    text-wrap: balance;
+  }
+  body#concierge .sticky-scroll__image-wrapper img {
+    aspect-ratio: 4 / 5;
+  }
 }

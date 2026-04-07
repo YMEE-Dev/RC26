@@ -20,88 +20,19 @@
 <div class="drawer-bis drawer__content-wrapper" data-bis-drawer>
   {%- comment -%} ── FORM VIEW ── {%- endcomment -%}
   <div class="drawer-bis__form-view" data-bis-form-view>
-    <h3 class="drawer__title drawer-content__title" data-bis-title>
-      {{ 'general.bis_form.notify_title' | t }}
-    </h3>
+    {%- comment -%} ── Sticky header ── {%- endcomment -%}
+    <div class="bis-header">
+      <h3 class="drawer__title drawer-content__title" data-bis-title>
+        {{ 'general.bis_form.notify_title' | t }}
+      </h3>
+    </div>
 
-    <div class="drawer__content drawer-content__main">
-      <div class="drawer-bis__fields" data-scroll-lock-scrollable>
-        <p class="drawer-bis__subtitle" data-bis-subtitle>
-          {{ 'general.bis_form.notify_subtitle' | t }}
-        </p>
+    {%- comment -%} ── Scrollable upper: subtitle + product card ── {%- endcomment -%}
+    <div class="drawer-bis__upper" data-scroll-lock-scrollable>
+      <p class="drawer-bis__subtitle" data-bis-subtitle>
+        {{ 'general.bis_form.notify_subtitle' | t }}
+      </p>
 
-        {%- comment -%} ── Inquire-only name fields ── {%- endcomment -%}
-        <div class="drawer-bis__inquire-fields" data-bis-inquire-fields style="display:none">
-          <div class="form-section">
-            <h4 class="form-section__title">*{{ 'general.bis_form.required_fields' | t }}</h4>
-            <div class="form-field">
-              <input
-                type="text"
-                name="first_name"
-                form="bis-drawer-form"
-                class="form-field__input"
-                placeholder="{{ 'general.bis_form.first_name' | t }}"
-                autocapitalize="words"
-                required
-              >
-            </div>
-            <div class="form-field">
-              <input
-                type="text"
-                name="last_name"
-                form="bis-drawer-form"
-                class="form-field__input"
-                placeholder="{{ 'general.bis_form.last_name' | t }}"
-                autocapitalize="words"
-                required
-              >
-            </div>
-          </div>
-        </div>
-
-        {%- comment -%} ── Email section (all modes) ── {%- endcomment -%}
-        <div class="form-section">
-          <h4 class="form-section__title drawer-bis__required-label" data-bis-required-label>*{{ 'general.bis_form.required_fields' | t }}</h4>
-          <div class="form-field">
-            <input
-              type="email"
-              name="email"
-              form="bis-drawer-form"
-              class="form-field__input"
-              placeholder="{{ 'general.bis_form.email_placeholder' | t }}"
-              autocorrect="off"
-              autocapitalize="off"
-              required
-              data-bis-email
-            >
-          </div>
-        </div>
-
-        {%- comment -%} ── Message (inquire only) ── {%- endcomment -%}
-        <div class="drawer-bis__inquire-fields" data-bis-inquire-fields style="display:none">
-          <div class="form-section">
-            <h4 class="form-section__title">{{ 'general.bis_form.message_label' | t }}</h4>
-            <div class="form-field">
-              <textarea
-                name="message"
-                form="bis-drawer-form"
-                class="form-field__input"
-                placeholder="{{ 'general.bis_form.message_placeholder' | t }}"
-                rows="3"
-              ></textarea>
-            </div>
-          </div>
-
-          <label class="drawer-bis__checkbox">
-            <input type="checkbox" name="privacy" form="bis-drawer-form" required data-bis-privacy>
-            <span>{{ 'general.bis_form.privacy_consent' | t }}</span>
-          </label>
-        </div>
-
-        <div class="drawer-bis__error" data-bis-error style="display:none"></div>
-      </div>
-
-      {%- comment -%} ── Product card + submit (pinned bottom, like hint preview card) ── {%- endcomment -%}
       <div class="drawer-bis__preview" data-bis-product-card>
         <div class="drawer-bis__product-image" data-bis-product-image>
           {%- if product_image -%}
@@ -115,40 +46,112 @@
             {%- if variant_title != blank -%}{{ variant_title }}{%- endif -%}
           </p>
         </div>
-
-        <form class="drawer-bis__form-el" id="bis-drawer-form" data-bis-form novalidate>
-          <input type="hidden" name="product_id" value="{{ product.id }}" data-bis-product-id>
-          <input type="hidden" name="variant_id" value="{{ current_variant.id }}" data-bis-variant-id>
-          <input type="hidden" name="product_title" value="{{ product.title | escape }}" data-bis-product-title-input>
-          <input type="hidden" name="form_type" value="notify" data-bis-form-type>
-        </form>
-
-        <button type="submit" form="bis-drawer-form" class="drawer-bis__submit" data-bis-submit>
-          <span class="drawer-bis__submit-text" data-bis-submit-text>
-            {{ 'general.bis_form.submit_notify' | t }}
-          </span>
-          <span class="drawer-bis__submit-loader" style="display:none" data-bis-loader>
-            <svg height="18" width="18" class="svg-loader">
-              <circle r="7" cx="9" cy="9" />
-              <circle stroke-dasharray="87.96 87.96" r="7" cx="9" cy="9" />
-            </svg>
-          </span>
-        </button>
       </div>
+    </div>
+
+    {%- comment -%} ── Divider ── {%- endcomment -%}
+    <hr class="drawer-bis__divider">
+
+    {%- comment -%} ── Pinned form fields ── {%- endcomment -%}
+    <div class="drawer-bis__fields">
+      {%- comment -%} ── Inquire-only name fields ── {%- endcomment -%}
+      <div class="drawer-bis__inquire-fields" data-bis-inquire-fields style="display:none">
+        <div class="form-section">
+          <h4 class="form-section__title">*{{ 'general.bis_form.required_fields' | t }}</h4>
+          <div class="form-field">
+            <input
+              type="text"
+              name="first_name"
+              form="bis-drawer-form"
+              class="form-field__input"
+              placeholder="{{ 'general.bis_form.first_name' | t }}"
+              autocapitalize="words"
+              required
+            >
+          </div>
+          <div class="form-field">
+            <input
+              type="text"
+              name="last_name"
+              form="bis-drawer-form"
+              class="form-field__input"
+              placeholder="{{ 'general.bis_form.last_name' | t }}"
+              autocapitalize="words"
+              required
+            >
+          </div>
+        </div>
+      </div>
+
+      {%- comment -%} ── Email section (all modes) ── {%- endcomment -%}
+      <div class="form-section">
+        <h4 class="form-section__title drawer-bis__required-label" data-bis-required-label>
+          *{{ 'general.bis_form.required_fields' | t }}
+        </h4>
+        <div class="form-field">
+          <input
+            type="email"
+            name="email"
+            form="bis-drawer-form"
+            class="form-field__input"
+            placeholder="{{ 'general.bis_form.email_placeholder' | t }}"
+            autocorrect="off"
+            autocapitalize="off"
+            required
+            data-bis-email
+          >
+        </div>
+      </div>
+
+      {%- comment -%} ── Message (inquire only) ── {%- endcomment -%}
+      <div class="drawer-bis__inquire-fields" data-bis-inquire-fields style="display:none">
+        <div class="form-section">
+          <h4 class="form-section__title">{{ 'general.bis_form.message_label' | t }}</h4>
+          <div class="form-field">
+            <textarea
+              name="message"
+              form="bis-drawer-form"
+              class="form-field__input"
+              placeholder="{{ 'general.bis_form.message_placeholder' | t }}"
+              rows="2"
+            ></textarea>
+          </div>
+        </div>
+
+        <label class="drawer-bis__checkbox">
+          <input type="checkbox" name="privacy" form="bis-drawer-form" required data-bis-privacy>
+          <span>{{ 'general.bis_form.privacy_consent' | t }}</span>
+        </label>
+      </div>
+
+      <div class="drawer-bis__error" data-bis-error style="display:none"></div>
+    </div>
+
+    {%- comment -%} ── Submit footer ── {%- endcomment -%}
+    <div class="drawer-bis__footer">
+      <form class="drawer-bis__form-el" id="bis-drawer-form" data-bis-form novalidate>
+        <input type="hidden" name="product_id" value="{{ product.id }}" data-bis-product-id>
+        <input type="hidden" name="variant_id" value="{{ current_variant.id }}" data-bis-variant-id>
+        <input type="hidden" name="product_title" value="{{ product.title | escape }}" data-bis-product-title-input>
+        <input type="hidden" name="form_type" value="notify" data-bis-form-type>
+      </form>
+
+      <button type="submit" form="bis-drawer-form" class="drawer-bis__submit" data-bis-submit>
+        <span class="drawer-bis__submit-text" data-bis-submit-text>
+          {{ 'general.bis_form.submit_notify' | t }}
+        </span>
+        <span class="drawer-bis__submit-loader" aria-hidden="true" data-bis-loader>
+          <svg height="18" width="18" class="svg-loader" viewBox="0 0 18 18">
+            <circle r="7" cx="9" cy="9" />
+            <circle r="7" cx="9" cy="9" />
+          </svg>
+        </span>
+      </button>
     </div>
   </div>
 
   {%- comment -%} ── SUCCESS VIEW ── {%- endcomment -%}
   <div class="drawer-bis__success-view" data-bis-success-view style="display:none">
-    <button
-      type="button"
-      class="drawer-bis__close drawer-bis__close--success"
-      data-drawer-close
-      aria-label="{{ 'general.accessibility.close' | t }}"
-    >
-      {%- render 'icon-close' -%}
-    </button>
-
     <div class="drawer-bis__success-content">
       <div class="drawer-bis__success-icon">
         <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -201,21 +204,29 @@
 
     #side-drawer-bis-form .drawer-bis {
       overflow: hidden;
-      padding: var(--drawer-padding) 0 0;
     }
   }
 
-  /* ── Drawer wrapper ── */
+  /* ── Variables ── */
   .drawer-bis {
     --drawer-padding-x: 40px;
     --drawer-padding: clamp(16px, 4vh, 40px);
-    padding: var(--drawer-padding) var(--drawer-padding-x);
+  }
+
+  /* ── Wrapper ── */
+  side-drawer .drawer-bis.drawer__content-wrapper {
+    padding: 0;
+  }
+
+  .drawer-bis {
+    padding: 0;
     display: flex;
     flex-direction: column;
     height: 100%;
+    background: #fff;
   }
 
-  /* ── Form view layout ── */
+  /* ── Form view ── */
   .drawer-bis__form-view {
     display: flex;
     flex-direction: column;
@@ -224,7 +235,17 @@
     overflow: hidden;
   }
 
-  /* ── Title (fixed, outside scroll) ── */
+  /* ── Sticky header ── */
+  .bis-header {
+    padding: 40px var(--drawer-padding-x) 20px;
+    flex-shrink: 0;
+  }
+
+  .bis-mode--notify .bis-header {
+    background-color: #f5f5f5;
+    padding-bottom: 50px;
+  }
+
   .drawer-bis .drawer-content__title {
     color: #000;
     font-family: var(--FONT-STACK-NAV);
@@ -234,46 +255,121 @@
     line-height: var(--LINE-HEIGHT-NAV);
     letter-spacing: var(--LETTER-SPACING-NAV);
     text-transform: uppercase;
-    margin-bottom: 0;
-    padding: 0 var(--drawer-padding);
+    margin: 0;
   }
 
-  /* ── Main content area ── */
-  .drawer-bis .drawer-content__main {
+  /* ── Scrollable upper (subtitle + product card) ── */
+  .drawer-bis__upper {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  /* ── Scrollable fields ── */
-  .drawer-bis__fields {
-    flex: 0 1 auto;
     min-height: 0;
     overflow-y: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    margin: clamp(12px, 3vh, 40px) 0 clamp(8px, 2vh, 20px) 0;
-    padding: 0 var(--drawer-padding);
+    display: flex;
+    flex-direction: column;
+    padding: 0 var(--drawer-padding-x);
   }
 
-  .drawer-bis__fields::-webkit-scrollbar {
+  .bis-mode--inquire .drawer-bis__upper {
+    flex: 0;
+  }
+
+  .bis-mode--notify .drawer-bis__upper {
+    background-color: #f5f5f5;
+  }
+
+  .bis-mode--inquire .drawer-bis__upper + .drawer-bis__divider {
     display: none;
   }
 
+  .drawer-bis__upper::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ── Subtitle ── */
   .drawer-bis__subtitle {
     font-family: var(--FONT-STACK-BODY);
     font-size: 14px;
     font-weight: var(--FONT-WEIGHT-BODY);
     line-height: 1.6;
     color: var(--COLOR-TEXT);
-    margin: 0 0 clamp(8px, 2vh, 20px);
+    margin: 0 0 20px;
   }
 
-  /* ── Form sections ── */
+  /* ── Product card ── */
+  .drawer-bis__preview {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 0;
+  }
+
+  .drawer-bis__product-image {
+    width: 100%;
+    flex: 1;
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .drawer-bis__product-image img {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: min(380px, 45vh);
+    display: block;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+  }
+
+  .drawer-bis__product-info {
+    width: 100%;
+    text-align: center;
+    padding: clamp(12px, 2vh, 24px) 0 clamp(16px, 3vh, 32px);
+  }
+
+  .drawer-bis__product-title {
+    margin: 0;
+    color: #000;
+    font-family: var(--FONT-STACK-NAV);
+    font-size: var(--FONT-SIZE-NAV);
+    font-style: normal;
+    font-weight: var(--FONT-WEIGHT-NAV);
+    line-height: var(--LINE-HEIGHT-NAV);
+    letter-spacing: var(--LETTER-SPACING-NAV);
+    text-transform: uppercase;
+  }
+
+  .drawer-bis__product-variant {
+    font-family: var(--FONT-STACK-BODY);
+    font-size: 13px;
+    font-weight: var(--FONT-WEIGHT-BODY);
+    line-height: 1.4;
+    text-transform: uppercase;
+    color: var(--COLOR-TEXT);
+    margin: 4px 0 0;
+    min-height: 1em;
+  }
+
+  /* ── Divider ── */
+  .drawer-bis__divider {
+    flex-shrink: 0;
+    margin: 0;
+    border: none;
+    border-top: 1px solid #e5e5e5;
+  }
+
+  /* ── Pinned form fields ── */
+  .drawer-bis__fields {
+    flex-shrink: 0;
+    padding: 24px var(--drawer-padding-x) 0;
+  }
+
   .drawer-bis .form-section {
-    margin-bottom: clamp(8px, 2vh, 20px);
+    margin-bottom: 0;
   }
 
   .drawer-bis .form-section__title {
@@ -324,12 +420,17 @@
     min-height: 60px;
   }
 
+  .drawer-bis__inquire-fields + .form-section,
+  .drawer-bis__fields .drawer-bis__inquire-fields {
+    margin-top: 24px;
+  }
+
   /* ── Checkbox ── */
   .drawer-bis__checkbox {
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    margin-top: clamp(8px, 2vh, 20px);
+    margin-top: 24px;
     font-family: var(--FONT-STACK-BODY);
     font-size: 13px;
     font-weight: var(--FONT-WEIGHT-BODY);
@@ -375,76 +476,21 @@
     margin-top: 8px;
   }
 
-  /* ── Preview card (product image + info + submit, pinned bottom) ── */
-  .drawer-bis__preview {
-    flex: 1;
-    min-height: 0;
-    background-color: #f5f5f5;
-    padding: 0 0 var(--drawer-padding) 0;
-    display: flex;
-    flex-direction: column;
-    border-top: 1px solid #e5e5e5;
+  /* ── Submit footer ── */
+  .drawer-bis__footer {
+    flex-shrink: 0;
+    padding: var(--drawer-padding) var(--drawer-padding-x);
   }
 
-  .drawer-bis__product-image {
-    flex: 1;
-    min-height: 150px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .drawer-bis__product-image img {
-    width: auto;
-    height: 100%;
-    max-width: 100%;
-    min-height: 150px;
-    max-height: min(400px, 40vh);
-    aspect-ratio: 1 / 1;
-    display: block;
-    object-fit: cover;
-    mix-blend-mode: multiply;
-  }
-
-  .drawer-bis__product-info {
-    padding: clamp(10px, 2vh, 25px) 0;
-    margin: 0 var(--drawer-padding);
-  }
-
-  .drawer-bis__product-title {
-    margin: 0;
-    color: #000;
-    font-family: var(--FONT-STACK-NAV);
-    font-size: var(--FONT-SIZE-NAV);
-    font-style: normal;
-    font-weight: var(--FONT-WEIGHT-NAV);
-    line-height: var(--LINE-HEIGHT-NAV);
-    letter-spacing: var(--LETTER-SPACING-NAV);
-    text-transform: uppercase;
-  }
-
-  .drawer-bis__product-variant {
-    font-family: var(--FONT-STACK-BODY);
-    font-size: 13px;
-    font-weight: var(--FONT-WEIGHT-BODY);
-    line-height: 1.4;
-    text-transform: uppercase;
-    color: var(--COLOR-TEXT);
-    margin: 4px 0 0;
-    min-height: 1em;
-  }
-
-  /* ── Submit button ── */
   .drawer-bis__submit {
-    margin: 0 var(--drawer-padding) clamp(10px, 2vh, 30px) var(--drawer-padding);
+    position: relative;
+    width: 100%;
+    min-height: 52px;
     background: var(--btn-bg, #000);
     color: var(--btn-text, #fff);
     border: 1px solid var(--btn-border, #000);
     border-radius: 0;
-    padding: 12px 20px;
+    padding: 16px 20px;
     text-align: center;
     font-size: var(--BTN-FONT-SIZE);
     font-weight: var(--BTN-FONT-WEIGHT);
@@ -459,6 +505,31 @@
     transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
   }
 
+  .drawer-bis__submit-text {
+    transition: opacity 180ms ease;
+  }
+
+  .drawer-bis__submit-loader {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 180ms ease, visibility 180ms ease;
+  }
+
+  .drawer-bis__submit.is-loading .drawer-bis__submit-text {
+    opacity: 0;
+  }
+
+  .drawer-bis__submit.is-loading .drawer-bis__submit-loader {
+    opacity: 1;
+    visibility: visible;
+  }
+
   .drawer-bis__submit:hover {
     background-color: #27574d;
     border-color: #27574d;
@@ -471,22 +542,34 @@
   }
 
   /* ── Loader spinner ── */
+  .drawer-bis__submit .svg-loader {
+    display: block;
+  }
+
   .drawer-bis__submit .svg-loader circle {
     fill: none;
     stroke: currentColor;
     stroke-width: 1.5;
   }
 
+  .drawer-bis__submit .svg-loader circle:first-child {
+    opacity: 0.25;
+  }
+
   .drawer-bis__submit .svg-loader circle:last-child {
+    stroke-linecap: round;
+    stroke-dasharray: 18 44;
     animation: bis-spin 0.8s linear infinite;
     transform-origin: center;
   }
 
   @keyframes bis-spin {
-    to { transform: rotate(360deg); }
+    to {
+      transform: rotate(360deg);
+    }
   }
 
-  /* ── Hidden form element (no visual) ── */
+  /* ── Hidden form element ── */
   .drawer-bis__form-el {
     display: contents;
   }
@@ -524,23 +607,24 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
   }
 
-  .drawer-bis__success-icon {
-    margin-bottom: 8px;
+  .drawer-bis__success-icon svg {
+    width: clamp(64px, 8vw, 90px);
+    height: clamp(64px, 8vw, 90px);
   }
 
   .drawer-bis__success-title {
     color: #000;
-    font-family: var(--FONT-STACK-NAV);
-    font-size: var(--FONT-SIZE-NAV);
+    font-family: var(--FONT-STACK-HEADING);
+    font-size: var(--FONT-DISPLAY-S);
     font-style: normal;
-    font-weight: var(--FONT-WEIGHT-NAV);
-    line-height: var(--LINE-HEIGHT-NAV);
-    letter-spacing: var(--LETTER-SPACING-NAV);
-    text-transform: uppercase;
+    font-weight: var(--FONT-WEIGHT-NAV-BOLD);
+    line-height: var(--LINE-HEIGHT-DISPLAY-S);
+    text-transform: none;
     margin: 0;
+    text-wrap: balance;
   }
 
   .drawer-bis__success-subtitle {
@@ -553,9 +637,22 @@
     opacity: 0.6;
   }
 
+  /* ── Mobile ── */
   @media (max-width: 574px) {
-    .drawer-bis {
-      padding: var(--drawer-padding) 0 0;
+    .bis-header {
+      padding: 20px 20px 16px;
+    }
+
+    .drawer-bis__upper {
+      padding: 0 20px;
+    }
+
+    .drawer-bis__fields {
+      padding: 20px 20px 0;
+    }
+
+    .drawer-bis__footer {
+      padding: var(--drawer-padding) 20px;
     }
   }
 {% endstylesheet %}

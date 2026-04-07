@@ -6,6 +6,8 @@
       titleKey: "notify_title",
       subtitleKey: "notify_subtitle",
       submitKey: "submit_notify",
+      successTitleKey: "success_notify_title",
+      successSubtitleKey: "success_notify_subtitle",
       showProduct: true,
       showInquireFields: false,
     },
@@ -13,6 +15,8 @@
       titleKey: "inquire_title",
       subtitleKey: "inquire_subtitle",
       submitKey: "submit_inquire",
+      successTitleKey: "success_inquire_title",
+      successSubtitleKey: "success_inquire_subtitle",
       showProduct: false,
       showInquireFields: true,
     },
@@ -20,6 +24,8 @@
       titleKey: "available_soon_title",
       subtitleKey: "available_soon_subtitle",
       submitKey: "submit_available_soon",
+      successTitleKey: "success_available_soon_title",
+      successSubtitleKey: "success_available_soon_subtitle",
       showProduct: true,
       showInquireFields: false,
     },
@@ -126,6 +132,12 @@
       var config = MODES[mode] || MODES.notify;
       currentMode = mode;
 
+      // Stamp mode as class on root for CSS targeting
+      Object.keys(MODES).forEach(function (m) {
+        drawer.classList.remove("bis-mode--" + m);
+      });
+      drawer.classList.add("bis-mode--" + mode);
+
       // Update form type
       if (formTypeInput) formTypeInput.value = mode;
 
@@ -136,7 +148,7 @@
       // Update title & subtitle
       if (titleEl) titleEl.textContent = getTranslation(config.titleKey);
       if (subtitleEl) {
-        subtitleEl.textContent = getTranslation(config.subtitleKey);
+        subtitleEl.innerHTML = getTranslation(config.subtitleKey);
         subtitleEl.style.display = "";
       }
 
@@ -175,15 +187,19 @@
       showFormView();
     }
 
+    function setSubmitting(isSubmitting) {
+      if (!submitBtn) return;
+      submitBtn.disabled = isSubmitting;
+      submitBtn.classList.toggle("is-loading", isSubmitting);
+    }
+
     function resetForm() {
       if (form) form.reset();
       if (errorEl) {
         errorEl.style.display = "none";
         errorEl.textContent = "";
       }
-      if (submitBtn) submitBtn.disabled = false;
-      if (loader) loader.style.display = "none";
-      if (submitText) submitText.style.display = "";
+      setSubmitting(false);
     }
 
     function showFormView() {
@@ -192,10 +208,11 @@
     }
 
     function showSuccessView() {
+      var config = MODES[currentMode] || MODES.notify;
       if (formView) formView.style.display = "none";
       if (successView) successView.style.display = "";
-      if (successTitle) successTitle.textContent = getTranslation("success_title");
-      if (successSubtitle) successSubtitle.textContent = getTranslation("success_subtitle");
+      if (successTitle) successTitle.textContent = getTranslation(config.successTitleKey);
+      if (successSubtitle) successSubtitle.textContent = getTranslation(config.successSubtitleKey);
     }
 
     function openDrawer(mode, variantId, productId) {
@@ -236,10 +253,8 @@
           }
         }
 
-        // Show loader
-        if (submitBtn) submitBtn.disabled = true;
-        if (submitText) submitText.style.display = "none";
-        if (loader) loader.style.display = "";
+        // Show loader while preserving button height
+        setSubmitting(true);
         if (errorEl) errorEl.style.display = "none";
 
         // Collect form data
@@ -286,18 +301,37 @@
 
       // For notify / available_soon — use AMP BIS if available
       if (window.BIS && typeof window.BIS.create === "function") {
+        var callbackFired = false;
+
+        // Safety timeout: AMP sometimes registers the signup but never calls
+        // the callback. After 3 s assume success (the entry appears in the
+        // AMP dashboard regardless).
+        var safetyTimer = setTimeout(function () {
+          if (!callbackFired) {
+            console.warn("[BIS Drawer] AMP callback did not fire within 3 s — assuming success");
+            callbackFired = true;
+            showSuccessView();
+          }
+        }, 3000);
+
+        console.info("[BIS Drawer] Calling BIS.create for variant " + formData.variant_id);
+
         window.BIS.create(formData.email, formData.variant_id, formData.product_id, {
           callback: function (data) {
-            if (data && data.status === "OK") {
+            if (callbackFired) return; // safety timer already handled it
+            callbackFired = true;
+            clearTimeout(safetyTimer);
+
+            console.info("[BIS Drawer] AMP callback received:", data);
+
+            if (data && (data.status === "OK" || data.status === "ok" || data.success)) {
               showSuccessView();
             } else {
               if (errorEl) {
                 errorEl.textContent = (data && data.message) || "Something went wrong. Please try again.";
                 errorEl.style.display = "";
               }
-              if (submitBtn) submitBtn.disabled = false;
-              if (submitText) submitText.style.display = "";
-              if (loader) loader.style.display = "none";
+              setSubmitting(false);
             }
           },
         });
@@ -305,6 +339,7 @@
       }
 
       if (window.BISPopup && typeof window.BISPopup.create === "function") {
+        console.info("[BIS Drawer] Calling BISPopup.create for variant " + formData.variant_id);
         window.BISPopup.create(formData.email, formData.variant_id, {
           callback: function () {
             showSuccessView();
@@ -348,9 +383,7 @@
             errorEl.textContent = "Something went wrong. Please try again.";
             errorEl.style.display = "";
           }
-          if (submitBtn) submitBtn.disabled = false;
-          if (submitText) submitText.style.display = "";
-          if (loader) loader.style.display = "none";
+          setSubmitting(false);
         });
     }
 

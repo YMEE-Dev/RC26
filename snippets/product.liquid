@@ -3133,15 +3133,17 @@
                           %}
                         </div>
 
-                        {% comment %} <div class="product__custom-drawer">
-                            {% render 'link-with-icon',
-                              text: 'Care recommendations',
-                              drawer_open: 'care-recommendations',
-                              icon: 'icon-care-recommendations',
-                              icon_position: 'left',
-                              content_alignment: 'right'
-                            %}
-                        </div> {% endcomment %}
+                        {% comment %}
+                          <div class="product__custom-drawer">
+                                {% render 'link-with-icon',
+                                  text: 'Care recommendations',
+                                  drawer_open: 'care-recommendations',
+                                  icon: 'icon-care-recommendations',
+                                  icon_position: 'left',
+                                  content_alignment: 'right'
+                                %}
+                          </div>
+                        {% endcomment %}
                       </div>
 
                       <style>
@@ -3450,7 +3452,13 @@
     submit_inquire: {{ 'general.bis_form.submit_inquire' | t | json }},
     submit_available_soon: {{ 'general.bis_form.submit_available_soon' | t | json }},
     success_title: {{ 'general.bis_form.success_title' | t | json }},
-    success_subtitle: {{ 'general.bis_form.success_subtitle' | t | json }}
+    success_subtitle: {{ 'general.bis_form.success_subtitle' | t | json }},
+    success_notify_title: {{ 'general.bis_form.success_notify_title' | t | json }},
+    success_notify_subtitle: {{ 'general.bis_form.success_notify_subtitle' | t | json }},
+    success_inquire_title: {{ 'general.bis_form.success_inquire_title' | t | json }},
+    success_inquire_subtitle: {{ 'general.bis_form.success_inquire_subtitle' | t | json }},
+    success_available_soon_title: {{ 'general.bis_form.success_available_soon_title' | t | json }},
+    success_available_soon_subtitle: {{ 'general.bis_form.success_available_soon_subtitle' | t | json }}
   };
 </script>
 <script src="{{ 'bis-drawer.js' | asset_url }}" defer="defer"></script>
@@ -3590,6 +3598,8 @@
      No grid changes. Title-price shrinks via max-width. Dropdown slides via transform.
      Dropdown & color picker keep their original size. */
   (function () {
+    if (document.documentElement.hasAttribute('data-geo-hidden')) return;
+
     var desktopMQ = window.matchMedia ? window.matchMedia('(min-width: 990px)') : null;
     if (!desktopMQ) return;
 
@@ -3625,7 +3635,7 @@
       var dropdown =
         buttonsBlock.querySelector('[data-ymee-variant-dropdown]') ||
         buttonsBlock.querySelector('[data-ymee-variant-dropdown-form-only]');
-      if (!dropdown) return false;
+      if (!dropdown || dropdown.offsetHeight === 0) return false;
 
       if (!titlePrice) titlePrice = sectionEl.querySelector('.product__title-price');
       if (!stickyInner) stickyInner = sectionEl.querySelector('.product__sticky-bar__inner');
@@ -3657,7 +3667,16 @@
         var pickerTx = ddRect.left - GAP - optsRect.width - optsRect.left;
         sectionEl.style.setProperty('--pdp-cp-transform', 'translateX(' + Math.round(pickerTx) + 'px)');
 
-        var ddTy = optsRect.top + optsRect.height / 2 - (ddRect.top + ddRect.height / 2);
+        /* Find the visible button element for precise vertical alignment */
+        var ddAlignRect = (function () {
+          var sels = ['[data-add-to-cart]', '[data-bis-drawer-open]', '.ymee-variant-dropdown__toggle-bg'];
+          for (var i = 0; i < sels.length; i++) {
+            var el = dropdown.querySelector(sels[i]);
+            if (el && el.offsetHeight > 0) return el.getBoundingClientRect();
+          }
+          return ddRect;
+        })();
+        var ddTy = optsRect.top + optsRect.height / 2 - (ddAlignRect.top + ddAlignRect.height / 2);
         sectionEl.style.setProperty('--pdp-dd-transform', 'translateY(' + Math.round(ddTy) + 'px)');
 
         /* Shrink title-price to not overlap the inline row */
@@ -3669,8 +3688,9 @@
       } else {
         /* No color picker — slide dropdown up to sticky bar area */
         sectionEl.style.removeProperty('--pdp-cp-transform');
+        var isNotifyOnly = !!dropdown.querySelector('[data-bis-drawer-open="notify"]');
         var stickyBar = sectionEl.querySelector('.product__sticky-bar');
-        if (stickyBar) {
+        if (stickyBar && !isNotifyOnly) {
           var barRect = stickyBar.getBoundingClientRect();
           sectionEl.style.setProperty(
             '--pdp-dd-transform',
@@ -3753,6 +3773,20 @@
       document.addEventListener('DOMContentLoaded', init);
     } else {
       init();
+    }
+
+    /* Strip animation if geo-hide resolves async (first visit) */
+    if (window.MutationObserver) {
+      var geoObserver = new MutationObserver(function (mutations) {
+        for (var i = 0; i < mutations.length; i++) {
+          if (document.documentElement.hasAttribute('data-geo-hidden')) {
+            stripClasses();
+            geoObserver.disconnect();
+            return;
+          }
+        }
+      });
+      geoObserver.observe(document.documentElement, {attributes: true, attributeFilter: ['data-geo-hidden']});
     }
   })();
 </script>
