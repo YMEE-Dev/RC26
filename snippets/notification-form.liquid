@@ -1,19 +1,38 @@
-{% comment %}
-  Renders a notification form for "out of stock" products
+{% doc %}
+  Renders a notification/inquiry form panel for products.
 
-    Accepts:
-    - product_title: {String} product title (required)
-    - current_variant: {Object} Current variant (required)
+  @param {string} product_title - The product title (required)
+  @param {object} current_variant - The current variant (required)
+  @param {string} [form_type] - Panel type: 'notify' (default), 'inquire', 'available_soon'
 
-    Usage:
-  {%- render 'notification-form' product_title: product.title, current_variant: current_variant -%}
-{% endcomment %}
+  @example
+  {%- render 'notification-form', product_title: product.title, current_variant: current_variant, form_type: 'inquire' -%}
+{% enddoc %}
 
-{%- capture notification_form_id -%}NotificationForm--{{ section.id }}--{{ current_variant.id }}{%- endcapture -%}
+{%- liquid
+  assign nf_type = form_type | default: 'notify'
+  if nf_type == 'inquire'
+    assign nf_title = 'general.newsletter_form.inquire_title' | t
+    assign nf_submit = 'general.newsletter_form.inquire_submit' | t
+    assign nf_success = 'general.newsletter_form.inquire_success' | t
+  elsif nf_type == 'available_soon'
+    assign nf_title = 'general.newsletter_form.available_soon_title' | t
+    assign nf_submit = 'general.newsletter_form.available_soon_submit' | t
+    assign nf_success = 'general.newsletter_form.available_soon_success' | t
+  else
+    assign nf_title = product_title | strip_html
+    assign nf_submit = 'general.newsletter_form.notify' | t
+    assign nf_success = 'general.newsletter_form.notification_success' | t
+  endif
+-%}
+
+{%- capture notification_form_id -%}NotificationForm--{{ section.id }}--{{ current_variant.id }}--{{ nf_type }}{%- endcapture -%}
 
 <product-notification class="product__notification">
   <div data-product-notification-heading>
-    <h2 class="product__notification__title h3">{{ product_title | strip_html }}</h2>
+    <h2 class="product__notification__title h3">{{ nf_title }}</h2>
+
+    <p class="product__notification__variant subheading">{{ product_title | strip_html }}</p>
 
     {%- unless current_variant.title == 'Default Title' -%}
       <p class="product__notification__variant subheading" data-variant-title>{{ current_variant.title }}</p>
@@ -23,7 +42,7 @@
   {%- form 'contact', id: notification_form_id, data-notification-form: '', data-variant-id: '' -%}
     {%- if form.posted_successfully? -%}
       <div class="product__notification__message">
-        <p>{{ 'general.newsletter_form.notification_success' | t }}</p>
+        <p>{{ nf_success }}</p>
       </div>
     {%- endif -%}
 
@@ -34,14 +53,44 @@
     <div class="product__notification__form">
       {%- assign product_notification_for = 'general.newsletter_form.product_notification_for' | t -%}
 
-      <label for="NotificaitonFormEmail" class="visually-hidden">{{ 'general.newsletter_form.email' | t }}</label>
-      <input type="email" class="contactFormEmail field" id="NotificaitonFormEmail" name="contact[email]" placeholder="{{ 'general.newsletter_form.email' | t }}" autocorrect="off" autocapitalize="off" required>
+      <label for="{{ notification_form_id }}-name" class="visually-hidden">
+        {{- 'general.newsletter_form.name_label' | t -}}
+      </label>
+      <input
+        type="text"
+        class="field"
+        id="{{ notification_form_id }}-name"
+        name="contact[name]"
+        placeholder="{{ 'general.newsletter_form.name_label' | t }}"
+        autocapitalize="words"
+        required
+      >
 
-      <label for="NotificationFormProduct" class="visually-hidden">{{ product_notification_for }}</label>
-      <input type="hidden" id="NotificationFormProduct" name="contact[{{ product_notification_for | handle }}]" autocapitalize="words" value="{{ product_title | escape }} - {{ current_variant.title | escape }}" data-notification-product>
+      <label for="{{ notification_form_id }}-email" class="visually-hidden">
+        {{- 'general.newsletter_form.email' | t -}}
+      </label>
+      <input
+        type="email"
+        class="contactFormEmail field"
+        id="{{ notification_form_id }}-email"
+        name="contact[email]"
+        placeholder="{{ 'general.newsletter_form.email' | t }}"
+        autocorrect="off"
+        autocapitalize="off"
+        required
+      >
+
+      <label for="{{ notification_form_id }}-product" class="visually-hidden">{{ product_notification_for }}</label>
+      <input
+        type="hidden"
+        id="{{ notification_form_id }}-product"
+        name="contact[{{ product_notification_for | handle }}]"
+        value="{{ product_title | escape }} - {{ current_variant.title | escape }}"
+        data-notification-product
+      >
 
       <button type="submit" name="subscribe" class="btn btn--primary btn--solid">
-        <span>{{ 'general.newsletter_form.notify' | t }}</span>
+        <span>{{ nf_submit }}</span>
       </button>
     </div>
   {%- endform -%}

@@ -1,10 +1,22 @@
 <!-- /sections/section-hero.liquid -->
+{%- liquid
+  assign show_video_background = false
+
+  if section.settings.video != blank
+    if section.settings.video.media_type == 'video'
+      assign show_video_background = true
+    elsif section.settings.video.sources != blank
+      assign show_video_background = true
+    endif
+  endif
+-%}
+
 {%- capture style -%}
   --PT: {{ section.settings.padding_top }}px;
   --PB: {{ section.settings.padding_bottom }}px;
 {%- endcapture -%}
 
-{%- if section.settings.video != null -%}
+{%- if show_video_background -%}
   <script src="{{ 'video-background.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 

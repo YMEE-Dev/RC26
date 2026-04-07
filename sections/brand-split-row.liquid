@@ -1,0 +1,187 @@
+<!-- /sections/brand-split-row.liquid -->
+{%- liquid
+  assign has_content = false
+  if section.settings.image != blank or section.settings.text != blank
+    assign has_content = true
+  endif
+-%}
+
+{%- if has_content -%}
+  {%- style -%}
+    #BrandSplitRow--{{ section.id }} {
+      --brand-split-pt: {{ section.settings.padding_top }}px;
+      --brand-split-pb: {{ section.settings.padding_bottom }}px;
+    }
+  {%- endstyle -%}
+
+  <section
+    id="BrandSplitRow--{{ section.id }}"
+    class="brand-split-row"
+    data-section-id="{{ section.id }}"
+    data-section-type="brand-split-row"
+  >
+    <div class="brand-split-row__inner {{ section.settings.width }}{% if section.settings.layout == 'image-right' %} brand-split-row__inner--image-right{% endif %}{% if section.settings.image == blank %} brand-split-row__inner--no-image{% endif %}">
+      {%- if section.settings.image != blank -%}
+        <div class="brand-split-row__media" data-brand-fade>
+          {{
+            section.settings.image
+            | image_url: width: 1600
+            | image_tag:
+              class: 'brand-split-row__image',
+              widths: '375, 550, 750, 900, 1200, 1600',
+              sizes: '(min-width: 990px) 50vw, 100vw',
+              loading: 'lazy'
+          }}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.text != blank -%}
+        <div class="brand-split-row__copy body rte" data-brand-fade>
+          {{ section.settings.text }}
+        </div>
+      {%- endif -%}
+    </div>
+  </section>
+{%- endif -%}
+
+{% stylesheet %}
+  .brand-split-row {
+    padding-top: var(--brand-split-pt);
+    padding-bottom: var(--brand-split-pb);
+  }
+
+  .brand-split-row__inner {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 56px;
+    align-items: center;
+  }
+
+  .brand-split-row__inner--image-right .brand-split-row__media {
+    order: 2;
+  }
+
+  .brand-split-row__inner--image-right .brand-split-row__copy {
+    order: 1;
+  }
+
+  .brand-split-row__image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .brand-split-row__copy p {
+    margin: 0;
+  }
+
+  .brand-split-row__copy {
+    padding-right: 40px;
+  }
+
+  .brand-split-row__inner--no-image {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-split-row__inner--no-image .brand-split-row__copy {
+    padding-right: 0;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  @media (min-width: 990px) {
+    .main-content--article-brand .brand-split-row__inner {
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+  @media (max-width: 989px) {
+    .brand-split-row__inner {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    .brand-split-row__inner--image-right .brand-split-row__media,
+    .brand-split-row__inner--image-right .brand-split-row__copy {
+      order: initial;
+    }
+
+    .brand-split-row__copy {
+      padding-right: 0;
+    }
+
+    .main-content--article-brand .brand-split-row__inner {
+      padding-left: 20px;
+      padding-right: 20px;
+      box-sizing: border-box;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Image Text Split",
+  "settings": [
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        {"value": "wrapper--full", "label": "Full width"},
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "default": "image-right",
+      "options": [
+        {"value": "image-right", "label": "Image right, text left"},
+        {"value": "image-left", "label": "Image left, text right"}
+      ]
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image Text Split",
+      "category": "Blog"
+    }
+  ]
+}
+{% endschema %}

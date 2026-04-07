@@ -1,0 +1,279 @@
+{% doc %}
+  Renders care recommendations in a drawer with tabs driven by a metaobject list.
+
+  Metafield setup:
+    - shop.metafields.info.care_recommendations  (type: list.metaobject_reference)
+    - Each metaobject entry has:
+        tab_label   (single_line_text)
+        title       (single_line_text)
+        description (rich_text or multi_line_text)
+        image       (file_reference → image)
+
+  Product- and collection-level metafields override shop-level.
+{% enddoc %}
+
+{%- liquid
+  assign care_content = null
+  if product and product.metafields.info.care_recommendations != blank
+    assign care_content = product.metafields.info.care_recommendations.value
+  elsif collection and collection.metafields.info.care_recommendations != blank
+    assign care_content = collection.metafields.info.care_recommendations.value
+  elsif shop.metafields.info.care_recommendations != blank
+    assign care_content = shop.metafields.info.care_recommendations.value
+  endif
+-%}
+
+<div class="drawer-care-recommendations drawer__content-wrapper">
+  <div class="care-header">
+    <h2 class="drawer-care-recommendations__title drawer-content__title">
+      {{- 'products.product.care_recommendations_title' | t -}}
+    </h2>
+
+    {%- if care_content != blank -%}
+      <div class="care-tabs" role="tablist" aria-label="{{ 'products.product.care_recommendations_title' | t }}">
+        {%- for tab in care_content -%}
+          <button
+            class="care-tabs__tab{% if forloop.first %} is-active{% endif %}"
+            role="tab"
+            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+            aria-controls="care-tab-panel-{{ forloop.index0 }}"
+            id="care-tab-{{ forloop.index0 }}"
+            data-care-tab="{{ forloop.index0 }}"
+          >
+            {{- tab.tab_label | default: tab.title -}}
+          </button>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+
+  {%- if care_content != blank -%}
+    <div class="care-tabs__panels">
+      {%- for tab in care_content -%}
+        <div
+          class="care-tabs__panel{% if forloop.first %} is-active{% endif %}"
+          id="care-tab-panel-{{ forloop.index0 }}"
+          role="tabpanel"
+          aria-labelledby="care-tab-{{ forloop.index0 }}"
+          {%- unless forloop.first %}
+            hidden
+          {%- endunless %}
+        >
+          {%- if tab.title != blank -%}
+            <h3 class="care-tabs__panel-heading">{{ tab.title }}</h3>
+          {%- endif -%}
+
+          {%- if tab.description != blank -%}
+            <div class="care-tabs__panel-body drawer-content__description">
+              {{ tab.description | metafield_tag }}
+            </div>
+          {%- endif -%}
+
+          {%- if tab.image != blank -%}
+            <div class="care-tabs__panel-image">
+              {{ tab.image | image_url: width: 600 | image_tag: loading: 'lazy' }}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .drawer-care-recommendations {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0;
+  }
+
+  side-drawer .drawer-care-recommendations.drawer__content-wrapper {
+    padding: 0;
+  }
+
+  side-drawer .drawer-care-recommendations.drawer__content-wrapper .drawer-content__title {
+    font-family: var(--FONT-STACK-NAV);
+    font-size: var(--FONT-SIZE-NAV);
+    font-style: normal;
+    font-weight: var(--FONT-WEIGHT-NAV);
+    line-height: var(--LINE-HEIGHT-NAV);
+    letter-spacing: var(--LETTER-SPACING-NAV);
+    text-transform: uppercase;
+    padding: 0;
+    margin-bottom: 50px;
+  }
+
+  .care-header {
+    background-color: #f9f9f9;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 40px 40px 0;
+    flex-shrink: 0;
+  }
+
+  .drawer-care-recommendations__title {
+    margin-bottom: 0;
+    padding-bottom: 20px;
+  }
+
+  .care-tabs {
+    display: flex;
+    border-bottom: 1px solid #e5e5e5;
+    margin: 0 -40px;
+    padding: 0 40px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    justify-content: space-between;
+  }
+
+  .care-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .care-tabs__tab {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 0 0 10px 0;
+    cursor: pointer;
+    color: var(--COLOR-TEXT-A50, rgba(0, 0, 0, 0.4));
+    font-family: var(--FONT-STACK-BODY);
+    font-size: var(--FONT-SIZE-CAPTION);
+    font-weight: var(--FONT-WEIGHT-BODY);
+    letter-spacing: var(--LETTER-SPACING-NAV);
+    text-transform: uppercase;
+    white-space: nowrap;
+    margin-bottom: -1px;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .care-tabs__tab.is-active,
+  .care-tabs__tab[aria-selected='true'] {
+    color: var(--COLOR-TEXT);
+    border-bottom-color: var(--COLOR-TEXT);
+  }
+
+  .care-tabs__tab:hover:not(.is-active) {
+    color: var(--COLOR-TEXT);
+  }
+
+  .care-tabs__panels {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    padding: 30px 40px 40px;
+    background-color: #ffffff;
+  }
+
+  .care-tabs__panel {
+    display: none;
+    flex-direction: column;
+    min-height: 100%;
+    scrollbar-width: none;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+
+  .care-tabs__panel::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .care-tabs__panel::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .care-tabs__panel::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+  }
+
+  .care-tabs__panel::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+
+  .care-tabs__panel.is-active {
+    display: flex;
+  }
+
+  .care-tabs__panel-heading {
+    font-family: var(--FONT-STACK-HEADING);
+    font-size: var(--font-display-s);
+    font-weight: var(--FONT-WEIGHT-HEADING);
+    font-style: var(--FONT-STYLE-HEADING);
+    line-height: var(--LINE-HEIGHT-DISPLAY-S);
+    letter-spacing: var(--LETTER-SPACING-HEADING);
+    text-transform: var(--FONT-UPPERCASE-HEADING);
+    color: var(--COLOR-TEXT);
+    margin-bottom: 20px;
+  }
+
+  .care-tabs__panel-body {
+    flex: 1;
+  }
+
+  .care-tabs__panel-image {
+    margin-top: auto;
+    padding-top: 30px;
+    width: 100%;
+  }
+
+  .care-tabs__panel-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    border-radius: var(--RADIUS, 0);
+  }
+
+  @media only screen and (max-width: 749px) {
+    .care-header {
+      padding: 20px 20px 0;
+    }
+
+    .care-tabs__panels {
+      padding: 30px 20px 40px;
+    }
+
+    .care-tabs {
+      gap: 0.5rem;
+    }
+  }
+{% endstylesheet %}
+
+<script>
+  (function () {
+    var wrapper = document.querySelector('.drawer-care-recommendations');
+    if (!wrapper) return;
+
+    var tabs = wrapper.querySelectorAll('.care-tabs__tab');
+    var panels = wrapper.querySelectorAll('.care-tabs__panel');
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var target = tab.dataset.careTab;
+
+        tabs.forEach(function (t) {
+          t.classList.remove('is-active');
+          t.setAttribute('aria-selected', 'false');
+        });
+
+        panels.forEach(function (p) {
+          p.classList.remove('is-active');
+          p.hidden = true;
+        });
+
+        tab.classList.add('is-active');
+        tab.setAttribute('aria-selected', 'true');
+
+        var panel = wrapper.querySelector('#care-tab-panel-' + target);
+        if (panel) {
+          panel.classList.add('is-active');
+          panel.hidden = false;
+        }
+      });
+    });
+  })();
+</script>

@@ -38,6 +38,8 @@
     assign transparent_header = true
   elsif template.name == 'product' and section.settings.transparent_product_page
     assign transparent_header = true
+  elsif template.name == 'blog' and section.settings.transparent_blog
+    assign transparent_header = true
   endif
 
   assign main_menu_linklist = section.settings.main_menu_linklist | default: 'main-menu'
@@ -61,10 +63,10 @@
     assign use_transparent_logo_pdp = true
   endif
 
-  assign logo_width = '400'
+  assign logo_width = '800'
   assign logo_width_15x = logo_width | times: 1.5 | round
   assign logo_width_2x = logo_width | times: 2 | round
-  assign logo_width_mobile = '200'
+  assign logo_width_mobile = '360'
   assign logo_width_mobile_15x = logo_width_mobile | times: 1.5 | round
   assign logo_width_mobile_2x = logo_width_mobile | times: 2 | round
   assign logo_sizes = '(min-width: 750px) ' | append: logo_width | append: 'px, (min-width: ' | append: logo_width_mobile_2x | append: 'px) ' | append: logo_width_mobile | append: 'px, calc((100vw - 64px) * 0.5)'
@@ -214,9 +216,20 @@
     will-change: opacity, backdrop-filter;
   }
 
+  .theme__header.search-open .theme__header__scroll-blur,
+  .theme__header:has(.tmenu_item--root.tmenu_item_level_0.tmenu_item_active) .theme__header__scroll-blur,
+  body:has(header-drawer.drawer--header.is-open) .theme__header__scroll-blur,
+  body:has(side-drawer.is-open) .theme__header__scroll-blur,
+  body:has(.drawer.is-open) .theme__header__scroll-blur {
+    opacity: 0;
+    --header-scroll-reveal-blur: 0px;
+    -webkit-backdrop-filter: blur(0);
+    backdrop-filter: blur(0);
+  }
+
   {%- if logo_asset != blank -%}
     .header__logo__link {
-      --logo-padding: {{ logo_padding }};
+      --logo-padding: 30px;
       --logo-padding_product: {{ logo_padding | times: 0.60 }};
       --logo-width-desktop: {{ logo_width }}px;
       --logo-width-mobile: {{ logo_width_mobile }}px;
@@ -792,21 +805,70 @@
     /* Scroll animation for header visibility is handled in assets/theme.dev.js */
 
     /* Menu images + overlay */
-    let currentImage = null;
+    const initCollectionLabelMirroring = () => {
+      const collectionLists = selectAll('ul.tmenu_submenu_type_automatic.tmenu_submenu');
+      if (!collectionLists.length) return;
+
+      const replaceCollectionPlaceholder = (element, value, datasetKey) => {
+        if (!element) return;
+
+        const sourceValue = element.dataset[datasetKey] || element.textContent;
+        element.dataset[datasetKey] = sourceValue;
+        element.textContent = sourceValue.includes('[collection]')
+          ? sourceValue.replaceAll('[collection]', value)
+          : value;
+      };
+
+      collectionLists.forEach((list) => {
+        const links = selectAll(
+          ':scope > li:not(.tmenu_item_mobile) > .tmenu_item_link:not([tmenu-disabled-link])',
+          list
+        );
+        if (links.length < 2) return;
+
+        const firstLink = links[0];
+        const lastLink = links[links.length - 1];
+        const firstLabelElement = firstLink.querySelector('.tmenu_item_text');
+        const lastLabelElement = lastLink.querySelector('.tmenu_item_text');
+        const firstLabel = (firstLabelElement ? firstLabelElement.textContent : firstLink.textContent).trim();
+        if (!firstLabel) return;
+
+        replaceCollectionPlaceholder(lastLabelElement || lastLink, firstLabel, 'collectionTemplateText');
+
+        const lastTitle = lastLink.dataset.collectionTemplateTitle || lastLink.getAttribute('title') || '';
+        lastLink.dataset.collectionTemplateTitle = lastTitle;
+        lastLink.setAttribute(
+          'title',
+          lastTitle.includes('[collection]') ? lastTitle.replaceAll('[collection]', firstLabel) : firstLabel
+        );
+      });
+    };
 
     const initMenuImages = () => {
-      const images = selectAll('.tmenu_collection--above > img');
+      const images = selectAll(
+        '.tmenu_nav .tmenu_item_level_0.tmenu_item_has_child .tmenu_submenu--desktop .tmenu_item_has_child .tmenu_collection--above > img'
+      );
       if (!images.length) return;
-      if (!currentImage || images.includes(currentImage) === false) {
-        currentImage = images[0];
-      }
-      images.forEach((img) => {
-        if (img === currentImage) {
-          img.classList.remove('hide-menu-image');
-        } else {
-          img.classList.add('hide-menu-image');
+      const defaultImage = images[0];
+      const lastCollectionLink = document.querySelector(
+        '.tmenu_nav .tmenu_item_level_0.tmenu_item_has_child .tmenu_submenu--desktop .tmenu_item_has_child:has(.tmenu_collection--above) li:last-child a'
+      );
+
+      const resetToDefaultImage = () => {
+        images.forEach((img) => {
+          if (img === defaultImage) {
+            img.classList.remove('hide-menu-image');
+          } else {
+            img.classList.add('hide-menu-image');
+          }
+        });
+
+        if (lastCollectionLink) {
+          lastCollectionLink.classList.remove('mild-hide');
         }
-      });
+      };
+
+      resetToDefaultImage();
 
       // DISCLAMER: find links that should trigger image changes - these are right-aligned links in mega menu collections
       const links = selectAll(
@@ -825,16 +887,30 @@
         if (match) {
           images.forEach((img) => img.classList.add('hide-menu-image'));
           match.classList.remove('hide-menu-image');
-          currentImage = match;
-        } else if (currentImage) {
-          // keep last shown image visible when there's no match for the hovered link
-          currentImage.classList.remove('hide-menu-image');
+          if (lastCollectionLink) {
+            lastCollectionLink.classList.add('mild-hide');
+          }
+        } else {
+          resetToDefaultImage();
         }
       };
 
+      const linksContainer = links[0].closest('.tmenu_submenu');
+      if (linksContainer && linksContainer.dataset.menuImageResetBound !== 'true') {
+        linksContainer.dataset.menuImageResetBound = 'true';
+        linksContainer.addEventListener('mouseleave', resetToDefaultImage);
+        linksContainer.addEventListener('focusout', (event) => {
+          if (linksContainer.contains(event.relatedTarget)) return;
+          resetToDefaultImage();
+        });
+      }
+
       links.forEach((link) => {
-        link.addEventListener('mouseenter', () => showImageForTitle(link.textContent));
-        link.addEventListener('focus', () => showImageForTitle(link.textContent));
+        const linkText = link.querySelector('.tmenu_item_text') || link;
+        if (linkText.dataset.menuImageBound === 'true') return;
+        linkText.dataset.menuImageBound = 'true';
+        linkText.addEventListener('mouseenter', () => showImageForTitle(link.textContent));
+        linkText.addEventListener('focus', () => showImageForTitle(link.textContent));
       });
     };
 
@@ -845,6 +921,7 @@
     let tmenuScrollLocked = false;
 
     const applyMenuOpenStyles = () => {
+      initCollectionLabelMirroring();
       initMenuImages();
     };
 
@@ -1006,11 +1083,22 @@
 
       const logoLightUrl = logoLinks[0].dataset.logoLight;
       const logoDarkUrl = logoLinks[0].dataset.logoDark;
-      const forcedLightLogoMode = 'light';
+      const forcedDrawerLogoMode = 'dark';
+      const forcedTmenuLogoMode = 'dark';
 
       const drawerIsOpen = () => drawerWrapper?.classList.contains('is-open');
       const tmenuIsOpen = () => tmenuIsActive || Boolean(document.querySelector(tmenuActiveSelector));
-      const shouldForceLightLogo = () => drawerIsOpen() || tmenuIsOpen();
+      const getForcedLogoMode = () => {
+        if (drawerIsOpen()) {
+          return forcedDrawerLogoMode;
+        }
+
+        if (tmenuIsOpen()) {
+          return forcedTmenuLogoMode;
+        }
+
+        return '';
+      };
 
       const setHeaderColors = (mode) => {
         const colorSet = colors[mode] || colors.light;
@@ -1046,16 +1134,19 @@
         if (resolved === currentMode) return;
         currentMode = resolved;
         setHeaderColors(currentMode);
-        if (!shouldForceLightLogo()) {
+        if (!getForcedLogoMode()) {
           setLogoSource(currentMode);
         }
       };
 
       const syncLogoWithHeaderState = () => {
-        if (shouldForceLightLogo()) {
-          setLogoSource(forcedLightLogoMode);
+        const forcedLogoMode = getForcedLogoMode();
+
+        if (forcedLogoMode) {
+          setLogoSource(forcedLogoMode);
           return;
         }
+
         setLogoSource(currentMode);
       };
 
@@ -1560,6 +1651,12 @@
       "label": "Enable on Product pages",
       "info": "Stretch image size recommended. Desktop only",
       "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "transparent_blog",
+      "label": "Enable on Blog page",
+      "default": true
     },
     {
       "type": "image_picker",

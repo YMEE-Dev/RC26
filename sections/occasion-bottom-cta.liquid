@@ -1,0 +1,198 @@
+<!-- /sections/occasion-bottom-cta.liquid -->
+{%- liquid
+  assign resolved_cta_label = section.settings.button_label
+  assign resolved_cta_link = section.settings.button_link
+
+  assign cta_metafield_link = blank
+  if article != blank
+    if article.metafields.custom.cta_link.value != blank
+      assign cta_metafield_link = article.metafields.custom.cta_link.value
+    elsif article.metafields.custom.cta_button.value != blank
+      assign cta_metafield_link = article.metafields.custom.cta_button.value
+    endif
+  endif
+
+  if cta_metafield_link != blank
+    if cta_metafield_link.url != blank
+      assign resolved_cta_link = cta_metafield_link.url
+    endif
+    if cta_metafield_link.text != blank
+      assign resolved_cta_label = cta_metafield_link.text
+    endif
+  endif
+-%}
+{%- style -%}
+  #OccasionBottomCta--{{ section.id }} {
+    --occasion-bottom-cta-pt: {{ section.settings.padding_top }}px;
+    --occasion-bottom-cta-pb: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+	<section
+	  id="OccasionBottomCta--{{ section.id }}"
+	  class="occasion-bottom-cta"
+	  data-section-id="{{ section.id }}"
+	  data-section-type="occasion-bottom-cta"
+	>
+	  <div class="occasion-bottom-cta__inner wrapper" data-brand-fade>
+	    <div class="occasion-bottom-cta__text-wrap">
+	      {%- if section.settings.text != blank -%}
+	        <div class="occasion-bottom-cta__text body rte">
+	          {{ section.settings.text }}
+	        </div>
+	      {%- endif -%}
+	    </div>
+
+	    <div class="occasion-bottom-cta__button-wrap">
+	      {%- if resolved_cta_label != blank and resolved_cta_link != blank -%}
+	        <a class="occasion-bottom-cta__button" href="{{ resolved_cta_link }}">
+	          {{ resolved_cta_label }}
+	        </a>
+	      {%- endif -%}
+	    </div>
+	  </div>
+	</section>
+
+{% stylesheet %}
+  .occasion-bottom-cta {
+    padding-top: var(--occasion-bottom-cta-pt);
+    padding-bottom: 100px;
+  }
+
+	  .occasion-bottom-cta__inner {
+	    display: flex;
+	    flex-direction: column;
+	    align-items: center;
+	    gap: 100px;
+	  }
+
+	  .occasion-bottom-cta__text-wrap,
+	  .occasion-bottom-cta__button-wrap {
+	    width: 100%;
+	    display: flex;
+	    justify-content: center;
+	  }
+
+	  .occasion-bottom-cta__text {
+	    text-align: center;
+	    max-width: 700px;
+	  }
+
+  .occasion-bottom-cta__text p {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .occasion-bottom-cta__button {
+    width: 400px;
+    min-height: 45px;
+    border: 1px solid #000;
+    padding: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+    text-decoration: none;
+    color: #000;
+    background: transparent;
+    font-family: Inter, sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 20px;
+    letter-spacing: 0.1em;
+    text-transform: none !important;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    cursor: pointer;
+  }
+
+  .occasion-bottom-cta__button:hover,
+  .occasion-bottom-cta__button:focus-visible {
+    background-color: #000 !important;
+    color: #fff !important;
+    border-color: #000 !important;
+  }
+
+  @media (min-width: 990px) {
+    .main-content--article-brand .occasion-bottom-cta__inner,
+    .main-content--article-celebrity .occasion-bottom-cta__inner,
+    .main-content--article-occasion-style .occasion-bottom-cta__inner {
+      width: min(100% - 48px, 1100px);
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+	  @media (max-width: 749px) {
+	    .main-content--article-occasion-style .occasion-bottom-cta__inner {
+	      gap: 0;
+	    }
+
+	    .main-content--article-occasion-style .occasion-bottom-cta__button-wrap {
+	      margin-top: 60px;
+	    }
+
+	    .occasion-bottom-cta__button {
+	      width: min(100%, 400px);
+	    }
+
+    .main-content--article-brand .occasion-bottom-cta__inner,
+    .main-content--article-celebrity .occasion-bottom-cta__inner,
+    .main-content--article-occasion-style .occasion-bottom-cta__inner {
+      padding-left: 20px;
+      padding-right: 20px;
+      box-sizing: border-box;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "CTA",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Discover more signature pieces crafted for every occasion.</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "VIEW ALL COLLECTIONS"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "CTA",
+      "category": "Blog"
+    }
+  ]
+}
+{% endschema %}

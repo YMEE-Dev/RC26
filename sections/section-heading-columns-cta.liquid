@@ -55,7 +55,7 @@
         <a
           target="{{ section.settings.button_target }}"
           href="{{ section.settings.button_url | default: '#' }}"
-          class="btn {{ section.settings.button_style }} {{ section.settings.button_size }} {{ section.settings.button_type }}"
+          class="btn button_culomns"
         >
           {{ section.settings.button_text }}
         </a>
@@ -138,6 +138,32 @@
 
   .heading-columns-cta__button-wrap .btn {
     min-width: 357px;
+  }
+  
+  .button_culomns {
+    display: inline-flex;
+    padding: 14px 32px;
+    justify-content: center;
+    align-items: center;
+    color: #000;
+    background-color: transparent;
+    border: 1px solid #000;
+    font-family: Inter;
+    font-size: 12px;
+    font-style: normal;
+    line-height: 20px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all .3s ease;
+    white-space: nowrap;
+  }
+
+  .button_culomns:hover {
+    background-color: #000;
+    border-color: #000;
+    color: #fff;
+    transition: all 0.3s ease;
   }
 
   @media (max-width: 425px) {

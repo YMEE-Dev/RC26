@@ -1667,6 +1667,16 @@
         this.showCannotAddMoreInCart = true;
       }
 
+      if (maxInventoryReached === "true") {
+        if (this.cartDrawer) {
+          document.dispatchEvent(new CustomEvent("theme:product:added", { bubbles: true }));
+        }
+        if (button) {
+          button.disabled = false;
+        }
+        return;
+      }
+
       this.addToCart(formData, button);
     }
 
@@ -2668,7 +2678,7 @@
           countValue = "9+";
         }
 
-        this.innerText = countValue + " items";
+        this.innerText = countValue;
       }
     }
   }
@@ -3293,7 +3303,10 @@
 
       const gap = parseInt(window.getComputedStyle(slide).marginRight) || 0;
       const slideWidth = slide.offsetWidth + gap;
-      const targetPosition = slide.offsetLeft;
+      const isStorytellingModal = Boolean(this.slider.closest(".storytelling-modal"));
+      const targetPosition = isStorytellingModal
+        ? slide.offsetLeft - this.slider.clientWidth / 2 + slide.clientWidth / 2
+        : slide.offsetLeft;
       const direction = this.velX > 0 ? 1 : -1;
       const slidesToScroll = Math.floor(Math.abs(this.velX) / 100) || 1;
 
@@ -3498,9 +3511,14 @@
         goToSlide(slide) {
           if (!slide) return;
 
+          const isStorytellingModal = Boolean(this.closest(".storytelling-modal"));
+          const left = isStorytellingModal
+            ? slide.offsetLeft - this.slider.clientWidth / 2 + slide.clientWidth / 2
+            : slide.offsetLeft;
+
           this.slider.scrollTo({
             top: 0,
-            left: slide.offsetLeft,
+            left,
             behavior: "smooth",
           });
         }
@@ -3619,10 +3637,13 @@
           this.body = document.body;
           this.isCollectionTemplate = this.body.classList.contains("template-collection");
           this.isBlogTemplate = this.body.classList.contains("template-blog");
+          this.isArticleTemplate = this.body.classList.contains("template-article");
           this.isSearchTemplate = this.body.classList.contains("template-search");
+          this.isTimelinePage = this.body.id.includes("the-brand");
           this.isSpotlightCollectionTemplate =
             this.isCollectionTemplate &&
             Boolean(document.querySelector(".main-content--collection-spotlight, .collection--spotlight"));
+          this.hasAlwaysVisibleFixedHeader = this.isSpotlightCollectionTemplate || this.isTimelinePage;
           this.deadLinks = document.querySelectorAll('.navlink[href="#"]');
           this.resizeObserver = null;
           this.headerHideLayerTimeout = null;
@@ -3638,6 +3659,7 @@
           this.scrollHideEvent = (e) => this.toggleHeaderHideOnScroll(e);
 
           this.body.classList.toggle("has-header-sticky", this.isSticky);
+          this.body.classList.toggle("has-always-visible-fixed-header", this.hasAlwaysVisibleFixedHeader);
         }
 
         connectedCallback() {
@@ -3758,6 +3780,11 @@
           this.updateHeaderOffset = this.updateHeaderOffset.bind(this);
           this.scrollEvent = (e) => this.onScroll(e);
 
+          if (this.hasAlwaysVisibleFixedHeader) {
+            this.stickSimple();
+            return;
+          }
+
           this.listen();
           this.stickOnLoad();
         }
@@ -3781,7 +3808,20 @@
           const stickyThreshold = typeof this.headerOffset === "number" ? this.headerOffset : 0;
           const shouldShowRevealBlur = this.isSticky && goingUp && !atTop && position > stickyThreshold;
 
-          if ((this.isCollectionTemplate && !this.isSpotlightCollectionTemplate) || this.isSearchTemplate || this.isBlogTemplate) {
+          if (this.hasAlwaysVisibleFixedHeader) {
+            this.body.classList.remove("header-scroll-hide");
+            this.resetHeaderLayerHide();
+            this.shouldShowScrollRevealBlur = true;
+            this.syncScrollRevealBlur();
+            return;
+          }
+
+          if (
+            (this.isCollectionTemplate && !this.isSpotlightCollectionTemplate) ||
+            this.isSearchTemplate ||
+            this.isBlogTemplate ||
+            this.isArticleTemplate
+          ) {
             if (atTop) {
               this.body.classList.remove("header-scroll-hide");
               this.resetHeaderLayerHide();
@@ -3924,6 +3964,7 @@
           this.resetHeaderLayerHide();
           document.removeEventListener("theme:scroll", this.scrollHideEvent);
           document.removeEventListener("theme:tmenu:state", this.handleTmenuState);
+          this.body.classList.remove("has-always-visible-fixed-header");
 
           if (this.isSticky) {
             document.removeEventListener("theme:scroll", this.scrollEvent);

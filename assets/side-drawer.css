@@ -1,6 +1,6 @@
 /* Side Drawer Common Styles */
 :root {
-  --side-drawer-width: 480px;
+  --side-drawer-width: 400px;
 }
 
 side-drawer {
@@ -10,7 +10,7 @@ side-drawer {
   bottom: 0;
   left: 0;
   width: 100%;
-  z-index: 6000;
+  z-index: 6002;
   pointer-events: none;
 }
 
@@ -182,7 +182,7 @@ side-drawer.side-drawer--from-bottom.is-closing .drawer__inner {
 
 @media only screen and (min-width: 480px) {
   side-drawer .drawer__inner {
-    max-width: var(--side-drawer-width, 480px);
+    max-width: var(--side-drawer-width, 400px);
   }
 }
 
@@ -190,6 +190,25 @@ side-drawer.side-drawer--from-bottom.is-closing .drawer__inner {
   side-drawer .drawer__inner {
     border-left: none;
     border-right: none;
+    overflow-y: hidden;
+  }
+
+  side-drawer.side-drawer--from-bottom .drawer__inner {
+    overflow-y: hidden;
+  }
+
+  side-drawer .drawer__content-wrapper {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: 100vh;
+    height: 100%;
+    position: relative;
+  }
+
+  /* Ensure scrolling works when body is locked */
+  body[data-scroll-locked] side-drawer .drawer__content-wrapper {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -201,16 +220,17 @@ side-drawer .drawer__close {
   border: none;
   padding: 8px;
   cursor: pointer;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: background-color 0.2s ease;
+  outline: none;
 }
 
-side-drawer .drawer__close:hover {
-  background-color: var(--bg-accent);
+side-drawer .drawer__close:focus-visible {
+  outline: 2px solid var(--COLOR-TEXT);
+  outline-offset: 2px;
 }
 
 side-drawer .drawer__close svg {
@@ -221,14 +241,15 @@ side-drawer .drawer__close svg {
 
 side-drawer .drawer__content-wrapper {
   padding: 40px;
-  height: 100%;
+  flex: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 side-drawer .drawer-content__main {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  min-height: 100%;
 }
 
 side-drawer .drawer-content__link {
@@ -258,7 +279,7 @@ side-drawer .drawer-content__title {
   margin-bottom: 15px;
   color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-HEADING);
-  font-size: var(--font-display-s);
+  font-size: var(--FONT-DISPLAY-S);
   font-style: var(--FONT-STYLE-HEADING);
   font-weight: var(--FONT-WEIGHT-HEADING);
   line-height: var(--LINE-HEIGHT-DISPLAY-S);
@@ -282,7 +303,7 @@ side-drawer .drawer-content__description {
   margin-bottom: 20px;
   color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-BODY);
-  font-size: var(--font-body-medium);
+  font-size: var(--FONT-SIZE-BASE);
   font-style: var(--FONT-STYLE-BODY);
   font-weight: var(--FONT-WEIGHT-BODY);
   line-height: var(--LINE-HEIGHT-BODY);
@@ -347,7 +368,7 @@ side-drawer .drawer__link {
   border-bottom: 1px solid #e5e5e5;
   transition: opacity 0.2s ease;
   font-family: var(--FONT-STACK-BODY);
-  font-size: var(--font-body-medium);
+  font-size: var(--FONT-SIZE-BASE);
   font-weight: var(--FONT-WEIGHT-BODY);
   line-height: var(--LINE-HEIGHT-BODY);
 }
@@ -426,6 +447,8 @@ side-drawer .form-field {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin: 0;
+  max-width: 100%;
 }
 
 side-drawer .form-section {
@@ -560,10 +583,10 @@ side-drawer .btn {
   justify-content: center;
   padding: 16px 24px;
   border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: 1px;
+  font-size: var(--BTN-FONT-SIZE);
+  font-weight: var(--BTN-FONT-WEIGHT);
+  line-height: var(--BTN-LINE-HEIGHT);
+  letter-spacing: var(--BTN-LETTER-SPACING);
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -578,7 +601,6 @@ side-drawer .btn--primary {
 
 side-drawer .btn--primary:hover {
   background-color: #333333;
-  transform: translateY(-1px);
 }
 
 side-drawer .btn--secondary {
@@ -611,6 +633,7 @@ side-drawer .accordion {
 
 side-drawer .accordion__title {
   padding: 13px 0px;
+  padding-right: 13px;
   cursor: pointer;
   color: var(--COLOR-TEXT);
   font-family: var(--FONT-STACK-BODY);
@@ -645,7 +668,9 @@ side-drawer .accordion__title .accordion-icon-wrapper .icon {
   position: absolute;
   left: 0;
   top: 0;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 side-drawer .accordion__title .accordion-icon-wrapper .icon path {
@@ -779,19 +804,38 @@ side-drawer[aria-hidden="false"] .drawer__underlay {
   }
 
   side-drawer .drawer__close {
-    top: 20px;
-    right: 20px;
+    top: 40px;
+    right: 12px;
   }
 }
 
 @media only screen and (max-width: 479px) {
+  side-drawer .drawer__close {
+    top: 20px;
+  }
 }
 
-@media only screen and (min-width: 750px) and (max-width: 989px) {
-}
-
-@media only screen and (min-width: 990px) {
-}
-
-@media only screen and (min-width: 1400px) {
+/* Concierge specific styles */
+@media only screen and (max-width: 749px) {
+  body#concierge .prestige-heading {
+    font-size: 30px;
+    line-height: 38px;
+    text-wrap: balance;
+  }
+  body#concierge .prestige-button {
+    text-wrap: balance;
+    white-space: nowrap;
+  }
+  body#concierge .personal-assistance__heading.heading-large,
+  body#concierge .protection-cards__heading.heading-large,
+  body#concierge .sticky-scroll__heading.heading-large,
+  body#concierge .store-locator__heading.heading-large,
+  body#concierge .questions-cta__heading.heading-large {
+    font-size: 36px;
+    line-height: 44px;
+    text-wrap: balance;
+  }
+  body#concierge .sticky-scroll__image-wrapper img {
+    aspect-ratio: 4 / 5;
+  }
 }

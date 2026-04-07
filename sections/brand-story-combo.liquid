@@ -1,0 +1,203 @@
+<!-- /sections/brand-story-combo.liquid -->
+{%- liquid
+  assign has_any_content = false
+  assign resolved_top_heading = section.settings.top_heading
+
+  if resolved_top_heading == blank and article != blank
+    if article.metafields.custom.story_top_heading.value != blank
+      assign resolved_top_heading = article.metafields.custom.story_top_heading.value
+    endif
+    if resolved_top_heading == blank and article.metafields.custom.top_heading.value != blank
+      assign resolved_top_heading = article.metafields.custom.top_heading.value
+    endif
+    if resolved_top_heading == blank and article.metafields.custom.heading.value != blank
+      assign resolved_top_heading = article.metafields.custom.heading.value
+    endif
+  endif
+
+  if resolved_top_heading != blank or section.settings.top_text != blank or section.settings.top_image != blank
+    assign has_any_content = true
+  endif
+-%}
+
+{%- if has_any_content -%}
+  {%- style -%}
+    #BrandStoryCombo--{{ section.id }} {
+      --brand-combo-pt: {{ section.settings.padding_top }}px;
+      --brand-combo-pb: {{ section.settings.padding_bottom }}px;
+    }
+  {%- endstyle -%}
+
+  <section
+    id="BrandStoryCombo--{{ section.id }}"
+    class="brand-story-combo"
+    data-section-id="{{ section.id }}"
+    data-section-type="brand-story-combo"
+  >
+    <div class="brand-story-combo__inner {{ section.settings.width }}">
+      <div class="brand-story-combo__split">
+        <div class="brand-story-combo__split-copy">
+          {%- if resolved_top_heading != blank -%}
+            <h3 class="brand-story-combo__heading h3" data-brand-fade>
+              {{ resolved_top_heading | newline_to_br }}
+            </h3>
+          {%- endif -%}
+          {%- if section.settings.top_text != blank -%}
+            <div class="brand-story-combo__text body rte" data-brand-fade>{{ section.settings.top_text }}</div>
+          {%- endif -%}
+        </div>
+
+        {%- if section.settings.top_image != blank -%}
+          <div class="brand-story-combo__split-media" data-brand-fade>
+            {{
+              section.settings.top_image
+              | image_url: width: 1200
+              | image_tag:
+                class: 'brand-story-combo__image',
+                widths: '375, 550, 750, 900, 1100, 1200',
+                sizes: '(min-width: 990px) 40vw, 100vw',
+                loading: 'lazy'
+            }}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+{% stylesheet %}
+  .brand-story-combo {
+    padding-top: var(--brand-combo-pt);
+    padding-bottom: var(--brand-combo-pb);
+  }
+
+  .brand-story-combo__inner {
+    display: block;
+  }
+
+  .brand-story-combo__split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 56px;
+    align-items: center;
+  }
+
+  .brand-story-combo__split-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .brand-story-combo__heading {
+    margin: 0;
+  }
+
+  .brand-story-combo__text p {
+    margin: 0;
+  }
+
+  .brand-story-combo__image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  @media (min-width: 990px) {
+    .main-content--article-brand .brand-story-combo__inner {
+      width: min(100% - 48px, 1100px);
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+  @media (max-width: 989px) {
+    .brand-story-combo__split {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+
+    .main-content--article-brand .brand-story-combo__split-copy {
+      grid-row: 2;
+      width: 100%;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+      align-items: center;
+    }
+
+    .main-content--article-brand .brand-story-combo__split-media {
+      grid-row: 1;
+    }
+
+    .main-content--article-brand .brand-story-combo__text {
+      text-align: center;
+    }
+
+    .main-content--article-brand .brand-story-combo__inner {
+      padding-left: 20px;
+      padding-right: 20px;
+      box-sizing: border-box;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Story Layout Bundle",
+  "settings": [
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        {"value": "wrapper--full", "label": "Full width"},
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"}
+      ]
+    },
+    {
+      "type": "richtext",
+      "id": "top_heading",
+      "label": "Top heading"
+    },
+    {
+      "type": "richtext",
+      "id": "top_text",
+      "label": "Top text"
+    },
+    {
+      "type": "image_picker",
+      "id": "top_image",
+      "label": "Top image"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Story Layout Bundle",
+      "category": "Blog"
+    }
+  ]
+}
+{% endschema %}

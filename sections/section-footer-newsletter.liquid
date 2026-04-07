@@ -1,0 +1,491 @@
+<!-- /sections/section-footer-newsletter.liquid -->
+
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign trigger_label = section.settings.trigger_label | strip
+  assign animation_anchor = '#FooterNewsletter--' | append: section.id
+  assign animation_order = 1
+-%}
+
+{%- style -%}
+  #FooterNewsletter--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    background: {{ section.settings.background_color }};
+  }
+{%- endstyle -%}
+
+<footer-newsletter-drawer class="footer-newsletter-popup">
+  <section
+    id="FooterNewsletter--{{ section.id }}"
+    class="footer-newsletter section-padding {{ color_scheme }}"
+    data-section-id="{{ section.id }}"
+    data-section-type="footer-newsletter"
+  >
+    <div class="footer-newsletter__inner wrapper--full-padded">
+      {%- if trigger_label != blank -%}
+        <button
+          type="button"
+          class="btn btn--secondary btn--outline footer-newsletter__trigger"
+          data-newsletter-drawer-open
+          data-aos="hero"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-order="{{ animation_order }}"
+          aria-expanded="false"
+          aria-controls="FooterNewsletterDrawer--{{ section.id }}"
+        >
+          <span class="footer-newsletter__trigger-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
+              <path d="M4 5.25C2.89062 5.25 2 6.1836 2 7.3047V17.6875C2 18.8086 2.89062 19.75 4 19.75H21C22.1094 19.75 23 18.8086 23 17.6875V7.3047C23 6.1836 22.1094 5.25 21 5.25H4ZM4 6.25H21C21.1465 6.25 21.289 6.28613 21.414 6.34375L13.1486 13.9923C12.7667 14.3458 12.2579 14.3458 11.8751 13.9923L3.59385 6.34375C3.71787 6.28809 3.85547 6.25 4 6.25ZM3.01562 7.17188L8.88288 12.5939L3.12512 18.1954C3.04895 18.045 3.00012 17.8751 3.00012 17.6876V7.30483C3.00012 7.25893 3.01074 7.21582 3.01562 7.17188ZM21.9844 7.17969C21.9893 7.22168 22 7.26172 22 7.30469V17.6874C22 17.871 21.9561 18.04 21.8828 18.1874L16.1406 12.5859L21.9844 7.17969ZM15.4141 13.2577L21.0314 18.7499H21.0001H4.00012H3.97669L9.61719 13.2654L11.1953 14.7264C11.9375 15.4119 13.0859 15.4129 13.8281 14.7264L15.4141 13.2577Z" fill="currentColor"/>
+            </svg>
+          </span>
+          <span class="footer-newsletter__trigger-text">{{ trigger_label | escape }}</span>
+        </button>
+      {%- endif -%}
+    </div>
+  </section>
+
+  <div
+    id="FooterNewsletterDrawer--{{ section.id }}"
+    class="collection__sidebar__slide-out footer-newsletter__drawer"
+    data-newsletter-drawer
+  >
+    <div class="collection__sidebar__head">
+      <button
+        type="button"
+        class="collection__sidebar__close footer-newsletter__drawer-close"
+        data-newsletter-drawer-close
+        aria-label="{{ 'general.accessibility.close' | t }}"
+      >
+        {%- render 'icon-close' -%}
+      </button>
+    </div>
+
+    <div class="footer-newsletter__drawer-body" data-scroll-lock-scrollable>
+      {%- render 'footer-newsletter-form', section: section -%}
+    </div>
+  </div>
+
+  <div class="underlay" data-newsletter-drawer-close></div>
+</footer-newsletter-drawer>
+
+{% stylesheet %}
+  .footer-newsletter__inner {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: var(--gutter);
+  }
+
+  .footer-newsletter__trigger {
+    grid-column: 4 / 6;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  @media only screen and (min-width: 768px) and (max-width: 1220px) {
+    .footer-newsletter__inner {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .footer-newsletter__trigger {
+      grid-column: 3 / 5;
+    }
+  }
+
+  .footer-newsletter__trigger-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /*
+   * --duration is only defined inside .collection__products so we set it
+   * here to match the collection filter slide-out timing exactly.
+   */
+  .footer-newsletter__drawer {
+    --duration: 0.6s;
+  }
+
+  .footer-newsletter__drawer-close {
+    top: 55px;
+    right: 15px;
+  }
+
+  .footer-newsletter__drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 var(--inner) var(--inner);
+  }
+
+  .footer-newsletter__drawer-body .modal__description p {
+    margin: 0;
+    padding-bottom: 40px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px;
+  }
+
+  .footer-newsletter-form__title {
+    margin: 0;
+    padding: 0;
+    padding-bottom: 40px;
+  }
+
+  .footer-newsletter-form {
+    width: 100%;
+    max-width: 62rem;
+  }
+
+  .footer-newsletter__drawer .footer-newsletter-form select.field,
+  .footer-newsletter__drawer .footer-newsletter-form input.field {
+    margin-top: 12px;
+    margin-bottom: 0;
+    padding-top: 0px;
+    padding-bottom: 11px;
+  }
+
+  .footer-newsletter-form__fields {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .footer-newsletter-form__group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .footer-newsletter-form__eyebrow {
+    margin: 0;
+    padding: 0;
+    padding-bottom: 0;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  .footer-newsletter-form__field::placeholder {
+    text-transform: uppercase;
+  }
+
+  .footer-newsletter-form__field--select {
+    color: var(--text);
+  }
+
+  .footer-newsletter-form__consent {
+    max-width: 58rem;
+    margin-top: 4px;
+  }
+
+  .footer-newsletter-form__consent input[type='checkbox'] + label {
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .footer-newsletter-form__consent input[type='checkbox'] + label::before {
+    width: 12px;
+    height: 12px;
+    margin-right: 0;
+    border-color: currentColor;
+    border-radius: 50%;
+    margin-top: 4px;
+  }
+
+  .footer-newsletter-form__consent-copy,
+  .footer-newsletter-form__consent-copy p {
+    margin: 0;
+    text-align: left;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px;
+  }
+
+  .footer-newsletter-form__policy,
+  .footer-newsletter-form__policy p {
+    text-align: left;
+    margin: 0;
+    margin-top: 20px;
+  }
+
+  .footer-newsletter-form__submit {
+    margin-top: 25px;
+  }
+
+  @media only screen and (max-width: 749px) {
+    .footer-newsletter__drawer {
+      max-width: 100%;
+    }
+
+    .footer-newsletter__inner {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+
+    .footer-newsletter__trigger {
+      grid-column: 1;
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  class FooterNewsletterDrawer extends HTMLElement {
+    connectedCallback() {
+      this.drawer = this.querySelector('[data-newsletter-drawer]');
+      this.trigger = this.querySelector('[data-newsletter-drawer-open]');
+      this.scrollableEl = this.querySelector('[data-scroll-lock-scrollable]');
+      this.lastFocusedElement = null;
+
+      this.trigger?.addEventListener('click', () => this.open());
+
+      this.querySelectorAll('[data-newsletter-drawer-close]').forEach((el) => {
+        el.addEventListener('click', () => this.close());
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.drawer.classList.contains('expanded')) {
+          this.close();
+        }
+      });
+    }
+
+    focusWithoutScroll(element) {
+      if (!(element instanceof HTMLElement)) {
+        return;
+      }
+
+      const scrollX = window.scrollX;
+      const scrollY = window.scrollY;
+
+      try {
+        element.focus({preventScroll: true});
+      } catch (error) {
+        element.focus();
+        window.scrollTo(scrollX, scrollY);
+      }
+    }
+
+    open() {
+      this.lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      this.trigger?.setAttribute('aria-expanded', 'true');
+
+      const removeExpanding = () => {
+        this.drawer.classList.remove('expanding');
+        this.drawer.removeEventListener('transitionend', removeExpanding);
+      };
+      const addExpanding = () => {
+        this.drawer.classList.add('expanding');
+        this.drawer.removeEventListener('transitionstart', addExpanding);
+      };
+      this.drawer.addEventListener('transitionstart', addExpanding);
+      this.drawer.addEventListener('transitionend', removeExpanding);
+      this.drawer.classList.add('expanded');
+
+      window.dispatchEvent(new CustomEvent('theme:scroll:lock', {detail: this.scrollableEl}));
+
+      if (window.theme?.a11y?.trapFocus) {
+        window.theme.a11y.trapFocus(this.drawer);
+      }
+    }
+
+    close() {
+      this.trigger?.setAttribute('aria-expanded', 'false');
+      this.drawer.classList.remove('expanded');
+      window.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
+
+      if (window.theme?.a11y?.removeTrapFocus) {
+        window.theme.a11y.removeTrapFocus();
+      }
+
+      const focusTarget =
+        this.lastFocusedElement instanceof HTMLElement && this.lastFocusedElement.isConnected
+          ? this.lastFocusedElement
+          : this.trigger;
+
+      this.focusWithoutScroll(focusTarget);
+    }
+  }
+
+  if (!customElements.get('footer-newsletter-drawer')) {
+    customElements.define('footer-newsletter-drawer', FooterNewsletterDrawer);
+  }
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Footer newsletter custom",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Trigger"
+    },
+    {
+      "type": "text",
+      "id": "trigger_label",
+      "label": "Trigger button label",
+      "default": "Join newsletter"
+    },
+    {
+      "type": "header",
+      "content": "Modal"
+    },
+    {
+      "type": "text",
+      "id": "form_title",
+      "label": "Form title",
+      "default": "KEEP IN TOUCH"
+    },
+    {
+      "type": "richtext",
+      "id": "heading_text",
+      "label": "Heading text",
+      "default": "<p>Subscribe now to be the first to know about our latest collections and future releases, discover collaborations and events</p>"
+    },
+    {
+      "type": "header",
+      "content": "Form"
+    },
+    {
+      "type": "text",
+      "id": "required_fields_label",
+      "label": "Required fields label",
+      "default": "*REQUIRED FIELDS"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Submit button text",
+      "default": "SIGN UP"
+    },
+    {
+      "type": "richtext",
+      "id": "consent_label",
+      "label": "Consent label",
+      "default": "<p>I Confirm that I have read, understood and accepted your privacy information, that I am over 16, and I agree to receive this newsletter.</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "policy_text",
+      "label": "Policy text",
+      "default": "<p>Your personal data will be used by roberto coin s.p.a. to provide you with the newsletter service you have expressly requested. your data are safe with roberto coin s.p.a. please read the privacy policy, and the cookie policy for further information.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Mailchimp"
+    },
+    {
+      "type": "url",
+      "id": "mailchimp_action_url",
+      "label": "Action URL",
+      "info": "Paste the Mailchimp form action URL from your hosted or embedded form."
+    },
+    {
+      "type": "text",
+      "id": "mailchimp_user_id",
+      "label": "User ID",
+      "info": "The hidden 'u' value from Mailchimp."
+    },
+    {
+      "type": "text",
+      "id": "mailchimp_audience_id",
+      "label": "Embed ID / Audience ID",
+      "info": "The hidden 'id' value from Mailchimp."
+    },
+    {
+      "type": "text",
+      "id": "mailchimp_tags",
+      "label": "Tags",
+      "info": "Optional Mailchimp tags hidden input value."
+    },
+    {
+      "type": "header",
+      "content": "Mailchimp field names"
+    },
+    {
+      "type": "text",
+      "id": "mailchimp_first_name_field",
+      "label": "First name field name",
+      "default": "FNAME"
+    },
+    {
+      "type": "text",
+      "id": "mailchimp_last_name_field",
+      "label": "Last name field name",
+      "default": "LNAME"
+    },
+    {
+      "type": "text",
+      "id": "mailchimp_email_field",
+      "label": "Email field name",
+      "default": "EMAIL"
+    },
+    {
+      "type": "text",
+      "id": "mailchimp_language_field",
+      "label": "Language field name",
+      "default": "LANGUAGE"
+    },
+    {
+      "type": "text",
+      "id": "mailchimp_consent_field",
+      "label": "Consent field name",
+      "default": "CONSENT"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 20,
+      "max": 160,
+      "step": 2,
+      "unit": "px",
+      "label": "Top",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 20,
+      "max": 160,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 30
+    }
+  ],
+  "presets": [
+    {
+      "name": "Footer newsletter custom",
+      "category": "Layout"
+    }
+  ],
+  "enabled_on": {
+    "groups": ["custom.pre_footer"]
+  }
+}
+{% endschema %}

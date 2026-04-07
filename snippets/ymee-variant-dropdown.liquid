@@ -48,11 +48,37 @@
       aria-haspopup="listbox"
       aria-expanded="false"
     >
-      <span class="ymee-variant-dropdown__placeholder" data-ymee-variant-dropdown-placeholder>
-        {{ 'products.product.choose_size' | t }}
+      <svg
+        class="ymee-variant-dropdown__toggle-bg"
+        viewBox="0 0 362 50"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+        preserveAspectRatio="none"
+      >
+        <defs>
+          <mask id="ymee-toggle-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="362" height="50">
+            <path d="M326.761 50C339.354 50 349.39 34.7756 358.149 28.529L361.5 26.1286V23.882L358.149 21.4731C349.381 15.2245 339.345 0 326.761 0L34.7301 0C22.1376 0 12.1019 15.2244 3.34241 21.471L0 23.8799V26.1265L3.34241 28.5269C12.1104 34.7734 22.1461 49.9979 34.7301 49.9979H326.761V50Z" fill="white"/>
+          </mask>
+        </defs>
+        <g mask="url(#ymee-toggle-mask)">
+          <rect width="286" height="50" fill="black"/>
+          <rect x="286" width="76" height="50" fill="white"/>
+        </g>
+        <path d="M326.761 50C339.354 50 349.39 34.7756 358.149 28.529L361.5 26.1286V23.882L358.149 21.4731C349.381 15.2245 339.345 0 326.761 0L34.7301 0C22.1376 0 12.1019 15.2244 3.34241 21.471L0 23.8799V26.1265L3.34241 28.5269C12.1104 34.7734 22.1461 49.9979 34.7301 49.9979H326.761V50Z" fill="none" stroke="#E5E5E5" stroke-width="1"/>
+      </svg>
+      <span class="ymee-variant-dropdown__toggle-label">
+        <span class="ymee-variant-dropdown__placeholder" data-ymee-variant-dropdown-placeholder>
+          {{ 'products.product.choose_size' | t }}
+        </span>
+        <span class="ymee-variant-dropdown__value" data-ymee-variant-dropdown-value hidden>
+          {{- ymee_selected_size | escape -}}
+        </span>
       </span>
-      <span class="ymee-variant-dropdown__value" data-ymee-variant-dropdown-value hidden>
-        {{- ymee_selected_size | escape -}}
+      <span class="ymee-variant-dropdown__toggle-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
+          <line x1="4" y1="8.5" x2="22" y2="8.5" stroke="black"/>
+          <line x1="4" y1="16.5" x2="22" y2="16.5" stroke="black"/>
+        </svg>
       </span>
     </button>
 
@@ -60,11 +86,17 @@
       {%- for variant in product.variants -%}
         {%- liquid
           assign ymee_size_value = variant.options[ymee_size_option_index]
+          assign ymee_cart_qty = cart | item_count_for_variant: variant.id
+          assign ymee_is_cart_soldout = false
 
           assign ymee_is_limited = false
           if variant.available and variant.inventory_management == 'shopify' and variant.inventory_policy != 'continue'
             if variant.inventory_quantity > 0 and variant.inventory_quantity <= 1
               assign ymee_is_limited = true
+            endif
+
+            if ymee_cart_qty >= variant.inventory_quantity
+              assign ymee_is_cart_soldout = true
             endif
           endif
         -%}
@@ -73,9 +105,17 @@
           role="option"
           aria-selected="{% if variant == selected_variant %}true{% else %}false{% endif %}"
           data-variant-id="{{ variant.id }}"
+          data-ymee-cart-soldout="{% if ymee_is_cart_soldout %}true{% else %}false{% endif %}"
+          data-inventory-management="{{ variant.inventory_management | escape }}"
+          data-inventory-policy="{{ variant.inventory_policy | escape }}"
+          data-inventory-quantity="{{ variant.inventory_quantity }}"
           data-option1="{{ variant.option1 | escape }}"
-          {%- if variant.option2 %} data-option2="{{ variant.option2 | escape }}"{% endif %}
-          {%- if variant.option3 %} data-option3="{{ variant.option3 | escape }}"{% endif %}
+          {%- if variant.option2 %}
+            data-option2="{{ variant.option2 | escape }}"
+          {% endif %}
+          {%- if variant.option3 %}
+            data-option3="{{ variant.option3 | escape }}"
+          {% endif %}
           data-size-value="{{ ymee_size_value | escape }}"
         >
           <span class="ymee-variant-dropdown__size">{{ ymee_size_value | escape }}</span>
@@ -86,17 +126,44 @@
                   {{ 'products.product.limited_availability' | t }}
                 </span>
               {%- endif -%}
+              {%- if cr_show_inquire -%}
+                <button type="button" class="ymee-variant-dropdown__action" data-action="inquire" data-variant-id="{{ variant.id }}" data-product-id="{{ product.id }}">
+                  {{ 'products.product.inquire' | t }}
+                </button>
+              {%- else -%}
               <div class="ymee-variant-dropdown__submit">
-                <button type="button" data-action="buy">
+                <button
+                  type="button"
+                  data-action="buy"
+                  {% if ymee_is_cart_soldout %}
+                    disabled
+                    aria-disabled="true"
+                  {% else %}
+                    aria-disabled="false"
+                  {% endif %}
+                >
                   {%- render 'icon-add2cart' -%}
-                  {{ 'products.product.add_to_cart' | t }}
+                  <span data-ymee-option-atc-label>
+                    {% if ymee_is_cart_soldout %}
+                      {{ 'products.product.inventory_out_of_stock' | t }}
+                    {% else %}
+                      {{ 'products.product.add_to_cart' | t }}
+                    {% endif %}
+                  </span>
                 </button>
               </div>
               <div class="ymee-variant-dropdown__accelerated" data-ymee-accelerated-slot></div>
+              {%- endif -%}
             {%- else -%}
-              <button type="button" class="ymee-variant-dropdown__action" data-action="notify">
-                {{ 'general.newsletter_form.notify' | t }}
-              </button>
+              {%- if cr_show_inquire -%}
+                <button type="button" class="ymee-variant-dropdown__action" data-action="inquire" data-variant-id="{{ variant.id }}" data-product-id="{{ product.id }}">
+                  {{ 'products.product.inquire' | t }}
+                </button>
+              {%- else -%}
+                <button type="button" class="ymee-variant-dropdown__action" data-action="notify">
+                  {{ 'general.newsletter_form.notify' | t }}
+                </button>
+              {%- endif -%}
             {%- endif -%}
           </span>
         </div>
@@ -109,8 +176,8 @@
           assign sizing_link_text = 'products.product.sizing_help' | t
 
           # Default sizing links - users can override these by passing parameters
-          assign default_ring_link = 'https://cdn.shopify.com/s/files/1/0969/2990/7075/files/Sizing-Guide-Rings_ENG_2024.pdf?v=1772819108'
-          assign default_bracelet_link = 'https://cdn.shopify.com/s/files/1/0969/2990/7075/files/Size-Guide-Bracelets_ENG_2024.pdf?v=1772819107'
+          assign default_ring_link = 'https://cdn.shopify.com/s/files/1/0969/2990/7075/files/00_Size-Guide-Rings_ENG_2026.pdf?v=1774277484'
+          assign default_bracelet_link = 'https://cdn.shopify.com/s/files/1/0969/2990/7075/files/00_Size-Guide-Bracelets_ENG_2026.pdf?v=1774277483'
 
           # Use custom links if provided, otherwise use defaults
           assign ring_sizing_link = ring_sizing_link | default: default_ring_link
@@ -123,8 +190,29 @@
           endif
         -%}
 
+        {%- if cr_show_inquire -%}
+          <button type="button" class="ymee-variant-dropdown__footer-atc" data-ymee-footer-atc data-action="inquire" data-variant-id="{{ selected_variant.id }}" data-product-id="{{ product.id }}" hidden>
+            <span class="btn__text">
+              {{ 'products.product.inquire' | t }}
+            </span>
+          </button>
+        {%- else -%}
+          <button type="button" class="ymee-variant-dropdown__footer-atc" data-ymee-footer-atc hidden>
+            <span class="btn__text">
+              {%- render 'icon-add2cart' -%}
+              {{ 'products.product.add_to_cart' | t }}
+            </span>
+          </button>
+        {%- endif -%}
+
         {%- if sizing_link != '#' -%}
-          <a href="{{ sizing_link }}" class="ymee-variant-dropdown__sizing-link" data-ymee-sizing-help target="_blank" rel="noopener">
+          <a
+            href="{{ sizing_link }}"
+            class="ymee-variant-dropdown__sizing-link"
+            data-ymee-sizing-help
+            target="_blank"
+            rel="noopener"
+          >
             {%- render 'icon-tape' -%}
             {{ sizing_link_text }}
           </a>
@@ -136,6 +224,8 @@
   <script>
     window.ymeeChooseSizeText = {{ 'products.product.choose_size' | t | json }};
     window.ymeeSizePrefixText = {{ 'products.product.size_prefix' | t | json }};
+    window.ymeeAddToCartText = {{ 'products.product.add_to_cart' | t | json }};
+    window.ymeeOutOfStockText = {{ 'products.product.inventory_out_of_stock' | t | json }};
   </script>
   <script type="application/json" data-product-json>
     {{ product | json }}
