@@ -3251,17 +3251,40 @@
                           {%- endfor -%}
                         </div>
 
-                        <div class="product__block product__custom-drawer product__ruby-signature">
-                          {%
-                            render 'link-with-icon',
-                            text: 'The Ruby — Roberto Coin''s Signature',
-                            drawer_open: 'ruby-signature',
-                            icon: 'icon-ruby-signature',
-                            icon_position: 'left',
-                            content_alignment: 'left',
-                            hero_image: 'https://cdn.shopify.com/s/files/1/1007/1697/0327/files/roberto-coin-ruby-section.jpg?v=1775583563'
-                          %}
-                        </div>
+                        {%- liquid
+                          assign ruby_sig_block = section.blocks | where: 'type', 'ruby-signature' | first
+                          assign ruby_sig_show = true
+                          assign ruby_sig_text = "The Ruby — Roberto Coin's Signature"
+                          assign ruby_sig_hero = 'https://cdn.shopify.com/s/files/1/1007/1697/0327/files/roberto-coin-ruby-section.jpg?v=1775583563'
+                          if ruby_sig_block != blank
+                            assign ruby_sig_show = ruby_sig_block.settings.show
+                            if ruby_sig_block.settings.text != blank
+                              assign ruby_sig_text = ruby_sig_block.settings.text
+                            endif
+                            if ruby_sig_block.settings.hero_image != blank
+                              assign ruby_sig_hero = ruby_sig_block.settings.hero_image | image_url: width: 800
+                            elsif ruby_sig_block.settings.hero_image_url != blank
+                              assign ruby_sig_hero = ruby_sig_block.settings.hero_image_url
+                            endif
+                          endif
+                        -%}
+                        {%- if ruby_sig_show -%}
+                          <div
+                            class="product__block product__custom-drawer product__ruby-signature"
+                            {% if ruby_sig_block != blank %}
+                              {{ ruby_sig_block.shopify_attributes -}}
+                            {% endif %}
+                          >
+                            {% render 'link-with-icon',
+                              text: ruby_sig_text,
+                              drawer_open: 'ruby-signature',
+                              icon: 'icon-ruby-signature',
+                              icon_position: 'left',
+                              content_alignment: 'left',
+                              hero_image: ruby_sig_hero
+                            %}
+                          </div>
+                        {%- endif -%}
                       </div>
                     </div>
                   {%- endif -%}
