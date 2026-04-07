@@ -84,8 +84,9 @@
         viewer = new CoreViewerApp({ container: viewerDiv });
         await viewer.initialize({
           caching: true,
-          // Use the SDK ground plugin for the shadow, but tune it below to avoid the visible floor quad.
-          ground: !isMobile,
+          // Keep the SDK ground plugin enabled on mobile too so the baked shadow
+          // is available on both mobile and desktop.
+          ground: true,
           bloom: false,
           enableDrop: false,
           importPopup: false,
@@ -590,6 +591,13 @@
       }
 
       viewer.renderer.refreshPipeline();
+
+      // Ensure autoRotate kicks in immediately after full setup
+      if (controls && controls.autoRotate) {
+        controls.update();
+        viewer.setDirty();
+        if (viewer.scene.activeCamera) viewer.scene.activeCamera.setDirty();
+      }
 
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
