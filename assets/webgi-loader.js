@@ -132,7 +132,10 @@
       // Desktop canvas renders ~#fff (needs dimming), mobile renders ~#e7e7e7 (needs brightening).
       container.style.backgroundColor = "#f9f9f9";
       viewerDiv.style.backgroundColor = "#f9f9f9";
-      if (canvas) canvas.style.filter = "brightness(0.9765)";
+      if (viewer.scene && typeof viewer.scene.setBackground === "function") {
+        viewer.scene.setBackground("#f9f9f9");
+      }
+      if (canvas) canvas.style.filter = isMobile ? "brightness(1.078)" : "brightness(0.9765)";
 
       viewer.renderer.displayCanvasScaling = dpr;
       viewer.renderer.refreshPipeline();
@@ -160,7 +163,7 @@
           groundPlugin.renderToDepth = false;
           groundPlugin.limitCameraAboveGround = false;
           if (typeof groundPlugin.autoBakeShadows !== "undefined") groundPlugin.autoBakeShadows = true;
-          if (typeof groundPlugin.size !== "undefined") groundPlugin.size = 6;
+          if (typeof groundPlugin.size !== "undefined") groundPlugin.size = isMobile ? 4.75 : 6;
           if (typeof groundPlugin.yOffset !== "undefined") groundPlugin.yOffset = -0.002;
 
           if (groundPlugin.shadowBaker) {
@@ -190,6 +193,7 @@
             groundMaterial.opacity = 1;
             if (typeof groundMaterial.depthWrite !== "undefined") groundMaterial.depthWrite = false;
             if (typeof groundMaterial.colorWrite !== "undefined") groundMaterial.colorWrite = true;
+            if (typeof groundMaterial.alphaTest !== "undefined") groundMaterial.alphaTest = isMobile ? 0.08 : 0;
             if (groundMaterial.color && typeof groundMaterial.color.set === "function") {
               groundMaterial.color.set("#000000");
             }
@@ -222,6 +226,9 @@
         var importer = manager && manager.importer ? manager.importer : viewer.getManager().importer;
         envMap = await importer.importSinglePath(ENV_MAP_URL);
         viewer.scene.setEnvironment(envMap);
+        if (typeof viewer.scene.setBackground === "function") {
+          viewer.scene.setBackground("#f9f9f9");
+        }
       } catch (e) {
         console.warn("[WebGI] HDR load error:", e);
       }

@@ -161,17 +161,13 @@
       :root { --cart-bar-height: 80px; }
     {%- endif -%}
 
-    body.template-product {
-      --pdp-page-bg-color: #f9f9f9;
-    }
-
     #MainProduct--{{ section.id }} {
       --PT: {{ section.settings.padding_top }}px;
       --PB: {{ section.settings.padding_bottom }}px;
 
       --swatch-size: var(--swatch-size-product);
       --pdp-sticky-bar-height: 100px; /* fallback, will be overridden on mobile */
-      --bg-color: var(--pdp-page-bg-color);
+      --bg-color: #f9f9f9;
     }
 
     {%- if template.name == 'product' and featured_product == false -%}
@@ -188,6 +184,29 @@
       body.template-product .header__wrapper,
       body.template-product .header__mobile__bottom {
         --bg: transparent;
+      }
+
+      @media only screen and (max-width: 989px) {
+        body.template-product header-component:not(.js__header__stuck) .header-sections,
+        body.template-product header-component:not(.js__header__stuck) .header__wrapper,
+        body.template-product header-component:not(.js__header__stuck) .header__mobile__bottom {
+          background: #f9f9f9 !important;
+        }
+
+        body.template-product header-component:not(.js__header__stuck) .header__wrapper,
+        body.template-product header-component:not(.js__header__stuck) .header__mobile__bottom,
+        body.template-product header-component:not(.js__header__stuck) .header__mobile__nav {
+          --bg: #f9f9f9;
+        }
+
+        body.template-product header-component:not(.js__header__stuck) .theme__header::after,
+        body.template-product header-component:not(.js__header__stuck) .header__mobile__nav::after,
+        body.template-product header-component:not(.js__header__stuck) .header__mobile__nav::before {
+          opacity: 1;
+          visibility: visible;
+          transition-delay: 0s;
+          background: #f9f9f9 !important;
+        }
       }
 
       body.template-product .main-content {
@@ -480,17 +499,6 @@
       #MainProduct--{{ section.id }} .pdp-embla--mobile {
         display: block;
         padding-top: var(--header-height);
-        background-color: var(--pdp-page-bg-color);
-      }
-
-      @media only screen and (max-width: 989px) {
-        body.template-product .header-sections,
-        body.template-product .header__wrapper,
-        body.template-product .header__backfill,
-        body.template-product [data-header-wrapper],
-        body.template-product [data-header-height] {
-          background-color: var(--pdp-page-bg-color) !important;
-        }
       }
 
       #MainProduct--{{ section.id }} .pdp-thumbs--desktop {
