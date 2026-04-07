@@ -3,6 +3,8 @@
 {%- liquid
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign trigger_label = section.settings.trigger_label | strip
+  assign animation_anchor = '#FooterNewsletter--' | append: section.id
+  assign animation_order = 1
 -%}
 
 {%- style -%}
@@ -26,6 +28,9 @@
           type="button"
           class="btn btn--secondary btn--outline footer-newsletter__trigger"
           data-newsletter-drawer-open
+          data-aos="hero"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-order="{{ animation_order }}"
           aria-expanded="false"
           aria-controls="FooterNewsletterDrawer--{{ section.id }}"
         >
@@ -66,17 +71,27 @@
 
 {% stylesheet %}
   .footer-newsletter__inner {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
     gap: var(--gutter);
   }
 
   .footer-newsletter__trigger {
+    grid-column: 4 / 6;
     display: inline-flex;
     align-items: center;
     gap: 12px;
     flex-shrink: 0;
+  }
+
+  @media only screen and (min-width: 768px) and (max-width: 1220px) {
+    .footer-newsletter__inner {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .footer-newsletter__trigger {
+      grid-column: 3 / 5;
+    }
   }
 
   .footer-newsletter__trigger-icon {
@@ -208,7 +223,12 @@
     }
 
     .footer-newsletter__inner {
+      grid-template-columns: 1fr;
       gap: 0;
+    }
+
+    .footer-newsletter__trigger {
+      grid-column: 1;
     }
   }
 {% endstylesheet %}

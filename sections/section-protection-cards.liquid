@@ -1,6 +1,8 @@
 <!-- /sections/section-protection-cards.liquid -->
 {%- liquid
   assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign animation_anchor = '#ProtectionCards--' | append: section.id
+  assign animation_order = 0
 -%}
 
 {%- style -%}
@@ -18,7 +20,15 @@
 >
   <div class="protection-cards__wrapper {{ section.settings.width }}">
     {%- if section.settings.heading != blank -%}
-      <h2 class="protection-cards__heading {{ section.settings.heading_size }}">{{ section.settings.heading }}</h2>
+      {%- assign animation_order = animation_order | plus: 1 -%}
+      <h2
+        class="protection-cards__heading {{ section.settings.heading_size }}"
+        data-aos="hero"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-order="{{ animation_order }}"
+      >
+        {{ section.settings.heading }}
+      </h2>
     {%- endif -%}
 
     {%- if section.blocks.size > 0 -%}
@@ -32,8 +42,16 @@
             {%- for block in section.blocks -%}
               {%- case block.type -%}
                 {%- when 'card' -%}
+                  {%- assign animation_order = animation_order | plus: 1 -%}
                   {%- if template.suffix == 'concierge' -%}
-                    <div class="grid-item protection-card" data-grid-item {{ block.shopify_attributes }}>
+                    <div
+                      class="grid-item protection-card"
+                      data-grid-item
+                      data-aos="hero"
+                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-order="{{ animation_order }}"
+                      {{ block.shopify_attributes }}
+                    >
                       {%- if forloop.first -%}
                         <a
                           href="https://cdn.shopify.com/s/files/1/0969/2990/7075/files/00_Size-Guide-Bracelets_Rings_ENG_2026.pdf?v=1775035281"
@@ -81,10 +99,20 @@
                         href="{{ block.settings.card_link }}"
                         class="grid-item protection-card protection-card--linked"
                         data-grid-item
+                        data-aos="hero"
+                        data-aos-anchor="{{ animation_anchor }}"
+                        data-aos-order="{{ animation_order }}"
                         {{ block.shopify_attributes }}
                       >
                     {%- else -%}
-                      <div class="grid-item protection-card" data-grid-item {{ block.shopify_attributes }}>
+                      <div
+                        class="grid-item protection-card"
+                        data-grid-item
+                        data-aos="hero"
+                        data-aos-anchor="{{ animation_anchor }}"
+                        data-aos-order="{{ animation_order }}"
+                        {{ block.shopify_attributes }}
+                      >
                     {%- endif -%}
                     {%- if block.settings.image != blank -%}
                       <div class="protection-card__image">
@@ -115,8 +143,15 @@
         </grid-slider>
       </div>
       {%- if section.settings.button_label != blank and section.settings.button_link != blank -%}
+        {%- assign animation_order = animation_order | plus: 1 -%}
         <div class="protection-cards__button-wrapper" style="margin-top: {{ section.settings.button_margin_top }}px;">
-          <a href="{{ section.settings.button_link }}" class="btn btn--outline protection-cards__btn">
+          <a
+            href="{{ section.settings.button_link }}"
+            class="btn btn--outline protection-cards__btn"
+            data-aos="hero"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-order="{{ animation_order }}"
+          >
             {{- section.settings.button_label -}}
           </a>
         </div>

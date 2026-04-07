@@ -2,6 +2,8 @@
 {{ 'gift-guide-slider.css' | asset_url | stylesheet_tag }}
 {%- liquid
   assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign animation_anchor = '#GiftGuideSlider--' | append: section.id
+  assign animation_order = 0
 -%}
 
 {%- style -%}
@@ -26,11 +28,25 @@
         {%- for block in section.blocks -%}
           {%- case block.type -%}
             {%- when 'subheading' -%}
-              <p class="gift-guide-slider__subheading title" {{ block.shopify_attributes }}>
+              {%- assign animation_order = animation_order | plus: 1 -%}
+              <p
+                class="gift-guide-slider__subheading title"
+                data-aos="hero"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-order="{{ animation_order }}"
+                {{ block.shopify_attributes }}
+              >
                 {{ block.settings.text | upcase }}
               </p>
             {%- when 'heading' -%}
-              <h2 class="gift-guide-slider__heading" {{ block.shopify_attributes }}>
+              {%- assign animation_order = animation_order | plus: 1 -%}
+              <h2
+                class="gift-guide-slider__heading"
+                data-aos="hero"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-order="{{ animation_order }}"
+                {{ block.shopify_attributes }}
+              >
                 {{ block.settings.text }}
               </h2>
           {%- endcase -%}
@@ -40,9 +56,13 @@
       <div class="gift-guide-slider__header-button">
         {%- for block in section.blocks -%}
           {%- if block.type == 'button' -%}
+            {%- assign animation_order = animation_order | plus: 1 -%}
             <a
               href="{{ block.settings.link | default: '#' }}"
               class="gift-guide-slider__button"
+              data-aos="hero"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-order="{{ animation_order }}"
               {{ block.shopify_attributes }}
             >
               {{ block.settings.text | upcase }}
@@ -58,7 +78,14 @@
         <div class="swiper gift-guide-slider__swiper">
           <div class="swiper-wrapper">
             {%- for block in gift_card_blocks -%}
-              <div class="swiper-slide" {{ block.shopify_attributes }}>
+              {%- assign animation_order = animation_order | plus: 1 -%}
+              <div
+                class="swiper-slide"
+                data-aos="hero"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-order="{{ animation_order }}"
+                {{ block.shopify_attributes }}
+              >
                 {%- if block.settings.url != blank -%}
                   <a
                     href="{{ block.settings.url }}"

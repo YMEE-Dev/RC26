@@ -5,6 +5,16 @@
  * Includes gallery filtering logic (still-life by Y/W/R, model always visible).
  */
 (function () {
+  // Wrap window.theme.scrollTo so color-picker variant changes can suppress it.
+  if (window.theme && typeof window.theme.scrollTo === "function" && !window.theme.__ymeeScrollToWrapped) {
+    var _origScrollTo = window.theme.scrollTo;
+    window.theme.scrollTo = function () {
+      if (window.__ymeeSkipScrollTo) return;
+      return _origScrollTo.apply(this, arguments);
+    };
+    window.theme.__ymeeScrollToWrapped = true;
+  }
+
   function cssEscape(val) {
     if (window.CSS && typeof window.CSS.escape === "function") return window.CSS.escape(val);
     return String(val).replace(/[^a-zA-Z0-9_\-]/g, function (ch) {
@@ -1540,6 +1550,13 @@
       if (variantSelects && !isNaN(optionPos)) {
         var wrapper = variantSelects.querySelector('.selector-wrapper[data-option-position="' + optionPos + '"]');
         if (wrapper) {
+          // Suppress scroll-to-media triggered by the theme's product-info
+          // updateMedia by setting a global flag checked by our scrollTo wrapper.
+          window.__ymeeSkipScrollTo = true;
+          setTimeout(function () {
+            window.__ymeeSkipScrollTo = false;
+          }, 4000);
+
           var radio = wrapper.querySelector('input[type="radio"][value="' + cssEscape(input.value) + '"]');
           if (radio && !radio.checked) {
             radio.checked = true;
@@ -1668,12 +1685,12 @@
     // CSS rules key off [data-notify-active] to swap ATC ↔ Notify.
     // This is immune to the theme's transient toggleSubmitButton()
     // calls that briefly set disabled on ATC during variant changes.
-    var submitItem = notifyBtn.closest('.product__submit__item');
+    var submitItem = notifyBtn.closest(".product__submit__item");
     if (submitItem) {
       if (isOutOfStock) {
-        submitItem.setAttribute('data-notify-active', '');
+        submitItem.setAttribute("data-notify-active", "");
       } else {
-        submitItem.removeAttribute('data-notify-active');
+        submitItem.removeAttribute("data-notify-active");
       }
     }
 
