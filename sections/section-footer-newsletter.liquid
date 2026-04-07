@@ -3,6 +3,8 @@
 {%- liquid
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign trigger_label = section.settings.trigger_label | strip
+  assign animation_anchor = '#FooterNewsletter--' | append: section.id
+  assign animation_order = 1
 -%}
 
 {%- style -%}
@@ -26,6 +28,9 @@
           type="button"
           class="btn btn--secondary btn--outline footer-newsletter__trigger"
           data-newsletter-drawer-open
+          data-aos="hero"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-order="{{ animation_order }}"
           aria-expanded="false"
           aria-controls="FooterNewsletterDrawer--{{ section.id }}"
         >

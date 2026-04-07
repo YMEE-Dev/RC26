@@ -10,29 +10,33 @@
 -%}
 
 {%- style -%}
-#BlogListing--{{ section.id }} {
-    --PT: {{ section.settings.padding_top }}px;
-    --PB: {{ section.settings.padding_bottom }}px;
-    --grid-cols: {{ section.settings.columns }};
+  #BlogListing--{{ section.id }} {
+      --PT: {{ section.settings.padding_top }}px;
+      --PB: {{ section.settings.padding_bottom }}px;
+      --grid-cols: {{ section.settings.columns }};
 
-    /* padding-inline:  var(--outer); */
-  }
-#shopify-section-{{ section.id }} .blog-listing-section-wrapper__inner {
-  border-bottom: 1px solid #e5e5e5; 
-}
-#shopify-section-{{ section.id }} .blog-listing-section {
-  background-color: #F9F9F9;
-}
-@media (max-width: 768px) {
+      /* padding-inline:  var(--outer); */
+    }
   #shopify-section-{{ section.id }} .blog-listing-section-wrapper__inner {
-    border-top: 1px solid #e5e5e5; 
+    border-bottom: 1px solid #e5e5e5;
   }
-}
+  #shopify-section-{{ section.id }} .blog-listing-section {
+    background-color: #F9F9F9;
+  }
+  @media (max-width: 768px) {
+    #shopify-section-{{ section.id }} .blog-listing-section-wrapper__inner {
+      border-top: 1px solid #e5e5e5;
+    }
+  }
 {%- endstyle -%}
+
 <section class="blog-listing-section-wrapper">
   <div class="blog-listing-section-wrapper__inner">
-    <div class="blog-listing__bar {{ section.settings.width }}" >
-      <a href="/blogs/all" class="blog-listing__view-all main-blog__filter-tag {% if blog.handle == 'all' %}main-blog__filter-tag--active{% endif %}">
+    <div class="blog-listing__bar {{ section.settings.width }}">
+      <a
+        href="/blogs/all"
+        class="blog-listing__view-all main-blog__filter-tag {% if blog.handle == 'all' %}main-blog__filter-tag--active{% endif %}"
+      >
         {{ section.settings.view_all_text | default: 'View all' | upcase }}
       </a>
       {%- if blog_links.size > 0 -%}
@@ -40,7 +44,6 @@
       {%- endif -%}
     </div>
   </div>
-  
 </section>
 <section
   id="BlogListing--{{ section.id }}"
@@ -49,8 +52,6 @@
   data-section-type="blog-listing"
 >
   <div class="blog-listing__wrapper {{ section.settings.width }}">
- 
-
     {%- if blog != blank -%}
       {%- paginate blog.articles by articles_per_page -%}
         <div class="blog-listing__grid">
@@ -60,10 +61,14 @@
         </div>
 
         <div class="custom-js-pagination" data-total-pages="0" data-current-page="1"></div>
-       
       {%- endpaginate -%}
     {%- else -%}
-      <p class="blog-listing__empty">{{ section.settings.empty_message | default: 'Add this section to a blog template to show articles (e.g. from /blogs/celebrity).' }}</p>
+      <p class="blog-listing__empty">
+        {{
+          section.settings.empty_message
+          | default: 'Add this section to a blog template to show articles (e.g. from /blogs/celebrity).'
+        }}
+      </p>
     {%- endif -%}
   </div>
 </section>
@@ -78,7 +83,7 @@
       this.currentPage = parseInt(container.dataset.currentPage) || 1;
       this.totalPages = parseInt(container.dataset.totalPages) || 1;
       this.onPageChange = options.onPageChange || (() => {});
-      
+
       this.render();
     }
 
@@ -116,7 +121,7 @@
       // Numbers
       const numbers = document.createElement('div');
       numbers.className = 'custom-js-pagination__numbers';
-      
+
       const pageNumbers = this.getPageNumbers();
       pageNumbers.forEach((num) => {
         if (num === '...') {
@@ -135,7 +140,7 @@
           numbers.appendChild(btn);
         }
       });
-      
+
       wrapper.appendChild(numbers);
 
       // Next button
@@ -182,10 +187,10 @@
     }
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
-    const STOREFRONT_TOKEN = "{{ shop.metaobjects.storefront_access_token.value }}";
-    const SHOP_DOMAIN = "{{ shop.domain }}";
-      /* -----------------------------
+  document.addEventListener('DOMContentLoaded', function () {
+    const STOREFRONT_TOKEN = '{{ shop.metaobjects.storefront_access_token.value }}';
+    const SHOP_DOMAIN = '{{ shop.domain }}';
+    /* -----------------------------
   NAVIGATION (Blogs)
   ----------------------------- */
     const query = `
@@ -198,57 +203,56 @@
       }
     }
     `;
-    
+
     fetch(`https://${SHOP_DOMAIN}/api/2026-01/graphql.json`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "X-Shopify-Storefront-Access-Token": STOREFRONT_TOKEN
+        'Content-Type': 'application/json',
+        'X-Shopify-Storefront-Access-Token': STOREFRONT_TOKEN,
       },
-      body: JSON.stringify({ query })
+      body: JSON.stringify({query}),
     })
-    .then(res => res.json())
-    .then(data => {
-      const blogs = data.data.blogs.nodes
-        .filter(blog => !'{{ section.settings.tag_to_exclude }}'.includes(blog.handle))
-        .sort((a, b) => a.title.localeCompare(b.title));
-      const nav = document.getElementById("blogNav");
-      const dropdown = document.getElementById("blogDropdown");
-    
-      blogs.forEach(blog => {
-        
-        // Create nav link
-        const link = document.createElement("a");
-        link.href = `/blogs/${blog.handle}`;
-        link.className = "main-blog__filter-tag";
-        if (blog.handle === "{{ blog.handle }}") {
-          link.classList.add('main-blog__filter-tag--active');
-        }
-        link.textContent = blog.title.toUpperCase();
-        nav.appendChild(link);
-      });
-      
-      // Add dropdown change event
-      dropdown.addEventListener('change', function() {
-        if (this.value) {
-          window.location.href = this.value;
-        }
-      });
-    });
+      .then((res) => res.json())
+      .then((data) => {
+        const blogs = data.data.blogs.nodes
+          .filter((blog) => !'{{ section.settings.tag_to_exclude }}'.includes(blog.handle))
+          .sort((a, b) => a.title.localeCompare(b.title));
+        const nav = document.getElementById('blogNav');
+        const dropdown = document.getElementById('blogDropdown');
 
-      /* -----------------------------
-  ARTICLES (All Blogs) 
+        blogs.forEach((blog) => {
+          // Create nav link
+          const link = document.createElement('a');
+          link.href = `/blogs/${blog.handle}`;
+          link.className = 'main-blog__filter-tag';
+          if (blog.handle === '{{ blog.handle }}') {
+            link.classList.add('main-blog__filter-tag--active');
+          }
+          link.textContent = blog.title.toUpperCase();
+          nav.appendChild(link);
+        });
+
+        // Add dropdown change event
+        dropdown.addEventListener('change', function () {
+          if (this.value) {
+            window.location.href = this.value;
+          }
+        });
+      });
+
+    /* -----------------------------
+  ARTICLES (All Blogs)
   ----------------------------- */
-  
-  // Get current blog handle from URL
-  const currentPath = window.location.pathname;
-  const blogMatch = currentPath.match(/\/blogs\/([^\/]+)/);
-  const currentBlogHandle = blogMatch ? blogMatch[1] : 'all';
-  const isAllBlogs = currentBlogHandle === 'all';
 
-  // Build GraphQL query based on blog
-  const articleQuery = isAllBlogs 
-    ? `{
+    // Get current blog handle from URL
+    const currentPath = window.location.pathname;
+    const blogMatch = currentPath.match(/\/blogs\/([^\/]+)/);
+    const currentBlogHandle = blogMatch ? blogMatch[1] : 'all';
+    const isAllBlogs = currentBlogHandle === 'all';
+
+    // Build GraphQL query based on blog
+    const articleQuery = isAllBlogs
+      ? `{
         articles(first: 250, sortKey: PUBLISHED_AT, reverse: true) {
           nodes {
             title
@@ -265,7 +269,7 @@
           }
         }
       }`
-    : `{
+      : `{
         blog(handle: "${currentBlogHandle}") {
           articles(first: 250, sortKey: PUBLISHED_AT, reverse: true) {
             nodes {
@@ -285,100 +289,103 @@
         }
       }`;
 
-  let allArticles = [];
-  let currentPage = 1;
-  const articlesPerPage = 9;
+    let allArticles = [];
+    let currentPage = 1;
+    const articlesPerPage = 9;
 
-  // Function to capitalize first letter of each word
-  function capitalizeTitle(str) {
-    return str
-      .toLowerCase()
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  }
+    // Function to capitalize first letter of each word
+    function capitalizeTitle(str) {
+      return str
+        .toLowerCase()
+        .split(' ')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    }
 
-  function renderArticles(page) {
-    const grid = document.querySelector(".blog-listing__grid");
-    grid.innerHTML = '';
-    
-    const startIndex = (page - 1) * articlesPerPage + 1; // +1 to skip first article
-    const endIndex = startIndex + articlesPerPage;
-    const articlesToShow = allArticles.slice(startIndex, endIndex);
+    function renderArticles(page) {
+      const grid = document.querySelector('.blog-listing__grid');
+      grid.innerHTML = '';
 
-    articlesToShow.forEach((article) => {
-      const image = article.image?.url || "";
-      const tag = article.tags[0] || "";
-      const url = `/blogs/${article.blog.handle}/${article.handle}`;
-      const title = capitalizeTitle(article.title);
-      const html = `
+      const startIndex = (page - 1) * articlesPerPage + 1; // +1 to skip first article
+      const endIndex = startIndex + articlesPerPage;
+      const articlesToShow = allArticles.slice(startIndex, endIndex);
+
+      articlesToShow.forEach((article) => {
+        const image = article.image?.url || '';
+        const tag = article.tags[0] || '';
+        const url = `/blogs/${article.blog.handle}/${article.handle}`;
+        const title = capitalizeTitle(article.title);
+        const html = `
         <article class="blog-listing__card">
           <a href="${url}" class="blog-listing__card-link">
 
             <div class="blog-listing__card-media">
-              ${image 
-                ? `<img src="${image}" alt="${article.title}" width="1000" height="1000">`
-                : `<div class="placeholder">No Image</div>`
+              ${
+                image
+                  ? `<img src="${image}" alt="${article.title}" width="1000" height="1000">`
+                  : `<div class="placeholder">No Image</div>`
               }
             </div>
 
             <div class="blog-listing__card-body">
-              ${article.blog.handle ? `<p class="blog-listing__card-tag">#${article.blog.handle.toUpperCase()}</p>` : ""}
+              ${
+                article.blog.handle ? `<p class="blog-listing__card-tag">#${article.blog.handle.toUpperCase()}</p>` : ''
+              }
               <h2 class="blog-listing__card-title heading-x-large">${title}</h2>
-              <p class="blog-listing__card-excerpt">${article.excerpt || ""}</p>
+              <p class="blog-listing__card-excerpt">${article.excerpt || ''}</p>
             </div>
 
           </a>
         </article>
       `;
 
-      grid.insertAdjacentHTML("beforeend", html);
-    });
+        grid.insertAdjacentHTML('beforeend', html);
+      });
 
-    // Removed auto-scroll to prevent unwanted scrolling when changing categories
-  }
-
-  fetch(`https://${SHOP_DOMAIN}/api/2026-01/graphql.json`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Shopify-Storefront-Access-Token": STOREFRONT_TOKEN
-    },
-    body: JSON.stringify({ query: articleQuery })
-  })
-  .then(res => res.json())
-  .then(data => {
-    // Get articles based on query type
-    if (isAllBlogs) {
-      allArticles = data.data.articles.nodes;
-    } else {
-      allArticles = data.data.blog?.articles?.nodes || [];
+      // Removed auto-scroll to prevent unwanted scrolling when changing categories
     }
-    
-    const grid = document.querySelector(".blog-listing__grid");
-    const loader = document.getElementById("blogLoading");
-    loader.remove();
 
-    // Calculate total pages (excluding first article)
-    const totalArticles = allArticles.length - 1; // -1 to exclude first article
-    const totalPages = Math.ceil(totalArticles / articlesPerPage);
+    fetch(`https://${SHOP_DOMAIN}/api/2026-01/graphql.json`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Storefront-Access-Token': STOREFRONT_TOKEN,
+      },
+      body: JSON.stringify({query: articleQuery}),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        // Get articles based on query type
+        if (isAllBlogs) {
+          allArticles = data.data.articles.nodes;
+        } else {
+          allArticles = data.data.blog?.articles?.nodes || [];
+        }
 
-    // Render first page
-    renderArticles(1);
+        const grid = document.querySelector('.blog-listing__grid');
+        const loader = document.getElementById('blogLoading');
+        loader.remove();
 
-    // Initialize pagination
-    const paginationEl = document.querySelector(".custom-js-pagination");
-    if (paginationEl && totalPages > 1) {
-      const pagination = new CustomPagination(paginationEl, {
-        onPageChange: (page) => {
-          currentPage = page;
-          renderArticles(page);
+        // Calculate total pages (excluding first article)
+        const totalArticles = allArticles.length - 1; // -1 to exclude first article
+        const totalPages = Math.ceil(totalArticles / articlesPerPage);
+
+        // Render first page
+        renderArticles(1);
+
+        // Initialize pagination
+        const paginationEl = document.querySelector('.custom-js-pagination');
+        if (paginationEl && totalPages > 1) {
+          const pagination = new CustomPagination(paginationEl, {
+            onPageChange: (page) => {
+              currentPage = page;
+              renderArticles(page);
+            },
+          });
+          pagination.setTotalPages(totalPages);
+          pagination.setPage(1);
         }
       });
-      pagination.setTotalPages(totalPages);
-      pagination.setPage(1);
-    }
-  });
   });
 </script>
 
@@ -430,7 +437,7 @@
       "type": "range",
       "id": "columns",
       "min": 2,
-      "max": 4, 
+      "max": 4,
       "step": 1,
       "label": "Columns (desktop)",
       "default": 3
@@ -462,12 +469,12 @@
       "label": "Title size",
       "default": "heading-small",
       "options": [
-        { "value": "heading-mini", "label": "Mini" },
-        { "value": "heading-x-small", "label": "Extra small" },
-        { "value": "heading-small", "label": "Small" },
-        { "value": "heading-medium", "label": "Medium" },
-        { "value": "heading-large", "label": "Large" },
-        { "value": "heading-x-large", "label": "Extra large" }
+        {"value": "heading-mini", "label": "Mini"},
+        {"value": "heading-x-small", "label": "Extra small"},
+        {"value": "heading-small", "label": "Small"},
+        {"value": "heading-medium", "label": "Medium"},
+        {"value": "heading-large", "label": "Large"},
+        {"value": "heading-x-large", "label": "Extra large"}
       ]
     },
     {
@@ -480,11 +487,11 @@
       "label": "Width",
       "default": "wrapper",
       "options": [
-        { "value": "wrapper--full-padded", "label": "Full width padded" },
-        { "value": "wrapper", "label": "Normal" },
-        { "value": "wrapper--wide", "label": "Wide" },
-        { "value": "wrapper--narrow", "label": "Narrow" },
-        { "value": "wrapper--custom", "label": "Custom (max-width: 1232px)" }
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"},
+        {"value": "wrapper--wide", "label": "Wide"},
+        {"value": "wrapper--narrow", "label": "Narrow"},
+        {"value": "wrapper--custom", "label": "Custom (max-width: 1232px)"}
       ]
     },
     {
@@ -544,10 +551,10 @@
       "name": "Blog listing",
       "category": "Blog",
       "blocks": [
-        { "type": "blog_link", "settings": { "label": "Celebrity" } },
-        { "type": "blog_link", "settings": { "label": "Culture" } },
-        { "type": "blog_link", "settings": { "label": "Style" } },
-        { "type": "blog_link", "settings": { "label": "Travel" } }
+        {"type": "blog_link", "settings": {"label": "Celebrity"}},
+        {"type": "blog_link", "settings": {"label": "Culture"}},
+        {"type": "blog_link", "settings": {"label": "Style"}},
+        {"type": "blog_link", "settings": {"label": "Travel"}}
       ]
     }
   ],

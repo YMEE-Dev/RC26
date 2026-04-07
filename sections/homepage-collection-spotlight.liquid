@@ -12,6 +12,8 @@
   assign show_recently_viewed_indicator = settings.show_recently_viewed_indicator
   assign sizes = '(min-width: 960px) 360px, calc(50vw - 30px)'
   assign rendered_products_count = 0
+  assign animation_anchor = '#HomepageCollectionSpotlight--' | append: section.id
+  assign animation_order = 0
 -%}
 
 {%- style -%}
@@ -42,15 +44,37 @@
       <div class="homepage-collection-spotlight__content">
         <div class="homepage-collection-spotlight__copy">
           {%- if section_eyebrow != blank -%}
-            <p class="homepage-collection-spotlight__eyebrow title">{{ section_eyebrow | escape }}</p>
+            {%- assign animation_order = animation_order | plus: 1 -%}
+            <p
+              class="homepage-collection-spotlight__eyebrow title"
+              data-aos="hero"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-order="{{ animation_order }}"
+            >
+              {{ section_eyebrow | escape }}
+            </p>
           {%- endif -%}
 
           {%- if section_title != blank -%}
-            <h2 class="homepage-collection-spotlight__title">{{ section_title | escape }}</h2>
+            {%- assign animation_order = animation_order | plus: 1 -%}
+            <h2
+              class="homepage-collection-spotlight__title"
+              data-aos="hero"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-order="{{ animation_order }}"
+            >
+              {{ section_title | escape }}
+            </h2>
           {%- endif -%}
 
           {%- if section_description != blank -%}
-            <div class="homepage-collection-spotlight__description rte body">
+            {%- assign animation_order = animation_order | plus: 1 -%}
+            <div
+              class="homepage-collection-spotlight__description rte body"
+              data-aos="hero"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-order="{{ animation_order }}"
+            >
               {{ section_description }}
             </div>
           {%- endif -%}
@@ -75,6 +99,8 @@
                   {%- assign rendered_products_count = rendered_products_count | plus: 1 -%}
                   {%- render 'product-grid-item',
                     product: product,
+                    animation_delay: rendered_products_count | minus: 1,
+                    animation_anchor: '#HomepageCollectionSpotlightSlider--' | append: section.id,
                     index: rendered_products_count,
                     sizes: sizes,
                     disable_image_hover: true,
@@ -95,7 +121,8 @@
                     title: placeholder_title,
                     placeholder: placeholder,
                     index: forloop.index,
-                    animation_delay: forloop.index0
+                    animation_delay: forloop.index0,
+                    animation_anchor: '#HomepageCollectionSpotlightSlider--' | append: section.id
                   -%}
                 {%- endfor -%}
               {%- endif -%}
@@ -104,7 +131,13 @@
         </div>
       </div>
 
-      <div class="homepage-collection-spotlight__media{% if mobile_image != blank %} homepage-collection-spotlight__media--has-mobile-image{% endif %}">
+      {%- assign animation_order = animation_order | plus: 1 -%}
+      <div
+        class="homepage-collection-spotlight__media{% if mobile_image != blank %} homepage-collection-spotlight__media--has-mobile-image{% endif %}"
+        data-aos="hero"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-order="{{ animation_order }}"
+      >
         {%- if image != blank or mobile_image != blank -%}
           {%- assign desktop_image = image | default: mobile_image -%}
           {{
