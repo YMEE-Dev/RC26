@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 (function () {
   var WEBGI_VIEWER_URL = "https://releases.ijewel3d.com/webgi/runtime/viewer-0.9.19.js";
@@ -92,6 +92,14 @@
           debug: false,
         });
         manager = viewer.getManager ? viewer.getManager() : null;
+        // SceneLoopPlugin drives the continuous render loop (needed for autoRotate, enableDamping)
+        try {
+          if (typeof SceneLoopPlugin !== "undefined" && !viewer.getPlugin(SceneLoopPlugin)) {
+            await viewer.addPlugin(SceneLoopPlugin);
+          }
+        } catch (e) {
+          console.warn("[WebGI] Could not add SceneLoopPlugin:", e);
+        }
         // MaterialConfiguratorPlugin is not added by CoreViewerApp.initialize() by default
         try {
           if (typeof MaterialConfiguratorPlugin !== "undefined" && !viewer.getPlugin(MaterialConfiguratorPlugin)) {
@@ -306,9 +314,9 @@
       try {
         var tonemap = viewer.getPlugin(TonemapPlugin);
         if (tonemap) {
-          if (typeof tonemap.contrast !== "undefined") tonemap.contrast = 1.1;
+          if (typeof tonemap.contrast !== "undefined") tonemap.contrast = 1.0;
           if (typeof tonemap.saturation !== "undefined") tonemap.saturation = 1.05;
-          if (typeof tonemap.exposure !== "undefined") tonemap.exposure = 1.05;
+          if (typeof tonemap.exposure !== "undefined") tonemap.exposure = 1.2;
         }
       } catch (e) {}
 
@@ -330,7 +338,7 @@
           ? viewer.scene.activeCamera.getCameraOptions()
           : null;
         if (camOptions) {
-          camOptions.zoom = 1;
+          camOptions.zoom = 1.15;
           viewer.scene.activeCamera.setCameraOptions(camOptions);
         }
 
@@ -357,32 +365,10 @@
         controls.minDistance = defaultDist * 0.35; // max zoom in
         controls.maxDistance = defaultDist * 1.6; // max zoom out
         controls.update();
-
-        // Resume auto-rotation 3s after user stops interacting
-        // Keep SSR always on to avoid white blink during drag
-        var autoRotateTimer = null;
-        canvas.addEventListener("pointerdown", function () {
-          controls.autoRotate = false;
-          if (autoRotateTimer) {
-            clearTimeout(autoRotateTimer);
-            autoRotateTimer = null;
-          }
-        });
-        canvas.addEventListener("pointerup", function () {
-          if (autoRotateTimer) clearTimeout(autoRotateTimer);
-          autoRotateTimer = setTimeout(function () {
-            controls.autoRotate = true;
-          }, 3000);
-        });
-        canvas.addEventListener("pointercancel", function () {
-          if (autoRotateTimer) clearTimeout(autoRotateTimer);
-          autoRotateTimer = setTimeout(function () {
-            controls.autoRotate = true;
-          }, 3000);
-        });
       }
 
       viewer.renderer.refreshPipeline();
+
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
           if (loader) loader.classList.add("webgi-loader--done");
