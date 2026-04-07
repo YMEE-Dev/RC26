@@ -1,0 +1,179 @@
+{{ 'head-country-redirect.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign popup_background = section.settings.background_color | default: '#f7f4ef'
+  assign popup_text = section.settings.text_color | default: '#111111'
+  assign modal_heading = section.settings.modal_heading | strip
+  assign redirect_button_label = section.settings.redirect_button_label | strip
+
+  capture popup_style
+    echo '--head-country-redirect-popup-bg: '
+    echo popup_background
+    echo '; --head-country-redirect-popup-text: '
+    echo popup_text
+    echo ';'
+  endcapture
+-%}
+
+<head-country-redirect
+  class="head-country-redirect {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="head-country-redirect"
+  style="{{ popup_style }}"
+>
+  <script type="application/json" data-country-redirect-config>
+    {
+      "enabled": {{ section.settings.enabled | json }},
+      "rules": [
+        {%- for block in section.blocks -%}
+          {
+            "enabled": {{ block.settings.enabled | json }},
+            "siteName": {{ block.settings.site_name | json }},
+            "countryCodes": {{ block.settings.country_codes | json }},
+            "destinationUrl": {{ block.settings.destination_url | json }}
+          }{%- unless forloop.last -%},{%- endunless -%}
+        {%- endfor -%}
+      ]
+    }
+  </script>
+
+  <dialog
+    class="head-country-redirect__dialog"
+    aria-modal="true"
+    {% if modal_heading != blank %}
+      aria-labelledby="HeadCountryRedirectTitle--{{ section.id }}"
+    {% else %}
+      aria-label="Country redirect notice"
+    {% endif %}
+    aria-hidden="true"
+    inert
+  >
+    <div class="head-country-redirect__body" data-scroll-lock-scrollable tabindex="-1">
+      {% if request.design_mode %}
+        <button
+          type="button"
+          class="head-country-redirect__close"
+          data-country-redirect-close
+          aria-label="{{ 'general.accessibility.close' | t }}"
+        >
+          {% render 'icon-close' %}
+        </button>
+      {% endif %}
+
+      {%- if modal_heading != blank -%}
+        <h2 id="HeadCountryRedirectTitle--{{ section.id }}" class="head-country-redirect__title title">
+          {{ modal_heading | escape }}
+        </h2>
+      {%- endif -%}
+
+      <h2 class="head-country-redirect__logo-wrapper">Roberto Coin</h2>
+
+      <div class="head-country-redirect__content">
+        {%- if section.settings.modal_body != blank -%}
+          <div class="head-country-redirect__copy rte body-medium" data-country-redirect-copy>
+            {{ section.settings.modal_body }}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <button
+        type="button"
+        class="head-country-redirect__button btn btn--secondary btn--outline"
+        data-country-redirect-cta
+      >
+        <span class="head-country-redirect__button-icon" data-country-redirect-flag aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
+            <path d="M19.6467 4.06688C20.4506 3.76268 21.2373 4.54936 20.9331 5.35333L14.878 21.355C14.5367 22.2571 13.2416 22.1986 12.9834 21.2693L10.9719 14.0281L3.73073 12.0166C2.80142 11.7584 2.74286 10.4633 3.64497 10.122L19.6467 4.06688ZM3.99776 11.0547L11.2389 13.0662C11.5762 13.1599 11.8401 13.4238 11.9338 13.7611L13.9453 21.0022L19.9995 5.00053L3.99776 11.0547Z" fill="currentColor"/>
+          </svg>
+        </span>
+        <span class="head-country-redirect__button-label">
+          {{ redirect_button_label | escape }}
+        </span>
+      </button>
+    </div>
+  </dialog>
+</head-country-redirect>
+
+{% schema %}
+{
+  "name": "Head country redirect",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Enable redirect popup",
+      "default": false
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Popup background color",
+      "default": "#F7F4EF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Popup text color",
+      "default": "#111111"
+    },
+    {
+      "type": "text",
+      "id": "modal_heading",
+      "label": "Popup eyebrow",
+      "default": "Welcome to"
+    },
+    {
+      "type": "richtext",
+      "id": "modal_body",
+      "label": "Popup body",
+      "info": "Use [country] where the detected country name should appear.",
+      "default": "<p>Seems like you are coming from [country].</p><p>We have a dedicated website for your region.</p>"
+    },
+    {
+      "type": "text",
+      "id": "redirect_button_label",
+      "label": "Redirect button label",
+      "default": "Take me there"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "country_redirect_rule",
+      "name": "Country redirect rule",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "enabled",
+          "label": "Enable rule",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "site_name",
+          "label": "Destination site name",
+          "default": "United States"
+        },
+        {
+          "type": "textarea",
+          "id": "country_codes",
+          "label": "Country codes",
+          "info": "Use comma-separated ISO alpha-2 country codes, for example: US, CA, MX"
+        },
+        {
+          "type": "url",
+          "id": "destination_url",
+          "label": "Destination site URL"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

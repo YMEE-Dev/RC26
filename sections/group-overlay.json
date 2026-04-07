@@ -11,6 +11,32 @@
   "type": "aside",
   "name": "Overlay",
   "sections": {
+    "head-country-redirect": {
+      "type": "head-country-redirect",
+      "blocks": {
+        "country_redirect_rule_GYWTbJ": {
+          "type": "country_redirect_rule",
+          "settings": {
+            "enabled": true,
+            "site_name": "United States",
+            "country_codes": "US, CA, MX, GT, NI, PR, CR, SV, HN, DM, SX, MF, JM, BM, CW, AW, BB, AG, AI, GD, KN, TC, LC, BS, KY, VI, VI, VG, HT",
+            "destination_url": "https://us.robertocoin.com/"
+          }
+        }
+      },
+      "block_order": [
+        "country_redirect_rule_GYWTbJ"
+      ],
+      "settings": {
+        "enabled": true,
+        "color_scheme": "scheme-3",
+        "background_color": "#f7f4ef",
+        "text_color": "#111111",
+        "modal_heading": "Welcome to",
+        "modal_body": "<p>Seems like you are coming from [country].<br/>We have a dedicated website for your region.</p>",
+        "redirect_button_label": "Take me there"
+      }
+    },
     "cart-drawer": {
       "type": "cart-drawer",
       "blocks": {
@@ -96,6 +122,7 @@
     }
   },
   "order": [
+    "head-country-redirect",
     "cart-drawer"
   ]
 }
