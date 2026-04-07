@@ -3262,7 +3262,7 @@
                               assign ruby_sig_text = ruby_sig_block.settings.text
                             endif
                             if ruby_sig_block.settings.hero_image != blank
-                              assign ruby_sig_hero = ruby_sig_block.settings.hero_image | image_url: width: 800
+                              assign ruby_sig_hero = ruby_sig_block.settings.hero_image | image_url: width: 800 | prepend: 'https:'
                             elsif ruby_sig_block.settings.hero_image_url != blank
                               assign ruby_sig_hero = ruby_sig_block.settings.hero_image_url
                             endif
