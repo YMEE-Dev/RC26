@@ -76,7 +76,7 @@
   async function setupViewer(viewerDiv, glbUrl, container, loader) {
     try {
       var isMobile = navigator.maxTouchPoints > 0 || window.innerWidth <= 1024;
-      var dpr = isMobile ? Math.min(window.devicePixelRatio, 1.75) : Math.min(window.devicePixelRatio, 1.75);
+      var dpr = Math.min(window.devicePixelRatio, isMobile ? 2.0 : 1.75);
 
       var viewer, manager;
       if (typeof CoreViewerApp !== "undefined") {
@@ -131,7 +131,7 @@
       // Desktop canvas renders ~#fff (needs dimming), mobile renders ~#e7e7e7 (needs brightening).
       container.style.backgroundColor = "#f9f9f9";
       viewerDiv.style.backgroundColor = "#f9f9f9";
-      if (canvas) canvas.style.filter = isMobile ? "brightness(1.078)" : "brightness(0.9765)";
+      if (canvas) canvas.style.filter = "brightness(0.9765)";
 
       viewer.renderer.displayCanvasScaling = dpr;
       viewer.renderer.refreshPipeline();
@@ -573,19 +573,11 @@
         controls.autoRotate = true;
         controls.autoRotateSpeed = 2;
         controls.dampingFactor = isMobile ? 0.12 : 0.1;
-        controls.zoomSpeed = isMobile ? 0.3 : 1.0;
+        controls.zoomSpeed = isMobile ? 0.4 : 1.0;
         controls.maxSpeed = 1.0;
         controls.enableDamping = true;
         controls.minDistance = defaultDist * 0.35; // max zoom in
         controls.maxDistance = defaultDist * 1.6; // max zoom out
-
-        // Mobile: disable user interaction (orbit/pan/zoom) — autorotate only
-        if (isMobile) {
-          controls.enableRotate = false;
-          controls.enablePan = false;
-          controls.enableZoom = false;
-        }
-
         controls.update();
       }
 
