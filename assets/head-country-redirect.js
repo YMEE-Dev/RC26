@@ -19,8 +19,8 @@
         const detectedCountry = String(window.Shopify?.country || '')
           .trim()
           .toUpperCase();
-        const devMode = this.isDevMode();
-        const matchedRule = devMode
+        const previewMode = this.isPreviewMode();
+        const matchedRule = previewMode
           ? this.getFirstValidRule()
           : detectedCountry
             ? this.getMatchingRule(detectedCountry)
@@ -31,7 +31,11 @@
         this.detectedCountry = matchedRule.countryCode || detectedCountry || '';
         this.matchedRule = matchedRule;
         this.siteLabel = matchedRule.siteName || matchedRule.url.hostname;
-        this.allowClose = devMode;
+        this.allowClose = previewMode;
+
+        if (this.closeButton) {
+          this.closeButton.hidden = !this.allowClose;
+        }
 
         this.bindEvents();
         this.updateDynamicContent();
@@ -68,11 +72,14 @@
       }
     }
 
-    isDevMode() {
-      return (
+    isPreviewMode() {
+      const searchParams = new URLSearchParams(window.location.search);
+
+      return Boolean(
         window.Shopify?.designMode ||
         window.Shopify?.visualPreviewMode ||
-        window.theme?.info?.role === 'development'
+        window.theme?.info?.role === 'development' ||
+        searchParams.has('preview_theme_id')
       );
     }
 
