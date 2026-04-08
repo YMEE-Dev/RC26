@@ -11,6 +11,8 @@
   assign modal_image = section.settings.modal_image | default: desktop_image
   assign modal_heading = section.settings.modal_heading | default: section_eyebrow | default: section_title
   assign modal_text = section.settings.modal_text
+  assign animation_anchor = '#HomepageFloatingImage--' | append: section.id
+  assign animation_order = 0
 -%}
 
 <popup-component class="homepage-floating-image__popup">
@@ -58,19 +60,39 @@
         <div class="homepage-floating-image__content">
           <div class="homepage-floating-image__copy">
             {%- if section_eyebrow != blank -%}
-              <p class="homepage-floating-image__eyebrow title">{{ section_eyebrow | escape }}</p>
+              {%- assign animation_order = animation_order | plus: 1 -%}
+              <p
+                class="homepage-floating-image__eyebrow title"
+                data-aos="hero"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-order="{{ animation_order }}"
+              >
+                {{ section_eyebrow | escape }}
+              </p>
             {%- endif -%}
 
             {%- if section_title != blank -%}
-              <h2 class="homepage-floating-image__title ">{{ section_title | escape }}</h2>
+              {%- assign animation_order = animation_order | plus: 1 -%}
+              <h2
+                class="homepage-floating-image__title "
+                data-aos="hero"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-order="{{ animation_order }}"
+              >
+                {{ section_title | escape }}
+              </h2>
             {%- endif -%}
           </div>
 
           {%- if button_label != blank -%}
+            {%- assign animation_order = animation_order | plus: 1 -%}
             <a
               href="{{ button_link | default: '#' }}"
               class="btn btn--outline btn--secondary homepage-floating-image__button"
               data-popup-open
+              data-aos="hero"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-order="{{ animation_order }}"
             >
               {{- button_label | escape -}}
             </a>

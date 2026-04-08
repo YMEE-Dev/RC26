@@ -50,7 +50,6 @@
       "name": "Blog Header and Video",
       "settings": {
         "featured_article": "{{ article }}",
-        "video": "{{ article.metafields.custom.blog_celebrity_template.value.blog_header_video.value }}",
         "video_url": "",
         "content_max_width": 1100,
         "title_max_width": 980,
@@ -148,11 +147,11 @@
       "type": "occasion-bottom-cta",
       "name": "CTA",
       "settings": {
-        "text": "",
-        "button_label": "",
-        "button_link": "",
-        "padding_top": 120,
-        "padding_bottom": 40
+        "text": "{{ article.metafields.custom.blog_celebrity_template.value.cta_text | metafield_tag }}",
+        "button_label": "{{ article.metafields.custom.blog_celebrity_template.value.cta_button_name.value }}",
+        "button_link": "{{ article.metafields.custom.blog_celebrity_template.value.cta_button_url.value }}",
+        "padding_top": 50,
+        "padding_bottom": 50
       }
     },
     "homepage_product_sliders_RAq9Xe": {

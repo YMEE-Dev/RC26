@@ -814,9 +814,10 @@
 
         const sourceValue = element.dataset[datasetKey] || element.textContent;
         element.dataset[datasetKey] = sourceValue;
-        element.textContent = sourceValue.includes('[collection]')
-          ? sourceValue.replaceAll('[collection]', value)
-          : value;
+
+        if (!sourceValue.includes('[collection]')) return;
+
+        element.textContent = sourceValue.replaceAll('[collection]', value);
       };
 
       collectionLists.forEach((list) => {
@@ -837,10 +838,10 @@
 
         const lastTitle = lastLink.dataset.collectionTemplateTitle || lastLink.getAttribute('title') || '';
         lastLink.dataset.collectionTemplateTitle = lastTitle;
-        lastLink.setAttribute(
-          'title',
-          lastTitle.includes('[collection]') ? lastTitle.replaceAll('[collection]', firstLabel) : firstLabel
-        );
+
+        if (lastTitle.includes('[collection]')) {
+          lastLink.setAttribute('title', lastTitle.replaceAll('[collection]', firstLabel));
+        }
       });
     };
 
@@ -1176,7 +1177,6 @@
       let sectionsToObserve = selectAll(
         'main .shopify-section section, main .shopify-section collection-component, main .shopify-section [data-section-id]'
       );
-      console.log('header observer init', {sections: sectionsToObserve});
       if (!sectionsToObserve.length) return;
 
       const DEBUG_HEADER_OBSERVER = false;

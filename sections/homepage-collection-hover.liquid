@@ -6,6 +6,10 @@
   assign placeholder_title = 'Collection title'
   assign first_block_id = ''
   assign active_block_id = ''
+  assign mobile_animation_anchor = '#HomepageCollectionHoverMobile--' | append: section.id
+  assign desktop_animation_anchor = '#HomepageCollectionHoverDesktop--' | append: section.id
+  assign mobile_animation_order = 0
+  assign desktop_animation_order = 0
 
   for block in section.blocks
     assign unique = 'HomepageCollectionHoverImage--' | append: section.id | append: '-' | append: block.id
@@ -39,12 +43,26 @@
   data-section-type="homepage-collection-hover"
 >
   <div class="homepage-collection-hover__wrapper">
-    <div class="homepage-collection-hover__mobile">
+    <div
+      id="HomepageCollectionHoverMobile--{{ section.id }}"
+      class="homepage-collection-hover__mobile"
+    >
       {%- if section_title != blank -%}
-        <h2 class="homepage-collection-hover__title title">{{ section_title | escape }}</h2>
+        {%- assign mobile_animation_order = mobile_animation_order | plus: 1 -%}
+        <h2
+          class="homepage-collection-hover__title title"
+          data-aos="hero"
+          data-aos-anchor="{{ mobile_animation_anchor }}"
+          data-aos-order="{{ mobile_animation_order }}"
+        >
+          {{ section_title | escape }}
+        </h2>
       {%- endif -%}
 
-      <div class="homepage-collection-hover__mobile-slider grid grid--mobile-slider">
+      <div
+        class="homepage-collection-hover__mobile-slider grid grid--mobile-slider"
+        id="HomepageCollectionHoverMobileSlider--{{ section.id }}"
+      >
         {%- if section.blocks.size > 0 -%}
           {%- for block in section.blocks -%}
             {%- liquid
@@ -52,9 +70,15 @@
               assign title = block.settings.title | strip | default: collection.title | default: placeholder_title
               assign image = block.settings.image | default: collection.image | default: collection.products.first.featured_media.preview_image
               assign collection_url = collection.url | default: '#'
+              assign mobile_animation_order = mobile_animation_order | plus: 1
             -%}
 
-            <div class="grid-item">
+            <div
+              class="grid-item"
+              data-aos="hero"
+              data-aos-anchor="{{ mobile_animation_anchor }}"
+              data-aos-order="{{ mobile_animation_order }}"
+            >
               <a href="{{ collection_url }}" class="homepage-collection-hover__card">
                 <div class="homepage-collection-hover__card-media">
                   {%- if image != blank -%}
@@ -80,7 +104,13 @@
           {%- endfor -%}
         {%- else -%}
           {%- for i in (1..2) -%}
-            <div class="grid-item">
+            {%- assign mobile_animation_order = mobile_animation_order | plus: 1 -%}
+            <div
+              class="grid-item"
+              data-aos="hero"
+              data-aos-anchor="{{ mobile_animation_anchor }}"
+              data-aos-order="{{ mobile_animation_order }}"
+            >
               <a href="#" class="homepage-collection-hover__card">
                 <div class="homepage-collection-hover__card-media">
                   <div class="homepage-collection-hover__card-placeholder">
@@ -96,8 +126,17 @@
       </div>
     </div>
 
-    <collections-hover class="homepage-collection-hover__desktop">
-      <div class="homepage-collection-hover__desktop-copy">
+    <collections-hover
+      id="HomepageCollectionHoverDesktop--{{ section.id }}"
+      class="homepage-collection-hover__desktop"
+    >
+      {%- assign desktop_animation_order = desktop_animation_order | plus: 1 -%}
+      <div
+        class="homepage-collection-hover__desktop-copy"
+        data-aos="hero"
+        data-aos-anchor="{{ desktop_animation_anchor }}"
+        data-aos-order="{{ desktop_animation_order }}"
+      >
         {%- if section_title != blank -%}
           <h2 class="homepage-collection-hover__title title">{{ section_title | escape }}</h2>
         {%- endif -%}
@@ -130,7 +169,13 @@
         </div>
       </div>
 
-      <div class="homepage-collection-hover__desktop-media">
+      {%- assign desktop_animation_order = desktop_animation_order | plus: 1 -%}
+      <div
+        class="homepage-collection-hover__desktop-media"
+        data-aos="hero"
+        data-aos-anchor="{{ desktop_animation_anchor }}"
+        data-aos-order="{{ desktop_animation_order }}"
+      >
         {%- if section.blocks.size > 0 -%}
           {%- for block in section.blocks -%}
             {%- liquid

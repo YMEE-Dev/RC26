@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 (function () {
   var WEBGI_VIEWER_URL = "https://releases.ijewel3d.com/webgi/runtime/viewer-0.9.19.js";
@@ -76,7 +76,7 @@
   async function setupViewer(viewerDiv, glbUrl, container, loader) {
     try {
       var isMobile = navigator.maxTouchPoints > 0 || window.innerWidth <= 1024;
-      var dpr = isMobile ? Math.min(window.devicePixelRatio, 1.25) : Math.min(window.devicePixelRatio, 1.75);
+      var dpr = Math.min(window.devicePixelRatio, isMobile ? 2.0 : 1.75);
 
       var viewer, manager;
       if (typeof CoreViewerApp !== "undefined") {
@@ -84,7 +84,9 @@
         viewer = new CoreViewerApp({ container: viewerDiv });
         await viewer.initialize({
           caching: true,
-          ground: !isMobile,
+          // Keep the SDK ground plugin enabled on mobile too so the baked shadow
+          // is available on both mobile and desktop.
+          ground: true,
           bloom: false,
           enableDrop: false,
           importPopup: false,
@@ -92,6 +94,14 @@
           debug: false,
         });
         manager = viewer.getManager ? viewer.getManager() : null;
+        // SceneLoopPlugin drives the continuous render loop (needed for autoRotate, enableDamping)
+        try {
+          if (typeof SceneLoopPlugin !== "undefined" && !viewer.getPlugin(SceneLoopPlugin)) {
+            await viewer.addPlugin(SceneLoopPlugin);
+          }
+        } catch (e) {
+          console.warn("[WebGI] Could not add SceneLoopPlugin:", e);
+        }
         // MaterialConfiguratorPlugin is not added by CoreViewerApp.initialize() by default
         try {
           if (typeof MaterialConfiguratorPlugin !== "undefined" && !viewer.getPlugin(MaterialConfiguratorPlugin)) {
@@ -122,6 +132,9 @@
       // Desktop canvas renders ~#fff (needs dimming), mobile renders ~#e7e7e7 (needs brightening).
       container.style.backgroundColor = "#f9f9f9";
       viewerDiv.style.backgroundColor = "#f9f9f9";
+      if (viewer.scene && typeof viewer.scene.setBackground === "function") {
+        viewer.scene.setBackground("#f9f9f9");
+      }
       if (canvas) canvas.style.filter = isMobile ? "brightness(1.078)" : "brightness(0.9765)";
 
       viewer.renderer.displayCanvasScaling = dpr;
@@ -137,18 +150,75 @@
         if (popup) popup.enabled = false;
       } catch (e) {}
 
+      function configureGroundPlugin(groundPlugin) {
+        if (!groundPlugin) return;
+        try {
+          // SDK-first configuration: keep the ground plugin active for shadows,
+          // but make it render as an alpha-only shadow catcher instead of a visible floor.
+          groundPlugin.visible = true;
+          groundPlugin.bakedShadows = true;
+          groundPlugin.groundReflection = false;
+          groundPlugin.physicalReflections = false;
+          groundPlugin.tonemapGround = false;
+          groundPlugin.renderToDepth = false;
+          groundPlugin.limitCameraAboveGround = false;
+          if (typeof groundPlugin.autoBakeShadows !== "undefined") groundPlugin.autoBakeShadows = true;
+          if (typeof groundPlugin.size !== "undefined") groundPlugin.size = isMobile ? 4.75 : 6;
+          if (typeof groundPlugin.yOffset !== "undefined") groundPlugin.yOffset = -0.002;
+
+          if (groundPlugin.shadowBaker) {
+            groundPlugin.shadowBaker.enabled = true;
+            groundPlugin.shadowBaker.shadowAutoUpdate = true;
+            groundPlugin.shadowBaker.smoothShadow = true;
+            groundPlugin.shadowBaker.alphaVignette = true;
+            groundPlugin.shadowBaker.alphaVignetteAxis = "xy";
+            groundPlugin.shadowBaker.groundMapMode = "alphaMap";
+          }
+
+          if (typeof groundPlugin.refreshOptions === "function") {
+            groundPlugin.refreshOptions();
+          }
+
+          var groundMesh = groundPlugin.shadowBaker && groundPlugin.shadowBaker.attachedMesh;
+          var groundMaterial = groundMesh && groundMesh.material;
+          if (groundMesh) {
+            groundMesh.visible = true;
+          }
+          if (groundMaterial) {
+            groundShadowMaterial = groundMaterial;
+            // alphaMap mode: the baked shadow texture controls per-pixel alpha.
+            // The material must be transparent with full opacity so the alphaMap drives visibility.
+            // colorWrite MUST be true otherwise nothing renders at all.
+            groundMaterial.transparent = true;
+            groundMaterial.opacity = 1;
+            if (typeof groundMaterial.depthWrite !== "undefined") groundMaterial.depthWrite = false;
+            if (typeof groundMaterial.colorWrite !== "undefined") groundMaterial.colorWrite = true;
+            if (typeof groundMaterial.alphaTest !== "undefined") groundMaterial.alphaTest = isMobile ? 0.08 : 0;
+            if (groundMaterial.color && typeof groundMaterial.color.set === "function") {
+              groundMaterial.color.set("#000000");
+            }
+            if (typeof groundMaterial.toneMapped !== "undefined") groundMaterial.toneMapped = false;
+            if (typeof groundMaterial.envMapIntensity !== "undefined") groundMaterial.envMapIntensity = 0;
+            if (typeof groundMaterial.setDirty === "function") groundMaterial.setDirty();
+            groundMaterial.needsUpdate = true;
+          }
+        } catch (e) {
+          console.warn("[WebGI] Could not configure GroundPlugin:", e);
+        }
+      }
+
+      var ground = viewer.getPlugin(GroundPlugin) || null;
+      var groundShadowMaterial = null;
+
       // Mobile: disable expensive plugins
       if (isMobile) {
         var ssrM = viewer.getPlugin(SSRPlugin);
         if (ssrM) ssrM.enabled = false;
         var ssaoM = viewer.getPlugin(SSAOPlugin);
         if (ssaoM) ssaoM.enabled = false;
-      } else {
-        var ground = viewer.getPlugin(GroundPlugin);
-        if (ground && ground.shadowBaker && ground.shadowBaker.attachedMesh) {
-          ground.shadowBaker.attachedMesh.material.transparent = true;
-        }
       }
+
+      configureGroundPlugin(ground);
 
       // Load HDR environment map
       var envMap = null;
@@ -156,6 +226,9 @@
         var importer = manager && manager.importer ? manager.importer : viewer.getManager().importer;
         envMap = await importer.importSinglePath(ENV_MAP_URL);
         viewer.scene.setEnvironment(envMap);
+        if (typeof viewer.scene.setBackground === "function") {
+          viewer.scene.setBackground("#f9f9f9");
+        }
       } catch (e) {
         console.warn("[WebGI] HDR load error:", e);
       }
@@ -191,84 +264,241 @@
       if (matConfigPlugin && matConfigPlugin.variations) {
       }
 
-      // Cache gold materials once at load time — avoids expensive traverse on every color click
-      var goldMaterials = [];
-      try {
-        viewer.scene.traverse(function (obj) {
-          if (!obj.material) return;
-          if (typeof obj.material.refractionIndex !== "undefined") return;
-          if ((obj.material.name || "").toLowerCase().indexOf("gold") === -1) return;
-          if (goldMaterials.indexOf(obj.material) === -1) goldMaterials.push(obj.material);
-        });
-      } catch (e) {}
+      function getEntitySearchText(entity) {
+        return [
+          entity && entity.name,
+          entity && entity.title,
+          entity && entity.label,
+          entity && entity.type,
+          entity && entity.uuid,
+          entity && entity.id,
+          entity && entity.userData && entity.userData.name,
+          entity && entity.userData && entity.userData.title,
+          entity && entity.userData && entity.userData.uuid,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+      }
+
+      function isGroundShadowMaterial(material) {
+        if (!material) return false;
+        var userData = material.userData || {};
+        var label = getEntitySearchText(material);
+        return !!(
+          userData.gMapMode ||
+          userData.groundMatExtension ||
+          typeof userData.renderToDepth !== "undefined" ||
+          typeof userData.__renderToDepth !== "undefined" ||
+          label.indexOf("ground") !== -1 ||
+          label.indexOf("shadow") !== -1
+        );
+      }
+
+      function resetGroundShadowMaterial() {
+        if (!groundShadowMaterial) return;
+        try {
+          if (groundShadowMaterial.color && typeof groundShadowMaterial.color.set === "function") {
+            groundShadowMaterial.color.set("#000000");
+          }
+          groundShadowMaterial.transparent = true;
+          groundShadowMaterial.opacity = 1;
+          if (typeof groundShadowMaterial.colorWrite !== "undefined") groundShadowMaterial.colorWrite = true;
+          if (typeof groundShadowMaterial.depthWrite !== "undefined") groundShadowMaterial.depthWrite = false;
+          if (typeof groundShadowMaterial.toneMapped !== "undefined") groundShadowMaterial.toneMapped = false;
+          if (typeof groundShadowMaterial.envMapIntensity !== "undefined") groundShadowMaterial.envMapIntensity = 0;
+          if (typeof groundShadowMaterial.setDirty === "function") groundShadowMaterial.setDirty();
+          groundShadowMaterial.needsUpdate = true;
+        } catch (e) {
+          console.warn("[WebGI] Could not reset ground shadow material:", e);
+        }
+      }
+
+      function normalizeMetalKey(value) {
+        var key = (value || "").trim().toLowerCase();
+        if (key.indexOf("rose") !== -1) return "rose";
+        if (key.indexOf("white") !== -1 || key.indexOf("platinum") !== -1 || key.indexOf("silver") !== -1)
+          return "white";
+        if (key.indexOf("yellow") !== -1 || key.indexOf("gold") !== -1) return "yellow";
+        return "";
+      }
+
+      function materialMatchesMetalKey(material, metalKey) {
+        var label = getEntitySearchText(material);
+        if (!label) return false;
+        if (metalKey === "rose") return label.indexOf("rose") !== -1;
+        if (metalKey === "white") {
+          return label.indexOf("white") !== -1 || label.indexOf("platinum") !== -1 || label.indexOf("silver") !== -1;
+        }
+        if (metalKey === "yellow") {
+          return label.indexOf("yellow") !== -1 || label.indexOf("gold") !== -1;
+        }
+        return false;
+      }
+
+      function isTintableMetalMaterial(material) {
+        if (!material || !material.color || !material.color.isColor) return false;
+        if (typeof material.refractionIndex !== "undefined") return false;
+        if (isGroundShadowMaterial(material)) return false;
+
+        var name = getEntitySearchText(material);
+        if (name.indexOf("diamond") !== -1 || name.indexOf("gem") !== -1) return false;
+        if (
+          name.indexOf("gold") !== -1 ||
+          name.indexOf("metal") !== -1 ||
+          name.indexOf("tag") !== -1 ||
+          name.indexOf("logo") !== -1 ||
+          name.indexOf("roberto") !== -1 ||
+          name.indexOf("coin") !== -1 ||
+          name.indexOf("texture") !== -1 ||
+          name.indexOf("engr") !== -1
+        ) {
+          return true;
+        }
+
+        return typeof material.metalness === "number" && material.metalness > 0.2;
+      }
+
+      function collectTintableMetalMaterials() {
+        var materials = [];
+        try {
+          viewer.scene.traverse(function (obj) {
+            if (!obj || !obj.material) return;
+            var objMaterials = Array.isArray(obj.material) ? obj.material : [obj.material];
+            objMaterials.forEach(function (material) {
+              if (isTintableMetalMaterial(material) && materials.indexOf(material) === -1) {
+                materials.push(material);
+              }
+            });
+          });
+        } catch (e) {}
+        return materials;
+      }
+
+      var metalMaterials = collectTintableMetalMaterials();
 
       var WEBGI_COLOR_MAP = {
-        "18kt yellow gold": "#D4A832",
-        "18kt white gold": "#E8E8E8",
-        "18kt rose gold": "#CF9FA6",
-        "yellow gold": "#D4A832",
-        "white gold": "#E8E8E8",
-        "rose gold": "#CF9FA6",
-        gold: "#D4A832",
+        "18kt yellow gold": "#D2AF63",
+        "18kt white gold": "#E5E1DA",
+        "18kt rose gold": "#D3A08F",
+        "yellow gold": "#D2AF63",
+        "white gold": "#E5E1DA",
+        "rose gold": "#D3A08F",
+        gold: "#D2AF63",
         silver: "#C0C0C0",
         platinum: "#E5E4E2",
       };
 
-      // Find the "Gold" variation in MaterialConfiguratorPlugin
-      var goldVariation = null;
-      if (matConfigPlugin && matConfigPlugin.variations) {
+      // SDK-first: resolve the metal variation and apply it through MaterialConfiguratorPlugin.
+      function getGoldVariation() {
+        if (!matConfigPlugin || !matConfigPlugin.variations) return null;
         for (var vi = 0; vi < matConfigPlugin.variations.length; vi++) {
-          if ((matConfigPlugin.variations[vi].title || "").toLowerCase() === "gold") {
-            goldVariation = matConfigPlugin.variations[vi];
-            break;
+          var variationLabel = getEntitySearchText(matConfigPlugin.variations[vi]);
+          if (variationLabel.indexOf("gold") !== -1 || variationLabel.indexOf("metal") !== -1) {
+            return matConfigPlugin.variations[vi];
           }
         }
+        return null;
+      }
+
+      var goldVariation = getGoldVariation();
+
+      function findVariationMaterial(variation, metalKey) {
+        if (!variation || !variation.materials) return null;
+        for (var i = 0; i < variation.materials.length; i++) {
+          if (materialMatchesMetalKey(variation.materials[i], metalKey)) {
+            return variation.materials[i];
+          }
+        }
+        return null;
+      }
+
+      function tintMaterialColor(material, hex) {
+        if (!material || !hex || !material.color || !material.color.isColor) return false;
+        if (isGroundShadowMaterial(material)) return false;
+        if (typeof material.color.set === "function") material.color.set(hex);
+        else if (typeof material.color.setRGB === "function") {
+          material.color.setRGB(
+            parseInt(hex.slice(1, 3), 16) / 255,
+            parseInt(hex.slice(3, 5), 16) / 255,
+            parseInt(hex.slice(5, 7), 16) / 255
+          );
+        }
+        if (typeof material.setDirty === "function") material.setDirty();
+        material.needsUpdate = true;
+        return true;
+      }
+
+      function applyMaterialVariation(variation, targetMaterial) {
+        if (!variation || !targetMaterial || !matConfigPlugin) return false;
+
+        var targetIndex = variation.materials ? variation.materials.indexOf(targetMaterial) : -1;
+        if (targetIndex !== -1) variation.selectedIndex = targetIndex;
+
+        try {
+          if (typeof matConfigPlugin.applyVariation === "function") {
+            return !!matConfigPlugin.applyVariation(variation, targetMaterial.uuid);
+          }
+        } catch (e) {
+          console.warn("[WebGI] Could not apply material variation:", e);
+        }
+
+        return targetIndex !== -1;
+      }
+
+      // Collect UUIDs of materials managed by the SDK variation so we can
+      // tell which scene metals are NOT covered by applyVariation().
+      function getVariationMaterialUUIDs(variation) {
+        var uuids = {};
+        if (!variation || !variation.materials) return uuids;
+        for (var i = 0; i < variation.materials.length; i++) {
+          var m = variation.materials[i];
+          if (m && m.uuid) uuids[m.uuid] = true;
+        }
+        return uuids;
       }
 
       function applyColorToModel(colorValue) {
-        if (!goldVariation || !matConfigPlugin) return;
-        var key = (colorValue || "").trim().toLowerCase();
-        var matName = null;
-        if (key.indexOf("rose") !== -1) matName = "rose";
-        else if (key.indexOf("white") !== -1) matName = "white";
-        else if (key.indexOf("yellow") !== -1 || key.indexOf("gold") !== -1) matName = "yellow";
-        if (!matName) return;
-        var targetIndex = -1;
-        var targetUuid = null;
-        for (var i = 0; i < goldVariation.materials.length; i++) {
-          if ((goldVariation.materials[i].name || "").toLowerCase() === matName) {
-            targetIndex = i;
-            targetUuid = goldVariation.materials[i].uuid;
-            break;
+        var metalKey = normalizeMetalKey(colorValue);
+        if (!metalKey) return;
+
+        // Fastest path: apply the SDK variation immediately and then sync any
+        // remaining metal materials in the same tick.
+        var sdkApplied = false;
+        var targetMaterial = findVariationMaterial(goldVariation, metalKey);
+
+        if (targetMaterial) {
+          sdkApplied = applyMaterialVariation(goldVariation, targetMaterial);
+        }
+
+        var referenceHex = null;
+        if (sdkApplied && targetMaterial && targetMaterial.color && targetMaterial.color.isColor) {
+          referenceHex = "#" + targetMaterial.color.getHexString();
+        }
+
+        if (!referenceHex) {
+          var key = (colorValue || "").trim().toLowerCase();
+          referenceHex =
+            WEBGI_COLOR_MAP[key] ||
+            WEBGI_COLOR_MAP[metalKey + " gold"] ||
+            (metalKey === "white" ? WEBGI_COLOR_MAP["white gold"] : null);
+        }
+
+        if (referenceHex) {
+          var variationUUIDs = getVariationMaterialUUIDs(goldVariation);
+          metalMaterials = collectTintableMetalMaterials();
+          for (var mi = 0; mi < metalMaterials.length; mi++) {
+            var mat = metalMaterials[mi];
+            if (sdkApplied && mat.uuid && variationUUIDs[mat.uuid]) continue;
+            tintMaterialColor(mat, referenceHex);
           }
         }
-        if (targetIndex === -1) return;
-        goldVariation.selectedIndex = targetIndex;
-        // copyProps doesn't update Three.js Color objects — set color directly on live materials
-        var hex = WEBGI_COLOR_MAP[key];
-        var r = 1,
-          g = 1,
-          b = 1;
-        if (hex) {
-          r = parseInt(hex.slice(1, 3), 16) / 255;
-          g = parseInt(hex.slice(3, 5), 16) / 255;
-          b = parseInt(hex.slice(5, 7), 16) / 255;
-        }
-        var mats = goldMaterials.filter(function (m) {
-          return m && m.color && m.color.isColor;
-        });
-        if (!mats.length) return;
-        for (var mi = 0; mi < mats.length; mi++) {
-          var m = mats[mi];
-          m.color.r = r;
-          m.color.g = g;
-          m.color.b = b;
-          m.needsUpdate = true;
-        }
-        // Mark scene dirty so the next render frame picks up the color change instantly
+
+        resetGroundShadowMaterial();
+
         viewer.setDirty();
+        viewer.renderer.refreshPipeline();
         if (viewer.scene.activeCamera) viewer.scene.activeCamera.setDirty();
-        console.log("[WebGI] applied color:", matName, hex);
       }
 
       container.__webgiApplyColor = applyColorToModel;
@@ -306,9 +536,9 @@
       try {
         var tonemap = viewer.getPlugin(TonemapPlugin);
         if (tonemap) {
-          if (typeof tonemap.contrast !== "undefined") tonemap.contrast = 1.1;
+          if (typeof tonemap.contrast !== "undefined") tonemap.contrast = 1.0;
           if (typeof tonemap.saturation !== "undefined") tonemap.saturation = 1.05;
-          if (typeof tonemap.exposure !== "undefined") tonemap.exposure = 1.05;
+          if (typeof tonemap.exposure !== "undefined") tonemap.exposure = 1.2;
         }
       } catch (e) {}
 
@@ -330,7 +560,7 @@
           ? viewer.scene.activeCamera.getCameraOptions()
           : null;
         if (camOptions) {
-          camOptions.zoom = 1;
+          camOptions.zoom = 1.15;
           viewer.scene.activeCamera.setCameraOptions(camOptions);
         }
 
@@ -351,38 +581,31 @@
         controls.autoRotate = true;
         controls.autoRotateSpeed = 2;
         controls.dampingFactor = isMobile ? 0.12 : 0.1;
-        controls.zoomSpeed = isMobile ? 0.8 : 1.0;
+        controls.zoomSpeed = isMobile ? 0.4 : 1.0;
         controls.maxSpeed = 1.0;
         controls.enableDamping = true;
         controls.minDistance = defaultDist * 0.35; // max zoom in
         controls.maxDistance = defaultDist * 1.6; // max zoom out
         controls.update();
+      }
 
-        // Resume auto-rotation 3s after user stops interacting
-        // Keep SSR always on to avoid white blink during drag
-        var autoRotateTimer = null;
-        canvas.addEventListener("pointerdown", function () {
-          controls.autoRotate = false;
-          if (autoRotateTimer) {
-            clearTimeout(autoRotateTimer);
-            autoRotateTimer = null;
-          }
-        });
-        canvas.addEventListener("pointerup", function () {
-          if (autoRotateTimer) clearTimeout(autoRotateTimer);
-          autoRotateTimer = setTimeout(function () {
-            controls.autoRotate = true;
-          }, 3000);
-        });
-        canvas.addEventListener("pointercancel", function () {
-          if (autoRotateTimer) clearTimeout(autoRotateTimer);
-          autoRotateTimer = setTimeout(function () {
-            controls.autoRotate = true;
-          }, 3000);
-        });
+      if (ground && ground.visible !== false && typeof ground.bakeShadows === "function") {
+        try {
+          ground.bakeShadows();
+        } catch (e) {
+          console.warn("[WebGI] Could not bake ground shadows:", e);
+        }
       }
 
       viewer.renderer.refreshPipeline();
+
+      // Ensure autoRotate kicks in immediately after full setup
+      if (controls && controls.autoRotate) {
+        controls.update();
+        viewer.setDirty();
+        if (viewer.scene.activeCamera) viewer.scene.activeCamera.setDirty();
+      }
+
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
           if (loader) loader.classList.add("webgi-loader--done");
