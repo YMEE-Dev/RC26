@@ -134,6 +134,15 @@
     assign on_sale = true
   endif
 
+  assign should_redirect_storytelling_product = false
+  if template.name == 'product'
+    if featured_product == false
+      if product.type == 'storytelling'
+        assign should_redirect_storytelling_product = true
+      endif
+    endif
+  endif
+
   assign badge = ''
   if badge == '' and product_tags contains '_badge_'
     assign badge = product_tags | split: '_badge_'
@@ -143,6 +152,11 @@
   assign color_scheme = 'color-' | append: section.settings.color_scheme
 -%}
 
+{%- if should_redirect_storytelling_product -%}
+  <script>
+    window.location.replace('/');
+  </script>
+{%- endif -%}
 <product-info
   id="MainProduct--{{ section.id }}"
   class="index-product section-padding {{ color_scheme }} pdp-dropdown-inline"
