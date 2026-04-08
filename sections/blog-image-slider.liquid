@@ -1,0 +1,384 @@
+<!-- /sections/blog-image-slider.liquid -->
+{%- liquid
+  assign slide_count = section.blocks.size
+-%}
+
+{%- style -%}
+  #BlogImageSlider--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    --max: {{ section.settings.max_width }}px;
+  }
+{%- endstyle -%}
+
+{%- if slide_count > 0 -%}
+  <section
+    id="BlogImageSlider--{{ section.id }}"
+    class="blog-image-slider section-padding"
+    data-section-id="{{ section.id }}"
+    data-section-type="blog-image-slider"
+  >
+    <div class="blog-image-slider__inner {{ section.settings.width }}">
+      <div class="blog-image-slider__track-wrapper">
+        <div class="blog-image-slider__track" data-slider-track>
+          {%- for block in section.blocks -%}
+            {%- assign image = block.settings.image -%}
+            {%- assign caption = block.settings.caption -%}
+            <div
+              class="blog-image-slider__slide{% if forloop.first %} is-active{% endif %}"
+              data-slide="{{ forloop.index0 }}"
+              {{ block.shopify_attributes }}
+            >
+              <div class="blog-image-slider__media">
+                {%- if image != blank -%}
+                  {{
+                    image
+                    | image_url: width: 2400
+                    | image_tag:
+                      class: 'blog-image-slider__image',
+                      widths: '550, 750, 900, 1100, 1500, 1800, 2400',
+                      sizes: '(min-width: 990px) min(var(--max), 100vw - 60px), calc(100vw - 40px)',
+                      loading: 'lazy'
+                  }}
+                {%- else -%}
+                  {{ 'image' | placeholder_svg_tag: 'blog-image-slider__image blog-image-slider__placeholder' }}
+                {%- endif -%}
+              </div>
+              {%- if caption != blank -%}
+                <p class="blog-image-slider__caption caption">{{ caption | escape }}</p>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        </div>
+
+        {%- if slide_count > 1 -%}
+          <button
+            class="blog-image-slider__arrow blog-image-slider__arrow--prev"
+            data-slider-prev
+            aria-label="{{ 'general.accessibility.previous_slide' | t | default: 'Previous slide' }}"
+            type="button"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+          <button
+            class="blog-image-slider__arrow blog-image-slider__arrow--next"
+            data-slider-next
+            aria-label="{{ 'general.accessibility.next_slide' | t | default: 'Next slide' }}"
+            type="button"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+        {%- endif -%}
+      </div>
+
+      {%- if slide_count > 1 and section.settings.show_dots -%}
+        <div class="blog-image-slider__dots" data-slider-dots aria-hidden="true">
+          {%- for block in section.blocks -%}
+            <button
+              class="blog-image-slider__dot{% if forloop.first %} is-active{% endif %}"
+              data-dot="{{ forloop.index0 }}"
+              type="button"
+            ></button>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- if slide_count > 1 -%}
+        <p class="blog-image-slider__counter caption" data-slider-counter aria-live="polite">
+          <span data-slider-current>1</span> / {{ slide_count }}
+        </p>
+      {%- endif -%}
+    </div>
+  </section>
+{%- endif -%}
+
+{% stylesheet %}
+  .blog-image-slider {
+    padding-top: var(--PT);
+    padding-bottom: var(--PB);
+  }
+
+  .blog-image-slider__inner {
+    width: min(calc(100% - 60px), var(--max));
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .blog-image-slider__track-wrapper {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .blog-image-slider__track {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+  }
+
+  .blog-image-slider__slide {
+    grid-area: 1 / 1;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  .blog-image-slider__slide.is-active {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  .blog-image-slider__media {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .blog-image-slider__image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .blog-image-slider__placeholder {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #f0f0f0;
+  }
+
+  .blog-image-slider__caption {
+    margin: 16px 0 0;
+    opacity: 0.7;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* Arrows */
+  .blog-image-slider__arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.85);
+    border: none;
+    cursor: pointer;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: background 0.2s ease, opacity 0.2s ease;
+    padding: 0;
+  }
+
+  .blog-image-slider__arrow:hover {
+    background: rgba(255, 255, 255, 1);
+  }
+
+  .blog-image-slider__arrow[disabled] {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .blog-image-slider__arrow svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+  }
+
+  .blog-image-slider__arrow--prev {
+    left: 16px;
+  }
+
+  .blog-image-slider__arrow--next {
+    right: 16px;
+  }
+
+  /* Dots */
+  .blog-image-slider__dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .blog-image-slider__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.2s ease;
+  }
+
+  .blog-image-slider__dot.is-active {
+    background: currentColor;
+  }
+
+  /* Counter */
+  .blog-image-slider__counter {
+    text-align: center;
+    margin: 16px 0 0;
+    opacity: 0.6;
+    letter-spacing: 0.12em;
+  }
+
+  @media (max-width: 989px) {
+    .blog-image-slider__inner {
+      width: calc(100% - 40px);
+    }
+
+    .blog-image-slider__arrow {
+      width: 36px;
+      height: 36px;
+    }
+
+    .blog-image-slider__arrow--prev {
+      left: 8px;
+    }
+
+    .blog-image-slider__arrow--next {
+      right: 8px;
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  (function () {
+    class BlogImageSlider {
+      constructor(section) {
+        this.section = section;
+        this.slides = Array.from(section.querySelectorAll('[data-slide]'));
+        this.dots = Array.from(section.querySelectorAll('[data-dot]'));
+        this.prevBtn = section.querySelector('[data-slider-prev]');
+        this.nextBtn = section.querySelector('[data-slider-next]');
+        this.counterCurrent = section.querySelector('[data-slider-current]');
+        this.current = 0;
+        this.total = this.slides.length;
+
+        if (this.total < 2) return;
+
+        this.prevBtn && this.prevBtn.addEventListener('click', () => this.go(this.current - 1));
+        this.nextBtn && this.nextBtn.addEventListener('click', () => this.go(this.current + 1));
+        this.dots.forEach((dot) => {
+          dot.addEventListener('click', () => this.go(parseInt(dot.dataset.dot)));
+        });
+
+        this.update();
+      }
+
+      go(index) {
+        this.slides[this.current].classList.remove('is-active');
+        this.dots[this.current] && this.dots[this.current].classList.remove('is-active');
+
+        this.current = (index + this.total) % this.total;
+
+        this.slides[this.current].classList.add('is-active');
+        this.dots[this.current] && this.dots[this.current].classList.add('is-active');
+        this.update();
+      }
+
+      update() {
+        if (this.counterCurrent) this.counterCurrent.textContent = this.current + 1;
+        if (this.prevBtn) this.prevBtn.disabled = false;
+        if (this.nextBtn) this.nextBtn.disabled = false;
+      }
+    }
+
+    document.querySelectorAll('[data-section-type="blog-image-slider"]').forEach((el) => {
+      new BlogImageSlider(el);
+    });
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Blog: Image Slider",
+  "settings": [
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        { "value": "wrapper--full", "label": "Full width" },
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Normal" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "min": 700,
+      "max": 1800,
+      "step": 20,
+      "unit": "px",
+      "label": "Max width",
+      "default": 1400
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show dot indicators",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 120
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption",
+          "default": ""
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blog: Image Slider",
+      "category": "Blog",
+      "blocks": [
+        { "type": "slide" },
+        { "type": "slide" },
+        { "type": "slide" }
+      ]
+    }
+  ]
+}
+{% endschema %}
