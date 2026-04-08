@@ -148,6 +148,10 @@
         if (loadingScreen) loadingScreen.enabled = false;
         var popup = viewer.getPluginByType("AssetManagerBasicPopupPlugin");
         if (popup) popup.enabled = false;
+        // Disable the interaction prompt ("drag to rotate" hand animation) —
+        // it fires after 3s of no pointerdown events regardless of autorotate state.
+        var interactionPrompt = viewer.getPluginByType("InteractionPromptPlugin");
+        if (interactionPrompt) interactionPrompt.enabled = false;
       } catch (e) {}
 
       function configureGroundPlugin(groundPlugin) {
@@ -312,6 +316,44 @@
         } catch (e) {
           console.warn("[WebGI] Could not reset ground shadow material:", e);
         }
+      }
+
+      function startAutoRotateLoop() {
+        if (!controls) return;
+
+        if (container.__webgiAutoRotateFrame) {
+          cancelAnimationFrame(container.__webgiAutoRotateFrame);
+        }
+
+        var lastTime = 0;
+
+        function tick(now) {
+          if (!container.isConnected) {
+            container.__webgiAutoRotateFrame = null;
+            return;
+          }
+
+          if (document.hidden) {
+            container.__webgiAutoRotateFrame = requestAnimationFrame(tick);
+            return;
+          }
+
+          var deltaMs = lastTime ? now - lastTime : 16.67;
+          lastTime = now;
+
+          if (controls.autoRotate && typeof controls.rotateLeft === "function") {
+            var angle = (2 * Math.PI * controls.autoRotateSpeed * deltaMs) / (60 * 1000);
+            controls.rotateLeft(angle);
+          }
+
+          controls.update();
+          viewer.setDirty();
+          if (viewer.scene.activeCamera) viewer.scene.activeCamera.setDirty();
+
+          container.__webgiAutoRotateFrame = requestAnimationFrame(tick);
+        }
+
+        container.__webgiAutoRotateFrame = requestAnimationFrame(tick);
       }
 
       function normalizeMetalKey(value) {
@@ -579,7 +621,7 @@
         } catch (e) {}
 
         controls.autoRotate = true;
-        controls.autoRotateSpeed = 2;
+        controls.autoRotateSpeed = 0.8;
         controls.dampingFactor = isMobile ? 0.12 : 0.1;
         controls.zoomSpeed = isMobile ? 0.4 : 1.0;
         controls.maxSpeed = 1.0;
@@ -604,6 +646,7 @@
         controls.update();
         viewer.setDirty();
         if (viewer.scene.activeCamera) viewer.scene.activeCamera.setDirty();
+        startAutoRotateLoop();
       }
 
       requestAnimationFrame(function () {
