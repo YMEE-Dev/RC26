@@ -323,7 +323,7 @@
         {%- endif -%}
       </h1>
     </a>
-    {%- if template.name == 'product' or template contains 'collection' or template contains 'page'  -%}
+    {%- if template.name == 'product' or template contains 'collection' or template contains 'page' or template.name == 'search' -%}
       <div class="header__logo__meta">
         {%- if template.name == 'product' -%}
           {%- assign current_collection = collection | default: product.collections.first -%}
@@ -403,6 +403,12 @@
         {%  elsif template contains 'page' %}
           <h6 class="header__logo__meta__page">
             <span>{{ page.title }}</span>
+          </h6>
+        {%- elsif template.name == 'search' -%}
+          <h6 class="header__logo__meta__page">
+            {%- if search.terms != blank -%}
+              <span>{{ 'general.search.title' | t }}</span>
+            {%- endif -%}
           </h6>
         {%- endif -%}
       </div>
