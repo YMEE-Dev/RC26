@@ -22,21 +22,21 @@
       assign subheading_text = section.settings.subheading_prefix | append: blog.title
     endif
   else
-    {%- assign latest_article = blank -%}
-    {%- for blog_kv in blogs -%}
-      {%- assign candidate_blog = blog_kv[1] -%}
-      {%- if candidate_blog != blank -%}
-        {%- assign candidate_article = candidate_blog.articles.first -%}
-        {%- if candidate_article != blank -%}
-          {%- if latest_article == blank -%}
-            {%- assign latest_article = candidate_article -%}
-          {%- elsif candidate_article.published_at > latest_article.published_at -%}
-            {%- assign latest_article = candidate_article -%}
-          {%- endif -%}
-        {%- endif -%}
-      {%- endif -%}
-    {%- endfor -%}
-    {%- assign featured_article = latest_article -%}
+    assign latest_article = blank
+    for blog_kv in blogs
+      assign candidate_blog = blog_kv[1]
+      if candidate_blog != blank
+        assign candidate_article = candidate_blog.articles.first
+        if candidate_article != blank
+          if latest_article == blank
+            assign latest_article = candidate_article
+          elsif candidate_article.published_at > latest_article.published_at
+            assign latest_article = candidate_article
+          endif
+        endif
+      endif
+    endfor
+    assign featured_article = latest_article
   endif
 
   if featured_article != blank
@@ -99,14 +99,16 @@
               {{
                 banner_image
                 | image_url: width: 2000
-                | image_tag:
-                  alt: banner_alt,
-                  width: 1000,
-                  height: 1000,
-                  loading: 'lazy'
+                | image_tag: alt: banner_alt, width: 1000, height: 1000, loading: 'lazy'
               }}
             {%- else -%}
-              <img src="{{ banner_image | escape }}" alt="{{ banner_alt | escape }}" width="1000" height="1000" loading="lazy">
+              <img
+                src="{{ banner_image | escape }}"
+                alt="{{ banner_alt | escape }}"
+                width="1000"
+                height="1000"
+                loading="lazy"
+              >
             {%- endif -%}
           </a>
         {%- endif -%}
@@ -163,7 +165,9 @@
   }
 
   @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   .new-main-blog-banner__wrapper {
@@ -203,7 +207,8 @@
   }
 
   @media (max-width: 768px) {
-    .new-main-blog-banner__text,.new-main-blog-banner__button {
+    .new-main-blog-banner__text,
+    .new-main-blog-banner__button {
       min-width: 50% !important;
     }
     .new-main-blog-banner__button-wrap {
@@ -211,19 +216,20 @@
     }
   }
   @media (max-width: 425px) {
-    .new-main-blog-banner__text,.new-main-blog-banner__button {
-    min-width: 100% !important;
-  }
-  .new-main-blog-banner__button-wrap {
-    width: 100%;
-  }
-  .blog-listing__card-title {
-    font-size: 20px;
-    line-height: 26px !important;
-}
-  .blog-listing__card-excerpt {
-    font-size: 12px;
-  }
+    .new-main-blog-banner__text,
+    .new-main-blog-banner__button {
+      min-width: 100% !important;
+    }
+    .new-main-blog-banner__button-wrap {
+      width: 100%;
+    }
+    .blog-listing__card-title {
+      font-size: 20px;
+      line-height: 26px !important;
+    }
+    .blog-listing__card-excerpt {
+      font-size: 12px;
+    }
   }
   .new-main-blog-banner__subheading {
     margin: 0 0 10px;
@@ -308,7 +314,7 @@
   .new-main-blog-banner__button:hover {
     text-decoration: none;
     background-color: var(--000000, #000);
-    color: var(--FFFFFF, #FFF);
+    color: var(--FFFFFF, #fff);
   }
   @media (max-width: 425px) {
     .new-main-blog-banner__button {
@@ -344,7 +350,7 @@
       "content": "Subheading"
     },
     {
-      "type": "checkbox", 
+      "type": "checkbox",
       "id": "show_subheading",
       "label": "Show subheading",
       "default": true
@@ -398,9 +404,9 @@
       "label": "Button style",
       "default": "btn--outline",
       "options": [
-        { "value": "btn--solid", "label": "Solid" },
-        { "value": "btn--outline", "label": "Outline" },
-        { "value": "btn--text", "label": "Text" }
+        {"value": "btn--solid", "label": "Solid"},
+        {"value": "btn--outline", "label": "Outline"},
+        {"value": "btn--text", "label": "Text"}
       ]
     },
     {
@@ -409,10 +415,10 @@
       "label": "Button color",
       "default": "btn--black",
       "options": [
-        { "value": "btn--black", "label": "Black" },
-        { "value": "btn--white", "label": "White" },
-        { "value": "btn--primary", "label": "Primary" },
-        { "value": "btn--secondary", "label": "Secondary" }
+        {"value": "btn--black", "label": "Black"},
+        {"value": "btn--white", "label": "White"},
+        {"value": "btn--primary", "label": "Primary"},
+        {"value": "btn--secondary", "label": "Secondary"}
       ]
     },
     {
@@ -421,9 +427,9 @@
       "label": "Button size",
       "default": "",
       "options": [
-        { "value": "btn--small", "label": "Small" },
-        { "value": "", "label": "Medium" },
-        { "value": "btn--large", "label": "Large" }
+        {"value": "btn--small", "label": "Small"},
+        {"value": "", "label": "Medium"},
+        {"value": "btn--large", "label": "Large"}
       ]
     },
     {
@@ -436,12 +442,12 @@
       "label": "Heading size",
       "default": "heading-large",
       "options": [
-        { "value": "heading-mini", "label": "Mini" },
-        { "value": "heading-x-small", "label": "Extra small" },
-        { "value": "heading-small", "label": "Small" },
-        { "value": "heading-medium", "label": "Medium" },
-        { "value": "heading-large", "label": "Large" },
-        { "value": "heading-x-large", "label": "Extra large" }
+        {"value": "heading-mini", "label": "Mini"},
+        {"value": "heading-x-small", "label": "Extra small"},
+        {"value": "heading-small", "label": "Small"},
+        {"value": "heading-medium", "label": "Medium"},
+        {"value": "heading-large", "label": "Large"},
+        {"value": "heading-x-large", "label": "Extra large"}
       ]
     },
     {
@@ -454,11 +460,11 @@
       "label": "Layout width",
       "default": "wrapper",
       "options": [
-        { "value": "wrapper--full-padded", "label": "Full width padded" },
-        { "value": "wrapper", "label": "Normal" },
-        { "value": "wrapper--wide", "label": "Wide" },
-        { "value": "wrapper--narrow", "label": "Narrow" },
-        { "value": "wrapper--custom", "label": "Custom (max-width: 1232px)" }
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"},
+        {"value": "wrapper--wide", "label": "Wide"},
+        {"value": "wrapper--narrow", "label": "Narrow"},
+        {"value": "wrapper--custom", "label": "Custom (max-width: 1232px)"}
       ]
     },
     {
