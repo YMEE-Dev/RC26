@@ -49,7 +49,8 @@
       "type": "blog-header-video",
       "name": "Blog Header and Video",
       "settings": {
-        "featured_article": "",
+        "featured_article": "{{ article }}",
+        "video": "{{ article.metafields.custom.blog_brand_template.value.blog_video.value }}",
         "video_url": "",
         "content_max_width": 1100,
         "title_max_width": 980,
@@ -76,8 +77,8 @@
       "name": "Image + Text + Two Images",
       "settings": {
         "width": "wrapper",
-        "full_image": "shopify://shop_images/roberto-coin-authentic-beauty-img3.png",
-        "center_text": "<p>As a company and as a brand, Roberto Coin is committed daily to the highest standards of ethical, social, environmental behavior and respect for human rights, to deliver jewelry that shines a true and good light into your hands.</p><p>All materials used in Roberto Coin jewelry come from certified and responsible sources. Diamonds come only from legitimate, conflict-free sources that are certified by the Kimberley Process Certification Scheme (KPCS). This is an international system of certification and warranties founded by the World Diamond Council itself, where Roberto Coin is an active member of the Board of Directors.</p>",
+        "full_image": "{{ article.metafields.custom.blog_brand_template.value.story_bundle_image.value }}",
+        "center_text": "",
         "two_image_left": "shopify://shop_images/479f924f5be912cb47dbd734518c487a4481e05a.png",
         "two_image_right": "shopify://shop_images/8bc0113b37b8b8f032634104e5928bd0f1e4ad64.png",
         "section_gap": 120,
