@@ -130,6 +130,16 @@
     background: var(--COLLECTION-PRODUCTS-BG);
   }
 
+  {% if is_spotlight_collection_template %}
+    body.template-collection:has(#Collection--{{ section.id }}.collection--spotlight) .theme__header__scroll-blur {
+      display: none;
+      opacity: 0;
+      --header-scroll-reveal-blur: 0px;
+      -webkit-backdrop-filter: blur(0);
+      backdrop-filter: blur(0);
+    }
+  {% endif %}
+
   {% if is_spotlight_collection_template and spotlight_menu_color != blank %}
     body.template-collection:has(#Collection--{{ section.id }}.collection--spotlight) {
       --spotlight-collection-menu-link: {{ spotlight_menu_color }};
