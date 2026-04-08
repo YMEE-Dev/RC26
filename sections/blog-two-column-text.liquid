@@ -1,0 +1,224 @@
+<!-- /sections/blog-two-column-text.liquid -->
+{% doc %}
+  Renders two columns of text for blog/article pages, optionally using heading or caption typography.
+
+  @example
+  In a JSON template:
+  { "type": "blog-two-column-text", "settings": { "left_text": "<p>...</p>", "right_text": "<p>...</p>" } }
+{% enddoc %}
+
+{%- liquid
+  assign left_text_class = section.settings.left_text_style | default: 'body'
+  assign right_text_class = section.settings.right_text_style | default: 'body'
+-%}
+
+{%- style -%}
+  #BlogTwoColText--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    --gap: {{ section.settings.gap }}px;
+    --max: {{ section.settings.max_width }}px;
+  }
+{%- endstyle -%}
+
+<section
+  id="BlogTwoColText--{{ section.id }}"
+  class="blog-two-col-text section-padding"
+  data-section-id="{{ section.id }}"
+  data-section-type="blog-two-column-text"
+>
+  <div class="blog-two-col-text__inner {{ section.settings.width }}">
+    <div class="blog-two-col-text__grid">
+      <div class="blog-two-col-text__col blog-two-col-text__col--left">
+        {%- if section.settings.left_heading != blank -%}
+          <h3 class="blog-two-col-text__heading h3">{{ section.settings.left_heading | escape }}</h3>
+        {%- endif -%}
+        {%- if section.settings.left_text != blank -%}
+          <div class="blog-two-col-text__text rte {{ left_text_class }}{% if section.settings.left_italic %} blog-two-col-text__text--italic{% endif %}">
+            {{ section.settings.left_text }}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div class="blog-two-col-text__col blog-two-col-text__col--right">
+        {%- if section.settings.right_heading != blank -%}
+          <h3 class="blog-two-col-text__heading h3">{{ section.settings.right_heading | escape }}</h3>
+        {%- endif -%}
+        {%- if section.settings.right_text != blank -%}
+          <div class="blog-two-col-text__text rte {{ right_text_class }}{% if section.settings.right_italic %} blog-two-col-text__text--italic{% endif %}">
+            {{ section.settings.right_text }}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .blog-two-col-text {
+    padding-top: var(--PT);
+    padding-bottom: var(--PB);
+  }
+
+  .blog-two-col-text__inner {
+    width: min(calc(100% - 60px), var(--max));
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .blog-two-col-text__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--gap);
+    align-items: start;
+  }
+
+  .blog-two-col-text__heading {
+    margin: 0 0 22px;
+  }
+
+  .blog-two-col-text__text p {
+    margin: 0 0 18px;
+  }
+
+  .blog-two-col-text__text--italic {
+    font-style: italic;
+  }
+
+  .blog-two-col-text__text.caption {
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 989px) {
+    .blog-two-col-text__inner {
+      width: calc(100% - 40px);
+    }
+
+    .blog-two-col-text__grid {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Blog: Two Column Text",
+  "settings": [
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        { "value": "wrapper--full", "label": "Full width" },
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Normal" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "min": 700,
+      "max": 1500,
+      "step": 20,
+      "unit": "px",
+      "label": "Max width",
+      "default": 1100
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "min": 20,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Column gap",
+      "default": 120
+    },
+    {
+      "type": "text",
+      "id": "left_heading",
+      "label": "Left heading",
+      "default": ""
+    },
+    {
+      "type": "richtext",
+      "id": "left_text",
+      "label": "Left text"
+    },
+    {
+      "type": "select",
+      "id": "left_text_style",
+      "label": "Left text style",
+      "default": "body",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "h4", "label": "Heading font" },
+        { "value": "caption", "label": "Caption" }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "left_italic",
+      "label": "Italic left text",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "right_heading",
+      "label": "Right heading",
+      "default": ""
+    },
+    {
+      "type": "richtext",
+      "id": "right_text",
+      "label": "Right text"
+    },
+    {
+      "type": "select",
+      "id": "right_text_style",
+      "label": "Right text style",
+      "default": "body",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "h4", "label": "Heading font" },
+        { "value": "caption", "label": "Caption" }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "right_italic",
+      "label": "Italic right text",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 120
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blog: Two Column Text"
+    }
+  ]
+}
+{% endschema %}
+

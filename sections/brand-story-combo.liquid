@@ -2,6 +2,12 @@
 {%- liquid
   assign has_any_content = false
   assign resolved_top_heading = section.settings.top_heading
+  assign resolved_top_image = section.settings.top_image
+  assign resolved_caption_text = section.settings.caption_text
+
+  if resolved_top_image != blank and resolved_top_image.value != blank
+    assign resolved_top_image = resolved_top_image.value
+  endif
 
   if resolved_top_heading == blank and article != blank
     if article.metafields.custom.story_top_heading.value != blank
@@ -15,7 +21,7 @@
     endif
   endif
 
-  if resolved_top_heading != blank or section.settings.top_text != blank or section.settings.top_image != blank
+  if resolved_top_heading != blank or section.settings.top_text != blank or section.settings.top_image != blank or resolved_caption_text != blank
     assign has_any_content = true
   endif
 -%}
@@ -47,17 +53,30 @@
           {%- endif -%}
         </div>
 
-        {%- if section.settings.top_image != blank -%}
+        {%- if resolved_top_image != blank -%}
           <div class="brand-story-combo__split-media" data-brand-fade>
-            {{
-              section.settings.top_image
-              | image_url: width: 1200
-              | image_tag:
-                class: 'brand-story-combo__image',
-                widths: '375, 550, 750, 900, 1100, 1200',
-                sizes: '(min-width: 990px) 40vw, 100vw',
-                loading: 'lazy'
-            }}
+            {%- if resolved_top_image.width != blank -%}
+              {{
+                resolved_top_image
+                | image_url: width: 1200
+                | image_tag:
+                  class: 'brand-story-combo__image',
+                  widths: '375, 550, 750, 900, 1100, 1200',
+                  sizes: '(min-width: 990px) 40vw, 100vw',
+                  loading: 'lazy'
+              }}
+            {%- else -%}
+              <img
+                class="brand-story-combo__image"
+                src="{{ resolved_top_image | escape }}"
+                alt=""
+                loading="lazy"
+              >
+            {%- endif -%}
+
+            {%- if resolved_caption_text != blank -%}
+              <p class="brand-story-combo__caption caption">{{ resolved_caption_text | escape }}</p>
+            {%- endif -%}
           </div>
         {%- endif -%}
       </div>
@@ -102,6 +121,13 @@
     display: block;
   }
 
+  .brand-story-combo__caption {
+    margin: 16px 0 0;
+    opacity: 0.7;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
   @media (min-width: 990px) {
     .main-content--article-brand .brand-story-combo__inner {
       width: min(100% - 48px, 1100px);
@@ -140,6 +166,42 @@
       box-sizing: border-box;
     }
   }
+
+  @media (min-width: 750px) and (max-width: 1024px) {
+    .brand-story-combo__split {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 56px;
+      align-items: center;
+    }
+
+    .main-content--article-brand .brand-story-combo__split-copy {
+      grid-row: auto;
+      width: auto;
+      max-width: none;
+      margin-left: 0;
+      margin-right: 0;
+      text-align: left;
+      align-items: flex-start;
+    }
+
+    .main-content--article-brand .brand-story-combo__split-media {
+      grid-row: auto;
+    }
+
+    .main-content--article-brand .brand-story-combo__text {
+      text-align: left;
+    }
+
+    .main-content--article-brand .brand-story-combo__inner {
+      width: calc(100% - 60px);
+      max-width: none;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 0;
+      padding-right: 0;
+      box-sizing: border-box;
+    }
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -171,6 +233,12 @@
       "type": "image_picker",
       "id": "top_image",
       "label": "Top image"
+    },
+    {
+      "type": "text",
+      "id": "caption_text",
+      "label": "Image caption",
+      "default": ""
     },
     {
       "type": "range",

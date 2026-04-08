@@ -45,11 +45,11 @@
         "padding_bottom": 50
       }
     },
-    "blog_celebrity_YVjnjW": {
+    "blog_occasion_style_main": {
       "type": "blog-header-video",
       "name": "Blog Header and Video",
       "settings": {
-        "featured_article": "{{ article }}",
+        "featured_article": "",
         "video_url": "",
         "content_max_width": 1100,
         "title_max_width": 980,
@@ -73,15 +73,15 @@
         "padding_bottom": 0
       }
     },
-    "homepage_collection_spotlight_NrJ6Yy": {
+    "homepage_collection_spotlight_UhUg9C": {
       "type": "homepage-collection-spotlight",
       "name": "Image Product Spotlight",
       "settings": {
         "eyebrow": "",
         "title": "",
-        "description": "",
-        "product_list": "{{ article.metafields.custom.blog_celebrity_template.value.spotlight_1_product.value }}",
-        "image": "{{ article.metafields.custom.blog_celebrity_template.value.spotlight_1_image.value }}",
+        "description": "{{ article.metafields.custom.blog_style_template.value.spot_light_1_text | metafield_tag }}",
+        "product_list": "{{ article.metafields.custom.blog_occasion_template.value.spot_light_1_product.value }}",
+        "image": "{{ article.metafields.custom.blog_style_template.value.spot_light_1_image.value }}",
         "layout": "",
         "mobile_layout": "",
         "width": "wrapper--full",
@@ -91,15 +91,33 @@
         "padding_bottom": 40
       }
     },
-    "homepage_collection_spotlight_FFFBck": {
+    "homepage_collection_spotlight_FBYizM": {
       "type": "homepage-collection-spotlight",
-      "disabled": true,
-      "name": "Image Product Spotlight",
+      "name": "Image Product Spotlight 2",
       "settings": {
         "eyebrow": "",
         "title": "",
-        "description": "",
-        "product_list": [],
+        "description": "{{ article.metafields.custom.blog_style_template.value.spot_light_2_text | metafield_tag }}",
+        "product_list": "{{ article.metafields.custom.blog_style_template.value.spot_light_2_product.value }}",
+        "image": "{{ article.metafields.custom.blog_style_template.value.spot_light_2_image.value }}",
+        "layout": "reversed",
+        "mobile_layout": "",
+        "width": "wrapper--full",
+        "color_scheme": "",
+        "background_color": "#ffffff",
+        "padding_top": 40,
+        "padding_bottom": 40
+      }
+    },
+    "homepage_collection_spotlight_fMdKKM": {
+      "type": "homepage-collection-spotlight",
+      "name": "Image Product Spotlight 3",
+      "settings": {
+        "eyebrow": "",
+        "title": "",
+        "description": "<p></p>{{ article.metafields.custom.blog_style_template.value.spot_light_3_text | metafield_tag }}",
+        "product_list": "{{ article.metafields.custom.blog_style_template.value.spot_light_3_product.value }}",
+        "image": "{{ article.metafields.custom.blog_style_template.value.spot_light_3_image.value }}",
         "layout": "",
         "mobile_layout": "",
         "width": "wrapper--full",
@@ -109,32 +127,35 @@
         "padding_bottom": 40
       }
     },
-    "occasion_image_text_grid_AxpeHj": {
+    "occasion_image_text_grid_1": {
       "type": "occasion-image-text-grid",
       "blocks": {
-        "item_jJQTzN": {
+        "item_1": {
           "type": "item",
           "settings": {
-            "text": ""
+            "image": "{{ article.metafields.custom.blog_occasion_template.value.card_1_image.value }}",
+            "text": "<p></p>{{ article.metafields.custom.blog_occasion_template.value.card_1_text | metafield_tag }}"
           }
         },
-        "item_jrV3Dq": {
+        "item_2": {
           "type": "item",
           "settings": {
-            "text": ""
+            "image": "{{ article.metafields.custom.blog_occasion_template.value.card_2_image.value }}",
+            "text": "{{ article.metafields.custom.blog_occasion_template.value.card_2_text | metafield_tag }}"
           }
         },
-        "item_CGCpjH": {
+        "item_3": {
           "type": "item",
           "settings": {
-            "text": ""
+            "image": "{{ article.metafields.custom.blog_occasion_template.value.card_3_image.value }}",
+            "text": "{{ article.metafields.custom.blog_occasion_template.value.card_3_text | metafield_tag }}"
           }
         }
       },
       "block_order": [
-        "item_jJQTzN",
-        "item_jrV3Dq",
-        "item_CGCpjH"
+        "item_1",
+        "item_2",
+        "item_3"
       ],
       "name": "Image Text Grid",
       "settings": {
@@ -143,21 +164,21 @@
         "padding_bottom": 40
       }
     },
-    "celebrity_bottom_cta": {
+    "occasion_bottom_cta_CqA9mP": {
       "type": "occasion-bottom-cta",
       "name": "CTA",
       "settings": {
-        "text": "{{ article.metafields.custom.blog_celebrity_template.value.cta_text | metafield_tag }}",
-        "button_label": "{{ article.metafields.custom.blog_celebrity_template.value.cta_button_name.value }}",
-        "button_link": "{{ article.metafields.custom.blog_celebrity_template.value.cta_button_url.value }}",
-        "padding_top": 50,
-        "padding_bottom": 50
+        "text": "<p></p><p></p>{{ article.metafields.custom.blog_style_template.value.cta_text | metafield_tag }}",
+        "button_label": "{{ article.metafields.custom.blog_occasion_template.value.button_name.value }}",
+        "button_link": "{{ article.metafields.custom.blog_style_template.value.url.value }}",
+        "padding_top": 40,
+        "padding_bottom": 40
       }
     },
-    "homepage_product_sliders_RAq9Xe": {
+    "homepage_product_sliders_BD6if9": {
       "type": "homepage-product-sliders",
       "blocks": {
-        "product_list_tab_xiGR8f": {
+        "product_list_tab_kBmnEB": {
           "type": "product_list_tab",
           "settings": {
             "tab_heading": "Featured products",
@@ -172,7 +193,7 @@
         }
       },
       "block_order": [
-        "product_list_tab_xiGR8f"
+        "product_list_tab_kBmnEB"
       ],
       "name": "Product Slider Tabs",
       "settings": {
@@ -189,12 +210,13 @@
   },
   "order": [
     "article",
-    "blog_celebrity_YVjnjW",
+    "blog_occasion_style_main",
     "blog_video_with_sound_main",
-    "homepage_collection_spotlight_NrJ6Yy",
-    "homepage_collection_spotlight_FFFBck",
-    "occasion_image_text_grid_AxpeHj",
-    "celebrity_bottom_cta",
-    "homepage_product_sliders_RAq9Xe"
+    "homepage_collection_spotlight_UhUg9C",
+    "homepage_collection_spotlight_FBYizM",
+    "homepage_collection_spotlight_fMdKKM",
+    "occasion_image_text_grid_1",
+    "occasion_bottom_cta_CqA9mP",
+    "homepage_product_sliders_BD6if9"
   ]
 }

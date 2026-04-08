@@ -1,0 +1,211 @@
+<!-- /sections/blog-video-with-sound.liquid -->
+{{ 'blog-video-with-sound.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'blog-video-with-sound.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign resolved_video = section.settings.video
+  assign resolved_video_url = section.settings.video_url | strip
+  assign has_video = false
+
+  if resolved_video != blank or resolved_video_url != blank
+    assign has_video = true
+  endif
+
+  assign modal_id = 'BlogVideoSoundModal--' | append: section.id
+  assign modal_title_id = modal_id | append: '-title'
+  assign modal_label = section.settings.modal_label | default: 'Video'
+-%}
+
+{%- if has_video -%}
+  {%- capture inline_video_markup -%}
+    {%- if resolved_video != blank -%}
+      {{
+        resolved_video
+        | video_tag:
+          autoplay: true,
+          loop: true,
+          controls: false,
+          muted: true,
+          playsinline: true,
+          class: 'blog-video-sound__video blog-video-sound__video--inline'
+      }}
+    {%- else -%}
+      <video class="blog-video-sound__video blog-video-sound__video--inline" autoplay loop muted playsinline>
+        <source src="{{ resolved_video_url | escape }}">
+      </video>
+    {%- endif -%}
+  {%- endcapture -%}
+
+  {%- capture modal_video_markup -%}
+    {%- if resolved_video != blank -%}
+      {{
+        resolved_video
+        | video_tag:
+          autoplay: false,
+          loop: false,
+          controls: false,
+          muted: false,
+          playsinline: true,
+          class: 'blog-video-sound__video blog-video-sound__video--modal'
+      }}
+    {%- else -%}
+      <video class="blog-video-sound__video blog-video-sound__video--modal" playsinline>
+        <source src="{{ resolved_video_url | escape }}">
+      </video>
+    {%- endif -%}
+  {%- endcapture -%}
+{%- endif -%}
+
+{%- style -%}
+  #BlogVideoSound--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    --max: {{ section.settings.max_width }}px;
+    --aspect: {{ section.settings.media_aspect_ratio | default: '16/9' }};
+  }
+{%- endstyle -%}
+
+<section
+  id="BlogVideoSound--{{ section.id }}"
+  class="blog-video-sound section-padding"
+  data-section-id="{{ section.id }}"
+  data-section-type="blog-video-with-sound"
+>
+  <div class="blog-video-sound__inner {{ section.settings.width }}">
+    <div class="blog-video-sound__frame">
+      {{ inline_video_markup }}
+      <button
+        type="button"
+        class="blog-video-sound__sound-trigger"
+        data-video-sound-open
+        aria-controls="{{ modal_id }}"
+        aria-expanded="false"
+        aria-haspopup="dialog"
+        aria-label="Play with sound"
+      >
+        <span class="blog-video-sound__sound-icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 43.52 43.52" fill="none">
+            <circle cx="21.76" cy="21.76" r="21.26" />
+            <line x1="27.18" y1="17.88" x2="34.16" y2="24.87" />
+            <line x1="34.16" y1="17.88" x2="27.18" y2="24.87" />
+            <polygon points="11.47 17.21 11.47 26.31 18.41 26.31 23.99 31.89 23.99 11.63 18.41 17.21 11.47 17.21" />
+          </svg>
+        </span>
+        <span>Play with sound</span>
+      </button>
+    </div>
+  </div>
+
+  <div
+    id="{{ modal_id }}"
+    class="blog-video-sound__video-modal"
+    data-video-sound-modal
+    aria-hidden="true"
+    hidden
+  >
+    <div class="blog-video-sound__video-modal-backdrop" data-video-sound-close></div>
+    <div
+      class="blog-video-sound__video-modal-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="{{ modal_title_id }}"
+      tabindex="-1"
+    >
+      <h3 id="{{ modal_title_id }}" class="visually-hidden">{{ modal_label | escape }}</h3>
+      <button
+        type="button"
+        class="blog-video-sound__video-modal-close"
+        data-video-sound-close
+        aria-label="Close"
+      >
+        &times;
+      </button>
+      <div class="blog-video-sound__video-modal-player">
+        {{ modal_video_markup }}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Video Section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        { "value": "wrapper--full", "label": "Full width" },
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Normal" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "min": 700,
+      "max": 1600,
+      "step": 10,
+      "unit": "px",
+      "label": "Max width",
+      "default": 1230
+    },
+    {
+      "type": "select",
+      "id": "media_aspect_ratio",
+      "label": "Media aspect ratio",
+      "default": "16/9",
+      "options": [
+        { "value": "16/9", "label": "16:9" },
+        { "value": "4/3", "label": "4:3" },
+        { "value": "3/4", "label": "3:4" },
+        { "value": "1/1", "label": "1:1" }
+      ]
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Video"
+    },
+    {
+      "type": "url",
+      "id": "video_url",
+      "label": "Video URL (fallback)"
+    },
+    {
+      "type": "text",
+      "id": "modal_label",
+      "label": "Accessibility label",
+      "default": "Video"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 120
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Video Section",
+      "category": "Blog"
+    }
+  ]
+}
+{% endschema %}
