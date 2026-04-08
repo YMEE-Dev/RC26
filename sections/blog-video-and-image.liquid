@@ -1,0 +1,272 @@
+<!-- /sections/blog-video-and-image.liquid -->
+{{ 'blog-video-and-image.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'blog-video-and-image.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign resolved_video = section.settings.video
+  assign resolved_video_url = section.settings.video_url | strip
+  assign resolved_image = section.settings.image
+  assign resolved_image_url = section.settings.image_url | strip
+  assign resolved_caption = section.settings.caption
+  assign has_video = false
+  assign has_image = false
+
+  if resolved_image == blank and resolved_image_url != blank
+    assign resolved_image = resolved_image_url
+  endif
+
+  if resolved_video != blank or resolved_video_url != blank
+    assign has_video = true
+  endif
+
+  if resolved_image != blank
+    assign has_image = true
+  endif
+
+  assign modal_id = 'BlogVideoImageModal--' | append: section.id
+  assign modal_title_id = modal_id | append: '-title'
+  assign modal_label = section.settings.modal_label | default: 'Video'
+-%}
+
+{%- if has_video or has_image -%}
+  {%- if has_video -%}
+    {%- capture inline_video_markup -%}
+      {%- if resolved_video != blank -%}
+        {{
+          resolved_video
+          | video_tag:
+            autoplay: true,
+            loop: true,
+            controls: false,
+            muted: true,
+            playsinline: true,
+            class: 'blog-video-image__video blog-video-image__video--inline'
+        }}
+      {%- else -%}
+        <video class="blog-video-image__video blog-video-image__video--inline" autoplay loop muted playsinline>
+          <source src="{{ resolved_video_url | escape }}">
+        </video>
+      {%- endif -%}
+    {%- endcapture -%}
+
+    {%- capture modal_video_markup -%}
+      {%- if resolved_video != blank -%}
+        {{
+          resolved_video
+          | video_tag:
+            autoplay: false,
+            loop: false,
+            controls: false,
+            muted: false,
+            playsinline: true,
+            class: 'blog-video-image__video blog-video-image__video--modal'
+        }}
+      {%- else -%}
+        <video class="blog-video-image__video blog-video-image__video--modal" playsinline>
+          <source src="{{ resolved_video_url | escape }}">
+        </video>
+      {%- endif -%}
+    {%- endcapture -%}
+  {%- endif -%}
+
+  {%- style -%}
+    #BlogVideoImage--{{ section.id }} {
+      --PT: {{ section.settings.padding_top }}px;
+      --PB: {{ section.settings.padding_bottom }}px;
+      --max: {{ section.settings.max_width }}px;
+      --aspect: {{ section.settings.media_aspect_ratio | default: '16/9' }};
+    }
+  {%- endstyle -%}
+
+  <section
+    id="BlogVideoImage--{{ section.id }}"
+    class="blog-video-image section-padding"
+    data-section-id="{{ section.id }}"
+    data-section-type="blog-video-and-image"
+  >
+    <div class="blog-video-image__inner {{ section.settings.width }}">
+      <div class="blog-video-image__frame">
+        {%- if has_video -%}
+          {{ inline_video_markup }}
+
+          <button
+            type="button"
+            class="blog-video-image__sound-trigger"
+            data-video-image-open
+            aria-controls="{{ modal_id }}"
+            aria-expanded="false"
+            aria-haspopup="dialog"
+            aria-label="Play with sound"
+          >
+            <span class="blog-video-image__sound-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 43.52 43.52" fill="none">
+                <circle cx="21.76" cy="21.76" r="21.26" />
+                <line x1="27.18" y1="17.88" x2="34.16" y2="24.87" />
+                <line x1="34.16" y1="17.88" x2="27.18" y2="24.87" />
+                <polygon points="11.47 17.21 11.47 26.31 18.41 26.31 23.99 31.89 23.99 11.63 18.41 17.21 11.47 17.21" />
+              </svg>
+            </span>
+            <span>Play with sound</span>
+          </button>
+        {%- elsif has_image -%}
+          {%- if resolved_image.width != blank -%}
+            {{
+              resolved_image
+              | image_url: width: 2400
+              | image_tag:
+                class: 'blog-video-image__image',
+                widths: '550, 750, 900, 1100, 1500, 1800, 2100, 2400',
+                sizes: '(min-width: 990px) min(var(--max), 100vw - 48px), calc(100vw - 32px)',
+                loading: 'lazy'
+            }}
+          {%- else -%}
+            <img class="blog-video-image__image" src="{{ resolved_image | escape }}" alt="" loading="lazy">
+          {%- endif -%}
+        {%- endif -%}
+      </div>
+
+      {%- if has_image and resolved_caption != blank -%}
+        <p class="blog-video-image__caption body">{{ resolved_caption | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- if has_video -%}
+      <div
+        id="{{ modal_id }}"
+        class="blog-video-image__video-modal"
+        data-video-image-modal
+        aria-hidden="true"
+        hidden
+      >
+        <div class="blog-video-image__video-modal-backdrop" data-video-image-close></div>
+        <div
+          class="blog-video-image__video-modal-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="{{ modal_title_id }}"
+          tabindex="-1"
+        >
+          <h3 id="{{ modal_title_id }}" class="visually-hidden">{{ modal_label | escape }}</h3>
+          <button
+            type="button"
+            class="blog-video-image__video-modal-close"
+            data-video-image-close
+            aria-label="Close"
+          >
+            &times;
+          </button>
+          <div class="blog-video-image__video-modal-player">
+            {{ modal_video_markup }}
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Video and Image Section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        { "value": "wrapper--full", "label": "Full width" },
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Normal" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "min": 700,
+      "max": 1600,
+      "step": 10,
+      "unit": "px",
+      "label": "Max width",
+      "default": 1230
+    },
+    {
+      "type": "select",
+      "id": "media_aspect_ratio",
+      "label": "Media aspect ratio",
+      "default": "16/9",
+      "options": [
+        { "value": "16/9", "label": "16:9" },
+        { "value": "4/3", "label": "4:3" },
+        { "value": "3/4", "label": "3:4" },
+        { "value": "1/1", "label": "1:1" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Video"
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Video"
+    },
+    {
+      "type": "url",
+      "id": "video_url",
+      "label": "Video URL (fallback)"
+    },
+    {
+      "type": "header",
+      "content": "Image (if no video)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "image_url",
+      "label": "Image URL (fallback)"
+    },
+    {
+      "type": "text",
+      "id": "modal_label",
+      "label": "Accessibility label",
+      "default": "Video"
+    },
+    {
+      "type": "text",
+      "id": "caption",
+      "label": "Image caption (shown under image)",
+      "default": ""
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 120
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Video and Image Section",
+      "category": "Blog"
+    }
+  ]
+}
+{% endschema %}
