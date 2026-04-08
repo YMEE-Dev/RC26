@@ -5,8 +5,10 @@
   assign featured_article = blank
   assign resolved_video = section.settings.video
   assign resolved_video_url = section.settings.video_url | strip
+  assign resolved_image = section.settings.image
   assign has_article_content = false
   assign has_video = false
+  assign has_image = false
   assign section_classes = 'blog-brand'
   assign modal_id = 'BlogBrandVideoModal--' | append: section.id
   assign modal_title_id = modal_id | append: '-title'
@@ -30,6 +32,10 @@
 
   if featured_article != blank
     assign modal_label = featured_article.title | default: modal_label
+
+    if resolved_image == blank and featured_article.image != blank
+      assign resolved_image = featured_article.image
+    endif
 
     if resolved_video == blank
       if featured_article.metafields.custom.top_video.value != blank
@@ -55,6 +61,10 @@
 
   if resolved_video != blank or resolved_video_url != blank
     assign has_video = true
+  endif
+
+  if resolved_image != blank
+    assign has_image = true
   endif
 -%}
 
@@ -180,6 +190,22 @@
           </div>
         </div>
       </div>
+    {%- elsif has_image -%}
+      <div class="blog-brand__media" data-brand-fade data-brand-fade-delay="0.6">
+        {%- if resolved_image.width != blank -%}
+          {{
+            resolved_image
+            | image_url: width: 2400
+            | image_tag:
+              class: 'blog-brand__image',
+              widths: '550, 750, 900, 1100, 1500, 1800, 2100, 2400',
+              sizes: '(min-width: 990px) min(var(--brand-content-max-width), 100vw - 48px), calc(100vw - 40px)',
+              loading: 'lazy'
+          }}
+        {%- else -%}
+          <img class="blog-brand__image" src="{{ resolved_image | escape }}" alt="{{ modal_label | escape }}" loading="lazy">
+        {%- endif -%}
+      </div>
     {%- endif -%}
 
     {%- if has_article_content -%}
@@ -208,6 +234,12 @@
       "type": "video",
       "id": "video",
       "label": "Video"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Header image (fallback)",
+      "info": "Optional. If no video is set, the article featured image (or this image) will be shown."
     },
     {
       "type": "url",
