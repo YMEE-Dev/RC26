@@ -24,135 +24,134 @@
   assign animation_order = 0
 -%}
 
-{%- style -%}
-  #HomepageCollectionSpotlight--{{ section.id }} {
-    --PT: {{ section.settings.padding_top }}px;
-    --PB: {{ section.settings.padding_bottom }}px;
-    --bg-color: {{ section.settings.background_color }};
-  }
-{%- endstyle -%}
+{%- if image != blank -%}
+  {%- style -%}
+    #HomepageCollectionSpotlight--{{ section.id }} {
+      --PT: {{ section.settings.padding_top }}px;
+      --PB: {{ section.settings.padding_bottom }}px;
+      --bg-color: {{ section.settings.background_color }};
+    }
+  {%- endstyle -%}
 
-{%- if show_recently_viewed_indicator -%}
-  <script src="{{ 'grid-item.js' | asset_url }}" defer></script>
-{%- endif -%}
+  {%- if show_recently_viewed_indicator -%}
+    <script src="{{ 'grid-item.js' | asset_url }}" defer></script>
+  {%- endif -%}
 
-{%- if settings.quickview_enable -%}
-  <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
-{%- endif -%}
+  {%- if settings.quickview_enable -%}
+    <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
 
-<section
-  id="HomepageCollectionSpotlight--{{ section.id }}"
-  class="homepage-collection-spotlight section-padding {{ color_scheme }}{% if layout == 'reversed' %} homepage-collection-spotlight--reversed{% endif %} {% if mobile_layout == 'reversed' %} homepage-collection-spotlight--mobile_reversed{% endif %}"
-  data-section-id="{{ section.id }}"
-  data-section-type="homepage-collection-spotlight"
-  style="background-color: var(--bg-color);"
->
-  <div class="homepage-collection-spotlight__wrapper {{ section.settings.width }}">
-    <div class="homepage-collection-spotlight__layout">
-      <div class="homepage-collection-spotlight__content">
-        <div class="homepage-collection-spotlight__copy">
-          {%- if section_eyebrow != blank -%}
-            {%- assign animation_order = animation_order | plus: 1 -%}
-            <p
-              class="homepage-collection-spotlight__eyebrow title"
-              data-aos="hero"
-              data-aos-anchor="{{ animation_anchor }}"
-              data-aos-order="{{ animation_order }}"
-            >
-              {{ section_eyebrow | escape }}
-            </p>
-          {%- endif -%}
+  <section
+    id="HomepageCollectionSpotlight--{{ section.id }}"
+    class="homepage-collection-spotlight section-padding {{ color_scheme }}{% if layout == 'reversed' %} homepage-collection-spotlight--reversed{% endif %} {% if mobile_layout == 'reversed' %} homepage-collection-spotlight--mobile_reversed{% endif %}"
+    data-section-id="{{ section.id }}"
+    data-section-type="homepage-collection-spotlight"
+    style="background-color: var(--bg-color);"
+  >
+    <div class="homepage-collection-spotlight__wrapper {{ section.settings.width }}">
+      <div class="homepage-collection-spotlight__layout">
+        <div class="homepage-collection-spotlight__content">
+          <div class="homepage-collection-spotlight__copy">
+            {%- if section_eyebrow != blank -%}
+              {%- assign animation_order = animation_order | plus: 1 -%}
+              <p
+                class="homepage-collection-spotlight__eyebrow title"
+                data-aos="hero"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-order="{{ animation_order }}"
+              >
+                {{ section_eyebrow | escape }}
+              </p>
+            {%- endif -%}
 
-          {%- if section_title != blank -%}
-            {%- assign animation_order = animation_order | plus: 1 -%}
-            <h2
-              class="homepage-collection-spotlight__title"
-              data-aos="hero"
-              data-aos-anchor="{{ animation_anchor }}"
-              data-aos-order="{{ animation_order }}"
-            >
-              {{ section_title | escape }}
-            </h2>
-          {%- endif -%}
+            {%- if section_title != blank -%}
+              {%- assign animation_order = animation_order | plus: 1 -%}
+              <h2
+                class="homepage-collection-spotlight__title"
+                data-aos="hero"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-order="{{ animation_order }}"
+              >
+                {{ section_title | escape }}
+              </h2>
+            {%- endif -%}
 
-          {%- if section_description != blank -%}
-            {%- assign animation_order = animation_order | plus: 1 -%}
-            <div
-              class="homepage-collection-spotlight__description rte body"
-              data-aos="hero"
-              data-aos-anchor="{{ animation_anchor }}"
-              data-aos-order="{{ animation_order }}"
-            >
-              {{ section_description }}
-            </div>
-          {%- endif -%}
-        </div>
+            {%- if section_description != blank -%}
+              {%- assign animation_order = animation_order | plus: 1 -%}
+              <div
+                class="homepage-collection-spotlight__description rte body"
+                data-aos="hero"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-order="{{ animation_order }}"
+              >
+                {{ section_description }}
+              </div>
+            {%- endif -%}
+          </div>
 
-        <div class="homepage-collection-spotlight__products">
-          <grid-slider>
-            <div
-              class="grid grid--slider grid--mobile-slider{% if section.settings.product_list.count <= 1 %} grid--slider-disabled{% endif %}"
-              data-grid-slider
-              id="HomepageCollectionSpotlightSlider--{{ section.id }}"
-            >
-              {%- for product in section.settings.product_list -%}
-                {%- liquid
-                  assign hidden_product = false
-                  if product.tags contains 'hide'
-                    assign hidden_product = true
-                  endif
-                -%}
-
-                {%- if hidden_product == false -%}
-                  {%- assign rendered_products_count = rendered_products_count | plus: 1 -%}
-                  {%-
-                    render 'product-grid-item',
-                    product: product,
-                    animation_delay: rendered_products_count | minus: 1,
-                    animation_anchor: '#HomepageCollectionSpotlightSlider--' | append: section.id,
-                    index: rendered_products_count,
-                    sizes: sizes,
-                    disable_image_hover: true,
-                    modifier_class: 'homepage-collection-spotlight__product-card'
-                  -%}
-                {%- endif -%}
-              {%- endfor -%}
-
-              {%- if rendered_products_count == 0 -%}
-                {%- for i in (1..2) -%}
+          <div class="homepage-collection-spotlight__products">
+            <grid-slider>
+              <div
+                class="grid grid--slider grid--mobile-slider{% if section.settings.product_list.count <= 1 %} grid--slider-disabled{% endif %}"
+                data-grid-slider
+                id="HomepageCollectionSpotlightSlider--{{ section.id }}"
+              >
+                {%- for product in section.settings.product_list -%}
                   {%- liquid
-                    assign placeholder = 'product-' | append: forloop.index
-                    capture placeholder_title
-                      cycle 'Spotlight Product', 'Collection Piece'
-                    endcapture
+                    assign hidden_product = false
+                    if product.tags contains 'hide'
+                      assign hidden_product = true
+                    endif
                   -%}
-                  {%-
-                    render 'onboarding-product-grid-item',
-                    title: placeholder_title,
-                    placeholder: placeholder,
-                    index: forloop.index,
-                    animation_delay: forloop.index0,
-                    animation_anchor: '#HomepageCollectionSpotlightSlider--' | append: section.id
-                  -%}
-                {%- endfor -%}
-              {%- endif -%}
-            </div>
-          </grid-slider>
-        </div>
-      </div>
 
-      {%- assign animation_order = animation_order | plus: 1 -%}
-      <div
-        class="homepage-collection-spotlight__media{% if mobile_image != blank %} homepage-collection-spotlight__media--has-mobile-image{% endif %}"
-        data-aos="hero"
-        data-aos-anchor="{{ animation_anchor }}"
-        data-aos-order="{{ animation_order }}"
-      >
-        {%- if image != blank or mobile_image != blank -%}
-          {%- assign desktop_image = image | default: mobile_image -%}
-          {%- if desktop_image.width != blank -%}
+                  {%- if hidden_product == false -%}
+                    {%- assign rendered_products_count = rendered_products_count | plus: 1 -%}
+                    {%-
+                      render 'product-grid-item',
+                      product: product,
+                      animation_delay: rendered_products_count | minus: 1,
+                      animation_anchor: '#HomepageCollectionSpotlightSlider--' | append: section.id,
+                      index: rendered_products_count,
+                      sizes: sizes,
+                      disable_image_hover: true,
+                      modifier_class: 'homepage-collection-spotlight__product-card'
+                    -%}
+                  {%- endif -%}
+                {%- endfor -%}
+
+                {%- if rendered_products_count == 0 -%}
+                  {%- for i in (1..2) -%}
+                    {%- liquid
+                      assign placeholder = 'product-' | append: forloop.index
+                      capture placeholder_title
+                        cycle 'Spotlight Product', 'Collection Piece'
+                      endcapture
+                    -%}
+                    {%-
+                      render 'onboarding-product-grid-item',
+                      title: placeholder_title,
+                      placeholder: placeholder,
+                      index: forloop.index,
+                      animation_delay: forloop.index0,
+                      animation_anchor: '#HomepageCollectionSpotlightSlider--' | append: section.id
+                    -%}
+                  {%- endfor -%}
+                {%- endif -%}
+              </div>
+            </grid-slider>
+          </div>
+        </div>
+
+        {%- assign animation_order = animation_order | plus: 1 -%}
+        <div
+          class="homepage-collection-spotlight__media{% if mobile_image != blank %} homepage-collection-spotlight__media--has-mobile-image{% endif %}"
+          data-aos="hero"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-order="{{ animation_order }}"
+        >
+          {%- if image.width != blank -%}
             {{
-              desktop_image
+              image
               | image_url: width: 2400
               | image_tag:
                 class: 'homepage-collection-spotlight__image homepage-collection-spotlight__image--desktop',
@@ -163,7 +162,7 @@
           {%- else -%}
             <img
               class="homepage-collection-spotlight__image homepage-collection-spotlight__image--desktop"
-              src="{{ desktop_image | escape }}"
+              src="{{ image | escape }}"
               alt=""
               loading="lazy"
             >
@@ -189,15 +188,11 @@
               >
             {%- endif -%}
           {%- endif -%}
-        {%- else -%}
-          <div class="homepage-collection-spotlight__placeholder">
-            {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-          </div>
-        {%- endif -%}
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
+{%- endif -%}
 
 {% schema %}
 {
