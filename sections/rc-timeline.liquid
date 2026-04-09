@@ -322,6 +322,31 @@
       {% endfor %}
     </div>
   </div>
+
+  {%- if section.settings.cta_enable -%}
+    <div
+      class="rc-story__cta"
+      style="
+        --rc-cta-pt: {{ section.settings.cta_padding_top }}px;
+        --rc-cta-pb: {{ section.settings.cta_padding_bottom }}px;
+        --rc-cta-text-max: {{ section.settings.cta_text_max_width }}px;
+      "
+    >
+      <div class="rc-story__cta-inner">
+        {%- if section.settings.cta_text != blank -%}
+          <div class="rc-story__cta-text body rte">
+            {{ section.settings.cta_text }}
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.cta_button_label != blank and section.settings.cta_button_link != blank -%}
+          <a class="rc-story__cta-button" href="{{ section.settings.cta_button_link }}">
+            {{ section.settings.cta_button_label | escape }}
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+  {%- endif -%}
 </section>
 
 {% schema %}
@@ -385,7 +410,16 @@
     { "type": "text", "id": "year_rail_aria_label", "label": "Year rail aria label", "default": "Timeline years" },
     { "type": "range", "id": "panel_height", "label": "Panel height", "min": 55, "max": 95, "step": 1, "unit": "vh", "default": 76 },
     { "type": "range", "id": "year_size", "label": "Year size", "min": 24, "max": 80, "step": 1, "unit": "px", "default": 40 },
-    { "type": "range", "id": "caption_size", "label": "Caption size", "min": 10, "max": 22, "step": 1, "unit": "px", "default": 16 }
+    { "type": "range", "id": "caption_size", "label": "Caption size", "min": 10, "max": 22, "step": 1, "unit": "px", "default": 16 },
+
+    { "type": "header", "content": "CTA" },
+    { "type": "checkbox", "id": "cta_enable", "label": "Show CTA", "default": true },
+    { "type": "richtext", "id": "cta_text", "label": "CTA text", "default": "<p>Discover more signature pieces crafted for every occasion.</p>" },
+    { "type": "text", "id": "cta_button_label", "label": "Button label", "default": "VIEW ALL COLLECTIONS" },
+    { "type": "url", "id": "cta_button_link", "label": "Button link" },
+    { "type": "range", "id": "cta_text_max_width", "label": "Text max width", "min": 280, "max": 700, "step": 10, "unit": "px", "default": 450 },
+    { "type": "range", "id": "cta_padding_top", "label": "CTA padding top", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 120 },
+    { "type": "range", "id": "cta_padding_bottom", "label": "CTA padding bottom", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 120 }
   ],
   "blocks": [
     {
