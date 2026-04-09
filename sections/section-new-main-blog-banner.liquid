@@ -42,7 +42,6 @@
   document.addEventListener('DOMContentLoaded', function() {
     const section = document.querySelector('[data-section-type="new-main-blog-banner"]');
     const container = document.getElementById('blogBannerContent');
-    const STOREFRONT_TOKEN = "{{ shop.metaobjects.storefront_access_token.value }}";
     const SHOP_DOMAIN = "{{ shop.domain }}";
 
     // Function to capitalize first letter of each word
@@ -99,12 +98,13 @@
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Shopify-Storefront-Access-Token": STOREFRONT_TOKEN
+        "X-Shopify-Storefront-Access-Token": ""
       },
       body: JSON.stringify({ query: articleQuery })
     })
     .then(res => res.json())
     .then(data => {
+      console.log('Blog articles:', data);
       let article;
 
       if (isAllBlogs) {
