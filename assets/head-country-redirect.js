@@ -1,4 +1,9 @@
 (() => {
+  const COUNTRY_REDIRECT_OPEN_ATTRIBUTE = 'data-country-redirect-open';
+  const COUNTRY_REDIRECT_SHOWN_ATTRIBUTE = 'data-country-redirect-shown';
+  const COUNTRY_REDIRECT_OPEN_EVENT = 'theme:country-redirect:opened';
+  const COUNTRY_REDIRECT_CLOSE_EVENT = 'theme:country-redirect:closed';
+
   class HeadCountryRedirect extends HTMLElement {
     connectedCallback() {
       if (this.initialized) return;
@@ -51,6 +56,10 @@
     }
 
     disconnectedCallback() {
+      if (this.isDialogOpen()) {
+        this.clearPriorityState();
+      }
+
       if (this.handleCancel) {
         this.dialog?.removeEventListener('cancel', this.handleCancel);
       }
@@ -70,6 +79,10 @@
       if (this.handleBackdropClose) {
         this.dialog?.removeEventListener('click', this.handleBackdropClose);
       }
+    }
+
+    isDialogOpen() {
+      return Boolean(this.dialog?.open || this.dataset.fallbackOpen === 'true');
     }
 
     isPreviewMode() {
@@ -288,6 +301,31 @@
       this.flagIcon.setAttribute('title', countryLabel);
     }
 
+    announceOpened() {
+      document.documentElement.setAttribute(COUNTRY_REDIRECT_OPEN_ATTRIBUTE, 'true');
+      document.documentElement.setAttribute(COUNTRY_REDIRECT_SHOWN_ATTRIBUTE, 'true');
+
+      document.dispatchEvent(
+        new CustomEvent(COUNTRY_REDIRECT_OPEN_EVENT, {
+          detail: {
+            sectionId: this.dataset.sectionId || '',
+          },
+        })
+      );
+    }
+
+    clearPriorityState() {
+      document.documentElement.removeAttribute(COUNTRY_REDIRECT_OPEN_ATTRIBUTE);
+
+      document.dispatchEvent(
+        new CustomEvent(COUNTRY_REDIRECT_CLOSE_EVENT, {
+          detail: {
+            sectionId: this.dataset.sectionId || '',
+          },
+        })
+      );
+    }
+
     open() {
       document.dispatchEvent(
         new CustomEvent('theme:scroll:lock', {
@@ -318,6 +356,8 @@
       } else {
         (this.ctaButton || this.scrollableEl || this.dialog).focus?.();
       }
+
+      this.announceOpened();
     }
 
     redirectNow() {
@@ -350,6 +390,7 @@
       }
 
       delete this.dataset.fallbackOpen;
+      this.clearPriorityState();
     }
   }
 
