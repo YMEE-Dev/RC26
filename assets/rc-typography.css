@@ -1,0 +1,71 @@
+/**
+ * RC26 Typography Overrides
+ * Targeted overrides for RC26 design specifications.
+ * Loaded after theme.css via snippets/head.liquid.
+ */
+
+/* ── Accordions ─────────────────────────────────────────────────── */
+
+/* Accordion title: 12/20 (theme.css sets line-height to LINE-HEIGHT-BODY=22px) */
+.accordion__title {
+  line-height: var(--LINE-HEIGHT-CAPTION);
+}
+
+/* ── FAQ sidebar widget links ───────────────────────────────────── */
+
+/* Parent container line-height: 17px → 20px */
+.widget__links {
+  line-height: var(--LINE-HEIGHT-CAPTION);
+}
+
+/* ── PLP collection nav ─────────────────────────────────────────── */
+
+/* Subcategory titles: 12/20 */
+.collection__nav .subcollection_links-link {
+  font-size: var(--FONT-SIZE-CAPTION);
+  line-height: var(--LINE-HEIGHT-CAPTION);
+}
+
+/* Filter group heading: 11/16 */
+.filter-group__heading {
+  font-size: var(--FONT-SIZE-INPUT-LABEL);
+  line-height: var(--LINE-HEIGHT-INPUT-LABEL);
+}
+
+/* ── Predictive search ──────────────────────────────────────────── */
+
+/* Suggested results: 12/20 */
+.predictive-search__item {
+  font-size: var(--FONT-SIZE-CAPTION);
+  line-height: var(--LINE-HEIGHT-CAPTION);
+}
+
+/* ── Mobile overrides ───────────────────────────────────────────── */
+
+@media only screen and (max-width: 749px) {
+  /* Homepage banner body text: 14/22 */
+  .hero__description {
+    font-size: var(--FONT-SIZE-BASE);
+    line-height: var(--LINE-HEIGHT-BODY);
+  }
+
+  /* PLP / Search PLP product titles: 11/16 */
+  .product-item__title {
+    font-size: var(--FONT-SIZE-INPUT-LABEL);
+    line-height: var(--LINE-HEIGHT-INPUT-LABEL);
+  }
+
+  /* PLP / Search PLP product prices: 11/16 */
+  .product-item .price,
+  .product-item .price__regular,
+  .product-item .price__sale,
+  .product-item .price-item {
+    font-size: var(--FONT-SIZE-INPUT-LABEL);
+    line-height: var(--LINE-HEIGHT-INPUT-LABEL);
+  }
+
+  /* PLP "read more": regular weight (not bold) */
+  .collection .caps--link {
+    font-weight: var(--FONT-WEIGHT-BODY);
+  }
+}
