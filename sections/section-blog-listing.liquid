@@ -188,7 +188,6 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    const STOREFRONT_TOKEN = '{{ shop.metaobjects.storefront_access_token.value }}';
     const SHOP_DOMAIN = '{{ shop.domain }}';
     /* -----------------------------
   NAVIGATION (Blogs)
@@ -208,12 +207,13 @@
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Shopify-Storefront-Access-Token': STOREFRONT_TOKEN,
+        'X-Shopify-Storefront-Access-Token': '',
       },
       body: JSON.stringify({query}),
     })
       .then((res) => res.json())
       .then((data) => {
+        console.log('Blogs:', data);
         const blogs = data.data.blogs.nodes
           .filter((blog) => !'{{ section.settings.tag_to_exclude }}'.includes(blog.handle))
           .sort((a, b) => a.title.localeCompare(b.title));

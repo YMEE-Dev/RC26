@@ -141,6 +141,17 @@
     event.preventDefault();
   });
 
+  const breakpointRefreshQuery = window.matchMedia("(min-width: 960px)");
+  const handleBreakpointRefresh = () => {
+    window.location.reload();
+  };
+
+  if (typeof breakpointRefreshQuery.addEventListener === "function") {
+    breakpointRefreshQuery.addEventListener("change", handleBreakpointRefresh);
+  } else if (typeof breakpointRefreshQuery.addListener === "function") {
+    breakpointRefreshQuery.addListener(handleBreakpointRefresh);
+  }
+
   // ^^ Keep your scripts inside this IIFE function call to
   // avoid leaking your variables into the global scope.
 })();
