@@ -4475,14 +4475,14 @@ body * {
 
 @media only screen and (min-width: 750px) and (max-width: 989px) {
   .section-padding {
-    --padding-top: calc(var(--PT) * 0.5);
+    --padding-top: calc(var(--PT) * 0.7);
     --padding-bottom: calc(var(--PB) * 0.5);
   }
 }
 
 @media only screen and (max-width: 749px) {
   .section-padding {
-    --padding-top: calc(var(--PT) * 0.5);
+    --padding-top: calc(var(--PT) * 0.7);
     --padding-bottom: calc(var(--PB) * 0.5);
     padding-top: var(--PT-MOBILE, var(--padding-top));
   }
@@ -7598,6 +7598,7 @@ hover-disclosure {
   position: absolute;
   z-index: 6002;
   width: 100%;
+  top: calc(0px - var(--announcement-height));
 }
 
 .theme__header .icon {
@@ -9095,7 +9096,7 @@ body:not(.is-loaded) .announcement__wrapper {
 }
 
 .announcement__wrapper--top {
-  z-index: 5500;
+  z-index: 6002;
 }
 
 .announcement__wrapper--top.announcement__wrapper--borders {
@@ -9565,7 +9566,7 @@ html.supports-touch ticker-bar[data-slide]:not([paused]) .ticker--animated {
   flex-direction: row-reverse;
   border: 0;
   padding: 0 !important;
-  height: 86px;
+  height: calc(var(--HEADER-HEIGHT-MOBILE) + var(--announcement-height, 36px));
 }
 
 .drawer--header .drawer__close {

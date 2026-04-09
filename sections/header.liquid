@@ -66,7 +66,7 @@
   assign logo_width = '800'
   assign logo_width_15x = logo_width | times: 1.5 | round
   assign logo_width_2x = logo_width | times: 2 | round
-  assign logo_width_mobile = '360'
+  assign logo_width_mobile = '700'
   assign logo_width_mobile_15x = logo_width_mobile | times: 1.5 | round
   assign logo_width_mobile_2x = logo_width_mobile | times: 2 | round
   assign logo_sizes = '(min-width: 750px) ' | append: logo_width | append: 'px, (min-width: ' | append: logo_width_mobile_2x | append: 'px) ' | append: logo_width_mobile | append: 'px, calc((100vw - 64px) * 0.5)'
@@ -180,7 +180,7 @@
   }
 
   .theme__header {
-    --PT: {{ padding_top }}px;
+    --PT: calc({{ padding_top }}px + var(--announcement-height, 36px));
     --PB: {{ padding_bottom }}px;
     isolation: isolate;
 
@@ -233,6 +233,7 @@
       --logo-padding_product: {{ logo_padding | times: 0.60 }};
       --logo-width-desktop: {{ logo_width }}px;
       --logo-width-mobile: {{ logo_width_mobile }}px;
+      --logo-width-mobile-desktop: 540px;
     }
   {%- endif -%}
 
@@ -1677,22 +1678,22 @@
     {
       "type": "range",
       "id": "padding_top",
-      "min": 5,
-      "max": 42,
-      "step": 1,
+      "min": 4,
+      "max": 80,
+      "step": 2,
       "unit": "px",
       "label": "Top",
-      "default": 15
+      "default": 12
     },
     {
       "type": "range",
       "id": "padding_bottom",
-      "min": 5,
-      "max": 42,
-      "step": 1,
+      "min": 4,
+      "max": 80,
+      "step": 2,
       "unit": "px",
       "label": "Bottom",
-      "default": 15
+      "default": 12
     }
   ],
   "blocks": [
