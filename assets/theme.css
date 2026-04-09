@@ -7486,6 +7486,9 @@ mobile-menu .drawer__body {
 .cart__item__content {
   width: calc(100% - 180px);
   padding-left: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 @media only screen and (max-width: 960px) {
@@ -18666,7 +18669,7 @@ a.review {
 
 /*====== Cart Template ======*/
 .cart {
-  --inner: 15px;
+  --inner: 20px;
   width: auto;
   padding-left: var(--outer);
   padding-right: var(--outer);
@@ -18683,7 +18686,7 @@ a.review {
   flex-flow: row nowrap;
   justify-content: space-between;
   align-items: center;
-  height: 100%;
+  height: auto;
 }
 
 .cart .cart__item__content__right {
@@ -18803,18 +18806,13 @@ a.review {
 }
 
 .cart__title {
-  font-family: var(--FONT-STACK-BODY);
-  font-weight: var(--FONT-WEIGHT-BODY-BOLD);
-  font-style: var(--FONT-STYLE-BODY);
-  letter-spacing: var(--LETTER-SPACING-BODY);
-  text-transform: none;
-  display: flex;
-  line-height: 1.36;
+  padding: 0;
+  margin: 0;
 }
 
 .cart__items {
   width: 100%;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid #d9d9d9;
   margin-top: var(--inner);
 }
 
@@ -18826,12 +18824,12 @@ a.review {
 
 .cart__items .cart__item {
   padding: var(--inner) 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid #d9d9d9;
   align-items: stretch;
 }
 
 .cart__items .cart__item:last-child {
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid #d9d9d9;
 }
 
 @media only screen and (max-width: 749px) {
@@ -18879,7 +18877,7 @@ a.review {
 .cart__items .cart__price {
   width: calc(60% - 95px);
   padding: 0 10px;
-  text-align: center;
+  text-align: left;
 }
 
 .cart__items .cart__price ins,
@@ -19057,7 +19055,6 @@ a.review {
 
 .cart__foot__inner {
   padding: calc(var(--inner) - 2px) 0;
-  border-top: 1px solid #e5e5e5;
 }
 
 .cart__note {
@@ -19138,7 +19135,7 @@ a.review {
 }
 
 .cart__checkout {
-  margin: var(--inner) 0;
+  margin: var(--inner) 0 0;
 }
 
 .cart__checkout .icon {
@@ -19229,7 +19226,10 @@ input.cart__acceptance__input {
   display: flex;
   justify-content: center;
   padding-top: calc(var(--inner) / 2);
-  border-top: 1px solid var(--border);
+}
+
+.additional-checkout-buttons {
+  margin-top: var(--inner);
 }
 
 .additional-checkout-buttons--express {
