@@ -183,6 +183,11 @@
     --PT: calc({{ padding_top }}px + var(--announcement-height, 36px));
     --PB: {{ padding_bottom }}px;
     isolation: isolate;
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity 0.24s ease,
+      visibility 0s linear;
 
     {% if show_separator_line %}
       {% unless border_color.alpha == 0.0 or border_color == blank %}
@@ -190,6 +195,24 @@
       {% endunless %}
       --border-opacity: {{ section.settings.separator_opacity | times: 0.01 }};
     {% endif %}
+  }
+
+  .theme__header[data-header-color-pending='true'] {
+    opacity: 0 !important;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .theme__header[data-header-color-pending='true']::before,
+  .theme__header[data-header-color-pending='true']::after {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  .theme__header[data-header-color-ready='true'] {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
   }
 
   .theme__header__scroll-blur {
@@ -634,8 +657,8 @@
     class="theme__header{% if show_separator_line %} has-border{% endif %}"
     role="banner"
     style="--header-scroll-reveal-opacity: 0; --header-scroll-reveal-blur: 0px; --header-scroll-reveal-background: linear-gradient(180deg, rgba(249, 249, 249, 0.25) 0%, rgba(249, 249, 249, 0.00) 100%);"
+    data-header-color-pending="true"
     data-header-height
-    data-aos="fade"
     data-header-desktop
   >
     <span class="theme__header__scroll-blur" aria-hidden="true"></span>
@@ -1006,6 +1029,131 @@
       return [255, 255, 255];
     };
 
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+    const getAlphaCompositedLuminance = (rgba, fallbackRgb) => {
+      const alpha = rgba[3] / 255;
+      if (alpha >= 1) {
+        return getLuminance([rgba[0], rgba[1], rgba[2]]);
+      }
+
+      const [bgR, bgG, bgB] = fallbackRgb;
+      return getLuminance([
+        Math.round(rgba[0] * alpha + bgR * (1 - alpha)),
+        Math.round(rgba[1] * alpha + bgG * (1 - alpha)),
+        Math.round(rgba[2] * alpha + bgB * (1 - alpha)),
+      ]);
+    };
+    const getObjectPositionOffset = (value, freeSpace, axis) => {
+      if (!value) return freeSpace / 2;
+
+      const normalized = value.toLowerCase();
+      if (normalized.endsWith('%')) {
+        return (parseFloat(normalized) / 100) * freeSpace;
+      }
+
+      if (normalized.endsWith('px')) {
+        return parseFloat(normalized);
+      }
+
+      if (normalized === 'center') return freeSpace / 2;
+      if (axis === 'x') {
+        if (normalized === 'left') return 0;
+        if (normalized === 'right') return freeSpace;
+      } else {
+        if (normalized === 'top') return 0;
+        if (normalized === 'bottom') return freeSpace;
+      }
+
+      const parsed = parseFloat(normalized);
+      return Number.isFinite(parsed) ? parsed : freeSpace / 2;
+    };
+    const getRenderedMediaGeometry = (mediaEl, sourceWidth, sourceHeight) => {
+      const rect = mediaEl.getBoundingClientRect();
+      const style = getComputedStyle(mediaEl);
+      const objectFit = style.objectFit || 'fill';
+      const positionTokens = (style.objectPosition || '50% 50%').trim().split(/\s+/);
+      const posX = positionTokens[0] || '50%';
+      const posY = positionTokens[1] || positionTokens[0] || '50%';
+
+      let renderedWidth = rect.width;
+      let renderedHeight = rect.height;
+
+      if (objectFit === 'contain' || objectFit === 'cover' || objectFit === 'scale-down') {
+        const containScale = Math.min(rect.width / sourceWidth, rect.height / sourceHeight);
+        const coverScale = Math.max(rect.width / sourceWidth, rect.height / sourceHeight);
+        const scale =
+          objectFit === 'cover'
+            ? coverScale
+            : objectFit === 'scale-down'
+              ? Math.min(1, containScale)
+              : containScale;
+
+        renderedWidth = sourceWidth * scale;
+        renderedHeight = sourceHeight * scale;
+      } else if (objectFit === 'none') {
+        renderedWidth = sourceWidth;
+        renderedHeight = sourceHeight;
+      }
+
+      const offsetX = getObjectPositionOffset(posX, rect.width - renderedWidth, 'x');
+      const offsetY = getObjectPositionOffset(posY, rect.height - renderedHeight, 'y');
+
+      return {
+        rect,
+        renderedWidth,
+        renderedHeight,
+        offsetX,
+        offsetY,
+      };
+    };
+    const getSourceSampleRect = (mediaEl, sourceWidth, sourceHeight, probePoint) => {
+      if (!probePoint) return null;
+
+      const geometry = getRenderedMediaGeometry(mediaEl, sourceWidth, sourceHeight);
+      const localX = probePoint.x - geometry.rect.left - geometry.offsetX;
+      const localY = probePoint.y - geometry.rect.top - geometry.offsetY;
+
+      if (
+        localX < 0 ||
+        localY < 0 ||
+        localX > geometry.renderedWidth ||
+        localY > geometry.renderedHeight ||
+        geometry.renderedWidth <= 0 ||
+        geometry.renderedHeight <= 0
+      ) {
+        return null;
+      }
+
+      const sampleDisplaySize = 12;
+      const sampleWidth = Math.max(1, (sampleDisplaySize / geometry.renderedWidth) * sourceWidth);
+      const sampleHeight = Math.max(1, (sampleDisplaySize / geometry.renderedHeight) * sourceHeight);
+      const centerX = (localX / geometry.renderedWidth) * sourceWidth;
+      const centerY = (localY / geometry.renderedHeight) * sourceHeight;
+      const sx = clamp(centerX - sampleWidth / 2, 0, Math.max(0, sourceWidth - sampleWidth));
+      const sy = clamp(centerY - sampleHeight / 2, 0, Math.max(0, sourceHeight - sampleHeight));
+
+      return {
+        sx,
+        sy,
+        sw: sampleWidth,
+        sh: sampleHeight,
+      };
+    };
+    const sampleDrawnMediaLuminance = (drawSample, fallbackRgb) =>
+      new Promise((resolve) => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = 1;
+          canvas.height = 1;
+          const ctx = canvas.getContext('2d', {willReadFrequently: true});
+          drawSample(ctx);
+          const data = ctx.getImageData(0, 0, 1, 1).data;
+          resolve(getAlphaCompositedLuminance(data, fallbackRgb));
+        } catch (err) {
+          resolve(null);
+        }
+      });
+
     const loadImageLuminance = (src) =>
       new Promise((resolve) => {
         if (!src) return resolve(null);
@@ -1030,29 +1178,52 @@
         img.onerror = () => resolve(null);
       });
 
-    const computeImageLuminance = (imgEl) => {
+    const computeImageLuminance = (imgEl, probePoint, fallbackRgb) => {
       const src = imgEl?.currentSrc || imgEl?.src;
+      const sampleRect =
+        imgEl?.naturalWidth && imgEl?.naturalHeight
+          ? getSourceSampleRect(imgEl, imgEl.naturalWidth, imgEl.naturalHeight, probePoint)
+          : null;
+
+      if (sampleRect) {
+        return sampleDrawnMediaLuminance((ctx) => {
+          ctx.drawImage(imgEl, sampleRect.sx, sampleRect.sy, sampleRect.sw, sampleRect.sh, 0, 0, 1, 1);
+        }, fallbackRgb);
+      }
+
+      if (probePoint) {
+        return Promise.resolve(getLuminance(fallbackRgb));
+      }
+
       return loadImageLuminance(src);
     };
 
     const computeBackgroundImageLuminance = (url) => loadImageLuminance(url);
 
-    const computeVideoLuminance = (videoEl) =>
-      new Promise((resolve) => {
-        if (!videoEl) return resolve(null);
+    const computeVideoLuminance = (videoEl, probePoint, fallbackRgb) => {
+      if (!videoEl) return Promise.resolve(null);
 
-        try {
-          const canvas = document.createElement('canvas');
-          canvas.width = 1;
-          canvas.height = 1;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(videoEl, 0, 0, 1, 1);
-          const data = ctx.getImageData(0, 0, 1, 1).data;
-          resolve(getLuminance([data[0], data[1], data[2]]));
-        } catch (err) {
-          resolve(null);
-        }
-      });
+      const sampleRect =
+        videoEl.videoWidth && videoEl.videoHeight
+          ? getSourceSampleRect(videoEl, videoEl.videoWidth, videoEl.videoHeight, probePoint)
+          : null;
+
+      if (sampleRect) {
+        return sampleDrawnMediaLuminance((ctx) => {
+          ctx.drawImage(videoEl, sampleRect.sx, sampleRect.sy, sampleRect.sw, sampleRect.sh, 0, 0, 1, 1);
+        }, fallbackRgb);
+      }
+
+      if (probePoint) {
+        return Promise.resolve(getLuminance(fallbackRgb));
+      }
+
+      return sampleDrawnMediaLuminance((ctx) => {
+        ctx.drawImage(videoEl, 0, 0, 1, 1);
+      }, fallbackRgb);
+    };
+    const isImageElement = (mediaEl) => mediaEl?.tagName === 'IMG';
+    const isVideoElement = (mediaEl) => mediaEl?.tagName === 'VIDEO';
 
     const initHeaderObserver = () => {
       const headerWrapper = document.querySelector('header.theme__header');
@@ -1061,9 +1232,20 @@
       const headerTargets = selectAll('.header__desktop, .header__mobile');
       const logoLinks = selectAll('.header__logo__link[data-logo-light][data-logo-dark]');
       const transparentImages = selectAll('.logo__img.logo__img--transparent');
-      if (!(headerTargets.length && logoLinks.length)) return;
+      const revealResolvedHeader = () => {
+        if (!headerWrapper || headerWrapper.dataset.headerColorReady === 'true') return;
 
-      const nearWhiteLuminanceThreshold = 0.4;
+        requestAnimationFrame(() => {
+          headerWrapper.removeAttribute('data-header-color-pending');
+          headerWrapper.setAttribute('data-header-color-ready', 'true');
+        });
+      };
+      if (!(headerTargets.length && logoLinks.length)) {
+        revealResolvedHeader();
+        return;
+      }
+
+      const nearWhiteLuminanceThreshold = 0.7;
       const colors = {
         light: {
           link: '#fff',
@@ -1079,7 +1261,7 @@
       const logoDarkUrl = logoLinks[0].dataset.logoDark;
       const forcedDrawerLogoMode = 'dark';
       const forcedTmenuLogoMode = 'dark';
-      const DEBUG_HEADER_OBSERVER = false;
+      const DEBUG_HEADER_OBSERVER = true;
       const APPLY_DEBOUNCE = 150;
       const intersectionThresholds = [0, 0.25, 0.5, 0.75, 1];
       const getSectionLabel = (sectionEl) =>
@@ -1192,7 +1374,10 @@
       let sectionsToObserve = selectAll(
         'main .shopify-section section, main .shopify-section collection-component, main .shopify-section [data-section-id]'
       );
-      if (!sectionsToObserve.length) return;
+      if (!sectionsToObserve.length) {
+        revealResolvedHeader();
+        return;
+      }
 
       const computeRootMargin = () => {
         const h = window.innerHeight || document.documentElement.clientHeight || 0;
@@ -1247,8 +1432,11 @@
 
       const luminanceCache = new WeakMap();
       const mediaReadyListeners = new WeakSet();
+      const deferredRevealTimers = new WeakMap();
       let currentObservedSection = null;
       const mediaSelector = 'img, video';
+      const sectionMediaRevealMargin = 200;
+      const deferredRevealTimeout = 1400;
       const getHeaderProbeBand = () => {
         const headerHeight = getHeaderHeight();
         const top = Math.max(0, headerHeight);
@@ -1290,6 +1478,15 @@
         });
 
         return candidates;
+      };
+      const getClampedProbePointForMedia = (mediaEl) => {
+        const rect = mediaEl.getBoundingClientRect();
+        const preferredPoint = getHeaderProbePoints()[0];
+
+        return {
+          x: clamp(preferredPoint.x, rect.left + 1, rect.right - 1),
+          y: clamp(preferredPoint.y, rect.top + 1, rect.bottom - 1),
+        };
       };
       const pickMediaFromElements = (elements, point, sectionEl) => {
         const matches = [];
@@ -1335,7 +1532,10 @@
               ...getMediaDescriptor(mediaEl),
             });
 
-            return mediaEl;
+            return {
+              mediaEl,
+              point,
+            };
           }
         }
 
@@ -1350,7 +1550,12 @@
           });
         }
 
-        return sectionMedia || null;
+        if (!sectionMedia) return null;
+
+        return {
+          mediaEl: sectionMedia,
+          point: getClampedProbePointForMedia(sectionMedia),
+        };
       };
 
       const isImageReady = (imgEl) => {
@@ -1364,11 +1569,26 @@
 
       const isVideoReady = (videoEl) => videoEl.readyState >= 2 && videoEl.videoWidth > 0 && videoEl.videoHeight > 0;
       const isVideoFailed = (videoEl) => Boolean(videoEl?.error);
+      const isMediaReady = (mediaEl) => {
+        if (isImageElement(mediaEl)) return isImageReady(mediaEl);
+        if (isVideoElement(mediaEl)) return isVideoReady(mediaEl);
+        return false;
+      };
+      const isMediaFailed = (mediaEl) => {
+        if (isImageElement(mediaEl)) return isImageFailed(mediaEl);
+        if (isVideoElement(mediaEl)) return isVideoFailed(mediaEl);
+        return false;
+      };
+      const isPendingMedia = (mediaEl) => {
+        if (!mediaEl) return false;
+        if (isVideoElement(mediaEl) && mediaEl.poster) return false;
+        return !isMediaReady(mediaEl) && !isMediaFailed(mediaEl);
+      };
 
       const getMediaDescriptor = (mediaEl) => {
         if (!mediaEl) return {};
 
-        if (mediaEl.tagName === 'IMG') {
+        if (isImageElement(mediaEl)) {
           return {
             tag: 'IMG',
             src: mediaEl.currentSrc || mediaEl.src || null,
@@ -1377,7 +1597,7 @@
           };
         }
 
-        if (mediaEl.tagName === 'VIDEO') {
+        if (isVideoElement(mediaEl)) {
           return {
             tag: 'VIDEO',
             poster: mediaEl.poster || null,
@@ -1396,8 +1616,9 @@
       const watchMediaReadiness = (sectionEl, mediaEl) => {
         if (!mediaEl || mediaReadyListeners.has(mediaEl)) return;
 
-        const eventNames =
-          mediaEl.tagName === 'IMG' ? ['load', 'error'] : ['loadeddata', 'loadedmetadata', 'canplay', 'error'];
+        const eventNames = isImageElement(mediaEl)
+          ? ['load', 'error']
+          : ['loadeddata', 'loadedmetadata', 'canplay', 'error'];
 
         const onMediaReady = (event) => {
           eventNames.forEach((eventName) => {
@@ -1427,6 +1648,77 @@
           section: getSectionLabel(sectionEl),
           ...getMediaDescriptor(mediaEl),
         });
+      };
+
+      const clearDeferredRevealTimer = (sectionEl) => {
+        const timer = deferredRevealTimers.get(sectionEl);
+        if (!timer) return;
+        clearTimeout(timer);
+        deferredRevealTimers.delete(sectionEl);
+      };
+
+      const queueDeferredReveal = (sectionEl) => {
+        if (deferredRevealTimers.has(sectionEl)) return;
+
+        const timer = window.setTimeout(() => {
+          deferredRevealTimers.delete(sectionEl);
+
+          if (
+            currentObservedSection !== sectionEl ||
+            !headerWrapper ||
+            headerWrapper.dataset.headerColorReady === 'true'
+          ) {
+            return;
+          }
+
+          debugLog('Revealed header after deferred media wait timeout', {
+            section: getSectionLabel(sectionEl),
+            timeoutMs: deferredRevealTimeout,
+          });
+          revealResolvedHeader();
+        }, deferredRevealTimeout);
+
+        deferredRevealTimers.set(sectionEl, timer);
+      };
+
+      const isRelevantSectionMedia = (mediaEl) => {
+        const rect = mediaEl.getBoundingClientRect();
+        const band = getHeaderProbeBand();
+
+        if (rect.right <= 0 || rect.left >= window.innerWidth) return false;
+
+        if (rect.width > 0 || rect.height > 0) {
+          return rect.bottom > band.top - sectionMediaRevealMargin && rect.top < band.bottom + sectionMediaRevealMargin;
+        }
+
+        return rect.top < band.bottom + sectionMediaRevealMargin;
+      };
+
+      const getPendingSectionMedia = (sectionEl) =>
+        Array.from(sectionEl.querySelectorAll(mediaSelector))
+          .filter((mediaEl) => isRelevantSectionMedia(mediaEl))
+          .slice(0, 3)
+          .filter((mediaEl) => isPendingMedia(mediaEl));
+
+      const deferRevealUntilMediaSettles = (sectionEl, source) => {
+        if (source !== 'background') {
+          clearDeferredRevealTimer(sectionEl);
+          return false;
+        }
+
+        const pendingMedia = getPendingSectionMedia(sectionEl);
+        if (!pendingMedia.length) {
+          clearDeferredRevealTimer(sectionEl);
+          return false;
+        }
+
+        pendingMedia.forEach((mediaEl) => watchMediaReadiness(sectionEl, mediaEl));
+        queueDeferredReveal(sectionEl);
+        debugLog('Deferred header reveal on background fallback while nearby media loads', {
+          section: getSectionLabel(sectionEl),
+          pendingMedia: pendingMedia.map((mediaEl) => getMediaDescriptor(mediaEl)),
+        });
+        return true;
       };
 
       const findElementBackgroundImage = (el) => {
@@ -1459,13 +1751,81 @@
         });
       };
       const getSectionFallbackLuminance = (sectionEl) => getLuminance(getBackgroundRGB(sectionEl));
-      const cacheAndApplyLuminance = (sectionEl, luminance, source) => {
+      const applyResolvedLuminance = (sectionEl, luminance, source) => {
         luminanceCache.set(sectionEl, luminance);
         logLuminance(luminance, sectionEl, source);
         applyLuminanceMode(luminance);
+        if (deferRevealUntilMediaSettles(sectionEl, source)) return;
+        revealResolvedHeader();
+      };
+      const applyAsyncLuminance = (sectionEl, luminancePromise, source, fallbackLuminance) => {
+        luminancePromise.then((luminance) => {
+          applyResolvedLuminance(sectionEl, luminance ?? fallbackLuminance, luminance !== null ? source : 'background');
+        });
+      };
+      const cacheAndApplyLuminance = (sectionEl, luminance, source) => {
+        applyResolvedLuminance(sectionEl, luminance, source);
       };
       const applyFallbackLuminance = (sectionEl, source = 'background') => {
         cacheAndApplyLuminance(sectionEl, getSectionFallbackLuminance(sectionEl), source);
+      };
+      const applyMediaLuminance = (sectionEl, mediaMatch, fallbackLuminance) => {
+        if (!mediaMatch) return false;
+
+        const {mediaEl, point} = mediaMatch;
+        const mediaFallbackRgb = getBackgroundRGB(mediaEl);
+
+        if (isImageElement(mediaEl)) {
+          if (isMediaFailed(mediaEl)) {
+            applyFallbackLuminance(sectionEl, 'background-after-image-error');
+            return true;
+          }
+
+          if (!isMediaReady(mediaEl)) {
+            watchMediaReadiness(sectionEl, mediaEl);
+            return true;
+          }
+
+          applyAsyncLuminance(
+            sectionEl,
+            computeImageLuminance(mediaEl, point, mediaFallbackRgb),
+            'image-sampled',
+            fallbackLuminance
+          );
+          return true;
+        }
+
+        if (isVideoElement(mediaEl)) {
+          if (isMediaFailed(mediaEl)) {
+            applyFallbackLuminance(sectionEl, 'background-after-video-error');
+            return true;
+          }
+
+          if (mediaEl.poster) {
+            applyAsyncLuminance(
+              sectionEl,
+              computeBackgroundImageLuminance(mediaEl.poster),
+              'video-poster',
+              fallbackLuminance
+            );
+            return true;
+          }
+
+          if (!isMediaReady(mediaEl)) {
+            watchMediaReadiness(sectionEl, mediaEl);
+            return true;
+          }
+
+          applyAsyncLuminance(
+            sectionEl,
+            computeVideoLuminance(mediaEl, point, mediaFallbackRgb),
+            'video-frame-sampled',
+            fallbackLuminance
+          );
+          return true;
+        }
+
+        return false;
       };
 
       const applyForSection = (sectionEl) => {
@@ -1476,76 +1836,18 @@
           return;
         }
 
-        const mediaEl = findMediaUnderHeader(sectionEl);
+        const mediaMatch = findMediaUnderHeader(sectionEl);
         const bgUrl = findElementBackgroundImage(sectionEl);
+        const fallbackLuminance = getSectionFallbackLuminance(sectionEl);
 
-        if (mediaEl) {
-          if (mediaEl.tagName === 'IMG') {
-            if (isImageFailed(mediaEl)) {
-              applyFallbackLuminance(sectionEl, 'background-after-image-error');
-              return;
-            }
-
-            if (!isImageReady(mediaEl)) {
-              watchMediaReadiness(sectionEl, mediaEl);
-              return;
-            }
-
-            computeImageLuminance(mediaEl).then((lum) => {
-              cacheAndApplyLuminance(
-                sectionEl,
-                lum ?? getSectionFallbackLuminance(sectionEl),
-                lum !== null ? 'image' : 'background'
-              );
-            });
-            return;
-          }
-
-          if (mediaEl.tagName === 'VIDEO') {
-            if (isVideoFailed(mediaEl)) {
-              applyFallbackLuminance(sectionEl, 'background-after-video-error');
-              return;
-            }
-
-            if (mediaEl.poster) {
-              computeBackgroundImageLuminance(mediaEl.poster).then((lum) => {
-                cacheAndApplyLuminance(
-                  sectionEl,
-                  lum ?? getSectionFallbackLuminance(sectionEl),
-                  lum !== null ? 'video-poster' : 'background'
-                );
-              });
-              return;
-            }
-
-            if (!isVideoReady(mediaEl)) {
-              watchMediaReadiness(sectionEl, mediaEl);
-              return;
-            }
-
-            computeVideoLuminance(mediaEl).then((lum) => {
-              cacheAndApplyLuminance(
-                sectionEl,
-                lum ?? getSectionFallbackLuminance(sectionEl),
-                lum !== null ? 'video-frame' : 'background'
-              );
-            });
-            return;
-          }
-        }
+        if (applyMediaLuminance(sectionEl, mediaMatch, fallbackLuminance)) return;
 
         if (bgUrl) {
-          computeBackgroundImageLuminance(bgUrl).then((lum) => {
-            cacheAndApplyLuminance(
-              sectionEl,
-              lum ?? getSectionFallbackLuminance(sectionEl),
-              lum !== null ? 'background-image' : 'background'
-            );
-          });
+          applyAsyncLuminance(sectionEl, computeBackgroundImageLuminance(bgUrl), 'background-image', fallbackLuminance);
           return;
         }
 
-        applyFallbackLuminance(sectionEl);
+        cacheAndApplyLuminance(sectionEl, fallbackLuminance, 'background');
       };
 
       const debounceFn = (fn, wait) => {
