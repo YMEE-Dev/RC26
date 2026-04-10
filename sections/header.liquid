@@ -46,16 +46,18 @@
   assign secondary_menu_linklist = section.settings.secondary_menu_linklist
   assign right_menu_linklist = section.settings.right_menu_linklist
 
-  assign logo_variant = section.settings.logo_variant | default: 'light'
+  assign logo_variant = section.settings.logo_variant | default: 'dark'
   assign logo_light_asset = 'RC_LOGO_light.svg'
   assign logo_dark_asset = 'RC_LOGO_dark.svg'
-  assign logo_asset = logo_light_asset
+  assign logo_asset = logo_dark_asset
   assign logo_denom = 814 | divided_by: 76
   assign transparent_logo_asset = logo_dark_asset
-  if logo_variant == 'dark'
+  if logo_variant == 'light'
+    assign logo_asset = logo_light_asset
+    assign logo_denom = 814 | divided_by: 76
+  else
     assign logo_asset = logo_dark_asset
     assign logo_denom = 800 | divided_by: 74
-    assign transparent_logo_asset = logo_light_asset
   endif
   assign transparent_logo_pdp = section.settings.transparent_logo_pdp
   assign use_transparent_logo_pdp = false
@@ -1008,219 +1010,6 @@
     }
 
     /* Header light/dark switcher */
-    const getLuminance = (rgb) => {
-      const [r, g, b] = rgb.map((v) => {
-        const n = v / 255;
-        return n <= 0.03928 ? n / 12.92 : Math.pow((n + 0.055) / 1.055, 2.4);
-      });
-      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    };
-
-    const getBackgroundRGB = (element) => {
-      let el = element;
-      while (el && el !== document.documentElement) {
-        const bg = getComputedStyle(el).backgroundColor;
-        if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
-          const match = bg.match(/\d+/g);
-          if (match) return match.map(Number);
-        }
-        el = el.parentElement;
-      }
-      return [255, 255, 255];
-    };
-
-    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-    const getAlphaCompositedLuminance = (rgba, fallbackRgb) => {
-      const alpha = rgba[3] / 255;
-      if (alpha >= 1) {
-        return getLuminance([rgba[0], rgba[1], rgba[2]]);
-      }
-
-      const [bgR, bgG, bgB] = fallbackRgb;
-      return getLuminance([
-        Math.round(rgba[0] * alpha + bgR * (1 - alpha)),
-        Math.round(rgba[1] * alpha + bgG * (1 - alpha)),
-        Math.round(rgba[2] * alpha + bgB * (1 - alpha)),
-      ]);
-    };
-    const getObjectPositionOffset = (value, freeSpace, axis) => {
-      if (!value) return freeSpace / 2;
-
-      const normalized = value.toLowerCase();
-      if (normalized.endsWith('%')) {
-        return (parseFloat(normalized) / 100) * freeSpace;
-      }
-
-      if (normalized.endsWith('px')) {
-        return parseFloat(normalized);
-      }
-
-      if (normalized === 'center') return freeSpace / 2;
-      if (axis === 'x') {
-        if (normalized === 'left') return 0;
-        if (normalized === 'right') return freeSpace;
-      } else {
-        if (normalized === 'top') return 0;
-        if (normalized === 'bottom') return freeSpace;
-      }
-
-      const parsed = parseFloat(normalized);
-      return Number.isFinite(parsed) ? parsed : freeSpace / 2;
-    };
-    const getRenderedMediaGeometry = (mediaEl, sourceWidth, sourceHeight) => {
-      const rect = mediaEl.getBoundingClientRect();
-      const style = getComputedStyle(mediaEl);
-      const objectFit = style.objectFit || 'fill';
-      const positionTokens = (style.objectPosition || '50% 50%').trim().split(/\s+/);
-      const posX = positionTokens[0] || '50%';
-      const posY = positionTokens[1] || positionTokens[0] || '50%';
-
-      let renderedWidth = rect.width;
-      let renderedHeight = rect.height;
-
-      if (objectFit === 'contain' || objectFit === 'cover' || objectFit === 'scale-down') {
-        const containScale = Math.min(rect.width / sourceWidth, rect.height / sourceHeight);
-        const coverScale = Math.max(rect.width / sourceWidth, rect.height / sourceHeight);
-        const scale =
-          objectFit === 'cover' ? coverScale : objectFit === 'scale-down' ? Math.min(1, containScale) : containScale;
-
-        renderedWidth = sourceWidth * scale;
-        renderedHeight = sourceHeight * scale;
-      } else if (objectFit === 'none') {
-        renderedWidth = sourceWidth;
-        renderedHeight = sourceHeight;
-      }
-
-      const offsetX = getObjectPositionOffset(posX, rect.width - renderedWidth, 'x');
-      const offsetY = getObjectPositionOffset(posY, rect.height - renderedHeight, 'y');
-
-      return {
-        rect,
-        renderedWidth,
-        renderedHeight,
-        offsetX,
-        offsetY,
-      };
-    };
-    const getSourceSampleRect = (mediaEl, sourceWidth, sourceHeight, probePoint) => {
-      if (!probePoint) return null;
-
-      const geometry = getRenderedMediaGeometry(mediaEl, sourceWidth, sourceHeight);
-      const localX = probePoint.x - geometry.rect.left - geometry.offsetX;
-      const localY = probePoint.y - geometry.rect.top - geometry.offsetY;
-
-      if (
-        localX < 0 ||
-        localY < 0 ||
-        localX > geometry.renderedWidth ||
-        localY > geometry.renderedHeight ||
-        geometry.renderedWidth <= 0 ||
-        geometry.renderedHeight <= 0
-      ) {
-        return null;
-      }
-
-      const sampleDisplaySize = 12;
-      const sampleWidth = Math.max(1, (sampleDisplaySize / geometry.renderedWidth) * sourceWidth);
-      const sampleHeight = Math.max(1, (sampleDisplaySize / geometry.renderedHeight) * sourceHeight);
-      const centerX = (localX / geometry.renderedWidth) * sourceWidth;
-      const centerY = (localY / geometry.renderedHeight) * sourceHeight;
-      const sx = clamp(centerX - sampleWidth / 2, 0, Math.max(0, sourceWidth - sampleWidth));
-      const sy = clamp(centerY - sampleHeight / 2, 0, Math.max(0, sourceHeight - sampleHeight));
-
-      return {
-        sx,
-        sy,
-        sw: sampleWidth,
-        sh: sampleHeight,
-      };
-    };
-    const sampleDrawnMediaLuminance = (drawSample, fallbackRgb) =>
-      new Promise((resolve) => {
-        try {
-          const canvas = document.createElement('canvas');
-          canvas.width = 1;
-          canvas.height = 1;
-          const ctx = canvas.getContext('2d', {willReadFrequently: true});
-          drawSample(ctx);
-          const data = ctx.getImageData(0, 0, 1, 1).data;
-          resolve(getAlphaCompositedLuminance(data, fallbackRgb));
-        } catch (err) {
-          resolve(null);
-        }
-      });
-
-    const loadImageLuminance = (src) =>
-      new Promise((resolve) => {
-        if (!src) return resolve(null);
-
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.src = src;
-        img.decode?.().catch(() => {});
-        img.onload = () => {
-          try {
-            const canvas = document.createElement('canvas');
-            canvas.width = 1;
-            canvas.height = 1;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, 1, 1);
-            const data = ctx.getImageData(0, 0, 1, 1).data;
-            resolve(getLuminance([data[0], data[1], data[2]]));
-          } catch (err) {
-            resolve(null);
-          }
-        };
-        img.onerror = () => resolve(null);
-      });
-
-    const computeImageLuminance = (imgEl, probePoint, fallbackRgb) => {
-      const src = imgEl?.currentSrc || imgEl?.src;
-      const sampleRect =
-        imgEl?.naturalWidth && imgEl?.naturalHeight
-          ? getSourceSampleRect(imgEl, imgEl.naturalWidth, imgEl.naturalHeight, probePoint)
-          : null;
-
-      if (sampleRect) {
-        return sampleDrawnMediaLuminance((ctx) => {
-          ctx.drawImage(imgEl, sampleRect.sx, sampleRect.sy, sampleRect.sw, sampleRect.sh, 0, 0, 1, 1);
-        }, fallbackRgb);
-      }
-
-      if (probePoint) {
-        return Promise.resolve(getLuminance(fallbackRgb));
-      }
-
-      return loadImageLuminance(src);
-    };
-
-    const computeBackgroundImageLuminance = (url) => loadImageLuminance(url);
-
-    const computeVideoLuminance = (videoEl, probePoint, fallbackRgb) => {
-      if (!videoEl) return Promise.resolve(null);
-
-      const sampleRect =
-        videoEl.videoWidth && videoEl.videoHeight
-          ? getSourceSampleRect(videoEl, videoEl.videoWidth, videoEl.videoHeight, probePoint)
-          : null;
-
-      if (sampleRect) {
-        return sampleDrawnMediaLuminance((ctx) => {
-          ctx.drawImage(videoEl, sampleRect.sx, sampleRect.sy, sampleRect.sw, sampleRect.sh, 0, 0, 1, 1);
-        }, fallbackRgb);
-      }
-
-      if (probePoint) {
-        return Promise.resolve(getLuminance(fallbackRgb));
-      }
-
-      return sampleDrawnMediaLuminance((ctx) => {
-        ctx.drawImage(videoEl, 0, 0, 1, 1);
-      }, fallbackRgb);
-    };
-    const isImageElement = (mediaEl) => mediaEl?.tagName === 'IMG';
-    const isVideoElement = (mediaEl) => mediaEl?.tagName === 'VIDEO';
-
     const initHeaderObserver = () => {
       const headerWrapper = document.querySelector('header.theme__header');
       const body = document.body;
@@ -1241,7 +1030,6 @@
         return;
       }
 
-      const nearWhiteLuminanceThreshold = 0.2;
       const colors = {
         light: {
           link: '#fff',
@@ -1257,12 +1045,11 @@
       const logoDarkUrl = logoLinks[0].dataset.logoDark;
       const forcedDrawerLogoMode = 'dark';
       const forcedTmenuLogoMode = 'dark';
-      const DEBUG_HEADER_OBSERVER = false;
-      const APPLY_DEBOUNCE = 150;
-      const intersectionThresholds = [0, 0.25, 0.5, 0.75, 1];
+      const DEBUG_HEADER_OBSERVER = true;
+      const observedSectionSelector = 'main .shopify-section [data-header-observer-mode]';
+      const intersectionThresholds = [0, 0.01, 0.1, 0.25, 0.5, 0.75, 1];
       const getSectionLabel = (sectionEl) =>
         sectionEl?.dataset.sectionId || sectionEl?.id || sectionEl?.className || 'unknown-section';
-      const roundForLog = (value) => (typeof value === 'number' ? Math.round(value * 100) / 100 : value);
       const debugLog = (message, payload = {}) => {
         if (!DEBUG_HEADER_OBSERVER) return;
         console.log('[HeaderObserver]', message, payload);
@@ -1307,11 +1094,10 @@
         });
       };
 
-      const defaultModeRaw = (logoLinks[0].dataset.logoDefault || 'light').trim();
-      const defaultMode = defaultModeRaw === 'dark' ? 'dark' : 'light';
+      const defaultMode = 'dark';
       let currentMode = defaultMode;
       const applyMode = (mode) => {
-        const resolved = mode || 'light';
+        const resolved = mode || defaultMode;
         if (resolved === currentMode) return;
         currentMode = resolved;
         setHeaderColors(currentMode);
@@ -1321,7 +1107,6 @@
         debugLog('Applied mode', {
           mode: currentMode,
           forcedLogoMode: getForcedLogoMode() || null,
-          nearWhiteLuminanceThreshold,
         });
       };
 
@@ -1367,40 +1152,11 @@
 
       document.addEventListener('theme:tmenu:state', syncLogoWithHeaderState);
 
-      let sectionsToObserve = selectAll(
-        'main .shopify-section section, main .shopify-section collection-component, main .shopify-section [data-section-id]'
-      );
+      let sectionsToObserve = selectAll(observedSectionSelector);
       if (!sectionsToObserve.length) {
         revealResolvedHeader();
         return;
       }
-
-      const computeRootMargin = () => {
-        const h = window.innerHeight || document.documentElement.clientHeight || 0;
-        const headerHeight = getHeaderHeight();
-        // Pull the root box down to just beneath the header so we sample what's under it.
-        const top = `-${headerHeight}px`;
-        const target = 200;
-        const bottom = target - h; // negative when h > target
-        return `${top} 0px ${bottom}px 0px`;
-      };
-
-      const marginToPx = (value, axisLength) => {
-        if (value.endsWith && value.endsWith('%')) {
-          return (parseFloat(value) / 100) * axisLength;
-        }
-        return parseFloat(value);
-      };
-
-      const parseRootMargin = (marginStr) => {
-        const [top, right, bottom, left] = marginStr.split(' ');
-        return {
-          top: marginToPx(top, window.innerHeight),
-          right: marginToPx(right, window.innerWidth),
-          bottom: marginToPx(bottom, window.innerHeight),
-          left: marginToPx(left, window.innerWidth),
-        };
-      };
 
       const createOverlay = (label, color) => {
         const existing = document.querySelector(`[data-header-observer-overlay="${label}"]`);
@@ -1414,510 +1170,160 @@
         return el;
       };
 
-      const updateOverlayPosition = (el, marginStr) => {
-        const m = parseRootMargin(marginStr);
-        const top = 0 - m.top;
-        const left = 0 - m.left;
-        const right = window.innerWidth + m.right;
-        const bottom = window.innerHeight + m.bottom;
-        el.style.top = `${top}px`;
-        el.style.left = `${left}px`;
-        el.style.width = `${right - left}px`;
-        el.style.height = `${bottom - top}px`;
+      const updateOverlayPosition = (el) => {
+        const band = getHeaderProbeBand();
+        el.style.top = `${band.top}px`;
+        el.style.left = '0px';
+        el.style.width = '100vw';
+        el.style.height = `${band.bottom - band.top}px`;
       };
 
-      const luminanceCache = new WeakMap();
-      const mediaReadyListeners = new WeakSet();
-      const deferredRevealTimers = new WeakMap();
       let currentObservedSection = null;
-      const mediaSelector = 'img, video';
-      const sectionMediaRevealMargin = 200;
-      const deferredRevealTimeout = 1400;
+      let sectionObserver = null;
+      const headerProbeBandHeight = 32;
       const getHeaderProbeBand = () => {
         const headerHeight = getHeaderHeight();
-        const top = Math.max(0, headerHeight);
-        const bottom = Math.min(window.innerHeight, top + 32);
+        const bandHeight = Math.min(headerProbeBandHeight, Math.max(1, headerHeight || headerProbeBandHeight));
+        const isMobileViewport = window.matchMedia('(max-width: 780px)').matches;
+        const top = isMobileViewport
+          ? Math.max(0, Math.min(window.innerHeight - bandHeight, window.innerHeight * 0.8 - bandHeight / 2))
+          : Math.max(0, (headerHeight - bandHeight) / 2);
+        const bottom = Math.min(window.innerHeight, top + bandHeight);
 
         return {top, bottom};
       };
-      const getHeaderProbePoints = () => {
-        const band = getHeaderProbeBand();
-        const y = Math.min(window.innerHeight - 1, Math.max(1, band.top + (band.bottom - band.top) / 2));
-
-        return [0.5, 0.18, 0.82].map((ratio) => ({
-          x: Math.min(window.innerWidth - 1, Math.max(1, window.innerWidth * ratio)),
-          y,
-        }));
-      };
-      const mediaContainsPoint = (mediaEl, point) => {
-        const rect = mediaEl.getBoundingClientRect();
-        return point.x >= rect.left && point.x <= rect.right && point.y >= rect.top && point.y <= rect.bottom;
-      };
-      const mediaOverlapsProbeBand = (mediaEl) => {
-        const rect = mediaEl.getBoundingClientRect();
-        const band = getHeaderProbeBand();
-
-        if (rect.width <= 0 || rect.height <= 0) return false;
-
-        return rect.bottom > band.top && rect.top < band.bottom && rect.right > 0 && rect.left < window.innerWidth;
-      };
-      const getMediaCandidatesFromElement = (element) => {
-        if (!(element instanceof Element)) return [];
-
-        const candidates = [];
-        if (element.matches(mediaSelector)) {
-          candidates.push(element);
-        }
-
-        element.querySelectorAll(mediaSelector).forEach((mediaEl) => {
-          candidates.push(mediaEl);
-        });
-
-        return candidates;
-      };
-      const getClampedProbePointForMedia = (mediaEl) => {
-        const rect = mediaEl.getBoundingClientRect();
-        const preferredPoint = getHeaderProbePoints()[0];
-
-        return {
-          x: clamp(preferredPoint.x, rect.left + 1, rect.right - 1),
-          y: clamp(preferredPoint.y, rect.top + 1, rect.bottom - 1),
-        };
-      };
-      const pickMediaFromElements = (elements, point, sectionEl) => {
-        const matches = [];
-
-        elements.forEach((element, index) => {
-          getMediaCandidatesFromElement(element).forEach((mediaEl) => {
-            if (!mediaContainsPoint(mediaEl, point) || !mediaOverlapsProbeBand(mediaEl)) return;
-
-            matches.push({
-              mediaEl,
-              depth: index,
-              inSection: Boolean(sectionEl && sectionEl.contains(mediaEl)),
-            });
-          });
-        });
-
-        if (!matches.length) return null;
-
-        matches.sort((a, b) => {
-          if (a.inSection !== b.inSection) {
-            return a.inSection ? -1 : 1;
-          }
-
-          return a.depth - b.depth;
-        });
-
-        return matches[0].mediaEl;
-      };
-      const findMediaUnderHeader = (sectionEl) => {
-        const probePoints = getHeaderProbePoints();
-
-        for (const point of probePoints) {
-          const elements = document.elementsFromPoint(point.x, point.y);
-          const mediaEl = pickMediaFromElements(elements, point, sectionEl);
-
-          if (mediaEl) {
-            debugLog('Picked media from header probe', {
-              section: getSectionLabel(sectionEl),
-              point: {
-                x: roundForLog(point.x),
-                y: roundForLog(point.y),
-              },
-              ...getMediaDescriptor(mediaEl),
-            });
-
-            return {
-              mediaEl,
-              point,
-            };
-          }
-        }
-
-        const sectionMedia = Array.from(sectionEl.querySelectorAll(mediaSelector)).find((mediaEl) =>
-          mediaOverlapsProbeBand(mediaEl)
-        );
-
-        if (sectionMedia) {
-          debugLog('Picked overlapping section media', {
-            section: getSectionLabel(sectionEl),
-            ...getMediaDescriptor(sectionMedia),
-          });
-        }
-
-        if (!sectionMedia) return null;
-
-        return {
-          mediaEl: sectionMedia,
-          point: getClampedProbePointForMedia(sectionMedia),
-        };
-      };
-
-      const isImageReady = (imgEl) => {
-        const src = imgEl?.currentSrc || imgEl?.src;
-        return Boolean(src) && imgEl.complete && imgEl.naturalWidth > 0;
-      };
-      const isImageFailed = (imgEl) => {
-        const src = imgEl?.currentSrc || imgEl?.src;
-        return Boolean(src) && imgEl.complete && imgEl.naturalWidth === 0;
-      };
-
-      const isVideoReady = (videoEl) => videoEl.readyState >= 2 && videoEl.videoWidth > 0 && videoEl.videoHeight > 0;
-      const isVideoFailed = (videoEl) => Boolean(videoEl?.error);
-      const isMediaReady = (mediaEl) => {
-        if (isImageElement(mediaEl)) return isImageReady(mediaEl);
-        if (isVideoElement(mediaEl)) return isVideoReady(mediaEl);
-        return false;
-      };
-      const isMediaFailed = (mediaEl) => {
-        if (isImageElement(mediaEl)) return isImageFailed(mediaEl);
-        if (isVideoElement(mediaEl)) return isVideoFailed(mediaEl);
-        return false;
-      };
-      const isPendingMedia = (mediaEl) => {
-        if (!mediaEl) return false;
-        if (isVideoElement(mediaEl) && mediaEl.poster) return false;
-        return !isMediaReady(mediaEl) && !isMediaFailed(mediaEl);
-      };
-
-      const getMediaDescriptor = (mediaEl) => {
-        if (!mediaEl) return {};
-
-        if (isImageElement(mediaEl)) {
-          return {
-            tag: 'IMG',
-            src: mediaEl.currentSrc || mediaEl.src || null,
-            complete: mediaEl.complete,
-            naturalWidth: mediaEl.naturalWidth,
-          };
-        }
-
-        if (isVideoElement(mediaEl)) {
-          return {
-            tag: 'VIDEO',
-            poster: mediaEl.poster || null,
-            readyState: mediaEl.readyState,
-            videoWidth: mediaEl.videoWidth,
-            videoHeight: mediaEl.videoHeight,
-            currentSrc: mediaEl.currentSrc || null,
-          };
-        }
-
-        return {
-          tag: mediaEl.tagName || 'UNKNOWN',
-        };
-      };
-
-      const watchMediaReadiness = (sectionEl, mediaEl) => {
-        if (!mediaEl || mediaReadyListeners.has(mediaEl)) return;
-
-        const eventNames = isImageElement(mediaEl)
-          ? ['load', 'error']
-          : ['loadeddata', 'loadedmetadata', 'canplay', 'error'];
-
-        const onMediaReady = (event) => {
-          eventNames.forEach((eventName) => {
-            mediaEl.removeEventListener(eventName, onMediaReady);
-          });
-
-          mediaReadyListeners.delete(mediaEl);
-          luminanceCache.delete(sectionEl);
-
-          debugLog('Media readiness event received', {
-            section: getSectionLabel(sectionEl),
-            eventType: event.type,
-            ...getMediaDescriptor(mediaEl),
-          });
-
-          if (currentObservedSection === sectionEl) {
-            scheduleApply(sectionEl);
-          }
-        };
-
-        mediaReadyListeners.add(mediaEl);
-        eventNames.forEach((eventName) => {
-          mediaEl.addEventListener(eventName, onMediaReady);
-        });
-
-        debugLog('Waiting for media readiness before computing luminance', {
-          section: getSectionLabel(sectionEl),
-          ...getMediaDescriptor(mediaEl),
-        });
-      };
-
-      const clearDeferredRevealTimer = (sectionEl) => {
-        const timer = deferredRevealTimers.get(sectionEl);
-        if (!timer) return;
-        clearTimeout(timer);
-        deferredRevealTimers.delete(sectionEl);
-      };
-
-      const queueDeferredReveal = (sectionEl) => {
-        if (deferredRevealTimers.has(sectionEl)) return;
-
-        const timer = window.setTimeout(() => {
-          deferredRevealTimers.delete(sectionEl);
-
-          if (
-            currentObservedSection !== sectionEl ||
-            !headerWrapper ||
-            headerWrapper.dataset.headerColorReady === 'true'
-          ) {
-            return;
-          }
-
-          debugLog('Revealed header after deferred media wait timeout', {
-            section: getSectionLabel(sectionEl),
-            timeoutMs: deferredRevealTimeout,
-          });
-          revealResolvedHeader();
-        }, deferredRevealTimeout);
-
-        deferredRevealTimers.set(sectionEl, timer);
-      };
-
-      const isRelevantSectionMedia = (mediaEl) => {
-        const rect = mediaEl.getBoundingClientRect();
-        const band = getHeaderProbeBand();
-
-        if (rect.right <= 0 || rect.left >= window.innerWidth) return false;
-
-        if (rect.width > 0 || rect.height > 0) {
-          return rect.bottom > band.top - sectionMediaRevealMargin && rect.top < band.bottom + sectionMediaRevealMargin;
-        }
-
-        return rect.top < band.bottom + sectionMediaRevealMargin;
-      };
-
-      const getPendingSectionMedia = (sectionEl) =>
-        Array.from(sectionEl.querySelectorAll(mediaSelector))
-          .filter((mediaEl) => isRelevantSectionMedia(mediaEl))
-          .slice(0, 3)
-          .filter((mediaEl) => isPendingMedia(mediaEl));
-
-      const deferRevealUntilMediaSettles = (sectionEl, source) => {
-        if (source !== 'background') {
-          clearDeferredRevealTimer(sectionEl);
-          return false;
-        }
-
-        const pendingMedia = getPendingSectionMedia(sectionEl);
-        if (!pendingMedia.length) {
-          clearDeferredRevealTimer(sectionEl);
-          return false;
-        }
-
-        pendingMedia.forEach((mediaEl) => watchMediaReadiness(sectionEl, mediaEl));
-        queueDeferredReveal(sectionEl);
-        debugLog('Deferred header reveal on background fallback while nearby media loads', {
-          section: getSectionLabel(sectionEl),
-          pendingMedia: pendingMedia.map((mediaEl) => getMediaDescriptor(mediaEl)),
-        });
-        return true;
-      };
-
-      const findElementBackgroundImage = (el) => {
-        let node = el;
-        while (node && node !== document.documentElement) {
-          const style = getComputedStyle(node);
-          const bgImage = style.backgroundImage;
-          if (bgImage && bgImage !== 'none' && !bgImage.startsWith('linear-gradient')) {
-            const match = bgImage.match(/url\(["']?(.*?)["']?\)/);
-            if (match && match[1]) {
-              return match[1];
-            }
-          }
-          node = node.parentElement;
-        }
-        return null;
-      };
-
-      const applyLuminanceMode = (luminance) => {
-        applyMode(luminance >= nearWhiteLuminanceThreshold ? 'dark' : 'light');
-      };
-
-      const logLuminance = (luminance, sectionEl, source) => {
-        debugLog('Computed luminance', {
-          luminance: roundForLog(luminance),
-          source,
-          threshold: roundForLog(nearWhiteLuminanceThreshold),
-          section: getSectionLabel(sectionEl),
-          resultingMode: luminance >= nearWhiteLuminanceThreshold ? 'dark' : 'light',
-        });
-      };
-      const getSectionFallbackLuminance = (sectionEl) => getLuminance(getBackgroundRGB(sectionEl));
-      const applyResolvedLuminance = (sectionEl, luminance, source) => {
-        luminanceCache.set(sectionEl, luminance);
-        logLuminance(luminance, sectionEl, source);
-        applyLuminanceMode(luminance);
-        if (deferRevealUntilMediaSettles(sectionEl, source)) return;
-        revealResolvedHeader();
-      };
-      const applyAsyncLuminance = (sectionEl, luminancePromise, source, fallbackLuminance) => {
-        luminancePromise.then((luminance) => {
-          applyResolvedLuminance(sectionEl, luminance ?? fallbackLuminance, luminance !== null ? source : 'background');
-        });
-      };
-      const cacheAndApplyLuminance = (sectionEl, luminance, source) => {
-        applyResolvedLuminance(sectionEl, luminance, source);
-      };
-      const applyFallbackLuminance = (sectionEl, source = 'background') => {
-        cacheAndApplyLuminance(sectionEl, getSectionFallbackLuminance(sectionEl), source);
-      };
-      const applyMediaLuminance = (sectionEl, mediaMatch, fallbackLuminance) => {
-        if (!mediaMatch) return false;
-
-        const {mediaEl, point} = mediaMatch;
-        const mediaFallbackRgb = getBackgroundRGB(mediaEl);
-
-        if (isImageElement(mediaEl)) {
-          if (isMediaFailed(mediaEl)) {
-            applyFallbackLuminance(sectionEl, 'background-after-image-error');
-            return true;
-          }
-
-          if (!isMediaReady(mediaEl)) {
-            watchMediaReadiness(sectionEl, mediaEl);
-            return true;
-          }
-
-          applyAsyncLuminance(
-            sectionEl,
-            computeImageLuminance(mediaEl, point, mediaFallbackRgb),
-            'image-sampled',
-            fallbackLuminance
-          );
-          return true;
-        }
-
-        if (isVideoElement(mediaEl)) {
-          if (isMediaFailed(mediaEl)) {
-            applyFallbackLuminance(sectionEl, 'background-after-video-error');
-            return true;
-          }
-
-          if (mediaEl.poster) {
-            applyAsyncLuminance(
-              sectionEl,
-              computeBackgroundImageLuminance(mediaEl.poster),
-              'video-poster',
-              fallbackLuminance
-            );
-            return true;
-          }
-
-          if (!isMediaReady(mediaEl)) {
-            watchMediaReadiness(sectionEl, mediaEl);
-            return true;
-          }
-
-          applyAsyncLuminance(
-            sectionEl,
-            computeVideoLuminance(mediaEl, point, mediaFallbackRgb),
-            'video-frame-sampled',
-            fallbackLuminance
-          );
-          return true;
-        }
-
-        return false;
-      };
-
-      const applyForSection = (sectionEl) => {
-        const cached = luminanceCache.get(sectionEl);
-        if (cached !== undefined) {
-          logLuminance(cached, sectionEl, 'cache');
-          applyLuminanceMode(cached);
-          return;
-        }
-
-        const mediaMatch = findMediaUnderHeader(sectionEl);
-        const bgUrl = findElementBackgroundImage(sectionEl);
-        const fallbackLuminance = getSectionFallbackLuminance(sectionEl);
-
-        if (applyMediaLuminance(sectionEl, mediaMatch, fallbackLuminance)) return;
-
-        if (bgUrl) {
-          applyAsyncLuminance(sectionEl, computeBackgroundImageLuminance(bgUrl), 'background-image', fallbackLuminance);
-          return;
-        }
-
-        cacheAndApplyLuminance(sectionEl, fallbackLuminance, 'background');
-      };
-
-      const debounceFn = (fn, wait) => {
-        if (window.theme && typeof window.theme.debounce === 'function') {
-          return window.theme.debounce(fn, wait);
-        }
-        let timer;
-        return (...args) => {
-          clearTimeout(timer);
-          timer = setTimeout(() => fn(...args), wait);
-        };
-      };
-
-      const scheduleApply = debounceFn(applyForSection, APPLY_DEBOUNCE);
-
-      const pickTopEntry = (entries) => {
-        const visible = entries.filter((entry) => entry.isIntersecting);
-        if (!visible.length) return null;
-        return visible.sort((a, b) => {
-          if (b.intersectionRatio !== a.intersectionRatio) {
-            return b.intersectionRatio - a.intersectionRatio;
-          }
-          return a.boundingClientRect.top - b.boundingClientRect.top;
-        })[0];
-      };
-
-      let rootMargin = computeRootMargin();
       let overlay;
+      const sectionOverlapsProbeBand = (sectionEl) => {
+        const rect = sectionEl.getBoundingClientRect();
+        const band = getHeaderProbeBand();
+        return rect.bottom > band.top && rect.top < band.bottom;
+      };
+      const getSectionMode = (sectionEl) => (sectionEl?.dataset.headerObserverMode === 'dark' ? 'dark' : 'light');
+      const getBandCenter = () => {
+        const band = getHeaderProbeBand();
+        return band.top + (band.bottom - band.top) / 2;
+      };
+      const getSectionDistanceToBandCenter = (sectionEl) => {
+        const rect = sectionEl.getBoundingClientRect();
+        const bandCenter = getBandCenter();
+
+        if (rect.top <= bandCenter && rect.bottom >= bandCenter) {
+          return 0;
+        }
+
+        if (rect.bottom < bandCenter) {
+          return bandCenter - rect.bottom;
+        }
+
+        return rect.top - bandCenter;
+      };
+      const getSectionOverlapHeight = (sectionEl) => {
+        const rect = sectionEl.getBoundingClientRect();
+        const band = getHeaderProbeBand();
+        return Math.max(0, Math.min(rect.bottom, band.bottom) - Math.max(rect.top, band.top));
+      };
+      const findActiveSection = () =>
+        sectionsToObserve
+          .filter((sectionEl) => sectionOverlapsProbeBand(sectionEl))
+          .sort((sectionA, sectionB) => {
+            const overlapDiff = getSectionOverlapHeight(sectionB) - getSectionOverlapHeight(sectionA);
+            if (overlapDiff !== 0) return overlapDiff;
+
+            const distanceDiff = getSectionDistanceToBandCenter(sectionA) - getSectionDistanceToBandCenter(sectionB);
+            if (distanceDiff !== 0) return distanceDiff;
+
+            return sectionA.getBoundingClientRect().top - sectionB.getBoundingClientRect().top;
+          })[0] || null;
       const ensureOverlay = () => {
         if (!DEBUG_HEADER_OBSERVER) return;
         if (!overlay) {
           overlay = createOverlay('header observer root', 'rgba(0, 128, 255, 0.2)');
         }
-        rootMargin = computeRootMargin();
-        updateOverlayPosition(overlay, rootMargin);
+        updateOverlayPosition(overlay);
       };
-
-      const onIntersect = (entries) => {
-        const entry = pickTopEntry(entries);
-        if (!entry) return;
-        currentObservedSection = entry.target;
-        debugLog('Intersection selected section', {
-          section: getSectionLabel(entry.target),
-          intersectionRatio: roundForLog(entry.intersectionRatio),
-          top: roundForLog(entry.boundingClientRect.top),
+      const refreshTrackedSections = () => {
+        sectionsToObserve = selectAll(observedSectionSelector);
+      };
+      const getObserverRootMargin = () => {
+        const band = getHeaderProbeBand();
+        const bottomMargin = Math.max(0, window.innerHeight - band.bottom);
+        return `-${Math.max(0, band.top)}px 0px -${bottomMargin}px 0px`;
+      };
+      const applyForSection = (sectionEl, source = 'intersection') => {
+        const mode = getSectionMode(sectionEl);
+        debugLog('Resolved section mode', {
+          section: getSectionLabel(sectionEl),
+          mode,
+          source,
         });
-        scheduleApply(entry.target);
+        applyMode(mode);
+        revealResolvedHeader();
       };
-
-      let intersectionObserver;
-      const observeAll = () => {
-        sectionsToObserve = selectAll(
-          'main .shopify-section section, main .shopify-section collection-component, main .shopify-section [data-section-id]'
-        );
-        sectionsToObserve.forEach((section) => intersectionObserver.observe(section));
-      };
-
-      const startObserver = () => {
-        rootMargin = computeRootMargin();
-        intersectionObserver = new IntersectionObserver(onIntersect, {
-          rootMargin,
-          threshold: intersectionThresholds,
-        });
-        observeAll();
+      const refreshObservedSection = (source = 'refresh') => {
+        const sectionEl = findActiveSection();
         ensureOverlay();
+        if (!sectionEl) {
+          currentObservedSection = null;
+          debugLog('No observer section matched probe band, using default mode', {
+            mode: defaultMode,
+            source,
+          });
+          applyMode(defaultMode);
+          revealResolvedHeader();
+          return;
+        }
+
+        const nextMode = getSectionMode(sectionEl);
+        if (currentObservedSection === sectionEl && currentMode === nextMode) return;
+
+        currentObservedSection = sectionEl;
+        applyForSection(sectionEl, source);
+      };
+      const disconnectSectionObserver = () => {
+        if (!sectionObserver) return;
+        sectionObserver.disconnect();
+        sectionObserver = null;
+      };
+      const observeSections = () => {
+        disconnectSectionObserver();
+        refreshTrackedSections();
+        ensureOverlay();
+        currentObservedSection = null;
+
+        if (!sectionsToObserve.length) {
+          revealResolvedHeader();
+          return;
+        }
+
+        sectionObserver = new IntersectionObserver(
+          () => {
+            refreshObservedSection('intersection');
+          },
+          {
+            root: null,
+            rootMargin: getObserverRootMargin(),
+            threshold: intersectionThresholds,
+          }
+        );
+
+        sectionsToObserve.forEach((sectionEl) => {
+          sectionObserver.observe(sectionEl);
+        });
+
+        debugLog('Initialized section observer', {
+          trackedSections: sectionsToObserve.map((sectionEl) => getSectionLabel(sectionEl)),
+          rootMargin: getObserverRootMargin(),
+          thresholds: intersectionThresholds,
+        });
+
+        refreshObservedSection('initial');
+      };
+      const resetSectionObserver = () => {
+        observeSections();
       };
 
-      const resetObserver = () => {
-        intersectionObserver && intersectionObserver.disconnect();
-        startObserver();
-      };
-
-      startObserver();
-      window.addEventListener('resize', resetObserver);
+      observeSections();
+      window.addEventListener('resize', resetSectionObserver);
     };
 
     window.addEventListener(
@@ -2021,7 +1427,7 @@
       "id": "logo_variant",
       "label": "Asset logo",
       "info": "Select the light or dark logo that ships with the theme.",
-      "default": "light",
+      "default": "dark",
       "options": [
         {"value": "light", "label": "Light"},
         {"value": "dark", "label": "Dark"}

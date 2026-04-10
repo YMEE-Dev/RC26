@@ -150,6 +150,11 @@
   endif
 
   assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign header_observer_mode = blank
+
+  if template.name == 'product' and featured_product == false
+    assign header_observer_mode = 'dark'
+  endif
 -%}
 
 {%- if should_redirect_storytelling_product -%}
@@ -159,13 +164,16 @@
 {%- endif -%}
 <product-info
   id="MainProduct--{{ section.id }}"
-  class="index-product section-padding {{ color_scheme }} pdp-dropdown-inline"
+  class="index-product section-padding {{ color_scheme }} pdp-dropdown-inline{% if header_observer_mode != blank %} header-observer--{{ header_observer_mode }}{% endif %}"
   data-section="{{ section.id }}"
   data-section-id="{{ section.id }}"
   data-product-handle="{{ product.handle }}"
   data-product-id="{{ product.id }}"
   data-enable-history-state="{{ enable_history_state }}"
   data-url="{{ product.url }}"
+  {% if header_observer_mode != blank %}
+    data-header-observer-mode="{{ header_observer_mode }}"
+  {% endif %}
   data-overlay-header
   data-sticky-enabled="{{ product_sticky_enable }}"
   data-variant-image-scroll="{{ section.settings.variant_image_scroll }}"

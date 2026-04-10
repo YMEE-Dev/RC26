@@ -47,9 +47,10 @@
 </section>
 <section
   id="BlogListing--{{ section.id }}"
-  class="blog-listing-section section-padding {{ color_scheme }}"
+  class="blog-listing-section section-padding {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}"
   data-section-id="{{ section.id }}"
   data-section-type="blog-listing"
+  data-header-observer-mode="{{ section.settings.header_observer_mode }}"
 >
   <div class="blog-listing__wrapper {{ section.settings.width }}">
     {%- if blog != blank -%}
@@ -395,6 +396,20 @@
   "tag": "section",
   "class": "section-blog-listing",
   "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
     {
       "type": "header",
       "content": "Filter bar"

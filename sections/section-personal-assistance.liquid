@@ -13,9 +13,10 @@
 
 <section
   id="PersonalAssistance--{{ section.id }}"
-  class="personal-assistance section-padding {{ color_scheme }}"
+  class="personal-assistance section-padding {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}"
   data-section-id="{{ section.id }}"
   data-section-type="personal-assistance"
+  data-header-observer-mode="{{ section.settings.header_observer_mode }}"
 >
   <div class="personal-assistance__wrapper {{ section.settings.width }}">
     <div class="personal-assistance__grid">
@@ -396,6 +397,20 @@
   "tag": "section",
   "class": "section-personal-assistance",
   "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
     {
       "type": "header",
       "content": "Image"

@@ -22,9 +22,10 @@
 
   <section
     id="BrandSplitRow--{{ section.id }}"
-    class="brand-split-row"
+    class="brand-split-row header-observer--{{ section.settings.header_observer_mode }}"
     data-section-id="{{ section.id }}"
     data-section-type="brand-split-row"
+    data-header-observer-mode="{{ section.settings.header_observer_mode }}"
   >
     <div class="brand-split-row__inner {{ section.settings.width }}{% if section.settings.layout == 'image-right' %} brand-split-row__inner--image-right{% endif %}{% if section.settings.image == blank %} brand-split-row__inner--no-image{% endif %}">
       {%- if resolved_image != blank -%}
@@ -169,7 +170,22 @@
 {% schema %}
 {
   "name": "Image Text Split",
+  "class": "brand-split-row",
   "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
     {
       "type": "select",
       "id": "width",

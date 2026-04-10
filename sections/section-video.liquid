@@ -26,9 +26,10 @@
 {%- endif -%}
 
 <div
-  class="index-hero section-padding color-{{ section.settings.color_scheme }}"
+  class="index-hero section-padding color-{{ section.settings.color_scheme }} header-observer--{{ section.settings.header_observer_mode }}"
   data-section-id="{{ section.id }}"
   data-section-type="featured-video"
+  data-header-observer-mode="{{ section.settings.header_observer_mode }}"
   data-overlay-header
   style="{{ style }}"
 >
@@ -42,6 +43,20 @@
   "name": "Video",
   "class": "section-overlay-header",
   "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "light",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
     {
       "type": "header",
       "content": "Content"

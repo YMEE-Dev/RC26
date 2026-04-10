@@ -177,11 +177,12 @@
 {%- endcapture -%}
 
 <section
-  class="homepage-product-sliders {{ color_scheme }}"
+  class="homepage-product-sliders {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}"
   id="HomepageProductSliders--{{ section.id }}"
   style="{{ style | strip }}"
   data-section-id="{{ section.id }}"
   data-section-type="homepage-product-sliders"
+  data-header-observer-mode="{{ section.settings.header_observer_mode }}"
 >
   {%- if rendered_tab_count > 0 -%}
     <tabs-component class="tabs-wrapper related__products">
@@ -220,6 +221,20 @@
   "name": "Homepage product sliders",
   "max_blocks": 8,
   "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
     {
       "type": "text",
       "id": "title",

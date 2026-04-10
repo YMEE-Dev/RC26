@@ -214,10 +214,11 @@
 {%- endif -%}
 
 <div
-  class="index-hero{% if section_content != '' and section_scrolling != '' %} index-hero--scrolling{% endif %} section-padding {{ color_scheme }}"
+  class="index-hero{% if section_content != '' and section_scrolling != '' %} index-hero--scrolling{% endif %} section-padding {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}"
   id="Hero--{{ section.id }}"
   data-section-id="{{ section.id }}"
   data-section-type="hero"
+  data-header-observer-mode="{{ section.settings.header_observer_mode }}"
   data-overlay-header
 >
   {%- if image_1 != blank or mobile_image != blank or show_placeholder or request.design_mode -%}
@@ -306,6 +307,20 @@
   "name": "Image with scrolling text",
   "class": "section-overlay-header",
   "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "light",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
     {
       "type": "header",
       "content": "Content"

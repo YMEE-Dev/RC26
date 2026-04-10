@@ -203,7 +203,12 @@
               loading: 'lazy'
           }}
         {%- else -%}
-          <img class="blog-brand__image" src="{{ resolved_image | escape }}" alt="{{ modal_label | escape }}" loading="lazy">
+          <img
+            class="blog-brand__image"
+            src="{{ resolved_image | escape }}"
+            alt="{{ modal_label | escape }}"
+            loading="lazy"
+          >
         {%- endif -%}
       </div>
     {%- endif -%}
@@ -223,6 +228,7 @@
 {% schema %}
 {
   "name": "Blog Header and Video",
+  "class": "blog-header-video",
   "settings": [
     {
       "type": "article",

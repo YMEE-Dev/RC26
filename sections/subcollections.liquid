@@ -27,9 +27,10 @@
   {%- endstyle -%}
 
   <section
-    class="subcollections collection-{{ collection.handle }} section-padding {{ color_scheme }}"
+    class="subcollections collection-{{ collection.handle }} section-padding {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}"
     data-section-id="{{ section.id }}"
     data-section-type="subcollections"
+    data-header-observer-mode="{{ section.settings.header_observer_mode }}"
     id="Subcollections--{{ section.id }}"
   >
     {%- if sub_collections.size > 0 -%}
@@ -106,6 +107,20 @@
   "name": "Subcollections",
   "class": "section-overlay-header",
   "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "light",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
     {
       "type": "paragraph",
       "content": "Create a [navigation list](/admin/content/menus) with the same name as this collection and link to other collections. [Learn more](https://broadcast.presidiocreative.com/collections/collection-pages/sub-collections)"
