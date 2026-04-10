@@ -1,6 +1,14 @@
 <!-- /sections/blog-image-slider.liquid -->
 {%- liquid
   assign slide_count = section.blocks.size
+  assign indicator_style = section.settings.indicator_style | default: ''
+  if indicator_style == blank
+    if section.settings.show_dots
+      assign indicator_style = 'dots'
+    else
+      assign indicator_style = 'progress'
+    endif
+  endif
 -%}
 
 {%- style -%}
@@ -16,6 +24,8 @@
   class="blog-image-slider section-padding"
   data-section-id="{{ section.id }}"
   data-section-type="blog-image-slider"
+  data-autoplay="{{ section.settings.autoplay }}"
+  data-autoplay-delay="{{ section.settings.autoplay_delay }}"
 >
   {%- if slide_count == 0 -%}
     <div class="blog-image-slider__inner {{ section.settings.width }}">
@@ -96,22 +106,22 @@
         {%- endif -%}
       </div>
 
-      {%- if slide_count > 1 and section.settings.show_dots -%}
-        <div class="blog-image-slider__dots" data-slider-dots aria-hidden="true">
-          {%- for block in section.blocks -%}
-            <button
-              class="blog-image-slider__dot{% if forloop.first %} is-active{% endif %}"
-              data-dot="{{ forloop.index0 }}"
-              type="button"
-            ></button>
-          {%- endfor -%}
-        </div>
-      {%- endif -%}
-
       {%- if slide_count > 1 -%}
-        <p class="blog-image-slider__counter caption" data-slider-counter aria-live="polite">
-          <span data-slider-current>1</span> / {{ slide_count }}
-        </p>
+        {%- if indicator_style == 'dots' -%}
+          <div class="blog-image-slider__dots" data-slider-dots aria-hidden="true">
+            {%- for block in section.blocks -%}
+              <button
+                class="blog-image-slider__dot{% if forloop.first %} is-active{% endif %}"
+                data-dot="{{ forloop.index0 }}"
+                type="button"
+              ></button>
+            {%- endfor -%}
+          </div>
+        {%- elsif indicator_style == 'progress' -%}
+          <div class="blog-image-slider__progress" aria-hidden="true">
+            <span class="blog-image-slider__progress-bar" data-slider-progress></span>
+          </div>
+        {%- endif -%}
       {%- endif -%}
     </div>
   {%- endif -%}
@@ -197,7 +207,8 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.85);
+    background: transparent;
+    color: #fff;
     border: none;
     cursor: pointer;
     width: 44px;
@@ -206,12 +217,13 @@
     align-items: center;
     justify-content: center;
     z-index: 2;
-    transition: background 0.2s ease, opacity 0.2s ease;
+    transition: background 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
     padding: 0;
   }
 
   .blog-image-slider__arrow:hover {
-    background: rgba(255, 255, 255, 1);
+    background: rgba(0, 0, 0, 0.25);
+    transform: translateY(-50%) scale(1.03);
   }
 
   .blog-image-slider__arrow[disabled] {
@@ -257,12 +269,33 @@
     background: currentColor;
   }
 
-  /* Counter */
-  .blog-image-slider__counter {
-    text-align: center;
-    margin: 16px 0 0;
-    opacity: 0.6;
-    letter-spacing: 0.12em;
+  /* Progress */
+  .blog-image-slider__progress {
+    width: 100%;
+    max-width: 560px;
+    margin: 26px auto 0;
+    height: 2px;
+    background: rgba(0, 0, 0, 0.25);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .blog-image-slider__progress-bar {
+    display: block;
+    height: 100%;
+    width: 100%;
+    transform: scaleX(0);
+    transform-origin: left center;
+    background: rgba(0, 0, 0, 1);
+  }
+
+  .blog-image-slider.is-autoplaying .blog-image-slider__progress-bar {
+    animation: blogImageSliderProgress var(--autoplay-duration, 4500ms) linear infinite;
+  }
+
+  @keyframes blogImageSliderProgress {
+    0% { transform: scaleX(0); }
+    100% { transform: scaleX(1); }
   }
 
   @media (max-width: 989px) {
@@ -294,9 +327,13 @@
         this.dots = Array.from(section.querySelectorAll('[data-dot]'));
         this.prevBtn = section.querySelector('[data-slider-prev]');
         this.nextBtn = section.querySelector('[data-slider-next]');
-        this.counterCurrent = section.querySelector('[data-slider-current]');
+        this.progress = section.querySelector('[data-slider-progress]');
         this.current = 0;
         this.total = this.slides.length;
+        this.autoplayEnabled = section.dataset.autoplay === 'true';
+        this.autoplayDelay = parseInt(section.dataset.autoplayDelay || '4500', 10);
+        if (Number.isNaN(this.autoplayDelay) || this.autoplayDelay < 1000) this.autoplayDelay = 4500;
+        this.autoplayTimer = null;
 
         if (this.total < 2) return;
 
@@ -306,7 +343,13 @@
           dot.addEventListener('click', () => this.go(parseInt(dot.dataset.dot)));
         });
 
+        this.section.addEventListener('mouseenter', () => this.stopAutoplay());
+        this.section.addEventListener('mouseleave', () => this.startAutoplay());
+        this.section.addEventListener('focusin', () => this.stopAutoplay());
+        this.section.addEventListener('focusout', () => this.startAutoplay());
+
         this.update();
+        this.startAutoplay();
       }
 
       go(index) {
@@ -321,9 +364,36 @@
       }
 
       update() {
-        if (this.counterCurrent) this.counterCurrent.textContent = this.current + 1;
         if (this.prevBtn) this.prevBtn.disabled = false;
         if (this.nextBtn) this.nextBtn.disabled = false;
+
+        if (this.progress) {
+          this.section.style.setProperty('--autoplay-duration', `${this.autoplayDelay}ms`);
+          this.restartProgress();
+        }
+      }
+
+      restartProgress() {
+        if (!this.progress) return;
+        this.section.classList.remove('is-autoplaying');
+        // force reflow to restart animation
+        void this.progress.offsetWidth; // eslint-disable-line no-unused-expressions
+        if (this.autoplayEnabled) this.section.classList.add('is-autoplaying');
+      }
+
+      startAutoplay() {
+        if (!this.autoplayEnabled) return;
+        this.stopAutoplay();
+        this.section.classList.add('is-autoplaying');
+        this.autoplayTimer = window.setInterval(() => this.go(this.current + 1), this.autoplayDelay);
+      }
+
+      stopAutoplay() {
+        if (this.autoplayTimer) {
+          window.clearInterval(this.autoplayTimer);
+          this.autoplayTimer = null;
+        }
+        this.section.classList.remove('is-autoplaying');
       }
     }
 
@@ -363,6 +433,33 @@
       "id": "show_dots",
       "label": "Show dot indicators",
       "default": false
+    },
+    {
+      "type": "select",
+      "id": "indicator_style",
+      "label": "Indicator style",
+      "default": "progress",
+      "options": [
+        { "value": "progress", "label": "Progress bar" },
+        { "value": "dots", "label": "Dots" },
+        { "value": "none", "label": "None" }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Autoplay",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "autoplay_delay",
+      "min": 2000,
+      "max": 9999,
+      "step": 250,
+      "unit": "ms",
+      "label": "Autoplay delay",
+      "default": 4500
     },
     {
       "type": "range",
