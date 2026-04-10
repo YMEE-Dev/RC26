@@ -1248,7 +1248,7 @@
             return;
           }
 
-          if (action === "notify" || action === "inquire") {
+          if (action === "notify" || action === "inquire" || action === "available_soon") {
             closeMenu();
             var variantId = optionEl ? optionEl.getAttribute("data-variant-id") : "";
             var pid = actionBtn ? actionBtn.getAttribute("data-product-id") || "" : "";
