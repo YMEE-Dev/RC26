@@ -30,6 +30,7 @@
     --left-h: {{ section.settings.left_media_height }}px;
     --right-h: {{ section.settings.right_media_height }}px;
     --right-h-mobile: {{ section.settings.right_media_height_mobile }}px;
+    --right-fit: {{ section.settings.right_image_fit }};
   }
 {%- endstyle -%}
 
@@ -214,6 +215,14 @@
     object-fit: cover;
   }
 
+  .blog-quote-two-images__media--right .blog-quote-two-images__image {
+    object-fit: var(--right-fit);
+  }
+
+  .blog-quote-two-images__media--right {
+    background: transparent;
+  }
+
   @media (max-width: 989px) {
     .blog-quote-two-images__inner {
       width: calc(100% - 40px);
@@ -364,6 +373,16 @@
       "unit": "px",
       "label": "Quote max width",
       "default": 520
+    },
+    {
+      "type": "select",
+      "id": "right_image_fit",
+      "label": "Right image fit",
+      "default": "cover",
+      "options": [
+        { "value": "cover", "label": "Cover (crop)" },
+        { "value": "contain", "label": "Contain (no crop)" }
+      ]
     },
     {
       "type": "image_picker",
