@@ -102,7 +102,6 @@
       return Boolean(
         window.Shopify?.designMode ||
         window.Shopify?.visualPreviewMode ||
-        window.theme?.info?.role === 'development' ||
         searchParams.has('preview_theme_id')
       );
     }
