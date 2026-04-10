@@ -19,6 +19,7 @@
     swiperInstances[sectionId] = new Swiper(swiperElement, {
       slidesPerView: 1.25,
       spaceBetween: 20,
+      freeMode: true,
       loop: false,
     });
   }
