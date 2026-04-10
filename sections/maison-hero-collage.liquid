@@ -1,0 +1,459 @@
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign interval_ms = section.settings.interval_seconds | times: 1000
+
+  assign top_a = section.settings.image_top
+  assign right_a = section.settings.image_right
+  assign left_a = section.settings.image_left
+  assign bottom_a = section.settings.image_bottom
+
+  assign top_b = section.settings.image_top_alt
+  assign right_b = section.settings.image_right_alt
+  assign left_b = section.settings.image_left_alt
+  assign bottom_b = section.settings.image_bottom_alt
+-%}
+
+{%- style -%}
+  #MaisonHeroCollage--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+<section
+  id="MaisonHeroCollage--{{ section.id }}"
+  class="maison-hero-collage section-padding {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="maison-hero-collage"
+>
+  <div
+    class="maison-hero-collage__inner {{ section.settings.width }}"
+    data-maison-collage
+    data-interval-ms="{{ interval_ms }}"
+  >
+    {%- if section.settings.show_text -%}
+      <div class="maison-hero-collage__copy">
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="maison-hero-collage__eyebrow">{{ section.settings.eyebrow }}</p>
+        {%- endif -%}
+        {%- if section.settings.title != blank -%}
+          <h2 class="maison-hero-collage__title">{{ section.settings.title }}</h2>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div class="maison-collage is-intro" aria-hidden="true" data-maison-collage-inner>
+      <figure class="maison-collage__item maison-collage__item--top">
+        {% if top_a != blank or top_b != blank %}
+          <img
+            src="{{ top_a | default: top_b | image_url: width: 1400 }}"
+            alt="{{ top_a.alt | default: top_b.alt | escape }}"
+            loading="eager"
+            data-image-a="{{ top_a | default: top_b | image_url: width: 1400 }}"
+            data-image-b="{% if top_b != blank %}{{ top_b | image_url: width: 1400 }}{% endif %}"
+            data-alt-a="{{ top_a.alt | default: top_b.alt | escape }}"
+            data-alt-b="{% if top_b != blank %}{{ top_b.alt | escape }}{% endif %}"
+          >
+        {% endif %}
+      </figure>
+
+      <figure class="maison-collage__item maison-collage__item--right">
+        {% if right_a != blank or right_b != blank %}
+          <img
+            src="{{ right_a | default: right_b | image_url: width: 1800 }}"
+            alt="{{ right_a.alt | default: right_b.alt | escape }}"
+            loading="eager"
+            data-image-a="{{ right_a | default: right_b | image_url: width: 1800 }}"
+            data-image-b="{% if right_b != blank %}{{ right_b | image_url: width: 1800 }}{% endif %}"
+            data-alt-a="{{ right_a.alt | default: right_b.alt | escape }}"
+            data-alt-b="{% if right_b != blank %}{{ right_b.alt | escape }}{% endif %}"
+          >
+        {% endif %}
+      </figure>
+
+      <figure class="maison-collage__item maison-collage__item--left">
+        {% if left_a != blank or left_b != blank %}
+          <img
+            src="{{ left_a | default: left_b | image_url: width: 1800 }}"
+            alt="{{ left_a.alt | default: left_b.alt | escape }}"
+            loading="eager"
+            data-image-a="{{ left_a | default: left_b | image_url: width: 1800 }}"
+            data-image-b="{% if left_b != blank %}{{ left_b | image_url: width: 1800 }}{% endif %}"
+            data-alt-a="{{ left_a.alt | default: left_b.alt | escape }}"
+            data-alt-b="{% if left_b != blank %}{{ left_b.alt | escape }}{% endif %}"
+          >
+        {% endif %}
+      </figure>
+
+      <figure class="maison-collage__item maison-collage__item--bottom">
+        {% if bottom_a != blank or bottom_b != blank %}
+          <img
+            src="{{ bottom_a | default: bottom_b | image_url: width: 1800 }}"
+            alt="{{ bottom_a.alt | default: bottom_b.alt | escape }}"
+            loading="eager"
+            data-image-a="{{ bottom_a | default: bottom_b | image_url: width: 1800 }}"
+            data-image-b="{% if bottom_b != blank %}{{ bottom_b | image_url: width: 1800 }}{% endif %}"
+            data-alt-a="{{ bottom_a.alt | default: bottom_b.alt | escape }}"
+            data-alt-b="{% if bottom_b != blank %}{{ bottom_b.alt | escape }}{% endif %}"
+          >
+        {% endif %}
+      </figure>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .maison-hero-collage {
+    background: var(--COLOR-BG, #fff);
+    color: var(--COLOR-TEXT, #212121);
+  }
+
+  .maison-hero-collage__inner {
+    position: relative;
+    padding-top: clamp(40px, 7vw, 90px);
+    padding-bottom: clamp(30px, 6vw, 70px);
+  }
+
+  .maison-hero-collage__copy {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .maison-hero-collage__eyebrow {
+    margin: 0 0 8px;
+    font-family: var(--FONT-STACK-BODY, Inter, sans-serif);
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    opacity: 0.9;
+  }
+
+  .maison-hero-collage__title {
+    margin: 0;
+    font-family: var(--FONT-STACK-HEADING, 'Portrait LS', serif);
+    font-weight: var(--FONT-WEIGHT-HEADING, 500);
+    font-size: 40px;
+    line-height: 1;
+    letter-spacing: 0.01em;
+  }
+
+  /* Collage (adapted from rc-timeline) */
+  .maison-collage {
+    position: relative;
+    width: min(980px, 82vw);
+    min-height: 620px;
+    margin: 0 auto;
+    transform: translateY(28px);
+    z-index: 1;
+  }
+
+  .maison-collage__item {
+    position: absolute;
+    margin: 0;
+    overflow: hidden;
+    opacity: 1;
+    transform: none;
+    transition:
+      top 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
+      right 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
+      bottom 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
+      left 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
+      width 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
+      height 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
+      opacity 0.9s cubic-bezier(0.33, 0.01, 0.25, 1),
+      transform 1.15s cubic-bezier(0.2, 0.88, 0.28, 1);
+    will-change: opacity, transform;
+  }
+
+  .maison-collage__item img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .maison-collage.is-intro .maison-collage__item {
+    opacity: 0;
+    transform: translateY(8px) scale(0.995);
+    transition-duration: 1.1s;
+    transition-timing-function: cubic-bezier(0.22, 0.84, 0.28, 1);
+    transition-delay: var(--intro-delay, 0ms);
+  }
+
+  .maison-collage.is-intro.is-intro-visible .maison-collage__item {
+    opacity: 1;
+    transform: none;
+  }
+
+  .maison-collage__item--top {
+    top: -10px;
+    left: calc(33% - 100px);
+    width: 200px;
+    height: 262px;
+  }
+
+  .maison-collage__item--right {
+    top: 0;
+    right: 9%;
+    width: 278px;
+    height: 376px;
+    z-index: 5;
+  }
+
+  .maison-collage__item--left {
+    left: calc(8% - 200px);
+    bottom: 92px;
+    width: 464px;
+    height: 360px;
+    z-index: 2;
+  }
+
+  .maison-collage__item--bottom {
+    right: 0;
+    bottom: 8px;
+    width: 296px;
+    height: 198px;
+    z-index: 2;
+  }
+
+  .maison-collage.is-intro.is-intro-visible .maison-collage__item--top { --intro-delay: 0ms; }
+  .maison-collage.is-intro.is-intro-visible .maison-collage__item--right { --intro-delay: 170ms; }
+  .maison-collage.is-intro.is-intro-visible .maison-collage__item--left { --intro-delay: 340ms; }
+  .maison-collage.is-intro.is-intro-visible .maison-collage__item--bottom { --intro-delay: 510ms; }
+
+  .maison-collage.is-switching {
+    filter: saturate(0.98);
+  }
+
+  @media (max-width: 749px) {
+    .maison-hero-collage__copy {
+      top: 42%;
+    }
+
+    .maison-collage {
+      width: min(560px, 92vw);
+      min-height: 520px;
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  (() => {
+    const init = (root) => {
+      const collage = root.querySelector('[data-maison-collage-inner]');
+      if (!collage) return;
+
+      requestAnimationFrame(() => collage.classList.add('is-intro-visible'));
+
+      const prefersReducedMotion =
+        window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReducedMotion) return;
+
+      const images = Array.from(collage.querySelectorAll('img')).filter(
+        (img) => img.dataset.imageA && img.dataset.imageB
+      );
+      if (images.length === 0) return;
+
+      const intervalMsRaw = Number(root.dataset.intervalMs || 6000);
+      const intervalMs = Math.max(3000, Math.min(15000, intervalMsRaw));
+
+      let showingAlt = false;
+      let timer = null;
+
+      const preload = (url) => {
+        if (!url) return;
+        const i = new Image();
+        i.decoding = 'async';
+        i.loading = 'eager';
+        i.src = url;
+      };
+
+      images.forEach((img) => preload(img.dataset.imageB));
+
+      const swap = () => {
+        showingAlt = !showingAlt;
+        collage.classList.add('is-switching');
+
+        window.setTimeout(() => {
+          images.forEach((img) => {
+            const nextSrc = showingAlt ? img.dataset.imageB : img.dataset.imageA;
+            const nextAlt = showingAlt ? img.dataset.altB : img.dataset.altA;
+            if (nextSrc) img.src = nextSrc;
+            if (typeof nextAlt === 'string') img.alt = nextAlt;
+          });
+          collage.classList.remove('is-switching');
+        }, 220);
+      };
+
+      const start = () => {
+        if (timer) return;
+        timer = window.setInterval(swap, intervalMs);
+      };
+
+      const stop = () => {
+        if (!timer) return;
+        window.clearInterval(timer);
+        timer = null;
+      };
+
+      start();
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (!entry) return;
+          if (entry.isIntersecting) start();
+          else stop();
+        },
+        { threshold: 0.15 }
+      );
+
+      observer.observe(root);
+    };
+
+    document.querySelectorAll('[data-maison-collage]').forEach(init);
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Maison — Hero collage",
+  "tag": "section",
+  "class": "section-maison-hero-collage",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_text",
+      "label": "Show text overlay",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Since 1996"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "The Brand"
+    },
+    {
+      "type": "header",
+      "content": "Slideshow"
+    },
+    {
+      "type": "range",
+      "id": "interval_seconds",
+      "min": 3,
+      "max": 12,
+      "step": 1,
+      "unit": "s",
+      "label": "Slide change interval",
+      "default": 6
+    },
+    {
+      "type": "image_picker",
+      "id": "image_top",
+      "label": "Image top (set 1)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_right",
+      "label": "Image right (set 1)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_left",
+      "label": "Image left (set 1)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_bottom",
+      "label": "Image bottom (set 1)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_top_alt",
+      "label": "Image top (set 2)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_right_alt",
+      "label": "Image right (set 2)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_left_alt",
+      "label": "Image left (set 2)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_bottom_alt",
+      "label": "Image bottom (set 2)"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Container width",
+      "default": "wrapper--full-padded",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Normal" },
+        { "value": "wrapper--wide", "label": "Wide" },
+        { "value": "wrapper--narrow", "label": "Narrow" }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Maison — Hero collage"
+    }
+  ]
+}
+{% endschema %}
+
