@@ -4,9 +4,13 @@
   assign resolved_top_heading = section.settings.top_heading
   assign resolved_top_image = section.settings.top_image
   assign resolved_caption_text = section.settings.caption_text
+  assign has_image = false
 
   if resolved_top_image != blank and resolved_top_image.value != blank
     assign resolved_top_image = resolved_top_image.value
+  endif
+  if resolved_top_image != blank
+    assign has_image = true
   endif
 
   if resolved_top_heading == blank and article != blank
@@ -41,7 +45,7 @@
     data-section-type="brand-story-combo"
   >
     <div class="brand-story-combo__inner {{ section.settings.width }}">
-      <div class="brand-story-combo__split{% if section.settings.layout == 'image-left' %} brand-story-combo__split--image-left{% endif %}">
+      <div class="brand-story-combo__split{% if section.settings.layout == 'image-left' %} brand-story-combo__split--image-left{% endif %}{% unless has_image %} brand-story-combo__split--no-image{% endunless %}">
         <div class="brand-story-combo__split-copy">
           {%- if resolved_top_heading != blank -%}
             <h3 class="brand-story-combo__heading h3" data-brand-fade>
@@ -107,6 +111,24 @@
 
   .brand-story-combo__split--image-left .brand-story-combo__split-media {
     order: 1;
+  }
+
+  .brand-story-combo__split--no-image {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .brand-story-combo__split--no-image .brand-story-combo__split-copy {
+    width: 100%;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    align-items: center;
+  }
+
+  .brand-story-combo__split--no-image .brand-story-combo__text {
+    text-align: center;
   }
 
   .brand-story-combo__split-copy {
