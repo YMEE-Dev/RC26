@@ -47,7 +47,12 @@
         {% if top_a != blank or top_b != blank %}
           <div
             class="maison-collage__shift"
-            style="--shift-x: {{ section.settings.top_shift_x }}px; --shift-y: {{ section.settings.top_shift_y }}px;"
+            style="
+              --shift-x-a: {{ section.settings.top_shift_x }}px;
+              --shift-y-a: {{ section.settings.top_shift_y }}px;
+              --shift-x-b: {{ section.settings.top_shift_x_alt }}px;
+              --shift-y-b: {{ section.settings.top_shift_y_alt }}px;
+            "
           >
             <img
               src="{{ top_a | default: top_b | image_url: width: 1400 }}"
@@ -66,7 +71,12 @@
         {% if right_a != blank or right_b != blank %}
           <div
             class="maison-collage__shift"
-            style="--shift-x: {{ section.settings.right_shift_x }}px; --shift-y: {{ section.settings.right_shift_y }}px;"
+            style="
+              --shift-x-a: {{ section.settings.right_shift_x }}px;
+              --shift-y-a: {{ section.settings.right_shift_y }}px;
+              --shift-x-b: {{ section.settings.right_shift_x_alt }}px;
+              --shift-y-b: {{ section.settings.right_shift_y_alt }}px;
+            "
           >
             <img
               src="{{ right_a | default: right_b | image_url: width: 1800 }}"
@@ -85,7 +95,12 @@
         {% if left_a != blank or left_b != blank %}
           <div
             class="maison-collage__shift"
-            style="--shift-x: {{ section.settings.left_shift_x }}px; --shift-y: {{ section.settings.left_shift_y }}px;"
+            style="
+              --shift-x-a: {{ section.settings.left_shift_x }}px;
+              --shift-y-a: {{ section.settings.left_shift_y }}px;
+              --shift-x-b: {{ section.settings.left_shift_x_alt }}px;
+              --shift-y-b: {{ section.settings.left_shift_y_alt }}px;
+            "
           >
             <img
               src="{{ left_a | default: left_b | image_url: width: 1800 }}"
@@ -104,7 +119,12 @@
         {% if bottom_a != blank or bottom_b != blank %}
           <div
             class="maison-collage__shift"
-            style="--shift-x: {{ section.settings.bottom_shift_x }}px; --shift-y: {{ section.settings.bottom_shift_y }}px;"
+            style="
+              --shift-x-a: {{ section.settings.bottom_shift_x }}px;
+              --shift-y-a: {{ section.settings.bottom_shift_y }}px;
+              --shift-x-b: {{ section.settings.bottom_shift_x_alt }}px;
+              --shift-y-b: {{ section.settings.bottom_shift_y_alt }}px;
+            "
           >
             <img
               src="{{ bottom_a | default: bottom_b | image_url: width: 1800 }}"
@@ -200,7 +220,11 @@
   .maison-collage__shift {
     width: 100%;
     height: 100%;
-    translate: var(--shift-x, 0px) var(--shift-y, 0px);
+    translate: var(--shift-x-a, 0px) var(--shift-y-a, 0px);
+  }
+
+  .maison-collage.is-alt .maison-collage__shift {
+    translate: var(--shift-x-b, var(--shift-x-a, 0px)) var(--shift-y-b, var(--shift-y-a, 0px));
   }
 
   .maison-collage.is-alt .maison-collage__item img {
@@ -604,10 +628,7 @@
       "id": "image_bottom_alt",
       "label": "Image bottom (set 2)"
     },
-    {
-      "type": "header",
-      "content": "Fine tune positioning"
-    },
+    { "type": "header", "content": "Fine tune positioning (Set 1)" },
     {
       "type": "range",
       "id": "top_shift_x",
@@ -686,6 +707,87 @@
       "step": 5,
       "unit": "px",
       "label": "Bottom image vertical",
+      "default": 0
+    },
+    { "type": "header", "content": "Fine tune positioning (Set 2)" },
+    {
+      "type": "range",
+      "id": "top_shift_x_alt",
+      "min": -240,
+      "max": 240,
+      "step": 5,
+      "unit": "px",
+      "label": "Top image horizontal (set 2)",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "top_shift_y_alt",
+      "min": -240,
+      "max": 240,
+      "step": 5,
+      "unit": "px",
+      "label": "Top image vertical (set 2)",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "right_shift_x_alt",
+      "min": -240,
+      "max": 240,
+      "step": 5,
+      "unit": "px",
+      "label": "Right image horizontal (set 2)",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "right_shift_y_alt",
+      "min": -240,
+      "max": 240,
+      "step": 5,
+      "unit": "px",
+      "label": "Right image vertical (set 2)",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "left_shift_x_alt",
+      "min": -240,
+      "max": 240,
+      "step": 5,
+      "unit": "px",
+      "label": "Left image horizontal (set 2)",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "left_shift_y_alt",
+      "min": -240,
+      "max": 240,
+      "step": 5,
+      "unit": "px",
+      "label": "Left image vertical (set 2)",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "bottom_shift_x_alt",
+      "min": -240,
+      "max": 240,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom image horizontal (set 2)",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "bottom_shift_y_alt",
+      "min": -240,
+      "max": 240,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom image vertical (set 2)",
       "default": 0
     },
     {
