@@ -38,7 +38,7 @@
   data-section-id="{{ section.id }}"
   data-section-type="blog-quote-two-images"
 >
-  <div class="blog-quote-two-images__inner {{ section.settings.width }}">
+  <div class="blog-quote-two-images__inner {{ section.settings.width }}{% if section.settings.layout == 'image-right' %} blog-quote-two-images__inner--image-right{% endif %}">
     <div class="blog-quote-two-images__grid">
       <div class="blog-quote-two-images__left">
         {%- if left_image != blank -%}
@@ -57,15 +57,26 @@
               <img class="blog-quote-two-images__image" src="{{ left_image | escape }}" alt="" loading="lazy">
             {%- endif -%}
           </div>
+          {%- if section.settings.left_caption != blank -%}
+            <p class="blog-quote-two-images__caption caption">{{ section.settings.left_caption | escape }}</p>
+          {%- endif -%}
         {%- endif -%}
       </div>
 
       <div class="blog-quote-two-images__right">
-        {%- if section.settings.quote != blank -%}
-          <div class="blog-quote-two-images__quote-wrap" data-brand-fade>
-            <div class="blog-quote-two-images__quote rte caption">
-              {{ section.settings.quote }}
-            </div>
+        {%- if section.settings.quote != blank or section.settings.body_text != blank -%}
+          <div class="blog-quote-two-images__content" data-brand-fade>
+            {%- if section.settings.quote != blank -%}
+              <div class="blog-quote-two-images__heading rte {% if section.settings.heading_style == 'caption' %}caption{% else %}h4{% endif %}">
+                {{ section.settings.quote }}
+              </div>
+            {%- endif -%}
+
+            {%- if section.settings.body_text != blank -%}
+              <div class="blog-quote-two-images__body rte body">
+                {{ section.settings.body_text }}
+              </div>
+            {%- endif -%}
           </div>
         {%- endif -%}
 
@@ -85,6 +96,9 @@
               <img class="blog-quote-two-images__image" src="{{ right_image | escape }}" alt="" loading="lazy">
             {%- endif -%}
           </div>
+          {%- if section.settings.right_caption != blank -%}
+            <p class="blog-quote-two-images__caption caption">{{ section.settings.right_caption | escape }}</p>
+          {%- endif -%}
         {%- endif -%}
       </div>
     </div>
@@ -108,6 +122,7 @@
     grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
     gap: var(--gap);
     align-items: start;
+    grid-template-areas: "left right";
   }
 
   .blog-quote-two-images__right {
@@ -115,17 +130,44 @@
     grid-template-rows: auto 1fr;
     gap: var(--gap);
     align-items: start;
+    grid-area: right;
   }
 
-  .blog-quote-two-images__quote-wrap {
+  .blog-quote-two-images__left {
+    grid-area: left;
+  }
+
+  .blog-quote-two-images__inner--image-right .blog-quote-two-images__grid {
+    grid-template-areas: "right left";
+  }
+
+  .blog-quote-two-images__content {
     width: min(100%, var(--quote-max));
     margin-left: auto;
     margin-right: auto;
     text-align: center;
+    display: grid;
+    gap: 18px;
+    align-items: start;
+    justify-items: center;
   }
 
-  .blog-quote-two-images__quote p {
+  .blog-quote-two-images__heading p,
+  .blog-quote-two-images__body p {
     margin: 0;
+  }
+
+  .blog-quote-two-images__heading.caption {
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .blog-quote-two-images__caption {
+    margin: 16px 0 0;
+    opacity: 0.7;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: left;
   }
 
   .blog-quote-two-images__media {
@@ -156,11 +198,20 @@
     .blog-quote-two-images__grid {
       grid-template-columns: 1fr;
       gap: 24px;
+      grid-template-areas:
+        "left"
+        "right";
     }
 
     .blog-quote-two-images__right {
       grid-template-rows: auto auto;
       gap: 24px;
+    }
+
+    .blog-quote-two-images__inner--image-right .blog-quote-two-images__grid {
+      grid-template-areas:
+        "right"
+        "left";
     }
 
     .blog-quote-two-images__media--left {
@@ -176,6 +227,11 @@
     .blog-quote-two-images__image {
       height: 100%;
     }
+
+    .blog-quote-two-images__caption {
+      margin-top: 12px;
+      text-align: center;
+    }
   }
 {% endstylesheet %}
 
@@ -183,6 +239,16 @@
 {
   "name": "Blog: Quote + Two Images",
   "settings": [
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "default": "image-left",
+      "options": [
+        { "value": "image-left", "label": "Image left, content right" },
+        { "value": "image-right", "label": "Content left, image right" }
+      ]
+    },
     {
       "type": "select",
       "id": "width",
@@ -220,9 +286,30 @@
       "label": "Left image"
     },
     {
+      "type": "text",
+      "id": "left_caption",
+      "label": "Left caption",
+      "default": ""
+    },
+    {
       "type": "richtext",
       "id": "quote",
-      "label": "Quote"
+      "label": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "heading_style",
+      "label": "Heading style",
+      "default": "caption",
+      "options": [
+        { "value": "caption", "label": "Caption (uppercase)" },
+        { "value": "h4", "label": "Heading font" }
+      ]
+    },
+    {
+      "type": "richtext",
+      "id": "body_text",
+      "label": "Body text"
     },
     {
       "type": "range",
@@ -238,6 +325,12 @@
       "type": "image_picker",
       "id": "right_image",
       "label": "Right image"
+    },
+    {
+      "type": "text",
+      "id": "right_caption",
+      "label": "Right caption",
+      "default": ""
     },
     {
       "type": "range",
@@ -288,4 +381,3 @@
   ]
 }
 {% endschema %}
-
