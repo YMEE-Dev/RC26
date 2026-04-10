@@ -1082,11 +1082,7 @@
         const containScale = Math.min(rect.width / sourceWidth, rect.height / sourceHeight);
         const coverScale = Math.max(rect.width / sourceWidth, rect.height / sourceHeight);
         const scale =
-          objectFit === 'cover'
-            ? coverScale
-            : objectFit === 'scale-down'
-              ? Math.min(1, containScale)
-              : containScale;
+          objectFit === 'cover' ? coverScale : objectFit === 'scale-down' ? Math.min(1, containScale) : containScale;
 
         renderedWidth = sourceWidth * scale;
         renderedHeight = sourceHeight * scale;
@@ -1261,7 +1257,7 @@
       const logoDarkUrl = logoLinks[0].dataset.logoDark;
       const forcedDrawerLogoMode = 'dark';
       const forcedTmenuLogoMode = 'dark';
-      const DEBUG_HEADER_OBSERVER = true;
+      const DEBUG_HEADER_OBSERVER = false;
       const APPLY_DEBOUNCE = 150;
       const intersectionThresholds = [0, 0.25, 0.5, 0.75, 1];
       const getSectionLabel = (sectionEl) =>
