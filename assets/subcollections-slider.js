@@ -17,9 +17,9 @@
     if (swiperInstances[sectionId]) return;
 
     swiperInstances[sectionId] = new Swiper(swiperElement, {
-      slidesPerView: 1,
+      slidesPerView: 1.25,
       spaceBetween: 20,
-      loop: false
+      loop: false,
     });
   }
 
@@ -50,12 +50,12 @@
     if (!section) return;
 
     const sectionId = section.dataset.sectionId;
-    const swiperElement = section.querySelector('[data-subcollections-swiper]');
+    const swiperElement = section.querySelector("[data-subcollections-swiper]");
 
     if (!sectionId || !swiperElement) return;
 
     if (isMobile()) {
-      if (typeof Swiper === 'undefined') {
+      if (typeof Swiper === "undefined") {
         scheduleRetry(section, sectionId, attempt || 0);
         return;
       }
@@ -81,26 +81,26 @@
   if (!window.__subcollectionsSliderInitialized) {
     window.__subcollectionsSliderInitialized = true;
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function () {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", function () {
         syncAll();
       });
     } else {
       syncAll();
     }
 
-    window.addEventListener('resize', function () {
+    window.addEventListener("resize", function () {
       syncAll();
     });
 
-    document.addEventListener('shopify:section:load', function (event) {
+    document.addEventListener("shopify:section:load", function (event) {
       const target = event.target;
       const section =
         target && target.matches && target.matches(sectionSelector)
           ? target
           : target && target.querySelector
-          ? target.querySelector(sectionSelector)
-          : null;
+            ? target.querySelector(sectionSelector)
+            : null;
 
       if (section) syncSection(section);
     });
