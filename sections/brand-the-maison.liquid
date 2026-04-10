@@ -21,7 +21,7 @@
   <div class="maison__hero {{ section.settings.width }}">
     <div class="maison__hero-inner">
       <div class="maison__hero-copy">
-        {%- if section.settings.hero_kicker != blank -%}
+        {%- if section.settings.show_kicker and section.settings.hero_kicker != blank -%}
           <p class="maison__label">{{ section.settings.hero_kicker }}</p>
         {%- endif -%}
         {%- if section.settings.hero_title != blank -%}
@@ -558,7 +558,13 @@
       "type": "text",
       "id": "hero_kicker",
       "label": "Small label (optional)",
-      "default": ""
+      "default": "The Brand"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_kicker",
+      "label": "Show small label",
+      "default": false
     },
     {
       "type": "text",
