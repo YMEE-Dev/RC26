@@ -16,14 +16,16 @@
   data-section-id="{{ section.id }}"
   data-section-type="brand-the-maison"
 >
-  <header class="maison__hero" aria-label="The Maison hero">
-    <div class="maison__hero-inner {{ section.settings.width }}">
+
+  {%- comment -%} ── HERO ── {%- endcomment -%}
+  <div class="maison__hero {{ section.settings.width }}">
+    <div class="maison__hero-inner">
       <div class="maison__hero-copy">
         {%- if section.settings.hero_kicker != blank -%}
-          <p class="maison__kicker">{{ section.settings.hero_kicker }}</p>
+          <p class="maison__label">{{ section.settings.hero_kicker }}</p>
         {%- endif -%}
         {%- if section.settings.hero_title != blank -%}
-          <h1 class="maison__title">{{ section.settings.hero_title }}</h1>
+          <h1 class="maison__h1">{{ section.settings.hero_title }}</h1>
         {%- endif -%}
         {%- if section.settings.hero_copy != blank -%}
           <div class="maison__lede rte">{{ section.settings.hero_copy }}</div>
@@ -31,349 +33,511 @@
       </div>
       {%- if section.settings.hero_image != blank -%}
         <div class="maison__hero-media">
-          {{ section.settings.hero_image | image_url: width: 2400 | image_tag: loading: 'eager', sizes: '100vw', class: 'maison__hero-img' }}
+          {{ section.settings.hero_image | image_url: width: 2000 | image_tag:
+            loading: 'eager',
+            sizes: '(min-width: 990px) 45vw, 100vw',
+            class: 'maison__hero-img'
+          }}
         </div>
       {%- endif -%}
     </div>
-  </header>
-
-  <div class="maison__wrap {{ section.settings.width }}">
-    <article class="maison__panel maison__panel--craft">
-      <div class="maison__grid">
-        <div class="maison__media">
-          {%- if section.settings.craft_image_primary != blank -%}
-            {{ section.settings.craft_image_primary | image_url: width: 1800 | image_tag: loading: 'lazy', sizes: '(min-width: 990px) 50vw, 100vw', class: 'maison__img' }}
-          {%- endif -%}
-        </div>
-        <div class="maison__content">
-          {%- if section.settings.craft_title != blank -%}
-            <h2 class="maison__heading">{{ section.settings.craft_title }}</h2>
-          {%- endif -%}
-          {%- if section.settings.craft_copy != blank -%}
-            <div class="maison__body rte">{{ section.settings.craft_copy }}</div>
-          {%- endif -%}
-
-          {%- if section.settings.craft_image_secondary != blank -%}
-            <figure class="maison__figure">
-              {{ section.settings.craft_image_secondary | image_url: width: 1800 | image_tag: loading: 'lazy', sizes: '(min-width: 990px) 50vw, 100vw', class: 'maison__img' }}
-            </figure>
-          {%- endif -%}
-        </div>
-      </div>
-
-      {%- if section.settings.quote_text != blank -%}
-        <figure class="maison__quote">
-          <blockquote class="maison__quote-text">“{{ section.settings.quote_text }}”</blockquote>
-          {%- if section.settings.quote_signature != blank -%}
-            <div class="maison__quote-signature">
-              {{ section.settings.quote_signature | image_url: width: 900 | image_tag: loading: 'lazy', sizes: '180px', class: 'maison__signature' }}
-            </div>
-          {%- endif -%}
-        </figure>
-      {%- endif -%}
-    </article>
-
-    <article class="maison__panel maison__panel--ruby" id="MaisonRuby--{{ section.id }}">
-      <div class="maison__grid maison__grid--ruby">
-        <div class="maison__content">
-          {%- if section.settings.ruby_title != blank -%}
-            <h2 class="maison__heading">{{ section.settings.ruby_title }}</h2>
-          {%- endif -%}
-          {%- if section.settings.ruby_copy != blank -%}
-            <div class="maison__body rte">{{ section.settings.ruby_copy }}</div>
-          {%- endif -%}
-        </div>
-        <div class="maison__media">
-          {%- if section.settings.ruby_image != blank -%}
-            {{ section.settings.ruby_image | image_url: width: 1800 | image_tag: loading: 'lazy', sizes: '(min-width: 990px) 50vw, 100vw', class: 'maison__img' }}
-          {%- endif -%}
-        </div>
-      </div>
-    </article>
-
-    <article class="maison__panel maison__panel--commitments">
-      {%- if section.settings.commitments_title != blank -%}
-        <h2 class="maison__heading">{{ section.settings.commitments_title }}</h2>
-      {%- endif -%}
-      {%- if section.settings.commitments_copy != blank -%}
-        <div class="maison__body rte">{{ section.settings.commitments_copy }}</div>
-      {%- endif -%}
-
-      <div class="maison__cards">
-        <div class="maison__card">
-          {%- if section.settings.kimberley_title != blank -%}
-            <h3 class="maison__card-title">{{ section.settings.kimberley_title }}</h3>
-          {%- endif -%}
-          {%- if section.settings.kimberley_copy != blank -%}
-            <div class="maison__card-body rte">{{ section.settings.kimberley_copy }}</div>
-          {%- endif -%}
-          {%- if section.settings.kimberley_image != blank -%}
-            <div class="maison__card-media">
-              {{ section.settings.kimberley_image | image_url: width: 1400 | image_tag: loading: 'lazy', sizes: '(min-width: 990px) 50vw, 100vw', class: 'maison__img' }}
-            </div>
-          {%- endif -%}
-          {%- if section.settings.kimberley_link != blank and section.settings.kimberley_link_label != blank -%}
-            <a class="maison__card-link" href="{{ section.settings.kimberley_link }}">{{ section.settings.kimberley_link_label }}</a>
-          {%- endif -%}
-        </div>
-
-        <div class="maison__card">
-          {%- if section.settings.rjc_title != blank -%}
-            <h3 class="maison__card-title">{{ section.settings.rjc_title }}</h3>
-          {%- endif -%}
-          {%- if section.settings.rjc_copy != blank -%}
-            <div class="maison__card-body rte">{{ section.settings.rjc_copy }}</div>
-          {%- endif -%}
-          {%- if section.settings.rjc_image != blank -%}
-            <div class="maison__card-media">
-              {{ section.settings.rjc_image | image_url: width: 1400 | image_tag: loading: 'lazy', sizes: '(min-width: 990px) 50vw, 100vw', class: 'maison__img' }}
-            </div>
-          {%- endif -%}
-          {%- if section.settings.rjc_link != blank and section.settings.rjc_link_label != blank -%}
-            <a class="maison__card-link" href="{{ section.settings.rjc_link }}">{{ section.settings.rjc_link_label }}</a>
-          {%- endif -%}
-        </div>
-      </div>
-    </article>
-
-    {%- if associations.size > 0 -%}
-      <article class="maison__panel maison__panel--associations" aria-label="Associations & organizations">
-        {%- if section.settings.associations_title != blank -%}
-          <h2 class="maison__heading">{{ section.settings.associations_title }}</h2>
-        {%- endif -%}
-        <div class="maison__associations">
-          {%- for block in associations -%}
-            <div class="maison__association" {{ block.shopify_attributes }}>
-              {%- if block.settings.title != blank -%}
-                <h3 class="maison__association-title">{{ block.settings.title }}</h3>
-              {%- endif -%}
-              {%- if block.settings.url != blank -%}
-                <a class="maison__association-link" href="{{ block.settings.url }}">{{ block.settings.url_label | default: block.settings.url }}</a>
-              {%- endif -%}
-            </div>
-          {%- endfor -%}
-        </div>
-      </article>
-    {%- endif -%}
   </div>
+
+  {%- comment -%} ── TIMELESS CRAFTSMANSHIP ── {%- endcomment -%}
+  <div class="maison__divider {{ section.settings.width }}"></div>
+
+  <article class="maison__panel {{ section.settings.width }}" aria-labelledby="maison-craft-{{ section.id }}">
+    <div class="maison__split maison__split--craft">
+      <div class="maison__split-media">
+        {%- if section.settings.craft_image_primary != blank -%}
+          {{ section.settings.craft_image_primary | image_url: width: 1800 | image_tag:
+            loading: 'lazy',
+            sizes: '(min-width: 990px) 48vw, 100vw',
+            class: 'maison__img'
+          }}
+        {%- endif -%}
+      </div>
+      <div class="maison__split-content">
+        {%- if section.settings.craft_title != blank -%}
+          <h2 class="maison__section-label" id="maison-craft-{{ section.id }}">{{ section.settings.craft_title }}</h2>
+        {%- endif -%}
+        {%- if section.settings.craft_copy != blank -%}
+          <div class="maison__body rte">{{ section.settings.craft_copy }}</div>
+        {%- endif -%}
+        {%- if section.settings.craft_image_secondary != blank -%}
+          <div class="maison__secondary-media">
+            {{ section.settings.craft_image_secondary | image_url: width: 1400 | image_tag:
+              loading: 'lazy',
+              sizes: '(min-width: 990px) 44vw, 100vw',
+              class: 'maison__img'
+            }}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+
+    {%- if section.settings.quote_text != blank -%}
+      <figure class="maison__quote-block" role="presentation">
+        <blockquote class="maison__quote-text">{{ section.settings.quote_text }}</blockquote>
+        {%- if section.settings.quote_signature != blank -%}
+          <figcaption class="maison__quote-sig">
+            {{ section.settings.quote_signature | image_url: width: 800 | image_tag:
+              loading: 'lazy',
+              sizes: '160px',
+              class: 'maison__sig-img'
+            }}
+          </figcaption>
+        {%- endif -%}
+      </figure>
+    {%- endif -%}
+  </article>
+
+  {%- comment -%} ── THE RUBY ── {%- endcomment -%}
+  <div class="maison__divider {{ section.settings.width }}"></div>
+
+  <article class="maison__panel {{ section.settings.width }}" aria-labelledby="maison-ruby-{{ section.id }}">
+    <div class="maison__split maison__split--ruby">
+      <div class="maison__split-content">
+        {%- if section.settings.ruby_title != blank -%}
+          <h2 class="maison__section-label" id="maison-ruby-{{ section.id }}">{{ section.settings.ruby_title }}</h2>
+        {%- endif -%}
+        {%- if section.settings.ruby_copy != blank -%}
+          <div class="maison__body rte">{{ section.settings.ruby_copy }}</div>
+        {%- endif -%}
+      </div>
+      <div class="maison__split-media">
+        {%- if section.settings.ruby_image != blank -%}
+          {{ section.settings.ruby_image | image_url: width: 1800 | image_tag:
+            loading: 'lazy',
+            sizes: '(min-width: 990px) 48vw, 100vw',
+            class: 'maison__img'
+          }}
+        {%- endif -%}
+      </div>
+    </div>
+  </article>
+
+  {%- comment -%} ── COMMITMENTS ── {%- endcomment -%}
+  <div class="maison__divider {{ section.settings.width }}"></div>
+
+  <article class="maison__panel {{ section.settings.width }}" aria-labelledby="maison-commitments-{{ section.id }}">
+    {%- if section.settings.commitments_title != blank -%}
+      <h2 class="maison__section-label" id="maison-commitments-{{ section.id }}">{{ section.settings.commitments_title }}</h2>
+    {%- endif -%}
+    {%- if section.settings.commitments_copy != blank -%}
+      <div class="maison__body maison__body--intro rte">{{ section.settings.commitments_copy }}</div>
+    {%- endif -%}
+
+    <div class="maison__certs">
+
+      <div class="maison__cert">
+        {%- if section.settings.kimberley_title != blank -%}
+          <h3 class="maison__cert-heading">{{ section.settings.kimberley_title }}</h3>
+        {%- endif -%}
+        {%- if section.settings.kimberley_copy != blank -%}
+          <div class="maison__body rte">{{ section.settings.kimberley_copy }}</div>
+        {%- endif -%}
+        {%- if section.settings.kimberley_image != blank -%}
+          <div class="maison__cert-logo">
+            {{ section.settings.kimberley_image | image_url: width: 600 | image_tag:
+              loading: 'lazy',
+              sizes: '240px',
+              class: 'maison__logo-img'
+            }}
+          </div>
+        {%- endif -%}
+        {%- if section.settings.kimberley_link != blank and section.settings.kimberley_link_label != blank -%}
+          <a class="maison__text-link" href="{{ section.settings.kimberley_link }}">{{ section.settings.kimberley_link_label }}</a>
+        {%- endif -%}
+      </div>
+
+      <div class="maison__cert">
+        {%- if section.settings.rjc_title != blank -%}
+          <h3 class="maison__cert-heading">{{ section.settings.rjc_title }}</h3>
+        {%- endif -%}
+        {%- if section.settings.rjc_copy != blank -%}
+          <div class="maison__body rte">{{ section.settings.rjc_copy }}</div>
+        {%- endif -%}
+        {%- if section.settings.rjc_image != blank -%}
+          <div class="maison__cert-logo">
+            {{ section.settings.rjc_image | image_url: width: 600 | image_tag:
+              loading: 'lazy',
+              sizes: '240px',
+              class: 'maison__logo-img'
+            }}
+          </div>
+        {%- endif -%}
+        {%- if section.settings.rjc_link != blank and section.settings.rjc_link_label != blank -%}
+          <a class="maison__text-link" href="{{ section.settings.rjc_link }}">{{ section.settings.rjc_link_label }}</a>
+        {%- endif -%}
+      </div>
+
+    </div>
+  </article>
+
+  {%- comment -%} ── ASSOCIATIONS ── {%- endcomment -%}
+  {%- if associations.size > 0 -%}
+    <div class="maison__divider {{ section.settings.width }}"></div>
+
+    <article class="maison__panel {{ section.settings.width }}" aria-labelledby="maison-assoc-{{ section.id }}">
+      {%- if section.settings.associations_title != blank -%}
+        <h2 class="maison__section-label" id="maison-assoc-{{ section.id }}">{{ section.settings.associations_title }}</h2>
+      {%- endif -%}
+      <ul class="maison__assoc-list" role="list">
+        {%- for block in associations -%}
+          <li class="maison__assoc-item" {{ block.shopify_attributes }}>
+            {%- if block.settings.title != blank -%}
+              <span class="maison__assoc-name">{{ block.settings.title }}</span>
+            {%- endif -%}
+            {%- if block.settings.url != blank -%}
+              <a
+                class="maison__assoc-link"
+                href="{{ block.settings.url }}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >{{ block.settings.url_label | default: block.settings.url }}</a>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    </article>
+  {%- endif -%}
+
 </section>
 
 {% stylesheet %}
-  .maison {
-    color: var(--000000, #000);
-    background: #fff;
+
+/* ─── Base ─────────────────────────────────────── */
+.maison {
+  color: var(--COLOR-TEXT, #212121);
+  background: var(--COLOR-BG, #fff);
+}
+
+/* ─── Wrapper shared ───────────────────────────── */
+.maison__hero,
+.maison__panel,
+.maison__divider {
+  padding-left: clamp(20px, 5vw, 80px);
+  padding-right: clamp(20px, 5vw, 80px);
+}
+
+/* ─── Thin divider ─────────────────────────────── */
+.maison__divider {
+  height: 1px;
+  background: var(--COLOR-BORDER-HAIRLINE, rgba(0,0,0,0.08));
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* ─── Hero ─────────────────────────────────────── */
+.maison__hero {
+  padding-top: clamp(64px, 9vw, 120px);
+  padding-bottom: clamp(64px, 9vw, 120px);
+}
+
+.maison__hero-inner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 48px;
+  align-items: center;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.maison__label {
+  margin: 0 0 20px;
+  font-family: var(--FONT-STACK-BODY, Inter, sans-serif);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--COLOR-TEXT-A80, rgba(33,33,33,0.8));
+}
+
+.maison__h1 {
+  margin: 0 0 28px;
+  font-family: var(--FONT-STACK-HEADING, 'Portrait LS', serif);
+  font-weight: var(--FONT-WEIGHT-HEADING, 500);
+  font-style: var(--FONT-STYLE-HEADING, normal);
+  font-size: clamp(44px, 6.5vw, 88px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-transform: var(--FONT-UPPERCASE-HEADING, none);
+  color: var(--COLOR-TEXT, #212121);
+}
+
+.maison__lede {
+  font-family: var(--FONT-STACK-BODY, Inter, sans-serif);
+  font-size: clamp(14px, 1.5vw, 16px);
+  line-height: 1.75;
+  color: var(--COLOR-TEXT-A80, rgba(33,33,33,0.8));
+  max-width: 560px;
+}
+
+.maison__hero-media {
+  width: 100%;
+  overflow: hidden;
+}
+
+.maison__hero-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+/* ─── Panels ───────────────────────────────────── */
+.maison__panel {
+  padding-top: clamp(56px, 7vw, 100px);
+  padding-bottom: clamp(56px, 7vw, 100px);
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+/* ─── Section label (H2) ───────────────────────── */
+.maison__section-label {
+  margin: 0 0 24px;
+  font-family: var(--FONT-STACK-BODY, Inter, sans-serif);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+  color: var(--COLOR-TEXT-A80, rgba(33,33,33,0.8));
+}
+
+/* ─── Body copy ────────────────────────────────── */
+.maison__body {
+  font-family: var(--FONT-STACK-BODY, Inter, sans-serif);
+  font-size: clamp(14px, 1.4vw, 16px);
+  line-height: 1.8;
+  color: var(--COLOR-TEXT-A80, rgba(33,33,33,0.8));
+}
+
+.maison__body--intro {
+  max-width: 660px;
+  margin-bottom: 48px;
+}
+
+.maison__body p { margin: 0 0 1.1em; }
+.maison__body p:last-child { margin-bottom: 0; }
+
+/* ─── Split layout (50/50) ─────────────────────── */
+.maison__split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+}
+
+.maison__split-media,
+.maison__split-content {
+  width: 100%;
+}
+
+/* ─── Images ───────────────────────────────────── */
+.maison__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.maison__secondary-media {
+  margin-top: clamp(24px, 3vw, 40px);
+}
+
+/* ─── Quote ────────────────────────────────────── */
+.maison__quote-block {
+  margin: clamp(48px, 6vw, 80px) 0 0;
+  padding: clamp(32px, 4vw, 52px) clamp(24px, 4vw, 60px);
+  border-left: 2px solid var(--COLOR-TEXT-A35, rgba(33,33,33,0.35));
+}
+
+.maison__quote-text {
+  margin: 0;
+  font-family: var(--FONT-STACK-HEADING, 'Portrait LS', serif);
+  font-weight: var(--FONT-WEIGHT-HEADING, 500);
+  font-style: italic;
+  font-size: clamp(20px, 2.6vw, 32px);
+  line-height: 1.4;
+  color: var(--COLOR-TEXT, #212121);
+  letter-spacing: 0.01em;
+}
+
+.maison__quote-sig {
+  margin-top: 24px;
+}
+
+.maison__sig-img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 160px;
+  object-fit: contain;
+}
+
+/* ─── Certifications ───────────────────────────── */
+.maison__certs {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+.maison__cert {
+  padding: clamp(36px, 5vw, 56px) 0;
+  border-top: 1px solid var(--COLOR-BORDER-HAIRLINE, rgba(0,0,0,0.08));
+}
+
+.maison__cert:last-child {
+  border-bottom: 1px solid var(--COLOR-BORDER-HAIRLINE, rgba(0,0,0,0.08));
+}
+
+.maison__cert-heading {
+  margin: 0 0 16px;
+  font-family: var(--FONT-STACK-BODY, Inter, sans-serif);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--COLOR-TEXT, #212121);
+}
+
+.maison__cert-logo {
+  margin-top: 24px;
+}
+
+.maison__logo-img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 200px;
+  max-height: 80px;
+  object-fit: contain;
+}
+
+/* ─── Text link ────────────────────────────────── */
+.maison__text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 20px;
+  font-family: var(--FONT-STACK-BODY, Inter, sans-serif);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--COLOR-TEXT, #212121);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 2px;
+  transition: opacity 0.2s ease;
+}
+
+.maison__text-link:hover {
+  opacity: 0.6;
+}
+
+/* ─── Associations ─────────────────────────────── */
+.maison__assoc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: 40px;
+}
+
+.maison__assoc-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: clamp(16px, 2.5vw, 24px) 0;
+  border-top: 1px solid var(--COLOR-BORDER-HAIRLINE, rgba(0,0,0,0.08));
+}
+
+.maison__assoc-item:last-child {
+  border-bottom: 1px solid var(--COLOR-BORDER-HAIRLINE, rgba(0,0,0,0.08));
+}
+
+.maison__assoc-name {
+  font-family: var(--FONT-STACK-BODY, Inter, sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--COLOR-TEXT, #212121);
+}
+
+.maison__assoc-link {
+  font-family: var(--FONT-STACK-BODY, Inter, sans-serif);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--COLOR-LINK, #282c2e);
+  text-decoration: underline;
+  word-break: break-word;
+  transition: opacity 0.2s ease;
+}
+
+.maison__assoc-link:hover {
+  opacity: 0.6;
+}
+
+/* ─── Responsive: tablet ────────────────────────── */
+@media (min-width: 768px) {
+  .maison__certs {
+    grid-template-columns: 1fr 1fr;
+    gap: 0 clamp(40px, 5vw, 80px);
   }
 
-  .maison__hero {
-    position: relative;
-    overflow: hidden;
-    padding: clamp(56px, 8vw, 110px) 0;
+  .maison__cert {
+    border-top: 1px solid var(--COLOR-BORDER-HAIRLINE, rgba(0,0,0,0.08));
   }
 
+  .maison__cert:last-child {
+    border-bottom: none;
+  }
+
+  .maison__assoc-list {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .maison__assoc-item:last-child {
+    border-bottom: none;
+  }
+}
+
+/* ─── Responsive: desktop ───────────────────────── */
+@media (min-width: 990px) {
   .maison__hero-inner {
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
-    align-items: center;
+    grid-template-columns: 55fr 45fr;
+    gap: clamp(48px, 6vw, 100px);
   }
 
-  .maison__hero-copy {
-    max-width: 920px;
-    margin: 0 auto;
-    text-align: center;
+  .maison__h1 {
+    font-size: clamp(60px, 7vw, 96px);
   }
 
-  .maison__kicker {
-    margin: 0 0 12px;
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    opacity: 0.7;
+  .maison__split {
+    grid-template-columns: 1fr 1fr;
   }
 
-  .maison__title {
-    margin: 0 0 16px;
-    font-family: "Portrait LC", "Times New Roman", Georgia, serif;
-    font-size: clamp(38px, 5.4vw, 72px);
-    font-weight: 500;
-    line-height: 1.05;
+  /* Craft: image left, content right (default order) */
+  .maison__split--craft .maison__split-media  { order: 1; }
+  .maison__split--craft .maison__split-content { order: 2; }
+
+  /* Ruby: content left, image right */
+  .maison__split--ruby .maison__split-content { order: 1; }
+  .maison__split--ruby .maison__split-media   { order: 2; }
+
+  .maison__assoc-list {
+    grid-template-columns: repeat(3, 1fr);
   }
 
-  .maison__lede {
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    font-size: 14px;
-    line-height: 22px;
-    opacity: 0.92;
+  .maison__certs {
+    grid-template-columns: 1fr 1fr;
   }
+}
 
-  .maison__hero-media {
-    border-radius: 18px;
-    overflow: hidden;
-  }
-
-  .maison__hero-img {
-    width: 100%;
-    height: auto;
-    display: block;
-    object-fit: cover;
-  }
-
-  .maison__panel {
-    padding: clamp(40px, 6vw, 90px) 0;
-  }
-
-  .maison__grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 40px;
-    align-items: start;
-  }
-
-  .maison__grid--ruby {
-    align-items: center;
-  }
-
-  .maison__heading {
-    margin: 0 0 18px;
-    font-family: "Portrait LC", "Times New Roman", Georgia, serif;
-    font-size: clamp(26px, 3.2vw, 40px);
-    font-weight: 500;
-    line-height: 1.15;
-    letter-spacing: 0.02em;
-  }
-
-  .maison__body {
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    font-size: 14px;
-    line-height: 22px;
-  }
-
-  .maison__img {
-    width: 100%;
-    height: auto;
-    display: block;
-    object-fit: cover;
-    border-radius: 14px;
-  }
-
-  .maison__figure {
-    margin: 28px 0 0;
-  }
-
-  .maison__quote {
-    margin: 44px 0 0;
-    padding: 28px 26px;
-    border-radius: 16px;
-    background: rgba(0, 0, 0, 0.035);
-    border: 1px solid rgba(0, 0, 0, 0.07);
-  }
-
-  .maison__quote-text {
-    margin: 0;
-    font-family: "Portrait LC", "Times New Roman", Georgia, serif;
-    font-size: clamp(18px, 2.1vw, 26px);
-    line-height: 1.35;
-    letter-spacing: 0.01em;
-  }
-
-  .maison__quote-signature {
-    margin-top: 18px;
-    max-width: 220px;
-    opacity: 0.9;
-  }
-
-  .maison__signature {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-
-  .maison__cards {
-    margin-top: 28px;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-
-  .maison__card {
-    padding: 26px;
-    border-radius: 16px;
-    border: 1px solid rgba(0, 0, 0, 0.07);
-    background: #fff;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
-  }
-
-  .maison__card-title {
-    margin: 0 0 12px;
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-  }
-
-  .maison__card-media {
-    margin-top: 16px;
-  }
-
-  .maison__card-link {
-    display: inline-block;
-    margin-top: 14px;
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    text-decoration: underline;
-  }
-
-  .maison__associations {
-    margin-top: 18px;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .maison__association {
-    padding: 18px 18px;
-    border-radius: 14px;
-    border: 1px solid rgba(0, 0, 0, 0.07);
-    background: rgba(0, 0, 0, 0.02);
-  }
-
-  .maison__association-title {
-    margin: 0 0 8px;
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-  }
-
-  .maison__association-link {
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    font-size: 14px;
-    line-height: 22px;
-    text-decoration: underline;
-    word-break: break-word;
-  }
-
-  @media (min-width: 990px) {
-    .maison__grid {
-      grid-template-columns: 1fr 1fr;
-      gap: 56px;
-    }
-
-    .maison__cards {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .maison__associations {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
 {% endstylesheet %}
 
 {% schema %}
@@ -389,13 +553,13 @@
     {
       "type": "text",
       "id": "hero_kicker",
-      "label": "Kicker",
-      "default": "The Brand"
+      "label": "Kicker / label",
+      "default": "The Story"
     },
     {
       "type": "text",
       "id": "hero_title",
-      "label": "Title",
+      "label": "Title (H1)",
       "default": "The Maison"
     },
     {
@@ -406,7 +570,7 @@
     {
       "type": "image_picker",
       "id": "hero_image",
-      "label": "Hero image"
+      "label": "Portrait / hero image"
     },
     {
       "type": "header",
@@ -415,7 +579,7 @@
     {
       "type": "text",
       "id": "craft_title",
-      "label": "Heading",
+      "label": "Section label",
       "default": "Timeless craftsmanship"
     },
     {
@@ -426,22 +590,22 @@
     {
       "type": "image_picker",
       "id": "craft_image_primary",
-      "label": "Primary image"
+      "label": "Primary image (left)"
     },
     {
       "type": "image_picker",
       "id": "craft_image_secondary",
-      "label": "Secondary image"
+      "label": "Secondary image (below copy)"
     },
     {
       "type": "header",
-      "content": "Quote"
+      "content": "Pull quote"
     },
     {
-      "type": "text",
+      "type": "textarea",
       "id": "quote_text",
-      "label": "Quote text",
-      "default": "Fashion is changeable. It is whimsical. Style is not."
+      "label": "Quote",
+      "default": "Fashion is changeable. It is whimsical. Style is not. Style is part of us, of our life, in every moment and every expression."
     },
     {
       "type": "image_picker",
@@ -455,7 +619,7 @@
     {
       "type": "text",
       "id": "ruby_title",
-      "label": "Heading",
+      "label": "Section label",
       "default": "The Ruby"
     },
     {
@@ -466,7 +630,7 @@
     {
       "type": "image_picker",
       "id": "ruby_image",
-      "label": "Image"
+      "label": "Image (right)"
     },
     {
       "type": "header",
@@ -475,13 +639,13 @@
     {
       "type": "text",
       "id": "commitments_title",
-      "label": "Heading",
+      "label": "Section label",
       "default": "Commitments"
     },
     {
       "type": "richtext",
       "id": "commitments_copy",
-      "label": "Body copy"
+      "label": "Intro copy"
     },
     {
       "type": "header",
@@ -501,7 +665,7 @@
     {
       "type": "image_picker",
       "id": "kimberley_image",
-      "label": "Image"
+      "label": "Logo / image"
     },
     {
       "type": "url",
@@ -532,7 +696,7 @@
     {
       "type": "image_picker",
       "id": "rjc_image",
-      "label": "Image"
+      "label": "Logo / image"
     },
     {
       "type": "url",
@@ -547,12 +711,12 @@
     },
     {
       "type": "header",
-      "content": "Associations"
+      "content": "Associations & organizations"
     },
     {
       "type": "text",
       "id": "associations_title",
-      "label": "Heading",
+      "label": "Section label",
       "default": "Associations & organizations"
     },
     {
@@ -562,7 +726,7 @@
     {
       "type": "select",
       "id": "width",
-      "label": "Layout width",
+      "label": "Container width",
       "default": "wrapper--full-padded",
       "options": [
         { "value": "wrapper--full-padded", "label": "Full width padded" },
@@ -589,7 +753,7 @@
       "step": 2,
       "unit": "px",
       "label": "Top",
-      "default": 50
+      "default": 0
     },
     {
       "type": "range",
@@ -599,7 +763,7 @@
       "step": 2,
       "unit": "px",
       "label": "Bottom",
-      "default": 50
+      "default": 0
     }
   ],
   "blocks": [
@@ -610,7 +774,7 @@
         {
           "type": "text",
           "id": "title",
-          "label": "Title",
+          "label": "Organization name",
           "default": "American Gem Society"
         },
         {
@@ -631,6 +795,11 @@
     {
       "name": "Brand — The Maison",
       "blocks": [
+        { "type": "association" },
+        { "type": "association" },
+        { "type": "association" },
+        { "type": "association" },
+        { "type": "association" },
         { "type": "association" },
         { "type": "association" }
       ]
