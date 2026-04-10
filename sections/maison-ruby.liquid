@@ -99,7 +99,14 @@
     margin-bottom: 0;
   }
 
+  /* Visible by default (don’t depend on JS to show content) */
   .maison-ruby .reveal-up {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* When JS opts-in, animate in */
+  .maison-ruby.maison-ruby--reveal .reveal-up {
     opacity: 0;
     transform: translateY(36px);
     transition:
@@ -154,6 +161,13 @@
       reveal.forEach((el) => el.classList.add('is-visible'));
       return;
     }
+
+    if (!('IntersectionObserver' in window)) {
+      reveal.forEach((el) => el.classList.add('is-visible'));
+      return;
+    }
+
+    sectionRoot.classList.add('maison-ruby--reveal');
 
     const observer = new IntersectionObserver(
       (entries) => {
