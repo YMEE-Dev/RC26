@@ -65,7 +65,11 @@
 
       <div class="blog-quote-two-images__right">
         {%- if section.settings.quote != blank or section.settings.body_text != blank -%}
-          <div class="blog-quote-two-images__content" data-brand-fade>
+          <div class="blog-quote-two-images__content {{ section.settings.text_alignment }}" data-brand-fade>
+            {%- if section.settings.headline != blank -%}
+              <p class="blog-quote-two-images__headline caption">{{ section.settings.headline | escape }}</p>
+            {%- endif -%}
+
             {%- if section.settings.quote != blank -%}
               <div class="blog-quote-two-images__heading rte {% if section.settings.heading_style == 'caption' %}caption{% else %}h4{% endif %}">
                 {{ section.settings.quote }}
@@ -150,6 +154,25 @@
     gap: 18px;
     align-items: start;
     justify-items: center;
+  }
+
+  .blog-quote-two-images__content.text-left {
+    margin-left: 0;
+    margin-right: auto;
+    text-align: left;
+    justify-items: start;
+  }
+
+  .blog-quote-two-images__content.text-right {
+    margin-left: auto;
+    margin-right: 0;
+    text-align: right;
+    justify-items: end;
+  }
+
+  .blog-quote-two-images__headline {
+    margin: 0;
+    opacity: 0.7;
   }
 
   .blog-quote-two-images__heading p,
@@ -297,6 +320,12 @@
       "label": "Heading"
     },
     {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline (small)",
+      "default": " "
+    },
+    {
       "type": "select",
       "id": "heading_style",
       "label": "Heading style",
@@ -310,6 +339,17 @@
       "type": "richtext",
       "id": "body_text",
       "label": "Body text"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "default": "text-center",
+      "options": [
+        { "value": "text-left", "label": "Left" },
+        { "value": "text-center", "label": "Center" },
+        { "value": "text-right", "label": "Right" }
+      ]
     },
     {
       "type": "range",
