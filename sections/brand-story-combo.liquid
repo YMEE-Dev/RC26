@@ -41,7 +41,7 @@
     data-section-type="brand-story-combo"
   >
     <div class="brand-story-combo__inner {{ section.settings.width }}">
-      <div class="brand-story-combo__split">
+      <div class="brand-story-combo__split{% if section.settings.layout == 'image-left' %} brand-story-combo__split--image-left{% endif %}">
         <div class="brand-story-combo__split-copy">
           {%- if resolved_top_heading != blank -%}
             <h3 class="brand-story-combo__heading h3" data-brand-fade>
@@ -99,6 +99,14 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 56px;
     align-items: center;
+  }
+
+  .brand-story-combo__split--image-left .brand-story-combo__split-copy {
+    order: 2;
+  }
+
+  .brand-story-combo__split--image-left .brand-story-combo__split-media {
+    order: 1;
   }
 
   .brand-story-combo__split-copy {
@@ -208,6 +216,16 @@
 {
   "name": "Story Layout Bundle",
   "settings": [
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "default": "image-right",
+      "options": [
+        { "value": "image-right", "label": "Text left, image right" },
+        { "value": "image-left", "label": "Image left, text right" }
+      ]
+    },
     {
       "type": "select",
       "id": "width",
