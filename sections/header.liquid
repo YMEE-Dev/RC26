@@ -795,7 +795,6 @@
   document.addEventListener('DOMContentLoaded', () => {
     /* Helpers */
     const selectAll = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
-    const isDesktop = () => window.matchMedia('(min-width: 750px)').matches;
 
     /* Mobile hamburger press animation */
     const hamburgerButtons = selectAll('.header__mobile__hamburger');
@@ -1007,10 +1006,8 @@
       return [255, 255, 255];
     };
 
-    const computeImageLuminance = (imgEl) =>
+    const loadImageLuminance = (src) =>
       new Promise((resolve) => {
-        if (!imgEl) return resolve(null);
-        const src = imgEl.currentSrc || imgEl.src;
         if (!src) return resolve(null);
 
         const img = new Image();
@@ -1033,28 +1030,12 @@
         img.onerror = () => resolve(null);
       });
 
-    const computeBackgroundImageLuminance = (url) =>
-      new Promise((resolve) => {
-        if (!url) return resolve(null);
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.src = url;
-        img.decode?.().catch(() => {});
-        img.onload = () => {
-          try {
-            const canvas = document.createElement('canvas');
-            canvas.width = 1;
-            canvas.height = 1;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, 1, 1);
-            const data = ctx.getImageData(0, 0, 1, 1).data;
-            resolve(getLuminance([data[0], data[1], data[2]]));
-          } catch (err) {
-            resolve(null);
-          }
-        };
-        img.onerror = () => resolve(null);
-      });
+    const computeImageLuminance = (imgEl) => {
+      const src = imgEl?.currentSrc || imgEl?.src;
+      return loadImageLuminance(src);
+    };
+
+    const computeBackgroundImageLuminance = (url) => loadImageLuminance(url);
 
     const computeVideoLuminance = (videoEl) =>
       new Promise((resolve) => {
@@ -1075,14 +1056,14 @@
 
     const initHeaderObserver = () => {
       const headerWrapper = document.querySelector('header.theme__header');
-      const body = document.querySelector('body');
+      const body = document.body;
       const drawerWrapper = document.querySelector('header-drawer.drawer--header');
       const headerTargets = selectAll('.header__desktop, .header__mobile');
       const logoLinks = selectAll('.header__logo__link[data-logo-light][data-logo-dark]');
       const transparentImages = selectAll('.logo__img.logo__img--transparent');
       if (!(headerTargets.length && logoLinks.length)) return;
 
-      const nearWhiteLuminanceThreshold = 0.7;
+      const nearWhiteLuminanceThreshold = 0.4;
       const colors = {
         light: {
           link: '#fff',
@@ -1100,7 +1081,7 @@
       const forcedTmenuLogoMode = 'dark';
       const DEBUG_HEADER_OBSERVER = false;
       const APPLY_DEBOUNCE = 150;
-      const thresholds = [0, 0.25, 0.5, 0.75, 1];
+      const intersectionThresholds = [0, 0.25, 0.5, 0.75, 1];
       const getSectionLabel = (sectionEl) =>
         sectionEl?.dataset.sectionId || sectionEl?.id || sectionEl?.className || 'unknown-section';
       const roundForLog = (value) => (typeof value === 'number' ? Math.round(value * 100) / 100 : value);
@@ -1108,6 +1089,7 @@
         if (!DEBUG_HEADER_OBSERVER) return;
         console.log('[HeaderObserver]', message, payload);
       };
+      const getHeaderHeight = () => document.querySelector('[data-header-height]')?.offsetHeight || 0;
 
       const drawerIsOpen = () => drawerWrapper?.classList.contains('is-open');
       const tmenuIsOpen = () => tmenuIsActive || Boolean(document.querySelector(tmenuActiveSelector));
@@ -1214,8 +1196,7 @@
 
       const computeRootMargin = () => {
         const h = window.innerHeight || document.documentElement.clientHeight || 0;
-        const headerEl = document.querySelector('[data-header-height]');
-        const headerHeight = headerEl ? headerEl.offsetHeight : 0;
+        const headerHeight = getHeaderHeight();
         // Pull the root box down to just beneath the header so we sample what's under it.
         const top = `-${headerHeight}px`;
         const target = 200;
@@ -1267,28 +1248,110 @@
       const luminanceCache = new WeakMap();
       const mediaReadyListeners = new WeakSet();
       let currentObservedSection = null;
+      const mediaSelector = 'img, video';
+      const getHeaderProbeBand = () => {
+        const headerHeight = getHeaderHeight();
+        const top = Math.max(0, headerHeight);
+        const bottom = Math.min(window.innerHeight, top + 32);
 
-      const findBackgroundMedia = (sectionEl) =>
-        sectionEl.querySelector(
-          [
-            '[data-header-luminance-img]',
-            '.subcollections__bg img',
-            '.hero__bg img',
-            '.section-background img',
-            '.banner__media img',
-            '.image-with-text__image img',
-            '.hero__bg video',
-            '.section-background video',
-            '.banner__media video',
-            '.image-with-text__image video',
-            '.blog-brand__media video',
-            '.video__poster img',
-            '.video-background img',
-            '.video-background video',
-            'video-background video',
-            '.video__player video',
-          ].join(', ')
+        return {top, bottom};
+      };
+      const getHeaderProbePoints = () => {
+        const band = getHeaderProbeBand();
+        const y = Math.min(window.innerHeight - 1, Math.max(1, band.top + (band.bottom - band.top) / 2));
+
+        return [0.5, 0.18, 0.82].map((ratio) => ({
+          x: Math.min(window.innerWidth - 1, Math.max(1, window.innerWidth * ratio)),
+          y,
+        }));
+      };
+      const mediaContainsPoint = (mediaEl, point) => {
+        const rect = mediaEl.getBoundingClientRect();
+        return point.x >= rect.left && point.x <= rect.right && point.y >= rect.top && point.y <= rect.bottom;
+      };
+      const mediaOverlapsProbeBand = (mediaEl) => {
+        const rect = mediaEl.getBoundingClientRect();
+        const band = getHeaderProbeBand();
+
+        if (rect.width <= 0 || rect.height <= 0) return false;
+
+        return rect.bottom > band.top && rect.top < band.bottom && rect.right > 0 && rect.left < window.innerWidth;
+      };
+      const getMediaCandidatesFromElement = (element) => {
+        if (!(element instanceof Element)) return [];
+
+        const candidates = [];
+        if (element.matches(mediaSelector)) {
+          candidates.push(element);
+        }
+
+        element.querySelectorAll(mediaSelector).forEach((mediaEl) => {
+          candidates.push(mediaEl);
+        });
+
+        return candidates;
+      };
+      const pickMediaFromElements = (elements, point, sectionEl) => {
+        const matches = [];
+
+        elements.forEach((element, index) => {
+          getMediaCandidatesFromElement(element).forEach((mediaEl) => {
+            if (!mediaContainsPoint(mediaEl, point) || !mediaOverlapsProbeBand(mediaEl)) return;
+
+            matches.push({
+              mediaEl,
+              depth: index,
+              inSection: Boolean(sectionEl && sectionEl.contains(mediaEl)),
+            });
+          });
+        });
+
+        if (!matches.length) return null;
+
+        matches.sort((a, b) => {
+          if (a.inSection !== b.inSection) {
+            return a.inSection ? -1 : 1;
+          }
+
+          return a.depth - b.depth;
+        });
+
+        return matches[0].mediaEl;
+      };
+      const findMediaUnderHeader = (sectionEl) => {
+        const probePoints = getHeaderProbePoints();
+
+        for (const point of probePoints) {
+          const elements = document.elementsFromPoint(point.x, point.y);
+          const mediaEl = pickMediaFromElements(elements, point, sectionEl);
+
+          if (mediaEl) {
+            debugLog('Picked media from header probe', {
+              section: getSectionLabel(sectionEl),
+              point: {
+                x: roundForLog(point.x),
+                y: roundForLog(point.y),
+              },
+              ...getMediaDescriptor(mediaEl),
+            });
+
+            return mediaEl;
+          }
+        }
+
+        const sectionMedia = Array.from(sectionEl.querySelectorAll(mediaSelector)).find((mediaEl) =>
+          mediaOverlapsProbeBand(mediaEl)
         );
+
+        if (sectionMedia) {
+          debugLog('Picked overlapping section media', {
+            section: getSectionLabel(sectionEl),
+            ...getMediaDescriptor(sectionMedia),
+          });
+        }
+
+        return sectionMedia || null;
+      };
 
       const isImageReady = (imgEl) => {
         const src = imgEl?.currentSrc || imgEl?.src;
@@ -1395,6 +1458,15 @@
           resultingMode: luminance >= nearWhiteLuminanceThreshold ? 'dark' : 'light',
         });
       };
+      const getSectionFallbackLuminance = (sectionEl) => getLuminance(getBackgroundRGB(sectionEl));
+      const cacheAndApplyLuminance = (sectionEl, luminance, source) => {
+        luminanceCache.set(sectionEl, luminance);
+        logLuminance(luminance, sectionEl, source);
+        applyLuminanceMode(luminance);
+      };
+      const applyFallbackLuminance = (sectionEl, source = 'background') => {
+        cacheAndApplyLuminance(sectionEl, getSectionFallbackLuminance(sectionEl), source);
+      };
 
       const applyForSection = (sectionEl) => {
         const cached = luminanceCache.get(sectionEl);
@@ -1404,16 +1476,13 @@
           return;
         }
 
-        const mediaEl = findBackgroundMedia(sectionEl);
+        const mediaEl = findMediaUnderHeader(sectionEl);
         const bgUrl = findElementBackgroundImage(sectionEl);
 
         if (mediaEl) {
           if (mediaEl.tagName === 'IMG') {
             if (isImageFailed(mediaEl)) {
-              const luminance = getLuminance(getBackgroundRGB(sectionEl));
-              luminanceCache.set(sectionEl, luminance);
-              logLuminance(luminance, sectionEl, 'background-after-image-error');
-              applyLuminanceMode(luminance);
+              applyFallbackLuminance(sectionEl, 'background-after-image-error');
               return;
             }
 
@@ -1423,29 +1492,28 @@
             }
 
             computeImageLuminance(mediaEl).then((lum) => {
-              const luminance = lum ?? getLuminance(getBackgroundRGB(sectionEl));
-              luminanceCache.set(sectionEl, luminance);
-              logLuminance(luminance, sectionEl, lum !== null ? 'image' : 'background');
-              applyLuminanceMode(luminance);
+              cacheAndApplyLuminance(
+                sectionEl,
+                lum ?? getSectionFallbackLuminance(sectionEl),
+                lum !== null ? 'image' : 'background'
+              );
             });
             return;
           }
 
           if (mediaEl.tagName === 'VIDEO') {
             if (isVideoFailed(mediaEl)) {
-              const luminance = getLuminance(getBackgroundRGB(sectionEl));
-              luminanceCache.set(sectionEl, luminance);
-              logLuminance(luminance, sectionEl, 'background-after-video-error');
-              applyLuminanceMode(luminance);
+              applyFallbackLuminance(sectionEl, 'background-after-video-error');
               return;
             }
 
             if (mediaEl.poster) {
               computeBackgroundImageLuminance(mediaEl.poster).then((lum) => {
-                const luminance = lum ?? getLuminance(getBackgroundRGB(sectionEl));
-                luminanceCache.set(sectionEl, luminance);
-                logLuminance(luminance, sectionEl, lum !== null ? 'video-poster' : 'background');
-                applyLuminanceMode(luminance);
+                cacheAndApplyLuminance(
+                  sectionEl,
+                  lum ?? getSectionFallbackLuminance(sectionEl),
+                  lum !== null ? 'video-poster' : 'background'
+                );
               });
               return;
             }
@@ -1456,10 +1524,11 @@
             }
 
             computeVideoLuminance(mediaEl).then((lum) => {
-              const luminance = lum ?? getLuminance(getBackgroundRGB(sectionEl));
-              luminanceCache.set(sectionEl, luminance);
-              logLuminance(luminance, sectionEl, lum !== null ? 'video-frame' : 'background');
-              applyLuminanceMode(luminance);
+              cacheAndApplyLuminance(
+                sectionEl,
+                lum ?? getSectionFallbackLuminance(sectionEl),
+                lum !== null ? 'video-frame' : 'background'
+              );
             });
             return;
           }
@@ -1467,18 +1536,16 @@
 
         if (bgUrl) {
           computeBackgroundImageLuminance(bgUrl).then((lum) => {
-            const luminance = lum ?? getLuminance(getBackgroundRGB(sectionEl));
-            luminanceCache.set(sectionEl, luminance);
-            logLuminance(luminance, sectionEl, lum !== null ? 'background-image' : 'background');
-            applyLuminanceMode(luminance);
+            cacheAndApplyLuminance(
+              sectionEl,
+              lum ?? getSectionFallbackLuminance(sectionEl),
+              lum !== null ? 'background-image' : 'background'
+            );
           });
           return;
         }
 
-        const luminance = getLuminance(getBackgroundRGB(sectionEl));
-        luminanceCache.set(sectionEl, luminance);
-        logLuminance(luminance, sectionEl, 'background');
-        applyLuminanceMode(luminance);
+        applyFallbackLuminance(sectionEl);
       };
 
       const debounceFn = (fn, wait) => {
@@ -1538,7 +1605,10 @@
 
       const startObserver = () => {
         rootMargin = computeRootMargin();
-        intersectionObserver = new IntersectionObserver(onIntersect, {rootMargin, threshold: thresholds});
+        intersectionObserver = new IntersectionObserver(onIntersect, {
+          rootMargin,
+          threshold: intersectionThresholds,
+        });
         observeAll();
         ensureOverlay();
       };
