@@ -1,0 +1,250 @@
+{% doc %}
+  Maison Ruby section extracted from the RC Timeline page.
+
+  Renders a full-bleed background image panel with white text overlay.
+{% enddoc %}
+
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+-%}
+
+{%- style -%}
+  #MaisonRuby--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+<section
+  id="MaisonRuby--{{ section.id }}"
+  class="maison-ruby section-padding {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="maison-ruby"
+>
+  <div class="{{ section.settings.width }}">
+    <div
+      class="maison-ruby__inner"
+      style="
+        {% if section.settings.ruby_image != blank %}
+          --ruby-image: url('{{ section.settings.ruby_image | image_url: width: 2400 }}');
+        {% endif %}
+        {% if section.settings.ruby_image_mobile != blank %}
+          --ruby-image-mobile: url('{{ section.settings.ruby_image_mobile | image_url: width: 1600 }}');
+        {% endif %}
+      "
+    >
+      <div class="maison-ruby__content reveal-up">
+        {%- if section.settings.ruby_title != blank -%}
+          <h2 class="maison-ruby__title">{{ section.settings.ruby_title }}</h2>
+        {%- endif -%}
+        {%- if section.settings.ruby_copy != blank -%}
+          <div class="maison-ruby__body rte">
+            {{ section.settings.ruby_copy }}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .maison-ruby {
+    padding-top: var(--PT);
+    padding-bottom: var(--PB);
+    isolation: isolate;
+  }
+
+  .maison-ruby__inner {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 90px 100px;
+    width: min(1232px, calc(100% - 48px));
+    min-height: 700px;
+    margin: 0 auto;
+    background-image: var(--ruby-image);
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-color: #0b0b0b;
+    overflow: hidden;
+  }
+
+  .maison-ruby__content {
+    width: min(380px, 38%);
+    margin-left: auto;
+    padding-top: 130px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .maison-ruby__title {
+    margin: 0 0 28px;
+    font-family: var(--FONT-STACK-HEADING, "Portrait LS", serif);
+    font-size: 40px;
+    line-height: 1;
+    font-weight: var(--FONT-WEIGHT-HEADING, 500);
+    color: #ffffff;
+  }
+
+  .maison-ruby__body p {
+    margin: 0 0 18px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  .maison-ruby__body p:last-child {
+    margin-bottom: 0;
+  }
+
+  .maison-ruby .reveal-up {
+    opacity: 0;
+    transform: translateY(36px);
+    transition:
+      opacity 0.75s ease,
+      transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .maison-ruby .reveal-up.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 820px) {
+    .maison-ruby__inner {
+      width: calc(100% - 32px);
+      min-height: 560px;
+      padding: 48px 20px;
+      align-items: flex-end;
+      background-position: center 0px;
+      background-image: var(--ruby-image-mobile, var(--ruby-image));
+    }
+
+    .maison-ruby__content {
+      width: min(100%, 420px);
+      padding-top: 0;
+      padding-bottom: 10px;
+    }
+
+    .maison-ruby__inner::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0.9) 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  (() => {
+    const sectionRoot = document.getElementById('MaisonRuby--{{ section.id }}');
+    if (!sectionRoot) return;
+
+    const reveal = sectionRoot.querySelectorAll('.reveal-up');
+    if (!reveal.length) return;
+
+    const prefersReducedMotion =
+      window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+      reveal.forEach((el) => el.classList.add('is-visible'));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) entry.target.classList.add('is-visible');
+        });
+      },
+      { threshold: 0.15 }
+    );
+
+    reveal.forEach((el) => observer.observe(el));
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Maison — Ruby",
+  "tag": "section",
+  "class": "section-maison-ruby",
+  "settings": [
+    {
+      "type": "text",
+      "id": "ruby_title",
+      "label": "Title",
+      "default": "The Ruby"
+    },
+    {
+      "type": "richtext",
+      "id": "ruby_copy",
+      "label": "Body copy"
+    },
+    {
+      "type": "image_picker",
+      "id": "ruby_image",
+      "label": "Background image"
+    },
+    {
+      "type": "image_picker",
+      "id": "ruby_image_mobile",
+      "label": "Background image (mobile)"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Container width",
+      "default": "wrapper--full-padded",
+      "options": [
+        { "value": "wrapper--full", "label": "Full width" },
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Normal" }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Maison — Ruby"
+    }
+  ]
+}
+{% endschema %}
