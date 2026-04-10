@@ -1,11 +1,4 @@
 <!-- /sections/blog-two-column-text.liquid -->
-{% doc %}
-  Renders two columns of text for blog/article pages, optionally using heading or caption typography.
-
-  @example
-  In a JSON template:
-  { "type": "blog-two-column-text", "settings": { "left_text": "<p>...</p>", "right_text": "<p>...</p>" } }
-{% enddoc %}
 
 {%- liquid
   assign left_text_class = section.settings.left_text_style | default: 'body'
@@ -112,9 +105,9 @@
       "label": "Width",
       "default": "wrapper",
       "options": [
-        { "value": "wrapper--full", "label": "Full width" },
-        { "value": "wrapper--full-padded", "label": "Full width padded" },
-        { "value": "wrapper", "label": "Normal" }
+        {"value": "wrapper--full", "label": "Full width"},
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"}
       ]
     },
     {
@@ -141,7 +134,7 @@
       "type": "text",
       "id": "left_heading",
       "label": "Left heading",
-      "default": ""
+      "default": "Left heading"
     },
     {
       "type": "richtext",
@@ -154,9 +147,9 @@
       "label": "Left text style",
       "default": "body",
       "options": [
-        { "value": "body", "label": "Body" },
-        { "value": "h4", "label": "Heading font" },
-        { "value": "caption", "label": "Caption" }
+        {"value": "body", "label": "Body"},
+        {"value": "h4", "label": "Heading font"},
+        {"value": "caption", "label": "Caption"}
       ]
     },
     {
@@ -169,7 +162,7 @@
       "type": "text",
       "id": "right_heading",
       "label": "Right heading",
-      "default": ""
+      "default": "Right heading"
     },
     {
       "type": "richtext",
@@ -182,9 +175,9 @@
       "label": "Right text style",
       "default": "body",
       "options": [
-        { "value": "body", "label": "Body" },
-        { "value": "h4", "label": "Heading font" },
-        { "value": "caption", "label": "Caption" }
+        {"value": "body", "label": "Body"},
+        {"value": "h4", "label": "Heading font"},
+        {"value": "caption", "label": "Caption"}
       ]
     },
     {
@@ -221,4 +214,3 @@
   ]
 }
 {% endschema %}
-

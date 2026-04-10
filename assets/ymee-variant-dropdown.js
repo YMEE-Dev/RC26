@@ -1413,10 +1413,13 @@
         });
       }
 
-      // Apply initial gallery filter for standalone mode
-      var initStandaloneColor = getColorFromPicker(sectionRoot);
-      if (initStandaloneColor) {
-        applyGalleryFilterDeferred(sectionId, initStandaloneColor);
+      // Apply initial gallery filter for standalone mode (only once)
+      if (!picker.dataset.ymeeGalleryFilterApplied) {
+        var initStandaloneColor = getColorFromPicker(sectionRoot);
+        if (initStandaloneColor) {
+          picker.dataset.ymeeGalleryFilterApplied = "true";
+          applyGalleryFilterDeferred(sectionId, initStandaloneColor);
+        }
       }
 
       var variantSelects = sectionRoot.querySelector('variant-selects[data-section="' + cssEscape(sectionId) + '"]');

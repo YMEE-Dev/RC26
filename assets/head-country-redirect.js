@@ -4,7 +4,7 @@
       if (this.initialized) return;
       this.initialized = true;
 
-      const init = () => {
+      const init = async () => {
         this.dialog = this.querySelector('.head-country-redirect__dialog');
         this.scrollableEl = this.querySelector('[data-scroll-lock-scrollable]');
         this.ctaButton = this.querySelector('[data-country-redirect-cta]');
@@ -16,10 +16,13 @@
 
         if (!this.dialog || !this.config?.enabled) return;
 
-        const detectedCountry = String(window.Shopify?.country || '')
-          .trim()
-          .toUpperCase();
         const previewMode = this.isPreviewMode();
+        const detectedCountry = previewMode
+          ? String(this.getPrimaryCountryCode(this.config?.rules?.[0]) || this.config?.fallbackCountryCode || '')
+          : await this.getDetectedCountry();
+
+        console.log('[head-country-redirect] detected country:', detectedCountry || '(none)');
+
         const matchedRule = previewMode
           ? this.getFirstValidRule()
           : detectedCountry
@@ -70,6 +73,27 @@
       if (this.handleBackdropClose) {
         this.dialog?.removeEventListener('click', this.handleBackdropClose);
       }
+    }
+
+    normalizeCountry(value) {
+      if (!value) return '';
+      return String(value).toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2);
+    }
+
+    async getDetectedCountry() {
+      try {
+        const response = await fetch('/browsing_context_suggestions.json', {
+          credentials: 'same-origin',
+        });
+        const data = await response.json();
+        const detectedCountry = this.normalizeCountry(data?.detected_values?.country?.handle);
+
+        if (detectedCountry) {
+          return detectedCountry;
+        }
+      } catch (error) {}
+
+      return this.normalizeCountry(this.config?.fallbackCountryCode || window.Shopify?.country);
     }
 
     isPreviewMode() {

@@ -3,6 +3,40 @@
 
   const swiperInstances = window.__giftGuideSliderSwipers || {};
   window.__giftGuideSliderSwipers = swiperInstances;
+  let documentObserverStarted = false;
+
+  function refreshSlider(sectionId) {
+    const swiper = swiperInstances[sectionId];
+
+    if (!swiper || swiper.destroyed) {
+      return;
+    }
+
+    swiper.updateSize();
+    swiper.updateSlides();
+    swiper.updateProgress();
+    swiper.update();
+
+    requestAnimationFrame(() => updateProgress(sectionId));
+  }
+
+  function bindImageRefresh(section, sectionId) {
+    section.querySelectorAll(".gift-guide-slider__swiper img").forEach((image) => {
+      if (image.complete) {
+        return;
+      }
+
+      if (image.hasAttribute("data-gift-guide-slider-bound")) {
+        return;
+      }
+
+      image.setAttribute("data-gift-guide-slider-bound", "true");
+
+      const refresh = () => refreshSlider(sectionId);
+      image.addEventListener("load", refresh, { once: true });
+      image.addEventListener("error", refresh, { once: true });
+    });
+  }
 
   function ensureProgress(container) {
     let progress = container.querySelector("[data-related-slider-progress]");
@@ -67,9 +101,14 @@
     }
 
     swiperInstances[sectionId] = new Swiper(swiperElement, {
-      slidesPerView: "auto",
+      slidesPerView: 1.15,
       spaceBetween: 20,
       loop: false,
+      watchOverflow: true,
+      observer: true,
+      observeParents: true,
+      resizeObserver: true,
+      updateOnWindowResize: true,
       freeMode: {
         enabled: true,
         momentum: true,
@@ -107,13 +146,15 @@
         },
       },
       breakpoints: {
-        0: { slidesPerView: 1.15, spaceBetween: 20 },
         750: { slidesPerView: 1.8, spaceBetween: 20 },
         960: { slidesPerView: 2.7, spaceBetween: 20 },
         1200: { slidesPerView: 2.7, spaceBetween: 80 },
       },
     });
 
+    bindImageRefresh(section, sectionId);
+    requestAnimationFrame(() => refreshSlider(sectionId));
+    window.setTimeout(() => refreshSlider(sectionId), 120);
     requestAnimationFrame(() => updateProgress(sectionId));
   }
 
@@ -127,15 +168,46 @@
     scope.querySelectorAll(sectionSelector).forEach(initSection);
   }
 
+  function startDocumentObserver() {
+    if (documentObserverStarted || !document.body) {
+      return;
+    }
+
+    documentObserverStarted = true;
+
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (!(node instanceof Element)) {
+            return;
+          }
+
+          if (node.matches(sectionSelector)) {
+            initSection(node);
+            return;
+          }
+
+          if (node.querySelector) {
+            initAll(node);
+          }
+        });
+      });
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+
   if (!window.__giftGuideSliderInitialized) {
     window.__giftGuideSliderInitialized = true;
 
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", function () {
         initAll();
+        startDocumentObserver();
       });
     } else {
       initAll();
+      startDocumentObserver();
     }
 
     document.addEventListener("shopify:section:load", function (event) {
@@ -151,7 +223,17 @@
         initSection(section);
       }
     });
+
+    document.addEventListener("theme:resize:width", function () {
+      Object.keys(swiperInstances).forEach(refreshSlider);
+    });
+
+    window.addEventListener("pageshow", function () {
+      initAll();
+      Object.keys(swiperInstances).forEach(refreshSlider);
+    });
   } else {
     initAll();
+    startDocumentObserver();
   }
 })();

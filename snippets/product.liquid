@@ -134,6 +134,15 @@
     assign on_sale = true
   endif
 
+  assign should_redirect_storytelling_product = false
+  if template.name == 'product'
+    if featured_product == false
+      if product.type == 'storytelling'
+        assign should_redirect_storytelling_product = true
+      endif
+    endif
+  endif
+
   assign badge = ''
   if badge == '' and product_tags contains '_badge_'
     assign badge = product_tags | split: '_badge_'
@@ -143,6 +152,11 @@
   assign color_scheme = 'color-' | append: section.settings.color_scheme
 -%}
 
+{%- if should_redirect_storytelling_product -%}
+  <script>
+    window.location.replace('/');
+  </script>
+{%- endif -%}
 <product-info
   id="MainProduct--{{ section.id }}"
   class="index-product section-padding {{ color_scheme }} pdp-dropdown-inline"
@@ -415,10 +429,11 @@
       }
 
       #MainProduct--{{ section.id }} .product__content-columns__aside .product__text .product__heading {
-        font-size: var(--font-body-small);
+        font-size: 12px;
+        line-height: 20px;
         font-family: var(--FONT-STACK-BODY);
         font-style: var(--FONT-STYLE-BODY);
-        font-weight: var(--FONT-WEIGHT-BODY);
+        font-weight: 400;
         letter-spacing: var(--LETTER-SPACING-NAV);
         text-transform: uppercase;
       }
@@ -427,7 +442,12 @@
         border-color: #E5E5E5;
       }
 
-      #MainProduct--{{ section.id }} .product__content-columns__aside .link-with-icon__text {
+      #MainProduct--{{ section.id }} .product__content-columns__aside .link-with-icon__text,
+      #MainProduct--{{ section.id }} .product__content-columns__aside .block__icon__text,
+      #MainProduct--{{ section.id }} .product__content-columns__aside .block__icon__text p {
+        font-size: 12px;
+        line-height: 20px;
+        font-weight: 400;
         letter-spacing: var(--LETTER-SPACING-NAV);
         text-align: left;
       }
@@ -1396,6 +1416,13 @@
 
                   var carousels = [];
 
+                  function getContainerSlides(el) {
+                    var container = el.querySelector('.pdp-embla__container');
+                    return container
+                      ? container.querySelectorAll('[data-embla-slide]')
+                      : el.querySelectorAll('[data-embla-slide]');
+                  }
+
                   function getActiveCarousel() {
                     for (var i = 0; i < carousels.length; i++) {
                       if (carousels[i].el && carousels[i].el.offsetParent !== null) return carousels[i];
@@ -1429,7 +1456,7 @@
 
                   function loadDeferredMediaByIndex(carousel, index) {
                     if (!carousel) return;
-                    var slideEls = carousel.el.querySelectorAll('[data-embla-slide]');
+                    var slideEls = getContainerSlides(carousel.el);
                     var slide = slideEls[index];
                     if (!slide) return;
 
@@ -1459,25 +1486,28 @@
 
                   function setActiveMediaByIndex(carousel, index) {
                     if (!carousel) return;
-                    var slideEls = carousel.el.querySelectorAll('[data-embla-slide]');
+                    var slideEls = getContainerSlides(carousel.el);
                     var slide = slideEls[index];
                     if (!slide) return;
 
+                    var newMediaId;
                     var primaryMediaId = slide.getAttribute('data-primary-media-id');
                     if (primaryMediaId) {
-                      productImagesEl.setAttribute('data-active-media', primaryMediaId);
-                      return;
+                      newMediaId = primaryMediaId;
+                    } else {
+                      var mediaEl = slide.querySelector('[data-media-id]');
+                      if (!mediaEl) return;
+                      newMediaId = mediaEl.getAttribute('data-media-id');
                     }
-
-                    var mediaEl = slide.querySelector('[data-media-id]');
-                    if (!mediaEl) return;
-                    productImagesEl.setAttribute('data-active-media', mediaEl.getAttribute('data-media-id'));
+                    if (productImagesEl.getAttribute('data-active-media') !== newMediaId) {
+                      productImagesEl.setAttribute('data-active-media', newMediaId);
+                    }
                   }
 
                   function findIndexByMediaId(carousel, mediaId) {
                     if (!carousel) return -1;
                     var targetMediaId = String(mediaId);
-                    var slideEls = carousel.el.querySelectorAll('[data-embla-slide]');
+                    var slideEls = getContainerSlides(carousel.el);
 
                     for (var i = 0; i < slideEls.length; i++) {
                       if (slideEls[i].getAttribute('data-primary-media-id') === targetMediaId) return i;
@@ -1497,7 +1527,7 @@
 
                     var isDesktopCarousel = carouselEl.classList.contains('pdp-embla--desktop');
 
-                    var allSlides = carouselEl.querySelectorAll('[data-embla-slide]');
+                    var allSlides = getContainerSlides(carouselEl);
                     var firstSlideIsModel =
                       allSlides.length > 0 && allSlides[0].getAttribute('data-media-type') === 'model';
                     var hasIntroStage = isDesktopCarousel && allSlides.length > 1 && !firstSlideIsModel;
@@ -1614,7 +1644,7 @@
 
                       // Disable next if at the last slide or last unique snap position
                       if (isDesktopCarousel) {
-                        var slideCount = carouselEl.querySelectorAll('[data-embla-slide]').length;
+                        var slideCount = getContainerSlides(carouselEl).length;
                         if (selectedIndex >= slideCount - 1) {
                           canNext = false;
                         } else if (canNext) {
@@ -1682,12 +1712,12 @@
                       thumbUpdatePending = true;
                       requestAnimationFrame(function () {
                         thumbUpdatePending = false;
-                        var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
                         var thumbsHolder = productImagesEl.querySelector(
                           '.pdp-thumbs--desktop .product__thumbs__holder'
                         );
+                        var thumbs = thumbsHolder ? thumbsHolder.querySelectorAll('.product__thumb') : [];
                         var currentIndex = embla.selectedScrollSnap();
-                        var slideEls = carouselEl.querySelectorAll('[data-embla-slide]');
+                        var slideEls = getContainerSlides(carouselEl);
                         var isModelSlide =
                           slideEls[currentIndex] && slideEls[currentIndex].getAttribute('data-media-type') === 'model';
                         var isNextModelSlide =
@@ -1737,7 +1767,7 @@
                       var activeCarousel = getActiveCarousel();
                       var index = embla.selectedScrollSnap();
 
-                      var slides = carouselEl.querySelectorAll('[data-embla-slide]');
+                      var slides = getContainerSlides(carouselEl);
                       slides.forEach(function (slide) {
                         slide.classList.remove('pdp-embla__slide--active');
                       });
@@ -1751,15 +1781,7 @@
                       updateArrows();
                       updateProgressByIndex(activeCarousel, index);
 
-                      if (!isDesktopCarousel) {
-                        var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--mobile .product__thumb');
-                        thumbs.forEach(function (thumb) {
-                          thumb.classList.remove('is-active');
-                        });
-                        if (thumbs[index]) {
-                          thumbs[index].classList.add('is-active');
-                        }
-                      } else {
+                      if (isDesktopCarousel) {
                         updateDesktopThumbs();
                       }
                     });
@@ -1816,7 +1838,10 @@
                     if (carouselEl && carouselEl.dataset) carouselEl.dataset.emblaInitialized = 'true';
                     carouselEl._emblaInstance = embla;
                     carouselEl._resetToIntro = function () {
-                      if (!hasIntroStage) return;
+                      var currentSlides = getContainerSlides(carouselEl);
+                      var currentFirstIsModel =
+                        currentSlides.length > 0 && currentSlides[0].getAttribute('data-media-type') === 'model';
+                      hasIntroStage = isDesktopCarousel && currentSlides.length > 1 && !currentFirstIsModel;
                       carouselStarted = false;
                       introTransitioning = false;
                       carouselEl.classList.remove('pdp-embla--started', 'pdp-embla--transitioning');
@@ -1855,9 +1880,9 @@
 
                     var carouselHasIntroStage =
                       activeCarousel.el.classList.contains('pdp-embla--desktop') &&
-                      activeCarousel.el.querySelectorAll('[data-embla-slide]').length > 1 &&
-                      activeCarousel.el.querySelector('[data-embla-slide]') &&
-                      activeCarousel.el.querySelector('[data-embla-slide]').getAttribute('data-media-type') !== 'model';
+                      getContainerSlides(activeCarousel.el).length > 1 &&
+                      getContainerSlides(activeCarousel.el)[0] &&
+                      getContainerSlides(activeCarousel.el)[0].getAttribute('data-media-type') !== 'model';
 
                     if (carouselHasIntroStage && isDesktop && !isStarted && targetIndex >= 1) {
                       // Intro → started: ensure clicked slide is visible in 2-slide view
@@ -1908,52 +1933,59 @@
 
                         // Update thumbnails based on carousel type
                         if (carousel.el.classList.contains('pdp-embla--desktop')) {
-                          var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--desktop .product__thumb');
-                          thumbs.forEach(function (thumb) {
-                            thumb.classList.remove('is-active', 'prev-active', 'single-active');
-                          });
+                          var thumbsHolder = productImagesEl.querySelector(
+                            '.pdp-thumbs--desktop .product__thumbs__holder'
+                          );
+                          var thumbs = thumbsHolder ? thumbsHolder.querySelectorAll('.product__thumb') : [];
+                          if (thumbs.length) {
+                            thumbs.forEach(function (thumb) {
+                              thumb.classList.remove('is-active', 'prev-active', 'single-active');
+                            });
 
-                          var currentIndex = carousel.embla.selectedScrollSnap();
-                          // On load, intro state is active (slide 1 at 100%) so only 1 slide is visually shown
-                          var hasIntro = carousel.el.querySelectorAll('[data-embla-slide]').length > 1;
-                          var isStarted = carousel.el.classList.contains('pdp-embla--started');
-                          var slideEls = carousel.el.querySelectorAll('[data-embla-slide]');
-                          var isModelSlide =
-                            slideEls[currentIndex] &&
-                            slideEls[currentIndex].getAttribute('data-media-type') === 'model';
-                          var isNextModelSlide =
-                            slideEls[currentIndex + 1] &&
-                            slideEls[currentIndex + 1].getAttribute('data-media-type') === 'model';
-                          var effectiveSlidesPerView =
-                            (hasIntro && !isStarted) || isModelSlide || isNextModelSlide ? 1 : 2;
-                          var activeCount = 0;
+                            var currentIndex = carousel.embla.selectedScrollSnap();
+                            var hasIntro = getContainerSlides(carousel.el).length > 1;
+                            var isStarted = carousel.el.classList.contains('pdp-embla--started');
+                            var slideEls = getContainerSlides(carousel.el);
+                            var isModelSlide =
+                              slideEls[currentIndex] &&
+                              slideEls[currentIndex].getAttribute('data-media-type') === 'model';
+                            var isNextModelSlide =
+                              slideEls[currentIndex + 1] &&
+                              slideEls[currentIndex + 1].getAttribute('data-media-type') === 'model';
+                            var effectiveSlidesPerView =
+                              (hasIntro && !isStarted) || isModelSlide || isNextModelSlide ? 1 : 2;
+                            var activeCount = 0;
 
-                          if (thumbs[currentIndex]) {
-                            thumbs[currentIndex].classList.add('is-active');
-                            activeCount++;
-                          }
-
-                          for (var i = 1; i < effectiveSlidesPerView; i++) {
-                            if (thumbs[currentIndex + i]) {
-                              thumbs[currentIndex + i].classList.add('is-active', 'prev-active');
+                            if (thumbs[currentIndex]) {
+                              thumbs[currentIndex].classList.add('is-active');
                               activeCount++;
                             }
-                          }
 
-                          if (activeCount === 1 && thumbs[currentIndex]) {
-                            thumbs[currentIndex].classList.add('single-active');
-                          }
-                        } else {
-                          // Mobile: Update single thumbnail based on selected index
-                          var thumbs = productImagesEl.querySelectorAll('.pdp-thumbs--mobile .product__thumb');
-                          thumbs.forEach(function (thumb) {
-                            thumb.classList.remove('is-active');
-                          });
-                          if (thumbs[startIndex]) {
-                            thumbs[startIndex].classList.add('is-active');
+                            for (var i = 1; i < effectiveSlidesPerView; i++) {
+                              if (thumbs[currentIndex + i]) {
+                                thumbs[currentIndex + i].classList.add('is-active', 'prev-active');
+                                activeCount++;
+                              }
+                            }
+
+                            if (activeCount === 1 && thumbs[currentIndex]) {
+                              thumbs[currentIndex].classList.add('single-active');
+                            }
                           }
                         }
+                        // Mobile: product-thumbs observer handles is-active via data-active-media
                       }
+                    });
+
+                    // The initial gallery filter may have run before Embla loaded,
+                    // so _resetToIntro + reInit ensures Embla picks up the filtered state.
+                    carousels.forEach(function (c) {
+                      if (c.el._resetToIntro) {
+                        c.el._resetToIntro();
+                      }
+                      c.embla.reInit();
+                      c.embla.scrollTo(0, true);
+                      c.updateArrows && c.updateArrows();
                     });
                   });
                 }

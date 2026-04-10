@@ -4,7 +4,6 @@
     {%- render 'head' -%}
 
     {{ content_for_header }}
-    {% include 'pagefly-app-header' %}
     {%- render 'geo-country-hide' -%}
   </head>
 
@@ -60,7 +59,7 @@
       just cut this next line and paste it outside this comment:
       <script src="{{ 'custom.js' | asset_url }}" defer="defer"></script>
     {%- endcomment -%}
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" async></script>
 
     {%- comment -%} Global drawers {%- endcomment -%}
     <side-drawer

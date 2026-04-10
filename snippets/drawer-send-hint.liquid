@@ -233,6 +233,10 @@
         return message;
       }
 
+      var previewMessage = form.querySelector('.hint-preview-card__message');
+      var recipientEmailInput = form.querySelector('#hint-recipient-email');
+      var senderEmailInput = form.querySelector('#hint-your-email');
+
       function updatePreview() {
         var recipientName = recipientInput.value.trim();
         var senderName = senderInput.value.trim();
@@ -240,10 +244,26 @@
         recipientDisplay.textContent = recipientName ? recipientName.toUpperCase() : 'NAME';
         senderDisplay.textContent = senderName ? senderName.toUpperCase() : 'NAME';
         messageInput.value = buildMessage(recipientName, senderName);
+
+        var recipientEmail = recipientEmailInput ? recipientEmailInput.value.trim() : '';
+        var senderEmailFilled = senderEmailInput
+          ? (senderEmailInput.value.trim() !== '' || senderEmailInput.closest('.hint-form__email-field--hidden') !== null)
+          : false;
+        var allFilled = recipientName !== '' && recipientEmail !== '' && senderName !== '' && senderEmailFilled;
+
+        if (previewMessage) {
+          if (allFilled) {
+            previewMessage.classList.add('hint-preview-card__message--visible');
+          } else {
+            previewMessage.classList.remove('hint-preview-card__message--visible');
+          }
+        }
       }
 
       recipientInput.addEventListener('input', updatePreview);
       senderInput.addEventListener('input', updatePreview);
+      if (recipientEmailInput) recipientEmailInput.addEventListener('input', updatePreview);
+      if (senderEmailInput) senderEmailInput.addEventListener('input', updatePreview);
       form.addEventListener('submit', updatePreview);
       updatePreview();
     }
@@ -467,6 +487,12 @@
   .hint-preview-card__message {
     padding: clamp(10px, 2vh, 25px) 0;
     margin: 0 var(--drawer-padding);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .hint-preview-card__message--visible {
+    opacity: 1;
   }
 
   .hint-preview-card__text {
