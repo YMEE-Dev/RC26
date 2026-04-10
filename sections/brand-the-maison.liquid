@@ -30,6 +30,7 @@
         {%- if section.settings.hero_copy != blank -%}
           <div class="maison__lede rte">{{ section.settings.hero_copy }}</div>
         {%- endif -%}
+        <span class="maison__hero-rule" aria-hidden="true"></span>
       </div>
       {%- if section.settings.hero_image != blank -%}
         <div class="maison__hero-media">
@@ -214,12 +215,7 @@
 }
 
 /* ─── Wrapper shared ───────────────────────────── */
-.maison__hero,
-.maison__panel,
-.maison__divider {
-  padding-left: clamp(20px, 5vw, 80px);
-  padding-right: clamp(20px, 5vw, 80px);
-}
+/* Wrapper width/padding comes from wrapper classes (e.g. `.wrapper`, `.wrapper--full-padded`). */
 
 /* ─── Thin divider ─────────────────────────────── */
 .maison__divider {
@@ -255,33 +251,45 @@
 }
 
 .maison__h1 {
-  margin: 0 0 28px;
-  font-family: var(--FONT-STACK-HEADING, 'Portrait LS', serif);
-  font-weight: var(--FONT-WEIGHT-HEADING, 500);
-  font-style: var(--FONT-STYLE-HEADING, normal);
-  font-size: clamp(44px, 6.5vw, 88px);
-  line-height: 1;
-  letter-spacing: -0.02em;
-  text-transform: var(--FONT-UPPERCASE-HEADING, none);
-  color: var(--COLOR-TEXT, #212121);
+  margin: 0 0 26px;
+  font-family: var(--FONT-STACK-BODY, Inter, sans-serif);
+  font-weight: 500;
+  font-style: normal;
+  font-size: 16px;
+  line-height: 1.2;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #0b0b0b;
 }
 
 .maison__lede {
-  font-family: var(--FONT-STACK-BODY, Inter, sans-serif);
-  font-size: clamp(14px, 1.5vw, 16px);
-  line-height: 1.75;
-  color: var(--COLOR-TEXT-A80, rgba(33,33,33,0.8));
-  max-width: 560px;
+  font-family: var(--FONT-STACK-HEADING, 'Portrait LS', serif);
+  font-size: 14px;
+  line-height: 1.85;
+  font-style: italic;
+  letter-spacing: 0.06em;
+  color: rgba(11, 11, 11, 0.54);
+  max-width: 460px;
+}
+
+.maison__hero-rule {
+  display: block;
+  width: 44px;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.12);
+  margin-top: 34px;
 }
 
 .maison__hero-media {
   width: 100%;
+  max-width: 780px;
   overflow: hidden;
+  aspect-ratio: 1 / 1;
 }
 
 .maison__hero-img {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
   object-fit: cover;
 }
@@ -509,12 +517,8 @@
 /* ─── Responsive: desktop ───────────────────────── */
 @media (min-width: 990px) {
   .maison__hero-inner {
-    grid-template-columns: 55fr 45fr;
-    gap: clamp(48px, 6vw, 100px);
-  }
-
-  .maison__h1 {
-    font-size: clamp(60px, 7vw, 96px);
+    grid-template-columns: minmax(320px, 460px) minmax(480px, 780px);
+    gap: clamp(56px, 7vw, 120px);
   }
 
   .maison__split {
@@ -548,29 +552,29 @@
   "settings": [
     {
       "type": "header",
-      "content": "Hero"
+      "content": "Top section"
     },
     {
       "type": "text",
       "id": "hero_kicker",
-      "label": "Kicker / label",
-      "default": "The Story"
+      "label": "Small label (optional)",
+      "default": ""
     },
     {
       "type": "text",
       "id": "hero_title",
-      "label": "Title (H1)",
-      "default": "The Maison"
+      "label": "Heading",
+      "default": "THE STORY"
     },
     {
       "type": "richtext",
       "id": "hero_copy",
-      "label": "Intro copy"
+      "label": "Body copy"
     },
     {
       "type": "image_picker",
       "id": "hero_image",
-      "label": "Portrait / hero image"
+      "label": "Image (right)"
     },
     {
       "type": "header",
