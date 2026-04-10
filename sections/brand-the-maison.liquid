@@ -1,0 +1,640 @@
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign associations = section.blocks | where: 'type', 'association'
+-%}
+
+{%- style -%}
+  #Maison--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+<section
+  id="Maison--{{ section.id }}"
+  class="maison section-padding {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="brand-the-maison"
+>
+  <header class="maison__hero" aria-label="The Maison hero">
+    <div class="maison__hero-inner {{ section.settings.width }}">
+      <div class="maison__hero-copy">
+        {%- if section.settings.hero_kicker != blank -%}
+          <p class="maison__kicker">{{ section.settings.hero_kicker }}</p>
+        {%- endif -%}
+        {%- if section.settings.hero_title != blank -%}
+          <h1 class="maison__title">{{ section.settings.hero_title }}</h1>
+        {%- endif -%}
+        {%- if section.settings.hero_copy != blank -%}
+          <div class="maison__lede rte">{{ section.settings.hero_copy }}</div>
+        {%- endif -%}
+      </div>
+      {%- if section.settings.hero_image != blank -%}
+        <div class="maison__hero-media">
+          {{ section.settings.hero_image | image_url: width: 2400 | image_tag: loading: 'eager', sizes: '100vw', class: 'maison__hero-img' }}
+        </div>
+      {%- endif -%}
+    </div>
+  </header>
+
+  <div class="maison__wrap {{ section.settings.width }}">
+    <article class="maison__panel maison__panel--craft">
+      <div class="maison__grid">
+        <div class="maison__media">
+          {%- if section.settings.craft_image_primary != blank -%}
+            {{ section.settings.craft_image_primary | image_url: width: 1800 | image_tag: loading: 'lazy', sizes: '(min-width: 990px) 50vw, 100vw', class: 'maison__img' }}
+          {%- endif -%}
+        </div>
+        <div class="maison__content">
+          {%- if section.settings.craft_title != blank -%}
+            <h2 class="maison__heading">{{ section.settings.craft_title }}</h2>
+          {%- endif -%}
+          {%- if section.settings.craft_copy != blank -%}
+            <div class="maison__body rte">{{ section.settings.craft_copy }}</div>
+          {%- endif -%}
+
+          {%- if section.settings.craft_image_secondary != blank -%}
+            <figure class="maison__figure">
+              {{ section.settings.craft_image_secondary | image_url: width: 1800 | image_tag: loading: 'lazy', sizes: '(min-width: 990px) 50vw, 100vw', class: 'maison__img' }}
+            </figure>
+          {%- endif -%}
+        </div>
+      </div>
+
+      {%- if section.settings.quote_text != blank -%}
+        <figure class="maison__quote">
+          <blockquote class="maison__quote-text">“{{ section.settings.quote_text }}”</blockquote>
+          {%- if section.settings.quote_signature != blank -%}
+            <div class="maison__quote-signature">
+              {{ section.settings.quote_signature | image_url: width: 900 | image_tag: loading: 'lazy', sizes: '180px', class: 'maison__signature' }}
+            </div>
+          {%- endif -%}
+        </figure>
+      {%- endif -%}
+    </article>
+
+    <article class="maison__panel maison__panel--ruby" id="MaisonRuby--{{ section.id }}">
+      <div class="maison__grid maison__grid--ruby">
+        <div class="maison__content">
+          {%- if section.settings.ruby_title != blank -%}
+            <h2 class="maison__heading">{{ section.settings.ruby_title }}</h2>
+          {%- endif -%}
+          {%- if section.settings.ruby_copy != blank -%}
+            <div class="maison__body rte">{{ section.settings.ruby_copy }}</div>
+          {%- endif -%}
+        </div>
+        <div class="maison__media">
+          {%- if section.settings.ruby_image != blank -%}
+            {{ section.settings.ruby_image | image_url: width: 1800 | image_tag: loading: 'lazy', sizes: '(min-width: 990px) 50vw, 100vw', class: 'maison__img' }}
+          {%- endif -%}
+        </div>
+      </div>
+    </article>
+
+    <article class="maison__panel maison__panel--commitments">
+      {%- if section.settings.commitments_title != blank -%}
+        <h2 class="maison__heading">{{ section.settings.commitments_title }}</h2>
+      {%- endif -%}
+      {%- if section.settings.commitments_copy != blank -%}
+        <div class="maison__body rte">{{ section.settings.commitments_copy }}</div>
+      {%- endif -%}
+
+      <div class="maison__cards">
+        <div class="maison__card">
+          {%- if section.settings.kimberley_title != blank -%}
+            <h3 class="maison__card-title">{{ section.settings.kimberley_title }}</h3>
+          {%- endif -%}
+          {%- if section.settings.kimberley_copy != blank -%}
+            <div class="maison__card-body rte">{{ section.settings.kimberley_copy }}</div>
+          {%- endif -%}
+          {%- if section.settings.kimberley_image != blank -%}
+            <div class="maison__card-media">
+              {{ section.settings.kimberley_image | image_url: width: 1400 | image_tag: loading: 'lazy', sizes: '(min-width: 990px) 50vw, 100vw', class: 'maison__img' }}
+            </div>
+          {%- endif -%}
+          {%- if section.settings.kimberley_link != blank and section.settings.kimberley_link_label != blank -%}
+            <a class="maison__card-link" href="{{ section.settings.kimberley_link }}">{{ section.settings.kimberley_link_label }}</a>
+          {%- endif -%}
+        </div>
+
+        <div class="maison__card">
+          {%- if section.settings.rjc_title != blank -%}
+            <h3 class="maison__card-title">{{ section.settings.rjc_title }}</h3>
+          {%- endif -%}
+          {%- if section.settings.rjc_copy != blank -%}
+            <div class="maison__card-body rte">{{ section.settings.rjc_copy }}</div>
+          {%- endif -%}
+          {%- if section.settings.rjc_image != blank -%}
+            <div class="maison__card-media">
+              {{ section.settings.rjc_image | image_url: width: 1400 | image_tag: loading: 'lazy', sizes: '(min-width: 990px) 50vw, 100vw', class: 'maison__img' }}
+            </div>
+          {%- endif -%}
+          {%- if section.settings.rjc_link != blank and section.settings.rjc_link_label != blank -%}
+            <a class="maison__card-link" href="{{ section.settings.rjc_link }}">{{ section.settings.rjc_link_label }}</a>
+          {%- endif -%}
+        </div>
+      </div>
+    </article>
+
+    {%- if associations.size > 0 -%}
+      <article class="maison__panel maison__panel--associations" aria-label="Associations & organizations">
+        {%- if section.settings.associations_title != blank -%}
+          <h2 class="maison__heading">{{ section.settings.associations_title }}</h2>
+        {%- endif -%}
+        <div class="maison__associations">
+          {%- for block in associations -%}
+            <div class="maison__association" {{ block.shopify_attributes }}>
+              {%- if block.settings.title != blank -%}
+                <h3 class="maison__association-title">{{ block.settings.title }}</h3>
+              {%- endif -%}
+              {%- if block.settings.url != blank -%}
+                <a class="maison__association-link" href="{{ block.settings.url }}">{{ block.settings.url_label | default: block.settings.url }}</a>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        </div>
+      </article>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .maison {
+    color: var(--000000, #000);
+    background: #fff;
+  }
+
+  .maison__hero {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(56px, 8vw, 110px) 0;
+  }
+
+  .maison__hero-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    align-items: center;
+  }
+
+  .maison__hero-copy {
+    max-width: 920px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .maison__kicker {
+    margin: 0 0 12px;
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  .maison__title {
+    margin: 0 0 16px;
+    font-family: "Portrait LC", "Times New Roman", Georgia, serif;
+    font-size: clamp(38px, 5.4vw, 72px);
+    font-weight: 500;
+    line-height: 1.05;
+  }
+
+  .maison__lede {
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 22px;
+    opacity: 0.92;
+  }
+
+  .maison__hero-media {
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .maison__hero-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+
+  .maison__panel {
+    padding: clamp(40px, 6vw, 90px) 0;
+  }
+
+  .maison__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+
+  .maison__grid--ruby {
+    align-items: center;
+  }
+
+  .maison__heading {
+    margin: 0 0 18px;
+    font-family: "Portrait LC", "Times New Roman", Georgia, serif;
+    font-size: clamp(26px, 3.2vw, 40px);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: 0.02em;
+  }
+
+  .maison__body {
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 22px;
+  }
+
+  .maison__img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    border-radius: 14px;
+  }
+
+  .maison__figure {
+    margin: 28px 0 0;
+  }
+
+  .maison__quote {
+    margin: 44px 0 0;
+    padding: 28px 26px;
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.035);
+    border: 1px solid rgba(0, 0, 0, 0.07);
+  }
+
+  .maison__quote-text {
+    margin: 0;
+    font-family: "Portrait LC", "Times New Roman", Georgia, serif;
+    font-size: clamp(18px, 2.1vw, 26px);
+    line-height: 1.35;
+    letter-spacing: 0.01em;
+  }
+
+  .maison__quote-signature {
+    margin-top: 18px;
+    max-width: 220px;
+    opacity: 0.9;
+  }
+
+  .maison__signature {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .maison__cards {
+    margin-top: 28px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .maison__card {
+    padding: 26px;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  }
+
+  .maison__card-title {
+    margin: 0 0 12px;
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
+
+  .maison__card-media {
+    margin-top: 16px;
+  }
+
+  .maison__card-link {
+    display: inline-block;
+    margin-top: 14px;
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-decoration: underline;
+  }
+
+  .maison__associations {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .maison__association {
+    padding: 18px 18px;
+    border-radius: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  .maison__association-title {
+    margin: 0 0 8px;
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
+
+  .maison__association-link {
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 22px;
+    text-decoration: underline;
+    word-break: break-word;
+  }
+
+  @media (min-width: 990px) {
+    .maison__grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+    }
+
+    .maison__cards {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .maison__associations {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Brand — The Maison",
+  "tag": "section",
+  "class": "section-brand-the-maison",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Hero"
+    },
+    {
+      "type": "text",
+      "id": "hero_kicker",
+      "label": "Kicker",
+      "default": "The Brand"
+    },
+    {
+      "type": "text",
+      "id": "hero_title",
+      "label": "Title",
+      "default": "The Maison"
+    },
+    {
+      "type": "richtext",
+      "id": "hero_copy",
+      "label": "Intro copy"
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero image"
+    },
+    {
+      "type": "header",
+      "content": "Timeless craftsmanship"
+    },
+    {
+      "type": "text",
+      "id": "craft_title",
+      "label": "Heading",
+      "default": "Timeless craftsmanship"
+    },
+    {
+      "type": "richtext",
+      "id": "craft_copy",
+      "label": "Body copy"
+    },
+    {
+      "type": "image_picker",
+      "id": "craft_image_primary",
+      "label": "Primary image"
+    },
+    {
+      "type": "image_picker",
+      "id": "craft_image_secondary",
+      "label": "Secondary image"
+    },
+    {
+      "type": "header",
+      "content": "Quote"
+    },
+    {
+      "type": "text",
+      "id": "quote_text",
+      "label": "Quote text",
+      "default": "Fashion is changeable. It is whimsical. Style is not."
+    },
+    {
+      "type": "image_picker",
+      "id": "quote_signature",
+      "label": "Signature image"
+    },
+    {
+      "type": "header",
+      "content": "The Ruby"
+    },
+    {
+      "type": "text",
+      "id": "ruby_title",
+      "label": "Heading",
+      "default": "The Ruby"
+    },
+    {
+      "type": "richtext",
+      "id": "ruby_copy",
+      "label": "Body copy"
+    },
+    {
+      "type": "image_picker",
+      "id": "ruby_image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Commitments"
+    },
+    {
+      "type": "text",
+      "id": "commitments_title",
+      "label": "Heading",
+      "default": "Commitments"
+    },
+    {
+      "type": "richtext",
+      "id": "commitments_copy",
+      "label": "Body copy"
+    },
+    {
+      "type": "header",
+      "content": "Kimberley Process"
+    },
+    {
+      "type": "text",
+      "id": "kimberley_title",
+      "label": "Heading",
+      "default": "The Kimberley Process"
+    },
+    {
+      "type": "richtext",
+      "id": "kimberley_copy",
+      "label": "Body copy"
+    },
+    {
+      "type": "image_picker",
+      "id": "kimberley_image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "kimberley_link",
+      "label": "Link"
+    },
+    {
+      "type": "text",
+      "id": "kimberley_link_label",
+      "label": "Link label",
+      "default": "Learn more"
+    },
+    {
+      "type": "header",
+      "content": "Responsible Jewellery Council"
+    },
+    {
+      "type": "text",
+      "id": "rjc_title",
+      "label": "Heading",
+      "default": "Responsible Jewellery Council"
+    },
+    {
+      "type": "richtext",
+      "id": "rjc_copy",
+      "label": "Body copy"
+    },
+    {
+      "type": "image_picker",
+      "id": "rjc_image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "rjc_link",
+      "label": "Link"
+    },
+    {
+      "type": "text",
+      "id": "rjc_link_label",
+      "label": "Link label",
+      "default": "Learn more"
+    },
+    {
+      "type": "header",
+      "content": "Associations"
+    },
+    {
+      "type": "text",
+      "id": "associations_title",
+      "label": "Heading",
+      "default": "Associations & organizations"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Layout width",
+      "default": "wrapper--full-padded",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Normal" },
+        { "value": "wrapper--wide", "label": "Wide" },
+        { "value": "wrapper--narrow", "label": "Narrow" }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Top",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "type": "association",
+      "name": "Association",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "American Gem Society"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "URL"
+        },
+        {
+          "type": "text",
+          "id": "url_label",
+          "label": "Link label",
+          "info": "Optional. Defaults to the URL when empty."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Brand — The Maison",
+      "blocks": [
+        { "type": "association" },
+        { "type": "association" }
+      ]
+    }
+  ]
+}
+{% endschema %}
