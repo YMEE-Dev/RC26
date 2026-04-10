@@ -29,12 +29,13 @@
     --quote-max: {{ section.settings.quote_max_width }}px;
     --left-h: {{ section.settings.left_media_height }}px;
     --right-h: {{ section.settings.right_media_height }}px;
+    --right-h-mobile: {{ section.settings.right_media_height_mobile }}px;
   }
 {%- endstyle -%}
 
 <section
   id="BlogQuoteTwoImages--{{ section.id }}"
-  class="blog-quote-two-images section-padding"
+  class="blog-quote-two-images section-padding{% if section.settings.right_media_mobile_use_custom_height %} blog-quote-two-images--right-fixed-mobile{% endif %}"
   data-section-id="{{ section.id }}"
   data-section-type="blog-quote-two-images"
 >
@@ -247,6 +248,11 @@
       aspect-ratio: 16 / 9;
     }
 
+    .blog-quote-two-images--right-fixed-mobile .blog-quote-two-images__media--right {
+      height: var(--right-h-mobile);
+      aspect-ratio: auto;
+    }
+
     .blog-quote-two-images__image {
       height: 100%;
     }
@@ -386,8 +392,24 @@
       "max": 900,
       "step": 20,
       "unit": "px",
-      "label": "Right image height (desktop)",
+      "label": "Right image height (desktop only)",
       "default": 390
+    },
+    {
+      "type": "checkbox",
+      "id": "right_media_mobile_use_custom_height",
+      "label": "Use custom right image height on mobile",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "right_media_height_mobile",
+      "min": 50,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "label": "Right image height (mobile)",
+      "default": 240
     },
     {
       "type": "range",
