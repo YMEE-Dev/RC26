@@ -768,11 +768,8 @@
 ></script>
 
 {%- if template.name == 'product' -%}
-  <script>
-    window.__webgiViewerURL = {{ 'webgi-0.19.0.min.js' | asset_url | json }};
-  </script>
   <script src="{{ 'webgi-loader.js' | asset_url }}" defer="defer"></script>
-  <link rel="preload" href="{{ 'webgi-0.19.0.min.js' | asset_url }}" as="script">
+  <link rel="preload" href="https://releases.ijewel3d.com/webgi/runtime/viewer-0.9.19.js" as="script" crossorigin>
 {%- endif -%}
 {%- if template.name == 'product' or template.suffix == 'concierge' -%}
   <link rel="stylesheet" href="{{ 'side-drawer.css' | asset_url }}">
