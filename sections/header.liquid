@@ -1056,6 +1056,23 @@
         img.onerror = () => resolve(null);
       });
 
+    const computeVideoLuminance = (videoEl) =>
+      new Promise((resolve) => {
+        if (!videoEl) return resolve(null);
+
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = 1;
+          canvas.height = 1;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(videoEl, 0, 0, 1, 1);
+          const data = ctx.getImageData(0, 0, 1, 1).data;
+          resolve(getLuminance([data[0], data[1], data[2]]));
+        } catch (err) {
+          resolve(null);
+        }
+      });
+
     const initHeaderObserver = () => {
       const headerWrapper = document.querySelector('header.theme__header');
       const body = document.querySelector('body');
@@ -1065,23 +1082,11 @@
       const transparentImages = selectAll('.logo__img.logo__img--transparent');
       if (!(headerTargets.length && logoLinks.length)) return;
 
-      const rootStyles = getComputedStyle(document.documentElement);
-      const getCssVariable = (name, fallback) => {
-        const value = rootStyles.getPropertyValue(name).trim();
-        return value || fallback;
-      };
+      const nearWhiteLuminanceThreshold = 0.7;
       const colors = {
         light: {
           link: '#fff',
           hover: '#f0f0f0',
-        },
-        dimmedLight: {
-          link: '#e0e0e0',
-          hover: '#f0f0f0',
-        },
-        lightDark: {
-          link: '#9a9a9a',
-          hover: '#b0b0b0',
         },
         dark: {
           link: '#000',
@@ -1093,6 +1098,16 @@
       const logoDarkUrl = logoLinks[0].dataset.logoDark;
       const forcedDrawerLogoMode = 'dark';
       const forcedTmenuLogoMode = 'dark';
+      const DEBUG_HEADER_OBSERVER = false;
+      const APPLY_DEBOUNCE = 150;
+      const thresholds = [0, 0.25, 0.5, 0.75, 1];
+      const getSectionLabel = (sectionEl) =>
+        sectionEl?.dataset.sectionId || sectionEl?.id || sectionEl?.className || 'unknown-section';
+      const roundForLog = (value) => (typeof value === 'number' ? Math.round(value * 100) / 100 : value);
+      const debugLog = (message, payload = {}) => {
+        if (!DEBUG_HEADER_OBSERVER) return;
+        console.log('[HeaderObserver]', message, payload);
+      };
 
       const drawerIsOpen = () => drawerWrapper?.classList.contains('is-open');
       const tmenuIsOpen = () => tmenuIsActive || Boolean(document.querySelector(tmenuActiveSelector));
@@ -1120,7 +1135,7 @@
       };
 
       const setLogoSource = (mode) => {
-        const useLightLogo = mode === 'light' || mode === 'dimmedLight';
+        const useLightLogo = mode === 'light';
         const logoUrl = useLightLogo ? logoLightUrl : logoDarkUrl;
         if (!logoUrl) return;
         logoLinks.forEach((link) => {
@@ -1133,9 +1148,7 @@
       };
 
       const defaultModeRaw = (logoLinks[0].dataset.logoDefault || 'light').trim();
-      const defaultMode = ['light', 'dimmedLight', 'lightDark', 'dark'].includes(defaultModeRaw)
-        ? defaultModeRaw
-        : 'light';
+      const defaultMode = defaultModeRaw === 'dark' ? 'dark' : 'light';
       let currentMode = defaultMode;
       const applyMode = (mode) => {
         const resolved = mode || 'light';
@@ -1145,6 +1158,11 @@
         if (!getForcedLogoMode()) {
           setLogoSource(currentMode);
         }
+        debugLog('Applied mode', {
+          mode: currentMode,
+          forcedLogoMode: getForcedLogoMode() || null,
+          nearWhiteLuminanceThreshold,
+        });
       };
 
       const syncLogoWithHeaderState = () => {
@@ -1152,10 +1170,18 @@
 
         if (forcedLogoMode) {
           setLogoSource(forcedLogoMode);
+          debugLog('Applied forced logo mode', {
+            forcedLogoMode,
+            drawerOpen: drawerIsOpen(),
+            tmenuOpen: tmenuIsOpen(),
+          });
           return;
         }
 
         setLogoSource(currentMode);
+        debugLog('Synced logo with header mode', {
+          mode: currentMode,
+        });
       };
 
       setHeaderColors(currentMode);
@@ -1185,10 +1211,6 @@
         'main .shopify-section section, main .shopify-section collection-component, main .shopify-section [data-section-id]'
       );
       if (!sectionsToObserve.length) return;
-
-      const DEBUG_HEADER_OBSERVER = false;
-      const APPLY_DEBOUNCE = 150;
-      const thresholds = [0, 0.25, 0.5, 0.75, 1];
 
       const computeRootMargin = () => {
         const h = window.innerHeight || document.documentElement.clientHeight || 0;
@@ -1243,11 +1265,106 @@
       };
 
       const luminanceCache = new WeakMap();
+      const mediaReadyListeners = new WeakSet();
+      let currentObservedSection = null;
 
-      const findBackgroundImage = (sectionEl) =>
+      const findBackgroundMedia = (sectionEl) =>
         sectionEl.querySelector(
-          '[data-header-luminance-img], .subcollections__bg img, .hero__bg img, .section-background img, .banner__media img, .image-with-text__image img'
+          [
+            '[data-header-luminance-img]',
+            '.subcollections__bg img',
+            '.hero__bg img',
+            '.section-background img',
+            '.banner__media img',
+            '.image-with-text__image img',
+            '.hero__bg video',
+            '.section-background video',
+            '.banner__media video',
+            '.image-with-text__image video',
+            '.blog-brand__media video',
+            '.video__poster img',
+            '.video-background img',
+            '.video-background video',
+            'video-background video',
+            '.video__player video',
+          ].join(', ')
         );
+
+      const isImageReady = (imgEl) => {
+        const src = imgEl?.currentSrc || imgEl?.src;
+        return Boolean(src) && imgEl.complete && imgEl.naturalWidth > 0;
+      };
+      const isImageFailed = (imgEl) => {
+        const src = imgEl?.currentSrc || imgEl?.src;
+        return Boolean(src) && imgEl.complete && imgEl.naturalWidth === 0;
+      };
+
+      const isVideoReady = (videoEl) => videoEl.readyState >= 2 && videoEl.videoWidth > 0 && videoEl.videoHeight > 0;
+      const isVideoFailed = (videoEl) => Boolean(videoEl?.error);
+
+      const getMediaDescriptor = (mediaEl) => {
+        if (!mediaEl) return {};
+
+        if (mediaEl.tagName === 'IMG') {
+          return {
+            tag: 'IMG',
+            src: mediaEl.currentSrc || mediaEl.src || null,
+            complete: mediaEl.complete,
+            naturalWidth: mediaEl.naturalWidth,
+          };
+        }
+
+        if (mediaEl.tagName === 'VIDEO') {
+          return {
+            tag: 'VIDEO',
+            poster: mediaEl.poster || null,
+            readyState: mediaEl.readyState,
+            videoWidth: mediaEl.videoWidth,
+            videoHeight: mediaEl.videoHeight,
+            currentSrc: mediaEl.currentSrc || null,
+          };
+        }
+
+        return {
+          tag: mediaEl.tagName || 'UNKNOWN',
+        };
+      };
+
+      const watchMediaReadiness = (sectionEl, mediaEl) => {
+        if (!mediaEl || mediaReadyListeners.has(mediaEl)) return;
+
+        const eventNames =
+          mediaEl.tagName === 'IMG' ? ['load', 'error'] : ['loadeddata', 'loadedmetadata', 'canplay', 'error'];
+
+        const onMediaReady = (event) => {
+          eventNames.forEach((eventName) => {
+            mediaEl.removeEventListener(eventName, onMediaReady);
+          });
+
+          mediaReadyListeners.delete(mediaEl);
+          luminanceCache.delete(sectionEl);
+
+          debugLog('Media readiness event received', {
+            section: getSectionLabel(sectionEl),
+            eventType: event.type,
+            ...getMediaDescriptor(mediaEl),
+          });
+
+          if (currentObservedSection === sectionEl) {
+            scheduleApply(sectionEl);
+          }
+        };
+
+        mediaReadyListeners.add(mediaEl);
+        eventNames.forEach((eventName) => {
+          mediaEl.addEventListener(eventName, onMediaReady);
+        });
+
+        debugLog('Waiting for media readiness before computing luminance', {
+          section: getSectionLabel(sectionEl),
+          ...getMediaDescriptor(mediaEl),
+        });
+      };
 
       const findElementBackgroundImage = (el) => {
         let node = el;
@@ -1266,23 +1383,16 @@
       };
 
       const applyLuminanceMode = (luminance) => {
-        if (luminance < 0.25) {
-          applyMode('light');
-        } else if (luminance < 0.5) {
-          applyMode('dimmedLight');
-        } else if (luminance < 0.75) {
-          applyMode('lightDark');
-        } else {
-          applyMode('dark');
-        }
+        applyMode(luminance >= nearWhiteLuminanceThreshold ? 'dark' : 'light');
       };
 
       const logLuminance = (luminance, sectionEl, source) => {
-        if (!DEBUG_HEADER_OBSERVER) return;
-        console.log('header luminance', {
-          luminance,
+        debugLog('Computed luminance', {
+          luminance: roundForLog(luminance),
           source,
-          section: sectionEl.dataset.sectionId || sectionEl.id || sectionEl.className,
+          threshold: roundForLog(nearWhiteLuminanceThreshold),
+          section: getSectionLabel(sectionEl),
+          resultingMode: luminance >= nearWhiteLuminanceThreshold ? 'dark' : 'light',
         });
       };
 
@@ -1294,17 +1404,65 @@
           return;
         }
 
-        const img = findBackgroundImage(sectionEl);
+        const mediaEl = findBackgroundMedia(sectionEl);
         const bgUrl = findElementBackgroundImage(sectionEl);
 
-        if (img) {
-          computeImageLuminance(img).then((lum) => {
-            const luminance = lum ?? getLuminance(getBackgroundRGB(sectionEl));
-            luminanceCache.set(sectionEl, luminance);
-            logLuminance(luminance, sectionEl, lum !== null ? 'image' : 'background');
-            applyLuminanceMode(luminance);
-          });
-          return;
+        if (mediaEl) {
+          if (mediaEl.tagName === 'IMG') {
+            if (isImageFailed(mediaEl)) {
+              const luminance = getLuminance(getBackgroundRGB(sectionEl));
+              luminanceCache.set(sectionEl, luminance);
+              logLuminance(luminance, sectionEl, 'background-after-image-error');
+              applyLuminanceMode(luminance);
+              return;
+            }
+
+            if (!isImageReady(mediaEl)) {
+              watchMediaReadiness(sectionEl, mediaEl);
+              return;
+            }
+
+            computeImageLuminance(mediaEl).then((lum) => {
+              const luminance = lum ?? getLuminance(getBackgroundRGB(sectionEl));
+              luminanceCache.set(sectionEl, luminance);
+              logLuminance(luminance, sectionEl, lum !== null ? 'image' : 'background');
+              applyLuminanceMode(luminance);
+            });
+            return;
+          }
+
+          if (mediaEl.tagName === 'VIDEO') {
+            if (isVideoFailed(mediaEl)) {
+              const luminance = getLuminance(getBackgroundRGB(sectionEl));
+              luminanceCache.set(sectionEl, luminance);
+              logLuminance(luminance, sectionEl, 'background-after-video-error');
+              applyLuminanceMode(luminance);
+              return;
+            }
+
+            if (mediaEl.poster) {
+              computeBackgroundImageLuminance(mediaEl.poster).then((lum) => {
+                const luminance = lum ?? getLuminance(getBackgroundRGB(sectionEl));
+                luminanceCache.set(sectionEl, luminance);
+                logLuminance(luminance, sectionEl, lum !== null ? 'video-poster' : 'background');
+                applyLuminanceMode(luminance);
+              });
+              return;
+            }
+
+            if (!isVideoReady(mediaEl)) {
+              watchMediaReadiness(sectionEl, mediaEl);
+              return;
+            }
+
+            computeVideoLuminance(mediaEl).then((lum) => {
+              const luminance = lum ?? getLuminance(getBackgroundRGB(sectionEl));
+              luminanceCache.set(sectionEl, luminance);
+              logLuminance(luminance, sectionEl, lum !== null ? 'video-frame' : 'background');
+              applyLuminanceMode(luminance);
+            });
+            return;
+          }
         }
 
         if (bgUrl) {
@@ -1361,6 +1519,12 @@
       const onIntersect = (entries) => {
         const entry = pickTopEntry(entries);
         if (!entry) return;
+        currentObservedSection = entry.target;
+        debugLog('Intersection selected section', {
+          section: getSectionLabel(entry.target),
+          intersectionRatio: roundForLog(entry.intersectionRatio),
+          top: roundForLog(entry.boundingClientRect.top),
+        });
         scheduleApply(entry.target);
       };
 
