@@ -11,13 +11,20 @@
   }
 {%- endstyle -%}
 
-{%- if slide_count > 0 -%}
-  <section
-    id="BlogImageSlider--{{ section.id }}"
-    class="blog-image-slider section-padding"
-    data-section-id="{{ section.id }}"
-    data-section-type="blog-image-slider"
-  >
+<section
+  id="BlogImageSlider--{{ section.id }}"
+  class="blog-image-slider section-padding"
+  data-section-id="{{ section.id }}"
+  data-section-type="blog-image-slider"
+>
+  {%- if slide_count == 0 -%}
+    <div class="blog-image-slider__inner {{ section.settings.width }}">
+      <div class="blog-image-slider__empty">
+        {{ 'lifestyle-1' | placeholder_svg_tag: 'blog-image-slider__placeholder' }}
+        <p class="caption" style="margin-top:12px;opacity:0.5;">Add slides to display images</p>
+      </div>
+    </div>
+  {%- else -%}
     <div class="blog-image-slider__inner {{ section.settings.width }}">
       <div class="blog-image-slider__track-wrapper">
         <div class="blog-image-slider__track" data-slider-track>
@@ -93,8 +100,8 @@
         </p>
       {%- endif -%}
     </div>
-  </section>
-{%- endif -%}
+  {%- endif -%}
+</section>
 
 {% stylesheet %}
   .blog-image-slider {
@@ -106,6 +113,20 @@
     width: min(calc(100% - 60px), var(--max));
     margin-left: auto;
     margin-right: auto;
+  }
+
+  .blog-image-slider__empty {
+    text-align: center;
+    padding: 40px 0;
+  }
+
+  .blog-image-slider__empty svg {
+    width: 100%;
+    max-width: 600px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    opacity: 0.4;
   }
 
   .blog-image-slider__track-wrapper {
@@ -380,8 +401,8 @@
       ]
     }
   ],
-  "enabled_on": {
-    "templates": ["article", "blog", "page", "index"]
+  "disabled_on": {
+    "groups": ["header", "aside", "footer"]
   }
 }
 {% endschema %}
