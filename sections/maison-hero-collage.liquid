@@ -177,6 +177,11 @@
     object-fit: cover;
   }
 
+  .maison-collage.is-alt .maison-collage__item img {
+    object-fit: contain;
+    object-position: center;
+  }
+
   .maison-collage.is-intro .maison-collage__item {
     opacity: 1;
     transform: none;
@@ -256,58 +261,207 @@
       const collage = root.querySelector('[data-maison-collage-inner]');
       if (!collage) return;
 
-      collage.classList.add('is-animating');
-      requestAnimationFrame(() => collage.classList.add('is-intro-visible'));
-
       const prefersReducedMotion =
         window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (prefersReducedMotion) return;
+      const heroCollage = collage;
+      const heroCollageItems = [...heroCollage.querySelectorAll('.maison-collage__item')];
+      if (!heroCollageItems.length) return;
 
-      const images = Array.from(collage.querySelectorAll('img')).filter(
-        (img) => img.dataset.imageA && img.dataset.imageB
-      );
-      if (images.length === 0) return;
+      const introAppearDuration = 1400;
+      heroCollage.classList.add('is-animating');
+      heroCollage.classList.add('is-intro');
+      window.setTimeout(() => heroCollage.classList.add('is-intro-visible'), 60);
+
+      window.setTimeout(() => {
+        heroCollage.classList.remove('is-intro');
+        heroCollage.classList.remove('is-intro-visible');
+        heroCollage.classList.remove('is-animating');
+      }, introAppearDuration);
+
+      if (prefersReducedMotion) return;
 
       const intervalMsRaw = Number(root.dataset.intervalMs || 6000);
       const intervalMs = Math.max(3000, Math.min(15000, intervalMsRaw));
 
-      let showingAlt = false;
-      let timer = null;
+      const heroAltLayoutPresets = [
+        [
+          { top: '14px', left: '5%', width: '172px', height: '220px' },
+          { top: '30px', right: '-4%', width: '190px', height: '172px' },
+          { bottom: '0px', left: '0%', width: '190px', height: '200px' },
+          { bottom: '-50px', right: '0%', width: '214px', height: '206px' },
+        ],
+      ];
+
+      const timeoutIds = new Set();
+      const intervalIds = new Set();
+
+      const scheduleTimeout = (callback, delay) => {
+        const timeoutId = window.setTimeout(() => {
+          timeoutIds.delete(timeoutId);
+          callback();
+        }, delay);
+        timeoutIds.add(timeoutId);
+        return timeoutId;
+      };
+
+      const scheduleInterval = (callback, delay) => {
+        const intervalId = window.setInterval(callback, delay);
+        intervalIds.add(intervalId);
+        return intervalId;
+      };
+
+      const clearScheduledWork = () => {
+        timeoutIds.forEach((timeoutId) => window.clearTimeout(timeoutId));
+        timeoutIds.clear();
+        intervalIds.forEach((intervalId) => window.clearInterval(intervalId));
+        intervalIds.clear();
+      };
 
       const preload = (url) => {
         if (!url) return;
-        const i = new Image();
-        i.decoding = 'async';
-        i.loading = 'eager';
-        i.src = url;
+        const image = new Image();
+        image.decoding = 'async';
+        image.loading = 'eager';
+        image.src = url;
       };
 
-      images.forEach((img) => preload(img.dataset.imageB));
+      const resetHeroItemPosition = (item) => {
+        if (!item) return;
+        item.style.removeProperty('top');
+        item.style.removeProperty('right');
+        item.style.removeProperty('bottom');
+        item.style.removeProperty('left');
+        item.style.removeProperty('width');
+        item.style.removeProperty('height');
+        item.style.removeProperty('z-index');
+      };
 
-      const swap = () => {
-        showingAlt = !showingAlt;
-        collage.classList.add('is-switching');
+      const applyHeroAltLayout = () => {
+        if (!heroCollageItems.length) return;
 
-        window.setTimeout(() => {
-          images.forEach((img) => {
-            const nextSrc = showingAlt ? img.dataset.imageB : img.dataset.imageA;
-            const nextAlt = showingAlt ? img.dataset.altB : img.dataset.altA;
-            if (nextSrc) img.src = nextSrc;
-            if (typeof nextAlt === 'string') img.alt = nextAlt;
+        if (window.innerWidth > 820) {
+          const altDesktopLayout = [
+            { top: '-100px', left: '25%', width: '252px', height: '328px' },
+            { top: '-42px', right: '4%', width: '300px', height: '416px' },
+            { left: 'calc(6% - 100px)', bottom: '100px', width: '530px', height: '418px' },
+            { right: '-50px', bottom: '0px', width: '386px', height: '256px' },
+          ];
+
+          heroCollageItems.forEach((item, index) => {
+            const styles = altDesktopLayout[index] || {};
+            item.style.top = styles.top ?? 'auto';
+            item.style.right = styles.right ?? 'auto';
+            item.style.bottom = styles.bottom ?? 'auto';
+            item.style.left = styles.left ?? 'auto';
+            item.style.width = styles.width ?? '';
+            item.style.height = styles.height ?? '';
+            item.style.zIndex = index === 3 ? '8' : '';
           });
-          collage.classList.remove('is-switching');
-        }, 220);
+          return;
+        }
+
+        const preset = heroAltLayoutPresets[Math.floor(Math.random() * heroAltLayoutPresets.length)];
+        heroCollageItems.forEach((item, index) => {
+          const styles = { ...(preset[index] || {}) };
+          item.style.top = styles.top ?? 'auto';
+          item.style.right = styles.right ?? 'auto';
+          item.style.bottom = styles.bottom ?? 'auto';
+          item.style.left = styles.left ?? 'auto';
+          item.style.width = styles.width ?? '';
+          item.style.height = styles.height ?? '';
+        });
       };
+
+      const sourcesA = [];
+      const altsA = [];
+      const sourcesB = [];
+      const altsB = [];
+
+      heroCollageItems.forEach((item) => {
+        const image = item.querySelector('img');
+        if (!image) return;
+
+        const sourceA = image.dataset.imageA || image.getAttribute('src') || '';
+        const sourceB = image.dataset.imageB || '';
+        const altA = image.dataset.altA || image.getAttribute('alt') || '';
+        const altB = image.dataset.altB || '';
+
+        sourcesA.push(sourceA);
+        altsA.push(altA);
+        sourcesB.push(sourceB);
+        altsB.push(altB);
+
+        preload(sourceB);
+      });
+
+      const hasAltSet = sourcesB.some(Boolean);
+      if (!hasAltSet) return;
+
+      let heroSwapAnimating = false;
+
+      function animateHeroSwap(showAlt) {
+        if (heroSwapAnimating) return;
+        heroSwapAnimating = true;
+
+        const totalFadeOutMs = 380;
+        const staggerMs = 70;
+        const totalMs = totalFadeOutMs + 520;
+
+        heroCollageItems.forEach((item, index) => {
+          const image = item.querySelector('img');
+          if (!image) return;
+
+          const nextSource = showAlt ? sourcesB[index] : sourcesA[index];
+          const nextAlt = showAlt ? altsB[index] : altsA[index];
+          const startDelay = index * staggerMs;
+
+          scheduleTimeout(() => {
+            item.style.opacity = '0';
+          }, startDelay);
+
+          scheduleTimeout(() => {
+            if (nextSource && image.getAttribute('src') !== nextSource) {
+              image.setAttribute('src', nextSource);
+            }
+            image.setAttribute('alt', nextAlt || '');
+          }, totalFadeOutMs + 40);
+
+          scheduleTimeout(() => {
+            item.style.opacity = '1';
+          }, totalFadeOutMs + 80 + startDelay);
+        });
+
+        scheduleTimeout(() => {
+          if (showAlt) {
+            applyHeroAltLayout();
+            heroCollage.classList.add('is-alt');
+          } else {
+            heroCollageItems.forEach(resetHeroItemPosition);
+            heroCollage.classList.remove('is-alt');
+          }
+        }, totalFadeOutMs + 20);
+
+        scheduleTimeout(() => {
+          heroSwapAnimating = false;
+        }, totalMs);
+      }
+
+      let heroSlideshowShowingAlt = false;
+      let intervalId = null;
 
       const start = () => {
-        if (timer) return;
-        timer = window.setInterval(swap, intervalMs);
+        if (intervalId) return;
+        intervalId = scheduleInterval(() => {
+          heroSlideshowShowingAlt = !heroSlideshowShowingAlt;
+          animateHeroSwap(heroSlideshowShowingAlt);
+        }, intervalMs);
       };
 
       const stop = () => {
-        if (!timer) return;
-        window.clearInterval(timer);
-        timer = null;
+        if (!intervalId) return;
+        window.clearInterval(intervalId);
+        intervalIds.delete(intervalId);
+        intervalId = null;
       };
 
       start();
