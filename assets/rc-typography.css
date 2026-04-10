@@ -26,15 +26,21 @@ body .btn {
 /* ── PLP collection nav ─────────────────────────────────────────── */
 
 /* Subcategory titles: 12/20 */
-.collection__nav .subcollection_links-link {
+body.template-collection .collection__nav .subcollection_links-link,
+body.template-collection .subcollection__title.navlink {
   font-size: var(--FONT-SIZE-CAPTION);
   line-height: var(--LINE-HEIGHT-CAPTION);
 }
 
 /* Filter group heading: 11/16 */
-.filter-group__heading {
+body.template-collection.filter-group__heading {
   font-size: var(--FONT-SIZE-INPUT-LABEL);
   line-height: var(--LINE-HEIGHT-INPUT-LABEL);
+}
+
+body.template-collection .hero__title.heading-large {
+  font-size: var(--FONT-DISPLAY-L);
+  line-height: var(--LINE-HEIGHT-DISPLAY-L);
 }
 
 /* ── Predictive search ──────────────────────────────────────────── */
@@ -43,6 +49,23 @@ body .btn {
 .predictive-search__item {
   font-size: var(--FONT-SIZE-CAPTION);
   line-height: var(--LINE-HEIGHT-CAPTION);
+}
+
+/* ── FAQ ──────────────────────────────────────────── */
+
+body#faq .section-sidebar__widget .widget__link {
+  font-weight: 400 !important;
+}
+
+body#faq .section-sidebar__title {
+  text-transform: inherit !important;
+}
+
+/* ── Concierge ──────────────────────────────────────────── */
+
+body#concierge .main-content p {
+  font-size: var(--FONT-SIZE-BASE) !important;
+  line-height: var(--LINE-HEIGHT-BODY) !important;
 }
 
 /* ── Japan Stores ──────────────────────────────────────────── */
@@ -131,6 +154,7 @@ body#our-commitment .image-title-desc__top-description {
 body#our-commitment .image-title-desc__top-description p {
   font-size: var(--FONT-SIZE-BASE);
   line-height: var(--LINE-HEIGHT-BODY);
+  font-family: var(--FONT-STACK-BODY);
 }
 
 body#our-commitment .image-title-desc__media img {
@@ -138,7 +162,6 @@ body#our-commitment .image-title-desc__media img {
   padding: 0;
   object-fit: cover;
 }
-
 
 /* ── Mobile overrides ───────────────────────────────────────────── */
 
