@@ -169,6 +169,12 @@
   #Slideshow2Header--{{ section.id }} {
     --section-top: {{ section.settings.padding_top }}px;
     --section-bottom: {{ section.settings.padding_bottom }}px;
+    --hero-lift: -100px;
+    --scale-a-desktop: {{ section.settings.scale_set1_desktop | times: 0.01 }};
+    --scale-b-desktop: {{ section.settings.scale_set2_desktop | times: 0.01 }};
+    --scale-a-mobile: {{ section.settings.scale_set1_mobile | times: 0.01 }};
+    --scale-b-mobile: {{ section.settings.scale_set2_mobile | times: 0.01 }};
+    --s2h-collage-scale: var(--scale-a-desktop);
   }
 
   #Slideshow2Header--{{ section.id }}.slideshow-2-header {
@@ -190,7 +196,7 @@
     flex: 1;
     display: grid;
     place-items: center;
-    margin-top: 150px;
+    margin-top: calc(150px + var(--hero-lift));
     padding-bottom: 2rem;
     position: relative;
   }
@@ -199,8 +205,13 @@
     position: relative;
     width: min(980px, 82vw);
     min-height: 620px;
-    transform: translateY(50px);
+    transform: translateY(50px) scale(var(--s2h-collage-scale));
+    transform-origin: center center;
     z-index: 1;
+  }
+
+  #Slideshow2Header--{{ section.id }} .slideshow-2-header__collage.is-alt {
+    --s2h-collage-scale: var(--scale-b-desktop);
   }
 
   #Slideshow2Header--{{ section.id }} .slideshow-2-header__item {
@@ -352,7 +363,15 @@
     #Slideshow2Header--{{ section.id }} .slideshow-2-header__collage {
       width: min(92vw, 560px);
       min-height: 560px;
-      transform: translateY(-50px);
+      transform: translateY(-50px) scale(var(--s2h-collage-scale));
+    }
+
+    #Slideshow2Header--{{ section.id }} .slideshow-2-header__collage {
+      --s2h-collage-scale: var(--scale-a-mobile);
+    }
+
+    #Slideshow2Header--{{ section.id }} .slideshow-2-header__collage.is-alt {
+      --s2h-collage-scale: var(--scale-b-mobile);
     }
 
     #Slideshow2Header--{{ section.id }} .slideshow-2-header__item--top {
@@ -693,6 +712,50 @@
       "unit": "s",
       "label": "Slide change interval",
       "default": 6
+    },
+    {
+      "type": "header",
+      "content": "Collage scale"
+    },
+    {
+      "type": "range",
+      "id": "scale_set1_desktop",
+      "min": 70,
+      "max": 150,
+      "step": 1,
+      "unit": "%",
+      "label": "Set 1 scale desktop",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "scale_set2_desktop",
+      "min": 70,
+      "max": 150,
+      "step": 1,
+      "unit": "%",
+      "label": "Set 2 scale desktop",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "scale_set1_mobile",
+      "min": 70,
+      "max": 150,
+      "step": 1,
+      "unit": "%",
+      "label": "Set 1 scale mobile",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "scale_set2_mobile",
+      "min": 70,
+      "max": 150,
+      "step": 1,
+      "unit": "%",
+      "label": "Set 2 scale mobile",
+      "default": 100
     },
     {
       "type": "header",
