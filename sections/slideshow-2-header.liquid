@@ -47,7 +47,19 @@
   <div class="slideshow-2-header__hero">
     <div class="slideshow-2-header__center">
       <div class="slideshow-2-header__collage" aria-hidden="true" data-s2h-collage>
-        <figure class="slideshow-2-header__item slideshow-2-header__item--top">
+        <figure
+          class="slideshow-2-header__item slideshow-2-header__item--top"
+          style="
+            --shift-x-a-desktop: {{ section.settings.s1_top_x_desktop }}px;
+            --shift-y-a-desktop: {{ section.settings.s1_top_y_desktop }}px;
+            --shift-x-a-mobile: {{ section.settings.s1_top_x_mobile }}px;
+            --shift-y-a-mobile: {{ section.settings.s1_top_y_mobile }}px;
+            --shift-x-b-desktop: {{ section.settings.s2_top_x_desktop }}px;
+            --shift-y-b-desktop: {{ section.settings.s2_top_y_desktop }}px;
+            --shift-x-b-mobile: {{ section.settings.s2_top_x_mobile }}px;
+            --shift-y-b-mobile: {{ section.settings.s2_top_y_mobile }}px;
+          "
+        >
           {% if hero_top_a != blank or hero_top_b != blank %}
             <img
               src="{{ hero_top_a | default: hero_top_b | image_url: width: 1400 }}"
@@ -61,7 +73,19 @@
           {% endif %}
         </figure>
 
-        <figure class="slideshow-2-header__item slideshow-2-header__item--right">
+        <figure
+          class="slideshow-2-header__item slideshow-2-header__item--right"
+          style="
+            --shift-x-a-desktop: {{ section.settings.s1_right_x_desktop }}px;
+            --shift-y-a-desktop: {{ section.settings.s1_right_y_desktop }}px;
+            --shift-x-a-mobile: {{ section.settings.s1_right_x_mobile }}px;
+            --shift-y-a-mobile: {{ section.settings.s1_right_y_mobile }}px;
+            --shift-x-b-desktop: {{ section.settings.s2_right_x_desktop }}px;
+            --shift-y-b-desktop: {{ section.settings.s2_right_y_desktop }}px;
+            --shift-x-b-mobile: {{ section.settings.s2_right_x_mobile }}px;
+            --shift-y-b-mobile: {{ section.settings.s2_right_y_mobile }}px;
+          "
+        >
           {% if hero_right_a != blank or hero_right_b != blank %}
             <img
               src="{{ hero_right_a | default: hero_right_b | image_url: width: 1800 }}"
@@ -75,7 +99,19 @@
           {% endif %}
         </figure>
 
-        <figure class="slideshow-2-header__item slideshow-2-header__item--left">
+        <figure
+          class="slideshow-2-header__item slideshow-2-header__item--left"
+          style="
+            --shift-x-a-desktop: {{ section.settings.s1_left_x_desktop }}px;
+            --shift-y-a-desktop: {{ section.settings.s1_left_y_desktop }}px;
+            --shift-x-a-mobile: {{ section.settings.s1_left_x_mobile }}px;
+            --shift-y-a-mobile: {{ section.settings.s1_left_y_mobile }}px;
+            --shift-x-b-desktop: {{ section.settings.s2_left_x_desktop }}px;
+            --shift-y-b-desktop: {{ section.settings.s2_left_y_desktop }}px;
+            --shift-x-b-mobile: {{ section.settings.s2_left_x_mobile }}px;
+            --shift-y-b-mobile: {{ section.settings.s2_left_y_mobile }}px;
+          "
+        >
           {% if hero_left_a != blank or hero_left_b != blank %}
             <img
               src="{{ hero_left_a | default: hero_left_b | image_url: width: 1800 }}"
@@ -89,7 +125,19 @@
           {% endif %}
         </figure>
 
-        <figure class="slideshow-2-header__item slideshow-2-header__item--bottom">
+        <figure
+          class="slideshow-2-header__item slideshow-2-header__item--bottom"
+          style="
+            --shift-x-a-desktop: {{ section.settings.s1_bottom_x_desktop }}px;
+            --shift-y-a-desktop: {{ section.settings.s1_bottom_y_desktop }}px;
+            --shift-x-a-mobile: {{ section.settings.s1_bottom_x_mobile }}px;
+            --shift-y-a-mobile: {{ section.settings.s1_bottom_y_mobile }}px;
+            --shift-x-b-desktop: {{ section.settings.s2_bottom_x_desktop }}px;
+            --shift-y-b-desktop: {{ section.settings.s2_bottom_y_desktop }}px;
+            --shift-x-b-mobile: {{ section.settings.s2_bottom_x_mobile }}px;
+            --shift-y-b-mobile: {{ section.settings.s2_bottom_y_mobile }}px;
+          "
+        >
           {% if hero_bottom_a != blank or hero_bottom_b != blank %}
             <img
               src="{{ hero_bottom_a | default: hero_bottom_b | image_url: width: 1800 }}"
@@ -110,8 +158,8 @@
             <path d="M253.807 274.486C269.754 297.022 275.418 309.308 275.418 330.306C275.418 356.938 258.949 385.107 228.059 405.585C197.169 385.107 180.7 356.938 180.7 330.306C180.7 309.308 186.364 297.022 202.331 274.486L198.214 272.428L186.364 286.253C155.996 321.595 147.741 338.497 147.741 354.36C147.741 394.816 196.646 427.082 216.731 455.252L224.443 466H231.653L239.386 455.252C259.471 427.602 308.377 394.816 308.377 354.36C308.377 338.476 300.142 321.574 269.754 286.253L257.924 272.428L253.807 274.486ZM10.8052 221.742L0 229.435V236.607L10.8052 244.278C39.6261 264.756 71.54 312.905 112.232 312.905C128.199 312.905 145.17 304.714 180.7 274.507L194.598 262.719L192.529 258.623C169.874 274.507 157.522 280.12 136.936 280.12C109.64 280.12 81.3421 263.218 61.2573 233.01C81.3421 202.782 109.661 185.901 136.936 185.901C157.522 185.901 169.874 191.535 192.529 207.418L194.598 203.323L180.7 191.556C145.17 161.348 128.199 153.137 112.232 153.137C71.5609 153.137 39.1245 201.784 10.8052 221.763M271.3 191.535L257.402 203.302L259.45 207.398C282.106 191.514 294.457 185.88 315.044 185.88C342.318 185.88 370.637 202.782 390.722 232.99C370.637 263.197 342.318 280.099 315.044 280.099C294.457 280.099 282.106 274.465 259.45 258.602L257.402 262.698L271.3 274.486C306.83 304.693 323.821 312.884 339.768 312.884C380.439 312.884 412.353 264.735 441.195 244.258L452 236.586V229.414L441.195 221.722C412.876 201.743 380.439 153.095 339.768 153.095C323.801 153.095 306.809 161.286 271.3 191.514M224.464 0L216.752 10.7482C196.667 38.9182 147.762 71.1838 147.762 111.64C147.762 127.503 155.996 144.405 186.384 179.747L198.235 193.572L202.352 191.514C186.384 168.978 180.721 156.692 180.721 136.214C180.721 109.083 197.712 80.9133 228.08 60.9345C258.447 80.9133 275.438 109.083 275.438 136.214C275.438 156.692 269.775 168.978 253.828 191.514L257.945 193.572L269.775 179.747C300.163 144.405 308.397 127.503 308.397 111.64C308.397 71.1838 260.014 39.438 239.407 10.7482L231.674 0H224.464Z" fill="#397E70"/>
           </svg>
         {% endif %}
+        <h1>{{ section.settings.hero_title }}</h1>
         <p class="eyebrow">{{ section.settings.hero_eyebrow }}</p>
-        <h2>{{ section.settings.hero_title }}</h2>
       </div>
     </div>
   </div>
@@ -162,6 +210,7 @@
     opacity: 1;
     transform: none;
     transition:
+      translate 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
       top 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
       right 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
       bottom 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
@@ -172,6 +221,11 @@
       transform 2s cubic-bezier(0.22, 1, 0.36, 1),
       filter 2s ease;
     will-change: opacity, transform, filter;
+    translate: var(--shift-x-a-desktop, 0px) var(--shift-y-a-desktop, 0px);
+  }
+
+  #Slideshow2Header--{{ section.id }} .slideshow-2-header__collage.is-alt .slideshow-2-header__item {
+    translate: var(--shift-x-b-desktop, 0px) var(--shift-y-b-desktop, 0px);
   }
 
   #Slideshow2Header--{{ section.id }} .slideshow-2-header__item img {
@@ -202,31 +256,31 @@
   #Slideshow2Header--{{ section.id }} .slideshow-2-header__item--top {
     top: -10px;
     left: calc(33% - 100px);
-    width: 200px;
-    height: 262px;
+    width: 300px;
+    height: 362px;
   }
 
   #Slideshow2Header--{{ section.id }} .slideshow-2-header__item--right {
     top: 0;
     right: 9%;
-    width: 278px;
-    height: 376px;
+    width: 378px;
+    height: 476px;
     z-index: 5;
   }
 
   #Slideshow2Header--{{ section.id }} .slideshow-2-header__item--left {
     left: calc(8% - 200px);
     bottom: 92px;
-    width: 464px;
-    height: 360px;
+    width: 564px;
+    height: 460px;
     z-index: 2;
   }
 
   #Slideshow2Header--{{ section.id }} .slideshow-2-header__item--bottom {
     right: 0;
     bottom: 8px;
-    width: 296px;
-    height: 198px;
+    width: 396px;
+    height: 298px;
     z-index: 2;
   }
 
@@ -252,20 +306,20 @@
   }
 
   #Slideshow2Header--{{ section.id }} .slideshow-2-header__copy .eyebrow,
-  #Slideshow2Header--{{ section.id }} .slideshow-2-header__copy h2 {
+  #Slideshow2Header--{{ section.id }} .slideshow-2-header__copy h1 {
     position: relative;
     z-index: 1;
     margin: 0;
   }
 
   #Slideshow2Header--{{ section.id }} .slideshow-2-header__copy .eyebrow {
-    margin: 0 0 0.4rem;
+    margin: 0.4rem 0 0;
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.22em;
   }
 
-  #Slideshow2Header--{{ section.id }} .slideshow-2-header__copy h2 {
+  #Slideshow2Header--{{ section.id }} .slideshow-2-header__copy h1 {
     font-family: "Portrait", "Cormorant Garamond", serif;
     font-size: 40px;
     line-height: 1;
@@ -304,30 +358,38 @@
     #Slideshow2Header--{{ section.id }} .slideshow-2-header__item--top {
       top: 34px;
       left: 10%;
-      width: 200px;
-      height: 166px;
+      width: 300px;
+      height: 266px;
     }
 
     #Slideshow2Header--{{ section.id }} .slideshow-2-header__item--right {
       top: 20px;
       right: 5%;
-      width: 134px;
-      height: 198px;
+      width: 234px;
+      height: 298px;
     }
 
     #Slideshow2Header--{{ section.id }} .slideshow-2-header__item--left {
       left: 0;
       bottom: 90px;
-      width: 250px;
-      height: 132px;
+      width: 350px;
+      height: 232px;
       z-index: 40;
     }
 
     #Slideshow2Header--{{ section.id }} .slideshow-2-header__item--bottom {
       right: 4%;
       bottom: -40px;
-      width: 188px;
-      height: 126px;
+      width: 288px;
+      height: 226px;
+    }
+
+    #Slideshow2Header--{{ section.id }} .slideshow-2-header__item {
+      translate: var(--shift-x-a-mobile, 0px) var(--shift-y-a-mobile, 0px);
+    }
+
+    #Slideshow2Header--{{ section.id }} .slideshow-2-header__collage.is-alt .slideshow-2-header__item {
+      translate: var(--shift-x-b-mobile, 0px) var(--shift-y-b-mobile, 0px);
     }
   }
 {% endstylesheet %}
@@ -376,10 +438,10 @@
       const applyAltLayout = () => {
         if (window.innerWidth > 820) {
           const altDesktopLayout = [
-            { top: '-100px', left: '25%', width: '252px', height: '328px' },
-            { top: '-42px', right: '4%', width: '300px', height: '416px' },
-            { left: 'calc(6% - 100px)', bottom: '100px', width: '530px', height: '418px' },
-            { right: '-50px', bottom: '0px', width: '386px', height: '256px' }
+            { top: '-100px', left: '25%', width: '352px', height: '428px' },
+            { top: '-42px', right: '4%', width: '400px', height: '516px' },
+            { left: 'calc(6% - 100px)', bottom: '100px', width: '630px', height: '518px' },
+            { right: '-50px', bottom: '0px', width: '486px', height: '356px' }
           ];
 
           items.forEach((item, index) => {
@@ -396,10 +458,10 @@
         }
 
         const mobileLayout = [
-          { top: '34px', left: '10%', width: '250px', height: '216px' },
-          { top: '20px', right: '5%', width: '134px', height: '198px' },
-          { bottom: '90px', left: '0%', width: '250px', height: '132px' },
-          { bottom: '-40px', right: '4%', width: '238px', height: '176px' }
+          { top: '34px', left: '10%', width: '350px', height: '316px' },
+          { top: '20px', right: '5%', width: '234px', height: '298px' },
+          { bottom: '90px', left: '0%', width: '350px', height: '232px' },
+          { bottom: '-40px', right: '4%', width: '338px', height: '276px' }
         ];
 
         items.forEach((item, index) => {
@@ -618,6 +680,58 @@
     { "type": "image_picker", "id": "hero_image_right_alt", "label": "Image right (set 2)" },
     { "type": "image_picker", "id": "hero_image_left_alt", "label": "Image left (set 2)" },
     { "type": "image_picker", "id": "hero_image_bottom_alt", "label": "Image bottom (set 2)" },
+    {
+      "type": "header",
+      "content": "Image fine tune"
+    },
+    {
+      "type": "paragraph",
+      "content": "Set 1 desktop"
+    },
+    { "type": "range", "id": "s1_top_x_desktop", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 1 top X", "default": 0 },
+    { "type": "range", "id": "s1_top_y_desktop", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 1 top Y", "default": 0 },
+    { "type": "range", "id": "s1_right_x_desktop", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 1 right X", "default": 0 },
+    { "type": "range", "id": "s1_right_y_desktop", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 1 right Y", "default": 0 },
+    { "type": "range", "id": "s1_left_x_desktop", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 1 left X", "default": 0 },
+    { "type": "range", "id": "s1_left_y_desktop", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 1 left Y", "default": 0 },
+    { "type": "range", "id": "s1_bottom_x_desktop", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 1 bottom X", "default": 0 },
+    { "type": "range", "id": "s1_bottom_y_desktop", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 1 bottom Y", "default": 0 },
+    {
+      "type": "paragraph",
+      "content": "Set 1 mobile"
+    },
+    { "type": "range", "id": "s1_top_x_mobile", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 1 top X mobile", "default": 0 },
+    { "type": "range", "id": "s1_top_y_mobile", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 1 top Y mobile", "default": 0 },
+    { "type": "range", "id": "s1_right_x_mobile", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 1 right X mobile", "default": 0 },
+    { "type": "range", "id": "s1_right_y_mobile", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 1 right Y mobile", "default": 0 },
+    { "type": "range", "id": "s1_left_x_mobile", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 1 left X mobile", "default": 0 },
+    { "type": "range", "id": "s1_left_y_mobile", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 1 left Y mobile", "default": 0 },
+    { "type": "range", "id": "s1_bottom_x_mobile", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 1 bottom X mobile", "default": 0 },
+    { "type": "range", "id": "s1_bottom_y_mobile", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 1 bottom Y mobile", "default": 0 },
+    {
+      "type": "paragraph",
+      "content": "Set 2 desktop"
+    },
+    { "type": "range", "id": "s2_top_x_desktop", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 2 top X", "default": 0 },
+    { "type": "range", "id": "s2_top_y_desktop", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 2 top Y", "default": 0 },
+    { "type": "range", "id": "s2_right_x_desktop", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 2 right X", "default": 0 },
+    { "type": "range", "id": "s2_right_y_desktop", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 2 right Y", "default": 0 },
+    { "type": "range", "id": "s2_left_x_desktop", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 2 left X", "default": 0 },
+    { "type": "range", "id": "s2_left_y_desktop", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 2 left Y", "default": 0 },
+    { "type": "range", "id": "s2_bottom_x_desktop", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 2 bottom X", "default": 0 },
+    { "type": "range", "id": "s2_bottom_y_desktop", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 2 bottom Y", "default": 0 },
+    {
+      "type": "paragraph",
+      "content": "Set 2 mobile"
+    },
+    { "type": "range", "id": "s2_top_x_mobile", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 2 top X mobile", "default": 0 },
+    { "type": "range", "id": "s2_top_y_mobile", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 2 top Y mobile", "default": 0 },
+    { "type": "range", "id": "s2_right_x_mobile", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 2 right X mobile", "default": 0 },
+    { "type": "range", "id": "s2_right_y_mobile", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 2 right Y mobile", "default": 0 },
+    { "type": "range", "id": "s2_left_x_mobile", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 2 left X mobile", "default": 0 },
+    { "type": "range", "id": "s2_left_y_mobile", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 2 left Y mobile", "default": 0 },
+    { "type": "range", "id": "s2_bottom_x_mobile", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 2 bottom X mobile", "default": 0 },
+    { "type": "range", "id": "s2_bottom_y_mobile", "min": -300, "max": 300, "step": 1, "unit": "px", "label": "Set 2 bottom Y mobile", "default": 0 },
     {
       "type": "header",
       "content": "Spacing"
