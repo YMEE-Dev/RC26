@@ -11,6 +11,35 @@
   assign right_b = section.settings.image_right_alt
   assign left_b = section.settings.image_left_alt
   assign bottom_b = section.settings.image_bottom_alt
+
+  comment
+    Dynamic sources can return metafield wrapper objects. Normalize to the underlying image object when possible.
+  endcomment
+  if top_a != blank and top_a.value != blank
+    assign top_a = top_a.value
+  endif
+  if right_a != blank and right_a.value != blank
+    assign right_a = right_a.value
+  endif
+  if left_a != blank and left_a.value != blank
+    assign left_a = left_a.value
+  endif
+  if bottom_a != blank and bottom_a.value != blank
+    assign bottom_a = bottom_a.value
+  endif
+
+  if top_b != blank and top_b.value != blank
+    assign top_b = top_b.value
+  endif
+  if right_b != blank and right_b.value != blank
+    assign right_b = right_b.value
+  endif
+  if left_b != blank and left_b.value != blank
+    assign left_b = left_b.value
+  endif
+  if bottom_b != blank and bottom_b.value != blank
+    assign bottom_b = bottom_b.value
+  endif
 -%}
 
 {%- style -%}
@@ -34,11 +63,11 @@
   >
     {%- if section.settings.show_text -%}
       <div class="maison-hero-collage__copy">
-        {%- if section.settings.eyebrow != blank -%}
-          <p class="maison-hero-collage__eyebrow">{{ section.settings.eyebrow }}</p>
-        {%- endif -%}
         {%- if section.settings.title != blank -%}
           <h2 class="maison-hero-collage__title">{{ section.settings.title }}</h2>
+        {%- endif -%}
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="maison-hero-collage__eyebrow">{{ section.settings.eyebrow }}</p>
         {%- endif -%}
       </div>
     {%- endif -%}
@@ -214,15 +243,15 @@
   .maison-hero-collage__copy {
     position: absolute;
     left: 50%;
-    top: 46%;
-    transform: translate(-50%, -50%);
+    top: clamp(36px, 4.4vw, 64px);
+    transform: translate(-50%, 0);
     z-index: 3;
     text-align: center;
     pointer-events: none;
   }
 
   .maison-hero-collage__eyebrow {
-    margin: 0 0 8px;
+    margin: 0;
     font-family: var(--FONT-STACK-BODY, Inter, sans-serif);
     font-size: 12px;
     letter-spacing: 0.22em;
@@ -231,7 +260,7 @@
   }
 
   .maison-hero-collage__title {
-    margin: 0;
+    margin: 0 0 12px;
     font-family: var(--FONT-STACK-HEADING, 'Portrait LS', serif);
     font-weight: var(--FONT-WEIGHT-HEADING, 500);
     font-size: 40px;
@@ -245,7 +274,7 @@
     width: min(980px, 82vw);
     min-height: 620px;
     margin: 0 auto;
-    transform: translateY(28px);
+    margin-top: clamp(140px, 12vw, 200px);
     z-index: 1;
   }
 
@@ -368,6 +397,33 @@
     width: 296px;
     height: 198px;
     z-index: 2;
+  }
+
+  @media (min-width: 990px) {
+    .maison-collage {
+      width: min(1180px, 90vw);
+      min-height: 820px;
+    }
+
+    .maison-collage__item--top {
+      width: 400px;
+      height: 462px;
+    }
+
+    .maison-collage__item--right {
+      width: 478px;
+      height: 576px;
+    }
+
+    .maison-collage__item--left {
+      width: 664px;
+      height: 560px;
+    }
+
+    .maison-collage__item--bottom {
+      width: 496px;
+      height: 398px;
+    }
   }
 
   .maison-collage.is-intro.is-intro-visible .maison-collage__item--top { --intro-delay: 0ms; }
