@@ -234,7 +234,7 @@
     height: 100%;
     object-fit: cover;
     opacity: var(--scroll-fade-opacity, 1);
-    transition: opacity 240ms linear;
+    transition: opacity 600ms ease;
   }
 
   #Slideshow2Header--{{ section.id }} .slideshow-2-header__collage.is-alt .slideshow-2-header__item img {
@@ -515,13 +515,13 @@
         if (swapAnimating) return;
         swapAnimating = true;
 
-        const fadeOutMs = 2400;
-        const staggerMs = 150;
+        const fadeOutMs = 3000;
+        const staggerMs = 220;
         const maxDelay = (items.length - 1) * staggerMs;
         const srcSwapAt = maxDelay + fadeOutMs + 40;
         const layoutAt = maxDelay + fadeOutMs + 20;
         const fadeInAt = srcSwapAt + 60;
-        const doneAt = fadeInAt + maxDelay + 2800;
+        const doneAt = fadeInAt + maxDelay + 3400;
 
         items.forEach((item, index) => {
           scheduleTimeout(() => {
@@ -595,9 +595,9 @@
         const isScrollingDown = scrollY > lastScrollY + 1;
         lastScrollY = scrollY;
 
-        const startAt = viewportHeight * 0.55;
-        const fadeDistance = Math.max(rect.height * 0.9, viewportHeight * 0.45);
-        const progress = Math.max(0, Math.min(1, (startAt - rect.top) / fadeDistance));
+        const fadeStart = 0;
+        const fadeDistance = Math.max(rect.height * 0.75, viewportHeight * 0.5);
+        const progress = Math.max(0, Math.min(1, (fadeStart - rect.top) / fadeDistance));
 
         items.forEach((item, index) => {
           if (!isScrollingDown) {
@@ -605,7 +605,7 @@
             return;
           }
 
-          const stagger = index * 0.12;
+          const stagger = index * 0.18;
           const normalized = Math.max(0, Math.min(1, (progress - stagger) / (1 - stagger)));
           const opacity = 1 - normalized;
           item.style.setProperty('--scroll-fade-opacity', opacity.toFixed(3));
