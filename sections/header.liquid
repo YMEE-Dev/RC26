@@ -188,7 +188,7 @@
     opacity: 1;
     visibility: visible;
     transition:
-      opacity 0.24s ease,
+      opacity 0.16s ease,
       visibility 0s linear;
 
     {% if show_separator_line %}
@@ -1045,7 +1045,7 @@
       const logoDarkUrl = logoLinks[0].dataset.logoDark;
       const forcedDrawerLogoMode = 'dark';
       const forcedTmenuLogoMode = 'dark';
-      const DEBUG_HEADER_OBSERVER = true;
+      const DEBUG_HEADER_OBSERVER = false;
       const observedSectionSelector = 'main .shopify-section [data-header-observer-mode]';
       const intersectionThresholds = [0, 0.01, 0.1, 0.25, 0.5, 0.75, 1];
       const getSectionLabel = (sectionEl) =>
@@ -1268,7 +1268,11 @@
             mode: defaultMode,
             source,
           });
-          applyMode(defaultMode);
+          currentMode = defaultMode;
+          setHeaderColors(defaultMode);
+          if (!getForcedLogoMode()) {
+            setLogoSource(defaultMode);
+          }
           revealResolvedHeader();
           return;
         }
@@ -1318,6 +1322,20 @@
 
         refreshObservedSection('initial');
       };
+      window.setTimeout(() => {
+        if (headerWrapper?.dataset.headerColorReady === 'true') return;
+
+        debugLog('Header observer fallback revealed default dark state', {
+          mode: defaultMode,
+        });
+        currentObservedSection = null;
+        currentMode = defaultMode;
+        setHeaderColors(defaultMode);
+        if (!getForcedLogoMode()) {
+          setLogoSource(defaultMode);
+        }
+        revealResolvedHeader();
+      }, 0);
       const resetSectionObserver = () => {
         observeSections();
       };

@@ -1,11 +1,19 @@
 {%- liquid
   assign text_color = section.settings.color
   assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign header_observer_mode = section.settings.header_observer_mode | default: collection.metafields.custom.header_observer_mode.value | default: 'light'
+  assign header_observer_mode = header_observer_mode | downcase | strip
+
+  unless header_observer_mode == 'dark' or header_observer_mode == 'light'
+    assign header_observer_mode = 'light'
+  endunless
+
   assign sub_collections = linklists[collection.handle].links
   assign sub_collection_html = ''
   assign sub_collection_counter = 0
   assign sub_collection_limit = 6
 -%}
+
 {%- if linklists[collection.handle].links.size > 0 -%}
   {%- style -%}
     #Subcollections--{{ section.id }} {
@@ -27,10 +35,10 @@
   {%- endstyle -%}
 
   <section
-    class="subcollections collection-{{ collection.handle }} section-padding {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}"
+    class="subcollections collection-{{ collection.handle }} section-padding {{ color_scheme }} header-observer--{{ header_observer_mode }}"
     data-section-id="{{ section.id }}"
     data-section-type="subcollections"
-    data-header-observer-mode="{{ section.settings.header_observer_mode }}"
+    data-header-observer-mode="{{ header_observer_mode }}"
     id="Subcollections--{{ section.id }}"
   >
     {%- if sub_collections.size > 0 -%}
@@ -112,14 +120,11 @@
       "content": "Header observer"
     },
     {
-      "type": "select",
+      "type": "text",
       "id": "header_observer_mode",
       "label": "Header mode",
       "default": "light",
-      "options": [
-        {"value": "light", "label": "Light"},
-        {"value": "dark", "label": "Dark"}
-      ]
+      "info": "Enter light or dark. Can be connected to a collection metafield."
     },
     {
       "type": "paragraph",

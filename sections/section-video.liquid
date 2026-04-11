@@ -1,6 +1,16 @@
 <!-- /sections/section-hero.liquid -->
 {%- liquid
   assign show_video_background = false
+  assign header_observer_mode = section.settings.header_observer_mode | default: 'light'
+
+  if template.name == 'collection' and template.suffix == 'media-only'
+    assign collection_header_observer_mode = collection.metafields.custom.header_observer_mode.value | default: header_observer_mode
+    assign header_observer_mode = collection_header_observer_mode | strip | downcase
+  endif
+
+  if header_observer_mode != 'light' and header_observer_mode != 'dark'
+    assign header_observer_mode = 'light'
+  endif
 
   if section.settings.video != blank
     if section.settings.video.media_type == 'video'
@@ -26,10 +36,10 @@
 {%- endif -%}
 
 <div
-  class="index-hero section-padding color-{{ section.settings.color_scheme }} header-observer--{{ section.settings.header_observer_mode }}"
+  class="index-hero section-padding color-{{ section.settings.color_scheme }} header-observer--{{ header_observer_mode }}"
   data-section-id="{{ section.id }}"
   data-section-type="featured-video"
-  data-header-observer-mode="{{ section.settings.header_observer_mode }}"
+  data-header-observer-mode="{{ header_observer_mode }}"
   data-overlay-header
   style="{{ style }}"
 >
