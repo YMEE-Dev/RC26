@@ -408,15 +408,15 @@
     .maison-collage__item--top {
       top: -140px;
       left: calc(38% - 260px);
-      width: 400px;
-      height: 462px;
+      width: 320px;
+      height: 382px;
     }
 
     .maison-collage__item--right {
       top: -100px;
       right: -2%;
-      width: 478px;
-      height: 576px;
+      width: 398px;
+      height: 496px;
     }
 
     .maison-collage__item--left {
@@ -597,8 +597,8 @@
 
         if (window.innerWidth > 820) {
           const altDesktopLayout = [
-            { top: '-180px', left: '20%', width: '452px', height: '528px' },
-            { top: '-140px', right: '-6%', width: '500px', height: '616px' },
+            { top: '-180px', left: '20%', width: '372px', height: '448px' },
+            { top: '-140px', right: '-6%', width: '420px', height: '536px' },
             { left: 'calc(2% - 260px)', bottom: '160px', width: '730px', height: '618px' },
             { right: '-180px', bottom: '-20px', width: '586px', height: '456px' },
           ];
@@ -672,6 +672,7 @@
           const startDelay = index * staggerMs;
 
           scheduleTimeout(() => {
+            item.classList.add('is-switching');
             item.style.opacity = '0';
           }, startDelay);
 
@@ -684,6 +685,7 @@
 
           scheduleTimeout(() => {
             item.style.opacity = '1';
+            item.classList.remove('is-switching');
           }, totalFadeOutMs + 80 + startDelay);
         });
 
@@ -739,6 +741,27 @@
       );
 
       observer.observe(root);
+
+      if (section && !prefersReducedMotion) {
+        const inviewObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              section.classList.add('inview-visible');
+              inviewObserver.disconnect();
+            });
+          },
+          { threshold: 0.12, rootMargin: '0px 0px -10% 0px' }
+        );
+
+        inviewObserver.observe(section);
+        window.setTimeout(() => {
+          if (!section.classList.contains('inview-visible')) {
+            section.classList.add('inview-visible');
+            inviewObserver.disconnect();
+          }
+        }, 250);
+      }
     };
 
     const initAll = (scope) => {
