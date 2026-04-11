@@ -1,6 +1,6 @@
 <!-- /sections/occasion-bottom-cta.liquid -->
 {%- liquid
-  assign resolved_cta_label = section.settings.button_label
+  assign resolved_cta_label = blank
   assign resolved_cta_link = section.settings.button_link
 
   assign cta_collection = blank
@@ -23,8 +23,8 @@
 
     if article.metafields.custom.cta_button_name.value != blank
       assign cta_button_name = article.metafields.custom.cta_button_name.value
-    elsif article.metafields.custom.cta_button_label.value != blank
-      assign cta_button_name = article.metafields.custom.cta_button_label.value
+    elsif article.metafields.custom.cta_button_name != blank
+      assign cta_button_name = article.metafields.custom.cta_button_name
     endif
 
     if article.metafields.custom.cta_link.value != blank
@@ -44,12 +44,6 @@
 
   if cta_button_name != blank
     assign resolved_cta_label = cta_button_name
-  elsif cta_collection != blank and cta_collection.title != blank
-    assign resolved_cta_label = cta_collection.title
-  elsif cta_metafield_link != blank and cta_metafield_link.text != blank
-    assign resolved_cta_label = cta_metafield_link.text
-  elsif resolved_cta_link != blank
-    assign resolved_cta_label = 'View more'
   endif
 -%}
 {%- style -%}
@@ -75,9 +69,9 @@
 	    </div>
 
 	    <div class="occasion-bottom-cta__button-wrap">
-	      {%- if resolved_cta_label != blank and resolved_cta_link != blank -%}
+	      {%- if article != blank and article.metafields.custom.cta_button_name != blank and resolved_cta_link != blank -%}
 	        <a class="occasion-bottom-cta__button" href="{{ resolved_cta_link }}">
-	          {{ resolved_cta_label }}
+	          {{ article.metafields.custom.cta_button_name }}
 	        </a>
 	      {%- endif -%}
 	    </div>
