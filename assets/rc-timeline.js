@@ -970,41 +970,42 @@
         }
 
         heroSwapAnimating = true;
-        const fadeMs = 2000;
-        const staggerMs = 100;
-        const settleMs = 200;
-        const maxDelay = (heroCollageItems.length - 1) * staggerMs;
-        const totalFadeOutMs = maxDelay + fadeMs;
-        const totalMs = totalFadeOutMs + maxDelay + fadeMs + settleMs;
 
+        // Timing mirrors the timeline media-card animation
+        const fadeOutMs  = 1800;  // CSS transition is 2s — 1800ms gives a safe buffer
+        const staggerMs  = 150;   // same stagger as timeline mobile cards
+        const maxDelay   = (heroCollageItems.length - 1) * staggerMs;
+        const srcSwapAt  = maxDelay + fadeOutMs + 40;   // swap while fully hidden
+        const layoutAt   = maxDelay + fadeOutMs + 20;   // reposition while hidden
+        const fadeInAt   = srcSwapAt + 60;              // start fade-in after swap
+        const doneAt     = fadeInAt + maxDelay + 2200;  // 2s fade-in + last stagger + buffer
+
+        // ── PHASE 1: fade OUT (CSS transition handles smoothness) ────────────
+        heroCollageItems.forEach((item, index) => {
+          scheduleTimeout(() => {
+            item.style.opacity   = "0";
+            item.style.transform = "scale(0.97)";
+            item.style.filter    = "blur(7px)";
+          }, index * staggerMs);
+        });
+
+        // ── PHASE 2: swap src while hidden ───────────────────────────────────
         heroCollageItems.forEach((item, index) => {
           const image = item.querySelector("img");
-          if (!image) {
-            return;
-          }
+          if (!image) return;
 
           const nextSource = showAlt ? sourcesB[index] : sourcesA[index];
-          const nextAlt = showAlt ? altsB[index] : altsA[index];
-
-          const startDelay = index * staggerMs;
-
-          scheduleTimeout(() => {
-            item.style.opacity = "0";
-          }, startDelay);
+          const nextAlt    = showAlt ? altsB[index]    : altsA[index];
 
           scheduleTimeout(() => {
             if (nextSource && image.getAttribute("src") !== nextSource) {
               image.setAttribute("src", nextSource);
             }
             image.setAttribute("alt", nextAlt || "");
-          }, totalFadeOutMs + 40);
-
-          scheduleTimeout(() => {
-            item.style.opacity = "1";
-          }, totalFadeOutMs + 80 + startDelay);
-
+          }, srcSwapAt);
         });
 
+        // ── PHASE 2b: reposition while hidden ───────────────────────────────
         scheduleTimeout(() => {
           if (showAlt) {
             applyHeroAltLayout();
@@ -1013,11 +1014,33 @@
             heroCollageItems.forEach(resetHeroItemPosition);
             heroCollage?.classList.remove("is-alt");
           }
-        }, totalFadeOutMs + 20);
+        }, layoutAt);
+
+        // ── PHASE 3: fade IN using rAF pattern (same as timeline cards) ─────
+        heroCollageItems.forEach((item, index) => {
+          scheduleTimeout(() => {
+            // Snap to starting state with no transition so browser paints it
+            item.style.transition = "none";
+            item.style.opacity    = "0";
+            item.style.transform  = "translateY(14px) scale(0.97)";
+            item.style.filter     = "blur(8px)";
+
+            // Double rAF: first rAF queues after paint; second rAF fires after
+            // the browser has committed the initial state — transition then runs.
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                item.style.transition = "";   // restore CSS transition from stylesheet
+                item.style.opacity    = "1";
+                item.style.transform  = "none";
+                item.style.filter     = "blur(0px)";
+              });
+            });
+          }, fadeInAt + index * staggerMs);
+        });
 
         scheduleTimeout(() => {
           heroSwapAnimating = false;
-        }, totalMs);
+        }, doneAt);
       }
 
       scheduleInterval(() => {

@@ -15,6 +15,8 @@
   #BlogImageSlider--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
+    --PT-mobile: {{ section.settings.padding_top_mobile }}px;
+    --PB-mobile: {{ section.settings.padding_bottom_mobile }}px;
     --max: {{ section.settings.max_width }}px;
   }
 {%- endstyle -%}
@@ -301,6 +303,11 @@
   }
 
   @media (max-width: 989px) {
+    .blog-image-slider {
+      padding-top: var(--PT-mobile, var(--PT));
+      padding-bottom: var(--PB-mobile, var(--PB));
+    }
+
     .blog-image-slider__inner {
       width: calc(100% - 40px);
     }
@@ -465,6 +472,26 @@
       "step": 4,
       "unit": "px",
       "label": "Bottom padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding (mobile)",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding (mobile)",
       "default": 0
     }
   ],

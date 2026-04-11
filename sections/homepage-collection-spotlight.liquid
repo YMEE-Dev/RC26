@@ -29,6 +29,8 @@
     #HomepageCollectionSpotlight--{{ section.id }} {
       --PT: {{ section.settings.padding_top }}px;
       --PB: {{ section.settings.padding_bottom }}px;
+      --PT-mobile: {{ section.settings.padding_top_mobile }}px;
+      --PB-mobile: {{ section.settings.padding_bottom_mobile }}px;
       --bg-color: {{ section.settings.background_color }};
     }
   {%- endstyle -%}
@@ -310,6 +312,26 @@
       "unit": "px",
       "label": "Bottom",
       "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Top (mobile)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom (mobile)",
+      "default": 20
     }
   ],
   "presets": [

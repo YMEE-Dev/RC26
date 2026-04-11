@@ -35,6 +35,8 @@
     #BrandStoryCombo--{{ section.id }} {
       --brand-combo-pt: {{ section.settings.padding_top }}px;
       --brand-combo-pb: {{ section.settings.padding_bottom }}px;
+      --brand-combo-pt-mobile: {{ section.settings.padding_top_mobile }}px;
+      --brand-combo-pb-mobile: {{ section.settings.padding_bottom_mobile }}px;
     }
   {%- endstyle -%}
 
@@ -167,6 +169,11 @@
   }
 
   @media (max-width: 989px) {
+    .brand-story-combo {
+      padding-top: var(--brand-combo-pt-mobile, var(--brand-combo-pt));
+      padding-bottom: var(--brand-combo-pb-mobile, var(--brand-combo-pb));
+    }
+
     .brand-story-combo__split {
       grid-template-columns: 1fr;
       gap: 28px;
@@ -298,6 +305,26 @@
       "step": 2,
       "unit": "px",
       "label": "Bottom padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Top padding (mobile)",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom padding (mobile)",
       "default": 0
     }
   ],
