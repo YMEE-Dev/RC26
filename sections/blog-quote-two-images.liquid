@@ -31,6 +31,7 @@
     --right-h: {{ section.settings.right_media_height }}px;
     --right-h-mobile: {{ section.settings.right_media_height_mobile }}px;
     --right-fit: {{ section.settings.right_image_fit }};
+    --right-scale: {{ section.settings.right_image_scale | times: 0.01 }};
   }
 {%- endstyle -%}
 
@@ -217,6 +218,8 @@
 
   .blog-quote-two-images__media--right .blog-quote-two-images__image {
     object-fit: var(--right-fit);
+    transform: scale(var(--right-scale, 1));
+    transform-origin: center center;
   }
 
   .blog-quote-two-images__media--right {
@@ -383,6 +386,16 @@
         { "value": "cover", "label": "Cover (crop)" },
         { "value": "contain", "label": "Contain (no crop)" }
       ]
+    },
+    {
+      "type": "range",
+      "id": "right_image_scale",
+      "min": 50,
+      "max": 150,
+      "step": 5,
+      "unit": "%",
+      "label": "Right image scale",
+      "default": 100
     },
     {
       "type": "image_picker",
