@@ -43,7 +43,8 @@
       const init = () => {
         this.dialog = this.querySelector('.store-info-popup__dialog');
         this.scrollableEl = this.querySelector('[data-scroll-lock-scrollable]');
-        this.closeButton = this.querySelector('[data-store-info-popup-close]');
+        this.closeButtons = Array.from(this.querySelectorAll('[data-store-info-popup-close]'));
+        this.closeButton = this.closeButtons.find((button) => !button.hasAttribute('hidden')) || this.closeButtons[0];
         this.config = this.getConfig();
 
         if (!this.dialog || !this.config?.enabled) return;
@@ -75,7 +76,9 @@
       }
 
       if (this.handleCloseClick) {
-        this.closeButton?.removeEventListener('click', this.handleCloseClick);
+        this.closeButtons?.forEach((button) => {
+          button.removeEventListener('click', this.handleCloseClick);
+        });
       }
 
       if (this.handleBackdropClose) {
@@ -162,7 +165,9 @@
       document.addEventListener(COUNTRY_REDIRECT_OPEN_EVENT, this.handleCountryRedirectOpen);
       this.dialog.addEventListener('cancel', this.handleCancel);
       document.addEventListener('keydown', this.handleEscape, true);
-      this.closeButton?.addEventListener('click', this.handleCloseClick);
+      this.closeButtons.forEach((button) => {
+        button.addEventListener('click', this.handleCloseClick);
+      });
       this.dialog.addEventListener('click', this.handleBackdropClose);
     }
 

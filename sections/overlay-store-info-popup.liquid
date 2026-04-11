@@ -7,10 +7,15 @@
   assign popup_text = section.settings.text_color | default: '#111111'
   assign modal_heading = section.settings.modal_heading | strip
   assign button_label = section.settings.button_label | strip
+  assign button_closes_popup = section.settings.button_closes_popup
   assign has_button = false
 
-  if button_label != blank and section.settings.button_url != blank
-    assign has_button = true
+  if button_label != blank
+    if button_closes_popup
+      assign has_button = true
+    elsif section.settings.button_url != blank
+      assign has_button = true
+    endif
   endif
 
   capture popup_style
@@ -53,6 +58,7 @@
         class="store-info-popup__close"
         data-store-info-popup-close
         aria-label="{{ 'general.accessibility.close' | t }}"
+        {% if button_closes_popup and button_label != blank %}hidden{% endif %}
       >
         {% render 'icon-close' %}
       </button>
@@ -74,12 +80,22 @@
       </div>
 
       {%- if has_button -%}
-        <a
-          href="{{ section.settings.button_url }}"
-          class="store-info-popup__button btn btn--secondary btn--outline"
-        >
-          <span>{{ button_label | escape }}</span>
-        </a>
+        {%- if button_closes_popup and button_label != blank -%}
+          <button
+            type="button"
+            class="store-info-popup__button btn btn--secondary btn--outline"
+            data-store-info-popup-close
+          >
+            <span>{{ button_label | escape }}</span>
+          </button>
+        {%- else -%}
+          <a
+            href="{{ section.settings.button_url }}"
+            class="store-info-popup__button btn btn--secondary btn--outline"
+          >
+            <span>{{ button_label | escape }}</span>
+          </a>
+        {%- endif -%}
       {%- endif -%}
     </div>
   </dialog>
@@ -140,6 +156,12 @@
       "type": "url",
       "id": "button_url",
       "label": "Button link"
+    },
+    {
+      "type": "checkbox",
+      "id": "button_closes_popup",
+      "label": "Button closes popup",
+      "default": false
     }
   ],
   "presets": [
