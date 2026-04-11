@@ -185,6 +185,26 @@
     color: var(--COLOR-TEXT, #212121);
   }
 
+  .maison-hero-collage.inview-ready {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+    transition: opacity 2s ease, transform 2s ease;
+    will-change: opacity, transform;
+  }
+
+  .maison-hero-collage.inview-ready.inview-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .maison-hero-collage.inview-ready {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
   .maison-hero-collage__inner {
     position: relative;
     padding-top: clamp(40px, 7vw, 90px);
@@ -416,6 +436,11 @@
       if (!root || root.dataset.maisonCollageInitialized === 'true') return;
       root.dataset.maisonCollageInitialized = 'true';
 
+      const section = root.closest('[data-section-type="maison-hero-collage"]');
+      if (section) {
+        section.classList.add('inview-ready');
+      }
+
       const collage = root.querySelector('[data-maison-collage-inner]');
       if (!collage) return;
 
@@ -424,6 +449,15 @@
       const heroCollage = collage;
       const heroCollageItems = [...heroCollage.querySelectorAll('.maison-collage__item')];
       if (!heroCollageItems.length) return;
+
+      if (section && prefersReducedMotion) {
+        section.classList.add('inview-visible');
+      } else if (section && !section.classList.contains('inview-visible')) {
+        const rect = section.getBoundingClientRect();
+        if (rect.top < window.innerHeight * 0.9 && rect.bottom > 0) {
+          requestAnimationFrame(() => section.classList.add('inview-visible'));
+        }
+      }
 
       const introAppearDuration = 1400;
       heroCollage.classList.add('is-animating');
@@ -628,8 +662,14 @@
         (entries) => {
           const entry = entries[0];
           if (!entry) return;
-          if (entry.isIntersecting) start();
-          else stop();
+          if (entry.isIntersecting) {
+            start();
+            if (section && !section.classList.contains('inview-visible')) {
+              requestAnimationFrame(() => section.classList.add('inview-visible'));
+            }
+          } else {
+            stop();
+          }
         },
         { threshold: 0.15 }
       );

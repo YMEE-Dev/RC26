@@ -1,0 +1,33 @@
+.main-content--page-rc-timeline .rc-inview-fade {
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+  transition: opacity 2s ease, transform 2s ease;
+  transition-delay: var(--rc-inview-delay, 0s);
+  will-change: opacity, transform;
+}
+
+.main-content--page-rc-timeline .rc-inview-fade.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.main-content--page-rc-timeline [data-brand-fade].brand-fade-init.rc-inview-fade {
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+  transition: opacity 2s ease, transform 2s ease;
+  transition-delay: var(--rc-inview-delay, 0s);
+}
+
+.main-content--page-rc-timeline [data-brand-fade].brand-fade-init.rc-inview-fade.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main-content--page-rc-timeline .rc-inview-fade,
+  .main-content--page-rc-timeline [data-brand-fade].brand-fade-init.rc-inview-fade {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

@@ -7,6 +7,10 @@
       {{- 'rc-inview-fade.css' | asset_url | stylesheet_tag -}}
     {%- endif -%}
 
+    {%- if template.name == 'page' and template.suffix == 'rc-timeline' -%}
+      {{- 'rc-rc-timeline-inview.css' | asset_url | stylesheet_tag -}}
+    {%- endif -%}
+
     {{ content_for_header }}
     {%- render 'geo-country-hide' -%}
   </head>
@@ -66,6 +70,10 @@
 
     {%- if template.name == 'article' and template.suffix == 'the-ultimate-explorer-of-beauty' -%}
       <script src="{{ 'rc-inview-fade.js' | asset_url }}" defer="defer"></script>
+    {%- endif -%}
+
+    {%- if template.name == 'page' and template.suffix == 'rc-timeline' -%}
+      <script src="{{ 'rc-rc-timeline-inview.js' | asset_url }}" defer="defer"></script>
     {%- endif -%}
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" async></script>
