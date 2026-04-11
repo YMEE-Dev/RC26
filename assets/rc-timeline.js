@@ -970,9 +970,9 @@
         }
 
         heroSwapAnimating = true;
-        const fadeMs = 780;
-        const staggerMs = 170;
-        const settleMs = 220;
+        const fadeMs = 2000;
+        const staggerMs = 100;
+        const settleMs = 200;
         const maxDelay = (heroCollageItems.length - 1) * staggerMs;
         const totalFadeOutMs = maxDelay + fadeMs;
         const totalMs = totalFadeOutMs + maxDelay + fadeMs + settleMs;
