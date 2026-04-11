@@ -58,6 +58,10 @@
             --shift-y-b-desktop: {{ section.settings.s2_top_y_desktop }}px;
             --shift-x-b-mobile: {{ section.settings.s2_top_x_mobile }}px;
             --shift-y-b-mobile: {{ section.settings.s2_top_y_mobile }}px;
+            --scale-a-desktop: {{ section.settings.s1_top_scale_desktop | times: 0.01 }};
+            --scale-a-mobile: {{ section.settings.s1_top_scale_mobile | times: 0.01 }};
+            --scale-b-desktop: {{ section.settings.s2_top_scale_desktop | times: 0.01 }};
+            --scale-b-mobile: {{ section.settings.s2_top_scale_mobile | times: 0.01 }};
           "
         >
           {% if hero_top_a != blank or hero_top_b != blank %}
@@ -84,6 +88,10 @@
             --shift-y-b-desktop: {{ section.settings.s2_right_y_desktop }}px;
             --shift-x-b-mobile: {{ section.settings.s2_right_x_mobile }}px;
             --shift-y-b-mobile: {{ section.settings.s2_right_y_mobile }}px;
+            --scale-a-desktop: {{ section.settings.s1_right_scale_desktop | times: 0.01 }};
+            --scale-a-mobile: {{ section.settings.s1_right_scale_mobile | times: 0.01 }};
+            --scale-b-desktop: {{ section.settings.s2_right_scale_desktop | times: 0.01 }};
+            --scale-b-mobile: {{ section.settings.s2_right_scale_mobile | times: 0.01 }};
           "
         >
           {% if hero_right_a != blank or hero_right_b != blank %}
@@ -110,6 +118,10 @@
             --shift-y-b-desktop: {{ section.settings.s2_left_y_desktop }}px;
             --shift-x-b-mobile: {{ section.settings.s2_left_x_mobile }}px;
             --shift-y-b-mobile: {{ section.settings.s2_left_y_mobile }}px;
+            --scale-a-desktop: {{ section.settings.s1_left_scale_desktop | times: 0.01 }};
+            --scale-a-mobile: {{ section.settings.s1_left_scale_mobile | times: 0.01 }};
+            --scale-b-desktop: {{ section.settings.s2_left_scale_desktop | times: 0.01 }};
+            --scale-b-mobile: {{ section.settings.s2_left_scale_mobile | times: 0.01 }};
           "
         >
           {% if hero_left_a != blank or hero_left_b != blank %}
@@ -136,6 +148,10 @@
             --shift-y-b-desktop: {{ section.settings.s2_bottom_y_desktop }}px;
             --shift-x-b-mobile: {{ section.settings.s2_bottom_x_mobile }}px;
             --shift-y-b-mobile: {{ section.settings.s2_bottom_y_mobile }}px;
+            --scale-a-desktop: {{ section.settings.s1_bottom_scale_desktop | times: 0.01 }};
+            --scale-a-mobile: {{ section.settings.s1_bottom_scale_mobile | times: 0.01 }};
+            --scale-b-desktop: {{ section.settings.s2_bottom_scale_desktop | times: 0.01 }};
+            --scale-b-mobile: {{ section.settings.s2_bottom_scale_mobile | times: 0.01 }};
           "
         >
           {% if hero_bottom_a != blank or hero_bottom_b != blank %}
@@ -170,11 +186,6 @@
     --section-top: {{ section.settings.padding_top }}px;
     --section-bottom: {{ section.settings.padding_bottom }}px;
     --hero-lift: -100px;
-    --scale-a-desktop: {{ section.settings.scale_set1_desktop | times: 0.01 }};
-    --scale-b-desktop: {{ section.settings.scale_set2_desktop | times: 0.01 }};
-    --scale-a-mobile: {{ section.settings.scale_set1_mobile | times: 0.01 }};
-    --scale-b-mobile: {{ section.settings.scale_set2_mobile | times: 0.01 }};
-    --s2h-collage-scale: var(--scale-a-desktop);
   }
 
   #Slideshow2Header--{{ section.id }}.slideshow-2-header {
@@ -205,13 +216,8 @@
     position: relative;
     width: min(980px, 82vw);
     min-height: 620px;
-    transform: translateY(50px) scale(var(--s2h-collage-scale));
-    transform-origin: center center;
+    transform: translateY(50px);
     z-index: 1;
-  }
-
-  #Slideshow2Header--{{ section.id }} .slideshow-2-header__collage.is-alt {
-    --s2h-collage-scale: var(--scale-b-desktop);
   }
 
   #Slideshow2Header--{{ section.id }} .slideshow-2-header__item {
@@ -222,6 +228,7 @@
     transform: none;
     transition:
       translate 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
+      scale 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
       top 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
       right 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
       bottom 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
@@ -233,10 +240,12 @@
       filter 2s ease;
     will-change: opacity, transform, filter;
     translate: var(--shift-x-a-desktop, 0px) var(--shift-y-a-desktop, 0px);
+    scale: var(--scale-a-desktop, 1);
   }
 
   #Slideshow2Header--{{ section.id }} .slideshow-2-header__collage.is-alt .slideshow-2-header__item {
     translate: var(--shift-x-b-desktop, 0px) var(--shift-y-b-desktop, 0px);
+    scale: var(--scale-b-desktop, 1);
   }
 
   #Slideshow2Header--{{ section.id }} .slideshow-2-header__item img {
@@ -363,15 +372,7 @@
     #Slideshow2Header--{{ section.id }} .slideshow-2-header__collage {
       width: min(92vw, 560px);
       min-height: 560px;
-      transform: translateY(-50px) scale(var(--s2h-collage-scale));
-    }
-
-    #Slideshow2Header--{{ section.id }} .slideshow-2-header__collage {
-      --s2h-collage-scale: var(--scale-a-mobile);
-    }
-
-    #Slideshow2Header--{{ section.id }} .slideshow-2-header__collage.is-alt {
-      --s2h-collage-scale: var(--scale-b-mobile);
+      transform: translateY(-50px);
     }
 
     #Slideshow2Header--{{ section.id }} .slideshow-2-header__item--top {
@@ -405,10 +406,12 @@
 
     #Slideshow2Header--{{ section.id }} .slideshow-2-header__item {
       translate: var(--shift-x-a-mobile, 0px) var(--shift-y-a-mobile, 0px);
+      scale: var(--scale-a-mobile, 1);
     }
 
     #Slideshow2Header--{{ section.id }} .slideshow-2-header__collage.is-alt .slideshow-2-header__item {
       translate: var(--shift-x-b-mobile, 0px) var(--shift-y-b-mobile, 0px);
+      scale: var(--scale-b-mobile, 1);
     }
   }
 {% endstylesheet %}
@@ -715,50 +718,6 @@
     },
     {
       "type": "header",
-      "content": "Collage scale"
-    },
-    {
-      "type": "range",
-      "id": "scale_set1_desktop",
-      "min": 70,
-      "max": 150,
-      "step": 1,
-      "unit": "%",
-      "label": "Set 1 scale desktop",
-      "default": 100
-    },
-    {
-      "type": "range",
-      "id": "scale_set2_desktop",
-      "min": 70,
-      "max": 150,
-      "step": 1,
-      "unit": "%",
-      "label": "Set 2 scale desktop",
-      "default": 100
-    },
-    {
-      "type": "range",
-      "id": "scale_set1_mobile",
-      "min": 70,
-      "max": 150,
-      "step": 1,
-      "unit": "%",
-      "label": "Set 1 scale mobile",
-      "default": 100
-    },
-    {
-      "type": "range",
-      "id": "scale_set2_mobile",
-      "min": 70,
-      "max": 150,
-      "step": 1,
-      "unit": "%",
-      "label": "Set 2 scale mobile",
-      "default": 100
-    },
-    {
-      "type": "header",
       "content": "Set 1"
     },
     { "type": "image_picker", "id": "hero_image_top", "label": "Image top" },
@@ -791,6 +750,14 @@
     { "type": "range", "id": "s1_bottom_y_desktop", "min": -300, "max": 300, "step": 6, "unit": "px", "label": "Set 1 bottom Y", "default": 0 },
     {
       "type": "paragraph",
+      "content": "Set 1 desktop scale"
+    },
+    { "type": "range", "id": "s1_top_scale_desktop", "min": 70, "max": 150, "step": 1, "unit": "%", "label": "Set 1 top scale", "default": 100 },
+    { "type": "range", "id": "s1_right_scale_desktop", "min": 70, "max": 150, "step": 1, "unit": "%", "label": "Set 1 right scale", "default": 100 },
+    { "type": "range", "id": "s1_left_scale_desktop", "min": 70, "max": 150, "step": 1, "unit": "%", "label": "Set 1 left scale", "default": 100 },
+    { "type": "range", "id": "s1_bottom_scale_desktop", "min": 70, "max": 150, "step": 1, "unit": "%", "label": "Set 1 bottom scale", "default": 100 },
+    {
+      "type": "paragraph",
       "content": "Set 1 mobile"
     },
     { "type": "range", "id": "s1_top_x_mobile", "min": -300, "max": 300, "step": 6, "unit": "px", "label": "Set 1 top X mobile", "default": 0 },
@@ -801,6 +768,14 @@
     { "type": "range", "id": "s1_left_y_mobile", "min": -300, "max": 300, "step": 6, "unit": "px", "label": "Set 1 left Y mobile", "default": 0 },
     { "type": "range", "id": "s1_bottom_x_mobile", "min": -300, "max": 300, "step": 6, "unit": "px", "label": "Set 1 bottom X mobile", "default": 0 },
     { "type": "range", "id": "s1_bottom_y_mobile", "min": -300, "max": 300, "step": 6, "unit": "px", "label": "Set 1 bottom Y mobile", "default": 0 },
+    {
+      "type": "paragraph",
+      "content": "Set 1 mobile scale"
+    },
+    { "type": "range", "id": "s1_top_scale_mobile", "min": 70, "max": 150, "step": 1, "unit": "%", "label": "Set 1 top scale mobile", "default": 100 },
+    { "type": "range", "id": "s1_right_scale_mobile", "min": 70, "max": 150, "step": 1, "unit": "%", "label": "Set 1 right scale mobile", "default": 100 },
+    { "type": "range", "id": "s1_left_scale_mobile", "min": 70, "max": 150, "step": 1, "unit": "%", "label": "Set 1 left scale mobile", "default": 100 },
+    { "type": "range", "id": "s1_bottom_scale_mobile", "min": 70, "max": 150, "step": 1, "unit": "%", "label": "Set 1 bottom scale mobile", "default": 100 },
     {
       "type": "paragraph",
       "content": "Set 2 desktop"
@@ -815,6 +790,14 @@
     { "type": "range", "id": "s2_bottom_y_desktop", "min": -300, "max": 300, "step": 6, "unit": "px", "label": "Set 2 bottom Y", "default": 0 },
     {
       "type": "paragraph",
+      "content": "Set 2 desktop scale"
+    },
+    { "type": "range", "id": "s2_top_scale_desktop", "min": 70, "max": 150, "step": 1, "unit": "%", "label": "Set 2 top scale", "default": 100 },
+    { "type": "range", "id": "s2_right_scale_desktop", "min": 70, "max": 150, "step": 1, "unit": "%", "label": "Set 2 right scale", "default": 100 },
+    { "type": "range", "id": "s2_left_scale_desktop", "min": 70, "max": 150, "step": 1, "unit": "%", "label": "Set 2 left scale", "default": 100 },
+    { "type": "range", "id": "s2_bottom_scale_desktop", "min": 70, "max": 150, "step": 1, "unit": "%", "label": "Set 2 bottom scale", "default": 100 },
+    {
+      "type": "paragraph",
       "content": "Set 2 mobile"
     },
     { "type": "range", "id": "s2_top_x_mobile", "min": -300, "max": 300, "step": 6, "unit": "px", "label": "Set 2 top X mobile", "default": 0 },
@@ -825,6 +808,14 @@
     { "type": "range", "id": "s2_left_y_mobile", "min": -300, "max": 300, "step": 6, "unit": "px", "label": "Set 2 left Y mobile", "default": 0 },
     { "type": "range", "id": "s2_bottom_x_mobile", "min": -300, "max": 300, "step": 6, "unit": "px", "label": "Set 2 bottom X mobile", "default": 0 },
     { "type": "range", "id": "s2_bottom_y_mobile", "min": -300, "max": 300, "step": 6, "unit": "px", "label": "Set 2 bottom Y mobile", "default": 0 },
+    {
+      "type": "paragraph",
+      "content": "Set 2 mobile scale"
+    },
+    { "type": "range", "id": "s2_top_scale_mobile", "min": 70, "max": 150, "step": 1, "unit": "%", "label": "Set 2 top scale mobile", "default": 100 },
+    { "type": "range", "id": "s2_right_scale_mobile", "min": 70, "max": 150, "step": 1, "unit": "%", "label": "Set 2 right scale mobile", "default": 100 },
+    { "type": "range", "id": "s2_left_scale_mobile", "min": 70, "max": 150, "step": 1, "unit": "%", "label": "Set 2 left scale mobile", "default": 100 },
+    { "type": "range", "id": "s2_bottom_scale_mobile", "min": 70, "max": 150, "step": 1, "unit": "%", "label": "Set 2 bottom scale mobile", "default": 100 },
     {
       "type": "header",
       "content": "Spacing"
