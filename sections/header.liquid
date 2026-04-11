@@ -47,7 +47,9 @@
   assign right_menu_linklist = section.settings.right_menu_linklist
   assign use_desktop_probe_band_on_mobile = false
   assign header_default_mode = 'dark'
-  if template.name == 'collection'
+  if template.name == 'product'
+    assign header_default_mode = 'dark'
+  elsif template.name == 'collection'
     assign header_default_mode = collection.metafields.custom.header_observer_mode.value | default: header_default_mode
     assign header_default_mode = header_default_mode | downcase | strip
     unless header_default_mode == 'light' or header_default_mode == 'dark'
