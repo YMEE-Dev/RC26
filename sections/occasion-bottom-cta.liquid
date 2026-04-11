@@ -3,8 +3,30 @@
   assign resolved_cta_label = section.settings.button_label
   assign resolved_cta_link = section.settings.button_link
 
+  assign cta_collection = blank
+  assign cta_url = blank
+  assign cta_button_name = blank
+
   assign cta_metafield_link = blank
   if article != blank
+    if article.metafields.custom.cta_collection_link.value != blank
+      assign cta_collection = article.metafields.custom.cta_collection_link.value
+    elsif article.metafields.custom.cta_collection.value != blank
+      assign cta_collection = article.metafields.custom.cta_collection.value
+    endif
+
+    if article.metafields.custom.cta_url.value != blank
+      assign cta_url = article.metafields.custom.cta_url.value
+    elsif article.metafields.custom.cta_link_url.value != blank
+      assign cta_url = article.metafields.custom.cta_link_url.value
+    endif
+
+    if article.metafields.custom.cta_button_name.value != blank
+      assign cta_button_name = article.metafields.custom.cta_button_name.value
+    elsif article.metafields.custom.cta_button_label.value != blank
+      assign cta_button_name = article.metafields.custom.cta_button_label.value
+    endif
+
     if article.metafields.custom.cta_link.value != blank
       assign cta_metafield_link = article.metafields.custom.cta_link.value
     elsif article.metafields.custom.cta_button.value != blank
@@ -12,13 +34,22 @@
     endif
   endif
 
-  if cta_metafield_link != blank
-    if cta_metafield_link.url != blank
-      assign resolved_cta_link = cta_metafield_link.url
-    endif
-    if cta_metafield_link.text != blank
-      assign resolved_cta_label = cta_metafield_link.text
-    endif
+  if cta_collection != blank and cta_collection.url != blank
+    assign resolved_cta_link = cta_collection.url
+  elsif cta_url != blank
+    assign resolved_cta_link = cta_url
+  elsif cta_metafield_link != blank and cta_metafield_link.url != blank
+    assign resolved_cta_link = cta_metafield_link.url
+  endif
+
+  if cta_button_name != blank
+    assign resolved_cta_label = cta_button_name
+  elsif cta_collection != blank and cta_collection.title != blank
+    assign resolved_cta_label = cta_collection.title
+  elsif cta_metafield_link != blank and cta_metafield_link.text != blank
+    assign resolved_cta_label = cta_metafield_link.text
+  elsif resolved_cta_link != blank
+    assign resolved_cta_label = 'View more'
   endif
 -%}
 {%- style -%}

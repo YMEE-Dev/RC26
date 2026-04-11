@@ -30,6 +30,7 @@
     class="maison-hero-collage__inner {{ section.settings.width }}"
     data-maison-collage
     data-interval-ms="{{ interval_ms }}"
+    style="--shift-zoom: {{ section.settings.shift_zoom | times: 0.01 }};"
   >
     {%- if section.settings.show_text -%}
       <div class="maison-hero-collage__copy">
@@ -257,6 +258,8 @@
     width: 100%;
     height: 100%;
     translate: var(--shift-x-a-desktop, 0px) var(--shift-y-a-desktop, 0px);
+    scale: var(--shift-zoom, 1);
+    transform-origin: center;
   }
 
   .maison-collage.is-alt .maison-collage__shift {
@@ -692,6 +695,17 @@
       "unit": "s",
       "label": "Slide change interval",
       "default": 6
+    },
+    {
+      "type": "range",
+      "id": "shift_zoom",
+      "min": 100,
+      "max": 160,
+      "step": 5,
+      "unit": "%",
+      "label": "Image zoom (for fine-tune)",
+      "info": "Increase this if moving the position sliders reveals empty edges.",
+      "default": 120
     },
     {
       "type": "image_picker",
