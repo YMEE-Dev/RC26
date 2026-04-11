@@ -12,9 +12,10 @@
 
 <section
   id="StickyScroll--{{ section.id }}"
-  class="sticky-scroll section-padding {{ color_scheme }}"
+  class="sticky-scroll section-padding {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}"
   data-section-id="{{ section.id }}"
   data-section-type="sticky-scroll"
+  data-header-observer-mode="{{ section.settings.header_observer_mode }}"
 >
   <div class="sticky-scroll__wrapper {{ section.settings.width }}">
     <div class="sticky-scroll__container">
@@ -383,6 +384,20 @@
     }
   ],
   "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
     {
       "type": "header",
       "content": "Content"

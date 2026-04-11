@@ -38,9 +38,10 @@
 
 <section
   id="HomepageCollectionHover--{{ section.id }}"
-  class="homepage-collection-hover section-padding {{ color_scheme }}"
+  class="homepage-collection-hover section-padding {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}"
   data-section-id="{{ section.id }}"
   data-section-type="homepage-collection-hover"
+  data-header-observer-mode="{{ section.settings.header_observer_mode }}"
 >
   <div class="homepage-collection-hover__wrapper">
     <div
@@ -224,6 +225,20 @@
   "name": "Homepage collection hover",
   "max_blocks": 20,
   "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
     {
       "type": "text",
       "id": "title",

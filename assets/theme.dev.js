@@ -3805,6 +3805,7 @@
           const atTop = position <= 0;
           const goingDown = Boolean(e?.detail?.down);
           const goingUp = Boolean(e?.detail?.up);
+          const isMobileViewport = window.innerWidth < 960;
           const stickyThreshold = typeof this.headerOffset === "number" ? this.headerOffset : 0;
           const shouldShowRevealBlur = this.isSticky && goingUp && !atTop && position > stickyThreshold;
 
@@ -3812,6 +3813,19 @@
             this.body.classList.remove("header-scroll-hide");
             this.resetHeaderLayerHide();
             this.shouldShowScrollRevealBlur = true;
+            this.syncScrollRevealBlur();
+            return;
+          }
+
+          if (isMobileViewport) {
+            if (atTop) {
+              this.body.classList.remove("header-scroll-hide");
+              this.resetHeaderLayerHide();
+            } else {
+              this.body.classList.add("header-scroll-hide");
+              this.resetHeaderLayerHide();
+            }
+            this.shouldShowScrollRevealBlur = false;
             this.syncScrollRevealBlur();
             return;
           }

@@ -43,9 +43,10 @@
 
   <section
     id="HomepageCollectionSpotlight--{{ section.id }}"
-    class="homepage-collection-spotlight section-padding {{ color_scheme }}{% if layout == 'reversed' %} homepage-collection-spotlight--reversed{% endif %} {% if mobile_layout == 'reversed' %} homepage-collection-spotlight--mobile_reversed{% endif %}"
+    class="homepage-collection-spotlight section-padding {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}{% if layout == 'reversed' %} homepage-collection-spotlight--reversed{% endif %} {% if mobile_layout == 'reversed' %} homepage-collection-spotlight--mobile_reversed{% endif %}"
     data-section-id="{{ section.id }}"
     data-section-type="homepage-collection-spotlight"
+    data-header-observer-mode="{{ section.settings.header_observer_mode }}"
     style="background-color: var(--bg-color);"
   >
     <div class="homepage-collection-spotlight__wrapper {{ section.settings.width }}">
@@ -198,6 +199,20 @@
 {
   "name": "Collection spotlight",
   "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
     {
       "type": "header",
       "content": "Content"

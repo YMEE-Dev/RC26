@@ -20,9 +20,10 @@
 
 <section
   id="HomepageStackedImages--{{ section.id }}"
-  class="homepage-stacked-images section-padding"
+  class="homepage-stacked-images section-padding header-observer--{{ section.settings.header_observer_mode }}"
   data-section-id="{{ section.id }}"
   data-section-type="homepage-stacked-images"
+  data-header-observer-mode="{{ section.settings.header_observer_mode }}"
 >
   <div class="homepage-stacked-images__media">
     {%- assign animation_order = animation_order | plus: 1 -%}
@@ -116,6 +117,20 @@
 {
   "name": "Homepage stacked images",
   "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "light",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
     {
       "type": "header",
       "content": "Background image"
