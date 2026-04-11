@@ -3,6 +3,10 @@
   <head>
     {%- render 'head' -%}
 
+    {%- if template.name == 'article' and template.suffix == 'the-ultimate-explorer-of-beauty' -%}
+      {{- 'rc-inview-fade.css' | asset_url | stylesheet_tag -}}
+    {%- endif -%}
+
     {{ content_for_header }}
     {%- render 'geo-country-hide' -%}
   </head>
@@ -59,6 +63,11 @@
       just cut this next line and paste it outside this comment:
       <script src="{{ 'custom.js' | asset_url }}" defer="defer"></script>
     {%- endcomment -%}
+
+    {%- if template.name == 'article' and template.suffix == 'the-ultimate-explorer-of-beauty' -%}
+      <script src="{{ 'rc-inview-fade.js' | asset_url }}" defer="defer"></script>
+    {%- endif -%}
+
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" async></script>
 
     {%- comment -%} Global drawers {%- endcomment -%}
