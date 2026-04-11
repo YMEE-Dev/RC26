@@ -3,9 +3,18 @@
   assign resolved_cta_label = section.settings.button_label
   assign resolved_cta_link = section.settings.button_link
 
-  assign button_collection = section.settings.button_collection
-  if button_collection != blank and button_collection.value != blank
-    assign button_collection = button_collection.value
+  assign button_collection_setting = section.settings.button_collection
+  if button_collection_setting != blank and button_collection_setting.value != blank
+    assign button_collection_setting = button_collection_setting.value
+  endif
+
+  assign button_collection = blank
+  if button_collection_setting != blank
+    if button_collection_setting.url != blank
+      assign button_collection = button_collection_setting
+    else
+      assign button_collection = collections[button_collection_setting]
+    endif
   endif
 
   if button_collection != blank and button_collection.url != blank
