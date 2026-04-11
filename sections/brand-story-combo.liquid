@@ -43,9 +43,10 @@
 
   <section
     id="BrandStoryCombo--{{ section.id }}"
-    class="brand-story-combo"
+    class="brand-story-combo header-observer--{{ section.settings.header_observer_mode }}"
     data-section-id="{{ section.id }}"
     data-section-type="brand-story-combo"
+    data-header-observer-mode="{{ section.settings.header_observer_mode }}"
   >
     <div class="brand-story-combo__inner {{ section.settings.width }}">
       <div class="brand-story-combo__split{% if section.settings.layout == 'image-left' %} brand-story-combo__split--image-left{% endif %}{% unless has_image %} brand-story-combo__split--no-image{% endunless %}">
@@ -264,7 +265,22 @@
 {% schema %}
 {
   "name": "Story Layout Bundle",
+  "class": "brand-story-combo",
   "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
     {
       "type": "select",
       "id": "layout",

@@ -45,9 +45,10 @@
 
   <section
     id="OccasionImageTextGrid--{{ section.id }}"
-    class="occasion-image-text-grid"
+    class="occasion-image-text-grid header-observer--{{ section.settings.header_observer_mode }}"
     data-section-id="{{ section.id }}"
     data-section-type="occasion-image-text-grid"
+    data-header-observer-mode="{{ section.settings.header_observer_mode }}"
   >
     <div class="occasion-image-text-grid__inner {{ section.settings.width }} {{ grid_layout_class }}">
       {%- for block in section.blocks -%}
@@ -114,6 +115,20 @@
   "name": "Image Text Grid",
   "max_blocks": 3,
   "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
     {
       "type": "select",
       "id": "width",

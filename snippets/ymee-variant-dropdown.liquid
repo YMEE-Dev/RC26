@@ -159,6 +159,10 @@
                 <button type="button" class="ymee-variant-dropdown__action" data-action="inquire" data-variant-id="{{ variant.id }}" data-product-id="{{ product.id }}">
                   {{ 'products.product.inquire' | t }}
                 </button>
+              {%- elsif cr_show_available_soon -%}
+                <button type="button" class="ymee-variant-dropdown__action" data-action="available_soon">
+                  {{ 'products.product.available_soon' | t }}
+                </button>
               {%- else -%}
                 <button type="button" class="ymee-variant-dropdown__action" data-action="notify">
                   {{ 'general.newsletter_form.notify' | t }}

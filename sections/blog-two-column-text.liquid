@@ -18,9 +18,10 @@
 
 <section
   id="BlogTwoColText--{{ section.id }}"
-  class="blog-two-col-text section-padding"
+  class="blog-two-col-text section-padding header-observer--{{ section.settings.header_observer_mode }}"
   data-section-id="{{ section.id }}"
   data-section-type="blog-two-column-text"
+  data-header-observer-mode="{{ section.settings.header_observer_mode }}"
 >
   <div class="blog-two-col-text__inner {{ section.settings.width }}">
     <div class="blog-two-col-text__grid">
@@ -111,7 +112,22 @@
 {% schema %}
 {
   "name": "Blog: Two Column Text",
+  "class": "blog-twocol-text",
   "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
     {
       "type": "select",
       "id": "width",

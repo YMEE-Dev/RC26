@@ -12,9 +12,10 @@
 
 <section
   id="BlogImageCaption--{{ section.id }}"
-  class="blog-image-caption section-padding"
+  class="blog-image-caption section-padding header-observer--{{ section.settings.header_observer_mode }}"
   data-section-id="{{ section.id }}"
   data-section-type="blog-image-with-caption"
+  data-header-observer-mode="{{ section.settings.header_observer_mode }}"
 >
   <div class="blog-image-caption__inner {{ section.settings.width }}">
     {%- if section.settings.image != blank -%}
@@ -81,7 +82,22 @@
 {% schema %}
 {
   "name": "Blog: Image + Caption",
+  "class": "blog-image-caption",
   "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
     {
       "type": "select",
       "id": "width",

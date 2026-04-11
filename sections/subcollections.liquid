@@ -1,11 +1,19 @@
 {%- liquid
   assign text_color = section.settings.color
   assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign header_observer_mode = section.settings.header_observer_mode | default: collection.metafields.custom.header_observer_mode.value | default: 'light'
+  assign header_observer_mode = header_observer_mode | downcase | strip
+
+  unless header_observer_mode == 'dark' or header_observer_mode == 'light'
+    assign header_observer_mode = 'light'
+  endunless
+
   assign sub_collections = linklists[collection.handle].links
   assign sub_collection_html = ''
   assign sub_collection_counter = 0
   assign sub_collection_limit = 6
 -%}
+
 {%- if linklists[collection.handle].links.size > 0 -%}
   {%- style -%}
     #Subcollections--{{ section.id }} {
@@ -27,9 +35,10 @@
   {%- endstyle -%}
 
   <section
-    class="subcollections collection-{{ collection.handle }} section-padding {{ color_scheme }}"
+    class="subcollections collection-{{ collection.handle }} section-padding {{ color_scheme }} header-observer--{{ header_observer_mode }}"
     data-section-id="{{ section.id }}"
     data-section-type="subcollections"
+    data-header-observer-mode="{{ header_observer_mode }}"
     id="Subcollections--{{ section.id }}"
   >
     {%- if sub_collections.size > 0 -%}
@@ -69,7 +78,7 @@
                     (min-width: 750px) (calc(100vw - 16px) / 3), calc(100vw - 32px)
                   {%- endcapture -%}
 
-                  {%- render 'image' image: image, sizes: sizes, cover: true, show_backfill: false -%}
+                  {%- render 'image' image: image, sizes: sizes, cover: true, show_backfill: false, loading: 'eager' -%}
                 </div>
               </a>
             </div>
@@ -90,7 +99,7 @@
       {%- endfor -%}
 
       {%- if sub_collection_html != '' and template.suffix != 'media-only' -%}
-        {{ 'subcollections-slider.js' | asset_url | script_tag }}
+        <script src="{{ 'subcollections-slider.js' | asset_url }}" defer></script>
         <div class="subcollections__swiper swiper" data-subcollections-swiper>
           <div class="swiper-wrapper">
             {{ sub_collection_html }}
@@ -106,6 +115,17 @@
   "name": "Subcollections",
   "class": "section-overlay-header",
   "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "text",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "light",
+      "info": "Enter light or dark. Can be connected to a collection metafield."
+    },
     {
       "type": "paragraph",
       "content": "Create a [navigation list](/admin/content/menus) with the same name as this collection and link to other collections. [Learn more](https://broadcast.presidiocreative.com/collections/collection-pages/sub-collections)"

@@ -1,0 +1,173 @@
+{{ 'store-info-popup.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'store-info-popup.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign popup_background = section.settings.background_color | default: '#f7f4ef'
+  assign popup_text = section.settings.text_color | default: '#111111'
+  assign modal_heading = section.settings.modal_heading | strip
+  assign button_label = section.settings.button_label | strip
+  assign button_closes_popup = section.settings.button_closes_popup
+  assign has_button = false
+
+  if button_label != blank
+    if button_closes_popup
+      assign has_button = true
+    elsif section.settings.button_url != blank
+      assign has_button = true
+    endif
+  endif
+
+  capture popup_style
+    echo '--store-info-popup-bg: '
+    echo popup_background
+    echo '; --store-info-popup-text: '
+    echo popup_text
+    echo ';'
+  endcapture
+-%}
+
+<store-info-popup
+  class="store-info-popup {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="store-info-popup"
+  style="{{ popup_style }}"
+>
+  <script type="application/json" data-store-info-popup-config>
+    {
+      "enabled": {{ section.settings.enabled | json }}
+    }
+  </script>
+
+  <dialog
+    class="store-info-popup__dialog"
+    data-cookie-name="store-info-popup-{{ section.id }}"
+    data-scroll-lock-required
+    aria-modal="true"
+    {% if modal_heading != blank %}
+      aria-labelledby="StoreInfoPopupTitle--{{ section.id }}"
+    {% else %}
+      aria-label="Store information"
+    {% endif %}
+    aria-hidden="true"
+    inert
+  >
+    <div class="store-info-popup__body" data-scroll-lock-scrollable tabindex="-1">
+      <button
+        type="button"
+        class="store-info-popup__close"
+        data-store-info-popup-close
+        aria-label="{{ 'general.accessibility.close' | t }}"
+        {% if button_closes_popup and button_label != blank %}hidden{% endif %}
+      >
+        {% render 'icon-close' %}
+      </button>
+
+      {%- if modal_heading != blank -%}
+        <h2 id="StoreInfoPopupTitle--{{ section.id }}" class="store-info-popup__title title">
+          {{ modal_heading | escape }}
+        </h2>
+      {%- endif -%}
+
+      <h2 class="store-info-popup__brand">{{ shop.name | escape }}</h2>
+
+      <div class="store-info-popup__content">
+        {%- if section.settings.modal_body != blank -%}
+          <div class="store-info-popup__copy rte body-medium">
+            {{ section.settings.modal_body }}
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- if has_button -%}
+        {%- if button_closes_popup and button_label != blank -%}
+          <button
+            type="button"
+            class="store-info-popup__button btn btn--secondary btn--outline"
+            data-store-info-popup-close
+          >
+            <span>{{ button_label | escape }}</span>
+          </button>
+        {%- else -%}
+          <a
+            href="{{ section.settings.button_url }}"
+            class="store-info-popup__button btn btn--secondary btn--outline"
+          >
+            <span>{{ button_label | escape }}</span>
+          </a>
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+  </dialog>
+</store-info-popup>
+
+{% schema %}
+{
+  "name": "Store info popup",
+  "class": "shopify-section-popups",
+  "limit": 1,
+  "enabled_on": {
+    "groups": ["aside"]
+  },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Enable popup",
+      "default": false
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Popup background color",
+      "default": "#F7F4EF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Popup text color",
+      "default": "#111111"
+    },
+    {
+      "type": "text",
+      "id": "modal_heading",
+      "label": "Popup eyebrow",
+      "default": "Welcome to"
+    },
+    {
+      "type": "richtext",
+      "id": "modal_body",
+      "label": "Popup body",
+      "default": "<p>Use this popup to share a welcome message, collection highlight, or important store information.</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Explore now"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button link"
+    },
+    {
+      "type": "checkbox",
+      "id": "button_closes_popup",
+      "label": "Button closes popup",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Store info popup"
+    }
+  ]
+}
+{% endschema %}

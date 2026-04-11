@@ -4476,14 +4476,14 @@ body * {
 @media only screen and (min-width: 750px) and (max-width: 989px) {
   .section-padding {
     --padding-top: calc(var(--PT) * 0.7);
-    --padding-bottom: calc(var(--PB) * 0.5);
+    --padding-bottom: calc(var(--PB) * 0.7);
   }
 }
 
 @media only screen and (max-width: 749px) {
   .section-padding {
     --padding-top: calc(var(--PT) * 0.7);
-    --padding-bottom: calc(var(--PB) * 0.5);
+    --padding-bottom: calc(var(--PB) * 0.7);
     padding-top: var(--PT-MOBILE, var(--padding-top));
   }
 }
@@ -7028,6 +7028,10 @@ toggle-ellipsis {
   margin: 0 0 calc(var(--inner) / 2);
 }
 
+.drawer .cart__express-toggle {
+  margin: 0;
+}
+
 .drawer .cart__acceptance__input ~ .cart__buttons {
   margin-top: var(--inner);
 }
@@ -7128,7 +7132,15 @@ toggle-ellipsis {
 }
 
 .drawer .cart__foot__inner {
-  padding: calc(var(--inner) - 2px) var(--inner);
+  padding: 40px;
+  background-color: #fff;
+  border-top: 1px solid #e5e5e5;
+}
+
+@media only screen and (max-width: 749px) {
+  .drawer .cart__foot__inner {
+    padding: 40px 20px;
+  }
 }
 
 .drawer .cart__widget__title {
@@ -7741,10 +7753,16 @@ body:has([data-header-transparent]) .header__mobile__bottom {
   width: 100%;
 }
 
+@media only screen and (max-width: 768px) {
+  .header__logo {
+    gap: 16px;
+  }
+}
+
 .header__logo__meta {
   display: flex;
   flex-direction: row;
-  color: var(--globaltext);
+  color: var(--link);
 }
 
 .header__logo__meta__separator {
@@ -9536,7 +9554,7 @@ html.supports-touch ticker-bar[data-slide]:not([paused]) .ticker--animated {
   --link-hover: var(--COLOR-LINK-HOVER);
   --link: var(--link);
   position: relative;
-  z-index: 5600;
+  z-index: 6001;
 }
 
 .drawer--header .drawer__inner {
@@ -9988,7 +10006,7 @@ mobile-menu .drawer:has(header-search-popdown.is-open) .drawer__content {
 }
 
 mobile-menu .drawer:has(header-search-popdown.is-open) .drawer__body {
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh - (var(--HEADER-HEIGHT-MOBILE) + var(--announcement-height, 36px)));
 }
 
 mobile-menu .drawer:has(header-search-popdown.is-open) .drawer__foot {
@@ -10120,7 +10138,7 @@ header-search-popdown.is-open .search-popdown {
 @media only screen and (max-width: 960px) {
   header-search-popdown.is-open .search-popdown {
     --text: #fff;
-    /* margin-top: 55px; */
+    margin-top: 55px;
     padding-top: 20px;
   }
 }
@@ -11422,15 +11440,6 @@ body:has([data-header-transparent]) .section-overlay-header:first-of-type .index
 .hero__rte,
 .hero__description {
   color: var(--text);
-}
-
-.hero__subheading {
-  font-size: var(--font-subheading);
-  font-family: var(--FONT-STACK-SUBHEADING);
-  font-style: var(--FONT-STYLE-SUBHEADING);
-  font-weight: var(--FONT-WEIGHT-SUBHEADING);
-  letter-spacing: var(--LETTER-SPACING-BODY);
-  text-transform: none;
 }
 
 .hero__rte p:first-child {
@@ -19111,11 +19120,11 @@ a.review {
   margin-top: 40px;
 }
 
-@media only screen and (max-width: 749px) {
+/* @media only screen and (max-width: 749px) {
   .cart__buttons-all {
     margin-top: 20px;
   }
-}
+} */
 
 .is-loading .cart__total__price--animated {
   opacity: 0;
@@ -19232,6 +19241,10 @@ input.cart__acceptance__input {
   margin-top: var(--inner);
 }
 
+.drawer--cart .additional-checkout-buttons {
+  margin-top: 0;
+}
+
 .additional-checkout-buttons--express {
   max-height: 0;
   opacity: 0;
@@ -19249,6 +19262,7 @@ input.cart__acceptance__input {
 
 .additional-checkout-buttons--express.expanding,
 .additional-checkout-buttons--express.expanded {
+  margin-top: calc(var(--inner) / 2);
   max-height: 320px;
   opacity: 1;
   visibility: visible;
@@ -21506,8 +21520,9 @@ body.has-line-design.grid-compact .collection__products .grid,
   }
 
   .popout_filters-wrapper {
-    width: 100%;
-    justify-content: space-between;
+    width: auto;
+    justify-content: flex-start;
+    padding: 0 var(--outer);
   }
 
   .collection__nav .availability-filter__button {
@@ -21519,9 +21534,9 @@ body.has-line-design.grid-compact .collection__products .grid,
     display: none;
   }
 
-  .collection__nav .subcollection_links-wrapper {
+  /* .collection__nav .subcollection_links-wrapper {
     display: none !important;
-  }
+  } */
 }
 
 /* .has-header-sticky .collection__nav {
@@ -23099,6 +23114,7 @@ body.has-line-design.grid-compact .collection__products .grid,
 @media only screen and (max-width: 767px) {
   .footer__blocks {
     gap: 10px;
+    row-gap: 40px;
   }
   .footer__blocks .accordion {
     margin-bottom: 0;
@@ -23118,6 +23134,9 @@ body.has-line-design.grid-compact .collection__products .grid,
 }
 
 @media only screen and (max-width: 767px) {
+  .footer__block {
+    text-align: center;
+  }
   .footer__block--hide-mobile {
     display: none;
   }
@@ -23869,7 +23888,7 @@ body.has-line-design .brick__block .hero__slide {
   width: 100%;
   display: flex;
   align-items: center;
-  padding: var(--outer);
+  padding: var(--brick-block-padding, 40px);
   background: var(--bg);
   margin: 0 auto;
 }
@@ -23904,7 +23923,10 @@ body.has-line-design .brick__block .hero__slide {
   flex-direction: column;
 }
 
-.brick__block__text.has-padding,
+.brick__block__text.has-padding {
+  padding: var(--brick-block-padding, 40px);
+}
+
 .brick__block__collection.has-padding {
   padding: var(--outer);
 }
@@ -23924,19 +23946,19 @@ body.has-line-design .brick__block .hero__slide {
 
 .wrapper--full.brick__section--reversed .brick__block:last-child .brick__block__text:not(.has-padding),
 .wrapper--full .brick__block:first-child .brick__block__text:not(.has-padding) {
-  padding-left: var(--outer);
+  padding-left: var(--brick-block-padding, 40px);
 }
 
 @media only screen and (max-width: 749px) {
   .wrapper--full .brick__block__text:not(.has-padding) {
-    padding-left: var(--outer);
-    padding-right: var(--outer);
+    padding-left: var(--brick-block-padding, 40px);
+    padding-right: var(--brick-block-padding, 40px);
   }
 }
 
 .brick__block__text.has-padding,
 .wrapper--full .brick__block__text.has-padding {
-  padding-left: var(--outer);
+  padding-left: var(--brick-block-padding, 40px);
 }
 
 @media only screen and (min-width: 750px) {
@@ -24753,9 +24775,10 @@ map-component {
   list-style: none;
 }
 
-@media only screen and (max-width: 749px) {
+@media only screen and (max-width: 768px) {
   .socials {
     row-gap: 10px;
+    justify-content: center;
   }
 }
 
@@ -24763,11 +24786,11 @@ map-component {
   margin: 6px;
 }
 
-@media only screen and (max-width: 749px) {
+/* @media only screen and (max-width: 749px) {
   .socials li {
     flex-basis: 26%;
   }
-}
+} */
 
 .socials:empty {
   display: none;
