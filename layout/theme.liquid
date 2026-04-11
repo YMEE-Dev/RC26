@@ -7,6 +7,10 @@
       {{- 'rc-inview-fade.css' | asset_url | stylesheet_tag -}}
     {%- endif -%}
 
+    {%- if template.name == 'blog' or template.name == 'article' -%}
+      {{- 'blog-mobile-headings.css' | asset_url | stylesheet_tag -}}
+    {%- endif -%}
+
     {%- if template.name == 'page' and template.suffix == 'rc-timeline' -%}
       {{- 'rc-rc-timeline-inview.css' | asset_url | stylesheet_tag -}}
     {%- endif -%}
