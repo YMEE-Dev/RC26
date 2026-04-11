@@ -99,7 +99,7 @@
       {%- endfor -%}
 
       {%- if sub_collection_html != '' and template.suffix != 'media-only' -%}
-        {{ 'subcollections-slider.js' | asset_url | script_tag }}
+        <script src="{{ 'subcollections-slider.js' | asset_url }}" defer></script>
         <div class="subcollections__swiper swiper" data-subcollections-swiper>
           <div class="swiper-wrapper">
             {{ sub_collection_html }}
