@@ -37,6 +37,7 @@
       --brand-combo-pb: {{ section.settings.padding_bottom }}px;
       --brand-combo-pt-mobile: {{ section.settings.padding_top_mobile }}px;
       --brand-combo-pb-mobile: {{ section.settings.padding_bottom_mobile }}px;
+      --brand-combo-max: {{ section.settings.max_width }}px;
     }
   {%- endstyle -%}
 
@@ -175,8 +176,7 @@
 
   @media (min-width: 990px) {
     .main-content--article-brand .brand-story-combo__inner {
-      width: 1100px;
-      max-width: calc(100% - 48px);
+      width: min(var(--brand-combo-max), calc(100% - 48px));
       margin-left: auto;
       margin-right: auto;
     }
@@ -319,6 +319,16 @@
       "id": "caption_text",
       "label": "Image caption",
       "default": "Image caption"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "min": 800,
+      "max": 1600,
+      "step": 10,
+      "unit": "px",
+      "label": "Max width",
+      "default": 1100
     },
     {
       "type": "range",
