@@ -10,6 +10,7 @@
       successSubtitleKey: "success_notify_subtitle",
       showProduct: true,
       showInquireFields: false,
+      klaviyoMetric: "Back in Stock",
     },
     inquire: {
       titleKey: "inquire_title",
@@ -19,6 +20,7 @@
       successSubtitleKey: "success_inquire_subtitle",
       showProduct: false,
       showInquireFields: true,
+      klaviyoMetric: "Product Inquiry",
     },
     available_soon: {
       titleKey: "available_soon_title",
@@ -28,14 +30,83 @@
       successSubtitleKey: "success_available_soon_subtitle",
       showProduct: true,
       showInquireFields: false,
+      klaviyoMetric: "Available Soon",
     },
   };
 
   // Translations are injected from the Liquid template via a global object
   var translations = window.__bisDrawerTranslations || {};
+  var KLAVIYO_API_KEY = window.__klaviyoPublicKey || "";
+
+  function decodeHtml(str) {
+    if (typeof str !== "string") {
+      return str || "";
+    }
+
+    var decoded = str;
+    var previous = null;
+    var txt = document.createElement("textarea");
+
+    while (decoded !== previous) {
+      previous = decoded;
+      txt.innerHTML = decoded;
+      decoded = txt.value;
+    }
+
+    return decoded;
+  }
 
   function getTranslation(key) {
-    return translations[key] || key;
+    return decodeHtml(translations[key] || key);
+  }
+
+  function submitToKlaviyo(metricName, email, properties) {
+    if (!KLAVIYO_API_KEY) {
+      console.error("[BIS Drawer] Klaviyo public API key is not configured.");
+      return Promise.reject(new Error("Missing Klaviyo API key"));
+    }
+
+    var payload = {
+      data: {
+        type: "event",
+        attributes: {
+          profile: {
+            data: {
+              type: "profile",
+              attributes: {
+                email: email,
+              },
+            },
+          },
+          metric: {
+            data: {
+              type: "metric",
+              attributes: {
+                name: metricName,
+              },
+            },
+          },
+          properties: properties,
+          time: new Date().toISOString(),
+        },
+      },
+    };
+
+    var url = "https://a.klaviyo.com/client/events/?company_id=" + encodeURIComponent(KLAVIYO_API_KEY);
+
+    return fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        revision: "2024-10-15",
+      },
+      body: JSON.stringify(payload),
+    }).then(function (response) {
+      if (response.ok || response.status === 202) {
+        return response;
+      }
+      throw new Error("Klaviyo API returned status " + response.status);
+    });
   }
 
   function initBisDrawer() {
@@ -216,18 +287,11 @@
     }
 
     function openDrawer(mode, variantId, productId) {
-      // Always open our custom side drawer for all modes
-      // AMP integration happens on form submit (if AMP API is available)
       setMode(mode, variantId, productId);
       sideDrawer.dispatchEvent(new CustomEvent("theme:drawer:open", { bubbles: true }));
     }
 
-    // Reset form view when drawer opens (in case it was left on success)
-    sideDrawer.addEventListener("theme:drawer:open", function () {
-      // Don't reset if we just set the mode
-    });
-
-    // Form submission
+    // Form submission via Klaviyo
     if (form) {
       form.addEventListener("submit", function (e) {
         e.preventDefault();
@@ -253,138 +317,75 @@
           }
         }
 
-        // Show loader while preserving button height
+        // Show loader
         setSubmitting(true);
         if (errorEl) errorEl.style.display = "none";
 
-        // Collect form data
-        var formData = {
-          email: email.value,
-          variant_id: variantIdInput ? variantIdInput.value : "",
-          product_id: productIdInput ? productIdInput.value : "",
+        var config = MODES[currentMode] || MODES.notify;
+        var product = getProductData();
+        var productTitle = productTitleInput ? productTitleInput.value : "";
+        var variantId = variantIdInput ? variantIdInput.value : "";
+        var productId = productIdInput ? productIdInput.value : "";
+
+        // Build Klaviyo event properties
+        var properties = {
           form_type: currentMode,
+          product_title: productTitle,
+          product_id: productId,
+          variant_id: variantId,
+          product_url: window.location.href,
         };
 
+        // Add variant info if available
+        if (product && product.variants) {
+          var variant = product.variants.find(function (v) {
+            return String(v.id) === String(variantId);
+          });
+          if (variant) {
+            properties.variant_title = variant.title || "";
+            properties.variant_sku = variant.sku || "";
+            if (variant.price) {
+              properties.variant_price = (variant.price / 100).toFixed(2);
+            }
+          }
+        }
+
+        // Add product image
+        if (product) {
+          var imgSrc = null;
+          if (product.featured_image) {
+            imgSrc = typeof product.featured_image === "string" ? product.featured_image : product.featured_image.src;
+          }
+          if (imgSrc) {
+            properties.product_image = imgSrc.includes("cdn.shopify.com")
+              ? imgSrc.split("?")[0] + "?width=600"
+              : imgSrc;
+          }
+        }
+
+        // Add inquire-specific fields
         if (currentMode === "inquire") {
           var firstName = drawer.querySelector('[name="first_name"]');
           var lastName = drawer.querySelector('[name="last_name"]');
           var message = drawer.querySelector('[name="message"]');
-          formData.first_name = firstName ? firstName.value : "";
-          formData.last_name = lastName ? lastName.value : "";
-          formData.message = message ? message.value : "";
+          properties.first_name = firstName ? firstName.value : "";
+          properties.last_name = lastName ? lastName.value : "";
+          properties.message = message ? message.value : "";
         }
 
-        // Try AMP integration for notify/available_soon modes
-        // Re-check at submit time since AMP may load asynchronously
-        var ampSuccess = triggerAmpRegistration(formData);
-
-        if (!ampSuccess) {
-          // Fallback: submit via Shopify contact form
-          console.info("[BIS Drawer] AMP not available for mode '" + currentMode + "', using contact form fallback");
-          submitViaContactForm(formData);
-        }
-      });
-    }
-
-    function isAmpAvailable() {
-      return (
-        (window.BIS && typeof window.BIS.create === "function") ||
-        (window.BISPopup && typeof window.BISPopup.create === "function")
-      );
-    }
-
-    function triggerAmpRegistration(formData) {
-      // For inquire mode, AMP doesn't manage these — always use contact form
-      if (formData.form_type === "inquire") {
-        return false;
-      }
-
-      // For notify / available_soon — use AMP BIS if available
-      if (window.BIS && typeof window.BIS.create === "function") {
-        var callbackFired = false;
-
-        // Safety timeout: AMP sometimes registers the signup but never calls
-        // the callback. After 3 s assume success (the entry appears in the
-        // AMP dashboard regardless).
-        var safetyTimer = setTimeout(function () {
-          if (!callbackFired) {
-            console.warn("[BIS Drawer] AMP callback did not fire within 3 s — assuming success");
-            callbackFired = true;
+        submitToKlaviyo(config.klaviyoMetric, email.value, properties)
+          .then(function () {
             showSuccessView();
-          }
-        }, 3000);
-
-        console.info("[BIS Drawer] Calling BIS.create for variant " + formData.variant_id);
-
-        window.BIS.create(formData.email, formData.variant_id, formData.product_id, {
-          callback: function (data) {
-            if (callbackFired) return; // safety timer already handled it
-            callbackFired = true;
-            clearTimeout(safetyTimer);
-
-            console.info("[BIS Drawer] AMP callback received:", data);
-
-            if (data && (data.status === "OK" || data.status === "ok" || data.success)) {
-              showSuccessView();
-            } else {
-              if (errorEl) {
-                errorEl.textContent = (data && data.message) || "Something went wrong. Please try again.";
-                errorEl.style.display = "";
-              }
-              setSubmitting(false);
+          })
+          .catch(function (err) {
+            console.error("[BIS Drawer] Klaviyo submission error:", err);
+            if (errorEl) {
+              errorEl.textContent = "Something went wrong. Please try again.";
+              errorEl.style.display = "";
             }
-          },
-        });
-        return true;
-      }
-
-      if (window.BISPopup && typeof window.BISPopup.create === "function") {
-        console.info("[BIS Drawer] Calling BISPopup.create for variant " + formData.variant_id);
-        window.BISPopup.create(formData.email, formData.variant_id, {
-          callback: function () {
-            showSuccessView();
-          },
-        });
-        return true;
-      }
-
-      return false;
-    }
-
-    function submitViaContactForm(formData) {
-      // Fallback: POST to Shopify contact form endpoint
-      var body = new FormData();
-      body.append("form_type", "contact");
-      body.append("utf8", "\u2713");
-      body.append("contact[email]", formData.email);
-      body.append(
-        "contact[body]",
-        "BIS Request (" +
-          formData.form_type +
-          ")\n" +
-          "Product ID: " +
-          formData.product_id +
-          "\n" +
-          "Variant ID: " +
-          formData.variant_id +
-          (formData.first_name ? "\nName: " + formData.first_name + " " + (formData.last_name || "") : "") +
-          (formData.message ? "\nMessage: " + formData.message : "")
-      );
-
-      fetch("/contact", {
-        method: "POST",
-        body: body,
-      })
-        .then(function () {
-          showSuccessView();
-        })
-        .catch(function () {
-          if (errorEl) {
-            errorEl.textContent = "Something went wrong. Please try again.";
-            errorEl.style.display = "";
-          }
-          setSubmitting(false);
-        });
+            setSubmitting(false);
+          });
+      });
     }
 
     // Expose global function for triggers
@@ -423,16 +424,7 @@
       // URL parsing not supported
     }
 
-    // AMP availability check — log on init and re-check after a delay
-    // (AMP script may load asynchronously after DOMContentLoaded)
-    function logAmpStatus() {
-      var ampReady = isAmpAvailable();
-      console.info(
-        "[BIS Drawer] AMP Back in Stock API " + (ampReady ? "detected ✓" : "not detected — using contact form fallback")
-      );
-    }
-    logAmpStatus();
-    setTimeout(logAmpStatus, 3000);
+    console.info("[BIS Drawer] Klaviyo integration active" + (KLAVIYO_API_KEY ? " ✓" : " — API key missing!"));
   }
 
   // Init on DOMContentLoaded

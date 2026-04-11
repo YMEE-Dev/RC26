@@ -79,6 +79,20 @@
   endfor
 
   comment
+    ── Group B (individual products): Hidden price, no ATC, show INQUIRE ───
+    Configured via settings.cr_group_b_products
+  endcomment
+  assign cr_group_b_products = settings.cr_group_b_products | default: '' | downcase | remove: ' '
+  assign cr_group_b_product_items = cr_group_b_products | split: ','
+  for cr_item in cr_group_b_product_items
+    if cr_item != blank
+      if product.handle == cr_item
+        assign cr_flags_out = cr_flags_out | append: 'hide_price|hide_atc|show_inquire|'
+      endif
+    endif
+  endfor
+
+  comment
     ── Group C: AVAILABLE SOON instead of sold-out ───
     Configured via settings.cr_group_c_collections
   endcomment

@@ -66,7 +66,7 @@
   assign logo_width = '800'
   assign logo_width_15x = logo_width | times: 1.5 | round
   assign logo_width_2x = logo_width | times: 2 | round
-  assign logo_width_mobile = '360'
+  assign logo_width_mobile = '700'
   assign logo_width_mobile_15x = logo_width_mobile | times: 1.5 | round
   assign logo_width_mobile_2x = logo_width_mobile | times: 2 | round
   assign logo_sizes = '(min-width: 750px) ' | append: logo_width | append: 'px, (min-width: ' | append: logo_width_mobile_2x | append: 'px) ' | append: logo_width_mobile | append: 'px, calc((100vw - 64px) * 0.5)'
@@ -180,9 +180,14 @@
   }
 
   .theme__header {
-    --PT: {{ padding_top }}px;
+    --PT: calc({{ padding_top }}px + var(--announcement-height, 36px));
     --PB: {{ padding_bottom }}px;
     isolation: isolate;
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity 0.24s ease,
+      visibility 0s linear;
 
     {% if show_separator_line %}
       {% unless border_color.alpha == 0.0 or border_color == blank %}
@@ -190,6 +195,24 @@
       {% endunless %}
       --border-opacity: {{ section.settings.separator_opacity | times: 0.01 }};
     {% endif %}
+  }
+
+  .theme__header[data-header-color-pending='true'] {
+    opacity: 0 !important;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .theme__header[data-header-color-pending='true']::before,
+  .theme__header[data-header-color-pending='true']::after {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  .theme__header[data-header-color-ready='true'] {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
   }
 
   .theme__header__scroll-blur {
@@ -233,6 +256,7 @@
       --logo-padding_product: {{ logo_padding | times: 0.60 }};
       --logo-width-desktop: {{ logo_width }}px;
       --logo-width-mobile: {{ logo_width_mobile }}px;
+      --logo-width-mobile-desktop: 540px;
     }
   {%- endif -%}
 
@@ -633,8 +657,8 @@
     class="theme__header{% if show_separator_line %} has-border{% endif %}"
     role="banner"
     style="--header-scroll-reveal-opacity: 0; --header-scroll-reveal-blur: 0px; --header-scroll-reveal-background: linear-gradient(180deg, rgba(249, 249, 249, 0.25) 0%, rgba(249, 249, 249, 0.00) 100%);"
+    data-header-color-pending="true"
     data-header-height
-    data-aos="fade"
     data-header-desktop
   >
     <span class="theme__header__scroll-blur" aria-hidden="true"></span>
@@ -794,7 +818,6 @@
   document.addEventListener('DOMContentLoaded', () => {
     /* Helpers */
     const selectAll = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
-    const isDesktop = () => window.matchMedia('(min-width: 750px)').matches;
 
     /* Mobile hamburger press animation */
     const hamburgerButtons = selectAll('.header__mobile__hamburger');
@@ -1006,10 +1029,129 @@
       return [255, 255, 255];
     };
 
-    const computeImageLuminance = (imgEl) =>
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+    const getAlphaCompositedLuminance = (rgba, fallbackRgb) => {
+      const alpha = rgba[3] / 255;
+      if (alpha >= 1) {
+        return getLuminance([rgba[0], rgba[1], rgba[2]]);
+      }
+
+      const [bgR, bgG, bgB] = fallbackRgb;
+      return getLuminance([
+        Math.round(rgba[0] * alpha + bgR * (1 - alpha)),
+        Math.round(rgba[1] * alpha + bgG * (1 - alpha)),
+        Math.round(rgba[2] * alpha + bgB * (1 - alpha)),
+      ]);
+    };
+    const getObjectPositionOffset = (value, freeSpace, axis) => {
+      if (!value) return freeSpace / 2;
+
+      const normalized = value.toLowerCase();
+      if (normalized.endsWith('%')) {
+        return (parseFloat(normalized) / 100) * freeSpace;
+      }
+
+      if (normalized.endsWith('px')) {
+        return parseFloat(normalized);
+      }
+
+      if (normalized === 'center') return freeSpace / 2;
+      if (axis === 'x') {
+        if (normalized === 'left') return 0;
+        if (normalized === 'right') return freeSpace;
+      } else {
+        if (normalized === 'top') return 0;
+        if (normalized === 'bottom') return freeSpace;
+      }
+
+      const parsed = parseFloat(normalized);
+      return Number.isFinite(parsed) ? parsed : freeSpace / 2;
+    };
+    const getRenderedMediaGeometry = (mediaEl, sourceWidth, sourceHeight) => {
+      const rect = mediaEl.getBoundingClientRect();
+      const style = getComputedStyle(mediaEl);
+      const objectFit = style.objectFit || 'fill';
+      const positionTokens = (style.objectPosition || '50% 50%').trim().split(/\s+/);
+      const posX = positionTokens[0] || '50%';
+      const posY = positionTokens[1] || positionTokens[0] || '50%';
+
+      let renderedWidth = rect.width;
+      let renderedHeight = rect.height;
+
+      if (objectFit === 'contain' || objectFit === 'cover' || objectFit === 'scale-down') {
+        const containScale = Math.min(rect.width / sourceWidth, rect.height / sourceHeight);
+        const coverScale = Math.max(rect.width / sourceWidth, rect.height / sourceHeight);
+        const scale =
+          objectFit === 'cover' ? coverScale : objectFit === 'scale-down' ? Math.min(1, containScale) : containScale;
+
+        renderedWidth = sourceWidth * scale;
+        renderedHeight = sourceHeight * scale;
+      } else if (objectFit === 'none') {
+        renderedWidth = sourceWidth;
+        renderedHeight = sourceHeight;
+      }
+
+      const offsetX = getObjectPositionOffset(posX, rect.width - renderedWidth, 'x');
+      const offsetY = getObjectPositionOffset(posY, rect.height - renderedHeight, 'y');
+
+      return {
+        rect,
+        renderedWidth,
+        renderedHeight,
+        offsetX,
+        offsetY,
+      };
+    };
+    const getSourceSampleRect = (mediaEl, sourceWidth, sourceHeight, probePoint) => {
+      if (!probePoint) return null;
+
+      const geometry = getRenderedMediaGeometry(mediaEl, sourceWidth, sourceHeight);
+      const localX = probePoint.x - geometry.rect.left - geometry.offsetX;
+      const localY = probePoint.y - geometry.rect.top - geometry.offsetY;
+
+      if (
+        localX < 0 ||
+        localY < 0 ||
+        localX > geometry.renderedWidth ||
+        localY > geometry.renderedHeight ||
+        geometry.renderedWidth <= 0 ||
+        geometry.renderedHeight <= 0
+      ) {
+        return null;
+      }
+
+      const sampleDisplaySize = 12;
+      const sampleWidth = Math.max(1, (sampleDisplaySize / geometry.renderedWidth) * sourceWidth);
+      const sampleHeight = Math.max(1, (sampleDisplaySize / geometry.renderedHeight) * sourceHeight);
+      const centerX = (localX / geometry.renderedWidth) * sourceWidth;
+      const centerY = (localY / geometry.renderedHeight) * sourceHeight;
+      const sx = clamp(centerX - sampleWidth / 2, 0, Math.max(0, sourceWidth - sampleWidth));
+      const sy = clamp(centerY - sampleHeight / 2, 0, Math.max(0, sourceHeight - sampleHeight));
+
+      return {
+        sx,
+        sy,
+        sw: sampleWidth,
+        sh: sampleHeight,
+      };
+    };
+    const sampleDrawnMediaLuminance = (drawSample, fallbackRgb) =>
       new Promise((resolve) => {
-        if (!imgEl) return resolve(null);
-        const src = imgEl.currentSrc || imgEl.src;
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = 1;
+          canvas.height = 1;
+          const ctx = canvas.getContext('2d', {willReadFrequently: true});
+          drawSample(ctx);
+          const data = ctx.getImageData(0, 0, 1, 1).data;
+          resolve(getAlphaCompositedLuminance(data, fallbackRgb));
+        } catch (err) {
+          resolve(null);
+        }
+      });
+
+    const loadImageLuminance = (src) =>
+      new Promise((resolve) => {
         if (!src) return resolve(null);
 
         const img = new Image();
@@ -1032,55 +1174,78 @@
         img.onerror = () => resolve(null);
       });
 
-    const computeBackgroundImageLuminance = (url) =>
-      new Promise((resolve) => {
-        if (!url) return resolve(null);
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.src = url;
-        img.decode?.().catch(() => {});
-        img.onload = () => {
-          try {
-            const canvas = document.createElement('canvas');
-            canvas.width = 1;
-            canvas.height = 1;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, 1, 1);
-            const data = ctx.getImageData(0, 0, 1, 1).data;
-            resolve(getLuminance([data[0], data[1], data[2]]));
-          } catch (err) {
-            resolve(null);
-          }
-        };
-        img.onerror = () => resolve(null);
-      });
+    const computeImageLuminance = (imgEl, probePoint, fallbackRgb) => {
+      const src = imgEl?.currentSrc || imgEl?.src;
+      const sampleRect =
+        imgEl?.naturalWidth && imgEl?.naturalHeight
+          ? getSourceSampleRect(imgEl, imgEl.naturalWidth, imgEl.naturalHeight, probePoint)
+          : null;
+
+      if (sampleRect) {
+        return sampleDrawnMediaLuminance((ctx) => {
+          ctx.drawImage(imgEl, sampleRect.sx, sampleRect.sy, sampleRect.sw, sampleRect.sh, 0, 0, 1, 1);
+        }, fallbackRgb);
+      }
+
+      if (probePoint) {
+        return Promise.resolve(getLuminance(fallbackRgb));
+      }
+
+      return loadImageLuminance(src);
+    };
+
+    const computeBackgroundImageLuminance = (url) => loadImageLuminance(url);
+
+    const computeVideoLuminance = (videoEl, probePoint, fallbackRgb) => {
+      if (!videoEl) return Promise.resolve(null);
+
+      const sampleRect =
+        videoEl.videoWidth && videoEl.videoHeight
+          ? getSourceSampleRect(videoEl, videoEl.videoWidth, videoEl.videoHeight, probePoint)
+          : null;
+
+      if (sampleRect) {
+        return sampleDrawnMediaLuminance((ctx) => {
+          ctx.drawImage(videoEl, sampleRect.sx, sampleRect.sy, sampleRect.sw, sampleRect.sh, 0, 0, 1, 1);
+        }, fallbackRgb);
+      }
+
+      if (probePoint) {
+        return Promise.resolve(getLuminance(fallbackRgb));
+      }
+
+      return sampleDrawnMediaLuminance((ctx) => {
+        ctx.drawImage(videoEl, 0, 0, 1, 1);
+      }, fallbackRgb);
+    };
+    const isImageElement = (mediaEl) => mediaEl?.tagName === 'IMG';
+    const isVideoElement = (mediaEl) => mediaEl?.tagName === 'VIDEO';
 
     const initHeaderObserver = () => {
       const headerWrapper = document.querySelector('header.theme__header');
-      const body = document.querySelector('body');
+      const body = document.body;
       const drawerWrapper = document.querySelector('header-drawer.drawer--header');
       const headerTargets = selectAll('.header__desktop, .header__mobile');
       const logoLinks = selectAll('.header__logo__link[data-logo-light][data-logo-dark]');
       const transparentImages = selectAll('.logo__img.logo__img--transparent');
-      if (!(headerTargets.length && logoLinks.length)) return;
+      const revealResolvedHeader = () => {
+        if (!headerWrapper || headerWrapper.dataset.headerColorReady === 'true') return;
 
-      const rootStyles = getComputedStyle(document.documentElement);
-      const getCssVariable = (name, fallback) => {
-        const value = rootStyles.getPropertyValue(name).trim();
-        return value || fallback;
+        requestAnimationFrame(() => {
+          headerWrapper.removeAttribute('data-header-color-pending');
+          headerWrapper.setAttribute('data-header-color-ready', 'true');
+        });
       };
+      if (!(headerTargets.length && logoLinks.length)) {
+        revealResolvedHeader();
+        return;
+      }
+
+      const nearWhiteLuminanceThreshold = 0.2;
       const colors = {
         light: {
           link: '#fff',
           hover: '#f0f0f0',
-        },
-        dimmedLight: {
-          link: '#e0e0e0',
-          hover: '#f0f0f0',
-        },
-        lightDark: {
-          link: '#9a9a9a',
-          hover: '#b0b0b0',
         },
         dark: {
           link: '#000',
@@ -1092,6 +1257,17 @@
       const logoDarkUrl = logoLinks[0].dataset.logoDark;
       const forcedDrawerLogoMode = 'dark';
       const forcedTmenuLogoMode = 'dark';
+      const DEBUG_HEADER_OBSERVER = false;
+      const APPLY_DEBOUNCE = 150;
+      const intersectionThresholds = [0, 0.25, 0.5, 0.75, 1];
+      const getSectionLabel = (sectionEl) =>
+        sectionEl?.dataset.sectionId || sectionEl?.id || sectionEl?.className || 'unknown-section';
+      const roundForLog = (value) => (typeof value === 'number' ? Math.round(value * 100) / 100 : value);
+      const debugLog = (message, payload = {}) => {
+        if (!DEBUG_HEADER_OBSERVER) return;
+        console.log('[HeaderObserver]', message, payload);
+      };
+      const getHeaderHeight = () => document.querySelector('[data-header-height]')?.offsetHeight || 0;
 
       const drawerIsOpen = () => drawerWrapper?.classList.contains('is-open');
       const tmenuIsOpen = () => tmenuIsActive || Boolean(document.querySelector(tmenuActiveSelector));
@@ -1119,7 +1295,7 @@
       };
 
       const setLogoSource = (mode) => {
-        const useLightLogo = mode === 'light' || mode === 'dimmedLight';
+        const useLightLogo = mode === 'light';
         const logoUrl = useLightLogo ? logoLightUrl : logoDarkUrl;
         if (!logoUrl) return;
         logoLinks.forEach((link) => {
@@ -1132,9 +1308,7 @@
       };
 
       const defaultModeRaw = (logoLinks[0].dataset.logoDefault || 'light').trim();
-      const defaultMode = ['light', 'dimmedLight', 'lightDark', 'dark'].includes(defaultModeRaw)
-        ? defaultModeRaw
-        : 'light';
+      const defaultMode = defaultModeRaw === 'dark' ? 'dark' : 'light';
       let currentMode = defaultMode;
       const applyMode = (mode) => {
         const resolved = mode || 'light';
@@ -1144,6 +1318,11 @@
         if (!getForcedLogoMode()) {
           setLogoSource(currentMode);
         }
+        debugLog('Applied mode', {
+          mode: currentMode,
+          forcedLogoMode: getForcedLogoMode() || null,
+          nearWhiteLuminanceThreshold,
+        });
       };
 
       const syncLogoWithHeaderState = () => {
@@ -1151,10 +1330,18 @@
 
         if (forcedLogoMode) {
           setLogoSource(forcedLogoMode);
+          debugLog('Applied forced logo mode', {
+            forcedLogoMode,
+            drawerOpen: drawerIsOpen(),
+            tmenuOpen: tmenuIsOpen(),
+          });
           return;
         }
 
         setLogoSource(currentMode);
+        debugLog('Synced logo with header mode', {
+          mode: currentMode,
+        });
       };
 
       setHeaderColors(currentMode);
@@ -1183,16 +1370,14 @@
       let sectionsToObserve = selectAll(
         'main .shopify-section section, main .shopify-section collection-component, main .shopify-section [data-section-id]'
       );
-      if (!sectionsToObserve.length) return;
-
-      const DEBUG_HEADER_OBSERVER = false;
-      const APPLY_DEBOUNCE = 150;
-      const thresholds = [0, 0.25, 0.5, 0.75, 1];
+      if (!sectionsToObserve.length) {
+        revealResolvedHeader();
+        return;
+      }
 
       const computeRootMargin = () => {
         const h = window.innerHeight || document.documentElement.clientHeight || 0;
-        const headerEl = document.querySelector('[data-header-height]');
-        const headerHeight = headerEl ? headerEl.offsetHeight : 0;
+        const headerHeight = getHeaderHeight();
         // Pull the root box down to just beneath the header so we sample what's under it.
         const top = `-${headerHeight}px`;
         const target = 200;
@@ -1242,11 +1427,295 @@
       };
 
       const luminanceCache = new WeakMap();
+      const mediaReadyListeners = new WeakSet();
+      const deferredRevealTimers = new WeakMap();
+      let currentObservedSection = null;
+      const mediaSelector = 'img, video';
+      const sectionMediaRevealMargin = 200;
+      const deferredRevealTimeout = 1400;
+      const getHeaderProbeBand = () => {
+        const headerHeight = getHeaderHeight();
+        const top = Math.max(0, headerHeight);
+        const bottom = Math.min(window.innerHeight, top + 32);
 
-      const findBackgroundImage = (sectionEl) =>
-        sectionEl.querySelector(
-          '[data-header-luminance-img], .subcollections__bg img, .hero__bg img, .section-background img, .banner__media img, .image-with-text__image img'
+        return {top, bottom};
+      };
+      const getHeaderProbePoints = () => {
+        const band = getHeaderProbeBand();
+        const y = Math.min(window.innerHeight - 1, Math.max(1, band.top + (band.bottom - band.top) / 2));
+
+        return [0.5, 0.18, 0.82].map((ratio) => ({
+          x: Math.min(window.innerWidth - 1, Math.max(1, window.innerWidth * ratio)),
+          y,
+        }));
+      };
+      const mediaContainsPoint = (mediaEl, point) => {
+        const rect = mediaEl.getBoundingClientRect();
+        return point.x >= rect.left && point.x <= rect.right && point.y >= rect.top && point.y <= rect.bottom;
+      };
+      const mediaOverlapsProbeBand = (mediaEl) => {
+        const rect = mediaEl.getBoundingClientRect();
+        const band = getHeaderProbeBand();
+
+        if (rect.width <= 0 || rect.height <= 0) return false;
+
+        return rect.bottom > band.top && rect.top < band.bottom && rect.right > 0 && rect.left < window.innerWidth;
+      };
+      const getMediaCandidatesFromElement = (element) => {
+        if (!(element instanceof Element)) return [];
+
+        const candidates = [];
+        if (element.matches(mediaSelector)) {
+          candidates.push(element);
+        }
+
+        element.querySelectorAll(mediaSelector).forEach((mediaEl) => {
+          candidates.push(mediaEl);
+        });
+
+        return candidates;
+      };
+      const getClampedProbePointForMedia = (mediaEl) => {
+        const rect = mediaEl.getBoundingClientRect();
+        const preferredPoint = getHeaderProbePoints()[0];
+
+        return {
+          x: clamp(preferredPoint.x, rect.left + 1, rect.right - 1),
+          y: clamp(preferredPoint.y, rect.top + 1, rect.bottom - 1),
+        };
+      };
+      const pickMediaFromElements = (elements, point, sectionEl) => {
+        const matches = [];
+
+        elements.forEach((element, index) => {
+          getMediaCandidatesFromElement(element).forEach((mediaEl) => {
+            if (!mediaContainsPoint(mediaEl, point) || !mediaOverlapsProbeBand(mediaEl)) return;
+
+            matches.push({
+              mediaEl,
+              depth: index,
+              inSection: Boolean(sectionEl && sectionEl.contains(mediaEl)),
+            });
+          });
+        });
+
+        if (!matches.length) return null;
+
+        matches.sort((a, b) => {
+          if (a.inSection !== b.inSection) {
+            return a.inSection ? -1 : 1;
+          }
+
+          return a.depth - b.depth;
+        });
+
+        return matches[0].mediaEl;
+      };
+      const findMediaUnderHeader = (sectionEl) => {
+        const probePoints = getHeaderProbePoints();
+
+        for (const point of probePoints) {
+          const elements = document.elementsFromPoint(point.x, point.y);
+          const mediaEl = pickMediaFromElements(elements, point, sectionEl);
+
+          if (mediaEl) {
+            debugLog('Picked media from header probe', {
+              section: getSectionLabel(sectionEl),
+              point: {
+                x: roundForLog(point.x),
+                y: roundForLog(point.y),
+              },
+              ...getMediaDescriptor(mediaEl),
+            });
+
+            return {
+              mediaEl,
+              point,
+            };
+          }
+        }
+
+        const sectionMedia = Array.from(sectionEl.querySelectorAll(mediaSelector)).find((mediaEl) =>
+          mediaOverlapsProbeBand(mediaEl)
         );
+
+        if (sectionMedia) {
+          debugLog('Picked overlapping section media', {
+            section: getSectionLabel(sectionEl),
+            ...getMediaDescriptor(sectionMedia),
+          });
+        }
+
+        if (!sectionMedia) return null;
+
+        return {
+          mediaEl: sectionMedia,
+          point: getClampedProbePointForMedia(sectionMedia),
+        };
+      };
+
+      const isImageReady = (imgEl) => {
+        const src = imgEl?.currentSrc || imgEl?.src;
+        return Boolean(src) && imgEl.complete && imgEl.naturalWidth > 0;
+      };
+      const isImageFailed = (imgEl) => {
+        const src = imgEl?.currentSrc || imgEl?.src;
+        return Boolean(src) && imgEl.complete && imgEl.naturalWidth === 0;
+      };
+
+      const isVideoReady = (videoEl) => videoEl.readyState >= 2 && videoEl.videoWidth > 0 && videoEl.videoHeight > 0;
+      const isVideoFailed = (videoEl) => Boolean(videoEl?.error);
+      const isMediaReady = (mediaEl) => {
+        if (isImageElement(mediaEl)) return isImageReady(mediaEl);
+        if (isVideoElement(mediaEl)) return isVideoReady(mediaEl);
+        return false;
+      };
+      const isMediaFailed = (mediaEl) => {
+        if (isImageElement(mediaEl)) return isImageFailed(mediaEl);
+        if (isVideoElement(mediaEl)) return isVideoFailed(mediaEl);
+        return false;
+      };
+      const isPendingMedia = (mediaEl) => {
+        if (!mediaEl) return false;
+        if (isVideoElement(mediaEl) && mediaEl.poster) return false;
+        return !isMediaReady(mediaEl) && !isMediaFailed(mediaEl);
+      };
+
+      const getMediaDescriptor = (mediaEl) => {
+        if (!mediaEl) return {};
+
+        if (isImageElement(mediaEl)) {
+          return {
+            tag: 'IMG',
+            src: mediaEl.currentSrc || mediaEl.src || null,
+            complete: mediaEl.complete,
+            naturalWidth: mediaEl.naturalWidth,
+          };
+        }
+
+        if (isVideoElement(mediaEl)) {
+          return {
+            tag: 'VIDEO',
+            poster: mediaEl.poster || null,
+            readyState: mediaEl.readyState,
+            videoWidth: mediaEl.videoWidth,
+            videoHeight: mediaEl.videoHeight,
+            currentSrc: mediaEl.currentSrc || null,
+          };
+        }
+
+        return {
+          tag: mediaEl.tagName || 'UNKNOWN',
+        };
+      };
+
+      const watchMediaReadiness = (sectionEl, mediaEl) => {
+        if (!mediaEl || mediaReadyListeners.has(mediaEl)) return;
+
+        const eventNames = isImageElement(mediaEl)
+          ? ['load', 'error']
+          : ['loadeddata', 'loadedmetadata', 'canplay', 'error'];
+
+        const onMediaReady = (event) => {
+          eventNames.forEach((eventName) => {
+            mediaEl.removeEventListener(eventName, onMediaReady);
+          });
+
+          mediaReadyListeners.delete(mediaEl);
+          luminanceCache.delete(sectionEl);
+
+          debugLog('Media readiness event received', {
+            section: getSectionLabel(sectionEl),
+            eventType: event.type,
+            ...getMediaDescriptor(mediaEl),
+          });
+
+          if (currentObservedSection === sectionEl) {
+            scheduleApply(sectionEl);
+          }
+        };
+
+        mediaReadyListeners.add(mediaEl);
+        eventNames.forEach((eventName) => {
+          mediaEl.addEventListener(eventName, onMediaReady);
+        });
+
+        debugLog('Waiting for media readiness before computing luminance', {
+          section: getSectionLabel(sectionEl),
+          ...getMediaDescriptor(mediaEl),
+        });
+      };
+
+      const clearDeferredRevealTimer = (sectionEl) => {
+        const timer = deferredRevealTimers.get(sectionEl);
+        if (!timer) return;
+        clearTimeout(timer);
+        deferredRevealTimers.delete(sectionEl);
+      };
+
+      const queueDeferredReveal = (sectionEl) => {
+        if (deferredRevealTimers.has(sectionEl)) return;
+
+        const timer = window.setTimeout(() => {
+          deferredRevealTimers.delete(sectionEl);
+
+          if (
+            currentObservedSection !== sectionEl ||
+            !headerWrapper ||
+            headerWrapper.dataset.headerColorReady === 'true'
+          ) {
+            return;
+          }
+
+          debugLog('Revealed header after deferred media wait timeout', {
+            section: getSectionLabel(sectionEl),
+            timeoutMs: deferredRevealTimeout,
+          });
+          revealResolvedHeader();
+        }, deferredRevealTimeout);
+
+        deferredRevealTimers.set(sectionEl, timer);
+      };
+
+      const isRelevantSectionMedia = (mediaEl) => {
+        const rect = mediaEl.getBoundingClientRect();
+        const band = getHeaderProbeBand();
+
+        if (rect.right <= 0 || rect.left >= window.innerWidth) return false;
+
+        if (rect.width > 0 || rect.height > 0) {
+          return rect.bottom > band.top - sectionMediaRevealMargin && rect.top < band.bottom + sectionMediaRevealMargin;
+        }
+
+        return rect.top < band.bottom + sectionMediaRevealMargin;
+      };
+
+      const getPendingSectionMedia = (sectionEl) =>
+        Array.from(sectionEl.querySelectorAll(mediaSelector))
+          .filter((mediaEl) => isRelevantSectionMedia(mediaEl))
+          .slice(0, 3)
+          .filter((mediaEl) => isPendingMedia(mediaEl));
+
+      const deferRevealUntilMediaSettles = (sectionEl, source) => {
+        if (source !== 'background') {
+          clearDeferredRevealTimer(sectionEl);
+          return false;
+        }
+
+        const pendingMedia = getPendingSectionMedia(sectionEl);
+        if (!pendingMedia.length) {
+          clearDeferredRevealTimer(sectionEl);
+          return false;
+        }
+
+        pendingMedia.forEach((mediaEl) => watchMediaReadiness(sectionEl, mediaEl));
+        queueDeferredReveal(sectionEl);
+        debugLog('Deferred header reveal on background fallback while nearby media loads', {
+          section: getSectionLabel(sectionEl),
+          pendingMedia: pendingMedia.map((mediaEl) => getMediaDescriptor(mediaEl)),
+        });
+        return true;
+      };
 
       const findElementBackgroundImage = (el) => {
         let node = el;
@@ -1265,24 +1734,94 @@
       };
 
       const applyLuminanceMode = (luminance) => {
-        if (luminance < 0.25) {
-          applyMode('light');
-        } else if (luminance < 0.5) {
-          applyMode('dimmedLight');
-        } else if (luminance < 0.75) {
-          applyMode('lightDark');
-        } else {
-          applyMode('dark');
-        }
+        applyMode(luminance >= nearWhiteLuminanceThreshold ? 'dark' : 'light');
       };
 
       const logLuminance = (luminance, sectionEl, source) => {
-        if (!DEBUG_HEADER_OBSERVER) return;
-        console.log('header luminance', {
-          luminance,
+        debugLog('Computed luminance', {
+          luminance: roundForLog(luminance),
           source,
-          section: sectionEl.dataset.sectionId || sectionEl.id || sectionEl.className,
+          threshold: roundForLog(nearWhiteLuminanceThreshold),
+          section: getSectionLabel(sectionEl),
+          resultingMode: luminance >= nearWhiteLuminanceThreshold ? 'dark' : 'light',
         });
+      };
+      const getSectionFallbackLuminance = (sectionEl) => getLuminance(getBackgroundRGB(sectionEl));
+      const applyResolvedLuminance = (sectionEl, luminance, source) => {
+        luminanceCache.set(sectionEl, luminance);
+        logLuminance(luminance, sectionEl, source);
+        applyLuminanceMode(luminance);
+        if (deferRevealUntilMediaSettles(sectionEl, source)) return;
+        revealResolvedHeader();
+      };
+      const applyAsyncLuminance = (sectionEl, luminancePromise, source, fallbackLuminance) => {
+        luminancePromise.then((luminance) => {
+          applyResolvedLuminance(sectionEl, luminance ?? fallbackLuminance, luminance !== null ? source : 'background');
+        });
+      };
+      const cacheAndApplyLuminance = (sectionEl, luminance, source) => {
+        applyResolvedLuminance(sectionEl, luminance, source);
+      };
+      const applyFallbackLuminance = (sectionEl, source = 'background') => {
+        cacheAndApplyLuminance(sectionEl, getSectionFallbackLuminance(sectionEl), source);
+      };
+      const applyMediaLuminance = (sectionEl, mediaMatch, fallbackLuminance) => {
+        if (!mediaMatch) return false;
+
+        const {mediaEl, point} = mediaMatch;
+        const mediaFallbackRgb = getBackgroundRGB(mediaEl);
+
+        if (isImageElement(mediaEl)) {
+          if (isMediaFailed(mediaEl)) {
+            applyFallbackLuminance(sectionEl, 'background-after-image-error');
+            return true;
+          }
+
+          if (!isMediaReady(mediaEl)) {
+            watchMediaReadiness(sectionEl, mediaEl);
+            return true;
+          }
+
+          applyAsyncLuminance(
+            sectionEl,
+            computeImageLuminance(mediaEl, point, mediaFallbackRgb),
+            'image-sampled',
+            fallbackLuminance
+          );
+          return true;
+        }
+
+        if (isVideoElement(mediaEl)) {
+          if (isMediaFailed(mediaEl)) {
+            applyFallbackLuminance(sectionEl, 'background-after-video-error');
+            return true;
+          }
+
+          if (mediaEl.poster) {
+            applyAsyncLuminance(
+              sectionEl,
+              computeBackgroundImageLuminance(mediaEl.poster),
+              'video-poster',
+              fallbackLuminance
+            );
+            return true;
+          }
+
+          if (!isMediaReady(mediaEl)) {
+            watchMediaReadiness(sectionEl, mediaEl);
+            return true;
+          }
+
+          applyAsyncLuminance(
+            sectionEl,
+            computeVideoLuminance(mediaEl, point, mediaFallbackRgb),
+            'video-frame-sampled',
+            fallbackLuminance
+          );
+          return true;
+        }
+
+        return false;
       };
 
       const applyForSection = (sectionEl) => {
@@ -1293,33 +1832,18 @@
           return;
         }
 
-        const img = findBackgroundImage(sectionEl);
+        const mediaMatch = findMediaUnderHeader(sectionEl);
         const bgUrl = findElementBackgroundImage(sectionEl);
+        const fallbackLuminance = getSectionFallbackLuminance(sectionEl);
 
-        if (img) {
-          computeImageLuminance(img).then((lum) => {
-            const luminance = lum ?? getLuminance(getBackgroundRGB(sectionEl));
-            luminanceCache.set(sectionEl, luminance);
-            logLuminance(luminance, sectionEl, lum !== null ? 'image' : 'background');
-            applyLuminanceMode(luminance);
-          });
-          return;
-        }
+        if (applyMediaLuminance(sectionEl, mediaMatch, fallbackLuminance)) return;
 
         if (bgUrl) {
-          computeBackgroundImageLuminance(bgUrl).then((lum) => {
-            const luminance = lum ?? getLuminance(getBackgroundRGB(sectionEl));
-            luminanceCache.set(sectionEl, luminance);
-            logLuminance(luminance, sectionEl, lum !== null ? 'background-image' : 'background');
-            applyLuminanceMode(luminance);
-          });
+          applyAsyncLuminance(sectionEl, computeBackgroundImageLuminance(bgUrl), 'background-image', fallbackLuminance);
           return;
         }
 
-        const luminance = getLuminance(getBackgroundRGB(sectionEl));
-        luminanceCache.set(sectionEl, luminance);
-        logLuminance(luminance, sectionEl, 'background');
-        applyLuminanceMode(luminance);
+        cacheAndApplyLuminance(sectionEl, fallbackLuminance, 'background');
       };
 
       const debounceFn = (fn, wait) => {
@@ -1360,6 +1884,12 @@
       const onIntersect = (entries) => {
         const entry = pickTopEntry(entries);
         if (!entry) return;
+        currentObservedSection = entry.target;
+        debugLog('Intersection selected section', {
+          section: getSectionLabel(entry.target),
+          intersectionRatio: roundForLog(entry.intersectionRatio),
+          top: roundForLog(entry.boundingClientRect.top),
+        });
         scheduleApply(entry.target);
       };
 
@@ -1373,7 +1903,10 @@
 
       const startObserver = () => {
         rootMargin = computeRootMargin();
-        intersectionObserver = new IntersectionObserver(onIntersect, {rootMargin, threshold: thresholds});
+        intersectionObserver = new IntersectionObserver(onIntersect, {
+          rootMargin,
+          threshold: intersectionThresholds,
+        });
         observeAll();
         ensureOverlay();
       };
@@ -1677,22 +2210,22 @@
     {
       "type": "range",
       "id": "padding_top",
-      "min": 5,
-      "max": 42,
-      "step": 1,
+      "min": 4,
+      "max": 80,
+      "step": 2,
       "unit": "px",
       "label": "Top",
-      "default": 15
+      "default": 12
     },
     {
       "type": "range",
       "id": "padding_bottom",
-      "min": 5,
-      "max": 42,
-      "step": 1,
+      "min": 4,
+      "max": 80,
+      "step": 2,
       "unit": "px",
       "label": "Bottom",
-      "default": 15
+      "default": 12
     }
   ],
   "blocks": [

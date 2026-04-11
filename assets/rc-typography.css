@@ -1,0 +1,195 @@
+/**
+ * RC26 Typography Overrides
+ * Targeted overrides for RC26 design specifications.
+ * Loaded after theme.css via snippets/head.liquid.
+ */
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+body .btn {
+  line-height: var(--LINE-HEIGHT-CAPTION) !important;
+}
+
+/* ── Accordions ─────────────────────────────────────────────────── */
+
+/* Accordion title: 12/20 (theme.css sets line-height to LINE-HEIGHT-BODY=22px) */
+.accordion__title {
+  line-height: var(--LINE-HEIGHT-CAPTION);
+}
+
+/* ── FAQ sidebar widget links ───────────────────────────────────── */
+
+/* Parent container line-height: 17px → 20px */
+.widget__links {
+  line-height: var(--LINE-HEIGHT-CAPTION);
+}
+
+/* ── PLP collection nav ─────────────────────────────────────────── */
+
+/* Subcategory titles: 12/20 */
+body.template-collection .collection__nav .subcollection_links-link,
+body.template-collection .subcollection__title.navlink {
+  font-size: var(--FONT-SIZE-CAPTION);
+  line-height: var(--LINE-HEIGHT-CAPTION);
+}
+
+/* Filter group heading: 11/16 */
+body.template-collection.filter-group__heading {
+  font-size: var(--FONT-SIZE-INPUT-LABEL);
+  line-height: var(--LINE-HEIGHT-INPUT-LABEL);
+}
+
+body.template-collection .hero__title.heading-large {
+  font-size: var(--FONT-DISPLAY-L);
+  line-height: var(--LINE-HEIGHT-DISPLAY-L);
+}
+
+/* ── Predictive search ──────────────────────────────────────────── */
+
+/* Suggested results: 12/20 */
+.predictive-search__item {
+  font-size: var(--FONT-SIZE-CAPTION);
+  line-height: var(--LINE-HEIGHT-CAPTION);
+}
+
+/* ── FAQ ──────────────────────────────────────────── */
+
+body#faq .section-sidebar__widget .widget__link {
+  font-weight: 400 !important;
+}
+
+body#faq .section-sidebar__title {
+  text-transform: inherit !important;
+}
+
+/* ── Concierge ──────────────────────────────────────────── */
+
+body#concierge .main-content p {
+  font-size: var(--FONT-SIZE-BASE) !important;
+  line-height: var(--LINE-HEIGHT-BODY) !important;
+}
+
+/* ── Japan Stores ──────────────────────────────────────────── */
+
+body#japan-stores .image-title-desc__wrapper h4 {
+  margin: 0 auto 80px auto;
+  max-width: 80%;
+  text-align: center;
+  text-wrap: balance;
+}
+
+body#japan-stores .image-title-desc__media img {
+  height: 100%;
+  padding: 0;
+  object-fit: cover;
+}
+
+body#japan-stores .image-title-desc__title {
+  font-size: var(--FONT-DISPLAY-L);
+  line-height: var(--LINE-HEIGHT-DISPLAY-L);
+}
+
+body#japan-stores a:has(.image-title-desc__logo) img {
+  display: none;
+}
+
+body#japan-stores a:has(.image-title-desc__logo) .image-title-desc__logo-text {
+  color: inherit;
+  text-decoration: none;
+}
+
+body#japan-stores a:has(.image-title-desc__logo) {
+  background: var(--btn-bg, #000);
+  color: var(--btn-text, #fff);
+  border: 1px solid var(--btn-border, #000);
+  border-radius: 0;
+  padding: 12px 20px;
+  text-align: center;
+  font-size: var(--BTN-FONT-SIZE);
+  font-weight: var(--BTN-FONT-WEIGHT);
+  line-height: var(--BTN-LINE-HEIGHT);
+  letter-spacing: var(--BTN-LETTER-SPACING);
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+body#japan-stores a:has(.image-title-desc__logo):hover {
+  border-color: var(--btn-border, #000);
+  background-color: #27574d;
+  color: #000;
+}
+
+body#japan-stores a:has(.image-title-desc__logo)::before {
+  content: "";
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2218%22%20height%3D%2218%22%20viewBox%3D%220%200%2018%2018%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M16.6467%200.0668817C17.4506%20-0.237324%2018.2373%200.549363%2017.9331%201.35333L11.878%2017.355C11.5367%2018.2571%2010.2416%2018.1986%209.98343%2017.2693L7.97189%2010.0281L0.730729%208.01657C-0.198581%207.75838%20-0.257142%206.46331%200.644965%206.12197L16.6467%200.0668817ZM0.997765%207.05465L8.23893%209.06619C8.57619%209.15988%208.84012%209.42382%208.93381%209.76107L10.9453%2017.0022L16.9995%201.00053L0.997765%207.05465Z%22%20fill%3D%22white%22%2F%3E%3C%2Fsvg%3E");
+  transform: translate(5px, 0px);
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: middle;
+}
+body#japan-stores a:has(.image-title-desc__logo):hover::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18' fill='none'%3E%3Cpath d='M16.6467 0.0668817C17.4506 -0.237324 18.2373 0.549363 17.9331 1.35333L11.878 17.355C11.5367 18.2571 10.2416 18.1986 9.98343 17.2693L7.97189 10.0281L0.730729 8.01657C-0.198581 7.75838 -0.257142 6.46331 0.644965 6.12197L16.6467 0.0668817ZM0.997765 7.05465L8.23893 9.06619C8.57619 9.15988 8.84012 9.42382 8.93381 9.76107L10.9453 17.0022L16.9995 1.00053L0.997765 7.05465Z' fill='black'/%3E%3C/svg%3E");
+  transition:
+    background-image 180ms ease,
+    color 180ms ease;
+}
+
+/* ── Our commitment ──────────────────────────────────────────── */
+
+body#our-commitment .image-title-desc__top-description {
+  margin: 0 auto 80px auto;
+  max-width: 70%;
+  text-align: center;
+  text-wrap: balance;
+}
+
+body#our-commitment .image-title-desc__top-description p {
+  font-size: var(--FONT-SIZE-BASE);
+  line-height: var(--LINE-HEIGHT-BODY);
+  font-family: var(--FONT-STACK-BODY);
+}
+
+body#our-commitment .image-title-desc__media img {
+  height: 100%;
+  padding: 0;
+  object-fit: cover;
+}
+
+/* ── Mobile overrides ───────────────────────────────────────────── */
+
+@media only screen and (max-width: 749px) {
+  /* Homepage banner body text: 14/22 */
+  .hero__description {
+    font-size: var(--FONT-SIZE-BASE);
+    line-height: var(--LINE-HEIGHT-BODY);
+  }
+
+  /* PLP / Search PLP product titles: 11/16 */
+  .product-item__title {
+    font-size: var(--FONT-SIZE-INPUT-LABEL);
+    line-height: var(--LINE-HEIGHT-INPUT-LABEL);
+  }
+
+  /* PLP / Search PLP product prices: 11/16 */
+  .product-item .price,
+  .product-item .price__regular,
+  .product-item .price__sale,
+  .product-item .price-item {
+    font-size: var(--FONT-SIZE-INPUT-LABEL);
+    line-height: var(--LINE-HEIGHT-INPUT-LABEL);
+  }
+
+  /* PLP "read more": regular weight (not bold) */
+  .collection .caps--link {
+    font-weight: var(--FONT-WEIGHT-BODY);
+  }
+}
+

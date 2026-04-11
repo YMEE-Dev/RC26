@@ -435,7 +435,8 @@
           current_variant: current_variant,
           section_id: section_id,
           ring_sizing_link: ring_sizing_link,
-          bracelet_sizing_link: bracelet_sizing_link
+          bracelet_sizing_link: bracelet_sizing_link,
+          cr_show_available_soon: cr_show_available_soon
         -%}
       {%- endif -%}
 
@@ -507,8 +508,16 @@
               {%- render 'gift-card-recipient-form', product: product, form: form, section: section -%}
             {%- endif -%}
 
+            {%- liquid
+              assign initial_notify_active = false
+              if show_newsletter and ymee_has_size == false
+                if current_variant.available == false or quantity_rule_soldout or current_variant == null
+                  assign initial_notify_active = true
+                endif
+              endif
+            -%}
             <div class="product__submit__buttons{% if show_dynamic_checkout and show_quantity == false %} product__submit__buttons--inline{% endif %}">
-              <div class="product__submit__item{% if show_quantity %} product__submit__item--inline{% endif %}">
+              <div class="product__submit__item{% if show_quantity %} product__submit__item--inline{% endif %}"{% if initial_notify_active %} data-notify-active{% endif %}>
                 {{ quantity_selector }}
 
                 <button

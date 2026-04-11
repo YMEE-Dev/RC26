@@ -147,7 +147,7 @@
         <div class="protection-cards__button-wrapper" style="margin-top: {{ section.settings.button_margin_top }}px;">
           <a
             href="{{ section.settings.button_link }}"
-            class="btn btn--outline protection-cards__btn"
+            class="btn btn--primary btn--solid protection-cards__btn"
             data-aos="hero"
             data-aos-anchor="{{ animation_anchor }}"
             data-aos-order="{{ animation_order }}"
@@ -291,39 +291,12 @@
     }
   }
 
-  /* .protection-cards__grid {
-    display: grid;
-    grid-template-columns: 2fr 2fr 2fr;
-    gap: 80px;
-    width: 100%;
-  }
-
-  @media (max-width: 1024px) {
-    .protection-cards__grid {
-      grid-template-columns: 2fr 2fr;
-      gap: 80px;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .protection-cards__grid {
-      gap: 40px !important;
-    }
-  }
-  @media (max-width: 425px) {
-    .protection-cards__grid {
-      grid-template-columns: 1fr;
-      gap: 80px;
-    }
-  } */
-
   .protection-card {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     position: relative;
-    /* gap: 24px; */
   }
 
   .protection-card__overlay-link {
@@ -367,13 +340,9 @@
     justify-content: center;
   }
 
-  .protection-cards__btn {
-    --btn-border: #000;
-    --btn-bg: #000;
-    --btn-text: #fff;
-    --btn-bg-hover: #27574d;
-    --btn-border-hover: #27574d;
-    --btn-text-hover: #fff;
+  .protection-cards .protection-cards__wrapper .protection-cards__btn {
+    animation-delay: initial;
+    transition-delay: initial;
   }
 
   @media (min-width: 990px) {
@@ -427,10 +396,10 @@
     text-align: center;
     margin: 0;
     font-family: var(--FONT-STACK-BODY);
-    font-size: 14px;
+    font-size: var(--FONT-SIZE-BASE);
     font-style: var(--FONT-STYLE-BODY);
     font-weight: var(--FONT-WEIGHT-BODY);
-    line-height: 22px;
+    line-height: var(--LINE-HEIGHT-BODY);
   }
 
   @media (min-width: 990px) {
