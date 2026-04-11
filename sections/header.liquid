@@ -46,16 +46,32 @@
   assign secondary_menu_linklist = section.settings.secondary_menu_linklist
   assign right_menu_linklist = section.settings.right_menu_linklist
   assign use_desktop_probe_band_on_mobile = false
+  assign header_default_mode = 'dark'
+  if template.name == 'collection'
+    assign header_default_mode = collection.metafields.custom.header_observer_mode.value | default: header_default_mode
+    assign header_default_mode = header_default_mode | downcase | strip
+    unless header_default_mode == 'light' or header_default_mode == 'dark'
+      assign header_default_mode = 'dark'
+    endunless
+  endif
+  assign header_default_link = '#000'
+  assign header_default_link_hover = '#222'
+  if header_default_mode == 'light'
+    assign header_default_link = '#fff'
+    assign header_default_link_hover = '#f0f0f0'
+  endif
   if template.name == 'product' or template.name == 'collection'
     assign use_desktop_probe_band_on_mobile = true
   endif
 
   assign logo_variant = section.settings.logo_variant | default: 'dark'
+  if template.name == 'collection'
+    assign logo_variant = header_default_mode
+  endif
   assign logo_light_asset = 'RC_LOGO_light.svg'
   assign logo_dark_asset = 'RC_LOGO_dark.svg'
   assign logo_asset = logo_dark_asset
   assign logo_denom = 814 | divided_by: 76
-  assign transparent_logo_asset = logo_dark_asset
   if logo_variant == 'light'
     assign logo_asset = logo_light_asset
     assign logo_denom = 814 | divided_by: 76
@@ -63,6 +79,7 @@
     assign logo_asset = logo_dark_asset
     assign logo_denom = 800 | divided_by: 74
   endif
+  assign transparent_logo_asset = logo_asset
   assign transparent_logo_pdp = section.settings.transparent_logo_pdp
   assign use_transparent_logo_pdp = false
   if template.name == 'product' and section.settings.transparent_product_page and transparent_logo_pdp != blank
@@ -662,10 +679,11 @@
   <header
     class="theme__header{% if show_separator_line %} has-border{% endif %}"
     role="banner"
-    style="--header-scroll-reveal-opacity: 0; --header-scroll-reveal-blur: 0px; --header-scroll-reveal-background: linear-gradient(180deg, rgba(249, 249, 249, 0.25) 0%, rgba(249, 249, 249, 0.00) 100%);"
-    data-header-color-pending="true"
+    style="--header-scroll-reveal-opacity: 0; --header-scroll-reveal-blur: 0px; --header-scroll-reveal-background: linear-gradient(180deg, rgba(249, 249, 249, 0.25) 0%, rgba(249, 249, 249, 0.00) 100%); --globaltext: {{ header_default_link }}; --link: {{ header_default_link }}; --link-hover: {{ header_default_link_hover }};"
+    data-header-color-ready="true"
     data-header-height
     data-header-desktop
+    data-header-default-mode="{{ header_default_mode }}"
     data-header-probe-band-mobile-desktop="{{ use_desktop_probe_band_on_mobile }}"
   >
     <span class="theme__header__scroll-blur" aria-hidden="true"></span>
@@ -686,11 +704,11 @@
           {%- render 'icon-menu' -%}
         </button>
       </div>
-      <div class="header__mobile">
+      <div class="header__mobile" style="--globaltext: {{ header_default_link }}; --text: {{ header_default_link }}; --link: {{ header_default_link }}; --link-hover: {{ header_default_link_hover }};">
         {{ minimal }}
       </div>
 
-      <div class="header__desktop">
+      <div class="header__desktop" style="--globaltext: {{ header_default_link }}; --text: {{ header_default_link }}; --link: {{ header_default_link }}; --link-hover: {{ header_default_link_hover }};">
         {%- case section.settings.header_style -%}
           {%- when 'logo_beside' -%}
             <div class="header__desktop__upper" data-takes-space-wrapper>
@@ -755,7 +773,7 @@
     </div>
   </header>
   <span class="underlay" data-popdown-underlay></span>
-</header-component>
+  </header-component>
 
 <div class="header__backfill" data-header-backfill></div>
 
@@ -1099,7 +1117,7 @@
         });
       };
 
-      const defaultMode = 'dark';
+      const defaultMode = headerWrapper?.dataset.headerDefaultMode === 'light' ? 'light' : 'dark';
       let currentMode = defaultMode;
       const applyMode = (mode) => {
         const resolved = mode || defaultMode;
