@@ -34,6 +34,7 @@
     --right-h-mobile: {{ section.settings.right_media_height_mobile }}px;
     --right-fit: {{ section.settings.right_image_fit }};
     --right-scale: {{ section.settings.right_image_scale | times: 0.01 }};
+    --right-offset-y: {{ section.settings.right_column_offset_y }}px;
   }
 {%- endstyle -%}
 
@@ -140,6 +141,7 @@
     gap: var(--gap);
     align-items: start;
     grid-area: right;
+    transform: translateY(var(--right-offset-y));
   }
 
   .blog-quote-two-images__left {
@@ -403,6 +405,16 @@
       "unit": "%",
       "label": "Right image scale",
       "default": 100
+    },
+    {
+      "type": "range",
+      "id": "right_column_offset_y",
+      "min": -240,
+      "max": 240,
+      "step": 4,
+      "unit": "px",
+      "label": "Right side vertical offset",
+      "default": 0
     },
     {
       "type": "image_picker",
