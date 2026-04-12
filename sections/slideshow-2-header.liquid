@@ -35,7 +35,132 @@
   endif
 
   assign interval_ms = section.settings.interval_seconds | times: 1000
+
+  assign hero_top_primary = hero_top_a | default: hero_top_b
+  assign hero_right_primary = hero_right_a | default: hero_right_b
+  assign hero_left_primary = hero_left_a | default: hero_left_b
+  assign hero_bottom_primary = hero_bottom_a | default: hero_bottom_b
+
+  assign hero_top_src_a = hero_top_primary | image_url: width: 1400
+  assign hero_top_src_b = ''
+  assign hero_top_alt_a = hero_top_a.alt | default: hero_top_b.alt | escape
+  assign hero_top_alt_b = ''
+  if hero_top_b != blank
+    assign hero_top_src_b = hero_top_b | image_url: width: 1400
+    assign hero_top_alt_b = hero_top_b.alt | escape
+  endif
+
+  assign hero_right_src_a = hero_right_primary | image_url: width: 1800
+  assign hero_right_src_b = ''
+  assign hero_right_alt_a = hero_right_a.alt | default: hero_right_b.alt | escape
+  assign hero_right_alt_b = ''
+  if hero_right_b != blank
+    assign hero_right_src_b = hero_right_b | image_url: width: 1800
+    assign hero_right_alt_b = hero_right_b.alt | escape
+  endif
+
+  assign hero_left_src_a = hero_left_primary | image_url: width: 1800
+  assign hero_left_src_b = ''
+  assign hero_left_alt_a = hero_left_a.alt | default: hero_left_b.alt | escape
+  assign hero_left_alt_b = ''
+  if hero_left_b != blank
+    assign hero_left_src_b = hero_left_b | image_url: width: 1800
+    assign hero_left_alt_b = hero_left_b.alt | escape
+  endif
+
+  assign hero_bottom_src_a = hero_bottom_primary | image_url: width: 1800
+  assign hero_bottom_src_b = ''
+  assign hero_bottom_alt_a = hero_bottom_a.alt | default: hero_bottom_b.alt | escape
+  assign hero_bottom_alt_b = ''
+  if hero_bottom_b != blank
+    assign hero_bottom_src_b = hero_bottom_b | image_url: width: 1800
+    assign hero_bottom_alt_b = hero_bottom_b.alt | escape
+  endif
 -%}
+
+{%- capture hero_top_style -%}
+--shift-x-a-desktop: {{ section.settings.s1_top_x_desktop }}px;
+--shift-y-a-desktop: {{ section.settings.s1_top_y_desktop }}px;
+--shift-x-a-mobile: {{ section.settings.s1_top_x_mobile }}px;
+--shift-y-a-mobile: {{ section.settings.s1_top_y_mobile }}px;
+--shift-x-a-ipad: {{ section.settings.s1_top_x_ipad }}px;
+--shift-y-a-ipad: {{ section.settings.s1_top_y_ipad }}px;
+--shift-x-b-desktop: {{ section.settings.s2_top_x_desktop }}px;
+--shift-y-b-desktop: {{ section.settings.s2_top_y_desktop }}px;
+--shift-x-b-mobile: {{ section.settings.s2_top_x_mobile }}px;
+--shift-y-b-mobile: {{ section.settings.s2_top_y_mobile }}px;
+--shift-x-b-ipad: {{ section.settings.s2_top_x_ipad }}px;
+--shift-y-b-ipad: {{ section.settings.s2_top_y_ipad }}px;
+--scale-a-desktop: {{ section.settings.s1_top_scale_desktop | times: 0.01 }};
+--scale-a-mobile: {{ section.settings.s1_top_scale_mobile | times: 0.01 }};
+--scale-a-ipad: {{ section.settings.s1_top_scale_ipad | times: 0.01 }};
+--scale-b-desktop: {{ section.settings.s2_top_scale_desktop | times: 0.01 }};
+--scale-b-mobile: {{ section.settings.s2_top_scale_mobile | times: 0.01 }};
+--scale-b-ipad: {{ section.settings.s2_top_scale_ipad | times: 0.01 }};
+{%- endcapture -%}
+
+{%- capture hero_right_style -%}
+--shift-x-a-desktop: {{ section.settings.s1_right_x_desktop }}px;
+--shift-y-a-desktop: {{ section.settings.s1_right_y_desktop }}px;
+--shift-x-a-mobile: {{ section.settings.s1_right_x_mobile }}px;
+--shift-y-a-mobile: {{ section.settings.s1_right_y_mobile }}px;
+--shift-x-a-ipad: {{ section.settings.s1_right_x_ipad }}px;
+--shift-y-a-ipad: {{ section.settings.s1_right_y_ipad }}px;
+--shift-x-b-desktop: {{ section.settings.s2_right_x_desktop }}px;
+--shift-y-b-desktop: {{ section.settings.s2_right_y_desktop }}px;
+--shift-x-b-mobile: {{ section.settings.s2_right_x_mobile }}px;
+--shift-y-b-mobile: {{ section.settings.s2_right_y_mobile }}px;
+--shift-x-b-ipad: {{ section.settings.s2_right_x_ipad }}px;
+--shift-y-b-ipad: {{ section.settings.s2_right_y_ipad }}px;
+--scale-a-desktop: {{ section.settings.s1_right_scale_desktop | times: 0.01 }};
+--scale-a-mobile: {{ section.settings.s1_right_scale_mobile | times: 0.01 }};
+--scale-a-ipad: {{ section.settings.s1_right_scale_ipad | times: 0.01 }};
+--scale-b-desktop: {{ section.settings.s2_right_scale_desktop | times: 0.01 }};
+--scale-b-mobile: {{ section.settings.s2_right_scale_mobile | times: 0.01 }};
+--scale-b-ipad: {{ section.settings.s2_right_scale_ipad | times: 0.01 }};
+{%- endcapture -%}
+
+{%- capture hero_left_style -%}
+--shift-x-a-desktop: {{ section.settings.s1_left_x_desktop }}px;
+--shift-y-a-desktop: {{ section.settings.s1_left_y_desktop }}px;
+--shift-x-a-mobile: {{ section.settings.s1_left_x_mobile }}px;
+--shift-y-a-mobile: {{ section.settings.s1_left_y_mobile }}px;
+--shift-x-a-ipad: {{ section.settings.s1_left_x_ipad }}px;
+--shift-y-a-ipad: {{ section.settings.s1_left_y_ipad }}px;
+--shift-x-b-desktop: {{ section.settings.s2_left_x_desktop }}px;
+--shift-y-b-desktop: {{ section.settings.s2_left_y_desktop }}px;
+--shift-x-b-mobile: {{ section.settings.s2_left_x_mobile }}px;
+--shift-y-b-mobile: {{ section.settings.s2_left_y_mobile }}px;
+--shift-x-b-ipad: {{ section.settings.s2_left_x_ipad }}px;
+--shift-y-b-ipad: {{ section.settings.s2_left_y_ipad }}px;
+--scale-a-desktop: {{ section.settings.s1_left_scale_desktop | times: 0.01 }};
+--scale-a-mobile: {{ section.settings.s1_left_scale_mobile | times: 0.01 }};
+--scale-a-ipad: {{ section.settings.s1_left_scale_ipad | times: 0.01 }};
+--scale-b-desktop: {{ section.settings.s2_left_scale_desktop | times: 0.01 }};
+--scale-b-mobile: {{ section.settings.s2_left_scale_mobile | times: 0.01 }};
+--scale-b-ipad: {{ section.settings.s2_left_scale_ipad | times: 0.01 }};
+{%- endcapture -%}
+
+{%- capture hero_bottom_style -%}
+--shift-x-a-desktop: {{ section.settings.s1_bottom_x_desktop }}px;
+--shift-y-a-desktop: {{ section.settings.s1_bottom_y_desktop }}px;
+--shift-x-a-mobile: {{ section.settings.s1_bottom_x_mobile }}px;
+--shift-y-a-mobile: {{ section.settings.s1_bottom_y_mobile }}px;
+--shift-x-a-ipad: {{ section.settings.s1_bottom_x_ipad }}px;
+--shift-y-a-ipad: {{ section.settings.s1_bottom_y_ipad }}px;
+--shift-x-b-desktop: {{ section.settings.s2_bottom_x_desktop }}px;
+--shift-y-b-desktop: {{ section.settings.s2_bottom_y_desktop }}px;
+--shift-x-b-mobile: {{ section.settings.s2_bottom_x_mobile }}px;
+--shift-y-b-mobile: {{ section.settings.s2_bottom_y_mobile }}px;
+--shift-x-b-ipad: {{ section.settings.s2_bottom_x_ipad }}px;
+--shift-y-b-ipad: {{ section.settings.s2_bottom_y_ipad }}px;
+--scale-a-desktop: {{ section.settings.s1_bottom_scale_desktop | times: 0.01 }};
+--scale-a-mobile: {{ section.settings.s1_bottom_scale_mobile | times: 0.01 }};
+--scale-a-ipad: {{ section.settings.s1_bottom_scale_ipad | times: 0.01 }};
+--scale-b-desktop: {{ section.settings.s2_bottom_scale_desktop | times: 0.01 }};
+--scale-b-mobile: {{ section.settings.s2_bottom_scale_mobile | times: 0.01 }};
+--scale-b-ipad: {{ section.settings.s2_bottom_scale_ipad | times: 0.01 }};
+{%- endcapture -%}
 
 <section
   id="Slideshow2Header--{{ section.id }}"
@@ -49,35 +174,16 @@
       <div class="slideshow-2-header__collage" aria-hidden="true" data-s2h-collage>
         <figure
           class="slideshow-2-header__item slideshow-2-header__item--top"
-          style="
-            --shift-x-a-desktop: {{ section.settings.s1_top_x_desktop }}px;
-            --shift-y-a-desktop: {{ section.settings.s1_top_y_desktop }}px;
-            --shift-x-a-mobile: {{ section.settings.s1_top_x_mobile }}px;
-            --shift-y-a-mobile: {{ section.settings.s1_top_y_mobile }}px;
-            --shift-x-a-ipad: {{ section.settings.s1_top_x_ipad }}px;
-            --shift-y-a-ipad: {{ section.settings.s1_top_y_ipad }}px;
-            --shift-x-b-desktop: {{ section.settings.s2_top_x_desktop }}px;
-            --shift-y-b-desktop: {{ section.settings.s2_top_y_desktop }}px;
-            --shift-x-b-mobile: {{ section.settings.s2_top_x_mobile }}px;
-            --shift-y-b-mobile: {{ section.settings.s2_top_y_mobile }}px;
-            --shift-x-b-ipad: {{ section.settings.s2_top_x_ipad }}px;
-            --shift-y-b-ipad: {{ section.settings.s2_top_y_ipad }}px;
-            --scale-a-desktop: {{ section.settings.s1_top_scale_desktop | times: 0.01 }};
-            --scale-a-mobile: {{ section.settings.s1_top_scale_mobile | times: 0.01 }};
-            --scale-a-ipad: {{ section.settings.s1_top_scale_ipad | times: 0.01 }};
-            --scale-b-desktop: {{ section.settings.s2_top_scale_desktop | times: 0.01 }};
-            --scale-b-mobile: {{ section.settings.s2_top_scale_mobile | times: 0.01 }};
-            --scale-b-ipad: {{ section.settings.s2_top_scale_ipad | times: 0.01 }};
-          "
+          style="{{ hero_top_style | strip }}"
         >
           {% if hero_top_a != blank or hero_top_b != blank %}
             <img
-              src="{{ hero_top_a | default: hero_top_b | image_url: width: 1400 }}"
-              alt="{{ hero_top_a.alt | default: hero_top_b.alt | escape }}"
-              data-image-a="{{ hero_top_a | default: hero_top_b | image_url: width: 1400 }}"
-              data-image-b="{% if hero_top_b != blank %}{{ hero_top_b | image_url: width: 1400 }}{% endif %}"
-              data-alt-a="{{ hero_top_a.alt | default: hero_top_b.alt | escape }}"
-              data-alt-b="{% if hero_top_b != blank %}{{ hero_top_b.alt | escape }}{% endif %}"
+              src="{{ hero_top_src_a }}"
+              alt="{{ hero_top_alt_a }}"
+              data-image-a="{{ hero_top_src_a }}"
+              data-image-b="{{ hero_top_src_b }}"
+              data-alt-a="{{ hero_top_alt_a }}"
+              data-alt-b="{{ hero_top_alt_b }}"
               loading="eager"
             >
           {% endif %}
@@ -85,35 +191,16 @@
 
         <figure
           class="slideshow-2-header__item slideshow-2-header__item--right"
-          style="
-            --shift-x-a-desktop: {{ section.settings.s1_right_x_desktop }}px;
-            --shift-y-a-desktop: {{ section.settings.s1_right_y_desktop }}px;
-            --shift-x-a-mobile: {{ section.settings.s1_right_x_mobile }}px;
-            --shift-y-a-mobile: {{ section.settings.s1_right_y_mobile }}px;
-            --shift-x-a-ipad: {{ section.settings.s1_right_x_ipad }}px;
-            --shift-y-a-ipad: {{ section.settings.s1_right_y_ipad }}px;
-            --shift-x-b-desktop: {{ section.settings.s2_right_x_desktop }}px;
-            --shift-y-b-desktop: {{ section.settings.s2_right_y_desktop }}px;
-            --shift-x-b-mobile: {{ section.settings.s2_right_x_mobile }}px;
-            --shift-y-b-mobile: {{ section.settings.s2_right_y_mobile }}px;
-            --shift-x-b-ipad: {{ section.settings.s2_right_x_ipad }}px;
-            --shift-y-b-ipad: {{ section.settings.s2_right_y_ipad }}px;
-            --scale-a-desktop: {{ section.settings.s1_right_scale_desktop | times: 0.01 }};
-            --scale-a-mobile: {{ section.settings.s1_right_scale_mobile | times: 0.01 }};
-            --scale-a-ipad: {{ section.settings.s1_right_scale_ipad | times: 0.01 }};
-            --scale-b-desktop: {{ section.settings.s2_right_scale_desktop | times: 0.01 }};
-            --scale-b-mobile: {{ section.settings.s2_right_scale_mobile | times: 0.01 }};
-            --scale-b-ipad: {{ section.settings.s2_right_scale_ipad | times: 0.01 }};
-          "
+          style="{{ hero_right_style | strip }}"
         >
           {% if hero_right_a != blank or hero_right_b != blank %}
             <img
-              src="{{ hero_right_a | default: hero_right_b | image_url: width: 1800 }}"
-              alt="{{ hero_right_a.alt | default: hero_right_b.alt | escape }}"
-              data-image-a="{{ hero_right_a | default: hero_right_b | image_url: width: 1800 }}"
-              data-image-b="{% if hero_right_b != blank %}{{ hero_right_b | image_url: width: 1800 }}{% endif %}"
-              data-alt-a="{{ hero_right_a.alt | default: hero_right_b.alt | escape }}"
-              data-alt-b="{% if hero_right_b != blank %}{{ hero_right_b.alt | escape }}{% endif %}"
+              src="{{ hero_right_src_a }}"
+              alt="{{ hero_right_alt_a }}"
+              data-image-a="{{ hero_right_src_a }}"
+              data-image-b="{{ hero_right_src_b }}"
+              data-alt-a="{{ hero_right_alt_a }}"
+              data-alt-b="{{ hero_right_alt_b }}"
               loading="eager"
             >
           {% endif %}
@@ -121,35 +208,16 @@
 
         <figure
           class="slideshow-2-header__item slideshow-2-header__item--left"
-          style="
-            --shift-x-a-desktop: {{ section.settings.s1_left_x_desktop }}px;
-            --shift-y-a-desktop: {{ section.settings.s1_left_y_desktop }}px;
-            --shift-x-a-mobile: {{ section.settings.s1_left_x_mobile }}px;
-            --shift-y-a-mobile: {{ section.settings.s1_left_y_mobile }}px;
-            --shift-x-a-ipad: {{ section.settings.s1_left_x_ipad }}px;
-            --shift-y-a-ipad: {{ section.settings.s1_left_y_ipad }}px;
-            --shift-x-b-desktop: {{ section.settings.s2_left_x_desktop }}px;
-            --shift-y-b-desktop: {{ section.settings.s2_left_y_desktop }}px;
-            --shift-x-b-mobile: {{ section.settings.s2_left_x_mobile }}px;
-            --shift-y-b-mobile: {{ section.settings.s2_left_y_mobile }}px;
-            --shift-x-b-ipad: {{ section.settings.s2_left_x_ipad }}px;
-            --shift-y-b-ipad: {{ section.settings.s2_left_y_ipad }}px;
-            --scale-a-desktop: {{ section.settings.s1_left_scale_desktop | times: 0.01 }};
-            --scale-a-mobile: {{ section.settings.s1_left_scale_mobile | times: 0.01 }};
-            --scale-a-ipad: {{ section.settings.s1_left_scale_ipad | times: 0.01 }};
-            --scale-b-desktop: {{ section.settings.s2_left_scale_desktop | times: 0.01 }};
-            --scale-b-mobile: {{ section.settings.s2_left_scale_mobile | times: 0.01 }};
-            --scale-b-ipad: {{ section.settings.s2_left_scale_ipad | times: 0.01 }};
-          "
+          style="{{ hero_left_style | strip }}"
         >
           {% if hero_left_a != blank or hero_left_b != blank %}
             <img
-              src="{{ hero_left_a | default: hero_left_b | image_url: width: 1800 }}"
-              alt="{{ hero_left_a.alt | default: hero_left_b.alt | escape }}"
-              data-image-a="{{ hero_left_a | default: hero_left_b | image_url: width: 1800 }}"
-              data-image-b="{% if hero_left_b != blank %}{{ hero_left_b | image_url: width: 1800 }}{% endif %}"
-              data-alt-a="{{ hero_left_a.alt | default: hero_left_b.alt | escape }}"
-              data-alt-b="{% if hero_left_b != blank %}{{ hero_left_b.alt | escape }}{% endif %}"
+              src="{{ hero_left_src_a }}"
+              alt="{{ hero_left_alt_a }}"
+              data-image-a="{{ hero_left_src_a }}"
+              data-image-b="{{ hero_left_src_b }}"
+              data-alt-a="{{ hero_left_alt_a }}"
+              data-alt-b="{{ hero_left_alt_b }}"
               loading="eager"
             >
           {% endif %}
@@ -157,35 +225,16 @@
 
         <figure
           class="slideshow-2-header__item slideshow-2-header__item--bottom"
-          style="
-            --shift-x-a-desktop: {{ section.settings.s1_bottom_x_desktop }}px;
-            --shift-y-a-desktop: {{ section.settings.s1_bottom_y_desktop }}px;
-            --shift-x-a-mobile: {{ section.settings.s1_bottom_x_mobile }}px;
-            --shift-y-a-mobile: {{ section.settings.s1_bottom_y_mobile }}px;
-            --shift-x-a-ipad: {{ section.settings.s1_bottom_x_ipad }}px;
-            --shift-y-a-ipad: {{ section.settings.s1_bottom_y_ipad }}px;
-            --shift-x-b-desktop: {{ section.settings.s2_bottom_x_desktop }}px;
-            --shift-y-b-desktop: {{ section.settings.s2_bottom_y_desktop }}px;
-            --shift-x-b-mobile: {{ section.settings.s2_bottom_x_mobile }}px;
-            --shift-y-b-mobile: {{ section.settings.s2_bottom_y_mobile }}px;
-            --shift-x-b-ipad: {{ section.settings.s2_bottom_x_ipad }}px;
-            --shift-y-b-ipad: {{ section.settings.s2_bottom_y_ipad }}px;
-            --scale-a-desktop: {{ section.settings.s1_bottom_scale_desktop | times: 0.01 }};
-            --scale-a-mobile: {{ section.settings.s1_bottom_scale_mobile | times: 0.01 }};
-            --scale-a-ipad: {{ section.settings.s1_bottom_scale_ipad | times: 0.01 }};
-            --scale-b-desktop: {{ section.settings.s2_bottom_scale_desktop | times: 0.01 }};
-            --scale-b-mobile: {{ section.settings.s2_bottom_scale_mobile | times: 0.01 }};
-            --scale-b-ipad: {{ section.settings.s2_bottom_scale_ipad | times: 0.01 }};
-          "
+          style="{{ hero_bottom_style | strip }}"
         >
           {% if hero_bottom_a != blank or hero_bottom_b != blank %}
             <img
-              src="{{ hero_bottom_a | default: hero_bottom_b | image_url: width: 1800 }}"
-              alt="{{ hero_bottom_a.alt | default: hero_bottom_b.alt | escape }}"
-              data-image-a="{{ hero_bottom_a | default: hero_bottom_b | image_url: width: 1800 }}"
-              data-image-b="{% if hero_bottom_b != blank %}{{ hero_bottom_b | image_url: width: 1800 }}{% endif %}"
-              data-alt-a="{{ hero_bottom_a.alt | default: hero_bottom_b.alt | escape }}"
-              data-alt-b="{% if hero_bottom_b != blank %}{{ hero_bottom_b.alt | escape }}{% endif %}"
+              src="{{ hero_bottom_src_a }}"
+              alt="{{ hero_bottom_alt_a }}"
+              data-image-a="{{ hero_bottom_src_a }}"
+              data-image-b="{{ hero_bottom_src_b }}"
+              data-alt-a="{{ hero_bottom_alt_a }}"
+              data-alt-b="{{ hero_bottom_alt_b }}"
               loading="eager"
             >
           {% endif %}
@@ -216,7 +265,7 @@
     position: relative;
     padding-top: var(--section-top);
     padding-bottom: var(--section-bottom);
-    overflow-x: clip;
+    overflow-x: hidden;
   }
 
   #Slideshow2Header--{{ section.id }} .slideshow-2-header__hero {
@@ -248,10 +297,9 @@
     position: absolute;
     margin: 0;
     overflow: hidden;
-    opacity: 1;
+    opacity: var(--scroll-fade-opacity, 1);
     transition:
-      translate 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
-      scale 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
+      transform 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
       top 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
       right 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
       bottom 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
@@ -259,14 +307,12 @@
       width 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
       height 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
       opacity 2s ease;
-    will-change: opacity;
-    translate: var(--shift-x-a-desktop, 0px) var(--shift-y-a-desktop, 0px);
-    scale: var(--scale-a-desktop, 1);
+    will-change: transform, opacity;
+    transform: translate(var(--shift-x-a-desktop, 0px), var(--shift-y-a-desktop, 0px)) scale(var(--scale-a-desktop, 1));
   }
 
   #Slideshow2Header--{{ section.id }} .slideshow-2-header__collage.is-alt .slideshow-2-header__item {
-    translate: var(--shift-x-b-desktop, 0px) var(--shift-y-b-desktop, 0px);
-    scale: var(--scale-b-desktop, 1);
+    transform: translate(var(--shift-x-b-desktop, 0px), var(--shift-y-b-desktop, 0px)) scale(var(--scale-b-desktop, 1));
   }
 
   #Slideshow2Header--{{ section.id }} .slideshow-2-header__item img {
@@ -388,13 +434,11 @@
     }
 
     #Slideshow2Header--{{ section.id }} .slideshow-2-header__item {
-      translate: var(--shift-x-a-ipad, 0px) var(--shift-y-a-ipad, 0px);
-      scale: var(--scale-a-ipad, 1);
+      transform: translate(var(--shift-x-a-ipad, 0px), var(--shift-y-a-ipad, 0px)) scale(var(--scale-a-ipad, 1));
     }
 
     #Slideshow2Header--{{ section.id }} .slideshow-2-header__collage.is-alt .slideshow-2-header__item {
-      translate: var(--shift-x-b-ipad, 0px) var(--shift-y-b-ipad, 0px);
-      scale: var(--scale-b-ipad, 1);
+      transform: translate(var(--shift-x-b-ipad, 0px), var(--shift-y-b-ipad, 0px)) scale(var(--scale-b-ipad, 1));
     }
   }
 
@@ -444,13 +488,11 @@
     }
 
     #Slideshow2Header--{{ section.id }} .slideshow-2-header__item {
-      translate: var(--shift-x-a-mobile, 0px) var(--shift-y-a-mobile, 0px);
-      scale: var(--scale-a-mobile, 1);
+      transform: translate(var(--shift-x-a-mobile, 0px), var(--shift-y-a-mobile, 0px)) scale(var(--scale-a-mobile, 1));
     }
 
     #Slideshow2Header--{{ section.id }} .slideshow-2-header__collage.is-alt .slideshow-2-header__item {
-      translate: var(--shift-x-b-mobile, 0px) var(--shift-y-b-mobile, 0px);
-      scale: var(--scale-b-mobile, 1);
+      transform: translate(var(--shift-x-b-mobile, 0px), var(--shift-y-b-mobile, 0px)) scale(var(--scale-b-mobile, 1));
     }
   }
 {% endstylesheet %}
