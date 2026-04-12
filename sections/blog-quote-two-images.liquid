@@ -34,7 +34,9 @@
     --right-h-mobile: {{ section.settings.right_media_height_mobile }}px;
     --right-fit: {{ section.settings.right_image_fit }};
     --right-scale: {{ section.settings.right_image_scale | times: 0.01 }};
+    --right-scale-mobile: {{ section.settings.right_image_scale_mobile | times: 0.01 }};
     --right-offset-y: {{ section.settings.right_column_offset_y }}px;
+    --right-offset-y-mobile: {{ section.settings.right_column_offset_y_mobile }}px;
   }
 {%- endstyle -%}
 
@@ -251,6 +253,7 @@
     .blog-quote-two-images__right {
       grid-template-rows: auto auto;
       gap: 24px;
+      transform: translateY(var(--right-offset-y-mobile, var(--right-offset-y)));
     }
 
     .blog-quote-two-images__inner--image-right .blog-quote-two-images__grid {
@@ -276,6 +279,10 @@
 
     .blog-quote-two-images__image {
       height: 100%;
+    }
+
+    .blog-quote-two-images__media--right .blog-quote-two-images__image {
+      transform: scale(var(--right-scale-mobile, var(--right-scale, 1)));
     }
 
     .blog-quote-two-images__caption {
@@ -408,12 +415,32 @@
     },
     {
       "type": "range",
+      "id": "right_image_scale_mobile",
+      "min": 50,
+      "max": 150,
+      "step": 5,
+      "unit": "%",
+      "label": "Right image scale (mobile)",
+      "default": 100
+    },
+    {
+      "type": "range",
       "id": "right_column_offset_y",
       "min": -240,
       "max": 240,
       "step": 6,
       "unit": "px",
       "label": "Text + right image vertical offset",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "right_column_offset_y_mobile",
+      "min": -240,
+      "max": 240,
+      "step": 6,
+      "unit": "px",
+      "label": "Text + right image vertical offset (mobile)",
       "default": 0
     },
     {
