@@ -48,12 +48,11 @@
 
         if (!this.dialog || !this.config?.enabled) return;
 
-        this.designMode = this.isDesignMode();
         this.cookie = new StoreInfoPopupCookie(this.dialog.dataset.cookieName);
 
         this.bindEvents();
 
-        if (!this.designMode && this.cookie.read() !== false) {
+        if (this.cookie.read() !== false) {
           return;
         }
 
@@ -107,17 +106,6 @@
       } catch (error) {
         return null;
       }
-    }
-
-    isDesignMode() {
-      const searchParams = new URLSearchParams(window.location.search);
-
-      return Boolean(
-        window.Shopify?.designMode ||
-        window.Shopify?.visualPreviewMode ||
-        window.theme?.info?.role === "development" ||
-        searchParams.has("preview_theme_id")
-      );
     }
 
     hasCountryRedirectPriority() {
@@ -206,9 +194,7 @@
         this.dialog.setAttribute("open", "");
       }
 
-      if (!this.designMode) {
-        this.cookie.write();
-      }
+      this.cookie.write();
 
       if (window.theme?.a11y?.trapFocus) {
         window.theme.a11y.lastElement = document.activeElement;
