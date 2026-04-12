@@ -275,6 +275,10 @@
     backdrop-filter: blur(0);
   }
 
+  .template-collection .theme__header__scroll-blur {
+    display: none;
+  }
+
   {%- if logo_asset != blank -%}
     .header__logo__link {
       --logo-padding: 30px;
@@ -1161,6 +1165,7 @@
       if (drawerWrapper) {
         document.addEventListener('theme:drawer:open', (event) => {
           if (event.target !== drawerWrapper) return;
+          document.body.classList.add('header-drawer-is-open');
           syncLogoWithHeaderState();
         });
 
@@ -1169,7 +1174,14 @@
           syncLogoWithHeaderState();
         });
 
-        new MutationObserver(syncLogoWithHeaderState).observe(drawerWrapper, {
+        new MutationObserver(() => {
+          const isOpen = drawerWrapper.classList.contains('is-open');
+          const isClosing = drawerWrapper.classList.contains('is-closing');
+          if (!isOpen && !isClosing) {
+            document.body.classList.remove('header-drawer-is-open');
+          }
+          syncLogoWithHeaderState();
+        }).observe(drawerWrapper, {
           attributes: true,
           attributeFilter: ['class'],
         });
