@@ -39,6 +39,8 @@
   loadScriptOnce(dataset.timelineSrc || "", "data-timeline-script");
   loadScriptOnce(dataset.socialVideosSrc || "", "data-social-videos-script");
   loadScriptOnce(dataset.rcTimelineSrc || "", "data-rc-timeline-script");
+  loadScriptOnce(dataset.rcInviewFadeSrc || "", "data-rc-inview-fade-script");
+  loadScriptOnce(dataset.rcTimelineInviewSrc || "", "data-rc-timeline-inview-script");
 
   const normalizePathname = (pathname) => {
     const normalizedPath = `${pathname || ""}`.trim().toLowerCase().replace(/\/+$/, "");
