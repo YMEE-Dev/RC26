@@ -122,8 +122,10 @@
 >
   <div
     class="grid-media__media-wrapper"
-    data-storytelling-modal-trigger
-    data-storytelling-modal-target="{{ modal_id }}"
+    {%- if storytelling_slide_count > 0 -%}
+      data-storytelling-modal-trigger
+      data-storytelling-modal-target="{{ modal_id }}"
+    {%- endif -%}
   >
     {%- if first_media_is_video -%}
       {%- assign trigger_video_classes = 'custom-autoplay-video storytelling-trigger-video' -%}
@@ -160,90 +162,95 @@
         </picture>
       {%- endif -%}
     {%- endif -%}
-    <button
-      type="button"
-      class="btn btn--solid btn--primary product-shop-the-look"
-      data-shopify-title="{{ product.title | strip_html }}"
-      data-storytelling-modal-trigger
-      data-storytelling-modal-target="{{ modal_id }}"
-      aria-haspopup="dialog"
-      aria-controls="{{ modal_id }}"
-      aria-expanded="false"
-    >
-      <span class="product-shop-the-look-text">{{ cta_text }}</span>
-    </button>
+
+    {%- if storytelling_slide_count > 0 -%}
+      <button
+        type="button"
+        class="btn btn--solid btn--primary product-shop-the-look"
+        data-shopify-title="{{ product.title | strip_html }}"
+        data-storytelling-modal-trigger
+        data-storytelling-modal-target="{{ modal_id }}"
+        aria-haspopup="dialog"
+        aria-controls="{{ modal_id }}"
+        aria-expanded="false"
+      >
+        <span class="product-shop-the-look-text">{{ cta_text }}</span>
+      </button>
+    {%- endif -%}
   </div>
 
-  <dialog
-    id="{{ modal_id }}"
-    class="storytelling-modal"
-    aria-label="{{ cta_text | escape }}"
-    aria-modal="true"
-    data-storytelling-modal
-    data-scroll-lock-required
-  >
-    <div class="storytelling-modal__inner">
-      <look-component class="look">
-        <div class="storytelling-look__image">
-          {%- if modal_media_is_video -%}
-            {%- liquid
-              case modal_media.media_type
-                when 'video'
-                  echo modal_media | media_tag: image_size: '2048x', class: 'storytelling custom-autoplay-video', autoplay: true, loop: true, controls: false, preload: 'none', muted: true
-                when 'external_video'
-                  if modal_media.host == 'youtube'
-                    echo modal_media | external_video_url: autoplay: true, playsinline: true, loop: true, playlist: modal_media.external_id, controls: false, mute: true, showinfo: false | external_video_tag: class: 'storytelling custom-autoplay-video', loading: 'lazy', data-host: modal_media.host
-                  else
-                    echo modal_media | external_video_url: autoplay: true, playsinline: true, loop: true, controls: false, muted: true | external_video_tag: class: 'storytelling custom-autoplay-video', data-host: modal_media.host
-                  endif
-              endcase
-            -%}
-          {%- else -%}
-            {%- if modal_image -%}
-              <img
-                class=""
-                src="{{ modal_image | image_url: width: 2048 }}"
-                alt="{{ product.title | strip_html | escape }}"
-                width="auto"
-                height="auto"
-              >
+  {%- if storytelling_slide_count > 0 -%}
+    <dialog
+      id="{{ modal_id }}"
+      class="storytelling-modal"
+      aria-label="{{ cta_text | escape }}"
+      aria-modal="true"
+      data-storytelling-modal
+      data-scroll-lock-required
+    >
+      <div class="storytelling-modal__inner">
+        <look-component class="look">
+          <div class="storytelling-look__image">
+            {%- if modal_media_is_video -%}
+              {%- liquid
+                case modal_media.media_type
+                  when 'video'
+                    echo modal_media | media_tag: image_size: '2048x', class: 'storytelling custom-autoplay-video', autoplay: true, loop: true, controls: false, preload: 'none', muted: true
+                  when 'external_video'
+                    if modal_media.host == 'youtube'
+                      echo modal_media | external_video_url: autoplay: true, playsinline: true, loop: true, playlist: modal_media.external_id, controls: false, mute: true, showinfo: false | external_video_tag: class: 'storytelling custom-autoplay-video', loading: 'lazy', data-host: modal_media.host
+                    else
+                      echo modal_media | external_video_url: autoplay: true, playsinline: true, loop: true, controls: false, muted: true | external_video_tag: class: 'storytelling custom-autoplay-video', data-host: modal_media.host
+                    endif
+                endcase
+              -%}
+            {%- else -%}
+              {%- if modal_image -%}
+                <img
+                  class=""
+                  src="{{ modal_image | image_url: width: 2048 }}"
+                  alt="{{ product.title | strip_html | escape }}"
+                  width="auto"
+                  height="auto"
+                >
+              {%- endif -%}
             {%- endif -%}
-          {%- endif -%}
-        </div>
+          </div>
 
-        <div class="look__aside" data-popup-container>
-          <div class="underlay mobile look__underlay" data-popup-close></div>
+          <div class="look__aside" data-popup-container>
+            <div class="underlay mobile look__underlay" data-popup-close></div>
 
-          <div class="look__content" data-popup-content data-scroll-lock-scrollable>
-            <div class="storytelling-modal__slider-shell">
-              <div
-                class="swiper storytelling-modal__swiper"
-                data-storytelling-swiper
-                data-storytelling-swiper-id="{{ modal_id }}"
-              >
-                <div class="swiper-wrapper">
-                  {{ look_slider }}
-                </div>
+            <div class="look__content" data-popup-content data-scroll-lock-scrollable>
+              <div class="storytelling-modal__slider-shell">
                 <div
-                  class="swiper-pagination storytelling-modal__slider-progress{% if storytelling_slide_count <= 1 %} is-hidden{% endif %}"
-                  data-storytelling-swiper-pagination
-                  aria-hidden="true"
-                ></div>
+                  class="swiper storytelling-modal__swiper"
+                  data-storytelling-swiper
+                  data-storytelling-swiper-id="{{ modal_id }}"
+                >
+                  <div class="swiper-wrapper">
+                    {{ look_slider }}
+                  </div>
+                  <div
+                    class="swiper-pagination storytelling-modal__slider-progress{% if storytelling_slide_count <= 1 %} is-hidden{% endif %}"
+                    data-storytelling-swiper-pagination
+                    aria-hidden="true"
+                  ></div>
+                </div>
               </div>
             </div>
+            <button
+              type="button"
+              class="storytelling-modal__close"
+              data-storytelling-modal-close
+              aria-label="{{ 'general.accessibility.close' | t }}"
+            >
+              {%- render 'icon-close' -%}
+            </button>
           </div>
-          <button
-            type="button"
-            class="storytelling-modal__close"
-            data-storytelling-modal-close
-            aria-label="{{ 'general.accessibility.close' | t }}"
-          >
-            {%- render 'icon-close' -%}
-          </button>
-        </div>
-      </look-component>
-    </div>
-  </dialog>
+        </look-component>
+      </div>
+    </dialog>
+  {%- endif -%}
 </grid-item>
 
 {% javascript %}
