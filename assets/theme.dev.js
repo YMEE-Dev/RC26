@@ -6078,6 +6078,8 @@
     slide: "[data-hover-slide]",
     slideTouch: "[data-hover-slide-touch]",
     slider: "[data-hover-slider]",
+    progressBar: "[data-related-slider-progress]",
+    progressLine: ".related-slider-progress__line",
     recentlyViewed: "recently-viewed",
     video: "video",
     vimeo: '[data-host="vimeo"]',
@@ -6090,8 +6092,11 @@
 
       this.flkty = null;
       this.slider = this.querySelector(selectors$8.slider);
+      this.progressBar = this.querySelector(selectors$8.progressBar);
+      this.progressLine = this.progressBar?.querySelector(selectors$8.progressLine) || null;
       this.productItem = this.closest(selectors$8.productItem);
       this.handleScroll = this.handleScroll.bind(this);
+      this.updateProgressBar = this.updateProgressBar.bind(this);
       this.recentlyViewed = this.closest(selectors$8.recentlyViewed);
       this.hovered = false;
 
@@ -6106,6 +6111,7 @@
 
     connectedCallback() {
       this.addArrowClickHandler();
+      this.updateProgressBar();
 
       if (this.recentlyViewed) {
         this.recentlyViewed.addEventListener("theme:recently-viewed:loaded", () => {
@@ -6135,6 +6141,10 @@
         this.productItem.removeEventListener("mouseenter", this.productItemMouseEnterEvent);
         this.productItem.removeEventListener("mouseleave", this.productItemMouseLeaveEvent);
       }
+
+      if (this.slider) {
+        this.slider.removeEventListener("scroll", this.handleScroll);
+      }
     }
 
     initBasedOnDevice() {
@@ -6159,11 +6169,51 @@
     initTouch() {
       this.style.setProperty("--slides-count", this.querySelectorAll(selectors$8.slideTouch).length);
       this.slider.addEventListener("scroll", this.handleScroll);
+      this.updateProgressBar();
     }
 
     handleScroll() {
       const slideIndex = this.slider.scrollLeft / this.slider.clientWidth;
       this.style.setProperty("--slider-index", slideIndex);
+      this.updateProgressBar();
+    }
+
+    updateProgressBar() {
+      if (!this.progressBar) return;
+
+      const slideCount = window.theme.touch
+        ? this.querySelectorAll(selectors$8.slideTouch).length
+        : this.flkty?.cells?.length || this.querySelectorAll(selectors$8.slide).length;
+
+      if (slideCount <= 1) {
+        this.progressBar.hidden = true;
+        return;
+      }
+
+      let progress = 0;
+
+      if (window.theme.touch) {
+        const isScrollable = this.slider.scrollWidth > this.slider.clientWidth + 1;
+        this.progressBar.classList.toggle("hidden", !isScrollable);
+
+        if (!isScrollable) {
+          this.progressBar.style.setProperty("--related-slider-progress", "0%");
+          return;
+        }
+
+        const progressPercent = ((this.slider.scrollLeft + this.slider.clientWidth) / this.slider.scrollWidth) * 100;
+        progress = Math.max(0, Math.min(100, progressPercent));
+      } else if (this.flkty) {
+        const maxIndex = Math.max(slideCount - 1, 1);
+        progress = Math.max(0, Math.min(100, ((this.flkty.selectedIndex || 0) / maxIndex) * 100));
+        this.progressBar.classList.remove("hidden");
+      }
+
+      this.progressBar.hidden = false;
+      this.progressBar.style.setProperty("--related-slider-progress", `${progress}%`);
+      if (this.progressLine) {
+        this.progressLine.style.width = `${progress}%`;
+      }
     }
 
     initFlickity() {
@@ -6196,10 +6246,13 @@
 
       requestAnimationFrame(refreshFlickityLayout);
       this.flkty.pausePlayer();
+      this.updateProgressBar();
+      this.flkty.on("change", this.updateProgressBar);
 
       this.addEventListener("mouseenter", () => {
         refreshFlickityLayout();
         this.flkty.unpausePlayer();
+        this.updateProgressBar();
       });
 
       this.addEventListener("mouseleave", () => {
