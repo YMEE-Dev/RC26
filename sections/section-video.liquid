@@ -43,10 +43,35 @@
   data-overlay-header
   style="{{ style }}"
 >
-  <div class="frame {{ section.settings.width }}">
+  <div class="frame {{ section.settings.width }} section-video__frame">
+    {%- if section.settings.show_top_blur and header_observer_mode == 'light' -%}
+      <span class="section-video__top-blur" aria-hidden="true"></span>
+    {%- endif -%}
+
     {%- render 'video' -%}
   </div>
 </div>
+
+{% stylesheet %}
+  .section-video__frame {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .section-video__top-blur {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 160px;
+    pointer-events: none;
+    z-index: 5;
+    background: linear-gradient(180deg, rgba(27, 27, 24, 0.49) 9.53%, rgba(27, 27, 24, 0) 63.18%);
+
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 58%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 0%, #000 58%, transparent 100%);
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
@@ -75,6 +100,13 @@
       "type": "video",
       "id": "video",
       "label": "Video"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_top_blur",
+      "label": "Show top blur",
+      "default": false,
+      "info": "Adds a gradient blur bar across the top edge of the video."
     },
     {
       "type": "header",

@@ -47,7 +47,9 @@
   assign right_menu_linklist = section.settings.right_menu_linklist
   assign use_desktop_probe_band_on_mobile = false
   assign header_default_mode = 'dark'
-  if template.name == 'product'
+  if template == 'index'
+    assign header_default_mode = 'light'
+  elsif template.name == 'product'
     assign header_default_mode = 'dark'
   elsif template.name == 'collection'
     assign header_default_mode = collection.metafields.custom.header_observer_mode.value | default: header_default_mode
@@ -67,7 +69,7 @@
   endif
 
   assign logo_variant = section.settings.logo_variant | default: 'dark'
-  if template.name == 'collection'
+  if template == 'index' or template.name == 'collection'
     assign logo_variant = header_default_mode
   endif
   assign logo_light_asset = 'RC_LOGO_light.svg'

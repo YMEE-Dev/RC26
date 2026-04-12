@@ -19,6 +19,9 @@
     #Subcollections--{{ section.id }} {
       --PT: {{ section.settings.padding_top }}px;
       --PB: {{ section.settings.padding_bottom }}px;
+      --globaltext: {% if header_observer_mode == 'light' %}#fff{% else %}#000{% endif %};
+      --link: {% if header_observer_mode == 'light' %}#fff{% else %}#000{% endif %};
+      --link-hover: {% if header_observer_mode == 'light' %}#f0f0f0{% else %}#222{% endif %};
 
       {%- unless text_color == 'rgba(0,0,0,0)' or text_color == blank -%}
         --text: {{ text_color }};
