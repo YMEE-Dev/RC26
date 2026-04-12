@@ -364,7 +364,8 @@
     font-family: var(--FONT-STACK-HEADING, 'Portrait LS', serif);
     font-size: 40px;
     line-height: 1;
-    font-weight: 500;
+    font-weight: var(--FONT-WEIGHT-HEADING, 500);
+    font-style: var(--FONT-STYLE-HEADING, normal);
   }
 
   #Slideshow2Header--{{ section.id }} .slideshow-2-header__collage.is-intro.is-intro-visible .slideshow-2-header__item--top {
@@ -575,10 +576,13 @@
 
         const fadeOutMs = 1800;
         const staggerMs = 150;
+        const blankGapMs = 280;
+        const fadeInBufferMs = 140;
         const maxDelay = (items.length - 1) * staggerMs;
-        const srcSwapAt = maxDelay + fadeOutMs + 40;
-        const layoutAt = maxDelay + fadeOutMs + 20;
-        const fadeInAt = srcSwapAt + 60;
+        const fullyHiddenAt = maxDelay + fadeOutMs;
+        const layoutAt = fullyHiddenAt + 20;
+        const srcSwapAt = fullyHiddenAt + blankGapMs;
+        const fadeInAt = srcSwapAt + fadeInBufferMs;
         const doneAt = fadeInAt + maxDelay + 2200;
 
         items.forEach((item, index) => {
