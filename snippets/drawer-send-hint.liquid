@@ -20,6 +20,11 @@
         >
         <input
           type="hidden"
+          id="hint-product-variant-id"
+          value="{{ product.selected_or_first_available_variant.id }}"
+        >
+        <input
+          type="hidden"
           id="hint-product-price"
           value="{{ product.selected_or_first_available_variant.price | money }}"
         >
@@ -209,8 +214,8 @@
               data: {
                 type: 'profile',
                 attributes: {
-                  email: formData.senderEmail,
-                  first_name: formData.senderName
+                  email: formData.recipientEmail,
+                  first_name: formData.recipientName
                 }
               }
             },
@@ -223,10 +228,7 @@
               }
             },
             properties: {
-              recipient_name: formData.recipientName,
-              recipient_email: formData.recipientEmail,
               sender_name: formData.senderName,
-              sender_email: formData.senderEmail,
               product_title: formData.productTitle,
               product_url: formData.productUrl,
               product_variant: formData.productVariant,
@@ -369,13 +371,19 @@
         var imageInput = document.getElementById('hint-product-image');
         var priceInput = document.getElementById('hint-product-price');
 
+        var variantIdInput = document.getElementById('hint-product-variant-id');
+        var variantId = variantIdInput ? variantIdInput.value : '';
+        var fullProductUrl = productUrl;
+        if (variantId) {
+          fullProductUrl += (productUrl.indexOf('?') === -1 ? '?' : '&') + 'variant=' + variantId;
+        }
+
         var formData = {
           recipientName: recipientName,
           recipientEmail: recipientEmail,
           senderName: senderName,
-          senderEmail: senderEmail,
           productTitle: productTitle,
-          productUrl: productUrl,
+          productUrl: fullProductUrl,
           productVariant: variantInput ? variantInput.value : '',
           productPrice: priceInput ? priceInput.value : productPrice,
           productImage: imageInput ? imageInput.value : '',
