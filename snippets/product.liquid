@@ -573,14 +573,14 @@
       @media only screen and (min-width: 750px) and (max-width: 989px) {
 
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: calc(100dvh - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 60px) - var(--pdp-dropdown-height, 70px));
+          height: calc(var(--full-height, 100svh) - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 60px) - var(--pdp-dropdown-height, 70px));
         }
       }
 
       @media only screen and (max-width: 749px) {
 
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: calc(100dvh - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 60px) - var(--pdp-dropdown-height, 70px));
+          height: calc(var(--full-height, 100svh) - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 60px) - var(--pdp-dropdown-height, 70px));
         }
       }
 
@@ -1182,9 +1182,9 @@
       }
 
       @media only screen and (max-width: 989px) {
-        /* Mobile: gallery + sticky bar = 100dvh minus header and fixed dropdown space */
+        /* Mobile: gallery + sticky bar = full-height minus header and fixed dropdown space */
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: calc(100dvh - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 60px) - var(--pdp-dropdown-height, 70px));
+          height: calc(var(--full-height, 100svh) - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 60px) - var(--pdp-dropdown-height, 70px));
         }
 
         #MainProduct--{{ section.id }} .product__sticky-bar {
