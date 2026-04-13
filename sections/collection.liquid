@@ -106,6 +106,9 @@
 {%- endcapture -%}
 
 {%- style -%}
+  body:has(.main-content--collection-super-naked) #Collection--{{ section.id }} .collection__products {
+    padding-top: calc({{ section.settings.padding_top }}px + var(--header-height));
+  }
   #Collection--{{ section.id }} {
     position: relative;
     --PT: {{ section.settings.padding_top }}px;
