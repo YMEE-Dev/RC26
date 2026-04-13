@@ -44,6 +44,8 @@
               {%- case block.type -%}
                 {%- when 'card' -%}
                   {%- assign animation_order = animation_order | plus: 1 -%}
+                  {%- assign use_drawer_open = block.settings.use_drawer_open -%}
+                  {%- assign card_target = block.settings.card_link -%}
                   {%- if template.suffix == 'concierge' -%}
                     <div
                       class="grid-item protection-card"
@@ -53,28 +55,38 @@
                       data-aos-order="{{ animation_order }}"
                       {{ block.shopify_attributes }}
                     >
-                      {%- if forloop.first -%}
-                        <a
-                          href="https://cdn.shopify.com/s/files/1/0969/2990/7075/files/00_Size-Guide-Bracelets_Rings_ENG_2026.pdf?v=1775035281"
-                          download
-                          target="_blank"
-                          class="protection-card__overlay-link"
-                          aria-label="{{ block.settings.title | escape }}"
-                        ></a>
-                      {%- elsif forloop.last -%}
-                        <button
-                          type="button"
-                          class="protection-card__overlay-link"
-                          data-drawer-open="ask-concierge"
-                          aria-label="{{ block.settings.title | escape }}"
-                        ></button>
+                      {%- if use_drawer_open -%}
+                        {%- if forloop.first -%}
+                          <a
+                            href="https://cdn.shopify.com/s/files/1/0969/2990/7075/files/00_Size-Guide-Bracelets_Rings_ENG_2026.pdf?v=1775035281"
+                            download
+                            target="_blank"
+                            class="protection-card__overlay-link"
+                            aria-label="{{ block.settings.title | escape }}"
+                          ></a>
+                        {%- elsif forloop.last -%}
+                          <button
+                            type="button"
+                            class="protection-card__overlay-link"
+                            data-drawer-open="ask-concierge"
+                            aria-label="{{ block.settings.title | escape }}"
+                          ></button>
+                        {%- else -%}
+                          <button
+                            type="button"
+                            class="protection-card__overlay-link"
+                            data-drawer-open="care-recommendations"
+                            aria-label="{{ block.settings.title | escape }}"
+                          ></button>
+                        {%- endif -%}
                       {%- else -%}
-                        <button
-                          type="button"
-                          class="protection-card__overlay-link"
-                          data-drawer-open="care-recommendations"
-                          aria-label="{{ block.settings.title | escape }}"
-                        ></button>
+                        {%- if card_target != blank -%}
+                          <a
+                            href="{{ card_target }}"
+                            class="protection-card__overlay-link"
+                            aria-label="{{ block.settings.title | escape }}"
+                          ></a>
+                        {%- endif -%}
                       {%- endif -%}
                       {%- if block.settings.image != blank -%}
                         <div class="protection-card__image">
@@ -449,6 +461,12 @@
       "type": "card",
       "name": "Card",
       "settings": [
+        {
+          "type": "checkbox",
+          "id": "use_drawer_open",
+          "label": "Open drawer on click",
+          "default": true
+        },
         {
           "type": "image_picker",
           "id": "image",
