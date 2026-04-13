@@ -1,0 +1,344 @@
+<!-- /sections/image-text-section.liquid -->
+{%- liquid
+  assign has_any_content = false
+  assign has_copy = false
+  assign resolved_heading = section.settings.heading
+  assign resolved_text = section.settings.text
+  assign resolved_image = section.settings.image
+
+  if resolved_image != blank and resolved_image.value != blank
+    assign resolved_image = resolved_image.value
+  endif
+
+  if resolved_heading != blank or resolved_text != blank
+    assign has_copy = true
+  endif
+
+  if resolved_heading != blank or resolved_text != blank or resolved_image != blank
+    assign has_any_content = true
+  endif
+-%}
+
+{%- if has_any_content -%}
+  {%- style -%}
+    #ImageTextSection--{{ section.id }} {
+      --image-text-pt: {{ section.settings.padding_top }}px;
+      --image-text-pb: {{ section.settings.padding_bottom }}px;
+      --image-text-pt-mobile: {{ section.settings.padding_top_mobile }}px;
+      --image-text-pb-mobile: {{ section.settings.padding_bottom_mobile }}px;
+      --image-text-gap-mobile: {{ section.settings.gap_mobile }}px;
+      --image-text-image-width-desktop: {{ section.settings.image_width_desktop }}%;
+      --image-text-copy-order-desktop: {% if section.settings.desktop_order == 'image-left' %}2{% else %}1{% endif %};
+      --image-text-media-order-desktop: {% if section.settings.desktop_order == 'image-left' %}1{% else %}2{% endif %};
+      --image-text-copy-order-mobile: {% if section.settings.mobile_order == 'image-first' %}2{% else %}1{% endif %};
+      --image-text-media-order-mobile: {% if section.settings.mobile_order == 'image-first' %}1{% else %}2{% endif %};
+    }
+  {%- endstyle -%}
+
+  <section
+    id="ImageTextSection--{{ section.id }}"
+    class="image-text-section section-padding header-observer--{{ section.settings.header_observer_mode }}"
+    data-section-id="{{ section.id }}"
+    data-section-type="image-text-section"
+    data-header-observer-mode="{{ section.settings.header_observer_mode }}"
+  >
+    <div class="image-text-section__wrapper {{ section.settings.width }}">
+      <div class="image-text-section__split{% if has_copy == false %} image-text-section__split--media-only{% endif %}{% unless resolved_image != blank %} image-text-section__split--copy-only{% endunless %}">
+        {%- if has_copy -%}
+          <div class="image-text-section__copy" data-brand-fade>
+            {%- if resolved_heading != blank -%}
+              <h3 class="image-text-section__heading h3">
+                {{ resolved_heading | newline_to_br }}
+              </h3>
+            {%- endif -%}
+
+            {%- if resolved_text != blank -%}
+              <div class="image-text-section__text body rte">
+                {{ resolved_text }}
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- if resolved_image != blank -%}
+          <div class="image-text-section__media" data-brand-fade>
+            {%- if resolved_image.width != blank -%}
+              {{
+                resolved_image
+                | image_url: width: 1400
+                | image_tag:
+                  class: 'image-text-section__image',
+                  widths: '375, 550, 750, 900, 1100, 1400',
+                  sizes: '(min-width: 990px) 50vw, calc(100vw - 40px)',
+                  loading: 'lazy'
+              }}
+            {%- else -%}
+              <img
+                class="image-text-section__image"
+                src="{{ resolved_image | escape }}"
+                alt=""
+                loading="lazy"
+              >
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+{% stylesheet %}
+  .image-text-section__wrapper {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .image-text-section {
+    --PT: var(--image-text-pt);
+    --PB: var(--image-text-pb);
+  }
+
+  .image-text-section__split {
+    display: flex;
+    flex-direction: column;
+    gap: var(--image-text-gap-mobile);
+    align-items: center;
+  }
+
+  .image-text-section__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+    order: var(--image-text-copy-order-mobile);
+  }
+
+  .image-text-section__media {
+    width: 100%;
+    order: var(--image-text-media-order-mobile);
+  }
+
+  .image-text-section__image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .image-text-section__heading {
+    margin: 0;
+  }
+
+  .image-text-section__text p {
+    margin: 0;
+  }
+
+  .image-text-section__split--media-only {
+    justify-content: center;
+  }
+
+  @media (max-width: 989px) {
+    .image-text-section {
+      --PT: var(--image-text-pt-mobile, var(--image-text-pt));
+      --PB: var(--image-text-pb-mobile, var(--image-text-pb));
+    }
+
+    .image-text-section__split {
+      gap: var(--image-text-gap-mobile);
+    }
+
+    .image-text-section__split--copy-only .image-text-section__copy,
+    .image-text-section__split--media-only .image-text-section__copy {
+      max-width: 100%;
+    }
+  }
+
+  @media (min-width: 990px) {
+    .image-text-section {
+      --PT: var(--image-text-pt);
+      --PB: var(--image-text-pb);
+    }
+
+    .image-text-section__split {
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .image-text-section__copy {
+      order: var(--image-text-copy-order-desktop);
+      flex: 1 1 0;
+      min-width: 0;
+      padding: 0 80px;
+    }
+
+    .image-text-section__media {
+      order: var(--image-text-media-order-desktop);
+      flex: 0 0 var(--image-text-image-width-desktop);
+      max-width: var(--image-text-image-width-desktop);
+    }
+
+    .image-text-section__copy,
+    .image-text-section__media {
+      width: auto;
+    }
+
+    .image-text-section__split--media-only {
+      justify-content: center;
+    }
+
+    .image-text-section__split--media-only .image-text-section__media {
+      max-width: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Image + Text Section",
+  "tag": "section",
+  "class": "section-image-text",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        {"value": "wrapper--full", "label": "Full width"},
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "desktop_order",
+      "label": "Desktop order",
+      "default": "text-left",
+      "options": [
+        {"value": "text-left", "label": "Text left, image right"},
+        {"value": "image-left", "label": "Image left, text right"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "mobile_order",
+      "label": "Mobile order",
+      "default": "text-first",
+      "options": [
+        {"value": "text-first", "label": "Text first"},
+        {"value": "image-first", "label": "Image first"}
+      ]
+    },
+    {
+      "type": "range",
+      "id": "image_width_desktop",
+      "label": "Image width on desktop",
+      "min": 20,
+      "max": 80,
+      "step": 1,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "gap_mobile",
+      "label": "Gap on mobile",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Top padding (mobile)",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom padding (mobile)",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image + Text Section",
+      "category": "Text"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "aside", "footer"]
+  }
+}
+{% endschema %}

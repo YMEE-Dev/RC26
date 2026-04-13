@@ -8,6 +8,8 @@
   #PersonalAssistance--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
+    --personal-assistance-media-order: {% if section.settings.content_order == 'text-first' %}2{% else %}1{% endif %};
+    --personal-assistance-content-order: {% if section.settings.content_order == 'text-first' %}1{% else %}2{% endif %};
   }
 {%- endstyle -%}
 
@@ -38,13 +40,13 @@
       </div>
 
       <div class="personal-assistance__content">
-        {%- if section.settings.subheading != blank -%}
-          <p class="personal-assistance__subheading">{{ section.settings.subheading | upcase }}</p>
-        {%- endif -%}
         {%- if section.settings.heading != blank -%}
           <h2 class="personal-assistance__heading {{ section.settings.heading_font_size }}">
             {{ section.settings.heading }}
           </h2>
+        {%- endif -%}
+        {%- if section.settings.subheading != blank -%}
+          <p class="personal-assistance__subheading">{{ section.settings.subheading }}</p>
         {%- endif -%}
 
         {%- if contact_blocks.size > 0 -%}
@@ -115,17 +117,29 @@
     align-items: stretch;
   }
 
+  .personal-assistance__subheading {
+    color: var(--000000, #000);
+    font-family: Inter;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px;
+  }
+
   @media (min-width: 990px) {
     .personal-assistance__grid {
-      grid-template-columns: 4fr 2fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: 228px;
+    }
+
+    .personal-assistance__media {
+      min-width: 0;
     }
   }
 
   .personal-assistance__media {
     position: relative;
-    min-height: 756px;
-    /* min-width: 606px; */
+    order: var(--personal-assistance-media-order);
   }
 
   .personal-assistance__media {
@@ -161,12 +175,6 @@
     }
   }
 
-  .personal-assistance__image {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-  }
-
   .personal-assistance__image img,
   .personal-assistance__placeholder {
     width: 100%;
@@ -191,23 +199,14 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-width: 397px;
     width: 100%;
+    order: var(--personal-assistance-content-order);
+    padding: 0 80px 0 0;
   }
 
   .personal-assistance__subheading {
     margin: 0 0 10px;
     color: var(--000000, #000);
-
-    /* RC26/Title (ALL CAPS) */
-    font-family: Inter;
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 22px;
-    /* 137.5% */
-    letter-spacing: 1.6px;
-    text-transform: uppercase;
   }
 
   .personal-assistance__heading {
@@ -357,27 +356,18 @@
     opacity: 1;
   }
 
-  @media (max-width: 1340px) {
-    .personal-assistance__grid {
-      grid-template-columns: 4fr 3fr;
-      gap: 200px;
-    }
+  .personal-assistance__grid {
+    gap: 40px;
   }
 
-  @media (max-width: 1240px) {
-    .personal-assistance__grid {
-      grid-template-columns: 4fr 3fr;
-      gap: 100px;
-    }
-  }
   @media (max-width: 960px) {
     .personal-assistance__grid {
       grid-template-columns: 1fr !important;
-      gap: 40px;
     }
     .personal-assistance__content {
       max-width: 100% !important;
       min-width: 100% !important;
+      padding: 0;
     }
   }
   @media (max-width: 768px) {
@@ -425,7 +415,7 @@
       "content": "Content"
     },
     {
-      "type": "text",
+      "type": "textarea",
       "id": "subheading",
       "label": "Subheading",
       "default": "The art of personal assistance"
@@ -453,6 +443,16 @@
     {
       "type": "header",
       "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "content_order",
+      "label": "Content order",
+      "default": "image-first",
+      "options": [
+        {"value": "image-first", "label": "Image first"},
+        {"value": "text-first", "label": "Text first"}
+      ]
     },
     {
       "type": "select",
