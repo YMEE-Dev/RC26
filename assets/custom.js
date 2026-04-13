@@ -102,19 +102,31 @@
     return true;
   };
 
-  if (!window.theme) {
-    window.theme = {};
-  }
+  const isPrimaryLeftClick = (event) => {
+    return (
+      event &&
+      event.button === 0 &&
+      !event.metaKey &&
+      !event.ctrlKey &&
+      !event.shiftKey &&
+      !event.altKey
+    );
+  };
 
-  window.theme.openNewsletterDrawer = openNewsletterDrawer;
-  window.openNewsletterDrawer = openNewsletterDrawer;
-
-  document.addEventListener("click", (event) => {
-    if (event.defaultPrevented || event.button !== 0) {
-      return;
+  const shouldIgnoreNewsletterLink = (link) => {
+    if (!link) {
+      return true;
     }
 
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+    if (link.hasAttribute("download") || link.getAttribute("target") === "_blank") {
+      return true;
+    }
+
+    return false;
+  };
+
+  const handleNewsletterLinkClick = (event) => {
+    if (!isPrimaryLeftClick(event) || event.defaultPrevented) {
       return;
     }
 
@@ -124,24 +136,31 @@
 
     const link = event.target.closest("a[href]");
 
-    if (!link) {
+    if (!(link instanceof HTMLAnchorElement)) {
       return;
     }
 
-    if (link.hasAttribute("download") || link.getAttribute("target") === "_blank") {
-      return;
-    }
-
-    if (!isNewsletterDrawerLink(link.getAttribute("href"))) {
-      return;
-    }
-
-    if (!openNewsletterDrawer()) {
+    if (shouldIgnoreNewsletterLink(link) || !isNewsletterDrawerLink(link.getAttribute("href"))) {
       return;
     }
 
     event.preventDefault();
-  });
+
+    if (typeof event.stopImmediatePropagation === "function") {
+      event.stopImmediatePropagation();
+    }
+
+    openNewsletterDrawer();
+  };
+
+  if (!window.theme) {
+    window.theme = {};
+  }
+
+  window.theme.openNewsletterDrawer = openNewsletterDrawer;
+  window.openNewsletterDrawer = openNewsletterDrawer;
+
+  document.addEventListener("click", handleNewsletterLinkClick, true);
 
   const breakpointRefreshQuery = window.matchMedia("(min-width: 960px)");
   const handleBreakpointRefresh = () => {
