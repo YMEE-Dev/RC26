@@ -7742,6 +7742,10 @@ body:has([data-header-transparent]) .header__mobile__bottom {
   height: var(--header-height);
 }
 
+body:has(.main-content--collection-super-naked) .header__backfill {
+  height: 0;
+}
+
 .header__logo {
   margin: 0;
   display: flex;
@@ -8306,11 +8310,11 @@ body:not(.is-loaded) .header__desktop {
   z-index: 6000;
 }
 
-@media only screen and (max-width: 960px) {
+/* @media only screen and (max-width: 960px) {
   .js__header__stuck {
     position: relative;
   }
-}
+} */
 
 body.header-drawer-is-open .js__header__stuck,
 body:has(.drawer--header.is-open) .js__header__stuck {
@@ -10510,7 +10514,7 @@ header-search-popdown.is-open .search-popdown {
 } */
 
 .header__mobile__hamburger {
-  position: absolute;
+  position: fixed;
   display: flex;
   align-items: center;
   justify-content: center;
