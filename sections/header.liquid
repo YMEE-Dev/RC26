@@ -51,6 +51,8 @@
     assign header_default_mode = 'light'
   elsif template.name == 'product'
     assign header_default_mode = 'dark'
+  elsif template.name == 'page'
+    assign header_default_mode = 'dark'
   elsif template.name == 'collection'
     assign header_default_mode = collection.metafields.custom.header_observer_mode.value | default: header_default_mode
     assign header_default_mode = header_default_mode | downcase | strip
@@ -69,7 +71,7 @@
   endif
 
   assign logo_variant = section.settings.logo_variant | default: 'dark'
-  if template.name == 'product'
+  if template.name == 'product' or template.name == 'page'
     assign logo_variant = 'dark'
   elsif template == 'index' or template.name == 'collection'
     assign logo_variant = header_default_mode
@@ -86,7 +88,7 @@
     assign logo_denom = 800 | divided_by: 74
   endif
   assign transparent_logo_asset = logo_asset
-  if template.name == 'product'
+  if template.name == 'product' or template.name == 'page'
     assign transparent_logo_asset = logo_dark_asset
   endif
   assign transparent_logo_pdp = section.settings.transparent_logo_pdp

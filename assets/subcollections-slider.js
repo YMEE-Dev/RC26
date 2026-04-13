@@ -17,7 +17,12 @@
     if (swiperInstances[sectionId]) return;
 
     swiperInstances[sectionId] = new Swiper(swiperElement, {
-      slidesPerView: 1.25,
+      slidesPerView: 2,
+      breakpoints: {
+        481: {
+          slidesPerView: 3,
+        },
+      },
       spaceBetween: 20,
       freeMode: true,
       loop: false,

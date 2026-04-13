@@ -1,3 +1,4 @@
+{{ 'rc-timeline-inview.css' | asset_url | stylesheet_tag }}
 {{ 'rc-timeline.css' | asset_url | stylesheet_tag }}
 
 {%- liquid
@@ -6,11 +7,12 @@
   assign creator_id = section_id | append: '-creator'
   assign ruby_id = section_id | append: '-ruby'
   assign timeline_id = section_id | append: '-timeline'
+  assign timeline_enabled = section.settings.timeline_enable
 -%}
 
 <section
   id="{{ section_id }}"
-  class="rc-story"
+  class="rc-story{% unless timeline_enabled %} rc-story--timeline-disabled{% endunless %}"
   style="
     --bg: {{ section.settings.background_color }};
     --bg-soft: {{ section.settings.background_soft_color }};
@@ -105,7 +107,9 @@
             <h2>{{ hero_title }}</h2>
           </div>
 
-          <a class="scroll-link" href="#{{ timeline_id }}">{{ section.settings.scroll_text }}</a>
+          {%- if timeline_enabled -%}
+            <a class="scroll-link" href="#{{ timeline_id }}">{{ section.settings.scroll_text }}</a>
+          {%- endif -%}
         </div>
       </section>
 
@@ -172,19 +176,21 @@
         </div>
       </section>
 
-      <section class="timeline" id="{{ timeline_id }}" aria-label="{{ section.settings.timeline_aria_label | escape }}">
-        <div class="timeline-stage" data-stage>
-          <div class="timeline-panel">
-            <div class="media-layout" data-media-layout></div>
-            <div class="timeline-caption" data-timeline-caption>
-              <p data-caption-line-one></p>
-              <p data-caption-line-two></p>
+      {%- if timeline_enabled -%}
+        <section class="timeline" id="{{ timeline_id }}" aria-label="{{ section.settings.timeline_aria_label | escape }}">
+          <div class="timeline-stage" data-stage>
+            <div class="timeline-panel">
+              <div class="media-layout" data-media-layout></div>
+              <div class="timeline-caption" data-timeline-caption>
+                <p data-caption-line-one></p>
+                <p data-caption-line-two></p>
+              </div>
             </div>
+            <div class="year-rail" aria-label="{{ section.settings.year_rail_aria_label | escape }}" data-year-rail></div>
           </div>
-          <div class="year-rail" aria-label="{{ section.settings.year_rail_aria_label | escape }}" data-year-rail></div>
-        </div>
-        <div class="timeline-markers" data-timeline-markers></div>
-      </section>
+          <div class="timeline-markers" data-timeline-markers></div>
+        </section>
+      {%- endif -%}
     </div>
 
     <nav class="section-nav section-nav--fixed" aria-label="Page sections">
@@ -204,7 +210,9 @@
           <a class="section-nav__tab" data-idx="0" data-section="{{ history_id }}" href="#{{ history_id }}">{{ section.settings.section_nav_history }}</a>
           <a class="section-nav__tab" data-idx="1" data-section="{{ creator_id }}" href="#{{ creator_id }}">{{ section.settings.section_nav_creator }}</a>
           <a class="section-nav__tab" data-idx="2" data-section="{{ ruby_id }}" href="#{{ ruby_id }}">{{ section.settings.section_nav_ruby }}</a>
-          <a class="section-nav__tab" data-idx="3" data-section="{{ timeline_id }}" href="#{{ timeline_id }}">{{ section.settings.section_nav_timeline }}</a>
+          {%- if timeline_enabled -%}
+            <a class="section-nav__tab" data-idx="3" data-section="{{ timeline_id }}" href="#{{ timeline_id }}">{{ section.settings.section_nav_timeline }}</a>
+          {%- endif -%}
         </div>
         <div class="section-nav__mobile">
           <div
@@ -216,7 +224,9 @@
             <a class="section-nav__mobile-link" href="#{{ history_id }}" data-section="{{ history_id }}" data-idx="0">{{ section.settings.section_nav_history }}</a>
             <a class="section-nav__mobile-link" href="#{{ creator_id }}" data-section="{{ creator_id }}" data-idx="1">{{ section.settings.section_nav_creator }}</a>
             <a class="section-nav__mobile-link" href="#{{ ruby_id }}" data-section="{{ ruby_id }}" data-idx="2">{{ section.settings.section_nav_ruby }}</a>
-            <a class="section-nav__mobile-link" href="#{{ timeline_id }}" data-section="{{ timeline_id }}" data-idx="3">{{ section.settings.section_nav_timeline }}</a>
+            {%- if timeline_enabled -%}
+              <a class="section-nav__mobile-link" href="#{{ timeline_id }}" data-section="{{ timeline_id }}" data-idx="3">{{ section.settings.section_nav_timeline }}</a>
+            {%- endif -%}
           </div>
           <svg class="section-nav__mobile-bg" viewBox="0 0 362 50" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g opacity="0.85">
@@ -322,6 +332,31 @@
       {% endfor %}
     </div>
   </div>
+
+  {%- if section.settings.cta_enable -%}
+    <div
+      class="rc-story__cta"
+      style="
+        --rc-cta-pt: {%- if timeline_enabled -%}{{ section.settings.cta_padding_top }}{%- else -%}150{%- endif -%}px;
+        --rc-cta-pb: {{ section.settings.cta_padding_bottom }}px;
+        --rc-cta-text-max: {{ section.settings.cta_text_max_width }}px;
+      "
+    >
+      <div class="rc-story__cta-inner">
+        {%- if section.settings.cta_text != blank -%}
+          <div class="rc-story__cta-text body rte">
+            {{ section.settings.cta_text }}
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.cta_button_label != blank and section.settings.cta_button_link != blank -%}
+          <a class="rc-story__cta-button" href="{{ section.settings.cta_button_link }}">
+            {{ section.settings.cta_button_label | escape }}
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+  {%- endif -%}
 </section>
 
 {% schema %}
@@ -381,11 +416,21 @@
     { "type": "text", "id": "section_nav_timeline", "label": "Timeline label", "default": "Timeline" },
 
     { "type": "header", "content": "Timeline layout" },
+    { "type": "checkbox", "id": "timeline_enable", "label": "Show timeline section", "default": true },
     { "type": "text", "id": "timeline_aria_label", "label": "Timeline aria label", "default": "Heritage timeline" },
     { "type": "text", "id": "year_rail_aria_label", "label": "Year rail aria label", "default": "Timeline years" },
     { "type": "range", "id": "panel_height", "label": "Panel height", "min": 55, "max": 95, "step": 1, "unit": "vh", "default": 76 },
     { "type": "range", "id": "year_size", "label": "Year size", "min": 24, "max": 80, "step": 1, "unit": "px", "default": 40 },
-    { "type": "range", "id": "caption_size", "label": "Caption size", "min": 10, "max": 22, "step": 1, "unit": "px", "default": 16 }
+    { "type": "range", "id": "caption_size", "label": "Caption size", "min": 10, "max": 22, "step": 1, "unit": "px", "default": 16 },
+
+    { "type": "header", "content": "CTA" },
+    { "type": "checkbox", "id": "cta_enable", "label": "Show CTA", "default": true },
+    { "type": "richtext", "id": "cta_text", "label": "CTA text", "default": "<p>Discover more signature pieces crafted for every occasion.</p>" },
+    { "type": "text", "id": "cta_button_label", "label": "Button label", "default": "VIEW ALL COLLECTIONS" },
+    { "type": "url", "id": "cta_button_link", "label": "Button link" },
+    { "type": "range", "id": "cta_text_max_width", "label": "Text max width", "min": 280, "max": 700, "step": 10, "unit": "px", "default": 450 },
+    { "type": "range", "id": "cta_padding_top", "label": "CTA padding top", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 120 },
+    { "type": "range", "id": "cta_padding_bottom", "label": "CTA padding bottom", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 120 }
   ],
   "blocks": [
     {

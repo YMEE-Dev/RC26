@@ -60,27 +60,16 @@
         "padding_bottom": 0
       }
     },
-    "blog_video_with_sound_f9AKHy": {
-      "type": "blog-video-with-sound",
-      "name": "Video Section",
-      "settings": {
-        "width": "wrapper",
-        "max_width": 1230,
-        "media_aspect_ratio": "16/9",
-        "video_url": "",
-        "modal_label": "Video",
-        "padding_top": 120,
-        "padding_bottom": 0
-      }
-    },
     "brand_story_combo_main": {
       "type": "brand-story-combo",
-      "name": "Story Layout Bundle",
+      "name": "Text + Image Section 1",
       "settings": {
+        "layout": "image-right",
         "width": "wrapper",
         "top_heading": "{{ article.metafields.custom.blog_brand_template.value.story_bundle_heading_text | metafield_tag }}",
-        "top_text": "<p>{{ article.metafields.custom.blog_brand_template.value.story_bundle_body_text | metafield_tag }}</p>",
+        "top_text": "{{ article.metafields.custom.blog_brand_template.value.story_bundle_body_text | metafield_tag }}",
         "top_image": "{{ article.metafields.custom.blog_brand_template.value.story_bundle_image.value }}",
+        "caption_text": "",
         "padding_top": 120,
         "padding_bottom": 0
       }
@@ -92,21 +81,36 @@
         "width": "wrapper",
         "full_image": "{{ article.metafields.custom.blog_brand_template.value.img_text_2_img_image.value }}",
         "center_text": "{{ article.metafields.custom.blog_brand_template.value.img_text_2_img_text | metafield_tag }}",
-        "two_image_left": "shopify://shop_images/479f924f5be912cb47dbd734518c487a4481e05a.png",
-        "two_image_right": "shopify://shop_images/8bc0113b37b8b8f032634104e5928bd0f1e4ad64.png",
+        "two_image_left": "{{ article.metafields.custom.blog_brand_template.value.img_text_2_img_image_1.value }}",
+        "two_image_right": "{{ article.metafields.custom.blog_brand_template.value.img_text_2_img_image_2.value }}",
         "section_gap": 120,
+        "padding_top": 120,
+        "padding_bottom": 0
+      }
+    },
+    "brand_story_combo_VKe4Wy": {
+      "type": "brand-story-combo",
+      "name": "Text + Image Section 1",
+      "settings": {
+        "layout": "image-left",
+        "width": "wrapper",
+        "top_heading": "{{ article.metafields.custom.blog_brand_template.value.text_image_section_2_heading_text | metafield_tag }}",
+        "top_text": "{{ article.metafields.custom.blog_brand_template.value.image_text_split_1_text | metafield_tag }}",
+        "top_image": "{{ article.metafields.custom.blog_brand_template.value.image_text_split_1_image.value }}",
+        "caption_text": "",
         "padding_top": 120,
         "padding_bottom": 0
       }
     },
     "brand_split_row_main": {
       "type": "brand-split-row",
+      "disabled": true,
       "name": "Image Text Split",
       "settings": {
         "width": "wrapper",
         "layout": "image-left",
         "image": "{{ article.metafields.custom.blog_brand_template.value.image_text_split_1_image.value }}",
-        "text": "<p>Roberto Coin’s concrete commitment has been demonstrated not only in its day-to-day operations, business planning, and production and decision-making processes, but also in campaigns, such as the one featuring Christy Turlington in support of humanitarian associations such as Youth Aids, Care and Every Mother Counts, as well as in contributions to tradeshows, symposiums and conferences around the world.</p>{{ article.metafields.custom.blog_brand_template.value.image_text_split_1_text | metafield_tag }}",
+        "text": "<p></p>{{ article.metafields.custom.blog_brand_template.value.image_text_split_1_text | metafield_tag }}",
         "padding_top": 120,
         "padding_bottom": 0
       }
@@ -148,8 +152,23 @@
         "padding_bottom": 0
       }
     },
+    "brand_story_combo_QntWFa": {
+      "type": "brand-story-combo",
+      "name": "Text + Image Section 3",
+      "settings": {
+        "layout": "image-right",
+        "width": "wrapper",
+        "top_heading": "{{ article.metafields.custom.blog_brand_template.value.text_image_section_3_heading_text | metafield_tag }}",
+        "top_text": "{{ article.metafields.custom.blog_brand_template.value.image_text_split_2_text | metafield_tag }}",
+        "top_image": "{{ article.metafields.custom.blog_brand_template.value.image_text_split_2_image.value }}",
+        "caption_text": "",
+        "padding_top": 120,
+        "padding_bottom": 0
+      }
+    },
     "brand_split_row_chpbUh": {
       "type": "brand-split-row",
+      "disabled": true,
       "name": "Image Text Split 2",
       "settings": {
         "width": "wrapper",
@@ -167,6 +186,7 @@
         "text": "{{ article.metafields.custom.blog_brand_template.value.cta_text | metafield_tag }}",
         "button_label": "{{ article.metafields.custom.blog_brand_template.value.cta_button_lable.value }}",
         "button_link": "{{ article.metafields.custom.blog_brand_template.value.button_url.value }}",
+        "button_collection": "{{ article.metafields.custom.blog_brand_template.value.collection_cta.value }}",
         "padding_top": 120,
         "padding_bottom": 40
       }
@@ -202,18 +222,40 @@
         "padding_top": 30,
         "padding_bottom": 30
       }
+    },
+    "two_column_text_optional": {
+      "type": "blog-two-column-text",
+      "disabled": true,
+      "name": "Two Column Text",
+      "settings": {
+        "width": "wrapper",
+        "max_width": 1100,
+        "gap": 120,
+        "left_heading": "",
+        "left_text": "",
+        "left_text_style": "body",
+        "left_italic": true,
+        "right_heading": "",
+        "right_text": "",
+        "right_text_style": "body",
+        "right_italic": true,
+        "padding_top": 120,
+        "padding_bottom": 0
+      }
     }
   },
   "order": [
     "article",
     "blog_brand_main",
-    "blog_video_with_sound_f9AKHy",
     "brand_story_combo_main",
     "brand_image_text_twoup_main",
+    "brand_story_combo_VKe4Wy",
     "brand_split_row_main",
     "brand_image_cards",
+    "brand_story_combo_QntWFa",
     "brand_split_row_chpbUh",
     "brand_bottom_cta",
-    "homepage_product_sliders_iatVKi"
+    "homepage_product_sliders_iatVKi",
+    "two_column_text_optional"
   ]
 }
