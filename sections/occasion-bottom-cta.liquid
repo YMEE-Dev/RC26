@@ -3,6 +3,24 @@
   assign resolved_cta_label = section.settings.button_label
   assign resolved_cta_link = section.settings.button_link
 
+  assign button_collection_setting = section.settings.button_collection
+  if button_collection_setting != blank and button_collection_setting.value != blank
+    assign button_collection_setting = button_collection_setting.value
+  endif
+
+  assign button_collection = blank
+  if button_collection_setting != blank
+    if button_collection_setting.url != blank
+      assign button_collection = button_collection_setting
+    else
+      assign button_collection = collections[button_collection_setting]
+    endif
+  endif
+
+  if button_collection != blank and button_collection.url != blank
+    assign resolved_cta_link = button_collection.url
+  endif
+
   assign cta_metafield_link = blank
   if article != blank
     if article.metafields.custom.cta_link.value != blank
@@ -25,6 +43,8 @@
   #OccasionBottomCta--{{ section.id }} {
     --occasion-bottom-cta-pt: {{ section.settings.padding_top }}px;
     --occasion-bottom-cta-pb: {{ section.settings.padding_bottom }}px;
+    --occasion-bottom-cta-pt-mobile: {{ section.settings.padding_top_mobile }}px;
+    --occasion-bottom-cta-pb-mobile: {{ section.settings.padding_bottom_mobile }}px;
   }
 {%- endstyle -%}
 
@@ -56,7 +76,8 @@
 {% stylesheet %}
   .occasion-bottom-cta {
     padding-top: var(--occasion-bottom-cta-pt);
-    padding-bottom: 100px;
+    padding-bottom: var(--occasion-bottom-cta-pb);
+    background: transparent;
   }
 
 	  .occasion-bottom-cta__inner {
@@ -77,6 +98,14 @@
 	    text-align: center;
 	    max-width: 700px;
 	  }
+
+    .main-content--article .occasion-bottom-cta__text {
+      max-width: 450px;
+    }
+
+    .main-content--page-rc-timeline .occasion-bottom-cta__text {
+      max-width: 450px;
+    }
 
   .occasion-bottom-cta__text p {
     margin-left: auto;
@@ -124,6 +153,11 @@
   }
 
 	  @media (max-width: 749px) {
+      .occasion-bottom-cta {
+        padding-top: var(--occasion-bottom-cta-pt-mobile, var(--occasion-bottom-cta-pt));
+        padding-bottom: var(--occasion-bottom-cta-pb-mobile, var(--occasion-bottom-cta-pb));
+      }
+
 	    .main-content--article-occasion-style .occasion-bottom-cta__inner {
 	      gap: 0;
 	    }
@@ -168,6 +202,12 @@
       "label": "Button link"
     },
     {
+      "type": "collection",
+      "id": "button_collection",
+      "label": "Button collection (dynamic source)",
+      "info": "Optional. When set, the button links to the selected collection. This setting supports dynamic sources (e.g. a metaobject field that returns a collection reference)."
+    },
+    {
       "type": "range",
       "id": "padding_top",
       "min": 0,
@@ -185,6 +225,26 @@
       "step": 2,
       "unit": "px",
       "label": "Bottom padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Top padding (mobile)",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom padding (mobile)",
       "default": 40
     }
   ],

@@ -288,7 +288,7 @@
 
 @media (min-width: 750px) and (max-width: 1024px) {
   .blog-brand {
-    padding-top: calc(var(--brand-top-padding) + 100px);
+    padding-top: var(--brand-top-padding);
   }
 
   .blog-brand__media {
@@ -312,6 +312,11 @@
 }
 
 @media (max-width: 749px) {
+  .blog-brand {
+    padding-top: var(--brand-top-padding-mobile, var(--brand-top-padding));
+    padding-bottom: var(--brand-bottom-padding-mobile, var(--brand-bottom-padding));
+  }
+
   .blog-brand__top {
     width: min(100% - 32px, var(--brand-content-max-width));
     gap: 16px;
@@ -323,9 +328,29 @@
     height: var(--brand-media-height-mobile);
   }
 
-  .blog-brand--has-content .blog-brand__media {
-    margin-bottom: 60px;
+  .blog-brand:not(.blog-brand--has-content) .blog-brand__media {
+    margin-bottom: 0;
+    height: auto;
+    min-height: 0;
   }
+
+  .blog-brand:not(.blog-brand--has-content) .blog-brand__media > .blog-brand__video,
+  .blog-brand:not(.blog-brand--has-content) .blog-brand__media > .blog-brand__image,
+  .blog-brand:not(.blog-brand--has-content) .blog-brand__media > img,
+  .blog-brand:not(.blog-brand--has-content) .blog-brand__media > picture,
+  .blog-brand:not(.blog-brand--has-content) .blog-brand__media > video,
+  .blog-brand:not(.blog-brand--has-content) .blog-brand__media > iframe {
+    height: auto;
+  }
+
+  .blog-brand--has-content .blog-brand__media {
+    margin-bottom: 0;
+  }
+
+  .blog-brand__content-wrapper {
+    margin-top: -50px;
+  }
+
 
   .blog-brand__media > .blog-brand__video,
   .blog-brand__media > .blog-brand__image,

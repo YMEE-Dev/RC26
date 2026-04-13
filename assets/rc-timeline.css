@@ -594,9 +594,10 @@ body.has-rc-story {
     left 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
     width 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
     height 1.25s cubic-bezier(0.2, 0.88, 0.28, 1),
-    opacity 0.9s cubic-bezier(0.33, 0.01, 0.25, 1),
-    transform 1.15s cubic-bezier(0.2, 0.88, 0.28, 1);
-  will-change: opacity, transform;
+    opacity 2s ease,
+    transform 2s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 2s ease;
+  will-change: opacity, transform, filter;
 }
 
 .hero-collage__item img {
@@ -942,11 +943,16 @@ body.has-rc-story {
 }
 
 .ruby-section__body--stagger p {
-  opacity: 0;
-  transform: translateY(14px);
+  opacity: 1;
+  transform: none;
   transition:
     opacity 0.55s ease,
     transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ruby-section .reveal-up {
+  opacity: 1;
+  transform: none;
 }
 
 .ruby-section__body--stagger.reveal-up.is-visible p {
@@ -1593,4 +1599,74 @@ body.has-rc-story mobile-menu .drawer__main-menu .navlink,
 body.has-rc-story mobile-menu .drawer__main-menu .sliderow__title,
 body.has-rc-story mobile-menu .drawer__main-menu .sliderow__links a {
   color: #fff !important;
+}
+
+/* CTA (inside RC timeline section) */
+.rc-story__cta {
+  padding-top: var(--rc-cta-pt, 120px);
+  padding-bottom: var(--rc-cta-pb, 120px);
+  background: transparent;
+}
+
+.rc-story__cta-inner {
+  width: min(100% - 48px, 1100px);
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 60px;
+}
+
+.rc-story__cta-text {
+  max-width: var(--rc-cta-text-max, 450px);
+  text-align: center;
+}
+
+.rc-story__cta-text p {
+  margin: 0;
+}
+
+.rc-story__cta-button {
+  width: min(100%, 400px);
+  min-height: 45px;
+  border: 1px solid currentColor;
+  padding: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  text-decoration: none;
+  color: currentColor;
+  background: transparent;
+  font-family: Inter, sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 20px;
+  letter-spacing: 0.1em;
+  text-transform: none !important;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+  cursor: pointer;
+}
+
+.rc-story__cta-button:hover,
+.rc-story__cta-button:focus-visible {
+  background-color: currentColor;
+  color: var(--bg, #fff);
+  border-color: currentColor;
+}
+
+.rc-story--timeline-disabled .ruby-section {
+  margin-bottom: 0;
+}
+
+@media (max-width: 749px) {
+  .rc-story__cta-inner {
+    width: calc(100% - 40px);
+    gap: 40px;
+  }
 }
