@@ -391,7 +391,9 @@
             return String(v.id) === String(variantId);
           });
           if (variant) {
-            properties.variant_title = variant.title || "";
+            var vTitle = variant.title || "";
+            if (vTitle.toLowerCase() === "default title") vTitle = "";
+            properties.variant_title = vTitle;
             properties.variant_sku = variant.sku || "";
             if (variant.price) {
               properties.variant_price = (variant.price / 100).toFixed(2);
