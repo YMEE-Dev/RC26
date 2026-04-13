@@ -107,7 +107,13 @@
 
 {%- style -%}
   body:has(.main-content--collection-super-naked) #Collection--{{ section.id }} .collection__products {
-    padding-top: calc({{ section.settings.padding_top }}px + var(--header-height));
+    padding-top: calc(({{ section.settings.padding_top }}px / 2) + var(--header-height));
+  }
+
+  @media screen and (max-width: 749px) {
+     body:has(.main-content--collection-super-naked) #Collection--{{ section.id }} .collection__products {
+      padding-top: var(--header-height);
+    }
   }
   #Collection--{{ section.id }} {
     position: relative;
