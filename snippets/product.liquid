@@ -611,6 +611,29 @@
         }
       }
 
+      /* Mobile swipe hint: nudges the active slide image left and bounces it back */
+      @keyframes pdp-swipe-hint-bounce-{{ section.id }} {
+        0%   { transform: translateX(0); }
+        15%  { transform: translateX(-28px); }
+        30%  { transform: translateX(-28px); }
+        50%  { transform: translateX(6px); }
+        65%  { transform: translateX(0); }
+        100% { transform: translateX(0); }
+      }
+
+      @media (max-width: 989px) {
+        #MainProduct--{{ section.id }} .pdp-embla--mobile.pdp-embla--swipe-hint .pdp-embla__slide--active img,
+        #MainProduct--{{ section.id }} .pdp-embla--mobile.pdp-embla--swipe-hint .pdp-embla__slide:first-child img {
+          animation: pdp-swipe-hint-bounce-{{ section.id }} 2.8s ease-in-out 1s infinite;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #MainProduct--{{ section.id }} .pdp-embla--mobile.pdp-embla--swipe-hint .pdp-embla__slide img {
+          animation: none;
+        }
+      }
+
       #MainProduct--{{ section.id }} .pdp-embla__container {
         display: flex;
         height: 100%;
@@ -1279,7 +1302,6 @@
         #MainProduct--{{ section.id }} .product__collection-section .product__collection-image {
           margin-bottom: 80px;
         }
-
         #MainProduct--{{ section.id }} .product__content {
           margin: 0;
           padding-left: 20px;
@@ -1307,11 +1329,16 @@
 
       }
 
-      @media only screen and (min-width: 750px) and (max-width: 989px) {
-
-      }
-
       @media only screen and (max-width: 749px) {
+
+        #MainProduct--{{ section.id }} .product__collection-section .product__collection-image {
+          margin-bottom: 40px;
+        }
+
+        #MainProduct--template--29285039538519__product .product__ruby-signature {
+          margin-top: 40px;
+          margin-bottom: 40px;
+        }
 
         #MainProduct--{{ section.id }} .pdp-embla__arrows {
           display: none;
@@ -1449,15 +1476,15 @@
                     if (slideCount <= 1) {
                       carousel.progressBar.style.width = '100%';
                       carousel.progressBar.style.left = '0%';
+                      carousel.progressBar.style.transform = 'translateX(0)';
                       return;
                     }
 
-                    // Calculate scroll progress
-                    var scrollProgress = carousel.embla.scrollProgress();
-                    var clampedProgress = Math.max(0, Math.min(1, scrollProgress));
+                    // Segment-based progress: 1/N on first slide so bar is always partially visible
+                    var segmentProgress = (index + 1) / slideCount;
 
                     // Update progress bar
-                    carousel.progressBar.style.width = clampedProgress * 100 + '%';
+                    carousel.progressBar.style.width = segmentProgress * 100 + '%';
                     carousel.progressBar.style.left = '0%';
                     carousel.progressBar.style.transform = 'translateX(0)';
                   }
@@ -1795,11 +1822,14 @@
                     });
 
                     embla.on('scroll', function () {
-                      // Update progress bar during scroll
+                      // Update progress bar during scroll (segment-based, consistent with select handler)
                       if (progressBar) {
+                        var slideCount = embla.scrollSnapList().length;
                         var scrollProgress = embla.scrollProgress();
-                        var clampedProgress = Math.max(0, Math.min(1, scrollProgress));
-                        progressBar.style.width = clampedProgress * 100 + '%';
+                        var segmentProgress = slideCount > 1
+                          ? (scrollProgress * (slideCount - 1) + 1) / slideCount
+                          : 1;
+                        progressBar.style.width = Math.max(0, Math.min(1, segmentProgress)) * 100 + '%';
                         progressBar.style.left = '0%';
                         progressBar.style.transform = 'translateX(0)';
                       }
@@ -1994,6 +2024,34 @@
                       c.embla.reInit();
                       c.embla.scrollTo(0, true);
                       c.updateArrows && c.updateArrows();
+                    });
+
+                    // Mobile swipe hint: repeat the peek animation until the user actually
+                    // scrolls the gallery. Stop on either a pointer touch or the first scroll.
+                    carousels.forEach(function (carousel) {
+                      if (carousel.el.classList.contains('pdp-embla--desktop')) return;
+                      var slideCount = carousel.embla.scrollSnapList().length;
+                      if (slideCount <= 1) return;
+
+                      var hintEl = carousel.el;
+                      hintEl.classList.add('pdp-embla--swipe-hint');
+
+                      var hintRemoved = false;
+                      function removeHint() {
+                        if (hintRemoved) return;
+                        hintRemoved = true;
+                        hintEl.classList.remove('pdp-embla--swipe-hint');
+                      }
+
+                      var vp = hintEl.querySelector('[data-embla-viewport]');
+                      if (vp) vp.addEventListener('pointerdown', removeHint, { once: true });
+
+                      // Also stop when the user actually scrolls the carousel
+                      function onScroll() {
+                        removeHint();
+                        carousel.embla.off('scroll', onScroll);
+                      }
+                      carousel.embla.on('scroll', onScroll);
                     });
                   });
                 }
@@ -3228,19 +3286,8 @@
                           margin-bottom: 0;
                         }
 
-                        .product__ruby-signature {
-                          margin-top: 50px;
-                          margin-bottom: 20px;
-                        }
-
-                         {
-                        }
-                        -ee {
-                          display: flex;
-                          flex-direction: column;
-                        }
-
                         @media only screen and (max-width: 749px) {
+
                           .product__custom-drawers-row {
                             gap: 20px;
                             overflow: hidden;
