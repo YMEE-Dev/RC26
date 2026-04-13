@@ -10,7 +10,7 @@
       successSubtitleKey: "success_notify_subtitle",
       showProduct: true,
       showInquireFields: false,
-      klaviyoMetric: "Back in Stock",
+      useBisSubscription: true,
     },
     inquire: {
       titleKey: "inquire_title",
@@ -58,6 +58,55 @@
 
   function getTranslation(key) {
     return decodeHtml(translations[key] || key);
+  }
+
+  function submitBisSubscription(email, variantId) {
+    if (!KLAVIYO_API_KEY) {
+      console.error("[BIS Drawer] Klaviyo public API key is not configured.");
+      return Promise.reject(new Error("Missing Klaviyo API key"));
+    }
+
+    var payload = {
+      data: {
+        type: "back-in-stock-subscription",
+        attributes: {
+          profile: {
+            data: {
+              type: "profile",
+              attributes: {
+                email: email,
+              },
+            },
+          },
+          channels: ["EMAIL"],
+        },
+        relationships: {
+          variant: {
+            data: {
+              type: "catalog-variant",
+              id: "$shopify:::$default:::" + variantId,
+            },
+          },
+        },
+      },
+    };
+
+    var url =
+      "https://a.klaviyo.com/client/back-in-stock-subscriptions/?company_id=" + encodeURIComponent(KLAVIYO_API_KEY);
+
+    return fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        revision: "2024-10-15",
+      },
+      body: JSON.stringify(payload),
+    }).then(function (response) {
+      if (response.ok || response.status === 202) {
+        return response;
+      }
+      throw new Error("Klaviyo BIS API returned status " + response.status);
+    });
   }
 
   function submitToKlaviyo(metricName, email, properties) {
@@ -373,7 +422,15 @@
           properties.message = message ? message.value : "";
         }
 
-        submitToKlaviyo(config.klaviyoMetric, email.value, properties)
+        var submitPromise;
+        if (config.useBisSubscription) {
+          // Use Klaviyo's native Back in Stock Subscription API for notify mode
+          submitPromise = submitBisSubscription(email.value, variantId);
+        } else {
+          submitPromise = submitToKlaviyo(config.klaviyoMetric, email.value, properties);
+        }
+
+        submitPromise
           .then(function () {
             showSuccessView();
           })
