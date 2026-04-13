@@ -209,29 +209,29 @@
       }
 
       /* Show gallery background on header, fade it out when header starts hiding */
-      body.template-product header-component .theme__header::after {
+      body.template-product:not(:has(header-drawer.is-open)) header-component .theme__header::after {
         background: #f9f9f9 !important;
         opacity: 1 !important;
         visibility: visible !important;
         transition: opacity 0.35s ease !important;
       }
 
-      body.template-product.header-scroll-hide header-component .theme__header::after {
+      body.template-product.header-scroll-hide:not(:has(header-drawer.is-open)) header-component .theme__header::after {
         opacity: 0 !important;
       }
 
       /* Mobile bottom nav strip */
-      body.template-product:not(.header-scroll-hide) header-component .header__mobile__bottom {
+      body.template-product:not(.header-scroll-hide):not(:has(header-drawer.is-open)) header-component .header__mobile__bottom {
         background: #f9f9f9 !important;
         --bg: #f9f9f9;
       }
 
-      body.template-product:not(.header-scroll-hide) header-component .header__mobile__nav {
+      body.template-product:not(.header-scroll-hide):not(:has(header-drawer.is-open)) header-component .header__mobile__nav {
         --bg: #f9f9f9;
       }
 
-      body.template-product:not(.header-scroll-hide) header-component .header__mobile__nav::after,
-      body.template-product:not(.header-scroll-hide) header-component .header__mobile__nav::before {
+      body.template-product:not(.header-scroll-hide):not(:has(header-drawer.is-open)) header-component .header__mobile__nav::after,
+      body.template-product:not(.header-scroll-hide):not(:has(header-drawer.is-open)) header-component .header__mobile__nav::before {
         opacity: 1;
         visibility: visible;
         transition-delay: 0s;
