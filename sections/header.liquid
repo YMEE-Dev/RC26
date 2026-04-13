@@ -69,7 +69,9 @@
   endif
 
   assign logo_variant = section.settings.logo_variant | default: 'dark'
-  if template == 'index' or template.name == 'collection'
+  if template.name == 'product'
+    assign logo_variant = 'dark'
+  elsif template == 'index' or template.name == 'collection'
     assign logo_variant = header_default_mode
   endif
   assign logo_light_asset = 'RC_LOGO_light.svg'
@@ -84,6 +86,9 @@
     assign logo_denom = 800 | divided_by: 74
   endif
   assign transparent_logo_asset = logo_asset
+  if template.name == 'product'
+    assign transparent_logo_asset = logo_dark_asset
+  endif
   assign transparent_logo_pdp = section.settings.transparent_logo_pdp
   assign use_transparent_logo_pdp = false
   if template.name == 'product' and section.settings.transparent_product_page and transparent_logo_pdp != blank
