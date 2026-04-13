@@ -208,34 +208,21 @@
         --bg: transparent;
       }
 
-      /* Show gallery background on header, fade it out when header starts hiding */
-      body.template-product:not(:has(header-drawer.is-open)) header-component .theme__header::after {
-        background: #f9f9f9 !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-        transition: opacity 0.35s ease !important;
-      }
+      /* ── PDP mobile/tablet: gallery fills behind transparent header ── */
 
-      body.template-product.header-scroll-hide:not(:has(header-drawer.is-open)) header-component .theme__header::after {
-        opacity: 0 !important;
-      }
+      @media only screen and (max-width: 989px) {
+        /* Pull gallery up under header, pad to keep slides in place */
+        #MainProduct--{{ section.id }} .product__images {
+          background-color: var(--bg-color);
+          margin-top: calc(-1 * var(--header-height, 80px));
+          padding-top: var(--header-height, 80px);
+        }
 
-      /* Mobile bottom nav strip */
-      body.template-product:not(.header-scroll-hide):not(:has(header-drawer.is-open)) header-component .header__mobile__bottom {
-        background: #f9f9f9 !important;
-        --bg: #f9f9f9;
-      }
-
-      body.template-product:not(.header-scroll-hide):not(:has(header-drawer.is-open)) header-component .header__mobile__nav {
-        --bg: #f9f9f9;
-      }
-
-      body.template-product:not(.header-scroll-hide):not(:has(header-drawer.is-open)) header-component .header__mobile__nav::after,
-      body.template-product:not(.header-scroll-hide):not(:has(header-drawer.is-open)) header-component .header__mobile__nav::before {
-        opacity: 1;
-        visibility: visible;
-        transition-delay: 0s;
-        background: #f9f9f9 !important;
+        /* Sections below ATF stay white */
+        #MainProduct--{{ section.id }} .product__content,
+        #MainProduct--{{ section.id }} .product__sticky-bar {
+          background-color: var(--COLOR-BG);
+        }
       }
 
       body.template-product .main-content {
