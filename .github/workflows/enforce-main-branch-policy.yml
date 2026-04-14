@@ -1,0 +1,90 @@
+name: Branch policy — enforce main
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  enforce:
+    name: branch-policy/enforce-main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout event
+        uses: actions/checkout@v4
+
+      - name: Validate source branch or commit messages (whitelist Shopify bot)
+        env:
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+        run: |
+          python3 - <<'PY'
+          import json, os, sys
+
+          event_path = os.environ.get('GITHUB_EVENT_PATH')
+          if not event_path or not os.path.exists(event_path):
+            print('Missing or unreadable GITHUB_EVENT_PATH; refusing by default.')
+            sys.exit(1)
+
+          event = json.load(open(event_path))
+
+          # PR events: require PR head branch == 'dev'
+          if 'pull_request' in event:
+            head = event['pull_request']['head'].get('ref', '')
+            if head != 'dev':
+              print(f"Pull requests to main are only allowed from the 'dev' branch. This PR is from '{head}'.")
+              sys.exit(1)
+            print("PR source is 'dev' — allowed")
+            sys.exit(0)
+
+          # Push events: allow if every commit is either from Shopify app OR has a message starting with 'hotfix:'
+          commits = event.get('commits', [])
+          if not commits:
+            print('No commit data in event payload; refusing push by default.')
+            sys.exit(1)
+
+          # Known Shopify app identifiers (from your repo's commits)
+          BOT_LOGINS = {'shopify[bot]'}
+          BOT_EMAILS = {'79544226+shopify[bot]@users.noreply.github.com'}
+          BOT_NAMES = {'shopify[bot]'}
+
+          def commit_is_shopify(c):
+            # Check common spots where identity may appear
+            author = c.get('author') or {}
+            login = author.get('login') or author.get('username')
+            name = author.get('name')
+            email = author.get('email')
+            pusher = event.get('pusher') or {}
+            pusher_name = pusher.get('name') or pusher.get('email') or ''
+            if login and login in BOT_LOGINS:
+              return True
+            if name and name in BOT_NAMES:
+              return True
+            if email and email in BOT_EMAILS:
+              return True
+            if pusher_name and pusher_name in BOT_LOGINS.union(BOT_NAMES).union(BOT_EMAILS):
+              return True
+            return False
+
+          bad_commits = []
+          for c in commits:
+            msg = c.get('message', '') or ''
+            if commit_is_shopify(c):
+              continue
+            if msg.startswith('hotfix:'):
+              continue
+            bad_commits.append({
+              'id': c.get('id','<unknown>'),
+              'message': msg.splitlines()[0] if msg else '<empty>'
+            })
+
+          if bad_commits:
+            print('Push to main blocked: every commit must either be from the Shopify integration (shopify[bot]) or have a message starting with "hotfix:".')
+            print('Offending commits:')
+            for bc in bad_commits:
+              print(f"- {bc['id']}: {bc['message']}")
+            sys.exit(1)
+
+          print('Push allowed: all commits are either shopify[bot] or start with "hotfix:".')
+          PY
