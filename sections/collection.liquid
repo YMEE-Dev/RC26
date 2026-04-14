@@ -13,13 +13,20 @@
   assign sub_collections = linklists[collection.handle].links
   assign sub_collection_links_limit = 6
   assign has_active_subcollection_link = false
+  assign parent_collection_url = collection.url
 
-  if collection.handle contains '-'
-    assign possible_parent_handle = collection.handle | split: '-' | first
-    assign possible_parent_collection = collections[possible_parent_handle]
+  if collection.title contains ' - '
+    assign parent_collection_title = collection.title | split: ' - ' | first | strip
+    assign child_collection_title = collection.title | remove_first: parent_collection_title | remove_first: ' - ' | strip
 
-    if possible_parent_collection != blank
-      assign has_active_subcollection_link = true
+    if parent_collection_title != blank and child_collection_title != blank
+      assign parent_collection_handle = parent_collection_title | handleize
+      assign parent_collection_obj = collections[parent_collection_handle]
+
+      if parent_collection_obj != blank
+        assign parent_collection_url = parent_collection_obj.url
+        assign has_active_subcollection_link = true
+      endif
     endif
   endif
 
@@ -266,7 +273,7 @@
       >
         <div class="availability_filter-wrapper" data-availability-filter>
           <a
-            href="{{ collection.url }}"
+            href="{{ parent_collection_url }}"
             type="button"
             class="availability-filter__button navlink"
             data-availability-view-all
