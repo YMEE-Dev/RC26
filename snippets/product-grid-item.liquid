@@ -709,12 +709,16 @@
 
           {%- if double_img -%}
             {%- liquid
-              assign skip_first_hover_slide = false
-              assign second_media_alt = ''
+              assign has_common_model_hover_slide = false
 
-              if product.media.size > 1
-                assign second_media_alt = product.media[1].alt | downcase | strip
-              endif
+              for media in product.media limit: settings.image_hover_limit
+                assign media_alt = media.alt | default: '' | downcase | strip
+
+                if media_alt contains 'common:model'
+                  assign has_common_model_hover_slide = true
+                  break
+                endif
+              endfor
             -%}
 
             <hover-images class="product-item__bg__under">
@@ -723,11 +727,12 @@
                   {%- liquid
                     assign hover_slide_attr = ''
                     assign scale_class = ''
+                    assign media_alt = media.alt | default: '' | downcase | strip
 
-                    if second_media_alt contains 'common:model'
-                      unless forloop.first
+                    if has_common_model_hover_slide
+                      if media_alt contains 'common:model'
                         assign hover_slide_attr = ' data-hover-slide'
-                      endunless
+                      endif
                     else
                       assign hover_slide_attr = ' data-hover-slide'
                       assign scale_class = ' product-item__bg__slide--scale'
