@@ -7,21 +7,33 @@
 {% enddoc %}
 
 {%- liquid
-  assign first_image = product.media | where: 'media_type', 'image' | first
+  assign product_images = product.media | where: 'media_type', 'image'
+  assign first_image = product_images | first
+  assign second_image = product_images[1]
   assign first_media = product.media.first
   assign modal_media = product.media[1]
   assign modal_image = blank
+  assign desktop_trigger_image = blank
+  assign mobile_trigger_image = blank
   assign look_slider = ''
-
-  assign has_video = false
-  for media in product.media
-    if media.media_type == 'video'
-      assign has_video = true
-    endif
-  endfor
+  assign storytelling_slide_count = 0
+  assign first_media_is_video = false
+  assign modal_media_is_video = false
 
   if modal_media == blank
     assign modal_media = first_media
+  endif
+
+  if first_media != blank
+    if first_media.media_type == 'video' or first_media.media_type == 'external_video'
+      assign first_media_is_video = true
+    endif
+  endif
+
+  if modal_media != blank
+    if modal_media.media_type == 'video' or modal_media.media_type == 'external_video'
+      assign modal_media_is_video = true
+    endif
   endif
 
   if modal_media != blank
@@ -32,10 +44,18 @@
     endif
   endif
 
+  if pdp_mode and modal_image != blank
+    assign desktop_trigger_image = modal_image
+  else
+    assign desktop_trigger_image = first_image
+  endif
+
+  assign mobile_trigger_image = second_image | default: modal_image | default: desktop_trigger_image
+
   assign cta_text = product.metafields.custom.ste_cta | default: 'Shop the look'
   assign storytelling_products = product.metafields.custom.ste_products.value
 
-  assign grid_item_styles = 'grid-column: 1 / -3;'
+  assign grid_item_styles = 'grid-column: 0 / -3;'
   assign grid_item_type = 'one_column'
   if product.metafields.custom.ste_full_bleed == true
     assign grid_item_styles = 'grid-column: 1 / -1; object-fit: contain; width: 100%; height: auto;'
@@ -52,18 +72,47 @@
 -%}
 
 {%- for storytelling_product in storytelling_products -%}
-  {%- capture look_slider -%}
-  {{ look_slider }}
+  {%- if storytelling_product == blank -%}
+    {%- continue -%}
+  {%- endif -%}
 
-  <div class="look__slide look__slide--{{ forloop.index0 }}" data-slide="{{ forloop.index0 }}" data-grid-item >
-    {%- if storytelling_product != blank -%}
-      {%- render 'product-grid-item', product: storytelling_product, index: forloop.index, show_product_card: true, disable_image_hover: true -%}
-    {%- else -%}
-      {%- assign placeholder = 'product-' | append: forloop.index -%}
-      {%- render 'onboarding-product-grid-item', title: 'Product Title', show_product_card: true, placeholder: placeholder, index: forloop.index, animation_delay: forloop.index0 -%}
-    {%- endif -%}
-  </div>
-{%- endcapture -%}
+  {%- liquid
+    assign storytelling_product_image = storytelling_product.featured_media.preview_image
+
+    if storytelling_product_image == blank
+      assign storytelling_product_image = storytelling_product.media | where: 'media_type', 'image' | first
+    endif
+
+    assign storytelling_slide_count = storytelling_slide_count | plus: 1
+  -%}
+
+  {%- capture look_slider -%}
+    {{ look_slider }}
+
+    <div class="swiper-slide storytelling-modal__product-slide" data-storytelling-product-slide>
+      <a href="{{ storytelling_product.url }}" class="storytelling-product-card">
+        <div class="storytelling-product-card__image">
+          {%- if storytelling_product_image != blank -%}
+            {{
+              storytelling_product_image
+              | image_url: width: 1200
+              | image_tag:
+                alt: storytelling_product.title,
+                loading: 'lazy',
+                widths: '480, 720, 960, 1200'
+            }}
+          {%- else -%}
+            {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg storytelling-product-card__placeholder' }}
+          {%- endif -%}
+        </div>
+
+        <div class="storytelling-product-card__content">
+          <p class="storytelling-product-card__title navlink">{{ storytelling_product.title | strip_html | escape }}</p>
+          <p class="storytelling-product-card__price price">{{ storytelling_product.price | money }}</p>
+        </div>
+      </a>
+    </div>
+  {%- endcapture -%}
 {% endfor %}
 
 <grid-item
@@ -73,146 +122,143 @@
 >
   <div
     class="grid-media__media-wrapper"
-    data-storytelling-modal-trigger
-    data-storytelling-modal-target="{{ modal_id }}"
-  >
-    {%- if has_video and first_media.media_type == 'video' -%}
-      <video
-        class="custom-autoplay-video"
-        autoplay="1"
-        muted
-        loop
-        playsinline
-        poster="{{ first_media.preview_image | image_url: width: 2048 }}"
-      >
-        {% for source in first_media.sources %}
-          <source src="{{ source.url }}" type="{{ source.mime_type }}">
-        {% endfor %}
-        Your browser does not support the video tag.
-      </video>
-    {%- else -%}
-      {%- liquid
-        if pdp_mode and modal_image != blank
-          assign trigger_image = modal_image
-        else
-          assign trigger_image = first_image
-        endif
-      -%}
-      {%- if trigger_image -%}
-        {{
-          trigger_image
-          | image_url: width: 2048
-          | image_tag: alt: product.title, loading: 'eager', fetchpriority: 'high'
-        }}
-      {%- endif -%}
-    {%- endif -%}
-    {% comment %} <div class="grid-media__text-container">{{ product.title }}</div> {% endcomment %}
-    <button
-      type="button"
-      class="btn btn--solid btn--black btn--ar product-shop-the-look"
-      data-shopify-title="{{ product.title | strip_html }}"
+    {%- if storytelling_slide_count > 0 -%}
       data-storytelling-modal-trigger
       data-storytelling-modal-target="{{ modal_id }}"
-      aria-haspopup="dialog"
-      aria-controls="{{ modal_id }}"
-      aria-expanded="false"
-    >
-      <span class="product-shop-the-look-text">{{ cta_text }}</span>
-    </button>
-  </div>
-
-  <dialog
-    id="{{ modal_id }}"
-    class="storytelling-modal"
-    aria-label="{{ cta_text | escape }}"
-    aria-modal="true"
-    data-storytelling-modal
-    data-scroll-lock-required
+    {%- endif -%}
   >
-    <div class="storytelling-modal__inner">
-      <look-component class="look">
-        <div class="storytelling-look__image">
-          {%- if modal_media != blank and modal_media.media_type == 'video' -%}
-            <video
-              class="storytelling custom-autoplay-video"
-              autoplay="1"
-              muted
-              loop
-              playsinline
-              poster="{{ modal_media.preview_image | image_url: width: 2048 }}"
+    {%- if first_media_is_video -%}
+      {%- assign trigger_video_classes = 'custom-autoplay-video storytelling-trigger-video' -%}
+      {%- liquid
+        case first_media.media_type
+          when 'video'
+            echo first_media | media_tag: image_size: '2048x', class: trigger_video_classes, autoplay: true, loop: true, controls: false, preload: 'none', muted: true
+          when 'external_video'
+            if first_media.host == 'youtube'
+              echo first_media | external_video_url: autoplay: true, playsinline: true, loop: true, playlist: first_media.external_id, controls: false, mute: true, showinfo: false | external_video_tag: class: trigger_video_classes, loading: 'lazy', data-host: first_media.host
+            else
+              echo first_media | external_video_url: autoplay: true, playsinline: true, loop: true, controls: false, muted: true | external_video_tag: class: trigger_video_classes, data-host: first_media.host
+            endif
+        endcase
+      -%}
+    {%- else -%}
+      {%- if desktop_trigger_image -%}
+        <picture class="storytelling-trigger-picture">
+          {%- if mobile_trigger_image != blank and mobile_trigger_image != desktop_trigger_image -%}
+            <source
+              media="(max-width: 960px)"
+              srcset="{{ mobile_trigger_image | image_url: width: 2048 }}"
             >
-              {% for source in modal_media.sources %}
-                <source src="{{ source.url }}" type="{{ source.mime_type }}">
-              {% endfor %}
-              Your browser does not support the video tag.
-            </video>
-          {%- else -%}
-            {%- if modal_image -%}
-              {% comment %}
-                {%- render 'image',
-                  image: modal_image,
-                  sizes: '(min-width: 750px) 50vw, 100vw',
-                  aspect_ratio: 1,
-                  modifier: 'storytelling-look__image-bg',
-                  placeholder: 'collection-1'
-                -%}
-              {% endcomment %}
-              <img
-                class=""
-                src="{{ modal_image | image_url: width: 2048 }}"
-                alt="{{ product.title | strip_html | escape }}"
-                width="auto"
-                height="auto"
-              >
-            {%- endif -%}
           {%- endif -%}
-        </div>
+          {{
+            desktop_trigger_image
+            | image_url: width: 2048
+            | image_tag:
+              alt: product.title,
+              loading: 'eager',
+              fetchpriority: 'high',
+              class: 'storytelling-trigger-image'
+          }}
+        </picture>
+      {%- endif -%}
+    {%- endif -%}
 
-        <div class="look__aside" data-popup-container>
-          <div class="underlay mobile look__underlay" data-popup-close></div>
-
-          <div class="look__content" data-popup-content data-scroll-lock-scrollable>
-            <div class="storytelling-modal__slider-shell">
-              <grid-slider data-arrow-position-middle>
-                <div
-                  class="grid--slider look__slider look__slider--grid"
-                  data-grid-slider
-                  data-slider-mobile="{{ product.id }}"
-                  data-arrow-position-middle
-                  data-scroll-lock-scrollable
-                  {% if request.design_mode %}
-                    data-block-scroll
-                  {% endif %}
-                >
-                  {{ look_slider }}
-                </div>
-              </grid-slider>
-
-              <div class="storytelling-modal__slider-progress" data-storytelling-slider-progress aria-hidden="true">
-                <span class="storytelling-modal__slider-progress-thumb" data-storytelling-slider-progress-thumb></span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </look-component>
-
+    {%- if storytelling_slide_count > 0 -%}
       <button
         type="button"
-        class="storytelling-modal__close"
-        data-storytelling-modal-close
-        aria-label="{{ 'general.accessibility.close' | t }}"
+        class="btn btn--solid btn--primary product-shop-the-look"
+        data-shopify-title="{{ product.title | strip_html }}"
+        data-storytelling-modal-trigger
+        data-storytelling-modal-target="{{ modal_id }}"
+        aria-haspopup="dialog"
+        aria-controls="{{ modal_id }}"
+        aria-expanded="false"
       >
-        {%- render 'icon-cancel' -%}
+        <span class="product-shop-the-look-text">{{ cta_text }}</span>
       </button>
-    </div>
-  </dialog>
+    {%- endif -%}
+  </div>
+
+  {%- if storytelling_slide_count > 0 -%}
+    <dialog
+      id="{{ modal_id }}"
+      class="storytelling-modal"
+      aria-label="{{ cta_text | escape }}"
+      aria-modal="true"
+      data-storytelling-modal
+      data-scroll-lock-required
+    >
+      <div class="storytelling-modal__inner">
+        <look-component class="look">
+          <div class="storytelling-look__image">
+            {%- if modal_media_is_video -%}
+              {%- liquid
+                case modal_media.media_type
+                  when 'video'
+                    echo modal_media | media_tag: image_size: '2048x', class: 'storytelling custom-autoplay-video', autoplay: true, loop: true, controls: false, preload: 'none', muted: true
+                  when 'external_video'
+                    if modal_media.host == 'youtube'
+                      echo modal_media | external_video_url: autoplay: true, playsinline: true, loop: true, playlist: modal_media.external_id, controls: false, mute: true, showinfo: false | external_video_tag: class: 'storytelling custom-autoplay-video', loading: 'lazy', data-host: modal_media.host
+                    else
+                      echo modal_media | external_video_url: autoplay: true, playsinline: true, loop: true, controls: false, muted: true | external_video_tag: class: 'storytelling custom-autoplay-video', data-host: modal_media.host
+                    endif
+                endcase
+              -%}
+            {%- else -%}
+              {%- if modal_image -%}
+                <img
+                  class=""
+                  src="{{ modal_image | image_url: width: 2048 }}"
+                  alt="{{ product.title | strip_html | escape }}"
+                  width="auto"
+                  height="auto"
+                >
+              {%- endif -%}
+            {%- endif -%}
+          </div>
+
+          <div class="look__aside" data-popup-container>
+            <div class="underlay mobile look__underlay" data-popup-close></div>
+
+            <div class="look__content" data-popup-content data-scroll-lock-scrollable>
+              <div class="storytelling-modal__slider-shell">
+                <div
+                  class="swiper storytelling-modal__swiper"
+                  data-storytelling-swiper
+                  data-storytelling-swiper-id="{{ modal_id }}"
+                >
+                  <div class="swiper-wrapper">
+                    {{ look_slider }}
+                  </div>
+                  <div
+                    class="swiper-pagination storytelling-modal__slider-progress{% if storytelling_slide_count <= 1 %} is-hidden{% endif %}"
+                    data-storytelling-swiper-pagination
+                    aria-hidden="true"
+                  ></div>
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="storytelling-modal__close"
+              data-storytelling-modal-close
+              aria-label="{{ 'general.accessibility.close' | t }}"
+            >
+              {%- render 'icon-close' -%}
+            </button>
+          </div>
+        </look-component>
+      </div>
+    </dialog>
+  {%- endif -%}
 </grid-item>
 
 {% javascript %}
   (() => {
     if (window.__storytellingModalInitialized) return;
     window.__storytellingModalInitialized = true;
-    const sliderProgressBindings = new WeakMap();
+    const swiperInstances = window.__storytellingModalSwipers || new WeakMap();
+    window.__storytellingModalSwipers = swiperInstances;
 
     const getModalByTrigger = (trigger) => {
       const modalId = trigger.getAttribute('data-storytelling-modal-target');
@@ -225,89 +271,91 @@
       return Array.from(document.querySelectorAll(`[data-storytelling-modal-target="${modalId}"]`));
     };
 
-    const refreshModalSliders = (modal) => {
-      if (!modal) return;
+    const updateStorytellingProgress = (swiper) => {
+      if (!swiper || swiper.destroyed) return;
 
-      const gridSliders = modal.querySelectorAll('grid-slider');
-      if (!gridSliders.length) return;
+      const progressTrack = swiper.pagination && swiper.pagination.el;
+      const progressFill = progressTrack && progressTrack.querySelector('.swiper-pagination-progressbar-fill');
+      if (!progressTrack || !progressFill) return;
 
-      gridSliders.forEach((gridSlider) => {
-        if (typeof gridSlider.toggleSlider === 'function') {
-          gridSlider.toggleSlider();
-        }
-
-        if (typeof gridSlider.positionArrows === 'function') {
-          gridSlider.positionArrows();
-        }
-      });
-    };
-
-    const updateSliderProgress = (slider, progressTrack, progressThumb) => {
-      if (!slider || !progressTrack || !progressThumb) return;
-
-      const maxScroll = Math.max(slider.scrollWidth - slider.clientWidth, 0);
-      if (maxScroll <= 0) {
-        progressTrack.classList.add('is-hidden');
-        progressThumb.style.width = '100%';
-        progressThumb.style.transform = 'translateX(0)';
-        return;
-      }
+      const slidesCount = swiper.slides ? swiper.slides.length : 0;
+      if (slidesCount <= 1) return;
 
       const trackWidth = progressTrack.clientWidth;
       if (!trackWidth) return;
 
-      progressTrack.classList.remove('is-hidden');
-
-      const thumbWidth = Math.max((slider.clientWidth / slider.scrollWidth) * trackWidth, 18);
+      const thumbWidth = Math.max(trackWidth / slidesCount, 36);
       const maxOffset = Math.max(trackWidth - thumbWidth, 0);
-      const scrollProgress = slider.scrollLeft / maxScroll;
-      const offset = maxOffset * scrollProgress;
+      const clampedProgress = Math.max(0, Math.min(1, swiper.progress || 0));
+      const offset = maxOffset * clampedProgress;
 
-      progressThumb.style.width = `${thumbWidth}px`;
-      progressThumb.style.transform = `translateX(${offset}px)`;
+      progressFill.style.width = `${thumbWidth}px`;
+      progressFill.style.transform = `translate3d(${offset}px, 0, 0)`;
     };
 
-    const bindSliderProgress = (slider, progressTrack, progressThumb) => {
-      if (!slider || !progressTrack || !progressThumb) return;
+    const initModalSwiper = (modal) => {
+      if (!modal) return;
+      if (typeof Swiper === 'undefined') return;
 
-      const existingBinding = sliderProgressBindings.get(slider);
-      if (existingBinding) {
-        existingBinding.update();
+      const swiperElement = modal.querySelector('[data-storytelling-swiper]');
+      const paginationElement = modal.querySelector('[data-storytelling-swiper-pagination]');
+      if (!swiperElement || !paginationElement) return;
+      if (!swiperElement.querySelector('.swiper-slide')) return;
+
+      let swiper = swiperInstances.get(modal);
+
+      if (swiper && !swiper.destroyed) {
+        swiper.update();
+        if (swiper.pagination && typeof swiper.pagination.update === 'function') {
+          swiper.pagination.update();
+        }
+        requestAnimationFrame(() => {
+          updateStorytellingProgress(swiper);
+        });
         return;
       }
 
-      const update = () => updateSliderProgress(slider, progressTrack, progressThumb);
-      const onScroll = () => update();
-      slider.addEventListener('scroll', onScroll, { passive: true });
-      let resizeObserver = null;
-      let onResize = null;
-
-      if ('ResizeObserver' in window) {
-        resizeObserver = new ResizeObserver(() => update());
-        resizeObserver.observe(slider);
-        resizeObserver.observe(progressTrack);
-      } else {
-        onResize = () => requestAnimationFrame(update);
-        window.addEventListener('resize', onResize);
-        document.addEventListener('theme:resize:width', onResize);
-      }
-
-      sliderProgressBindings.set(slider, { update, resizeObserver, onResize });
-      update();
-    };
-
-    const initModalSliderProgress = (modal) => {
-      if (!modal) return;
-
-      const sliderShells = modal.querySelectorAll('.storytelling-modal__slider-shell');
-      if (!sliderShells.length) return;
-
-      sliderShells.forEach((sliderShell) => {
-        const slider = sliderShell.querySelector('[data-grid-slider]');
-        const progressTrack = sliderShell.querySelector('[data-storytelling-slider-progress]');
-        const progressThumb = sliderShell.querySelector('[data-storytelling-slider-progress-thumb]');
-        bindSliderProgress(slider, progressTrack, progressThumb);
+      swiper = new Swiper(swiperElement, {
+        slidesPerView: 1,
+        spaceBetween: 0,
+        loop: false,
+        watchOverflow: true,
+        observer: true,
+        observeParents: true,
+        a11y: true,
+        keyboard: {
+          enabled: true,
+          onlyInViewport: false,
+        },
+        pagination: {
+          el: paginationElement,
+          type: 'progressbar',
+        },
+        on: {
+          afterInit(instance) {
+            requestAnimationFrame(() => {
+              updateStorytellingProgress(instance);
+            });
+          },
+          progress(instance) {
+            requestAnimationFrame(() => {
+              updateStorytellingProgress(instance);
+            });
+          },
+          resize(instance) {
+            requestAnimationFrame(() => {
+              updateStorytellingProgress(instance);
+            });
+          },
+          update(instance) {
+            requestAnimationFrame(() => {
+              updateStorytellingProgress(instance);
+            });
+          },
+        },
       });
+
+      swiperInstances.set(modal, swiper);
     };
 
     const onModalClosed = (modal) => {
@@ -318,10 +366,10 @@
 
       if (window.theme && typeof window.theme.hasOpenModals === 'function') {
         if (!window.theme.hasOpenModals()) {
-          document.dispatchEvent(new CustomEvent('theme:scroll:unlock', { bubbles: true }));
+          document.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
         }
       } else {
-        document.dispatchEvent(new CustomEvent('theme:scroll:unlock', { bubbles: true }));
+        document.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
       }
 
       const triggers = getTriggersByModalId(modal.id);
@@ -364,7 +412,7 @@
 
       const openModalElement = document.querySelector('[data-storytelling-modal][open]');
       if (openModalElement && openModalElement !== modal) {
-        closeModal(openModalElement, { restoreFocus: false });
+        closeModal(openModalElement, {restoreFocus: false});
       }
 
       if (typeof modal.showModal === 'function') {
@@ -375,15 +423,14 @@
         modal.setAttribute('open', '');
       }
 
-      document.dispatchEvent(new CustomEvent('theme:scroll:lock', { bubbles: true }));
+      document.dispatchEvent(new CustomEvent('theme:scroll:lock', {bubbles: true}));
       getTriggersByModalId(modal.id).forEach((modalTrigger) => {
         modalTrigger.setAttribute('aria-expanded', 'true');
       });
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          refreshModalSliders(modal);
-          initModalSliderProgress(modal);
+          initModalSwiper(modal);
         });
       });
 
@@ -444,5 +491,16 @@
       },
       true
     );
+
+    document.addEventListener('shopify:section:load', (event) => {
+      const target = event.target;
+      if (!target || !target.querySelectorAll) return;
+
+      target.querySelectorAll('[data-storytelling-modal][open]').forEach((modal) => {
+        requestAnimationFrame(() => {
+          initModalSwiper(modal);
+        });
+      });
+    });
   })();
 {% endjavascript %}

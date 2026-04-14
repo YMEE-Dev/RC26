@@ -9,16 +9,49 @@
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
     --bg-color: {{ section.settings.background_color }};
-    /* padding-inline:  var(--outer); */
-    overflow: hidden;
+    --COLUMNS: 3;
+    --COLUMNS-MEDIUM: 2;
+    --COLUMNS-SMALL: 2;
+    --COLUMNS-MOBILE: 1;
+    --gap: 80px;
+    --column-count: 3;
+    overflow-x: visible;
+  }
+  #StoreLocator--{{ section.id }} .store-locator__carousel-container {
+    overflow: visible;
+  }
+  #StoreLocator--{{ section.id }} .slider__button  {
+    display: none;
+  }
+  /* Item width: ~30–35% so 2–3 slides visible (was 1 due to viewport-based calc in narrow wrappers) */
+  @media (min-width: 750px) {
+    #StoreLocator--{{ section.id }} .store-locator__grid.grid--slider {
+      --item-width: 32%;
+    }
+  }
+  @media (min-width: 990px) {
+    #StoreLocator--{{ section.id }} .store-locator__grid.grid--slider {
+      --item-width: 33%;
+    }
+  }
+  /* Mobile: 1.5 slides visible, reduced gap */
+  @media (max-width: 768px) {
+    #StoreLocator--{{ section.id }} {
+      --gap: 8px;
+    }
+    #StoreLocator--{{ section.id }} .store-locator__grid.grid--mobile-slider .grid-item {
+      width: calc(66.67% - (var(--gap) / 2));
+      min-width: calc(66.67% - (var(--gap) / 2));
+    }
   }
 {%- endstyle -%}
 
 <section
   id="StoreLocator--{{ section.id }}"
-  class="store-locator section-padding {{ color_scheme }}"
+  class="store-locator section-padding {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}"
   data-section-id="{{ section.id }}"
   data-section-type="store-locator"
+  data-header-observer-mode="{{ section.settings.header_observer_mode }}"
   data-enable-fetch="{{ section.settings.enable_fetch_from_app }}"
   style="background-color: var(--bg-color);"
 >
@@ -31,7 +64,7 @@
               <p class="store-locator__subheading" {{ block.shopify_attributes }}>
                 {{ block.settings.text | upcase }}
               </p>
-            
+
             {%- when 'heading' -%}
               <h2 class="store-locator__heading {{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
                 {{ block.settings.text }}
@@ -39,8 +72,8 @@
           {%- endcase -%}
         {%- endfor -%}
       </div>
-      
-      <div class="store-locator__header-button">
+
+      <div class="store-locator__header-button desktop-display">
         {%- for block in section.blocks -%}
           {%- if block.type == 'button' -%}
             <a
@@ -57,11 +90,15 @@
 
     {%- assign location_blocks = section.blocks | where: 'type', 'location_card' -%}
     {%- if location_blocks.size > 0 -%}
-      <div class="store-locator__carousel-container">
-        <div class="swiper store-locator__swiper">
-          <div class="swiper-wrapper">
+      <div class="store-locator__carousel-container grid-outer_">
+        <grid-slider align-arrows>
+          <div
+            class="store-locator__grid grid grid--slider grid--mobile-slider"
+            data-grid-slider
+            style="--column-count: {{ location_blocks.size }};"
+          >
             {%- for block in location_blocks -%}
-              <div class="swiper-slide" {{ block.shopify_attributes }}>
+              <div class="grid-item store-locator__grid-item" data-grid-item {{ block.shopify_attributes }}>
                 <div class="store-locator__card">
                   {%- if block.settings.image != blank -%}
                     <div class="store-locator__card-image">
@@ -85,13 +122,23 @@
               </div>
             {%- endfor -%}
           </div>
-          
-          <!-- Navigation buttons -->
-          {% comment %} <div class="swiper-button-prev store-locator__nav-prev"></div>
-          <div class="swiper-button-next store-locator__nav-next"></div> {% endcomment %}
-        </div>
+        </grid-slider>
       </div>
     {%- endif -%}
+
+    <div class="store-locator__header-button mobile-display">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'button' -%}
+          <a
+            href="{{ block.settings.link | default: '#' }}"
+            class="store-locator__button"
+            {{ block.shopify_attributes }}
+          >
+            {{ block.settings.text | upcase }}
+          </a>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
 
     <!-- Loading state for app fetch -->
     <div class="store-locator__loading" id="storeLocatorLoading--{{ section.id }}" style="display: none;">
@@ -102,10 +149,8 @@
 </section>
 
 <script>
-  (function() {
+  (function () {
     const sectionId = '{{ section.id }}';
-    const swiperInstances = window.__storeLocatorSwipers || {};
-    window.__storeLocatorSwipers = swiperInstances;
 
     function initStoreLocatorSection() {
       const section = document.querySelector('[data-section-id="' + sectionId + '"]');
@@ -113,50 +158,38 @@
 
       const enableFetch = section.dataset.enableFetch === 'true';
 
-      function initSwiper() {
-        if (typeof Swiper === 'undefined') return;
-        var el = document.querySelector('#StoreLocator--' + sectionId + ' .store-locator__swiper');
-        if (!el) return;
-
-        if (swiperInstances[sectionId]) {
-          swiperInstances[sectionId].destroy(true, true);
-          delete swiperInstances[sectionId];
+      function initGridSlider() {
+        const gridSlider = section.querySelector('grid-slider');
+        if (gridSlider) {
+          gridSlider.dispatchEvent(new CustomEvent('theme:grid-slider:init'));
         }
-
-        swiperInstances[sectionId] = new Swiper(el, {
-          slidesPerView: 1,
-          spaceBetween: 80,
-          loop: false,
-          smooth: true,
-          breakpoints: {
-            640: { slidesPerView: 2, spaceBetween: 80 },
-            990: { slidesPerView: 2.7, spaceBetween: 80 },
-            1200: { slidesPerView: 2.7, spaceBetween: 80 }
-          }
-        });
       }
 
       function renderLocations(locations) {
-        const swiperWrapper = section.querySelector('.swiper-wrapper');
-        if (!swiperWrapper) return;
-        swiperWrapper.innerHTML = '';
+        const gridSlider = section.querySelector('[data-grid-slider]');
+        if (!gridSlider) return;
+        gridSlider.innerHTML = '';
 
-        locations.forEach(location => {
-          const slide = document.createElement('div');
-          slide.className = 'swiper-slide';
-          slide.innerHTML = `
-            <div class="store-locator__card">
-              ${location.image 
-                ? `<div class="store-locator__card-image"><img src="${location.image}" alt="${location.name}" loading="lazy"></div>`
-                : `<div class="store-locator__card-placeholder"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 525.5 525.5"><path d="M375 262.7L262.7 375 150.4 262.7l112.3-112.3z"/></svg></div>`
-              }
-              <div class="store-locator__card-content">
-                ${location.subheading ? `<p class="store-locator__card-subheading">${location.subheading.toUpperCase()}</p>` : ''}
-                ${location.name ? `<h3 class="store-locator__card-heading">${location.name}</h3>` : ''}
-              </div>
-            </div>
-          `;
-          swiperWrapper.appendChild(slide);
+        locations.forEach(function (location) {
+          const item = document.createElement('div');
+          item.className = 'grid-item store-locator__grid-item';
+          item.setAttribute('data-grid-item', '');
+          item.innerHTML =
+            '<div class="store-locator__card">' +
+            (location.image
+              ? '<div class="store-locator__card-image"><img src="' +
+                location.image +
+                '" alt="' +
+                (location.name || '') +
+                '" loading="lazy"></div>'
+              : '<div class="store-locator__card-placeholder"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 525.5 525.5"><path d="M375 262.7L262.7 375 150.4 262.7l112.3-112.3z"/></svg></div>') +
+            '<div class="store-locator__card-content">' +
+            (location.subheading
+              ? '<p class="store-locator__card-subheading">' + location.subheading.toUpperCase() + '</p>'
+              : '') +
+            (location.name ? '<h3 class="store-locator__card-heading">' + location.name + '</h3>' : '') +
+            '</div></div>';
+          gridSlider.appendChild(item);
         });
       }
 
@@ -167,21 +200,23 @@
         if (carousel) carousel.style.display = 'none';
 
         fetch('/apps/store-locator/locations')
-          .then(res => res.json())
-          .then(data => {
+          .then(function (res) {
+            return res.json();
+          })
+          .then(function (data) {
             if (data && data.locations && data.locations.length > 0) renderLocations(data.locations);
             loading.style.display = 'none';
             if (carousel) carousel.style.display = 'block';
-            initSwiper();
+            initGridSlider();
           })
-          .catch(function(err) {
+          .catch(function (err) {
             console.error('Error fetching locations:', err);
             loading.style.display = 'none';
             if (carousel) carousel.style.display = 'block';
-            initSwiper();
+            initGridSlider();
           });
       } else {
-        initSwiper();
+        initGridSlider();
       }
     }
 
@@ -195,9 +230,10 @@
 
     runInit();
 
-    document.addEventListener('shopify:section:load', function(event) {
+    document.addEventListener('shopify:section:load', function (event) {
       const loadedSection = event.target?.querySelector?.('[data-section-id]') || event.target;
-      const isOurSection = (loadedSection && loadedSection.dataset?.sectionId === sectionId) ||
+      const isOurSection =
+        (loadedSection && loadedSection.dataset?.sectionId === sectionId) ||
         (event.detail && String(event.detail.sectionId) === String(sectionId));
       if (isOurSection) {
         initStoreLocatorSection();
@@ -242,10 +278,10 @@
           "label": "Heading size",
           "default": "heading-large",
           "options": [
-            { "value": "heading-small", "label": "Small" },
-            { "value": "heading-medium", "label": "Medium" },
-            { "value": "heading-large", "label": "Large" },
-            { "value": "heading-x-large", "label": "Extra large" }
+            {"value": "heading-small", "label": "Small"},
+            {"value": "heading-medium", "label": "Medium"},
+            {"value": "heading-large", "label": "Large"},
+            {"value": "heading-x-large", "label": "Extra large"}
           ]
         }
       ]
@@ -295,6 +331,20 @@
   "settings": [
     {
       "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
+    {
+      "type": "header",
       "content": "Layout"
     },
     {
@@ -303,10 +353,10 @@
       "label": "Width",
       "default": "wrapper",
       "options": [
-        { "value": "wrapper--full-padded", "label": "Full width padded" },
-        { "value": "wrapper", "label": "Normal" },
-        { "value": "wrapper--narrow", "label": "Narrow" },
-        { "value": "wrapper--custom", "label": "Custom (max-width: 1232px)" }  
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"},
+        {"value": "wrapper--narrow", "label": "Narrow"},
+        {"value": "wrapper--custom", "label": "Custom (max-width: 1232px)"}
       ]
     },
     {

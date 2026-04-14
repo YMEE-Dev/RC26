@@ -1,0 +1,358 @@
+<!-- /sections/homepage-collection-spotlight.liquid -->
+{{ 'homepage-collection-spotlight.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign section_eyebrow = section.settings.eyebrow | strip
+  assign section_title = section.settings.title | strip
+  assign section_description = section.settings.description
+  assign image = section.settings.image
+  assign mobile_image = section.settings.mobile_image
+  assign layout = section.settings.layout
+  assign mobile_layout = section.settings.mobile_layout
+  assign show_recently_viewed_indicator = settings.show_recently_viewed_indicator
+  assign sizes = '(min-width: 960px) 360px, calc(50vw - 30px)'
+  assign rendered_products_count = 0
+
+  if image != blank and image.value != blank
+    assign image = image.value
+  endif
+
+  if mobile_image != blank and mobile_image.value != blank
+    assign mobile_image = mobile_image.value
+  endif
+  assign animation_anchor = '#HomepageCollectionSpotlight--' | append: section.id
+  assign animation_order = 0
+-%}
+
+{%- if image != blank -%}
+  {%- style -%}
+    #HomepageCollectionSpotlight--{{ section.id }} {
+      --PT: {{ section.settings.padding_top }}px;
+      --PB: {{ section.settings.padding_bottom }}px;
+      --PT-mobile: {{ section.settings.padding_top_mobile }}px;
+      --PB-mobile: {{ section.settings.padding_bottom_mobile }}px;
+      --bg-color: {{ section.settings.background_color }};
+    }
+  {%- endstyle -%}
+
+  {%- if show_recently_viewed_indicator -%}
+    <script src="{{ 'grid-item.js' | asset_url }}" defer></script>
+  {%- endif -%}
+
+  {%- if settings.quickview_enable -%}
+    <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+
+  <section
+    id="HomepageCollectionSpotlight--{{ section.id }}"
+    class="homepage-collection-spotlight section-padding {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}{% if layout == 'reversed' %} homepage-collection-spotlight--reversed{% endif %} {% if mobile_layout == 'reversed' %} homepage-collection-spotlight--mobile_reversed{% endif %}"
+    data-section-id="{{ section.id }}"
+    data-section-type="homepage-collection-spotlight"
+    data-header-observer-mode="{{ section.settings.header_observer_mode }}"
+    style="background-color: var(--bg-color);"
+  >
+    <div class="homepage-collection-spotlight__wrapper {{ section.settings.width }}">
+      <div class="homepage-collection-spotlight__layout">
+        <div class="homepage-collection-spotlight__content">
+          <div class="homepage-collection-spotlight__copy">
+            {%- if section_eyebrow != blank -%}
+              {%- assign animation_order = animation_order | plus: 1 -%}
+              <p
+                class="homepage-collection-spotlight__eyebrow title"
+                data-aos="hero"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-order="{{ animation_order }}"
+              >
+                {{ section_eyebrow | escape }}
+              </p>
+            {%- endif -%}
+
+            {%- if section_title != blank -%}
+              {%- assign animation_order = animation_order | plus: 1 -%}
+              <h2
+                class="homepage-collection-spotlight__title"
+                data-aos="hero"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-order="{{ animation_order }}"
+              >
+                {{ section_title | escape }}
+              </h2>
+            {%- endif -%}
+
+            {%- if section_description != blank -%}
+              {%- assign animation_order = animation_order | plus: 1 -%}
+              <div
+                class="homepage-collection-spotlight__description rte body"
+                data-aos="hero"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-order="{{ animation_order }}"
+              >
+                {{ section_description }}
+              </div>
+            {%- endif -%}
+          </div>
+
+          <div class="homepage-collection-spotlight__products">
+            <grid-slider>
+              <div
+                class="grid grid--slider grid--mobile-slider{% if section.settings.product_list.count <= 1 %} grid--slider-disabled{% endif %}"
+                data-grid-slider
+                id="HomepageCollectionSpotlightSlider--{{ section.id }}"
+              >
+                {%- for product in section.settings.product_list -%}
+                  {%- liquid
+                    assign hidden_product = false
+                    if product.tags contains 'hide'
+                      assign hidden_product = true
+                    endif
+                  -%}
+
+                  {%- if hidden_product == false -%}
+                    {%- assign rendered_products_count = rendered_products_count | plus: 1 -%}
+                    {%-
+                      render 'product-grid-item',
+                      product: product,
+                      animation_delay: rendered_products_count | minus: 1,
+                      animation_anchor: '#HomepageCollectionSpotlightSlider--' | append: section.id,
+                      index: rendered_products_count,
+                      sizes: sizes,
+                      disable_image_hover: true,
+                      modifier_class: 'homepage-collection-spotlight__product-card'
+                    -%}
+                  {%- endif -%}
+                {%- endfor -%}
+
+                {%- if rendered_products_count == 0 -%}
+                  {%- for i in (1..2) -%}
+                    {%- liquid
+                      assign placeholder = 'product-' | append: forloop.index
+                      capture placeholder_title
+                        cycle 'Spotlight Product', 'Collection Piece'
+                      endcapture
+                    -%}
+                    {%-
+                      render 'onboarding-product-grid-item',
+                      title: placeholder_title,
+                      placeholder: placeholder,
+                      index: forloop.index,
+                      animation_delay: forloop.index0,
+                      animation_anchor: '#HomepageCollectionSpotlightSlider--' | append: section.id
+                    -%}
+                  {%- endfor -%}
+                {%- endif -%}
+              </div>
+            </grid-slider>
+          </div>
+        </div>
+
+        {%- assign animation_order = animation_order | plus: 1 -%}
+        <div
+          class="homepage-collection-spotlight__media{% if mobile_image != blank %} homepage-collection-spotlight__media--has-mobile-image{% endif %}"
+          data-aos="hero"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-order="{{ animation_order }}"
+        >
+          {%- if image.width != blank -%}
+            {{
+              image
+              | image_url: width: 2400
+              | image_tag:
+                class: 'homepage-collection-spotlight__image homepage-collection-spotlight__image--desktop',
+                loading: 'lazy',
+                sizes: '(min-width: 960px) 50vw, 100vw',
+                widths: '375, 550, 750, 990, 1200, 1600, 2000, 2400'
+            }}
+          {%- else -%}
+            <img
+              class="homepage-collection-spotlight__image homepage-collection-spotlight__image--desktop"
+              src="{{ image | escape }}"
+              alt=""
+              loading="lazy"
+            >
+          {%- endif -%}
+
+          {%- if mobile_image != blank -%}
+            {%- if mobile_image.width != blank -%}
+              {{
+                mobile_image
+                | image_url: width: 1500
+                | image_tag:
+                  class: 'homepage-collection-spotlight__image homepage-collection-spotlight__image--mobile',
+                  loading: 'lazy',
+                  sizes: '100vw',
+                  widths: '320, 375, 550, 750, 990, 1200, 1500'
+              }}
+            {%- else -%}
+              <img
+                class="homepage-collection-spotlight__image homepage-collection-spotlight__image--mobile"
+                src="{{ mobile_image | escape }}"
+                alt=""
+                loading="lazy"
+              >
+            {%- endif -%}
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Collection spotlight",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Collection spotlight"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Tiare"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>Inspired by the luminous beauty of the Tiare flower, this Roberto Coin Tiara collection expresses effortless femininity, pure light, and feminine strength.</p>"
+    },
+    {
+      "type": "product_list",
+      "id": "product_list",
+      "label": "Products",
+      "limit": 8
+    },
+    {
+      "type": "header",
+      "content": "Media"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "Mobile image"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Desktop layout",
+      "default": "",
+      "options": [
+        {"value": "", "label": "Image left, content right"},
+        {"value": "reversed", "label": "Content left, image right"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "mobile_layout",
+      "label": "Mobile layout",
+      "default": "",
+      "options": [
+        {"value": "", "label": "Image top, content bottom"},
+        {"value": "reversed", "label": "Content top, image bottom"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        {"value": "wrapper--full", "label": "Full width"},
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"}
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Top (mobile)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom (mobile)",
+      "default": 20
+    }
+  ],
+  "presets": [
+    {
+      "name": "Homepage collection spotlight"
+    }
+  ]
+}
+{% endschema %}

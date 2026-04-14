@@ -8,21 +8,29 @@
   #PersonalAssistance--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
+    --personal-assistance-media-order: {% if section.settings.content_order == 'text-first' %}2{% else %}1{% endif %};
+    --personal-assistance-content-order: {% if section.settings.content_order == 'text-first' %}1{% else %}2{% endif %};
   }
 {%- endstyle -%}
 
 <section
   id="PersonalAssistance--{{ section.id }}"
-  class="personal-assistance section-padding {{ color_scheme }}"
+  class="personal-assistance section-padding {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}"
   data-section-id="{{ section.id }}"
   data-section-type="personal-assistance"
+  data-header-observer-mode="{{ section.settings.header_observer_mode }}"
 >
   <div class="personal-assistance__wrapper {{ section.settings.width }}">
     <div class="personal-assistance__grid">
       <div class="personal-assistance__media">
         {%- if section.settings.image != blank -%}
           <div class="personal-assistance__image">
-            <img src="{{ section.settings.image | img_url: 'master' }}" alt="{{ section.settings.image.alt }}" width="1000" height="1000">
+            <img
+              src="{{ section.settings.image | img_url: 'master' }}"
+              alt="{{ section.settings.image.alt }}"
+              width="1000"
+              height="1000"
+            >
           </div>
         {%- else -%}
           <div class="personal-assistance__placeholder">
@@ -32,48 +40,60 @@
       </div>
 
       <div class="personal-assistance__content">
-        {%- if section.settings.subheading != blank -%}
-          <p class="personal-assistance__subheading">{{ section.settings.subheading | upcase }}</p>
-        {%- endif -%}
         {%- if section.settings.heading != blank -%}
           <h2 class="personal-assistance__heading {{ section.settings.heading_font_size }}">
             {{ section.settings.heading }}
           </h2>
         {%- endif -%}
+        {%- if section.settings.subheading != blank -%}
+          <p class="personal-assistance__subheading">{{ section.settings.subheading }}</p>
+        {%- endif -%}
 
         {%- if contact_blocks.size > 0 -%}
           <div class="personal-assistance__items">
             {%- for block in contact_blocks -%}
-              <a href="{{ block.settings.link }}" class="personal-assistance__item-value personal-assistance__item-value--link">
-              <div
-                class="personal-assistance__item"
-                {{ block.shopify_attributes }}
+              <a
+                href="{{ block.settings.link }}"
+                class="personal-assistance__item-value personal-assistance__item-value--link"
               >
-                <div class="personal-assistance__item-icon">
-                  {%- if block.settings.icon_image != blank -%}
-                    <img src="{{ block.settings.icon_image | img_url: 'master' }}" alt="{{ block.settings.icon_image.alt }}" width="25" height="25">
-                  {%- elsif block.settings.icon_name != blank -%}
-                    <span class="personal-assistance__icon-svg" style="--icon-size: {{ block.settings.icon_size | default: 24 }}px">
-                      {%- render 'animated-icon', filename: block.settings.icon_name -%}
-                    </span>
-                  {%- endif -%}
+                <div
+                  class="personal-assistance__item"
+                  {{ block.shopify_attributes }}
+                >
+                  <div class="personal-assistance__item-icon">
+                    {%- if block.settings.icon_image != blank -%}
+                      <img
+                        src="{{ block.settings.icon_image | img_url: 'master' }}"
+                        alt="{{ block.settings.icon_image.alt }}"
+                        width="25"
+                        height="25"
+                      >
+                    {%- elsif block.settings.icon_name != blank -%}
+                      <span
+                        class="personal-assistance__icon-svg"
+                        style="--icon-size: {{ block.settings.icon_size | default: 24 }}px"
+                      >
+                        {%- render 'animated-icon', filename: block.settings.icon_name -%}
+                      </span>
+                    {%- endif -%}
+                  </div>
+                  <div class="personal-assistance__item-body">
+                    {%- if block.settings.title != blank -%}
+                      <span class="personal-assistance__item-title">{{ block.settings.title | upcase }}</span>
+                    {%- endif -%}
+                    {%- if block.settings.value != blank or block.settings.link != blank -%}
+                      {%- if block.settings.link != blank -%}
+                        <span class="personal-assistance__item-value-container">
+                          {{- block.settings.value | default: block.settings.link_title -}}
+                        </span>
+
+                      {%- else -%}
+                        <span class="personal-assistance__item-value">{{ block.settings.value }}</span>
+                      {%- endif -%}
+                    {%- endif -%}
+                  </div>
                 </div>
-                <div class="personal-assistance__item-body">
-                  {%- if block.settings.title != blank -%}
-                    <span class="personal-assistance__item-title">{{ block.settings.title | upcase }}</span>
-                  {%- endif -%}
-                  {%- if block.settings.value != blank or block.settings.link != blank -%}
-                    {%- if block.settings.link != blank -%}
-                     
-                        {{ block.settings.value | default: block.settings.link_title }}
-                    
-                    {%- else -%}
-                      <span class="personal-assistance__item-value">{{ block.settings.value }}</span>
-                    {%- endif -%} 
-                  {%- endif -%}
-                </div>
-              </div> 
-            </a>
+              </a>
             {%- endfor -%}
           </div>
         {%- endif -%}
@@ -83,287 +103,282 @@
 </section>
 
 {% stylesheet %}
-.personal-assistance__wrapper {
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 0 var(--outer);
-}
+  .personal-assistance__wrapper {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 var(--outer);
+  }
 
-.personal-assistance__grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 228px;
-  align-items: stretch;
-}
-
-@media (min-width: 990px) {
   .personal-assistance__grid {
-    grid-template-columns: 4fr 2fr;
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 228px;
+    align-items: stretch;
   }
-}
 
-.personal-assistance__media {
-  position: relative;
-  min-height: 756px;
-  /* min-width: 606px; */
-}
+  .personal-assistance__subheading {
+    color: var(--000000, #000);
+    font-family: Inter;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px;
+  }
 
-.personal-assistance__media {
-  width: 100%;
-  height: auto;
-  position: relative;
-}
+  @media (min-width: 990px) {
+    .personal-assistance__grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 228px;
+    }
 
-@media (max-width: 1024px) {
+    .personal-assistance__media {
+      min-width: 0;
+    }
+  }
+
   .personal-assistance__media {
-    min-height: 600px;
-    min-width: 50%;
+    position: relative;
+    order: var(--personal-assistance-media-order);
   }
 
-  .personal-assistance__grid {
-    gap: 80px;
-  }
-
-}
-
-@media (max-width: 1024px) {
   .personal-assistance__media {
-    min-height: 600px;
-    min-width: 50%;
+    width: 100%;
+    height: auto;
+    position: relative;
   }
-}
 
-@media (max-width: 425px) {
+  @media (max-width: 1024px) {
+    .personal-assistance__media {
+      min-height: 600px;
+      min-width: 50%;
+    }
+
+    .personal-assistance__grid {
+      gap: 80px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .personal-assistance__media {
+      min-height: 600px;
+      min-width: 50%;
+    }
+  }
+
+  @media (max-width: 425px) {
+    .personal-assistance__item-body {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 0px !important;
+      align-items: flex-start !important;
+    }
+  }
+
+  .personal-assistance__image img,
+  .personal-assistance__placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .personal-assistance__placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .personal-assistance__placeholder .placeholder-svg {
+    width: 60%;
+    height: auto;
+    opacity: 0.3;
+  }
+
+  .personal-assistance__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    order: var(--personal-assistance-content-order);
+    padding: 0 80px 0 0;
+  }
+
+  .personal-assistance__subheading {
+    margin: 0 0 10px;
+    color: var(--000000, #000);
+  }
+
+  .personal-assistance__heading {
+    margin: 0 0 40px;
+    color: var(--000000, #000);
+    font-family: var(--FONT-STACK-HEADING);
+    font-size: var(--FONT-DISPLAY-L);
+    font-style: var(--FONT-STYLE-HEADING);
+    font-weight: var(--FONT-WEIGHT-HEADING);
+    line-height: var(--LINE-HEIGHT-DISPLAY-L);
+    /* 120% */
+    text-transform: capitalize;
+  }
+
+  .personal-assistance__items {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
   .personal-assistance__item-body {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 0px !important;
-    align-items: flex-start !important;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
   }
-}
 
-.personal-assistance__image {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
+  span.personal-assistance__item-title {
+    color: var(--000000, #000);
+    text-align: center;
 
-.personal-assistance__image img,
-.personal-assistance__placeholder {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+    /* RC26/Button (ALL CAPS) */
+    font-family: var(--FONT-STACK-NAV);
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px;
+    /* 166.667% */
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
 
-.personal-assistance__placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.05);
-}
+  span.personal-assistance__item-value {
+    color: #a7a7a7;
 
-.personal-assistance__placeholder .placeholder-svg {
-  width: 60%;
-  height: auto;
-  opacity: 0.3;
-}
+    /* RC26/Nav (ALL CAPS) */
+    font-family: var(--FONT-STACK-NAV);
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px;
+    /* 166.667% */
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
 
-.personal-assistance__content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 397px;
-  width: 100%;
-}
+  .personal-assistance__item {
+    display: flex;
+    height: 46px;
+    padding: 11px 0px 10px 0;
+    align-items: center;
+    gap: 10px;
+    align-self: stretch;
+  }
 
-.personal-assistance__subheading {
-  margin: 0 0 10px;
-  color: var(--000000, #000);
+  a.personal-assistance__item-value {
+    border-bottom: 1px solid #d6d6d6;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+  }
 
-  /* RC26/Title (ALL CAPS) */
-  font-family: Inter;
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 22px;
-  /* 137.5% */
-  letter-spacing: 1.6px;
-  text-transform: uppercase;
-}
+  a.personal-assistance__item-value:hover {
+    opacity: 0.5;
+  }
 
-.personal-assistance__heading {
-  margin: 0 0 40px;
-  color: var(--000000, #000);
-  font-family: var(--FONT-STACK-HEADING);
-  font-size: var(--FONT-DISPLAY-M);
-  font-style: var(--FONT-STYLE-HEADING);
-  font-weight: var(--FONT-WEIGHT-HEADING);
-  line-height: var(--LINE-HEIGHT-DISPLAY-M);
-  /* 120% */
-  text-transform: capitalize;
-}
+  .personal-assistance__item:last-child {
+    border-bottom: none;
+  }
 
-.personal-assistance__items {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
+  .personal-assistance__item-icon {
+    flex-shrink: 0;
+    width: var(--icon-size, 24px);
+    height: var(--icon-size, 24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-.personal-assistance__item-body {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 20px;
-}
+  .personal-assistance__item-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
 
-span.personal-assistance__item-title {
-  color: var(--000000, #000);
-  text-align: center;
+  .personal-assistance__icon-svg {
+    display: block;
+    width: var(--icon-size);
+    height: var(--icon-size);
+  }
 
-  /* RC26/Button (ALL CAPS) */
-  font-family: var(--FONT-STACK-NAV);
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: 20px;
-  /* 166.667% */
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-}
+  .personal-assistance__icon-svg svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+  }
 
-span.personal-assistance__item-value {
-  color: #A7A7A7;
+  .personal-assistance__item-body {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    letter-spacing: 0px;
+    align-items: center;
+  }
 
-  /* RC26/Nav (ALL CAPS) */
-  font-family: var(--FONT-STACK-NAV);
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 20px;
-  /* 166.667% */
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-}
+  .personal-assistance__item-title {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+  }
 
-.personal-assistance__item {
-  display: flex;
-  height: 46px;
-  padding: 11px 0px 10px 0;
-  align-items: center;
-  gap: 10px;
-  align-self: stretch;
-}
+  .personal-assistance__item-value {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    opacity: 0.9;
+  }
 
-a.personal-assistance__item-value {
-  border-bottom: 1px solid #D6D6D6;
-  opacity: 1;
-  transition: opacity 0.5s ease-in-out;
-}
+  .personal-assistance__item-value--link {
+    color: inherit;
+    /* text-decoration: underline; */
+    /* text-underline-offset: 2px; */
 
-a.personal-assistance__item-value:hover {
-  opacity: 0.5;
-}
+    color: #a7a7a7;
 
-.personal-assistance__item:last-child {
-  border-bottom: none;
-}
+    /* RC26/Nav (ALL CAPS) */
+    font-family: Inter;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px;
+    /* 166.667% */
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
 
-.personal-assistance__item-icon {
-  flex-shrink: 0;
-  width: var(--icon-size, 24px);
-  height: var(--icon-size, 24px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.personal-assistance__item-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.personal-assistance__icon-svg {
-  display: block;
-  width: var(--icon-size);
-  height: var(--icon-size);
-}
-
-.personal-assistance__icon-svg svg {
-  width: 100%;
-  height: 100%;
-  fill: currentColor;
-}
-
-.personal-assistance__item-body {
-  display: flex;
-  flex-direction: row;
-  gap: 20px;
-  letter-spacing: 0px;
-  align-items: center;
-}
-
-.personal-assistance__item-title {
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  line-height: 1.4;
-}
-
-.personal-assistance__item-value {
-  font-size: 0.9375rem;
-  line-height: 1.5;
-  opacity: 0.9;
-}
-
-.personal-assistance__item-value--link {
-  color: inherit;
-  /* text-decoration: underline; */
-  /* text-underline-offset: 2px; */
-
-  color: #A7A7A7;
-
-  /* RC26/Nav (ALL CAPS) */
-  font-family: Inter;
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 20px;
-  /* 166.667% */
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-}
-
-.personal-assistance__item-value--link:hover {
-  opacity: 1;
-}
-
-@media (max-width: 1340px) {
+  .personal-assistance__item-value--link:hover {
+    opacity: 1;
+  }
 
   .personal-assistance__grid {
-    grid-template-columns: 4fr 3fr;
-    gap: 200px;
-  }
-}
-
-@media (max-width: 1240px) {
-
-  .personal-assistance__grid {
-    grid-template-columns: 4fr 3fr;
-    gap: 100px;
-  }
-}
-@media (max-width: 960px) {
-  .personal-assistance__grid {
-    grid-template-columns: 1fr !important;
     gap: 40px;
   }
-  .personal-assistance__content{
-    max-width: 100% !important;
+
+  @media (max-width: 960px) {
+    .personal-assistance__grid {
+      grid-template-columns: 1fr !important;
+    }
+    .personal-assistance__content {
+      max-width: 100% !important;
+      min-width: 100% !important;
+      padding: 0;
+    }
   }
-}
+  @media (max-width: 768px) {
+    .personal-assistance__media {
+      aspect-ratio: 362 / 231;
+      min-height: auto;
+    }
+    .personal-assistance__item-value-container {
+      display: none;
+    }
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -372,6 +387,20 @@ a.personal-assistance__item-value:hover {
   "tag": "section",
   "class": "section-personal-assistance",
   "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
     {
       "type": "header",
       "content": "Image"
@@ -386,7 +415,7 @@ a.personal-assistance__item-value:hover {
       "content": "Content"
     },
     {
-      "type": "text",
+      "type": "textarea",
       "id": "subheading",
       "label": "Subheading",
       "default": "The art of personal assistance"
@@ -403,12 +432,12 @@ a.personal-assistance__item-value:hover {
       "label": "Heading size",
       "default": "heading-large",
       "options": [
-        { "value": "heading-mini", "label": "Mini" },
-        { "value": "heading-x-small", "label": "Extra small" },
-        { "value": "heading-small", "label": "Small" },
-        { "value": "heading-medium", "label": "Medium" },
-        { "value": "heading-large", "label": "Large" },
-        { "value": "heading-x-large", "label": "Extra large" }
+        {"value": "heading-mini", "label": "Mini"},
+        {"value": "heading-x-small", "label": "Extra small"},
+        {"value": "heading-small", "label": "Small"},
+        {"value": "heading-medium", "label": "Medium"},
+        {"value": "heading-large", "label": "Large"},
+        {"value": "heading-x-large", "label": "Extra large"}
       ]
     },
     {
@@ -417,15 +446,25 @@ a.personal-assistance__item-value:hover {
     },
     {
       "type": "select",
+      "id": "content_order",
+      "label": "Content order",
+      "default": "image-first",
+      "options": [
+        {"value": "image-first", "label": "Image first"},
+        {"value": "text-first", "label": "Text first"}
+      ]
+    },
+    {
+      "type": "select",
       "id": "width",
       "label": "Width",
       "default": "wrapper",
       "options": [
-        { "value": "wrapper--full-padded", "label": "Full width padded" },
-        { "value": "wrapper", "label": "Normal" },
-        { "value": "wrapper--wide", "label": "Wide" },
-        { "value": "wrapper--narrow", "label": "Narrow" },
-        { "value": "wrapper--custom", "label": "Custom (max-width: 1232px)" }
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"},
+        {"value": "wrapper--wide", "label": "Wide"},
+        {"value": "wrapper--narrow", "label": "Narrow"},
+        {"value": "wrapper--custom", "label": "Custom (max-width: 1232px)"}
       ]
     },
     {
@@ -470,11 +509,11 @@ a.personal-assistance__item-value:hover {
           "label": "Icon",
           "default": "icon-phone",
           "options": [
-            { "label": "Phone", "value": "icon-phone" },
-            { "label": "Email", "value": "icon-email" },
-            { "label": "Mail", "value": "icon-mail" },
-            { "label": "Chat / video", "value": "icon-chat" },
-            { "label": "Location", "value": "icon-location" }
+            {"label": "Phone", "value": "icon-phone"},
+            {"label": "Email", "value": "icon-email"},
+            {"label": "Mail", "value": "icon-mail"},
+            {"label": "Chat / video", "value": "icon-chat"},
+            {"label": "Location", "value": "icon-location"}
           ]
         },
         {

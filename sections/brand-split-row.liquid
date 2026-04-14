@@ -1,0 +1,249 @@
+<!-- /sections/brand-split-row.liquid -->
+{%- liquid
+  assign has_content = false
+  assign resolved_image = section.settings.image
+
+  if resolved_image != blank and resolved_image.value != blank
+    assign resolved_image = resolved_image.value
+  endif
+
+  if resolved_image != blank or section.settings.text != blank
+    assign has_content = true
+  endif
+-%}
+
+{%- if has_content -%}
+  {%- style -%}
+    #BrandSplitRow--{{ section.id }} {
+      --brand-split-pt: {{ section.settings.padding_top }}px;
+      --brand-split-pb: {{ section.settings.padding_bottom }}px;
+    }
+  {%- endstyle -%}
+
+  <section
+    id="BrandSplitRow--{{ section.id }}"
+    class="brand-split-row header-observer--{{ section.settings.header_observer_mode }}"
+    data-section-id="{{ section.id }}"
+    data-section-type="brand-split-row"
+    data-header-observer-mode="{{ section.settings.header_observer_mode }}"
+  >
+    <div class="brand-split-row__inner {{ section.settings.width }}{% if section.settings.layout == 'image-right' %} brand-split-row__inner--image-right{% endif %}{% if section.settings.image == blank %} brand-split-row__inner--no-image{% endif %}">
+      {%- if resolved_image != blank -%}
+        <div class="brand-split-row__media" data-brand-fade>
+          {%- if resolved_image.width != blank -%}
+            {{
+              resolved_image
+              | image_url: width: 2400
+              | image_tag:
+                class: 'brand-split-row__image',
+                widths: '375, 550, 750, 900, 1200, 1600, 2000, 2400',
+                sizes: '(min-width: 990px) 50vw, 100vw',
+                loading: 'lazy'
+            }}
+          {%- else -%}
+            <img
+              class="brand-split-row__image"
+              src="{{ resolved_image | escape }}"
+              alt=""
+              loading="lazy"
+            >
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.text != blank -%}
+        <div class="brand-split-row__copy body rte" data-brand-fade>
+          {{ section.settings.text }}
+        </div>
+      {%- endif -%}
+    </div>
+  </section>
+{%- endif -%}
+
+{% stylesheet %}
+  .brand-split-row {
+    padding-top: var(--brand-split-pt);
+    padding-bottom: var(--brand-split-pb);
+  }
+
+  .brand-split-row__inner {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 56px;
+    align-items: center;
+  }
+
+  .brand-split-row__inner--image-right .brand-split-row__media {
+    order: 2;
+  }
+
+  .brand-split-row__inner--image-right .brand-split-row__copy {
+    order: 1;
+  }
+
+  .brand-split-row__image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .brand-split-row__copy p {
+    margin: 0;
+  }
+
+  .brand-split-row__copy {
+    padding-right: 40px;
+  }
+
+  .brand-split-row__inner--no-image {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-split-row__inner--no-image .brand-split-row__copy {
+    padding-right: 0;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  @media (min-width: 990px) {
+    .main-content--article .brand-split-row__inner {
+      width: min(100% - 48px, 1100px);
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+  @media (max-width: 989px) {
+    .brand-split-row__inner {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    .brand-split-row__inner--image-right .brand-split-row__media,
+    .brand-split-row__inner--image-right .brand-split-row__copy {
+      order: initial;
+    }
+
+    .brand-split-row__copy {
+      padding-right: 0;
+    }
+
+    .main-content--article .brand-split-row__inner {
+      padding-left: 20px;
+      padding-right: 20px;
+      box-sizing: border-box;
+    }
+  }
+
+  @media (min-width: 750px) and (max-width: 1024px) {
+    .brand-split-row__inner {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 56px;
+      align-items: center;
+    }
+
+    .brand-split-row__inner--image-right .brand-split-row__media {
+      order: 2;
+    }
+
+    .brand-split-row__inner--image-right .brand-split-row__copy {
+      order: 1;
+    }
+
+    .brand-split-row__copy {
+      padding-right: 40px;
+    }
+
+    .main-content--article .brand-split-row__inner {
+      width: calc(100% - 60px);
+      max-width: none;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 0;
+      padding-right: 0;
+      box-sizing: border-box;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Image Text Split",
+  "class": "brand-split-row",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        {"value": "wrapper--full", "label": "Full width"},
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "default": "image-right",
+      "options": [
+        {"value": "image-right", "label": "Image right, text left"},
+        {"value": "image-left", "label": "Image left, text right"}
+      ]
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image Text Split",
+      "category": "Blog"
+    }
+  ]
+}
+{% endschema %}

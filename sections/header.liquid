@@ -38,22 +38,58 @@
     assign transparent_header = true
   elsif template.name == 'product' and section.settings.transparent_product_page
     assign transparent_header = true
+  elsif template.name == 'blog' and section.settings.transparent_blog
+    assign transparent_header = true
   endif
 
   assign main_menu_linklist = section.settings.main_menu_linklist | default: 'main-menu'
   assign secondary_menu_linklist = section.settings.secondary_menu_linklist
   assign right_menu_linklist = section.settings.right_menu_linklist
+  assign use_desktop_probe_band_on_mobile = false
+  assign header_default_mode = 'dark'
+  if template == 'index'
+    assign header_default_mode = 'light'
+  elsif template.name == 'product'
+    assign header_default_mode = 'dark'
+  elsif template.name == 'page'
+    assign header_default_mode = 'dark'
+  elsif template.name == 'collection'
+    assign header_default_mode = collection.metafields.custom.header_observer_mode.value | default: header_default_mode
+    assign header_default_mode = header_default_mode | downcase | strip
+    unless header_default_mode == 'light' or header_default_mode == 'dark'
+      assign header_default_mode = 'dark'
+    endunless
+  endif
+  assign header_default_link = '#000'
+  assign header_default_link_hover = '#222'
+  if header_default_mode == 'light'
+    assign header_default_link = '#fff'
+    assign header_default_link_hover = '#f0f0f0'
+  endif
+  if template.name == 'product' or template.name == 'collection'
+    assign use_desktop_probe_band_on_mobile = true
+  endif
 
-  assign logo_variant = section.settings.logo_variant | default: 'light'
+  assign logo_variant = section.settings.logo_variant | default: 'dark'
+  if template.name == 'product' or template.name == 'page'
+    assign logo_variant = 'dark'
+  elsif template == 'index' or template.name == 'collection'
+    assign logo_variant = header_default_mode
+  endif
   assign logo_light_asset = 'RC_LOGO_light.svg'
   assign logo_dark_asset = 'RC_LOGO_dark.svg'
-  assign logo_asset = logo_light_asset
+  assign logo_asset = logo_dark_asset
   assign logo_denom = 814 | divided_by: 76
-  assign transparent_logo_asset = logo_dark_asset
-  if logo_variant == 'dark'
+  if logo_variant == 'light'
+    assign logo_asset = logo_light_asset
+    assign logo_denom = 814 | divided_by: 76
+  else
     assign logo_asset = logo_dark_asset
     assign logo_denom = 800 | divided_by: 74
-    assign transparent_logo_asset = logo_light_asset
+  endif
+  assign transparent_logo_asset = logo_asset
+  if template.name == 'product' or template.name == 'page'
+    assign transparent_logo_asset = logo_dark_asset
   endif
   assign transparent_logo_pdp = section.settings.transparent_logo_pdp
   assign use_transparent_logo_pdp = false
@@ -61,10 +97,10 @@
     assign use_transparent_logo_pdp = true
   endif
 
-  assign logo_width = '400'
+  assign logo_width = '800'
   assign logo_width_15x = logo_width | times: 1.5 | round
   assign logo_width_2x = logo_width | times: 2 | round
-  assign logo_width_mobile = '200'
+  assign logo_width_mobile = '700'
   assign logo_width_mobile_15x = logo_width_mobile | times: 1.5 | round
   assign logo_width_mobile_2x = logo_width_mobile | times: 2 | round
   assign logo_sizes = '(min-width: 750px) ' | append: logo_width | append: 'px, (min-width: ' | append: logo_width_mobile_2x | append: 'px) ' | append: logo_width_mobile | append: 'px, calc((100vw - 64px) * 0.5)'
@@ -178,9 +214,14 @@
   }
 
   .theme__header {
-    --PT: {{ padding_top }}px;
+    --PT: calc({{ padding_top }}px + var(--announcement-height, 36px));
     --PB: {{ padding_bottom }}px;
     isolation: isolate;
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity 0.16s ease,
+      visibility 0s linear;
 
     {% if show_separator_line %}
       {% unless border_color.alpha == 0.0 or border_color == blank %}
@@ -189,6 +230,31 @@
       --border-opacity: {{ section.settings.separator_opacity | times: 0.01 }};
     {% endif %}
   }
+
+  .theme__header[data-header-color-pending='true'] {
+    opacity: 0 !important;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .theme__header[data-header-color-pending='true']::before,
+  .theme__header[data-header-color-pending='true']::after {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  .theme__header[data-header-color-ready='true'] {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  /* tech debt */
+  /* .header__wrapper.js__header__stuck .theme__header[data-header-color-ready='true'] .section-padding,
+  .header__wrapper.js__header__stuck .theme__header[data-header-color-ready='true'] .section-padding .header__mobile,
+  .header__wrapper.js__header__stuck .theme__header[data-header-color-ready='true'] {
+    height: 0;
+  } */
 
   .theme__header__scroll-blur {
     position: absolute;
@@ -214,12 +280,28 @@
     will-change: opacity, backdrop-filter;
   }
 
+  .theme__header.search-open .theme__header__scroll-blur,
+  .theme__header:has(.tmenu_item--root.tmenu_item_level_0.tmenu_item_active) .theme__header__scroll-blur,
+  body:has(header-drawer.drawer--header.is-open) .theme__header__scroll-blur,
+  body:has(side-drawer.is-open) .theme__header__scroll-blur,
+  body:has(.drawer.is-open) .theme__header__scroll-blur {
+    opacity: 0;
+    --header-scroll-reveal-blur: 0px;
+    -webkit-backdrop-filter: blur(0);
+    backdrop-filter: blur(0);
+  }
+
+  .template-collection .theme__header__scroll-blur {
+    display: none;
+  }
+
   {%- if logo_asset != blank -%}
     .header__logo__link {
-      --logo-padding: {{ logo_padding }};
+      --logo-padding: 30px;
       --logo-padding_product: {{ logo_padding | times: 0.60 }};
       --logo-width-desktop: {{ logo_width }}px;
       --logo-width-mobile: {{ logo_width_mobile }}px;
+      --logo-width-mobile-desktop: 540px;
     }
   {%- endif -%}
 
@@ -310,7 +392,7 @@
         {%- endif -%}
       </h1>
     </a>
-    {%- if template.name == 'product' or template contains 'collection' or template contains 'page'  -%}
+    {%- if template.name == 'product' or template contains 'collection' or template contains 'page' or template.name == 'search' -%}
       <div class="header__logo__meta">
         {%- if template.name == 'product' -%}
           {%- assign current_collection = collection | default: product.collections.first -%}
@@ -390,6 +472,12 @@
         {%  elsif template contains 'page' %}
           <h6 class="header__logo__meta__page">
             <span>{{ page.title }}</span>
+          </h6>
+        {%- elsif template.name == 'search' -%}
+          <h6 class="header__logo__meta__page">
+            {%- if search.terms != blank -%}
+              <span>{{ 'general.search.title' | t }}</span>
+            {%- endif -%}
           </h6>
         {%- endif -%}
       </div>
@@ -613,10 +701,12 @@
   <header
     class="theme__header{% if show_separator_line %} has-border{% endif %}"
     role="banner"
-    style="--header-scroll-reveal-opacity: 0; --header-scroll-reveal-blur: 0px; --header-scroll-reveal-background: linear-gradient(180deg, rgba(249, 249, 249, 0.25) 0%, rgba(249, 249, 249, 0.00) 100%);"
+    style="--header-scroll-reveal-opacity: 0; --header-scroll-reveal-blur: 0px; --header-scroll-reveal-background: linear-gradient(180deg, rgba(249, 249, 249, 0.25) 0%, rgba(249, 249, 249, 0.00) 100%); --globaltext: {{ header_default_link }}; --link: {{ header_default_link }}; --link-hover: {{ header_default_link_hover }};"
+    data-header-color-ready="true"
     data-header-height
-    data-aos="fade"
     data-header-desktop
+    data-header-default-mode="{{ header_default_mode }}"
+    data-header-probe-band-mobile-desktop="{{ use_desktop_probe_band_on_mobile }}"
   >
     <span class="theme__header__scroll-blur" aria-hidden="true"></span>
     {%- if toolbar != blank -%}
@@ -636,11 +726,17 @@
           {%- render 'icon-menu' -%}
         </button>
       </div>
-      <div class="header__mobile">
+      <div
+        class="header__mobile"
+        style="--globaltext: {{ header_default_link }}; --text: {{ header_default_link }}; --link: {{ header_default_link }}; --link-hover: {{ header_default_link_hover }};"
+      >
         {{ minimal }}
       </div>
 
-      <div class="header__desktop">
+      <div
+        class="header__desktop"
+        style="--globaltext: {{ header_default_link }}; --text: {{ header_default_link }}; --link: {{ header_default_link }}; --link-hover: {{ header_default_link_hover }};"
+      >
         {%- case section.settings.header_style -%}
           {%- when 'logo_beside' -%}
             <div class="header__desktop__upper" data-takes-space-wrapper>
@@ -775,7 +871,6 @@
   document.addEventListener('DOMContentLoaded', () => {
     /* Helpers */
     const selectAll = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
-    const isDesktop = () => window.matchMedia('(min-width: 750px)').matches;
 
     /* Mobile hamburger press animation */
     const hamburgerButtons = selectAll('.header__mobile__hamburger');
@@ -792,25 +887,75 @@
     /* Scroll animation for header visibility is handled in assets/theme.dev.js */
 
     /* Menu images + overlay */
-    let currentImage = null;
+    const initCollectionLabelMirroring = () => {
+      const collectionLists = selectAll('ul.tmenu_submenu_type_automatic.tmenu_submenu');
+      if (!collectionLists.length) return;
 
-    const initMenuImages = () => {
-      const images = selectAll('.tmenu_collection--above > img');
-      if (!images.length) return;
-      if (!currentImage || images.includes(currentImage) === false) {
-        currentImage = images[0];
-      }
-      images.forEach((img) => {
-        if (img === currentImage) {
-          img.classList.remove('hide-menu-image');
-        } else {
-          img.classList.add('hide-menu-image');
+      const replaceCollectionPlaceholder = (element, value, datasetKey) => {
+        if (!element) return;
+
+        const sourceValue = element.dataset[datasetKey] || element.textContent;
+        element.dataset[datasetKey] = sourceValue;
+
+        if (!sourceValue.includes('[collection]')) return;
+
+        element.textContent = sourceValue.replaceAll('[collection]', value);
+      };
+
+      collectionLists.forEach((list) => {
+        const links = selectAll(
+          ':scope > li:not(.tmenu_item_mobile) > .tmenu_item_link:not([tmenu-disabled-link])',
+          list
+        );
+        if (links.length < 2) return;
+
+        const firstLink = links[0];
+        const lastLink = links[links.length - 1];
+        const firstLabelElement = firstLink.querySelector('.tmenu_item_text');
+        const lastLabelElement = lastLink.querySelector('.tmenu_item_text');
+        const firstLabel = (firstLabelElement ? firstLabelElement.textContent : firstLink.textContent).trim();
+        if (!firstLabel) return;
+
+        replaceCollectionPlaceholder(lastLabelElement || lastLink, firstLabel, 'collectionTemplateText');
+
+        const lastTitle = lastLink.dataset.collectionTemplateTitle || lastLink.getAttribute('title') || '';
+        lastLink.dataset.collectionTemplateTitle = lastTitle;
+
+        if (lastTitle.includes('[collection]')) {
+          lastLink.setAttribute('title', lastTitle.replaceAll('[collection]', firstLabel));
         }
       });
+    };
+
+    const initMenuImages = () => {
+      const images = selectAll(
+        '.tmenu_nav .tmenu_item_level_0.tmenu_item_has_child .tmenu_submenu--desktop .tmenu_item_has_child .tmenu_collection--above > img'
+      );
+      if (!images.length) return;
+      const defaultImage = images[0];
+      const lastCollectionLink = document.querySelector(
+        '.tmenu_nav .tmenu_item_level_0.tmenu_item_has_child .tmenu_submenu--desktop .tmenu_item_has_child:has(.tmenu_collection--above) li:last-child a'
+      );
+
+      const resetToDefaultImage = () => {
+        images.forEach((img) => {
+          if (img === defaultImage) {
+            img.classList.remove('hide-menu-image');
+          } else {
+            img.classList.add('hide-menu-image');
+          }
+        });
+
+        if (lastCollectionLink) {
+          lastCollectionLink.classList.remove('mild-hide');
+        }
+      };
+
+      resetToDefaultImage();
 
       // DISCLAMER: find links that should trigger image changes - these are right-aligned links in mega menu collections
       const links = selectAll(
-        '.header__desktop__bar__c .tmenu_nav .tmenu_item_level_1:nth-child(4) .tmenu_item_level_2 a.tmenu_item_link'
+        '.header__desktop__bar__c .tmenu_nav .tmenu_item_level_1:nth-last-child(-n + 2) .tmenu_item_level_2 a.tmenu_item_link'
       );
       if (!links.length) return;
 
@@ -825,16 +970,30 @@
         if (match) {
           images.forEach((img) => img.classList.add('hide-menu-image'));
           match.classList.remove('hide-menu-image');
-          currentImage = match;
-        } else if (currentImage) {
-          // keep last shown image visible when there's no match for the hovered link
-          currentImage.classList.remove('hide-menu-image');
+          if (lastCollectionLink) {
+            lastCollectionLink.classList.add('mild-hide');
+          }
+        } else {
+          resetToDefaultImage();
         }
       };
 
+      const linksContainer = links[0].closest('.tmenu_submenu');
+      if (linksContainer && linksContainer.dataset.menuImageResetBound !== 'true') {
+        linksContainer.dataset.menuImageResetBound = 'true';
+        linksContainer.addEventListener('mouseleave', resetToDefaultImage);
+        linksContainer.addEventListener('focusout', (event) => {
+          if (linksContainer.contains(event.relatedTarget)) return;
+          resetToDefaultImage();
+        });
+      }
+
       links.forEach((link) => {
-        link.addEventListener('mouseenter', () => showImageForTitle(link.textContent));
-        link.addEventListener('focus', () => showImageForTitle(link.textContent));
+        const linkText = link.querySelector('.tmenu_item_text') || link;
+        if (linkText.dataset.menuImageBound === 'true') return;
+        linkText.dataset.menuImageBound = 'true';
+        linkText.addEventListener('mouseenter', () => showImageForTitle(link.textContent));
+        linkText.addEventListener('focus', () => showImageForTitle(link.textContent));
       });
     };
 
@@ -845,6 +1004,7 @@
     let tmenuScrollLocked = false;
 
     const applyMenuOpenStyles = () => {
+      initCollectionLabelMirroring();
       initMenuImages();
     };
 
@@ -901,102 +1061,30 @@
     }
 
     /* Header light/dark switcher */
-    const getLuminance = (rgb) => {
-      const [r, g, b] = rgb.map((v) => {
-        const n = v / 255;
-        return n <= 0.03928 ? n / 12.92 : Math.pow((n + 0.055) / 1.055, 2.4);
-      });
-      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    };
-
-    const getBackgroundRGB = (element) => {
-      let el = element;
-      while (el && el !== document.documentElement) {
-        const bg = getComputedStyle(el).backgroundColor;
-        if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
-          const match = bg.match(/\d+/g);
-          if (match) return match.map(Number);
-        }
-        el = el.parentElement;
-      }
-      return [255, 255, 255];
-    };
-
-    const computeImageLuminance = (imgEl) =>
-      new Promise((resolve) => {
-        if (!imgEl) return resolve(null);
-        const src = imgEl.currentSrc || imgEl.src;
-        if (!src) return resolve(null);
-
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.src = src;
-        img.decode?.().catch(() => {});
-        img.onload = () => {
-          try {
-            const canvas = document.createElement('canvas');
-            canvas.width = 1;
-            canvas.height = 1;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, 1, 1);
-            const data = ctx.getImageData(0, 0, 1, 1).data;
-            resolve(getLuminance([data[0], data[1], data[2]]));
-          } catch (err) {
-            resolve(null);
-          }
-        };
-        img.onerror = () => resolve(null);
-      });
-
-    const computeBackgroundImageLuminance = (url) =>
-      new Promise((resolve) => {
-        if (!url) return resolve(null);
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.src = url;
-        img.decode?.().catch(() => {});
-        img.onload = () => {
-          try {
-            const canvas = document.createElement('canvas');
-            canvas.width = 1;
-            canvas.height = 1;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, 1, 1);
-            const data = ctx.getImageData(0, 0, 1, 1).data;
-            resolve(getLuminance([data[0], data[1], data[2]]));
-          } catch (err) {
-            resolve(null);
-          }
-        };
-        img.onerror = () => resolve(null);
-      });
-
     const initHeaderObserver = () => {
       const headerWrapper = document.querySelector('header.theme__header');
-      const body = document.querySelector('body');
+      const body = document.body;
       const drawerWrapper = document.querySelector('header-drawer.drawer--header');
       const headerTargets = selectAll('.header__desktop, .header__mobile');
       const logoLinks = selectAll('.header__logo__link[data-logo-light][data-logo-dark]');
       const transparentImages = selectAll('.logo__img.logo__img--transparent');
-      if (!(headerTargets.length && logoLinks.length)) return;
+      const revealResolvedHeader = () => {
+        if (!headerWrapper || headerWrapper.dataset.headerColorReady === 'true') return;
 
-      const rootStyles = getComputedStyle(document.documentElement);
-      const getCssVariable = (name, fallback) => {
-        const value = rootStyles.getPropertyValue(name).trim();
-        return value || fallback;
+        requestAnimationFrame(() => {
+          headerWrapper.removeAttribute('data-header-color-pending');
+          headerWrapper.setAttribute('data-header-color-ready', 'true');
+        });
       };
+      if (!(headerTargets.length && logoLinks.length)) {
+        revealResolvedHeader();
+        return;
+      }
+
       const colors = {
         light: {
           link: '#fff',
           hover: '#f0f0f0',
-        },
-        dimmedLight: {
-          link: '#e0e0e0',
-          hover: '#f0f0f0',
-        },
-        lightDark: {
-          link: '#9a9a9a',
-          hover: '#b0b0b0',
         },
         dark: {
           link: '#000',
@@ -1006,11 +1094,32 @@
 
       const logoLightUrl = logoLinks[0].dataset.logoLight;
       const logoDarkUrl = logoLinks[0].dataset.logoDark;
-      const forcedLightLogoMode = 'light';
+      const forcedDrawerLogoMode = 'dark';
+      const forcedTmenuLogoMode = 'dark';
+      const DEBUG_HEADER_OBSERVER = false;
+      const observedSectionSelector = 'main .shopify-section [data-header-observer-mode]';
+      const intersectionThresholds = [0, 0.01, 0.1, 0.25, 0.5, 0.75, 1];
+      const getSectionLabel = (sectionEl) =>
+        sectionEl?.dataset.sectionId || sectionEl?.id || sectionEl?.className || 'unknown-section';
+      const debugLog = (message, payload = {}) => {
+        if (!DEBUG_HEADER_OBSERVER) return;
+        console.log('[HeaderObserver]', message, payload);
+      };
+      const getHeaderHeight = () => document.querySelector('[data-header-height]')?.offsetHeight || 0;
 
       const drawerIsOpen = () => drawerWrapper?.classList.contains('is-open');
       const tmenuIsOpen = () => tmenuIsActive || Boolean(document.querySelector(tmenuActiveSelector));
-      const shouldForceLightLogo = () => drawerIsOpen() || tmenuIsOpen();
+      const getForcedLogoMode = () => {
+        if (drawerIsOpen()) {
+          return forcedDrawerLogoMode;
+        }
+
+        if (tmenuIsOpen()) {
+          return forcedTmenuLogoMode;
+        }
+
+        return '';
+      };
 
       const setHeaderColors = (mode) => {
         const colorSet = colors[mode] || colors.light;
@@ -1024,7 +1133,7 @@
       };
 
       const setLogoSource = (mode) => {
-        const useLightLogo = mode === 'light' || mode === 'dimmedLight';
+        const useLightLogo = mode === 'light';
         const logoUrl = useLightLogo ? logoLightUrl : logoDarkUrl;
         if (!logoUrl) return;
         logoLinks.forEach((link) => {
@@ -1036,27 +1145,39 @@
         });
       };
 
-      const defaultModeRaw = (logoLinks[0].dataset.logoDefault || 'light').trim();
-      const defaultMode = ['light', 'dimmedLight', 'lightDark', 'dark'].includes(defaultModeRaw)
-        ? defaultModeRaw
-        : 'light';
+      const defaultMode = headerWrapper?.dataset.headerDefaultMode === 'light' ? 'light' : 'dark';
       let currentMode = defaultMode;
       const applyMode = (mode) => {
-        const resolved = mode || 'light';
+        const resolved = mode || defaultMode;
         if (resolved === currentMode) return;
         currentMode = resolved;
         setHeaderColors(currentMode);
-        if (!shouldForceLightLogo()) {
+        if (!getForcedLogoMode()) {
           setLogoSource(currentMode);
         }
+        debugLog('Applied mode', {
+          mode: currentMode,
+          forcedLogoMode: getForcedLogoMode() || null,
+        });
       };
 
       const syncLogoWithHeaderState = () => {
-        if (shouldForceLightLogo()) {
-          setLogoSource(forcedLightLogoMode);
+        const forcedLogoMode = getForcedLogoMode();
+
+        if (forcedLogoMode) {
+          setLogoSource(forcedLogoMode);
+          debugLog('Applied forced logo mode', {
+            forcedLogoMode,
+            drawerOpen: drawerIsOpen(),
+            tmenuOpen: tmenuIsOpen(),
+          });
           return;
         }
+
         setLogoSource(currentMode);
+        debugLog('Synced logo with header mode', {
+          mode: currentMode,
+        });
       };
 
       setHeaderColors(currentMode);
@@ -1066,6 +1187,7 @@
       if (drawerWrapper) {
         document.addEventListener('theme:drawer:open', (event) => {
           if (event.target !== drawerWrapper) return;
+          document.body.classList.add('header-drawer-is-open');
           syncLogoWithHeaderState();
         });
 
@@ -1074,7 +1196,14 @@
           syncLogoWithHeaderState();
         });
 
-        new MutationObserver(syncLogoWithHeaderState).observe(drawerWrapper, {
+        new MutationObserver(() => {
+          const isOpen = drawerWrapper.classList.contains('is-open');
+          const isClosing = drawerWrapper.classList.contains('is-closing');
+          if (!isOpen && !isClosing) {
+            document.body.classList.remove('header-drawer-is-open');
+          }
+          syncLogoWithHeaderState();
+        }).observe(drawerWrapper, {
           attributes: true,
           attributeFilter: ['class'],
         });
@@ -1082,43 +1211,11 @@
 
       document.addEventListener('theme:tmenu:state', syncLogoWithHeaderState);
 
-      let sectionsToObserve = selectAll(
-        'main .shopify-section section, main .shopify-section collection-component, main .shopify-section [data-section-id]'
-      );
-      console.log('header observer init', {sections: sectionsToObserve});
-      if (!sectionsToObserve.length) return;
-
-      const DEBUG_HEADER_OBSERVER = false;
-      const APPLY_DEBOUNCE = 150;
-      const thresholds = [0, 0.25, 0.5, 0.75, 1];
-
-      const computeRootMargin = () => {
-        const h = window.innerHeight || document.documentElement.clientHeight || 0;
-        const headerEl = document.querySelector('[data-header-height]');
-        const headerHeight = headerEl ? headerEl.offsetHeight : 0;
-        // Pull the root box down to just beneath the header so we sample what's under it.
-        const top = `-${headerHeight}px`;
-        const target = 200;
-        const bottom = target - h; // negative when h > target
-        return `${top} 0px ${bottom}px 0px`;
-      };
-
-      const marginToPx = (value, axisLength) => {
-        if (value.endsWith && value.endsWith('%')) {
-          return (parseFloat(value) / 100) * axisLength;
-        }
-        return parseFloat(value);
-      };
-
-      const parseRootMargin = (marginStr) => {
-        const [top, right, bottom, left] = marginStr.split(' ');
-        return {
-          top: marginToPx(top, window.innerHeight),
-          right: marginToPx(right, window.innerWidth),
-          bottom: marginToPx(bottom, window.innerHeight),
-          left: marginToPx(left, window.innerWidth),
-        };
-      };
+      let sectionsToObserve = selectAll(observedSectionSelector);
+      if (!sectionsToObserve.length) {
+        revealResolvedHeader();
+        return;
+      }
 
       const createOverlay = (label, color) => {
         const existing = document.querySelector(`[data-header-observer-overlay="${label}"]`);
@@ -1132,162 +1229,181 @@
         return el;
       };
 
-      const updateOverlayPosition = (el, marginStr) => {
-        const m = parseRootMargin(marginStr);
-        const top = 0 - m.top;
-        const left = 0 - m.left;
-        const right = window.innerWidth + m.right;
-        const bottom = window.innerHeight + m.bottom;
-        el.style.top = `${top}px`;
-        el.style.left = `${left}px`;
-        el.style.width = `${right - left}px`;
-        el.style.height = `${bottom - top}px`;
+      const updateOverlayPosition = (el) => {
+        const band = getHeaderProbeBand();
+        el.style.top = `${band.top}px`;
+        el.style.left = '0px';
+        el.style.width = '100vw';
+        el.style.height = `${band.bottom - band.top}px`;
       };
 
-      const luminanceCache = new WeakMap();
+      let currentObservedSection = null;
+      let sectionObserver = null;
+      const headerProbeBandHeight = 32;
+      const useDesktopProbeBandOnMobile = headerWrapper?.dataset.headerProbeBandMobileDesktop === 'true';
+      const getHeaderProbeBand = () => {
+        const headerHeight = getHeaderHeight();
+        const bandHeight = Math.min(headerProbeBandHeight, Math.max(1, headerHeight || headerProbeBandHeight));
+        const isMobileViewport = window.matchMedia('(max-width: 780px)').matches;
+        const top = isMobileViewport
+          ? useDesktopProbeBandOnMobile
+            ? Math.max(0, (headerHeight - bandHeight) / 2)
+            : Math.max(0, Math.min(window.innerHeight - bandHeight, window.innerHeight * 0.8 - bandHeight / 2))
+          : Math.max(0, (headerHeight - bandHeight) / 2);
+        const bottom = Math.min(window.innerHeight, top + bandHeight);
 
-      const findBackgroundImage = (sectionEl) =>
-        sectionEl.querySelector(
-          '[data-header-luminance-img], .subcollections__bg img, .hero__bg img, .section-background img, .banner__media img, .image-with-text__image img'
-        );
-
-      const findElementBackgroundImage = (el) => {
-        let node = el;
-        while (node && node !== document.documentElement) {
-          const style = getComputedStyle(node);
-          const bgImage = style.backgroundImage;
-          if (bgImage && bgImage !== 'none' && !bgImage.startsWith('linear-gradient')) {
-            const match = bgImage.match(/url\(["']?(.*?)["']?\)/);
-            if (match && match[1]) {
-              return match[1];
-            }
-          }
-          node = node.parentElement;
-        }
-        return null;
+        return {top, bottom};
       };
-
-      const applyLuminanceMode = (luminance) => {
-        if (luminance < 0.25) {
-          applyMode('light');
-        } else if (luminance < 0.5) {
-          applyMode('dimmedLight');
-        } else if (luminance < 0.75) {
-          applyMode('lightDark');
-        } else {
-          applyMode('dark');
-        }
-      };
-
-      const logLuminance = (luminance, sectionEl, source) => {
-        if (!DEBUG_HEADER_OBSERVER) return;
-        console.log('header luminance', {
-          luminance,
-          source,
-          section: sectionEl.dataset.sectionId || sectionEl.id || sectionEl.className,
-        });
-      };
-
-      const applyForSection = (sectionEl) => {
-        const cached = luminanceCache.get(sectionEl);
-        if (cached !== undefined) {
-          logLuminance(cached, sectionEl, 'cache');
-          applyLuminanceMode(cached);
-          return;
-        }
-
-        const img = findBackgroundImage(sectionEl);
-        const bgUrl = findElementBackgroundImage(sectionEl);
-
-        if (img) {
-          computeImageLuminance(img).then((lum) => {
-            const luminance = lum ?? getLuminance(getBackgroundRGB(sectionEl));
-            luminanceCache.set(sectionEl, luminance);
-            logLuminance(luminance, sectionEl, lum !== null ? 'image' : 'background');
-            applyLuminanceMode(luminance);
-          });
-          return;
-        }
-
-        if (bgUrl) {
-          computeBackgroundImageLuminance(bgUrl).then((lum) => {
-            const luminance = lum ?? getLuminance(getBackgroundRGB(sectionEl));
-            luminanceCache.set(sectionEl, luminance);
-            logLuminance(luminance, sectionEl, lum !== null ? 'background-image' : 'background');
-            applyLuminanceMode(luminance);
-          });
-          return;
-        }
-
-        const luminance = getLuminance(getBackgroundRGB(sectionEl));
-        luminanceCache.set(sectionEl, luminance);
-        logLuminance(luminance, sectionEl, 'background');
-        applyLuminanceMode(luminance);
-      };
-
-      const debounceFn = (fn, wait) => {
-        if (window.theme && typeof window.theme.debounce === 'function') {
-          return window.theme.debounce(fn, wait);
-        }
-        let timer;
-        return (...args) => {
-          clearTimeout(timer);
-          timer = setTimeout(() => fn(...args), wait);
-        };
-      };
-
-      const scheduleApply = debounceFn(applyForSection, APPLY_DEBOUNCE);
-
-      const pickTopEntry = (entries) => {
-        const visible = entries.filter((entry) => entry.isIntersecting);
-        if (!visible.length) return null;
-        return visible.sort((a, b) => {
-          if (b.intersectionRatio !== a.intersectionRatio) {
-            return b.intersectionRatio - a.intersectionRatio;
-          }
-          return a.boundingClientRect.top - b.boundingClientRect.top;
-        })[0];
-      };
-
-      let rootMargin = computeRootMargin();
       let overlay;
+      const sectionOverlapsProbeBand = (sectionEl) => {
+        const rect = sectionEl.getBoundingClientRect();
+        const band = getHeaderProbeBand();
+        return rect.bottom > band.top && rect.top < band.bottom;
+      };
+      const getSectionMode = (sectionEl) => (sectionEl?.dataset.headerObserverMode === 'dark' ? 'dark' : 'light');
+      const getBandCenter = () => {
+        const band = getHeaderProbeBand();
+        return band.top + (band.bottom - band.top) / 2;
+      };
+      const getSectionDistanceToBandCenter = (sectionEl) => {
+        const rect = sectionEl.getBoundingClientRect();
+        const bandCenter = getBandCenter();
+
+        if (rect.top <= bandCenter && rect.bottom >= bandCenter) {
+          return 0;
+        }
+
+        if (rect.bottom < bandCenter) {
+          return bandCenter - rect.bottom;
+        }
+
+        return rect.top - bandCenter;
+      };
+      const getSectionOverlapHeight = (sectionEl) => {
+        const rect = sectionEl.getBoundingClientRect();
+        const band = getHeaderProbeBand();
+        return Math.max(0, Math.min(rect.bottom, band.bottom) - Math.max(rect.top, band.top));
+      };
+      const findActiveSection = () =>
+        sectionsToObserve
+          .filter((sectionEl) => sectionOverlapsProbeBand(sectionEl))
+          .sort((sectionA, sectionB) => {
+            const overlapDiff = getSectionOverlapHeight(sectionB) - getSectionOverlapHeight(sectionA);
+            if (overlapDiff !== 0) return overlapDiff;
+
+            const distanceDiff = getSectionDistanceToBandCenter(sectionA) - getSectionDistanceToBandCenter(sectionB);
+            if (distanceDiff !== 0) return distanceDiff;
+
+            return sectionA.getBoundingClientRect().top - sectionB.getBoundingClientRect().top;
+          })[0] || null;
       const ensureOverlay = () => {
         if (!DEBUG_HEADER_OBSERVER) return;
         if (!overlay) {
           overlay = createOverlay('header observer root', 'rgba(0, 128, 255, 0.2)');
         }
-        rootMargin = computeRootMargin();
-        updateOverlayPosition(overlay, rootMargin);
+        updateOverlayPosition(overlay);
       };
-
-      const onIntersect = (entries) => {
-        const entry = pickTopEntry(entries);
-        if (!entry) return;
-        scheduleApply(entry.target);
+      const refreshTrackedSections = () => {
+        sectionsToObserve = selectAll(observedSectionSelector);
       };
-
-      let intersectionObserver;
-      const observeAll = () => {
-        sectionsToObserve = selectAll(
-          'main .shopify-section section, main .shopify-section collection-component, main .shopify-section [data-section-id]'
-        );
-        sectionsToObserve.forEach((section) => intersectionObserver.observe(section));
+      const getObserverRootMargin = () => {
+        const band = getHeaderProbeBand();
+        const bottomMargin = Math.max(0, window.innerHeight - band.bottom);
+        return `-${Math.max(0, band.top)}px 0px -${bottomMargin}px 0px`;
       };
-
-      const startObserver = () => {
-        rootMargin = computeRootMargin();
-        intersectionObserver = new IntersectionObserver(onIntersect, {rootMargin, threshold: thresholds});
-        observeAll();
+      const applyForSection = (sectionEl, source = 'intersection') => {
+        const mode = getSectionMode(sectionEl);
+        debugLog('Resolved section mode', {
+          section: getSectionLabel(sectionEl),
+          mode,
+          source,
+        });
+        applyMode(mode);
+        revealResolvedHeader();
+      };
+      const refreshObservedSection = (source = 'refresh') => {
+        const sectionEl = findActiveSection();
         ensureOverlay();
+        if (!sectionEl) {
+          currentObservedSection = null;
+          debugLog('No observer section matched probe band, using default mode', {
+            mode: defaultMode,
+            source,
+          });
+          currentMode = defaultMode;
+          setHeaderColors(defaultMode);
+          if (!getForcedLogoMode()) {
+            setLogoSource(defaultMode);
+          }
+          revealResolvedHeader();
+          return;
+        }
+
+        const nextMode = getSectionMode(sectionEl);
+        if (currentObservedSection === sectionEl && currentMode === nextMode) return;
+
+        currentObservedSection = sectionEl;
+        applyForSection(sectionEl, source);
+      };
+      const disconnectSectionObserver = () => {
+        if (!sectionObserver) return;
+        sectionObserver.disconnect();
+        sectionObserver = null;
+      };
+      const observeSections = () => {
+        disconnectSectionObserver();
+        refreshTrackedSections();
+        ensureOverlay();
+        currentObservedSection = null;
+
+        if (!sectionsToObserve.length) {
+          revealResolvedHeader();
+          return;
+        }
+
+        sectionObserver = new IntersectionObserver(
+          () => {
+            refreshObservedSection('intersection');
+          },
+          {
+            root: null,
+            rootMargin: getObserverRootMargin(),
+            threshold: intersectionThresholds,
+          }
+        );
+
+        sectionsToObserve.forEach((sectionEl) => {
+          sectionObserver.observe(sectionEl);
+        });
+
+        debugLog('Initialized section observer', {
+          trackedSections: sectionsToObserve.map((sectionEl) => getSectionLabel(sectionEl)),
+          rootMargin: getObserverRootMargin(),
+          thresholds: intersectionThresholds,
+        });
+
+        refreshObservedSection('initial');
+      };
+      window.setTimeout(() => {
+        if (headerWrapper?.dataset.headerColorReady === 'true') return;
+
+        debugLog('Header observer fallback revealed default dark state', {
+          mode: defaultMode,
+        });
+        currentObservedSection = null;
+        currentMode = defaultMode;
+        setHeaderColors(defaultMode);
+        if (!getForcedLogoMode()) {
+          setLogoSource(defaultMode);
+        }
+        revealResolvedHeader();
+      }, 0);
+      const resetSectionObserver = () => {
+        observeSections();
       };
 
-      const resetObserver = () => {
-        intersectionObserver && intersectionObserver.disconnect();
-        startObserver();
-      };
-
-      startObserver();
-      window.addEventListener('resize', resetObserver);
+      observeSections();
+      window.addEventListener('resize', resetSectionObserver);
     };
 
     window.addEventListener(
@@ -1391,7 +1507,7 @@
       "id": "logo_variant",
       "label": "Asset logo",
       "info": "Select the light or dark logo that ships with the theme.",
-      "default": "light",
+      "default": "dark",
       "options": [
         {"value": "light", "label": "Light"},
         {"value": "dark", "label": "Dark"}
@@ -1562,6 +1678,12 @@
       "default": false
     },
     {
+      "type": "checkbox",
+      "id": "transparent_blog",
+      "label": "Enable on Blog page",
+      "default": true
+    },
+    {
       "type": "image_picker",
       "id": "transparent_logo_pdp",
       "label": "Product pages logo",
@@ -1574,22 +1696,22 @@
     {
       "type": "range",
       "id": "padding_top",
-      "min": 5,
-      "max": 42,
-      "step": 1,
+      "min": 4,
+      "max": 80,
+      "step": 2,
       "unit": "px",
       "label": "Top",
-      "default": 15
+      "default": 12
     },
     {
       "type": "range",
       "id": "padding_bottom",
-      "min": 5,
-      "max": 42,
-      "step": 1,
+      "min": 4,
+      "max": 80,
+      "step": 2,
       "unit": "px",
       "label": "Bottom",
-      "default": 15
+      "default": 12
     }
   ],
   "blocks": [

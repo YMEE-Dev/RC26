@@ -254,7 +254,7 @@
       --BTN-SECONDARY-TEXT: {{ scheme.settings.btn_secondary_text }};
       --BTN-SECONDARY-BORDER: {{ scheme.settings.btn_secondary_border }};
       --BTN-SECONDARY-BORDER-A70: {{ scheme.settings.btn_secondary_border | color_modify: 'alpha', 0.7 }};
-      --BTN-SECONDARY-BG-BRIGHTER: {{ scheme.settings.btn_secondary_hover | default: '#000000' }};
+      --BTN-SECONDARY-BG-HOVER: {{ scheme.settings.btn_secondary_hover | default: '#000000' }};
 
       {% comment %}
         Create an appropriate poster background color
@@ -421,11 +421,14 @@
     --PRODUCT-GRID-ASPECT-RATIO: {{ settings.product_grid_aspect_ratio | times: 100 }}%;
 
     /* === Typography ===*/
+    --FONT-DISPLAY-L: {{ settings.display_l_size | append: 'px' }};
     --FONT-DISPLAY-M: {{ settings.display_m_size | append: 'px' }};
     --FONT-DISPLAY-S: {{ settings.display_s_size | append: 'px' }};
     --FONT-HEADLINE: {{ settings.headline_size | append: 'px' }};
     --FONT-TITLE: {{ settings.title_size | append: 'px' }};
+    --FONT-TITLE-LETTER-SPACING: {{ settings.title_size | divided_by: 10 | append: 'px' }};
 
+    --LINE-HEIGHT-DISPLAY-L: {{ settings.display_l_line_height | append: 'px' }};
     --LINE-HEIGHT-DISPLAY-M: {{ settings.display_m_line_height | append: 'px' }};
     --LINE-HEIGHT-DISPLAY-S: {{ settings.display_s_line_height | append: 'px' }};
     --LINE-HEIGHT-HEADLINE: {{ settings.headline_line_height | append: 'px' }};
@@ -494,19 +497,19 @@
     --COLUMNS-MOBILE: 2;
 
     {%- if settings.grid_style == 'compact' -%}
-      --LAYOUT-OUTER: 32px;
-      --LAYOUT-GUTTER: 32px;
-      --LAYOUT-OUTER-MEDIUM: 22px;
-      --LAYOUT-GUTTER-MEDIUM: 22px;
-      --LAYOUT-OUTER-SMALL: 16px;
-      --LAYOUT-GUTTER-SMALL: 16px;
+      --LAYOUT-OUTER: 40px;
+      --LAYOUT-GUTTER: 20px;
+      --LAYOUT-OUTER-MEDIUM: 20px;
+      --LAYOUT-GUTTER-MEDIUM: 20px;
+      --LAYOUT-OUTER-SMALL: 20px;
+      --LAYOUT-GUTTER-SMALL: 10px;
     {%- else -%}
       --LAYOUT-OUTER: 40px;
-      --LAYOUT-GUTTER: 32px;
+      --LAYOUT-GUTTER: 20px;
       --LAYOUT-OUTER-MEDIUM: 20px;
-      --LAYOUT-GUTTER-MEDIUM: 22px;
+      --LAYOUT-GUTTER-MEDIUM: 20px;
       --LAYOUT-OUTER-SMALL: 20px;
-      --LAYOUT-GUTTER-SMALL: 16px;
+      --LAYOUT-GUTTER-SMALL: 10px;
     {%- endif -%}
 
     {%- comment -%} Custom variables {%- endcomment -%}
@@ -530,7 +533,7 @@
 
     /* === Button General ===*/
     --BTN-FONT-STACK: {{ btn_font.family }}, {{ btn_font.fallback_families }};
-    --BTN-FONT-WEIGHT: {{ btn_font.weight }};
+    --BTN-FONT-WEIGHT: 600;
     --BTN-FONT-STYLE: {{ btn_font.style }};
     --BTN-FONT-SIZE: {{ settings.button_text_size }}px;
     --BTN-LINE-HEIGHT: {{ settings.button_text_line_height }}px;
@@ -630,6 +633,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 
 {{ 'theme.css' | asset_url | stylesheet_tag }}
+{{ 'rc-typography.css' | asset_url | stylesheet_tag }}
 
 {%- if settings.show_siblings or settings.enable_swatches -%}
   {{ 'swatches.css' | asset_url | stylesheet_tag }}
@@ -747,12 +751,35 @@
 <!-- Theme Javascript ============================================================== -->
 <script src="{{ 'vendor.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'theme.dev.js' | asset_url }}" defer="defer"></script>
+<script
+  src="{{ 'custom.js' | asset_url }}"
+  defer="defer"
+  data-homepage-product-sliders-src="{{ 'homepage-product-sliders.js' | asset_url }}"
+  data-homepage-floating-image-src="{{ 'homepage-floating-image.js' | asset_url }}"
+  data-homepage-stacked-images-src="{{ 'homepage-stacked-images.js' | asset_url }}"
+  data-homepage-collection-spotlight-src="{{ 'homepage-collection-spotlight.js' | asset_url }}"
+  data-homepage-collection-hover-src="{{ 'homepage-collection-hover.js' | asset_url }}"
+  data-head-country-redirect-src="{{ 'head-country-redirect.js' | asset_url }}"
+  data-blog-header-video-src="{{ 'blog-header-video.js' | asset_url }}"
+  data-gift-guide-slider-src="{{ 'gift-guide-slider.js' | asset_url }}"
+  data-timeline-src="{{ 'timeline.js' | asset_url }}"
+  data-social-videos-src="{{ 'social-videos.js' | asset_url }}"
+  data-rc-timeline-src="{{ 'rc-timeline.js' | asset_url }}"
+  {%- if template.name == 'article' and template.suffix == 'the-ultimate-explorer-of-beauty' -%}
+    data-rc-inview-fade-src="{{ 'rc-inview-fade.js' | asset_url }}"
+  {%- endif -%}
+  {%- if template.name == 'page' and template.suffix == 'rc-timeline' -%}
+    data-rc-timeline-inview-src="{{ 'rc-timeline-inview.js' | asset_url }}"
+  {%- endif -%}
+></script>
 
 {%- if template.name == 'product' -%}
-  <link rel="stylesheet" href="{{ 'side-drawer.css' | asset_url }}">
-  <script src="{{ 'side-drawer.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'webgi-loader.js' | asset_url }}" defer="defer"></script>
   <link rel="preload" href="https://releases.ijewel3d.com/webgi/runtime/viewer-0.9.19.js" as="script" crossorigin>
+{%- endif -%}
+{%- if template.name == 'product' or template.suffix == 'concierge' -%}
+  <link rel="stylesheet" href="{{ 'side-drawer.css' | asset_url }}">
+  <script src="{{ 'side-drawer.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 {%- if request.design_mode -%}
   <script

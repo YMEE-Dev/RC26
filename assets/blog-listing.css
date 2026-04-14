@@ -92,16 +92,14 @@ a.blog-listing__view-all {
   backdrop-filter: blur(30px);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 999;
 }
 
 
 @media (max-width: 768px) {
-  .blog-listing-section-wrapper {
-    padding-top: 100px;
-  }
   .blog-listing__nav {
     justify-content: flex-start !important;
+    overflow-x: auto;
   }
 }
 
@@ -174,7 +172,7 @@ a.blog-listing__view-all {
   /* allow horizontal touch scroll */
   flex: 1 1 0%;
   /* take remaining space so nav width is constrained and content scrolls */
-  max-width: 70%;
+  max-width: min-content;
 }
 
 .blog-listing__nav::-webkit-scrollbar {

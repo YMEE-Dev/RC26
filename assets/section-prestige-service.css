@@ -1,0 +1,214 @@
+.prestige-service {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.prestige-service__wrapper {
+  position: relative;
+  width: 100%;
+  min-height: 677px;
+
+  max-width: 1232px;
+  display: flex;
+  padding-left: 72px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.prestige-service__wrapper.wrapper--full-padded {
+  width: 100%;
+  padding: 0 40px;
+}
+
+.prestige-service__wrapper.wrapper--narrow {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.prestige-service__background {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.prestige-service__background img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.prestige-service__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.prestige-service__placeholder .placeholder-svg {
+  width: 60%;
+  height: auto;
+  opacity: 0.3;
+}
+
+.prestige-service__content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 419px;
+
+  /* padding: 72px 20px; */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  /* gap: 24px; */
+}
+
+.prestige-service__background img.prestige-service__background-mobile {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .prestige-service__wrapper {
+    min-height: 600px;
+  }
+}
+
+@media (min-width: 990px) {
+  .prestige-service__wrapper {
+    min-height: 700px;
+  }
+}
+
+@media (max-width: 768px) {
+  .prestige-service__content {
+    width: 100%;
+    max-width: 100%;
+    align-items: center;
+  }
+
+  .prestige-service__wrapper {
+    padding: 40px 20px;
+    align-items: unset;
+  }
+
+  .prestige-button {
+    width: 100%;
+  }
+
+  .prestige-service {
+    padding-inline: 20px;
+  }
+
+  .prestige-subheading,
+  .prestige-heading {
+    text-align: center;
+    width: 100%;
+  }
+
+  .prestige-button {
+    margin-top: auto;
+    text-align: center;
+  }
+
+  .prestige-service__background img.prestige-service__background-mobile {
+    display: block;
+    position: absolute;
+    top: 0;
+  }
+}
+
+.prestige-subheading {
+  color: #f9f9f9;
+
+  /* RC26/Title (ALL CAPS) */
+  font-family: Inter;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 22px;
+  /* 137.5% */
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  text-transform: uppercase;
+  margin: 0 0 20px;
+}
+
+.prestige-heading {
+  color: #f9f9f9;
+  font-family: var(--FONT-STACK-HEADING);
+  font-size: var(--FONT-DISPLAY-L);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--LINE-HEIGHT-DISPLAY-L);
+  margin: 0 0 20px;
+}
+
+@media (max-width: 767px) {
+  .prestige-heading {
+    font-size: var(--FONT-DISPLAY-M);
+    line-height: var(--LINE-HEIGHT-DISPLAY-M);
+  }
+}
+
+.prestige-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 14px 32px;
+  color: var(--text-color, #000000);
+  background-color: var(--bg-color, #ffffff);
+  border: var(--border-width, 1px) solid var(--border-color, #ffffff);
+  font-family: Inter, sans-serif;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.prestige-button:hover {
+  color: var(--hover-text-color, #ffffff);
+  background-color: var(--hover-bg-color, #000000);
+  border-color: var(--hover-bg-color, #000000);
+}
+
+.prestige-button:focus {
+  outline: 2px solid var(--hover-bg-color, #000000);
+  outline-offset: 2px;
+}
+
+@media (max-width: 375px) {
+  .prestige-subheading {
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 1.4px;
+  }
+
+  .prestige-heading {
+    line-height: var(--LINE-HEIGHT-DISPLAY-M);
+  }
+
+  .prestige-button {
+    padding: 14px 14px;
+  }
+}
+
+@media (max-width: 320px) {
+  .prestige-button {
+    padding: 12px 48px;
+  }
+  .prestige-subheading {
+    padding: 0 27px;
+  }
+}

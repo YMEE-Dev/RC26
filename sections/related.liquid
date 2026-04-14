@@ -160,26 +160,32 @@
 {%- for block in section.blocks -%}
   {%- if block.type == 'related' -%}
     {%- if current_collection != blank or current_category_collection != blank -%}
-    {%- if current_collection != blank -%}
-      {%- liquid
-        assign related_count = 0
-        capture related_products
-          for related_product in current_collection.products
-            assign hidden_product = false
-            if related_product.tags contains 'hide'
-              assign hidden_product = true
-            endif
+      {%- if current_collection != blank -%}
+        {%- liquid
+          assign related_count = 0
+          capture related_products
+            for related_product in current_collection.products
+              assign hidden_product = false
+              assign excluded_product = false
+              assign product_type = related_product.type | strip | downcase
+              if related_product.tags contains 'hide'
+                assign hidden_product = true
+              endif
 
-            if related_product.id != product.id and hidden_product == false and related_count < related_category_limit
-              assign related_count = related_count | plus: 1
-              render 'product-grid-item', product: related_product, animation_delay: forloop.index0 | times: 1, animation_anchor: '#RelatedProductsCollection--' | append: section.id, index: forloop.index
-            endif
-          endfor
-        endcapture
-      -%}
+              if product_type == 'storytelling'
+                assign excluded_product = true
+              endif
 
-      {%- if related_count > 0 -%}
-        {%- capture related -%}
+              if related_product.id != product.id and hidden_product == false and excluded_product == false and related_count < related_category_limit
+                assign related_count = related_count | plus: 1
+                render 'product-grid-item', product: related_product, animation_delay: forloop.index0 | times: 1, animation_anchor: '#RelatedProductsCollection--' | append: section.id, index: forloop.index
+              endif
+            endfor
+          endcapture
+        -%}
+
+        {%- if related_count > 0 -%}
+          {%- capture related -%}
           <div class="grid-outer" style="--column-count: {{ column_count }}; --COLUMNS: {{ columns_desktop }}; --COLUMNS-MEDIUM: {{ columns_medium }}; --COLUMNS-SMALL: {{ columns_small }}; --COLUMNS-MOBILE: {{ columns_mobile }};" {{ block.shopify_attributes }}>
             <grid-slider align-arrows>
               <div class="grid{% if layout_desktop == 'slider' %} grid--slider{% if related_count <= 4 %} grid--slider-disabled{% endif %}{% endif %}{% if layout_mobile == 'slider' or layout_mobile == nil %} grid--mobile-slider{% else %} grid--mobile-vertical{% endif %}" data-grid-slider id="RelatedProductsCollection--{{ section.id }}">
@@ -188,29 +194,35 @@
             </grid-slider>
           </div>
         {%- endcapture -%}
+        {%- endif -%}
       {%- endif -%}
-    {%- endif -%}
 
-    {%- if current_category_collection != blank -%}
-      {%- liquid
-        assign category_count = 0
-        capture category_products
-          for category_product in current_category_collection.products
-            assign hidden_product = false
-            if category_product.tags contains 'hide'
-              assign hidden_product = true
-            endif
+      {%- if current_category_collection != blank -%}
+        {%- liquid
+          assign category_count = 0
+          capture category_products
+            for category_product in current_category_collection.products
+              assign hidden_product = false
+              assign excluded_product = false
+              assign product_type = category_product.type | strip | downcase
+              if category_product.tags contains 'hide'
+                assign hidden_product = true
+              endif
 
-            if category_product.id != product.id and hidden_product == false and category_count < related_category_limit
-              assign category_count = category_count | plus: 1
-              render 'product-grid-item', product: category_product, animation_delay: forloop.index0 | times: 1, animation_anchor: '#RelatedProductsCategory--' | append: section.id, index: forloop.index
-            endif
-          endfor
-        endcapture
-      -%}
+              if product_type == 'storytelling'
+                assign excluded_product = true
+              endif
 
-      {%- if category_count > 0 -%}
-        {%- capture category -%}
+              if category_product.id != product.id and hidden_product == false and excluded_product == false and category_count < related_category_limit
+                assign category_count = category_count | plus: 1
+                render 'product-grid-item', product: category_product, animation_delay: forloop.index0 | times: 1, animation_anchor: '#RelatedProductsCategory--' | append: section.id, index: forloop.index
+              endif
+            endfor
+          endcapture
+        -%}
+
+        {%- if category_count > 0 -%}
+          {%- capture category -%}
           <div class="grid-outer" style="--column-count: {{ column_count }}; --COLUMNS: {{ columns_desktop }}; --COLUMNS-MEDIUM: {{ columns_medium }}; --COLUMNS-SMALL: {{ columns_small }}; --COLUMNS-MOBILE: {{ columns_mobile }};">
             <grid-slider align-arrows>
               <div class="grid{% if layout_desktop == 'slider' %} grid--slider{% if category_count <= 4 %} grid--slider-disabled{% endif %}{% endif %}{% if layout_mobile == 'slider' or layout_mobile == nil %} grid--mobile-slider{% else %} grid--mobile-vertical{% endif %}" data-grid-slider id="RelatedProductsCategory--{{ section.id }}">
@@ -219,8 +231,8 @@
             </grid-slider>
           </div>
         {%- endcapture -%}
+        {%- endif -%}
       {%- endif -%}
-    {%- endif -%}
     {%- endif -%}
   {%- endif -%}
 
@@ -230,7 +242,6 @@
     {%- capture recent -%}
       {%- render 'products-recently-viewed', product: product, limit: limit, block: block, columns_desktop: columns_desktop, columns_medium: columns_medium, columns_small: columns_small, columns_mobile: columns_mobile, column_count: column_count, layout_desktop: layout_desktop, layout_mobile: layout_mobile -%}
     {%- endcapture -%}
-
   {%- endif -%}
 {%- endfor -%}
 
@@ -249,6 +260,30 @@
   #RelatedProducts--{{ section.id }} .tab-content {
     border-top: 1px solid #E5E5E5;
     background: var(--bg-color);
+    padding-bottom: 80px;
+  }
+  #RelatedProducts--{{ section.id }} .product-item {
+    mix-blend-mode: normal;
+  }
+  #RelatedProducts--{{ section.id }} .product-item__image:not(.image--empty) {
+    background: var(--bg-color);
+  }
+  #RelatedProducts--{{ section.id }} .product-item__image img {
+    mix-blend-mode: multiply;
+  }
+  #RelatedProducts--{{ section.id }} .product-item__image .image-wrapper--cover {
+    background: var(--bg-color);
+    mix-blend-mode: normal;
+  }
+  #RelatedProducts--{{ section.id }} .product-item__bg__under {
+    background: var(--bg-color);
+  }
+  #RelatedProducts--{{ section.id }} .product-item__bg__under img {
+    mix-blend-mode: multiply;
+  }
+  #RelatedProducts--{{ section.id }} .product-item__bg__under .image-wrapper--cover {
+    background: var(--bg-color);
+    mix-blend-mode: normal;
   }
   #RelatedProducts--{{ section.id }} .grid__heading-holder {
     padding: 0;
@@ -278,11 +313,21 @@
     padding-bottom: 10px;
     display: inline-block;
   }
+  #RelatedProducts--{{ section.id }} .tabs .tab-link span,
+  #RelatedProducts--{{ section.id }} .tab__title {
+    font-family: var(--FONT-STACK-BODY);
+    font-size: 12px;
+    font-style: var(--FONT-STYLE-BODY);
+    font-weight: 400;
+    line-height: 20px;
+    text-transform: uppercase;
+  }
   #RelatedProducts--{{ section.id }} .tabs .tab-link.current span:first-of-type::after {
     bottom: 0;
   }
   #RelatedProducts--{{ section.id }} grid-slider {
-    padding-bottom: 28px;
+    padding-bottom: 20px;
+    margin-top: 80px;
   }
   #RelatedProducts--{{ section.id }} .related-slider-progress {
     position: absolute;
@@ -326,6 +371,15 @@
       padding-left: var(--outer);
       padding-right: var(--outer);
     }
+
+    #RelatedProducts--{{ section.id }} .tab-content {
+      padding-bottom: 40px;
+    }
+
+    #RelatedProducts--{{ section.id }} grid-slider {
+      margin-top: 40px;
+    }
+
   }
 
   @media only screen and (min-width: 750px) and (max-width: 989px) {
@@ -355,7 +409,6 @@
       width: var(--related-slider-progress, 0%);
     }
   }
-
 {%- endstyle -%}
 
 <script src="{{ 'related-products.js' | asset_url }}" defer="defer"></script>
@@ -420,7 +473,10 @@
       {%- endif -%}
 
       {%- if related -%}
-        <div class="tab-content tab-content-0{% if related %} current{% endif %} tabs__recommendation" data-tab-index="0">
+        <div
+          class="tab-content tab-content-0{% if related %} current{% endif %} tabs__recommendation"
+          data-tab-index="0"
+        >
           {%- if enable_tabs != true -%}
             <h6
               class="tab__title {{ heading_alignment }} {{ heading_size_class }}"

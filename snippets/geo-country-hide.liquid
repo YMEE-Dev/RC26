@@ -1,0 +1,208 @@
+{% doc %}
+  Detects a visitor's country via IP geolocation (Shopify browsing context API)
+  and hides prices + buy forms for visitors from restricted countries.
+
+  Works independently of Shopify Markets — uses the same IP detection that powers
+  Shopify's Geolocation app. Results are cached in sessionStorage so subsequent
+  page loads apply hiding synchronously (no flash).
+
+  The hidden-countries list is read from Theme Settings → Collection Rules →
+  "Country codes" (settings.cr_hidden_countries).
+
+  @example
+  {% render 'geo-country-hide' %}
+{% enddoc %}
+
+{%- assign geo_countries = settings.cr_hidden_countries | default: '' | upcase | remove: ' ' -%}
+{%- if geo_countries != blank -%}
+<style data-geo-hide-styles>
+  /*
+   * When html[data-geo-hidden] is set (by JS below), these rules
+   * hide prices and buy-forms across PDP, PLP, and search.
+   */
+
+  /* ── Prices (PDP + PLP) ── */
+  html[data-geo-hidden] [data-geo-price] {
+    display: none !important;
+  }
+
+  /* ── PDP buy form / variant dropdown ── */
+  html[data-geo-hidden] [data-geo-buyform] {
+    display: none !important;
+  }
+
+  /* ── PLP quick-add button ── */
+  html[data-geo-hidden] quick-add-product {
+    display: none !important;
+  }
+
+  /* ── Search results price ── */
+  html[data-geo-hidden] [data-geo-search-price] {
+    display: none !important;
+  }
+
+  /* ── Cart icon (header mobile + desktop) ── */
+  html[data-geo-hidden] [data-cart-toggle] {
+    visibility: hidden !important;
+  }
+</style>
+
+<script data-geo-hide-script>
+  (function () {
+    var HIDDEN = {{ geo_countries | split: ',' | json }};
+    var KEY = 'geo_hidden';
+    var OVERRIDE_KEY = 'geo_country_override';
+    var HIDDEN_OVERRIDE_KEY = 'geo_hidden_countries_override';
+
+    function getHiddenCountries() {
+      try {
+        var stored = window.sessionStorage.getItem(HIDDEN_OVERRIDE_KEY);
+        if (!stored) return HIDDEN;
+
+        var parsed = JSON.parse(stored);
+        if (!Array.isArray(parsed)) return HIDDEN;
+
+        return parsed
+          .map(normalizeCountry)
+          .filter(function (value, index, array) {
+            return value && array.indexOf(value) === index;
+          });
+      } catch (e) {
+        return HIDDEN;
+      }
+    }
+
+    function setHiddenCountriesOverride(rawCountries) {
+      var countries = String(rawCountries)
+        .split(',')
+        .map(normalizeCountry)
+        .filter(function (value, index, array) {
+          return value && array.indexOf(value) === index;
+        });
+
+      if (!countries.length) {
+        window.sessionStorage.removeItem(HIDDEN_OVERRIDE_KEY);
+        console.log('[geo-hide] hidden-country override cleared');
+        return;
+      }
+
+      window.sessionStorage.setItem(HIDDEN_OVERRIDE_KEY, JSON.stringify(countries));
+      console.log('[geo-hide] hidden-country override set to', countries);
+    }
+
+    function normalizeCountry(value) {
+      if (!value) return '';
+      return String(value).toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2);
+    }
+
+    function applyCountry(rawCountry, sourceLabel) {
+      var code = normalizeCountry(rawCountry);
+      if (!code) {
+        console.log('[geo-hide] no country code from', sourceLabel);
+        return false;
+      }
+
+      var hiddenCountries = getHiddenCountries();
+      var match = hiddenCountries.indexOf(code) !== -1;
+
+      try { window.sessionStorage.setItem(KEY, match ? '1' : '0'); } catch (e) {}
+
+      if (match) {
+        document.documentElement.setAttribute('data-geo-hidden', '');
+        console.log('[geo-hide] ' + sourceLabel + ' country:', code, 'MATCH -> hidden', 'hidden list:', hiddenCountries);
+      } else {
+        document.documentElement.removeAttribute('data-geo-hidden');
+        console.log('[geo-hide] ' + sourceLabel + ' country:', code, 'NO MATCH -> visible', 'hidden list:', hiddenCountries);
+      }
+
+      return true;
+    }
+
+    /* ── Debug override via URL: ?geo_country=JP|UA|... or ?geo_country=auto ── */
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var qp = params.get('geo_country');
+      var hiddenQp = params.get('geo_hidden_countries');
+      var hideQp = params.get('geo_hide');
+
+      if (hiddenQp) {
+        if (hiddenQp.toLowerCase() === 'auto' || hiddenQp.toLowerCase() === 'clear') {
+          window.sessionStorage.removeItem(HIDDEN_OVERRIDE_KEY);
+          window.sessionStorage.removeItem(KEY);
+          console.log('[geo-hide] hidden-country override cleared');
+        } else {
+          setHiddenCountriesOverride(hiddenQp);
+          window.sessionStorage.removeItem(KEY);
+        }
+      }
+
+      if (hideQp === '1' || hideQp === 'true') {
+        document.documentElement.setAttribute('data-geo-hidden', '');
+        window.sessionStorage.setItem(KEY, '1');
+        console.log('[geo-hide] forced hidden via geo_hide');
+        return;
+      }
+
+      if (hideQp === '0' || hideQp === 'false') {
+        document.documentElement.removeAttribute('data-geo-hidden');
+        window.sessionStorage.setItem(KEY, '0');
+        console.log('[geo-hide] forced visible via geo_hide');
+        return;
+      }
+
+      if (qp) {
+        var qpNorm = normalizeCountry(qp);
+        if (qp.toLowerCase() === 'auto' || qp.toLowerCase() === 'clear') {
+          window.sessionStorage.removeItem(OVERRIDE_KEY);
+          window.sessionStorage.removeItem(KEY);
+          console.log('[geo-hide] debug override cleared');
+        } else if (qpNorm) {
+          window.sessionStorage.setItem(OVERRIDE_KEY, qpNorm);
+          window.sessionStorage.removeItem(KEY);
+          console.log('[geo-hide] debug override set to', qpNorm);
+        }
+      }
+    } catch (e) {}
+
+    /* ── If debug override exists, use it and skip geolocation fetch ── */
+    try {
+      var forcedCountry = window.sessionStorage.getItem(OVERRIDE_KEY);
+      if (forcedCountry) {
+        applyCountry(forcedCountry, 'override');
+        return;
+      }
+    } catch (e) {}
+
+    /* ── Synchronous: check sessionStorage first (no flash on repeat visits) ── */
+    try {
+      var cached = window.sessionStorage.getItem(KEY);
+      if (cached === '1') {
+        document.documentElement.setAttribute('data-geo-hidden', '');
+        console.log('[geo-hide] cached → hidden');
+        return;
+      }
+      if (cached === '0') {
+        console.log('[geo-hide] cached → visible');
+        return;
+      }
+    } catch (e) { /* private browsing – fall through to fetch */ }
+
+    /* ── Async: first visit – detect via Shopify browsing-context API ── */
+    fetch('/browsing_context_suggestions.json')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var detected =
+          data &&
+          data.detected_values &&
+          data.detected_values.country &&
+          data.detected_values.country.handle;
+
+        console.log('[geo-hide] detected country:', detected, 'hidden list:', getHiddenCountries());
+        applyCountry(detected, 'detected');
+      })
+      .catch(function (err) {
+        console.warn('[geo-hide] API error:', err);
+      });
+  })();
+</script>
+{%- endif -%}

@@ -14,21 +14,274 @@
       "blocks": {
         "related": {
           "type": "related",
-          "settings": {}
+          "settings": {
+            "title": "Related products",
+            "product_list": []
+          }
         },
         "recent": {
           "type": "recent",
-          "settings": {}
+          "settings": {
+            "title": "Recent articles"
+          }
         }
       },
       "block_order": [
         "related",
         "recent"
       ],
-      "settings": {}
+      "disabled": true,
+      "settings": {
+        "show_image": true,
+        "show_date": true,
+        "show_author": true,
+        "tags": false,
+        "show_sharing": true,
+        "arrows": false,
+        "height": "screen-height-one-third",
+        "mobile_height": "screen-height-one-third--mobile",
+        "color_scheme": "",
+        "padding_top": 0,
+        "padding_bottom": 50
+      }
+    },
+    "blog_brand_main": {
+      "type": "blog-header-video",
+      "name": "Blog Header and Video",
+      "settings": {
+        "featured_article": "{{ article }}",
+        "video": "{{ article.metafields.custom.blog_brand_template.value.blog_video.value }}",
+        "video_url": "",
+        "content_max_width": 1100,
+        "title_max_width": 980,
+        "content_gap": 28,
+        "video_height_mobile": 40,
+        "padding_top": 40,
+        "padding_bottom": 0,
+        "padding_top_mobile": 60,
+        "padding_bottom_mobile": 0
+      }
+    },
+    "brand_story_combo_main": {
+      "type": "brand-story-combo",
+      "name": "Text + Image Section 1",
+      "settings": {
+        "header_observer_mode": "dark",
+        "layout": "image-right",
+        "width": "wrapper",
+        "top_heading": "{{ article.metafields.custom.blog_brand_template.value.story_bundle_heading_text | metafield_tag }}",
+        "top_text": "{{ article.metafields.custom.blog_brand_template.value.story_bundle_body_text | metafield_tag }}",
+        "top_image": "{{ article.metafields.custom.blog_brand_template.value.story_bundle_image.value }}",
+        "caption_text": "",
+        "max_width": 1100,
+        "padding_top": 120,
+        "padding_bottom": 0,
+        "padding_top_mobile": 60,
+        "padding_bottom_mobile": 0
+      }
+    },
+    "brand_image_text_twoup_main": {
+      "type": "blog-image-text-twoup",
+      "name": "Image + Text + Two Images",
+      "settings": {
+        "header_observer_mode": "dark",
+        "width": "wrapper",
+        "full_image": "{{ article.metafields.custom.blog_brand_template.value.img_text_2_img_image.value }}",
+        "center_text": "{{ article.metafields.custom.blog_brand_template.value.img_text_2_img_text | metafield_tag }}",
+        "two_image_left": "{{ article.metafields.custom.blog_brand_template.value.img_text_2_img_image_1.value }}",
+        "two_image_right": "{{ article.metafields.custom.blog_brand_template.value.img_text_2_img_image_2.value }}",
+        "section_gap": 120,
+        "padding_top": 120,
+        "padding_bottom": 0
+      }
+    },
+    "brand_story_combo_VKe4Wy": {
+      "type": "brand-story-combo",
+      "name": "Text + Image Section 1",
+      "settings": {
+        "header_observer_mode": "dark",
+        "layout": "image-left",
+        "width": "wrapper",
+        "top_heading": "{{ article.metafields.custom.blog_brand_template.value.text_image_section_2_heading_text | metafield_tag }}",
+        "top_text": "{{ article.metafields.custom.blog_brand_template.value.image_text_split_1_text | metafield_tag }}",
+        "top_image": "{{ article.metafields.custom.blog_brand_template.value.image_text_split_1_image.value }}",
+        "caption_text": "",
+        "max_width": 1100,
+        "padding_top": 120,
+        "padding_bottom": 0,
+        "padding_top_mobile": 60,
+        "padding_bottom_mobile": 0
+      }
+    },
+    "brand_split_row_main": {
+      "type": "brand-split-row",
+      "disabled": true,
+      "name": "Image Text Split",
+      "settings": {
+        "header_observer_mode": "dark",
+        "width": "wrapper",
+        "layout": "image-left",
+        "image": "{{ article.metafields.custom.blog_brand_template.value.image_text_split_1_image.value }}",
+        "text": "<p></p>{{ article.metafields.custom.blog_brand_template.value.image_text_split_1_text | metafield_tag }}",
+        "padding_top": 120,
+        "padding_bottom": 0
+      }
+    },
+    "brand_image_cards": {
+      "type": "occasion-image-text-grid",
+      "blocks": {
+        "item_1": {
+          "type": "item",
+          "settings": {
+            "image": "{{ article.metafields.custom.blog_brand_template.value.grid_1_image.value }}",
+            "text": "<p></p>{{ article.metafields.custom.blog_brand_template.value.grid_1_text | metafield_tag }}"
+          }
+        },
+        "item_2": {
+          "type": "item",
+          "settings": {
+            "image": "{{ article.metafields.custom.blog_brand_template.value.grid_2_image.value }}",
+            "text": "{{ article.metafields.custom.blog_brand_template.value.grid_2_text | metafield_tag }}"
+          }
+        },
+        "item_zJmaze": {
+          "type": "item",
+          "settings": {
+            "image": "{{ article.metafields.custom.blog_brand_template.value.grid_3_image.value }}",
+            "text": "{{ article.metafields.custom.blog_brand_template.value.grid_3_text | metafield_tag }}"
+          }
+        }
+      },
+      "block_order": [
+        "item_1",
+        "item_2",
+        "item_zJmaze"
+      ],
+      "name": "Image Text Grid",
+      "settings": {
+        "header_observer_mode": "dark",
+        "width": "wrapper",
+        "padding_top": 120,
+        "padding_bottom": 0
+      }
+    },
+    "brand_story_combo_QntWFa": {
+      "type": "brand-story-combo",
+      "name": "Text + Image Section 3",
+      "settings": {
+        "header_observer_mode": "dark",
+        "layout": "image-right",
+        "width": "wrapper",
+        "top_heading": "{{ article.metafields.custom.blog_brand_template.value.text_image_section_3_heading_text | metafield_tag }}",
+        "top_text": "{{ article.metafields.custom.blog_brand_template.value.image_text_split_2_text | metafield_tag }}",
+        "top_image": "{{ article.metafields.custom.blog_brand_template.value.image_text_split_2_image.value }}",
+        "caption_text": "",
+        "max_width": 1100,
+        "padding_top": 120,
+        "padding_bottom": 0,
+        "padding_top_mobile": 60,
+        "padding_bottom_mobile": 0
+      }
+    },
+    "brand_split_row_chpbUh": {
+      "type": "brand-split-row",
+      "disabled": true,
+      "name": "Image Text Split 2",
+      "settings": {
+        "header_observer_mode": "dark",
+        "width": "wrapper",
+        "layout": "image-right",
+        "image": "{{ article.metafields.custom.blog_brand_template.value.image_text_split_2_image.value }}",
+        "text": "{{ article.metafields.custom.blog_brand_template.value.image_text_split_2_text | metafield_tag }}",
+        "padding_top": 120,
+        "padding_bottom": 0
+      }
+    },
+    "brand_bottom_cta": {
+      "type": "occasion-bottom-cta",
+      "name": "CTA",
+      "settings": {
+        "text": "{{ article.metafields.custom.blog_brand_template.value.cta_text | metafield_tag }}",
+        "button_label": "{{ article.metafields.custom.blog_brand_template.value.cta_button_lable.value }}",
+        "button_link": "{{ article.metafields.custom.blog_brand_template.value.button_url.value }}",
+        "button_collection": "{{ article.metafields.custom.blog_brand_template.value.collection_cta.value }}",
+        "padding_top": 120,
+        "padding_bottom": 100,
+        "padding_top_mobile": 40,
+        "padding_bottom_mobile": 100
+      }
+    },
+    "homepage_product_sliders_iatVKi": {
+      "type": "homepage-product-sliders",
+      "blocks": {
+        "product_list_tab_cAFPeX": {
+          "type": "product_list_tab",
+          "settings": {
+            "tab_heading": "Featured products",
+            "product_list": [
+              "art-deco-bangle-with-black-jade-and-diamonds",
+              "art-deco-bangle-with-colored-stones-and-diamonds",
+              "art-deco-bangle-with-diamonds",
+              "art-deco-bracelet-with-black-jade-and-diamonds"
+            ],
+            "view_all_url": "shopify://collections/all-products"
+          }
+        }
+      },
+      "block_order": [
+        "product_list_tab_cAFPeX"
+      ],
+      "name": "Product Slider Tabs",
+      "settings": {
+        "header_observer_mode": "dark",
+        "title": "",
+        "limit": 4,
+        "header_direction": "row-reverse",
+        "enable_product_image_gallery": true,
+        "color_scheme": "",
+        "background_color": "#f9f9f9",
+        "padding_top": 30,
+        "padding_bottom": 30,
+        "padding_top_mobile": 16,
+        "padding_bottom_mobile": 16
+      }
+    },
+    "two_column_text_optional": {
+      "type": "blog-two-column-text",
+      "disabled": true,
+      "name": "Two Column Text",
+      "settings": {
+        "header_observer_mode": "dark",
+        "width": "wrapper",
+        "max_width": 1100,
+        "gap": 120,
+        "left_heading": "",
+        "left_text": "",
+        "left_text_style": "body",
+        "left_italic": true,
+        "right_heading": "",
+        "right_text": "",
+        "right_text_style": "body",
+        "right_italic": true,
+        "padding_top": 120,
+        "padding_bottom": 0,
+        "padding_top_mobile": 60,
+        "padding_bottom_mobile": 0
+      }
     }
   },
   "order": [
-    "article"
+    "article",
+    "blog_brand_main",
+    "brand_story_combo_main",
+    "brand_image_text_twoup_main",
+    "brand_story_combo_VKe4Wy",
+    "brand_split_row_main",
+    "brand_image_cards",
+    "brand_story_combo_QntWFa",
+    "brand_split_row_chpbUh",
+    "brand_bottom_cta",
+    "homepage_product_sliders_iatVKi",
+    "two_column_text_optional"
   ]
 }

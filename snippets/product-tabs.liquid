@@ -108,8 +108,47 @@
     assign accordion_content = accordion_text
     assign accordion_style = block.settings.style
 
+    assign accordion_brand_collection = blank
+    if product.metafields.custom.collection != blank
+      assign accordion_assigned_collection_value = product.metafields.custom.collection.value
+      if accordion_assigned_collection_value != blank
+        if accordion_assigned_collection_value.products != blank
+          assign accordion_brand_collection = accordion_assigned_collection_value
+        endif
+        if accordion_brand_collection == blank
+          assign accordion_assigned_collection_handle = accordion_assigned_collection_value | handleize
+          assign accordion_brand_collection = collections[accordion_assigned_collection_handle]
+        endif
+      endif
+    endif
+    if accordion_brand_collection == blank and product.vendor != blank
+      assign accordion_brand_handle = product.vendor | handleize
+      assign accordion_brand_collection = collections[accordion_brand_handle]
+    endif
+
+    assign accordion_collection_title = product.vendor | default: product.title
+    if accordion_brand_collection != blank
+      assign accordion_collection_title = accordion_brand_collection.title | default: accordion_collection_title
+    endif
+    assign accordion_collection_words = accordion_collection_title | split: ' '
+    assign accordion_collection_title = ''
+    for word in accordion_collection_words
+      assign capitalized_word = word | capitalize
+      assign accordion_collection_title = accordion_collection_title | append: capitalized_word
+      unless forloop.last
+        assign accordion_collection_title = accordion_collection_title | append: ' '
+      endunless
+    endfor
+
+    assign accordion_category = product.type | downcase
+
+    assign accordion_content = accordion_content | replace: '[Collection]', accordion_collection_title
+    assign accordion_content = accordion_content | replace: '[Category]', accordion_category
+
     if show_description
       assign accordion_content = product_description_content | append: accordion_text
+      assign accordion_content = accordion_content | replace: '[Collection]', accordion_collection_title
+      assign accordion_content = accordion_content | replace: '[Category]', accordion_category
     endif
   -%}
 
@@ -173,7 +212,9 @@
               {{ accordion_icon }}
               {{ accordion_heading }}
               {%- if block.settings.show_sku and product.selected_or_first_available_variant.sku != blank -%}
-                <span class="accordion__sku" data-variant-sku>SKU | {{ product.selected_or_first_available_variant.sku }}</span>
+                <span class="accordion__sku" data-variant-sku
+                  >SKU | {{ product.selected_or_first_available_variant.sku -}}
+                </span>
               {%- endif -%}
               <span class="accordion-icon-wrapper">
                 {%- render 'icon-plus' -%}
@@ -188,7 +229,13 @@
                 style="height: auto;"
               {% endif %}
             >
-              <div class="accordion__content" data-collapsible-content{% if block.settings.show_sku %} data-variant-content{% endif %}>
+              <div
+                class="accordion__content"
+                data-collapsible-content
+                {% if block.settings.show_sku %}
+                  data-variant-content
+                {% endif %}
+              >
                 {%- if block.settings.show_sku -%}
                   <div class="variant-description" data-variant-description>
                     {%- if product.selected_or_first_available_variant.description != blank -%}
@@ -214,7 +261,9 @@
             {{ accordion_icon }}
             {{ accordion_heading }}
             {%- if block.settings.show_sku and product.selected_or_first_available_variant.sku != blank -%}
-              <span class="accordion__sku" data-variant-sku>SKU | {{ product.selected_or_first_available_variant.sku }}</span>
+              <span class="accordion__sku" data-variant-sku
+                >SKU | {{ product.selected_or_first_available_variant.sku -}}
+              </span>
             {%- endif -%}
             {%- render 'icon-nav-arrow-right' -%}
           </button>
@@ -246,7 +295,13 @@
               </button>
             </div>
 
-            <div class="drawer__body rte {{ block.settings.text_font_size }}" data-scroll-lock-scrollable{% if block.settings.show_sku %} data-variant-content{% endif %}>
+            <div
+              class="drawer__body rte {{ block.settings.text_font_size }}"
+              data-scroll-lock-scrollable
+              {% if block.settings.show_sku %}
+                data-variant-content
+              {% endif %}
+            >
               {%- if block.settings.show_sku -%}
                 <div class="variant-description" data-variant-description>
                   {%- if product.selected_or_first_available_variant.description != blank -%}
@@ -266,21 +321,30 @@
 {%- endif -%}
 
 {% stylesheet %}
-
   .product-accordion .accordion {
-    border-color: #E5E5E5;
+    border-color: #e5e5e5;
   }
 
   .product__block--accordion .accordion__title,
   .accordion__content {
-    font-size: var(--font-body-small);
     font-family: var(--FONT-STACK-BODY);
     font-style: var(--FONT-STYLE-BODY);
     font-weight: var(--FONT-WEIGHT-BODY);
-    letter-spacing: var(--LETTER-SPACING-NAV);
+  }
+
+  .product-tabs .tabs .tab-link span,
+  .product__block--accordion .accordion__title {
+    font-size: 12px;
+    line-height: 20px;
+    font-weight: 400;
+  }
+
+  .product-tabs .tabs .tab-link span {
+    letter-spacing: 0;
   }
 
   .product__block--accordion .accordion__title {
+    letter-spacing: var(--LETTER-SPACING-NAV);
     text-transform: uppercase;
   }
 
@@ -297,7 +361,7 @@
   }
 
   .product__block--accordion .accordion__title .accordion__sku {
-    color: #A7A7A7;
+    color: #a7a7a7;
     padding-left: 1rem;
   }
 
@@ -352,16 +416,17 @@
       display: none;
     }
   }
-
 {% endstylesheet %}
 
 {% javascript %}
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     function updateVariantSKU(variant) {
       // Only update SKU elements in accordions that have SKU enabled
-      const skuElements = document.querySelectorAll('.product-accordion--has-sku [data-variant-sku], .accordion--has-sku [data-variant-sku]');
+      const skuElements = document.querySelectorAll(
+        '.product-accordion--has-sku [data-variant-sku], .accordion--has-sku [data-variant-sku]'
+      );
 
-      skuElements.forEach(element => {
+      skuElements.forEach((element) => {
         if (variant && variant.sku) {
           element.textContent = 'SKU | ' + variant.sku;
           element.style.display = '';
@@ -373,9 +438,11 @@
 
     function updateVariantDescription(variant) {
       // Only update description elements in accordions that have SKU enabled
-      const descriptionElements = document.querySelectorAll('.product-accordion--has-sku [data-variant-description], .accordion--has-sku [data-variant-description]');
+      const descriptionElements = document.querySelectorAll(
+        '.product-accordion--has-sku [data-variant-description], .accordion--has-sku [data-variant-description]'
+      );
 
-      descriptionElements.forEach(element => {
+      descriptionElements.forEach((element) => {
         if (variant && variant.description && variant.description !== '') {
           element.innerHTML = variant.description;
           element.style.display = '';
@@ -386,16 +453,18 @@
     }
 
     function getCurrentVariant() {
-      const selectedId = document.querySelector('input[name="id"]:checked')?.value ||
-                        document.querySelector('input[name="id"]')?.value;
+      const selectedId =
+        document.querySelector('input[name="id"]:checked')?.value || document.querySelector('input[name="id"]')?.value;
 
       if (!selectedId) return null;
 
-      const productDataElement = document.querySelector('#ProductData-' + document.querySelector('[data-product-id]')?.getAttribute('data-product-id'));
+      const productDataElement = document.querySelector(
+        '#ProductData-' + document.querySelector('[data-product-id]')?.getAttribute('data-product-id')
+      );
       if (productDataElement) {
         try {
           const product = JSON.parse(productDataElement.textContent);
-          return product.variants.find(v => v.id.toString() === selectedId.toString());
+          return product.variants.find((v) => v.id.toString() === selectedId.toString());
         } catch (e) {
           console.error('Error parsing product data:', e);
         }
@@ -413,21 +482,21 @@
     const variantInputs = document.querySelectorAll('input[name="id"]');
     const variantSelects = document.querySelectorAll('select[name="id"]');
 
-    variantInputs.forEach(input => {
+    variantInputs.forEach((input) => {
       input.addEventListener('change', handleVariantChange);
     });
 
-    variantSelects.forEach(select => {
+    variantSelects.forEach((select) => {
       select.addEventListener('change', handleVariantChange);
     });
 
-    document.addEventListener('theme:variant:change', function(event) {
+    document.addEventListener('theme:variant:change', function (event) {
       updateVariantSKU(event.detail.variant);
       updateVariantDescription(event.detail.variant);
     });
 
-    const observer = new MutationObserver(function(mutations) {
-      mutations.forEach(function(mutation) {
+    const observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
         if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
           const target = mutation.target;
           if (target.name === 'id') {
@@ -437,8 +506,8 @@
       });
     });
 
-    variantInputs.forEach(input => {
-      observer.observe(input, { attributes: true });
+    variantInputs.forEach((input) => {
+      observer.observe(input, {attributes: true});
     });
 
     const initialVariant = getCurrentVariant();

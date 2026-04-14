@@ -1,0 +1,110 @@
+{% doc %}
+  Central snippet for collection-specific and market-specific display rules.
+  Outputs a pipe-delimited string of active flags that consuming files capture
+  and parse to control price visibility, button text, etc.
+
+  Flags (only present when active):
+    hide_price      – hide price on PLP, PDP, and search
+    hide_atc        – hide Add to Cart / buy button
+    show_inquire    – show INQUIRE button instead of ATC
+    available_soon  – show AVAILABLE SOON instead of EMAIL ME when sold out
+    japan_market    – Japan market (all prices + ATC hidden)
+
+  @param {product} product - The product to evaluate (required)
+
+  @example
+  {%- capture cr_flags -%}{%- render 'collection-rules', product: product -%}{%- endcapture -%}
+  {%- assign cr_hide_price = false -%}
+  {%- if cr_flags contains 'hide_price' -%}{%- assign cr_hide_price = true -%}{%- endif -%}
+{% enddoc %}
+
+{%- liquid
+  assign cr_flags_out = ''
+
+  comment
+    ──────────────────────────────────────────────────
+    1. Country-based — hide prices + ATC for all products
+       Configured via settings.cr_hidden_countries (ISO 3166-1 alpha-2 codes)
+    ──────────────────────────────────────────────────
+  endcomment
+  assign cr_country = localization.country.iso_code | upcase | strip
+  assign cr_hidden_countries = settings.cr_hidden_countries | default: '' | upcase | remove: ' '
+  assign cr_hidden_countries_items = cr_hidden_countries | split: ','
+  for cr_country_item in cr_hidden_countries_items
+    if cr_country_item != blank
+      if cr_country == cr_country_item
+        assign cr_flags_out = cr_flags_out | append: 'hide_price|hide_atc|japan_market|'
+      endif
+    endif
+  endfor
+
+  comment
+    ──────────────────────────────────────────────────
+    2. Collection-based rules (configured in Theme Settings → Collection Rules)
+    ──────────────────────────────────────────────────
+  endcomment
+  assign cr_handles = ''
+  for c in product.collections
+    assign cr_handles = cr_handles | append: c.handle | append: ','
+  endfor
+
+  comment
+    ── Group A: Visible price, no ATC, show INQUIRE ──
+    Configured via settings.cr_group_a_collections
+  endcomment
+  assign cr_group_a = settings.cr_group_a_collections | default: '' | downcase | remove: ' '
+  assign cr_group_a_items = cr_group_a | split: ','
+  for cr_item in cr_group_a_items
+    if cr_item != blank
+      assign cr_item_match = cr_item | append: ','
+      if cr_handles contains cr_item_match
+        assign cr_flags_out = cr_flags_out | append: 'hide_atc|show_inquire|'
+      endif
+    endif
+  endfor
+
+  comment
+    ── Group B: Hidden price, no ATC, show INQUIRE ───
+    Configured via settings.cr_group_b_collections
+  endcomment
+  assign cr_group_b = settings.cr_group_b_collections | default: '' | downcase | remove: ' '
+  assign cr_group_b_items = cr_group_b | split: ','
+  for cr_item in cr_group_b_items
+    if cr_item != blank
+      assign cr_item_match = cr_item | append: ','
+      if cr_handles contains cr_item_match
+        assign cr_flags_out = cr_flags_out | append: 'hide_price|hide_atc|show_inquire|'
+      endif
+    endif
+  endfor
+
+  comment
+    ── Group B (individual products): Hidden price, no ATC, show INQUIRE ───
+    Configured via settings.cr_group_b_products
+  endcomment
+  assign cr_group_b_products = settings.cr_group_b_products | default: '' | downcase | remove: ' '
+  assign cr_group_b_product_items = cr_group_b_products | split: ','
+  for cr_item in cr_group_b_product_items
+    if cr_item != blank
+      if product.handle == cr_item
+        assign cr_flags_out = cr_flags_out | append: 'hide_price|hide_atc|show_inquire|'
+      endif
+    endif
+  endfor
+
+  comment
+    ── Group C: AVAILABLE SOON instead of sold-out ───
+    Configured via settings.cr_group_c_collections
+  endcomment
+  assign cr_group_c = settings.cr_group_c_collections | default: '' | downcase | remove: ' '
+  assign cr_group_c_items = cr_group_c | split: ','
+  for cr_item in cr_group_c_items
+    if cr_item != blank
+      assign cr_item_match = cr_item | append: ','
+      if cr_handles contains cr_item_match
+        assign cr_flags_out = cr_flags_out | append: 'available_soon|'
+      endif
+    endif
+  endfor
+-%}
+{{ cr_flags_out }}

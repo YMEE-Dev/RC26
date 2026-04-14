@@ -34,6 +34,8 @@
 
   assign bg_color = block.settings.bg_color | default: scheme_bg_color
   assign text_color = block.settings.color
+  assign content_gap = block.settings.content_gap | default: 40
+  assign content_padding = block.settings.content_padding | default: 40
   assign animation_order = 0
   assign animation_anchor = animation_anchor | default: ''
   assign padding_class = padding_class | default: ''
@@ -57,6 +59,9 @@
 -%}
 
 {%- capture style -%}
+  --brick-content-gap: {{ content_gap }}px;
+  --brick-block-padding: {{ content_padding }}px;
+
   {%- unless bg_color == 'rgba(0,0,0,0)' or bg_color == blank -%}
     --bg: {{ bg_color }};
   {%- endunless -%}
@@ -84,7 +89,7 @@
       {%- if subheading != blank -%}
         {%- assign animation_order = animation_order | plus: 1 -%}
         <p
-          class="hero__subheading"
+          class="hero__subheading title"
           data-aos="hero"
           data-aos-anchor="{{ animation_anchor }}"
           data-aos-order="{{ animation_order }}"
@@ -126,22 +131,65 @@
         </div>
       {%- endif -%}
 
-      {%- assign animation_order = animation_order | plus: 1 -%}
-      <div
-        class="suggested-collections__wrapper"
+      {%- if show_suggested_collections or show_in_occasion_collections -%}
+        {%- assign animation_order = animation_order | plus: 1 -%}
+        <div
+          class="suggested-collections__wrapper"
 
-        data-aos-anchor="{{ animation_anchor }}"
-        data-aos-order="{{ animation_order }}"
-      >
-        {%- if show_suggested_collections -%}
-          {%- if has_suggested_collections -%}
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-order="{{ animation_order }}"
+        >
+          {%- if show_suggested_collections -%}
+            {%- if has_suggested_collections -%}
+              <div>
+                <span
+                  data-aos="hero"
+                  data-aos-anchor="{{ animation_anchor }}"
+                  data-aos-order="{{ animation_order }}"
+                  class="label"
+                  >SHOP MORE</span
+                >
+                {%- assign animation_order = animation_order | plus: 1 -%}
+                <ul
+                  class="brick-text__suggested-collections"
+                  data-aos="hero"
+                  data-aos-anchor="{{ animation_anchor }}"
+                  data-aos-order="{{ animation_order }}"
+                >
+                  {%- for suggested_collection in suggested_collections_list -%}
+                    {%- liquid
+                      assign suggested_collection_url = suggested_collection.url
+                      assign suggested_collection_label = suggested_collection.title | default: suggested_collection.text
+
+                      if suggested_collection_url == blank
+                        continue
+                      endif
+
+                      if suggested_collection_label == blank
+                        assign suggested_collection_path = suggested_collection_url | split: '?' | first | split: '#' | first
+                        assign suggested_collection_label = suggested_collection_path | split: '/' | last | replace: '-', ' ' | upcase
+                      endif
+                    -%}
+
+                    <li class="brick-text__suggested-collections-item">
+                      <a class="navlink brick-text__suggested-collections-link" href="{{ suggested_collection_url }}">
+                        {{- suggested_collection_label -}}
+                      </a>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            {%- endif -%}
+          {%- endif -%}
+
+          {%- if show_in_occasion_collections -%}
             <div>
               <span
                 data-aos="hero"
                 data-aos-anchor="{{ animation_anchor }}"
                 data-aos-order="{{ animation_order }}"
                 class="label"
-                >SHOP NOW</span
+                >IN OCCASION</span
               >
               {%- assign animation_order = animation_order | plus: 1 -%}
               <ul
@@ -150,69 +198,27 @@
                 data-aos-anchor="{{ animation_anchor }}"
                 data-aos-order="{{ animation_order }}"
               >
-                {%- for suggested_collection in suggested_collections_list -%}
-                  {%- liquid
-                    assign suggested_collection_url = suggested_collection.url
-                    assign suggested_collection_label = suggested_collection.title | default: suggested_collection.text
-
-                    if suggested_collection_url == blank
-                      continue
-                    endif
-
-                    if suggested_collection_label == blank
-                      assign suggested_collection_path = suggested_collection_url | split: '?' | first | split: '#' | first
-                      assign suggested_collection_label = suggested_collection_path | split: '/' | last | replace: '-', ' ' | upcase
-                    endif
-                  -%}
-
-                  <li class="brick-text__suggested-collections-item">
-                    <a class="navlink brick-text__suggested-collections-link" href="{{ suggested_collection_url }}">
-                      {{- suggested_collection_label -}}
-                    </a>
-                  </li>
-                {%- endfor -%}
+                <li class="brick-text__suggested-collections-item">
+                  <a
+                    class="navlink brick-text__suggested-collections-link"
+                    href="{{ routes.collections_url }}/gift-ideas"
+                  >
+                    GIFT IDEAS
+                  </a>
+                </li>
+                <li class="brick-text__suggested-collections-item">
+                  <a
+                    class="navlink brick-text__suggested-collections-link"
+                    href="{{ routes.collections_url }}/everyday-treasures"
+                  >
+                    EVERYDAY TREASURES
+                  </a>
+                </li>
               </ul>
             </div>
-          {%- endif -%}
-        {%- endif -%}
-
-        {%- if show_in_occasion_collections -%}
-          <div>
-            <span
-              data-aos="hero"
-              data-aos-anchor="{{ animation_anchor }}"
-              data-aos-order="{{ animation_order }}"
-              class="label"
-              >IN OCCASION</span
-            >
-            {%- assign animation_order = animation_order | plus: 1 -%}
-            <ul
-              class="brick-text__suggested-collections"
-              data-aos="hero"
-              data-aos-anchor="{{ animation_anchor }}"
-              data-aos-order="{{ animation_order }}"
-            >
-              <li class="brick-text__suggested-collections-item">
-                <a
-                  class="navlink brick-text__suggested-collections-link"
-                  href="{{ routes.collections_url }}/gift-ideas"
-                >
-                  GIFT IDEAS
-                </a>
-              </li>
-              <li class="brick-text__suggested-collections-item">
-                <a
-                  class="navlink brick-text__suggested-collections-link"
-                  href="{{ routes.collections_url }}/1500-and-under"
-                >
-                  1,500 & UNDER
-                </a>
-              </li>
-            </ul>
-          </div>
-        {% endif %}
-      </div>
-
+          {% endif %}
+        </div>
+      {% endif %}
       {%- if button_text != blank -%}
         {%- assign animation_order = animation_order | plus: 1 -%}
         <div
@@ -258,7 +264,7 @@
 
 {% stylesheet %}
   .brick__block__text .hero__content {
-    gap: 40px;
+    gap: var(--brick-content-gap, 40px);
     height: auto;
   }
   .brick__block__text .hero__content h2 {
@@ -340,6 +346,7 @@
       color: var(--text);
       letter-spacing: 0.08em;
       text-transform: uppercase;
+      font-weight: 500;
     }
   }
 {% endstylesheet %}

@@ -1,0 +1,384 @@
+<!-- /sections/brand-story-combo.liquid -->
+{%- liquid
+  assign has_any_content = false
+  assign resolved_top_heading = section.settings.top_heading
+  assign resolved_top_image = section.settings.top_image
+  assign resolved_caption_text = section.settings.caption_text
+  assign has_image = false
+
+  if resolved_top_image != blank and resolved_top_image.value != blank
+    assign resolved_top_image = resolved_top_image.value
+  endif
+  if resolved_top_image != blank
+    assign has_image = true
+  endif
+
+  if resolved_top_heading == blank and article != blank
+    if article.metafields.custom.story_top_heading.value != blank
+      assign resolved_top_heading = article.metafields.custom.story_top_heading.value
+    endif
+    if resolved_top_heading == blank and article.metafields.custom.top_heading.value != blank
+      assign resolved_top_heading = article.metafields.custom.top_heading.value
+    endif
+    if resolved_top_heading == blank and article.metafields.custom.heading.value != blank
+      assign resolved_top_heading = article.metafields.custom.heading.value
+    endif
+  endif
+
+  if resolved_top_heading != blank or section.settings.top_text != blank or section.settings.top_image != blank or resolved_caption_text != blank
+    assign has_any_content = true
+  endif
+-%}
+
+{%- if has_any_content -%}
+  {%- style -%}
+    #BrandStoryCombo--{{ section.id }} {
+      --brand-combo-pt: {{ section.settings.padding_top }}px;
+      --brand-combo-pb: {{ section.settings.padding_bottom }}px;
+      --brand-combo-pt-mobile: {{ section.settings.padding_top_mobile }}px;
+      --brand-combo-pb-mobile: {{ section.settings.padding_bottom_mobile }}px;
+      --brand-combo-max: {{ section.settings.max_width }}px;
+    }
+  {%- endstyle -%}
+
+  <section
+    id="BrandStoryCombo--{{ section.id }}"
+    class="brand-story-combo header-observer--{{ section.settings.header_observer_mode }}"
+    data-section-id="{{ section.id }}"
+    data-section-type="brand-story-combo"
+    data-header-observer-mode="{{ section.settings.header_observer_mode }}"
+  >
+    <div class="brand-story-combo__inner {{ section.settings.width }}">
+      <div class="brand-story-combo__split{% if section.settings.layout == 'image-left' %} brand-story-combo__split--image-left{% endif %}{% unless has_image %} brand-story-combo__split--no-image{% endunless %}">
+        <div class="brand-story-combo__split-copy">
+          {%- if resolved_top_heading != blank -%}
+            <h3 class="brand-story-combo__heading h3" data-brand-fade>
+              {{ resolved_top_heading | newline_to_br }}
+            </h3>
+          {%- endif -%}
+          {%- if section.settings.top_text != blank -%}
+            <div class="brand-story-combo__text body rte" data-brand-fade>{{ section.settings.top_text }}</div>
+          {%- endif -%}
+        </div>
+
+        {%- if resolved_top_image != blank -%}
+          <div class="brand-story-combo__split-media" data-brand-fade>
+            {%- if resolved_top_image.width != blank -%}
+              {{
+                resolved_top_image
+                | image_url: width: 1200
+                | image_tag:
+                  class: 'brand-story-combo__image',
+                  widths: '375, 550, 750, 900, 1100, 1200',
+                  sizes: '(min-width: 990px) 40vw, 100vw',
+                  loading: 'lazy'
+              }}
+            {%- else -%}
+              <img
+                class="brand-story-combo__image"
+                src="{{ resolved_top_image | escape }}"
+                alt=""
+                loading="lazy"
+              >
+            {%- endif -%}
+
+            {%- if resolved_caption_text != blank -%}
+              <p class="brand-story-combo__caption caption">{{ resolved_caption_text | escape }}</p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+{% stylesheet %}
+  .brand-story-combo {
+    padding-top: var(--brand-combo-pt);
+    padding-bottom: var(--brand-combo-pb);
+  }
+
+  .brand-story-combo__inner {
+    display: block;
+    width: min(100% - 48px, var(--brand-combo-max));
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .brand-story-combo__split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 56px;
+    align-items: center;
+  }
+
+  .brand-story-combo__split--image-left .brand-story-combo__split-copy {
+    order: 2;
+  }
+
+  .brand-story-combo__split--image-left .brand-story-combo__split-media {
+    order: 1;
+  }
+
+  .brand-story-combo__split--no-image {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .brand-story-combo__split--no-image .brand-story-combo__split-copy {
+    width: 100%;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    align-items: center;
+  }
+
+  .brand-story-combo__split--no-image .brand-story-combo__text {
+    text-align: center;
+  }
+
+  .brand-story-combo__split-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .brand-story-combo__split-media {
+    width: 100%;
+    max-width: 520px;
+  }
+
+  .brand-story-combo__split:not(.brand-story-combo__split--image-left) .brand-story-combo__split-media {
+    justify-self: end;
+  }
+
+  .brand-story-combo__split--image-left .brand-story-combo__split-media {
+    justify-self: start;
+  }
+
+  .brand-story-combo__heading {
+    margin: 0;
+  }
+
+  .brand-story-combo__text p {
+    margin: 0;
+  }
+
+  .brand-story-combo__image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .brand-story-combo__caption {
+    margin: 16px 0 0;
+    opacity: 0.7;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 989px) {
+    .brand-story-combo {
+      padding-top: var(--brand-combo-pt-mobile, var(--brand-combo-pt));
+      padding-bottom: var(--brand-combo-pb-mobile, var(--brand-combo-pb));
+    }
+
+    .brand-story-combo__split {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+
+    .main-content--article-brand .brand-story-combo__split-copy {
+      grid-row: 2;
+      width: 100%;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+      align-items: center;
+    }
+
+    .main-content--article-brand .brand-story-combo__split-media {
+      grid-row: 1;
+      max-width: none;
+    }
+
+    .main-content--article-brand .brand-story-combo__text {
+      text-align: center;
+    }
+
+    .brand-story-combo__inner {
+      width: calc(100% - 40px);
+    }
+  }
+
+  @media (min-width: 750px) and (max-width: 1024px) {
+    .brand-story-combo__split {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 56px;
+      align-items: center;
+    }
+
+    .main-content--article-brand .brand-story-combo__split-copy {
+      grid-row: auto;
+      width: auto;
+      max-width: none;
+      margin-left: 0;
+      margin-right: 0;
+      text-align: left;
+      align-items: flex-start;
+    }
+
+    .main-content--article-brand .brand-story-combo__split-media {
+      grid-row: auto;
+    }
+
+    .main-content--article-brand .brand-story-combo__text {
+      text-align: left;
+    }
+
+    .brand-story-combo__inner {
+      width: min(100% - 48px, var(--brand-combo-max));
+    }
+
+    .brand-story-combo__split--no-image {
+      grid-template-columns: 1fr;
+      justify-items: center;
+    }
+
+    .main-content--article-brand .brand-story-combo__split--no-image .brand-story-combo__split-copy {
+      width: 100%;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+      align-items: center;
+    }
+
+    .main-content--article-brand .brand-story-combo__split--no-image .brand-story-combo__text {
+      text-align: center;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Story Layout Bundle",
+  "class": "brand-story-combo",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "default": "image-right",
+      "options": [
+        { "value": "image-right", "label": "Text left, image right" },
+        { "value": "image-left", "label": "Image left, text right" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        {"value": "wrapper--full", "label": "Full width"},
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"}
+      ]
+    },
+    {
+      "type": "richtext",
+      "id": "top_heading",
+      "label": "Top heading"
+    },
+    {
+      "type": "richtext",
+      "id": "top_text",
+      "label": "Top text"
+    },
+    {
+      "type": "image_picker",
+      "id": "top_image",
+      "label": "Top image"
+    },
+    {
+      "type": "text",
+      "id": "caption_text",
+      "label": "Image caption",
+      "default": "Image caption"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "min": 800,
+      "max": 1600,
+      "step": 10,
+      "unit": "px",
+      "label": "Max width",
+      "default": 1100
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Top padding (mobile)",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom padding (mobile)",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Story Layout Bundle",
+      "category": "Blog"
+    }
+  ]
+}
+{% endschema %}

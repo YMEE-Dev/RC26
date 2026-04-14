@@ -1,16 +1,27 @@
 {%- liquid
   assign text_color = section.settings.color
   assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign header_observer_mode = section.settings.header_observer_mode | default: collection.metafields.custom.header_observer_mode.value | default: 'light'
+  assign header_observer_mode = header_observer_mode | downcase | strip
+
+  unless header_observer_mode == 'dark' or header_observer_mode == 'light'
+    assign header_observer_mode = 'light'
+  endunless
+
   assign sub_collections = linklists[collection.handle].links
   assign sub_collection_html = ''
   assign sub_collection_counter = 0
   assign sub_collection_limit = 6
 -%}
+
 {%- if linklists[collection.handle].links.size > 0 -%}
   {%- style -%}
     #Subcollections--{{ section.id }} {
       --PT: {{ section.settings.padding_top }}px;
       --PB: {{ section.settings.padding_bottom }}px;
+      --globaltext: {% if header_observer_mode == 'light' %}#fff{% else %}#000{% endif %};
+      --link: {% if header_observer_mode == 'light' %}#fff{% else %}#000{% endif %};
+      --link-hover: {% if header_observer_mode == 'light' %}#f0f0f0{% else %}#222{% endif %};
 
       {%- unless text_color == 'rgba(0,0,0,0)' or text_color == blank -%}
         --text: {{ text_color }};
@@ -19,16 +30,18 @@
       {%  if section.settings.subcollection_bg %}
         background: url({{ section.settings.subcollection_bg | image_url }});
         background-repeat: initial;
-        background-position: center;
+        background-position: bottom;
         background-size: cover;
-        min-height: 500px;
+        min-height: 400px;
       {% endif %}
     }
   {%- endstyle -%}
 
   <section
-    class="subcollections collection-{{ collection.handle }} section-padding {{ color_scheme }}"
+    class="subcollections collection-{{ collection.handle }} section-padding {{ color_scheme }} header-observer--{{ header_observer_mode }}"
     data-section-id="{{ section.id }}"
+    data-section-type="subcollections"
+    data-header-observer-mode="{{ header_observer_mode }}"
     id="Subcollections--{{ section.id }}"
   >
     {%- if sub_collections.size > 0 -%}
@@ -51,7 +64,7 @@
         {%- capture sub_collection_html -%}
           {{ sub_collection_html }}
 
-          <div class="grid-item subcollection__item" data-grid-item>
+          <div class="swiper-slide subcollection__item">
             <div class="subcollection__inner">
               <a
                 class="subcollection__link{% if sub_collection.handle == collection.handle %} is-active{% endif %}"
@@ -68,7 +81,7 @@
                     (min-width: 750px) (calc(100vw - 16px) / 3), calc(100vw - 32px)
                   {%- endcapture -%}
 
-                  {%- render 'image' image: image, sizes: sizes, cover: true, show_backfill: false -%}
+                  {%- render 'image' image: image, sizes: sizes, cover: true, show_backfill: false, loading: 'eager' -%}
                 </div>
               </a>
             </div>
@@ -89,34 +102,11 @@
       {%- endfor -%}
 
       {%- if sub_collection_html != '' and template.suffix != 'media-only' -%}
-        {%- liquid
-          assign layout_slider = false
-          if section.settings.subcollection_layout == 'slider' and sub_collection_counter > 4
-            assign layout_slider = true
-          endif
-
-          assign columns_desktop = sub_collection_counter | at_most: 5
-          assign columns_medium = 3
-
-          if columns_desktop == 2 or columns_desktop == 4
-            assign columns_medium = 2
-          endif
-        -%}
-
-        {%- capture sub_collection_html -%}
-          <div class="grid{% if layout_slider %} grid--slider{% endif %} grid--mobile-slider"{% if layout_slider %} data-grid-slider{% endif %} style="--COLUMNS: {{ columns_desktop }}; --COLUMNS-MEDIUM: {{ columns_medium }};">
+        <script src="{{ 'subcollections-slider.js' | asset_url }}" defer></script>
+        <div class="subcollections__swiper swiper" data-subcollections-swiper>
+          <div class="swiper-wrapper">
             {{ sub_collection_html }}
           </div>
-        {%- endcapture -%}
-
-        <div>
-          {%- if layout_slider -%}
-            <grid-slider>
-              {{ sub_collection_html }}
-            </grid-slider>
-          {%- else -%}
-            {{ sub_collection_html }}
-          {%- endif -%}
         </div>
       {%- endif -%}
     {%- endif -%}
@@ -129,24 +119,19 @@
   "class": "section-overlay-header",
   "settings": [
     {
-      "type": "paragraph",
-      "content": "Create a [navigation list](/admin/content/menus) with the same name as this collection and link to other collections. [Learn more](https://broadcast.presidiocreative.com/collections/collection-pages/sub-collections)"
+      "type": "header",
+      "content": "Header observer"
     },
     {
-      "type": "select",
-      "id": "subcollection_layout",
-      "label": "Layout",
-      "options": [
-        {
-          "value": "grid",
-          "label": "Grid"
-        },
-        {
-          "value": "slider",
-          "label": "Slider"
-        }
-      ],
-      "default": "grid"
+      "type": "text",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "light",
+      "info": "Enter light or dark. Can be connected to a collection metafield."
+    },
+    {
+      "type": "paragraph",
+      "content": "Create a [navigation list](/admin/content/menus) with the same name as this collection and link to other collections. [Learn more](https://broadcast.presidiocreative.com/collections/collection-pages/sub-collections)"
     },
     {
       "type": "image_picker",

@@ -1,0 +1,180 @@
+<!-- /sections/blog-image-with-caption.liquid -->
+
+{%- style -%}
+  #BlogImageCaption--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    --PT-mobile: {{ section.settings.padding_top_mobile }}px;
+    --PB-mobile: {{ section.settings.padding_bottom_mobile }}px;
+    --max: {{ section.settings.max_width }}px;
+  }
+{%- endstyle -%}
+
+<section
+  id="BlogImageCaption--{{ section.id }}"
+  class="blog-image-caption section-padding header-observer--{{ section.settings.header_observer_mode }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="blog-image-with-caption"
+  data-header-observer-mode="{{ section.settings.header_observer_mode }}"
+>
+  <div class="blog-image-caption__inner {{ section.settings.width }}">
+    {%- if section.settings.image != blank -%}
+      <div class="blog-image-caption__media">
+        {{
+          section.settings.image
+          | image_url: width: 2400
+          | image_tag:
+            class: 'blog-image-caption__image',
+            widths: '550, 750, 900, 1100, 1500, 1800, 2100, 2400',
+            sizes: '(min-width: 990px) min(var(--max), 100vw - 60px), calc(100vw - 40px)',
+            loading: 'lazy'
+        }}
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.caption != blank -%}
+      <p class="blog-image-caption__caption caption">{{ section.settings.caption | escape }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .blog-image-caption {
+    padding-top: var(--PT);
+    padding-bottom: var(--PB);
+  }
+
+  .blog-image-caption__inner {
+    width: min(calc(100% - 60px), var(--max));
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .blog-image-caption__media {
+    width: 100%;
+  }
+
+  .blog-image-caption__image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .blog-image-caption__caption {
+    margin: 16px 0 0;
+    opacity: 0.7;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 989px) {
+    .blog-image-caption {
+      padding-top: var(--PT-mobile, var(--PT));
+      padding-bottom: var(--PB-mobile, var(--PB));
+    }
+
+    .blog-image-caption__inner {
+      width: calc(100% - 40px);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Blog: Image + Caption",
+  "class": "blog-image-caption",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        {"value": "wrapper--full", "label": "Full width"},
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"}
+      ]
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "min": 700,
+      "max": 1800,
+      "step": 20,
+      "unit": "px",
+      "label": "Max width",
+      "default": 1100
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "caption",
+      "label": "Caption",
+      "default": "Caption"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 120
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding (mobile)",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding (mobile)",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blog: Image + Caption"
+    }
+  ]
+}
+{% endschema %}

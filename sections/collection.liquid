@@ -1,6 +1,7 @@
 <!-- /sections/collections.liquid -->
 
 {{ 'custom-collection.css' | asset_url | stylesheet_tag }}
+{{ 'collection-floating-bar.css' | asset_url | stylesheet_tag }}
 
 {%- liquid
   assign enable_infinity_scroll = settings.enable_infinity_scroll
@@ -33,6 +34,7 @@
   assign blocks_featured_image = section.blocks | where: 'type', 'featured_image'
   assign collection_template_suffix = collection.template_suffix | default: template.suffix | downcase | strip
   assign is_spotlight_collection_template = false
+  assign is_media_only_collection_template = false
   assign should_use_spotlight_images = false
   assign spotlight_images = collection.metafields.custom.spotlight_collection_images.value
   assign spotlight_menu_color = collection.metafields.custom.spotlight_collection_menu_color.value
@@ -40,6 +42,10 @@
 
   if collection_template_suffix == 'spotlight'
     assign is_spotlight_collection_template = true
+  endif
+
+  if collection_template_suffix == 'media-only' or collection_template_suffix == 'naked'
+    assign is_media_only_collection_template = true
   endif
 
   assign spotlight_images_position = collection.metafields.custom.spotlight_collection_images_position.value | default: 'left' | downcase | strip
@@ -100,6 +106,15 @@
 {%- endcapture -%}
 
 {%- style -%}
+  body:has(.main-content--collection-super-naked) #Collection--{{ section.id }} .collection__products {
+    padding-top: calc(({{ section.settings.padding_top }}px / 2) + var(--header-height));
+  }
+
+  @media screen and (max-width: 749px) {
+     body:has(.main-content--collection-super-naked) #Collection--{{ section.id }} .collection__products {
+      padding-top: var(--header-height);
+    }
+  }
   #Collection--{{ section.id }} {
     position: relative;
     --PT: {{ section.settings.padding_top }}px;
@@ -123,6 +138,16 @@
   #Collection--{{ section.id }} .collection__products {
     background: var(--COLLECTION-PRODUCTS-BG);
   }
+
+  {% if is_spotlight_collection_template %}
+    body.template-collection:has(#Collection--{{ section.id }}.collection--spotlight) .theme__header__scroll-blur {
+      display: none;
+      opacity: 0;
+      --header-scroll-reveal-blur: 0px;
+      -webkit-backdrop-filter: blur(0);
+      backdrop-filter: blur(0);
+    }
+  {% endif %}
 
   {% if is_spotlight_collection_template and spotlight_menu_color != blank %}
     body.template-collection:has(#Collection--{{ section.id }}.collection--spotlight) {
@@ -197,14 +222,20 @@
             assign sub_collection_title = sublink.title
             assign sub_collection_handle_separator = sub_collection_handle | append: ',' | prepend: ','
             assign sub_collection = collections[sub_collection_handle]
+            assign is_active_sub_collection_link = false
 
             if sublink.object.handle contains sub_collection_handle_separator
               continue
             endif
+
+            if sub_collection.handle == collection.handle
+              assign is_active_sub_collection_link = true
+              assign has_active_subcollection_link = true
+            endif
           -%}
 
           <a
-            class="subcollection_links-link navlink{% if sub_collection.handle == collection.handle %} is-active{% endif %}"
+            class="subcollection_links-link navlink{% if is_active_sub_collection_link %} is-active{% endif %}"
             href="{{ sub_collection.url }}"
           >
             {{- sub_collection_title -}}
@@ -228,10 +259,14 @@
     {%- endif -%}
 
     {%- if enable_sort or enable_filters -%}
-      <nav class="collection__nav {{ align_classes }}" data-collection-nav>
+      <nav
+        class="collection__nav {{ align_classes }}{% if is_media_only_collection_template %} collection__nav--media-only{% endif %}"
+        data-collection-nav
+        data-has-active-subcollection-link="{{ has_active_subcollection_link }}"
+      >
         <div class="availability_filter-wrapper" data-availability-filter>
           <a
-            href="{{ collection.url | split: '-' | first }}"
+            href="{{ collection.url }}"
             type="button"
             class="availability-filter__button navlink"
             data-availability-view-all
@@ -313,6 +348,8 @@
       </nav>
     {%- endif -%}
 
+    {%- render 'collection-floating-bar' -%}
+
     <div class="collection__products">
       {%- if enable_filters -%}
         <div class="{{ collection_sidebar_class }}" id="filter-groups" data-collection-sidebar>
@@ -336,7 +373,7 @@
               data-collection-sidebar-close
               aria-label="{{ 'collections.general.hide_filters' | t }}"
             >
-              {%- render 'icon-cancel' -%}
+              {%- render 'icon-close' -%}
             </a>
           </div>
 
@@ -650,6 +687,8 @@
     <script src="{{ 'collection.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'collection-filters-form.js' | asset_url }}" defer="defer"></script>
   {%- endif -%}
+
+  <script src="{{ 'collection-floating-bar.js' | asset_url }}" defer="defer"></script>
 
   {%- if settings.quickview_enable -%}
     <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>

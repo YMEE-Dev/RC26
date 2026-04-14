@@ -1,6 +1,8 @@
 <!-- /sections/section-protection-cards.liquid -->
 {%- liquid
   assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign animation_anchor = '#ProtectionCards--' | append: section.id
+  assign animation_order = 0
 -%}
 
 {%- style -%}
@@ -12,47 +14,202 @@
 
 <section
   id="ProtectionCards--{{ section.id }}"
-  class="protection-cards section-padding {{ color_scheme }}"
+  class="protection-cards section-padding {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}"
   data-section-id="{{ section.id }}"
   data-section-type="protection-cards"
+  data-header-observer-mode="{{ section.settings.header_observer_mode }}"
 >
   <div class="protection-cards__wrapper {{ section.settings.width }}">
     {%- if section.settings.heading != blank -%}
-      <h2 class="protection-cards__heading {{ section.settings.heading_size }}">{{ section.settings.heading }}</h2>
+      {%- assign animation_order = animation_order | plus: 1 -%}
+      <h2
+        class="protection-cards__heading {{ section.settings.heading_size }}"
+        data-aos="hero"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-order="{{ animation_order }}"
+      >
+        {{ section.settings.heading }}
+      </h2>
     {%- endif -%}
 
     {%- if section.blocks.size > 0 -%}
-      <div class="protection-cards__grid">
-        {%- for block in section.blocks -%}
-          {%- case block.type -%}
-            {%- when 'card' -%}
-              <div class="protection-card" {{ block.shopify_attributes }}>
-                {%- if block.settings.image != blank -%}
-                  <div class="protection-card__image">
-                    {{ block.settings.image | image_url: width: 600 | image_tag: loading: 'lazy' }}
-                  </div>
-                {%- else -%}
-                  <div class="protection-card__placeholder">
-                    {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                  </div>
-                {%- endif -%}
-
-                <div class="protection-card__content">
-                  {%- if block.settings.title != blank -%}
-                    <h3 class="protection-card__title">{{ block.settings.title }}</h3>
+      <div class="protection-cards__carousel-container grid-outer">
+        <grid-slider>
+          <div
+            class="protection-cards__grid grid grid--slider grid--mobile-slider"
+            data-grid-slider
+            style="--column-count: 3;"
+          >
+            {%- for block in section.blocks -%}
+              {%- case block.type -%}
+                {%- when 'card' -%}
+                  {%- assign animation_order = animation_order | plus: 1 -%}
+                  {%- assign use_drawer_open = block.settings.use_drawer_open -%}
+                  {%- assign card_target = block.settings.card_link -%}
+                  {%- if template.suffix == 'concierge' -%}
+                    <div
+                      class="grid-item protection-card"
+                      data-grid-item
+                      data-aos="hero"
+                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-order="{{ animation_order }}"
+                      {{ block.shopify_attributes }}
+                    >
+                      {%- if use_drawer_open -%}
+                        {%- if forloop.first -%}
+                          <a
+                            href="https://cdn.shopify.com/s/files/1/0969/2990/7075/files/00_Size-Guide-Bracelets_Rings_ENG_2026.pdf?v=1775035281"
+                            download
+                            target="_blank"
+                            class="protection-card__overlay-link"
+                            aria-label="{{ block.settings.title | escape }}"
+                          ></a>
+                        {%- elsif forloop.last -%}
+                          <button
+                            type="button"
+                            class="protection-card__overlay-link"
+                            data-drawer-open="ask-concierge"
+                            aria-label="{{ block.settings.title | escape }}"
+                          ></button>
+                        {%- else -%}
+                          <button
+                            type="button"
+                            class="protection-card__overlay-link"
+                            data-drawer-open="care-recommendations"
+                            aria-label="{{ block.settings.title | escape }}"
+                          ></button>
+                        {%- endif -%}
+                      {%- else -%}
+                        {%- if card_target != blank -%}
+                          <a
+                            href="{{ card_target }}"
+                            class="protection-card__overlay-link"
+                            aria-label="{{ block.settings.title | escape }}"
+                          ></a>
+                        {%- endif -%}
+                      {%- endif -%}
+                      {%- if block.settings.image != blank -%}
+                        <div class="protection-card__image">
+                          {{ block.settings.image | image_url: width: 600 | image_tag: loading: 'lazy' }}
+                        </div>
+                      {%- else -%}
+                        <div class="protection-card__placeholder">
+                          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                        </div>
+                      {%- endif -%}
+                      <div class="protection-card__content">
+                        {%- if block.settings.title != blank -%}
+                          <h3 class="protection-card__title">{{ block.settings.title }}</h3>
+                        {%- endif -%}
+                        {%- if block.settings.description != blank -%}
+                          <p class="protection-card__description">{{ block.settings.description }}</p>
+                        {%- endif -%}
+                      </div>
+                    </div>
+                  {%- else -%}
+                    {%- if block.settings.card_link != blank -%}
+                      <a
+                        href="{{ block.settings.card_link }}"
+                        class="grid-item protection-card protection-card--linked"
+                        data-grid-item
+                        data-aos="hero"
+                        data-aos-anchor="{{ animation_anchor }}"
+                        data-aos-order="{{ animation_order }}"
+                        {{ block.shopify_attributes }}
+                      >
+                    {%- else -%}
+                      <div
+                        class="grid-item protection-card"
+                        data-grid-item
+                        data-aos="hero"
+                        data-aos-anchor="{{ animation_anchor }}"
+                        data-aos-order="{{ animation_order }}"
+                        {{ block.shopify_attributes }}
+                      >
+                    {%- endif -%}
+                    {%- if block.settings.image != blank -%}
+                      <div class="protection-card__image">
+                        {{ block.settings.image | image_url: width: 600 | image_tag: loading: 'lazy' }}
+                      </div>
+                    {%- else -%}
+                      <div class="protection-card__placeholder">
+                        {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                      </div>
+                    {%- endif -%}
+                    <div class="protection-card__content">
+                      {%- if block.settings.title != blank -%}
+                        <h3 class="protection-card__title">{{ block.settings.title }}</h3>
+                      {%- endif -%}
+                      {%- if block.settings.description != blank -%}
+                        <p class="protection-card__description">{{ block.settings.description }}</p>
+                      {%- endif -%}
+                    </div>
+                    {%- if block.settings.card_link != blank -%}
+                      </a>
+                    {%- else -%}
+                      </div>
+                    {%- endif -%}
                   {%- endif -%}
-
-                  {%- if block.settings.description != blank -%}
-                    <p class="protection-card__description">{{ block.settings.description }}</p>
-                  {%- endif -%}
-                </div>
-              </div>
-          {%- endcase -%}
-        {%- endfor -%}
+              {%- endcase -%}
+            {%- endfor -%}
+          </div>
+        </grid-slider>
       </div>
+      {%- if section.settings.button_label != blank and section.settings.button_link != blank -%}
+        {%- assign animation_order = animation_order | plus: 1 -%}
+        <div class="protection-cards__button-wrapper" style="margin-top: {{ section.settings.button_margin_top }}px;">
+          <a
+            href="{{ section.settings.button_link }}"
+            class="btn btn--primary btn--solid protection-cards__btn"
+            data-aos="hero"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-order="{{ animation_order }}"
+          >
+            {{- section.settings.button_label -}}
+          </a>
+        </div>
+      {%- endif -%}
     {%- endif -%}
   </div>
 </section>
+
+<script>
+  (function () {
+    const sectionId = '{{ section.id }}';
+
+    function initProtectionSlider() {
+      const section = document.querySelector('[data-section-id="' + sectionId + '"]');
+      if (!section) return;
+
+      const gridSlider = section.querySelector('grid-slider');
+      if (gridSlider) {
+        gridSlider.dispatchEvent(new CustomEvent('theme:grid-slider:init'));
+      }
+    }
+
+    function runInit() {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initProtectionSlider);
+      } else {
+        initProtectionSlider();
+      }
+    }
+
+    runInit();
+
+    document.addEventListener('shopify:section:load', function (event) {
+      const loadedSection = event.target?.querySelector?.('[data-section-id]') || event.target;
+
+      const isOurSection =
+        (loadedSection && loadedSection.dataset?.sectionId === sectionId) ||
+        (event.detail && String(event.detail.sectionId) === String(sectionId));
+
+      if (isOurSection) {
+        initProtectionSlider();
+      }
+    });
+  })();
+</script>
 
 {% stylesheet %}
   .protection-cards {
@@ -80,13 +237,11 @@
     padding: 0 var(--outer);
   }
 
-
-
   .protection-cards__heading {
     color: #000;
     text-align: center;
     margin: 0 0 40px;
-    font-family:var(--FONT-STACK-HEADING);
+    font-family: var(--FONT-STACK-HEADING);
     font-style: normal;
     font-weight: 500;
   }
@@ -134,29 +289,18 @@
   }
 
   .protection-cards__grid {
-    display: grid;
-    grid-template-columns: 2fr 2fr 2fr;     
-    gap: 80px;
-    width: 100%;
+    --column-count: 3;
   }
 
-  @media (max-width: 1024px) {
+  @media (max-width: 990px) {
     .protection-cards__grid {
-      grid-template-columns: 2fr 2fr;
-      gap: 80px;
+      --column-count: 2;
     }
   }
-
 
   @media (max-width: 768px) {
     .protection-cards__grid {
-      gap: 40px !important;
-    }
-  }
-  @media (max-width: 425px) {
-    .protection-cards__grid {
-      grid-template-columns: 1fr;
-      gap: 80px;
+      --column-count: 1;
     }
   }
 
@@ -165,18 +309,29 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    /* gap: 24px; */
+    position: relative;
+  }
+
+  .protection-card__overlay-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    text-decoration: none;
   }
 
   .protection-card__image {
     width: 100%;
-    height: 318px;
     margin-bottom: 40px;
-    /* aspect-ratio: 357/318; */
+    aspect-ratio: 357/318;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #F5F5F5;
+    background: #f5f5f5;
     overflow: hidden;
   }
 
@@ -184,11 +339,36 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
+
+  .protection-card--linked:hover .protection-card__image img,
+  .protection-card:has(.protection-card__overlay-link):hover .protection-card__image img {
+    transform: scale(1.05);
+  }
+
+  .protection-cards__button-wrapper {
+    display: flex;
+    justify-content: center;
+  }
+
+  .protection-cards .protection-cards__wrapper .protection-cards__btn {
+    animation-delay: initial;
+    transition-delay: initial;
+  }
+
+  @media (min-width: 990px) {
+    .protection-cards__btn {
+      min-width: 400px;
+    }
+  }
+
   @media (max-width: 768px) {
     .protection-card__image {
-      height: 318px !important;
-      aspect-ratio: auto !important;
+      height: auto !important;
+      aspect-ratio: 79 / 62 !important;
+      margin-bottom: 20px;
     }
   }
   .protection-card__placeholder {
@@ -198,8 +378,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #F5F5F5;
-
+    background: #f5f5f5;
   }
 
   .protection-card__placeholder .placeholder-svg {
@@ -211,29 +390,64 @@
   .protection-card__content {
     display: flex;
     flex-direction: column;
+    width: 100%;
   }
 
   .protection-card__title {
     margin: 0 0 20px;
-    color: var(--000000, #000);
+    color: var(--COLOR-TEXT);
     font-family: var(--FONT-STACK-HEADING);
+    font-style: var(--FONT-STYLE-HEADING);
+    font-weight: var(--FONT-WEIGHT-HEADING);
     text-align: center;
-    font-size: 32px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 36px; /* 112.5% */
+    font-size: var(--FONT-DISPLAY-S);
+    line-height: var(--LINE-HEIGHT-DISPLAY-S);
   }
 
   .protection-card__description {
-    color: var(--000000, #000);
+    color: var(--COLOR-TEXT);
     text-align: center;
     margin: 0;
-    /* RC26/Body */
-    font-family: Inter;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 22px; /* 157.143% */
+    font-family: var(--FONT-STACK-BODY);
+    font-size: var(--FONT-SIZE-BASE);
+    font-style: var(--FONT-STYLE-BODY);
+    font-weight: var(--FONT-WEIGHT-BODY);
+    line-height: var(--LINE-HEIGHT-BODY);
+  }
+
+  @media (min-width: 990px) {
+    .grid--slider .grid-item.protection-card {
+      flex: unset;
+    }
+  }
+
+  @media (min-width: 750px) {
+    .grid--slider .grid-item.protection-card:last-child {
+      margin-right: 0;
+    }
+  }
+
+  .grid--slider .grid-item.protection-card {
+    margin-right: 80px;
+    max-width: 33.33%;
+  }
+  .protection-cards__grid.grid.grid--slider {
+    padding-inline: 0;
+  }
+
+  @media (max-width: 990px) {
+    .grid--slider .grid-item.protection-card {
+      margin-right: 40px;
+      max-width: 60%;
+    }
+  }
+
+  @media (max-width: 749px) {
+    .grid--slider .grid-item.protection-card {
+      margin-right: 20px;
+      max-width: 80%;
+      width: 80%;
+    }
   }
 {% endstylesheet %}
 
@@ -247,6 +461,12 @@
       "type": "card",
       "name": "Card",
       "settings": [
+        {
+          "type": "checkbox",
+          "id": "use_drawer_open",
+          "label": "Open drawer on click",
+          "default": true
+        },
         {
           "type": "image_picker",
           "id": "image",
@@ -263,11 +483,31 @@
           "id": "description",
           "label": "Description",
           "default": "Card description text goes here"
+        },
+        {
+          "type": "url",
+          "id": "card_link",
+          "label": "Card link",
+          "info": "Makes the entire card clickable."
         }
       ]
     }
   ],
   "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
     {
       "type": "header",
       "content": "Content"
@@ -284,10 +524,10 @@
       "label": "Heading size",
       "default": "heading-large",
       "options": [
-        { "value": "heading-small", "label": "Small" },
-        { "value": "heading-medium", "label": "Medium" },
-        { "value": "heading-large", "label": "Large" },
-        { "value": "heading-x-large", "label": "Extra large" }
+        {"value": "heading-small", "label": "Small"},
+        {"value": "heading-medium", "label": "Medium"},
+        {"value": "heading-large", "label": "Large"},
+        {"value": "heading-x-large", "label": "Extra large"}
       ]
     },
     {
@@ -300,11 +540,10 @@
       "label": "Width",
       "default": "wrapper",
       "options": [
-        { "value": "wrapper--full-padded", "label": "Full width padded" },
-        { "value": "wrapper", "label": "Normal" },
-        { "value": "wrapper--narrow", "label": "Narrow" },
-        { "value": "wrapper--custom", "label": "Custom (max-width: 1232px)" }
-
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"},
+        {"value": "wrapper--narrow", "label": "Narrow"},
+        {"value": "wrapper--custom", "label": "Custom (max-width: 1232px)"}
       ]
     },
     {
@@ -332,6 +571,30 @@
       "id": "color_scheme",
       "default": "scheme_1",
       "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "range",
+      "id": "button_margin_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Button margin top",
+      "default": 32
     }
   ],
   "presets": [

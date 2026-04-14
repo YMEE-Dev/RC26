@@ -1,0 +1,490 @@
+{{ 'rc-timeline-inview.css' | asset_url | stylesheet_tag }}
+{{ 'rc-timeline.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign section_id = 'rc-story-' | append: section.id
+  assign history_id = section_id | append: '-history'
+  assign creator_id = section_id | append: '-creator'
+  assign ruby_id = section_id | append: '-ruby'
+  assign timeline_id = section_id | append: '-timeline'
+  assign timeline_enabled = section.settings.timeline_enable
+-%}
+
+<section
+  id="{{ section_id }}"
+  class="rc-story{% unless timeline_enabled %} rc-story--timeline-disabled{% endunless %}"
+  style="
+    --bg: {{ section.settings.background_color }};
+    --bg-soft: {{ section.settings.background_soft_color }};
+    --bg-glow: {{ section.settings.background_glow_color }};
+    --text: {{ section.settings.text_color }};
+    --muted: {{ section.settings.text_color | color_modify: 'alpha', 0.62 }};
+    --dim: {{ section.settings.text_color | color_modify: 'alpha', 0.34 }};
+    --accent: {{ section.settings.accent_color }};
+    --accent-soft: {{ section.settings.accent_color | color_modify: 'alpha', 0.35 }};
+    --logo-color: {{ section.settings.logo_color }};
+    --today-color: {{ section.settings.today_color }};
+    --active-year-color: {{ section.settings.timeline_active_year_color | default: section.settings.active_year_color }};
+    --year-size: {{ section.settings.year_size }}px;
+    --copy-size: {{ section.settings.caption_size }}px;
+    --panel-height: {{ section.settings.panel_height }}vh;
+  "
+  data-section-id="{{ section.id }}"
+>
+  <div class="page-shell">
+    <div class="rc-story__content">
+      <section class="hero" id="{{ section_id }}-top">
+
+        {%- liquid
+          assign hero_top_a = section.settings.rc_tl_hero_image_top | default: section.settings.hero_image_top
+          assign hero_right_a = section.settings.rc_tl_hero_image_right | default: section.settings.hero_image_right
+          assign hero_left_a = section.settings.rc_tl_hero_image_left | default: section.settings.hero_image_left
+          assign hero_bottom_a = section.settings.rc_tl_hero_image_bottom | default: section.settings.hero_image_bottom
+          assign hero_top_b = section.settings.rc_tl_hero_image_top_alt | default: section.settings.hero_image_top_alt
+          assign hero_right_b = section.settings.rc_tl_hero_image_right_alt | default: section.settings.hero_image_right_alt
+          assign hero_left_b = section.settings.rc_tl_hero_image_left_alt | default: section.settings.hero_image_left_alt
+          assign hero_bottom_b = section.settings.rc_tl_hero_image_bottom_alt | default: section.settings.hero_image_bottom_alt
+          assign hero_eyebrow = section.settings.rc_tl_hero_eyebrow | default: section.settings.hero_eyebrow
+          assign hero_title = section.settings.rc_tl_hero_title | default: section.settings.hero_title
+        -%}
+        <div class="hero-center">
+          <div class="hero-collage" aria-hidden="true">
+            <figure class="hero-collage__item hero-collage__item--top">
+              {% if hero_top_a != blank or hero_top_b != blank %}
+                <img
+                  src="{{ hero_top_a | default: hero_top_b | image_url: width: 1400 }}"
+                  alt="{{ hero_top_a.alt | default: hero_top_b.alt | escape }}"
+                  data-image-a="{{ hero_top_a | default: hero_top_b | image_url: width: 1400 }}"
+                  data-image-b="{% if hero_top_b != blank %}{{ hero_top_b | image_url: width: 1400 }}{% endif %}"
+                  data-alt-a="{{ hero_top_a.alt | default: hero_top_b.alt | escape }}"
+                  data-alt-b="{% if hero_top_b != blank %}{{ hero_top_b.alt | escape }}{% endif %}"
+                >
+              {% endif %}
+            </figure>
+            <figure class="hero-collage__item hero-collage__item--right">
+              {% if hero_right_a != blank or hero_right_b != blank %}
+                <img
+                  src="{{ hero_right_a | default: hero_right_b | image_url: width: 1800 }}"
+                  alt="{{ hero_right_a.alt | default: hero_right_b.alt | escape }}"
+                  data-image-a="{{ hero_right_a | default: hero_right_b | image_url: width: 1800 }}"
+                  data-image-b="{% if hero_right_b != blank %}{{ hero_right_b | image_url: width: 1800 }}{% endif %}"
+                  data-alt-a="{{ hero_right_a.alt | default: hero_right_b.alt | escape }}"
+                  data-alt-b="{% if hero_right_b != blank %}{{ hero_right_b.alt | escape }}{% endif %}"
+                >
+              {% endif %}
+            </figure>
+            <figure class="hero-collage__item hero-collage__item--left">
+              {% if hero_left_a != blank or hero_left_b != blank %}
+                <img
+                  src="{{ hero_left_a | default: hero_left_b | image_url: width: 1800 }}"
+                  alt="{{ hero_left_a.alt | default: hero_left_b.alt | escape }}"
+                  data-image-a="{{ hero_left_a | default: hero_left_b | image_url: width: 1800 }}"
+                  data-image-b="{% if hero_left_b != blank %}{{ hero_left_b | image_url: width: 1800 }}{% endif %}"
+                  data-alt-a="{{ hero_left_a.alt | default: hero_left_b.alt | escape }}"
+                  data-alt-b="{% if hero_left_b != blank %}{{ hero_left_b.alt | escape }}{% endif %}"
+                >
+              {% endif %}
+            </figure>
+            <figure class="hero-collage__item hero-collage__item--bottom">
+              {% if hero_bottom_a != blank or hero_bottom_b != blank %}
+                <img
+                  src="{{ hero_bottom_a | default: hero_bottom_b | image_url: width: 1800 }}"
+                  alt="{{ hero_bottom_a.alt | default: hero_bottom_b.alt | escape }}"
+                  data-image-a="{{ hero_bottom_a | default: hero_bottom_b | image_url: width: 1800 }}"
+                  data-image-b="{% if hero_bottom_b != blank %}{{ hero_bottom_b | image_url: width: 1800 }}{% endif %}"
+                  data-alt-a="{{ hero_bottom_a.alt | default: hero_bottom_b.alt | escape }}"
+                  data-alt-b="{% if hero_bottom_b != blank %}{{ hero_bottom_b.alt | escape }}{% endif %}"
+                >
+              {% endif %}
+            </figure>
+          </div>
+
+          <div class="hero-copy">
+            <svg class="hero-copy__flower" width="452" height="466" viewBox="0 0 452 466" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+              <path d="M253.807 274.486C269.754 297.022 275.418 309.308 275.418 330.306C275.418 356.938 258.949 385.107 228.059 405.585C197.169 385.107 180.7 356.938 180.7 330.306C180.7 309.308 186.364 297.022 202.331 274.486L198.214 272.428L186.364 286.253C155.996 321.595 147.741 338.497 147.741 354.36C147.741 394.816 196.646 427.082 216.731 455.252L224.443 466H231.653L239.386 455.252C259.471 427.602 308.377 394.816 308.377 354.36C308.377 338.476 300.142 321.574 269.754 286.253L257.924 272.428L253.807 274.486ZM10.8052 221.742L0 229.435V236.607L10.8052 244.278C39.6261 264.756 71.54 312.905 112.232 312.905C128.199 312.905 145.17 304.714 180.7 274.507L194.598 262.719L192.529 258.623C169.874 274.507 157.522 280.12 136.936 280.12C109.64 280.12 81.3421 263.218 61.2573 233.01C81.3421 202.782 109.661 185.901 136.936 185.901C157.522 185.901 169.874 191.535 192.529 207.418L194.598 203.323L180.7 191.556C145.17 161.348 128.199 153.137 112.232 153.137C71.5609 153.137 39.1245 201.784 10.8052 221.763M271.3 191.535L257.402 203.302L259.45 207.398C282.106 191.514 294.457 185.88 315.044 185.88C342.318 185.88 370.637 202.782 390.722 232.99C370.637 263.197 342.318 280.099 315.044 280.099C294.457 280.099 282.106 274.465 259.45 258.602L257.402 262.698L271.3 274.486C306.83 304.693 323.821 312.884 339.768 312.884C380.439 312.884 412.353 264.735 441.195 244.258L452 236.586V229.414L441.195 221.722C412.876 201.743 380.439 153.095 339.768 153.095C323.801 153.095 306.809 161.286 271.3 191.514M224.464 0L216.752 10.7482C196.667 38.9182 147.762 71.1838 147.762 111.64C147.762 127.503 155.996 144.405 186.384 179.747L198.235 193.572L202.352 191.514C186.384 168.978 180.721 156.692 180.721 136.214C180.721 109.083 197.712 80.9133 228.08 60.9345C258.447 80.9133 275.438 109.083 275.438 136.214C275.438 156.692 269.775 168.978 253.828 191.514L257.945 193.572L269.775 179.747C300.163 144.405 308.397 127.503 308.397 111.64C308.397 71.1838 260.014 39.438 239.407 10.7482L231.674 0H224.464Z" fill="#397E70"/>
+            </svg>
+            <p class="eyebrow">{{ hero_eyebrow }}</p>
+            <h2>{{ hero_title }}</h2>
+          </div>
+
+          {%- if timeline_enabled -%}
+            <a class="scroll-link" href="#{{ timeline_id }}">{{ section.settings.scroll_text }}</a>
+          {%- endif -%}
+        </div>
+      </section>
+
+      <section id="{{ history_id }}" class="history">
+        <div class="history__inner">
+          <div class="history__left">
+            <h2 class="history__title reveal-up">{{ section.settings.history_title }}</h2>
+            <p class="reveal-up reveal-up--delay-1">{{ section.settings.history_left_copy }}</p>
+          </div>
+
+          <div class="history__center">
+            {% if section.settings.history_ring_drawing != blank %}
+              <img class="history__ring history__ring--drawing" src="{{ section.settings.history_ring_drawing | image_url: width: 2200 }}" alt="{{ section.settings.history_ring_drawing.alt | escape }}">
+            {% endif %}
+            {% if section.settings.history_ring_photo != blank %}
+              <img class="history__ring history__ring--photo" src="{{ section.settings.history_ring_photo | image_url: width: 2200 }}" alt="{{ section.settings.history_ring_photo.alt | escape }}">
+            {% endif %}
+          </div>
+
+          <div class="history__right">
+            <p class="reveal-up reveal-up--delay-2">{{ section.settings.history_right_copy }}</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="{{ creator_id }}" class="creator">
+        <div class="creator__inner">
+          <div class="creator__image reveal-up">
+            {% if section.settings.creator_image != blank %}
+              <img src="{{ section.settings.creator_image | image_url: width: 1800 }}" alt="{{ section.settings.creator_image.alt | escape }}">
+            {% endif %}
+          </div>
+          <div class="creator__text">
+            <h2 class="creator__title reveal-up reveal-up--delay-1">{{ section.settings.creator_title }}</h2>
+            <div class="creator__body">
+              <p class="reveal-up reveal-up--delay-2">{{ section.settings.creator_copy_1 }}</p>
+              <p class="reveal-up reveal-up--delay-3">{{ section.settings.creator_copy_2 }}</p>
+            </div>
+          </div>
+        </div>
+        {% if section.settings.creator_drawing != blank %}
+          <img class="creator__vicenza reveal-up reveal-up--delay-3" src="{{ section.settings.creator_drawing | image_url: width: 2200 }}" alt="{{ section.settings.creator_drawing.alt | escape }}">
+        {% endif %}
+      </section>
+
+      <section id="{{ ruby_id }}" class="ruby-section">
+        <div
+          class="ruby-section__inner"
+          style="
+            {% if section.settings.ruby_image != blank %}
+              --ruby-image: url('{{ section.settings.ruby_image | image_url: width: 2400 }}');
+            {% endif %}
+            {% if section.settings.ruby_image_mobile != blank %}
+              --ruby-image-mobile: url('{{ section.settings.ruby_image_mobile | image_url: width: 1600 }}');
+            {% endif %}
+          "
+        >
+          <div class="ruby-section__content">
+            <h2 class="ruby-section__title reveal-up">{{ section.settings.ruby_title }}</h2>
+            <div class="ruby-section__body ruby-section__body--stagger reveal-up reveal-up--delay-1">
+              {{ section.settings.ruby_copy }}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {%- if timeline_enabled -%}
+        <section class="timeline" id="{{ timeline_id }}" aria-label="{{ section.settings.timeline_aria_label | escape }}">
+          <div class="timeline-stage" data-stage>
+            <div class="timeline-panel">
+              <div class="media-layout" data-media-layout></div>
+              <div class="timeline-caption" data-timeline-caption>
+                <p data-caption-line-one></p>
+                <p data-caption-line-two></p>
+              </div>
+            </div>
+            <div class="year-rail" aria-label="{{ section.settings.year_rail_aria_label | escape }}" data-year-rail></div>
+          </div>
+          <div class="timeline-markers" data-timeline-markers></div>
+        </section>
+      {%- endif -%}
+    </div>
+
+    <nav class="section-nav section-nav--fixed" aria-label="Page sections">
+      <div class="section-nav__shape">
+        <svg class="nav-bg" viewBox="0 0 814 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M34.7305 1H778.762C784.657 1.00012 790.067 4.57408 795.223 9.1416C797.788 11.4147 800.23 13.8755 802.618 16.1982C804.986 18.5016 807.305 20.6729 809.565 22.2842V22.2852L812.5 24.3945V25.6143L809.566 27.7158C807.308 29.3267 804.99 31.4991 802.623 33.8027C800.236 36.1251 797.795 38.5855 795.229 40.8584C790.103 45.3997 784.723 48.9576 778.862 48.998H34.7305C28.8352 48.998 23.4245 45.4239 18.2686 40.8564C15.7027 38.5835 13.2608 36.1233 10.873 33.8008C8.65216 31.6406 6.47441 29.596 4.34766 28.0215L3.92285 27.7129L1 25.6133V24.3916L3.92285 22.2852C6.18196 20.6742 8.50119 18.5016 10.8691 16.1973C13.2555 13.875 15.6961 11.4144 18.2617 9.1416C23.4175 4.57429 28.8308 1 34.7305 1Z" fill="#27574D" fill-opacity="0.6"/>
+          <path class="nav-highlight" d="M1 25.61 L3.92 27.71 L4.35 28.02 C6.47 29.6,8.65 31.64,10.87 33.8 C13.26 36.12,15.7 38.58,18.27 40.86 C23.42 45.4,28.84 49,34.73 49 H193 V1 H34.73 C28.83 1,23.42 4.57,18.26 9.14 C15.7 11.41,13.26 13.88,10.87 16.2 C8.5 18.5,6.18 20.67,3.92 22.28 L1 24.39 Z" fill="#3F625B" fill-opacity="0.72"/>
+          <path class="nav-highlight" d="M193 1 H407 V49 H193 Z" fill="#3F625B" fill-opacity="0.72"/>
+          <path class="nav-highlight" d="M407 1 H611 V49 H407 Z" fill="#3F625B" fill-opacity="0.72"/>
+          <path class="nav-highlight" d="M611 1 H778.76 C784.66 1,790.07 4.57,795.22 9.14 C797.79 11.41,800.23 13.88,802.62 16.2 C804.99 18.5,807.31 20.67,809.57 22.28 L812.5 24.39 V25.61 L809.57 27.72 C807.31 29.33,804.99 31.5,802.62 33.8 C800.24 36.12,797.8 38.58,795.23 40.86 C790.1 45.4,784.72 49,778.86 49 H611 Z" fill="#3F625B" fill-opacity="0.72"/>
+          <path d="M34.7305 1H778.762C784.657 1.00012 790.067 4.57408 795.223 9.1416C797.788 11.4147 800.23 13.8755 802.618 16.1982C804.986 18.5016 807.305 20.6729 809.565 22.2842V22.2852L812.5 24.3945V25.6143L809.566 27.7158C807.308 29.3267 804.99 31.4991 802.623 33.8027C800.236 36.1251 797.795 38.5855 795.229 40.8584C790.103 45.3997 784.723 48.9576 778.862 48.998H34.7305C28.8352 48.998 23.4245 45.4239 18.2686 40.8564C15.7027 38.5835 13.2608 36.1233 10.873 33.8008C8.65216 31.6406 6.47441 29.596 4.34766 28.0215L3.92285 27.7129L1 25.6133V24.3916L3.92285 22.2852C6.18196 20.6742 8.50119 18.5016 10.8691 16.1973C13.2555 13.875 15.6961 11.4144 18.2617 9.1416C23.4175 4.57429 28.8308 1 34.7305 1Z" fill="none" stroke="#27574D" stroke-width="2"/>
+          <line x1="193" y1="4" x2="193" y2="46" stroke="#27574D" stroke-width="1.5" stroke-opacity="0.8"/>
+          <line x1="407" y1="4" x2="407" y2="46" stroke="#27574D" stroke-width="1.5" stroke-opacity="0.8"/>
+          <line x1="611" y1="4" x2="611" y2="46" stroke="#27574D" stroke-width="1.5" stroke-opacity="0.8"/>
+        </svg>
+        <div class="section-nav__tabs">
+          <a class="section-nav__tab" data-idx="0" data-section="{{ history_id }}" href="#{{ history_id }}">{{ section.settings.section_nav_history }}</a>
+          <a class="section-nav__tab" data-idx="1" data-section="{{ creator_id }}" href="#{{ creator_id }}">{{ section.settings.section_nav_creator }}</a>
+          <a class="section-nav__tab" data-idx="2" data-section="{{ ruby_id }}" href="#{{ ruby_id }}">{{ section.settings.section_nav_ruby }}</a>
+          {%- if timeline_enabled -%}
+            <a class="section-nav__tab" data-idx="3" data-section="{{ timeline_id }}" href="#{{ timeline_id }}">{{ section.settings.section_nav_timeline }}</a>
+          {%- endif -%}
+        </div>
+        <div class="section-nav__mobile">
+          <div
+            id="{{ section_id }}-mobile-nav"
+            class="section-nav__mobile-dropdown"
+            aria-hidden="true"
+            hidden
+          >
+            <a class="section-nav__mobile-link" href="#{{ history_id }}" data-section="{{ history_id }}" data-idx="0">{{ section.settings.section_nav_history }}</a>
+            <a class="section-nav__mobile-link" href="#{{ creator_id }}" data-section="{{ creator_id }}" data-idx="1">{{ section.settings.section_nav_creator }}</a>
+            <a class="section-nav__mobile-link" href="#{{ ruby_id }}" data-section="{{ ruby_id }}" data-idx="2">{{ section.settings.section_nav_ruby }}</a>
+            {%- if timeline_enabled -%}
+              <a class="section-nav__mobile-link" href="#{{ timeline_id }}" data-section="{{ timeline_id }}" data-idx="3">{{ section.settings.section_nav_timeline }}</a>
+            {%- endif -%}
+          </div>
+          <svg class="section-nav__mobile-bg" viewBox="0 0 362 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g opacity="0.85">
+              <mask id="mask0_4058_4572_{{ section.id }}" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="362" height="50">
+                <path d="M326.761 50C339.354 50 349.39 34.7756 358.149 28.529L361.5 26.1286V23.882L358.149 21.4731C349.381 15.2245 339.345 0 326.761 0L34.7301 0C22.1376 0 12.1019 15.2244 3.34241 21.471L0 23.8799V26.1265L3.34241 28.5269C12.1104 34.7734 22.1461 49.9979 34.7301 49.9979H326.761V50Z" fill="#D9D9D9"/>
+              </mask>
+              <g mask="url(#mask0_4058_4572_{{ section.id }})">
+                <rect width="286" height="50" fill="#57746E"/>
+                <rect class="section-nav__mobile-progress-rect" width="286" height="50" fill="url(#mobile-nav-progress-{{ section.id }})"/>
+                <rect x="286" width="76" height="50" fill="white"/>
+              </g>
+              <path d="M326.761 49.25C333.005 49.25 338.486 45.4647 343.626 41.25C348.695 37.0943 353.334 32.6264 357.713 29.5039L360.75 27.327V22.6827L357.714 20.4978C353.336 17.3745 348.697 12.9058 343.627 8.75096C338.488 4.53658 333.007 0.75 326.761 0.75L34.7301 0.75C28.4868 0.75 23.0055 4.53595 17.8655 8.74995C12.7969 12.9046 8.15835 17.3715 3.77822 20.4948L0.75 22.6778V27.3222L3.77845 29.4969C8.15718 32.6208 12.7949 37.0894 17.8629 41.2441C23.0018 45.4575 28.4828 49.2434 34.7301 49.2479H326.761V49.25Z" stroke="#27574d" stroke-width="2.5"/>
+              <defs>
+                <linearGradient id="mobile-nav-progress-{{ section.id }}" x1="0" y1="25" x2="286" y2="25" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#50716A" stop-opacity="0.82"/>
+                  <stop offset="1" stop-color="#7FA19A" stop-opacity="0.78"/>
+                </linearGradient>
+              </defs>
+            </g>
+          </svg>
+          <button
+            class="section-nav__mobile-main"
+            type="button"
+            aria-controls="{{ section_id }}-mobile-nav"
+            aria-expanded="false"
+          >
+            <span class="section-nav__mobile-label">{{ section.settings.section_nav_history | upcase }}</span>
+          </button>
+          <button
+            class="section-nav__mobile-flower-trigger"
+            type="button"
+            aria-label="Open section navigation"
+            aria-controls="{{ section_id }}-mobile-nav"
+            aria-expanded="false"
+          >
+            <svg class="section-nav__mobile-flower section-nav__mobile-flower--back" width="1064" height="1023" viewBox="0 0 1064 1023" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+              <path d="M437.088 574.435C385.654 610.527 357.613 623.346 309.691 623.346C248.91 623.346 184.619 586.072 137.883 516.159C184.619 446.247 248.91 408.973 309.691 408.973C357.613 408.973 385.654 421.792 437.088 457.931L441.785 448.612L410.232 421.792C329.571 353.062 290.996 334.378 254.794 334.378C162.46 334.378 88.8217 445.064 24.5301 490.522L-0.000266461 507.976L-0.000267178 524.295L24.5301 541.797C87.6355 587.254 162.46 697.941 254.794 697.941C291.044 697.941 329.619 679.304 410.232 610.527L441.785 583.754L437.088 574.435ZM557.462 24.4552L539.907 -2.06387e-09L523.537 -7.13866e-07L506.029 24.4552C459.293 89.6846 349.404 161.915 349.404 254.012C349.404 290.15 368.099 328.56 437.04 408.973L463.943 440.429L473.29 435.746C437.04 384.471 424.229 356.515 424.229 309.923C424.229 248.146 462.804 184.099 531.746 138.642C600.735 184.099 639.262 248.194 639.262 309.923C639.262 356.515 626.404 384.471 590.154 435.746L599.501 440.429L626.356 408.973C695.298 328.56 714.04 290.15 714.04 254.012C714.04 161.962 603.012 88.5494 557.415 24.4552M626.404 614.027L599.548 582.571L590.201 587.207C626.451 638.482 639.309 666.438 639.309 713.03C639.309 774.759 600.735 838.853 531.793 884.311C462.852 838.853 424.277 774.759 424.277 713.03C424.277 666.438 437.135 638.482 473.337 587.207L463.99 582.571L437.088 614.027C368.146 694.44 349.452 732.897 349.452 768.988C349.452 861.038 459.34 933.268 506.076 998.545L523.585 1023L539.954 1023L557.51 998.545C603.107 934.451 714.134 861.038 714.134 768.988C714.134 732.85 695.44 694.393 626.451 614.027M1063.54 508.023L1039.01 490.569C974.717 445.112 901.078 334.425 808.745 334.425C772.543 334.425 733.968 353.062 653.307 421.839L621.754 448.659L626.451 457.978C677.884 421.839 705.926 409.02 752.662 409.02C814.581 409.02 878.873 447.477 924.47 516.207C878.873 584.936 814.581 623.393 752.662 623.393C705.926 623.393 677.884 610.574 626.451 574.483L621.754 583.801L653.307 610.574C733.968 679.351 772.543 697.988 808.745 697.988C901.078 697.988 973.531 588.484 1039.01 541.844L1063.54 524.343L1063.54 508.023Z" fill="#27574D"/>
+            </svg>
+            <svg class="section-nav__mobile-flower" width="1064" height="1023" viewBox="0 0 1064 1023" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+              <path d="M437.088 574.435C385.654 610.527 357.613 623.346 309.691 623.346C248.91 623.346 184.619 586.072 137.883 516.159C184.619 446.247 248.91 408.973 309.691 408.973C357.613 408.973 385.654 421.792 437.088 457.931L441.785 448.612L410.232 421.792C329.571 353.062 290.996 334.378 254.794 334.378C162.46 334.378 88.8217 445.064 24.5301 490.522L-0.000266461 507.976L-0.000267178 524.295L24.5301 541.797C87.6355 587.254 162.46 697.941 254.794 697.941C291.044 697.941 329.619 679.304 410.232 610.527L441.785 583.754L437.088 574.435ZM557.462 24.4552L539.907 -2.06387e-09L523.537 -7.13866e-07L506.029 24.4552C459.293 89.6846 349.404 161.915 349.404 254.012C349.404 290.15 368.099 328.56 437.04 408.973L463.943 440.429L473.29 435.746C437.04 384.471 424.229 356.515 424.229 309.923C424.229 248.146 462.804 184.099 531.746 138.642C600.735 184.099 639.262 248.194 639.262 309.923C639.262 356.515 626.404 384.471 590.154 435.746L599.501 440.429L626.356 408.973C695.298 328.56 714.04 290.15 714.04 254.012C714.04 161.962 603.012 88.5494 557.415 24.4552M626.404 614.027L599.548 582.571L590.201 587.207C626.451 638.482 639.309 666.438 639.309 713.03C639.309 774.759 600.735 838.853 531.793 884.311C462.852 838.853 424.277 774.759 424.277 713.03C424.277 666.438 437.135 638.482 473.337 587.207L463.99 582.571L437.088 614.027C368.146 694.44 349.452 732.897 349.452 768.988C349.452 861.038 459.34 933.268 506.076 998.545L523.585 1023L539.954 1023L557.51 998.545C603.107 934.451 714.134 861.038 714.134 768.988C714.134 732.85 695.44 694.393 626.451 614.027M1063.54 508.023L1039.01 490.569C974.717 445.112 901.078 334.425 808.745 334.425C772.543 334.425 733.968 353.062 653.307 421.839L621.754 448.659L626.451 457.978C677.884 421.839 705.926 409.02 752.662 409.02C814.581 409.02 878.873 447.477 924.47 516.207C878.873 584.936 814.581 623.393 752.662 623.393C705.926 623.393 677.884 610.574 626.451 574.483L621.754 583.801L653.307 610.574C733.968 679.351 772.543 697.988 808.745 697.988C901.078 697.988 973.531 588.484 1039.01 541.844L1063.54 524.343L1063.54 508.023Z" fill="#27574D"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <template data-media-card-template>
+      <article class="media-card">
+        <div class="media-art"></div>
+      </article>
+    </template>
+
+    <script type="application/json" data-timeline-data>
+      [
+        {% for block in section.blocks %}
+          {
+            "id": {{ block.id | json }},
+            "year": {{ block.settings.year | default: '1977' | json }},
+            "title": {{ block.settings.title | default: 'Milestone' | json }},
+            "copy": {{ block.settings.copy | strip_html | strip_newlines | default: block.settings.title | default: block.settings.year | json }},
+            "caption_x": {{ block.settings.caption_x | default: 74 | json }},
+            "caption_y": {{ block.settings.caption_y | default: 38 | json }},
+            "media": [
+              {
+                "label": {{ block.settings.media_1_label | default: 'Media 1' | json }},
+                "image": {% if block.settings.media_1_image != blank %}{{ block.settings.media_1_image | image_url: width: 1600 | json }}{% elsif block.settings.timeline_image != blank %}{{ block.settings.timeline_image | image_url: width: 1600 | json }}{% else %}null{% endif %},
+                "fill": {{ block.settings.media_1_fill | default: 'linear-gradient(135deg, #5f5a71 0%, #241f29 65%, #0d0d12 100%)' | json }},
+                "x": {{ block.settings.media_1_x | default: 0 | json }},
+                "y": {{ block.settings.media_1_y | default: 18 | json }},
+                "w": {{ block.settings.media_1_w | default: 36 | json }},
+                "h": {{ block.settings.media_1_h | default: 46 | json }},
+                "scale": {{ block.settings.media_1_scale | default: 100 | json }}
+              },
+              {
+                "label": {{ block.settings.media_2_label | default: 'Media 2' | json }},
+                "image": {% if block.settings.media_2_image != blank %}{{ block.settings.media_2_image | image_url: width: 1600 | json }}{% else %}null{% endif %},
+                "fill": {{ block.settings.media_2_fill | default: 'linear-gradient(180deg, #d8d8d5 0%, #8f8e88 50%, #4e4d4a 100%)' | json }},
+                "x": {{ block.settings.media_2_x | default: 43 | json }},
+                "y": {{ block.settings.media_2_y | default: 0 | json }},
+                "w": {{ block.settings.media_2_w | default: 24 | json }},
+                "h": {{ block.settings.media_2_h | default: 58 | json }},
+                "scale": {{ block.settings.media_2_scale | default: 100 | json }}
+              },
+              {
+                "label": {{ block.settings.media_3_label | default: 'Media 3' | json }},
+                "image": {% if block.settings.media_3_image != blank %}{{ block.settings.media_3_image | image_url: width: 1600 | json }}{% else %}null{% endif %},
+                "fill": {{ block.settings.media_3_fill | default: 'linear-gradient(135deg, #ceb78c 0%, #89683f 50%, #20150f 100%)' | json }},
+                "x": {{ block.settings.media_3_x | default: 74 | json }},
+                "y": {{ block.settings.media_3_y | default: 8 | json }},
+                "w": {{ block.settings.media_3_w | default: 18 | json }},
+                "h": {{ block.settings.media_3_h | default: 26 | json }},
+                "scale": {{ block.settings.media_3_scale | default: 100 | json }}
+              }
+            ]
+          }{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+      ]
+    </script>
+
+    <div class="visually-hidden" aria-hidden="true">
+      {% for block in section.blocks %}
+        <div data-block-id="{{ block.id }}" {{ block.shopify_attributes }}></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {%- if section.settings.cta_enable -%}
+    <div
+      class="rc-story__cta"
+      style="
+        --rc-cta-pt: {%- if timeline_enabled -%}{{ section.settings.cta_padding_top }}{%- else -%}150{%- endif -%}px;
+        --rc-cta-pb: {{ section.settings.cta_padding_bottom }}px;
+        --rc-cta-text-max: {{ section.settings.cta_text_max_width }}px;
+      "
+    >
+      <div class="rc-story__cta-inner">
+        {%- if section.settings.cta_text != blank -%}
+          <div class="rc-story__cta-text body rte">
+            {{ section.settings.cta_text }}
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.cta_button_label != blank and section.settings.cta_button_link != blank -%}
+          <a class="rc-story__cta-button" href="{{ section.settings.cta_button_link }}">
+            {{ section.settings.cta_button_label | escape }}
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Roberto Coin timeline",
+  "tag": "section",
+  "class": "section section-overlay-header",
+  "settings": [
+    { "type": "header", "content": "Theme" },
+    { "type": "color", "id": "background_color", "label": "Background color", "default": "#f9f9f9" },
+    { "type": "color", "id": "background_soft_color", "label": "Background soft color", "default": "#f1f1f1" },
+    { "type": "color", "id": "background_glow_color", "label": "Background glow color", "default": "#e7e7e7" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#1f2f2b" },
+    { "type": "color", "id": "accent_color", "label": "Accent color", "default": "#397e70" },
+    { "type": "color", "id": "logo_color", "label": "Logo color", "default": "#000000" },
+    { "type": "color", "id": "active_year_color", "label": "Active year color (legacy)", "default": "#ffffff" },
+    { "type": "color", "id": "timeline_active_year_color", "label": "Timeline active year color", "default": "#ffffff" },
+    { "type": "color", "id": "today_color", "label": "Today year color", "default": "#27574d" },
+
+    { "type": "header", "content": "Hero" },
+    { "type": "text", "id": "hero_eyebrow", "label": "Eyebrow", "default": "Since 1996" },
+    { "type": "text", "id": "hero_title", "label": "Title", "default": "The Brand" },
+    { "type": "text", "id": "scroll_text", "label": "Scroll label", "default": "Scroll to Explore" },
+    { "type": "image_picker", "id": "hero_image_top", "label": "Hero image top" },
+    { "type": "image_picker", "id": "hero_image_right", "label": "Hero image right (front portrait)" },
+    { "type": "image_picker", "id": "hero_image_left", "label": "Hero image left" },
+    { "type": "image_picker", "id": "hero_image_bottom", "label": "Hero image bottom" },
+    { "type": "image_picker", "id": "hero_image_top_alt", "label": "Hero image top (set 2)" },
+    { "type": "image_picker", "id": "hero_image_right_alt", "label": "Hero image right (set 2)" },
+    { "type": "image_picker", "id": "hero_image_left_alt", "label": "Hero image left (set 2)" },
+    { "type": "image_picker", "id": "hero_image_bottom_alt", "label": "Hero image bottom (set 2)" },
+
+    { "type": "header", "content": "History" },
+    { "type": "text", "id": "history_title", "label": "History title", "default": "History" },
+    { "type": "textarea", "id": "history_left_copy", "label": "Left copy", "default": "In 1996, Roberto Coin introduced Appassionata, the first collection to feature a hidden ruby, a symbol of protection, passion and prosperity." },
+    { "type": "textarea", "id": "history_right_copy", "label": "Right copy", "default": "Today, the Maison is present in over 60 countries worldwide, and the ruby remains its enduring symbol." },
+    { "type": "image_picker", "id": "history_ring_drawing", "label": "History ring drawing image" },
+    { "type": "image_picker", "id": "history_ring_photo", "label": "History ring photo image" },
+
+    { "type": "header", "content": "Creator" },
+    { "type": "text", "id": "creator_title", "label": "Creator title", "default": "The Creator" },
+    { "type": "textarea", "id": "creator_copy_1", "label": "Creator copy 1", "default": "Roberto Coin’s journey did not begin in jewelry. After a successful career in luxury hospitality across Europe, he returned to Italy and immersed himself in the goldsmith tradition of Vicenza." },
+    { "type": "textarea", "id": "creator_copy_2", "label": "Creator copy 2", "default": "In 1984, he began designing under his own name, transforming experience into creativity and vision into craftsmanship." },
+    { "type": "image_picker", "id": "creator_image", "label": "Creator portrait image" },
+    { "type": "image_picker", "id": "creator_drawing", "label": "Vicenza drawing image" },
+
+    { "type": "header", "content": "Ruby" },
+    { "type": "text", "id": "ruby_title", "label": "Ruby title", "default": "The Ruby" },
+    { "type": "richtext", "id": "ruby_copy", "label": "Ruby copy", "default": "<p>Roberto Coin chose the ruby as the hidden signature of his creations.</p><p>Set inside every jewel, the ruby is not meant to be seen but to be felt.</p>" },
+    { "type": "image_picker", "id": "ruby_image", "label": "Ruby image" },
+    { "type": "image_picker", "id": "ruby_image_mobile", "label": "Ruby image (mobile)" },
+
+    { "type": "header", "content": "Bottom nav labels" },
+    { "type": "text", "id": "section_nav_history", "label": "History label", "default": "History" },
+    { "type": "text", "id": "section_nav_creator", "label": "Creator label", "default": "The Creator" },
+    { "type": "text", "id": "section_nav_ruby", "label": "Ruby label", "default": "The Ruby" },
+    { "type": "text", "id": "section_nav_timeline", "label": "Timeline label", "default": "Timeline" },
+
+    { "type": "header", "content": "Timeline layout" },
+    { "type": "checkbox", "id": "timeline_enable", "label": "Show timeline section", "default": true },
+    { "type": "text", "id": "timeline_aria_label", "label": "Timeline aria label", "default": "Heritage timeline" },
+    { "type": "text", "id": "year_rail_aria_label", "label": "Year rail aria label", "default": "Timeline years" },
+    { "type": "range", "id": "panel_height", "label": "Panel height", "min": 55, "max": 95, "step": 1, "unit": "vh", "default": 76 },
+    { "type": "range", "id": "year_size", "label": "Year size", "min": 24, "max": 80, "step": 1, "unit": "px", "default": 40 },
+    { "type": "range", "id": "caption_size", "label": "Caption size", "min": 10, "max": 22, "step": 1, "unit": "px", "default": 16 },
+
+    { "type": "header", "content": "CTA" },
+    { "type": "checkbox", "id": "cta_enable", "label": "Show CTA", "default": true },
+    { "type": "richtext", "id": "cta_text", "label": "CTA text", "default": "<p>Discover more signature pieces crafted for every occasion.</p>" },
+    { "type": "text", "id": "cta_button_label", "label": "Button label", "default": "VIEW ALL COLLECTIONS" },
+    { "type": "url", "id": "cta_button_link", "label": "Button link" },
+    { "type": "range", "id": "cta_text_max_width", "label": "Text max width", "min": 280, "max": 700, "step": 10, "unit": "px", "default": 450 },
+    { "type": "range", "id": "cta_padding_top", "label": "CTA padding top", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 120 },
+    { "type": "range", "id": "cta_padding_bottom", "label": "CTA padding bottom", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 120 }
+  ],
+  "blocks": [
+    {
+      "type": "entry",
+      "name": "Timeline entry",
+      "settings": [
+        { "type": "text", "id": "year", "label": "Year", "default": "1977" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Milestone" },
+        { "type": "richtext", "id": "copy", "label": "Copy", "default": "<p>Roberto Coin returned to his homeland of Italy to study the goldsmithing tradition under the guidance of renowned Italian teachers. He launched his jewelry trade on the British market.</p>" },
+        { "type": "range", "id": "caption_x", "label": "Text X position", "min": 0, "max": 90, "step": 1, "unit": "%", "default": 74 },
+        { "type": "range", "id": "caption_y", "label": "Text Y position", "min": 0, "max": 90, "step": 1, "unit": "%", "default": 38 },
+        { "type": "image_picker", "id": "timeline_image", "label": "Timeline image (primary)" },
+
+        { "type": "header", "content": "Media 1" },
+        { "type": "text", "id": "media_1_label", "label": "Label", "default": "Workshop portrait" },
+        { "type": "image_picker", "id": "media_1_image", "label": "Image 1 (optional override)" },
+        { "type": "text", "id": "media_1_fill", "label": "Fallback gradient", "default": "linear-gradient(135deg, #5f5a71 0%, #241f29 65%, #0d0d12 100%)" },
+        { "type": "range", "id": "media_1_x", "label": "X position", "min": 0, "max": 90, "step": 1, "unit": "%", "default": 0 },
+        { "type": "range", "id": "media_1_y", "label": "Y position", "min": 0, "max": 90, "step": 1, "unit": "%", "default": 18 },
+        { "type": "range", "id": "media_1_w", "label": "Width", "min": 10, "max": 60, "step": 1, "unit": "%", "default": 36 },
+        { "type": "range", "id": "media_1_h", "label": "Height", "min": 10, "max": 70, "step": 1, "unit": "%", "default": 46 },
+        { "type": "range", "id": "media_1_scale", "label": "Image scale", "min": 60, "max": 180, "step": 2, "unit": "%", "default": 100 },
+
+        { "type": "header", "content": "Media 2" },
+        { "type": "text", "id": "media_2_label", "label": "Label", "default": "Street portrait" },
+        { "type": "image_picker", "id": "media_2_image", "label": "Image 2" },
+        { "type": "text", "id": "media_2_fill", "label": "Fallback gradient", "default": "linear-gradient(180deg, #d8d8d5 0%, #8f8e88 50%, #4e4d4a 100%)" },
+        { "type": "range", "id": "media_2_x", "label": "X position", "min": 0, "max": 90, "step": 1, "unit": "%", "default": 43 },
+        { "type": "range", "id": "media_2_y", "label": "Y position", "min": 0, "max": 90, "step": 1, "unit": "%", "default": 0 },
+        { "type": "range", "id": "media_2_w", "label": "Width", "min": 10, "max": 60, "step": 1, "unit": "%", "default": 24 },
+        { "type": "range", "id": "media_2_h", "label": "Height", "min": 10, "max": 70, "step": 1, "unit": "%", "default": 58 },
+        { "type": "range", "id": "media_2_scale", "label": "Image scale", "min": 60, "max": 180, "step": 2, "unit": "%", "default": 100 },
+
+        { "type": "header", "content": "Media 3" },
+        { "type": "text", "id": "media_3_label", "label": "Label", "default": "Gold detail" },
+        { "type": "image_picker", "id": "media_3_image", "label": "Image 3" },
+        { "type": "text", "id": "media_3_fill", "label": "Fallback gradient", "default": "linear-gradient(135deg, #ceb78c 0%, #89683f 50%, #20150f 100%)" },
+        { "type": "range", "id": "media_3_x", "label": "X position", "min": 0, "max": 90, "step": 1, "unit": "%", "default": 74 },
+        { "type": "range", "id": "media_3_y", "label": "Y position", "min": 0, "max": 90, "step": 1, "unit": "%", "default": 8 },
+        { "type": "range", "id": "media_3_w", "label": "Width", "min": 10, "max": 60, "step": 1, "unit": "%", "default": 18 },
+        { "type": "range", "id": "media_3_h", "label": "Height", "min": 10, "max": 70, "step": 1, "unit": "%", "default": 26 },
+        { "type": "range", "id": "media_3_scale", "label": "Image scale", "min": 60, "max": 180, "step": 2, "unit": "%", "default": 100 }
+      ]
+    }
+  ],
+  "max_blocks": 30,
+  "presets": [
+    {
+      "name": "Roberto Coin timeline",
+      "blocks": [
+        { "type": "entry", "settings": { "year": "1977", "title": "Milestone" } },
+        { "type": "entry", "settings": { "year": "1984", "title": "Expansion", "copy": "<p>He began designing and creating jewelry for some of the most prestigious international brands.</p>" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

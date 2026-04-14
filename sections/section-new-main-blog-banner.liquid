@@ -26,9 +26,10 @@
 
 <section
   id="NewMainBlogBanner--{{ section.id }}"
-  class="new-main-blog-banner section-padding {{ color_scheme }}"
+  class="new-main-blog-banner section-padding {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}"
   data-section-id="{{ section.id }}"
   data-section-type="new-main-blog-banner"
+  data-header-observer-mode="{{ section.settings.header_observer_mode }}"
   data-blog-handle="{{ blog.handle | default: 'all' }}"
 >
   <div class="new-main-blog-banner__wrapper {{ section.settings.width }}" id="blogBannerContent">
@@ -42,9 +43,8 @@
   document.addEventListener('DOMContentLoaded', function() {
     const section = document.querySelector('[data-section-type="new-main-blog-banner"]');
     const container = document.getElementById('blogBannerContent');
-    const STOREFRONT_TOKEN = "{{ shop.metaobjects.storefront_access_token.value }}";
     const SHOP_DOMAIN = "{{ shop.domain }}";
-    
+
     // Function to capitalize first letter of each word
     function capitalizeTitle(str) {
       return str
@@ -58,7 +58,7 @@
     const blogMatch = currentPath.match(/\/blogs\/([^\/]+)/);
     const currentBlogHandle = blogMatch ? blogMatch[1] : 'all';
     const isAllBlogs = currentBlogHandle === 'all';
-    const articleQuery = isAllBlogs 
+    const articleQuery = isAllBlogs
     ? `{
         articles(first: 1, sortKey: PUBLISHED_AT, reverse: true) {
           nodes {
@@ -99,42 +99,43 @@
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Shopify-Storefront-Access-Token": STOREFRONT_TOKEN
+        "X-Shopify-Storefront-Access-Token": ""
       },
       body: JSON.stringify({ query: articleQuery })
     })
     .then(res => res.json())
     .then(data => {
+      console.log('Blog articles:', data);
       let article;
-      
+
       if (isAllBlogs) {
         article = data.data.articles.nodes[0];
       } else {
         article = data.data.blog?.articles?.nodes[0];
       }
-      
+
       if (!article) {
         container.innerHTML = '<p class="new-main-blog-banner__empty">{{ section.settings.empty_message | default: "No posts yet." }}</p>';
         return;
       }
-   
+
       const articleUrl = `/blogs/${article.blog.handle}/${article.handle}`;
-      
+
       // Check if custom image exists, otherwise use article image
       const settingsImageUrl = '{{ section.settings.image | img_url: "master" }}';
       const hasSettingsImage = '{{ section.settings.image }}' !== '';
       const imageUrl = hasSettingsImage ? settingsImageUrl : (article.image?.url || '');
       const imageAlt = '{{ section.settings.image_alt }}' || article.image?.altText || article.title;
-      
+
       const subheading =  `LATEST IN #${article.blog.handle.toUpperCase()}`;
       const showSubheading = {{ section.settings.show_subheading }};
       const showDescription = {{ section.settings.show_description }};
-      
+
       const buttonText = '{{ section.settings.button_text | default: "Read story" }}';
       const buttonStyle = '{{ section.settings.button_style }}';
       const buttonSize = '{{ section.settings.button_size }}';
       const buttonType = '{{ section.settings.button_type }}';
-      
+
       const excerpt = article.excerpt ;
       const title = capitalizeTitle(article.title);
       container.innerHTML = `
@@ -145,7 +146,7 @@
             </a>
           ` : ''}
         </div>
-        
+
         <div class="new-main-blog-banner__content">
           <div class="new-main-blog-banner__text">
             ${showSubheading && subheading ? `
@@ -197,7 +198,9 @@
   }
 
   @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   .new-main-blog-banner__wrapper {
@@ -237,24 +240,29 @@
   }
 
   @media (max-width: 768px) {
-    .new-main-blog-banner__text,.new-main-blog-banner__button {
-    min-width: 50% !important;
-  }
+    .new-main-blog-banner__text,
+    .new-main-blog-banner__button {
+      min-width: 50% !important;
+    }
+    .new-main-blog-banner__button-wrap {
+      display: none;
+    }
   }
   @media (max-width: 425px) {
-    .new-main-blog-banner__text,.new-main-blog-banner__button {
-    min-width: 100% !important;
-  }
-  .new-main-blog-banner__button-wrap {
-    width: 100%;
-  }
-  .blog-listing__card-title {
-    font-size: 20px;
-    line-height: 26px !important;
-}
-  .blog-listing__card-excerpt {
-    font-size: 12px;
-  }
+    .new-main-blog-banner__text,
+    .new-main-blog-banner__button {
+      min-width: 100% !important;
+    }
+    .new-main-blog-banner__button-wrap {
+      width: 100%;
+    }
+    .blog-listing__card-title {
+      font-size: 20px;
+      line-height: 26px !important;
+    }
+    .blog-listing__card-excerpt {
+      font-size: 12px;
+    }
   }
   .new-main-blog-banner__subheading {
     margin: 0 0 10px;
@@ -339,7 +347,7 @@
   .new-main-blog-banner__button:hover {
     text-decoration: none;
     background-color: var(--000000, #000);
-    color: var(--FFFFFF, #FFF);
+    color: var(--FFFFFF, #fff);
   }
   @media (max-width: 425px) {
     .new-main-blog-banner__button {
@@ -354,6 +362,20 @@
   "tag": "section",
   "class": "section-new-main-blog-banner",
   "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
     {
       "type": "header",
       "content": "Image"
@@ -375,7 +397,7 @@
       "content": "Subheading"
     },
     {
-      "type": "checkbox", 
+      "type": "checkbox",
       "id": "show_subheading",
       "label": "Show subheading",
       "default": true
@@ -429,9 +451,9 @@
       "label": "Button style",
       "default": "btn--outline",
       "options": [
-        { "value": "btn--solid", "label": "Solid" },
-        { "value": "btn--outline", "label": "Outline" },
-        { "value": "btn--text", "label": "Text" }
+        {"value": "btn--solid", "label": "Solid"},
+        {"value": "btn--outline", "label": "Outline"},
+        {"value": "btn--text", "label": "Text"}
       ]
     },
     {
@@ -440,10 +462,10 @@
       "label": "Button color",
       "default": "btn--black",
       "options": [
-        { "value": "btn--black", "label": "Black" },
-        { "value": "btn--white", "label": "White" },
-        { "value": "btn--primary", "label": "Primary" },
-        { "value": "btn--secondary", "label": "Secondary" }
+        {"value": "btn--black", "label": "Black"},
+        {"value": "btn--white", "label": "White"},
+        {"value": "btn--primary", "label": "Primary"},
+        {"value": "btn--secondary", "label": "Secondary"}
       ]
     },
     {
@@ -452,9 +474,9 @@
       "label": "Button size",
       "default": "",
       "options": [
-        { "value": "btn--small", "label": "Small" },
-        { "value": "", "label": "Medium" },
-        { "value": "btn--large", "label": "Large" }
+        {"value": "btn--small", "label": "Small"},
+        {"value": "", "label": "Medium"},
+        {"value": "btn--large", "label": "Large"}
       ]
     },
     {
@@ -467,12 +489,12 @@
       "label": "Heading size",
       "default": "heading-large",
       "options": [
-        { "value": "heading-mini", "label": "Mini" },
-        { "value": "heading-x-small", "label": "Extra small" },
-        { "value": "heading-small", "label": "Small" },
-        { "value": "heading-medium", "label": "Medium" },
-        { "value": "heading-large", "label": "Large" },
-        { "value": "heading-x-large", "label": "Extra large" }
+        {"value": "heading-mini", "label": "Mini"},
+        {"value": "heading-x-small", "label": "Extra small"},
+        {"value": "heading-small", "label": "Small"},
+        {"value": "heading-medium", "label": "Medium"},
+        {"value": "heading-large", "label": "Large"},
+        {"value": "heading-x-large", "label": "Extra large"}
       ]
     },
     {
@@ -485,11 +507,11 @@
       "label": "Layout width",
       "default": "wrapper",
       "options": [
-        { "value": "wrapper--full-padded", "label": "Full width padded" },
-        { "value": "wrapper", "label": "Normal" },
-        { "value": "wrapper--wide", "label": "Wide" },
-        { "value": "wrapper--narrow", "label": "Narrow" },
-        { "value": "wrapper--custom", "label": "Custom (max-width: 1232px)" }
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"},
+        {"value": "wrapper--wide", "label": "Wide"},
+        {"value": "wrapper--narrow", "label": "Narrow"},
+        {"value": "wrapper--custom", "label": "Custom (max-width: 1232px)"}
       ]
     },
     {

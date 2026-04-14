@@ -1,33 +1,19 @@
 <!-- /sections/section-supporting-menu.liquid -->
 
 {%- liquid
-  assign languages = false
-  assign countries = false
-  assign show_locale_selector = section.settings.show_locale_selector
-  assign show_locale_code = section.settings.show_locale_code
-  assign show_globe_icon = section.settings.show_globe_icon
-  assign show_country_selector = section.settings.show_country_selector
-  assign show_country_name = section.settings.show_country_name
-  assign show_country_flag = section.settings.show_country_flag
   assign color_scheme = 'color-' | append: section.settings.color_scheme
-  assign selected_color_scheme = section.settings.color_scheme | strip
-  assign lines_and_border = settings.color_schemes[selected_color_scheme].settings.lines_and_border
+  assign supporting_grid_columns = 8
+  assign supporting_grid_span_total = 0
+  assign inline_blocks = ''
 
-  if show_locale_selector and localization.available_languages.size > 1
-    assign languages = true
+  for block in section.blocks
+    assign block_column_span = block.settings.column_span | default: 2 | plus: 0
+    assign supporting_grid_span_total = supporting_grid_span_total | plus: block_column_span
+  endfor
+
+  if supporting_grid_span_total <= supporting_grid_columns
+    assign inline_blocks = ' supporting-menu__block--divider--inline'
   endif
-
-  if show_country_selector and localization.available_countries.size > 1
-    assign countries = true
-  endif
-
-  capture localization_class
-    echo 'supporting-menu__item supporting-menu__item--localization'
-
-    if lines_and_border.alpha == 0 or lines_and_border == blank
-      echo ' supporting-menu__item--no-borders'
-    endif
-  endcapture
 -%}
 
 {%- style -%}
@@ -44,158 +30,724 @@
   data-section-type="supporting-menu"
 >
   <div class="supporting-menu__inner wrapper--full-padded">
-    {%- if languages or countries -%}
-      <div class="{{ localization_class }}">
-        {%- render 'localization',
-          unique: section.id,
-          show_locale_selector: show_locale_selector,
-          show_locale_code: show_locale_code,
-          show_globe_icon: show_globe_icon,
-          show_country_selector: show_country_selector,
-          show_country_flag: show_country_flag,
-          show_country_name: show_country_name,
-          class: 'footer',
-          show_icon: true
-        -%}
+    {%- if section.blocks.size > 0 -%}
+      <div class="supporting-menu__blocks">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign block_type = block.type
+            assign column_span = block.settings.column_span | default: 2 | plus: 0
+            assign alignment = block.settings.alignment | default: 'left'
+            assign viewport_visibility_class = ''
+            assign show_on_mobile = block.settings.show_on_mobile
+            assign show_on_tablet = block.settings.show_on_tablet
+            assign show_on_desktop = block.settings.show_on_desktop
+            assign text_alignment = 'left'
+            assign mobile_text_alignment = blank
+            assign justify_alignment = 'flex-start'
+
+            case alignment
+              when 'center'
+                assign text_alignment = 'center'
+                assign justify_alignment = 'center'
+              when 'right'
+                assign text_alignment = 'right'
+                assign justify_alignment = 'flex-end'
+            endcase
+
+            if block_type == 'text'
+              assign mobile_alignment = block.settings.mobile_alignment | default: alignment
+              assign mobile_text_alignment = 'left'
+
+              case mobile_alignment
+                when 'center'
+                  assign mobile_text_alignment = 'center'
+                when 'right'
+                  assign mobile_text_alignment = 'right'
+              endcase
+            endif
+
+            if block_type == 'legal'
+              assign mobile_alignment = block.settings.mobile_alignment | default: alignment
+              assign mobile_text_alignment = 'left'
+
+              case mobile_alignment
+                when 'center'
+                  assign mobile_text_alignment = 'center'
+                when 'right'
+                  assign mobile_text_alignment = 'right'
+              endcase
+            endif
+
+            if show_on_mobile
+              assign viewport_visibility_class = viewport_visibility_class | append: ' supporting-menu__block--show-mobile'
+            else
+              assign viewport_visibility_class = viewport_visibility_class | append: ' supporting-menu__block--hide-mobile'
+            endif
+
+            if show_on_tablet
+              assign viewport_visibility_class = viewport_visibility_class | append: ' supporting-menu__block--show-tablet'
+            else
+              assign viewport_visibility_class = viewport_visibility_class | append: ' supporting-menu__block--hide-tablet'
+            endif
+
+            if show_on_desktop
+              assign viewport_visibility_class = viewport_visibility_class | append: ' supporting-menu__block--show-desktop'
+            else
+              assign viewport_visibility_class = viewport_visibility_class | append: ' supporting-menu__block--hide-desktop'
+            endif
+
+            capture block_style
+              echo '--column-span: ' | append: column_span | append: ';'
+              echo '--supporting-menu-text-align: ' | append: text_alignment | append: ';'
+              echo '--supporting-menu-justify: ' | append: justify_alignment | append: ';'
+
+              if block_type == 'text'
+                echo '--supporting-menu-mobile-text-align: ' | append: mobile_text_alignment | append: ';'
+              endif
+
+              if block_type == 'legal'
+                echo '--supporting-menu-mobile-text-align: ' | append: mobile_text_alignment | append: ';'
+              endif
+            endcapture
+          -%}
+
+          {%- case block_type -%}
+            {%- when 'bottom_bar_link_list' -%}
+              {%- assign linklist = linklists[block.settings.linklist] -%}
+
+              {%- if linklist != blank -%}
+                <div
+                  class="supporting-menu__block supporting-menu__block--link-list {{ viewport_visibility_class }}"
+                  style="{{ block_style }}"
+                  {{ block.shopify_attributes }}
+                >
+                  <ul class="supporting-menu__links unstyled">
+                    {%- for link in linklist.links -%}
+                      <li>
+                        <a href="{{ link.url }}">{{ link.title }}</a>
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+                </div>
+              {%- endif -%}
+
+            {%- when 'divider' -%}
+              {%- liquid
+                assign divider_padding_top = block.settings.padding_top
+                assign divider_padding_bottom = block.settings.padding_bottom
+
+                capture divider_style
+                  if divider_padding_top != blank or divider_padding_bottom != blank
+                    echo '--block-padding-top:' | append: divider_padding_top | append: 'px;'
+                    echo '--block-padding-bottom:' | append: divider_padding_bottom | append: 'px;'
+                  endif
+                endcapture
+              -%}
+              <div
+                class="supporting-menu__block supporting-menu__block--divider {{ inline_blocks }} {{ viewport_visibility_class }}"
+                style="{{ block_style }}"
+                {{ block.shopify_attributes }}
+              >
+                <div class="divider-holder block-padding" style="{{ divider_style }}">
+                  <hr class="divider">
+                </div>
+              </div>
+
+            {%- when 'payment_logos' -%}
+              {%- unless shop.enabled_payment_types == empty -%}
+                <div
+                  class="supporting-menu__block supporting-menu__block--payment {{ viewport_visibility_class }}"
+                  style="{{ block_style }}"
+                  {{ block.shopify_attributes }}
+                >
+                  <ul class="supporting-menu__payment payment-icons{% if block.settings.enable_greyscale %} payment-icons--greyscale{% endif %}">
+                    {%- for type in shop.enabled_payment_types -%}
+                      <li>{{ type | payment_type_svg_tag: class: 'payment-icon' }}</li>
+                    {%- endfor -%}
+                  </ul>
+                </div>
+              {%- endunless -%}
+
+            {%- when 'text' -%}
+              {%- if block.settings.text != blank -%}
+                <div
+                  class="supporting-menu__block supporting-menu__block--text {{ viewport_visibility_class }}"
+                  style="{{ block_style }}"
+                  {{ block.shopify_attributes }}
+                >
+                  <div class="supporting-menu__text rte legal">
+                    {{ block.settings.text }}
+                  </div>
+                </div>
+              {%- endif -%}
+
+            {%- when 'legal' -%}
+              {%- if block.settings.trigger_text != blank and block.settings.accordion_text != blank -%}
+                <div
+                  class="supporting-menu__block supporting-menu__block--legal {{ viewport_visibility_class }}"
+                  style="{{ block_style }}"
+                  {{ block.shopify_attributes }}
+                >
+                  <button
+                    type="button"
+                    class="supporting-menu__legal-trigger legal"
+                    data-legal-trigger
+                    aria-expanded="false"
+                    aria-controls="SupportingMenuLegalPanel--{{ section.id }}--{{ block.id }}"
+                  >
+                    {{ block.settings.trigger_text | escape }}
+                  </button>
+                </div>
+              {%- endif -%}
+
+            {%- when 'logo' -%}
+              {%- if block.settings.image != blank -%}
+                {%- liquid
+                  assign image_width = block.settings.image_width
+                  assign image_width_x15 = image_width | times: 1.5
+                  assign image_width_x2 = image_width | times: 2
+                  assign image_sizes = image_width | append: 'px'
+                  assign image_widths = image_width | append: ', ' | append: image_width_x15 | append: ', ' | append: image_width_x2
+                -%}
+
+                <div
+                  class="supporting-menu__block supporting-menu__block--logo {{ viewport_visibility_class }}"
+                  style="{{ block_style }}"
+                  {{ block.shopify_attributes }}
+                >
+                  <div class="supporting-menu__logo" style="width: {{ image_width }}px;">
+                    {%- render 'image',
+                      image: block.settings.image,
+                      width: image_width_x2,
+                      sizes: image_sizes,
+                      widths: image_widths
+                    -%}
+                  </div>
+                </div>
+              {%- endif -%}
+
+            {%- when 'socials' -%}
+              <div
+                class="supporting-menu__block supporting-menu__block--socials {{ viewport_visibility_class }}"
+                style="{{ block_style }}"
+                {{ block.shopify_attributes }}
+              >
+                {%- render 'social-icons' -%}
+              </div>
+          {%- endcase -%}
+        {%- endfor -%}
       </div>
-    {%- endif -%}
 
-    <div class="supporting-menu__item supporting-menu__item--copyright">
-      <ul class="supporting-menu__copyright inline-list {{ section.settings.text_font_size }}">
-        <li>
-          <a href="{{ shop.secure_url }}"
-            >&copy; {{ shop.name }}
-            {{ 'now' | date: '%Y' -}}
-          </a>
-        </li>
-        {% for link in linklists[section.settings.linklist].links %}
-          <li>
-            <a href="{{ link.url }}">{{ link.title }}</a>
-          </li>
-        {% endfor %}
+      {%- capture legal_panels -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'legal' and block.settings.trigger_text != blank and block.settings.accordion_text != blank -%}
+            {%- liquid
+              assign panel_text_color = block.settings.accordion_text_color
 
-        <!-- The following lines fix Lighthouse security warnings on the Shopify link. -->
-        {%- liquid
-          assign powered_by_link_html = powered_by_link
-          if powered_by_link_html contains 'rel="'
-            assign powered_link_rel_text = powered_by_link_html | split: 'rel="'
-            assign powered_link_rel_text = powered_link_rel_text[1] | split: '"' | first
-            assign powered_link_rel = 'rel="' | append: powered_link_rel_text | append: '"'
-            assign powered_by_link_html = powered_by_link_html | replace_first: powered_link_rel, ''
-          endif
-          if powered_by_link_html contains '<a '
-            assign powered_by_link_html = powered_by_link_html | replace: '<a ', '<a rel="noopener" '
-          endif
-          assign powered_by_link = powered_by_link_html
-        -%}
+              capture panel_style
+                if panel_text_color != blank and panel_text_color != 'rgba(0,0,0,0)'
+                  echo '--supporting-menu-legal-color: ' | append: panel_text_color | append: ';'
+                endif
+              endcapture
+            -%}
 
-        <!-- Remove the following line to delete 'Powered by Shopify' from your footer -->
-        <li data-powered-link>{{ powered_by_link }}</li>
-        <!-- Do not delete below this line -->
-      </ul>
-    </div>
+            <div
+              id="SupportingMenuLegalPanel--{{ section.id }}--{{ block.id }}"
+              class="supporting-menu__legal-panel rte legal"
+              data-legal-panel
+              hidden
+              style="{{ panel_style }}"
+            >
+              {{ block.settings.accordion_text }}
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endcapture -%}
 
-    {%- if section.settings.footer_payment_enable -%}
-      {%- unless shop.enabled_payment_types == empty -%}
-        <div class="supporting-menu__item supporting-menu__item--payment">
-          <ul class="supporting-menu__payment payment-icons{% if section.settings.enable_greyscale %} payment-icons--greyscale{% endif %} inline-list">
-            {%- for type in shop.enabled_payment_types -%}
-              <li>{{ type | payment_type_svg_tag: class: 'payment-icon' }}</li>
-            {%- endfor -%}
-          </ul>
+      {%- if legal_panels != blank -%}
+        <div class="supporting-menu__legal-accordion" data-legal-accordion-container hidden>
+          {{ legal_panels }}
         </div>
-      {%- endunless -%}
+      {%- endif -%}
     {%- endif -%}
   </div>
 </section>
+
+{% stylesheet %}
+  .supporting-menu__inner {
+    display: block;
+  }
+
+  .supporting-menu__blocks {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--gutter);
+    grid-auto-flow: row dense;
+    position: relative;
+    align-items: center;
+    overflow-wrap: anywhere;
+  }
+
+  @media only screen and (min-width: 768px) and (max-width: 2200px) {
+    .supporting-menu__blocks {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+  }
+
+  @media only screen and (min-width: 2201px) {
+    .supporting-menu__blocks {
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+    }
+  }
+
+  @media only screen and (max-width: 767px) {
+    .supporting-menu__blocks {
+      padding: 0 calc(var(--gutter) / 2);
+    }
+  }
+
+  .supporting-menu__block {
+    min-width: 0;
+    text-align: var(--supporting-menu-text-align, left);
+  }
+
+  @media only screen and (max-width: 767px) {
+    .supporting-menu__block.supporting-menu__block--hide-mobile {
+      display: none;
+    }
+  }
+
+  @media only screen and (min-width: 768px) and (max-width: 2200px) {
+    .supporting-menu__block.supporting-menu__block--hide-tablet {
+      display: none;
+    }
+  }
+
+  @media only screen and (min-width: 2201px) {
+    .supporting-menu__block.supporting-menu__block--hide-desktop {
+      display: none;
+    }
+  }
+
+  @media only screen and (min-width: 768px) {
+    .supporting-menu__block {
+      grid-column: span var(--column-span);
+      padding: 0;
+    }
+  }
+
+  @media only screen and (min-width: 768px) {
+    .supporting-menu__block--divider {
+      position: relative;
+      display: flex;
+      padding: 0;
+      pointer-events: none;
+    }
+
+    .supporting-menu__block--divider .divider-holder {
+      display: flex;
+      justify-content: center;
+      flex: 0 1 100%;
+      margin: 0;
+    }
+
+    .supporting-menu__block--divider .divider {
+      height: 100%;
+    }
+  }
+
+  /* @media only screen and (min-width: 768px) and (max-width: 2200px) {
+    .supporting-menu__block--divider {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      bottom: 0;
+    }
+  } */
+
+  @media only screen and (max-width: 767px) {
+    .supporting-menu__block--divider.supporting-menu__block--hide-mobile {
+      display: none;
+    }
+  }
+
+  @media only screen and (min-width: 768px) and (max-width: 1220px) {
+    .supporting-menu__block--divider.supporting-menu__block--hide-tablet {
+      display: none;
+    }
+  }
+
+  @media only screen and (min-width: 2201px) {
+    .supporting-menu__block--divider.supporting-menu__block--hide-desktop {
+      display: none;
+    }
+  }
+
+  @media only screen and (min-width: 768px) {
+    body.grid-compact .supporting-menu__block--divider--inline {
+      margin-bottom: calc((var(--padding-bottom) * -1) + var(--gutter));
+    }
+
+    body.grid-compact .supporting-menu__blocks:only-child .supporting-menu__block--divider--inline {
+      margin-top: calc((var(--padding-top) * -1));
+    }
+  }
+
+  .supporting-menu__links,
+  .supporting-menu__payment {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: var(--supporting-menu-justify, flex-start);
+    gap: 8px 20px;
+    margin: 0;
+    list-style: none;
+  }
+
+  .supporting-menu__links li,
+  .supporting-menu__payment li {
+    margin: 0;
+  }
+
+  .supporting-menu__links a {
+    position: relative;
+  }
+
+  .supporting-menu__links a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background-color: var(--link);
+    transition: width 0.3s cubic-bezier(0.39, 0.575, 0.565, 1);
+  }
+
+  @media (hover: hover) {
+    .supporting-menu__links li:hover a::after {
+      width: 100%;
+    }
+  }
+
+  .supporting-menu__text > *:first-child {
+    margin-top: 0;
+  }
+
+  .supporting-menu__text > *:last-child {
+    margin-bottom: 0;
+  }
+
+  .supporting-menu__block--logo {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .supporting-menu__logo {
+    display: inline-block;
+    max-width: 100%;
+  }
+
+  .supporting-menu__payment .payment-icon {
+    display: block;
+    width: 36px;
+  }
+
+  .supporting-menu__block--socials .socials {
+    justify-content: var(--supporting-menu-justify, flex-start);
+    width: 100%;
+  }
+
+  .supporting-menu__block--socials .social-link {
+    color: var(--link);
+  }
+
+  .supporting-menu__block--socials .social-link:hover {
+    color: var(--link-hover);
+  }
+
+  .supporting-menu__block--text {
+    text-align: var(--supporting-menu-text-align, left);
+  }
+
+  .supporting-menu__block--legal {
+    text-align: var(--supporting-menu-text-align, left);
+  }
+
+  .supporting-menu__legal-trigger {
+    color: var(--link);
+    cursor: pointer;
+    text-align: inherit;
+  }
+
+  .supporting-menu__legal-trigger:hover {
+    color: var(--link-hover);
+  }
+
+  .supporting-menu__legal-trigger:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  .supporting-menu__legal-accordion {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    overflow: hidden;
+    height: 0;
+    background: #f9f9f9;
+    transition: height 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: height;
+  }
+
+  .supporting-menu__legal-panel {
+    grid-column: 1 / -1;
+    padding: 48px 0 20px;
+    color: var(--supporting-menu-legal-color, var(--text));
+    text-align: center;
+  }
+
+  .supporting-menu__legal-panel a {
+    color: currentColor;
+    opacity: 1;
+    display: inline;
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .supporting-menu__legal-panel a::after {
+    content: none;
+  }
+
+  @media only screen and (min-width: 1221px) {
+    .supporting-menu__legal-accordion {
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: var(--gutter);
+    }
+
+    .supporting-menu__legal-panel {
+      grid-column: 2 / span 6;
+    }
+  }
+
+  @media only screen and (max-width: 767px) {
+    .supporting-menu__block--divider {
+      display: none;
+    }
+
+    .supporting-menu__links,
+    .supporting-menu__payment,
+    .supporting-menu__block--socials .socials {
+      justify-content: flex-start;
+    }
+
+    .supporting-menu__block--text {
+      text-align: var(--supporting-menu-mobile-text-align, var(--supporting-menu-text-align, left));
+    }
+
+    .supporting-menu__block--legal {
+      text-align: var(--supporting-menu-mobile-text-align, var(--supporting-menu-text-align, left));
+    }
+
+    .supporting-menu__legal-panel {
+      padding: 20px 0 0;
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  (() => {
+    const initSupportingMenuLegalAccordion = (section) => {
+      if (!section || section.dataset.legalAccordionInitialized === 'true') {
+        return;
+      }
+
+      const container = section.querySelector('[data-legal-accordion-container]');
+      const triggers = Array.from(section.querySelectorAll('[data-legal-trigger]'));
+      const panels = Array.from(section.querySelectorAll('[data-legal-panel]'));
+
+      if (!container || triggers.length === 0 || panels.length === 0) {
+        return;
+      }
+
+      section.dataset.legalAccordionInitialized = 'true';
+
+      let activePanel = null;
+      let followExpansionFrame = null;
+
+      const setExpandedTrigger = (activeTrigger = null) => {
+        triggers.forEach((trigger) => {
+          trigger.setAttribute('aria-expanded', trigger === activeTrigger ? 'true' : 'false');
+        });
+      };
+
+      const getContainerHeight = () => container.getBoundingClientRect().height;
+
+      const finishOpenState = () => {
+        if (!container.classList.contains('is-open')) {
+          return;
+        }
+
+        container.style.height = 'auto';
+      };
+
+      const finishClosedState = () => {
+        if (activePanel) {
+          activePanel.hidden = true;
+          activePanel.classList.remove('is-active');
+          activePanel = null;
+        }
+
+        container.hidden = true;
+        container.style.height = '0px';
+      };
+
+      const stopFollowingExpansion = () => {
+        if (followExpansionFrame) {
+          cancelAnimationFrame(followExpansionFrame);
+          followExpansionFrame = null;
+        }
+      };
+
+      const transitionContainerTo = (targetHeight) => {
+        const startHeight = getContainerHeight();
+        const nextHeight = typeof targetHeight === 'number' ? `${targetHeight}px` : targetHeight;
+
+        container.style.height = `${startHeight}px`;
+        container.offsetHeight;
+        container.style.height = nextHeight;
+      };
+
+      const shouldFollowExpansion = (trigger) => {
+        if (!trigger) {
+          return false;
+        }
+
+        const triggerRect = trigger.getBoundingClientRect();
+        const spaceBelowTrigger = window.innerHeight - triggerRect.bottom;
+
+        return spaceBelowTrigger <= 120;
+      };
+
+      const followExpansion = (lastHeight) => {
+        const nextHeight = getContainerHeight();
+        const delta = nextHeight - lastHeight;
+
+        if (delta > 0) {
+          window.scrollBy(0, delta);
+        }
+
+        followExpansionFrame = requestAnimationFrame(() => {
+          followExpansion(nextHeight);
+        });
+      };
+
+      const openPanel = (trigger, panel) => {
+        if (!panel) {
+          return;
+        }
+
+        const previousPanel = activePanel;
+        const currentHeight = container.hidden ? 0 : getContainerHeight();
+        const followWhileOpening = shouldFollowExpansion(trigger);
+
+        setExpandedTrigger(trigger);
+        container.hidden = false;
+        container.classList.add('is-open');
+
+        if (previousPanel && previousPanel !== panel) {
+          previousPanel.classList.remove('is-active');
+          previousPanel.hidden = true;
+        }
+
+        panel.hidden = false;
+        activePanel = panel;
+
+        container.style.height = `${currentHeight}px`;
+
+        requestAnimationFrame(() => {
+          panel.classList.add('is-active');
+          transitionContainerTo(panel.offsetHeight);
+
+          if (followWhileOpening) {
+            stopFollowingExpansion();
+            followExpansion(currentHeight);
+          }
+        });
+      };
+
+      const closePanel = () => {
+        if (container.hidden || !activePanel) {
+          setExpandedTrigger();
+          return;
+        }
+
+        setExpandedTrigger();
+        stopFollowingExpansion();
+        container.style.height = `${getContainerHeight()}px`;
+        container.classList.remove('is-open');
+
+        requestAnimationFrame(() => {
+          if (activePanel) {
+            activePanel.classList.remove('is-active');
+          }
+
+          transitionContainerTo(0);
+        });
+      };
+
+      triggers.forEach((trigger) => {
+        trigger.addEventListener('click', () => {
+          const isExpanded = trigger.getAttribute('aria-expanded') == 'true';
+          const panelId = trigger.getAttribute('aria-controls');
+          const panel = panelId ? document.getElementById(panelId) : null;
+
+          if (isExpanded) {
+            closePanel();
+            return;
+          }
+
+          if (panel && section.contains(panel)) {
+            openPanel(trigger, panel);
+          }
+        });
+      });
+
+      container.addEventListener('transitionend', (event) => {
+        if (event.propertyName !== 'height') {
+          return;
+        }
+
+        if (container.classList.contains('is-open')) {
+          stopFollowingExpansion();
+          finishOpenState();
+        } else {
+          stopFollowingExpansion();
+          finishClosedState();
+        }
+      });
+    };
+
+    document.querySelectorAll('[data-section-type="supporting-menu"]').forEach((section) => {
+      initSupportingMenuLegalAccordion(section);
+    });
+
+    document.addEventListener('shopify:section:load', (event) => {
+      if (event.target && event.target.matches('[data-section-type="supporting-menu"]')) {
+        initSupportingMenuLegalAccordion(event.target);
+      }
+    });
+  })();
+{% endjavascript %}
 
 {% schema %}
 {
   "name": "Supporting menu",
   "limit": 1,
+  "max_blocks": 8,
   "settings": [
-    {
-      "type": "header",
-      "content": "Bottom bar"
-    },
-    {
-      "type": "link_list",
-      "id": "linklist",
-      "label": "Link List",
-      "info": "This menu won't show dropdown items."
-    },
-    {
-      "type": "select",
-      "id": "text_font_size",
-      "label": "Text size",
-      "info": "Automatically generated by the base size.",
-      "default": "body-small",
-      "options": [
-        {"value": "body-x-small", "label": "Extra small"},
-        {"value": "body-small", "label": "Small"},
-        {"value": "body-medium", "label": "Medium"},
-        {"value": "body-large", "label": "Large"},
-        {"value": "body-x-large", "label": "Extra large"}
-      ]
-    },
-    {
-      "type": "checkbox",
-      "id": "footer_payment_enable",
-      "label": "Show payment types",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_greyscale",
-      "label": "Enable greyscale for payment icons",
-      "default": false
-    },
-    {
-      "type": "header",
-      "content": "Language selector",
-      "info": "To add a language, go to your [language settings.](/admin/settings/languages)"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_locale_selector",
-      "label": "Show language selector",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "show_locale_code",
-      "label": "Show language code only",
-      "default": false
-    },
-    {
-      "type": "checkbox",
-      "id": "show_globe_icon",
-      "label": "Show globe icon",
-      "default": true
-    },
-    {
-      "type": "header",
-      "content": "Country/Region selector",
-      "info": "To add a country/region, go to your [markets settings](/admin/settings/markets)."
-    },
-    {
-      "type": "checkbox",
-      "id": "show_country_selector",
-      "label": "Show country/region selector",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "show_country_name",
-      "label": "Show country name",
-      "default": false
-    },
-    {
-      "type": "checkbox",
-      "id": "show_country_flag",
-      "label": "Show country flag",
-      "default": true
-    },
     {
       "type": "header",
       "content": "Colors"
@@ -229,6 +781,422 @@
       "unit": "px",
       "label": "Bottom",
       "default": 30
+    }
+  ],
+  "blocks": [
+    {
+      "type": "bottom_bar_link_list",
+      "name": "Bottom bar link list",
+      "settings": [
+        {
+          "type": "link_list",
+          "id": "linklist",
+          "label": "Link list",
+          "info": "This menu won't show dropdown items."
+        },
+        {
+          "type": "select",
+          "id": "column_span",
+          "label": "Tablet and desktop span",
+          "default": "2",
+          "options": [
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"}
+          ],
+          "info": "Uses the 6-column tablet grid and the 8-column desktop grid"
+        },
+        {
+          "type": "header",
+          "content": "Visibility"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_mobile",
+          "label": "Show on mobile",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_tablet",
+          "label": "Show on tablet",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_desktop",
+          "label": "Show on desktop",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "divider",
+      "name": "Divider",
+      "settings": [
+        {
+          "type": "select",
+          "id": "column_span",
+          "label": "Tablet and desktop span",
+          "default": "1",
+          "options": [
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"}
+          ],
+          "info": "Uses the 6-column tablet grid and the 8-column desktop grid"
+        },
+        {
+          "type": "header",
+          "content": "Visibility"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_mobile",
+          "label": "Show on mobile",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_tablet",
+          "label": "Show on tablet",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_desktop",
+          "label": "Show on desktop",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Mobile"
+        },
+        {
+          "type": "range",
+          "id": "padding_top",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "label": "Top",
+          "default": 20
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "label": "Bottom",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "type": "payment_logos",
+      "name": "Payment logos",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "enable_greyscale",
+          "label": "Enable greyscale",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "column_span",
+          "label": "Tablet and desktop span",
+          "default": "2",
+          "options": [
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"}
+          ],
+          "info": "Uses the 6-column tablet grid and the 8-column desktop grid"
+        },
+        {
+          "type": "header",
+          "content": "Visibility"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_mobile",
+          "label": "Show on mobile",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_tablet",
+          "label": "Show on tablet",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_desktop",
+          "label": "Show on desktop",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Add supporting footer text here.</p>"
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Alignment",
+          "default": "left",
+          "options": [
+            {"value": "left", "label": "Left"},
+            {"value": "center", "label": "Center"},
+            {"value": "right", "label": "Right"}
+          ]
+        },
+        {
+          "type": "select",
+          "id": "column_span",
+          "label": "Tablet and desktop span",
+          "default": "2",
+          "options": [
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"}
+          ],
+          "info": "Uses the 6-column tablet grid and the 8-column desktop grid"
+        },
+        {
+          "type": "header",
+          "content": "Visibility"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_mobile",
+          "label": "Show on mobile",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_tablet",
+          "label": "Show on tablet",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_desktop",
+          "label": "Show on desktop",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Mobile"
+        },
+        {
+          "type": "select",
+          "id": "mobile_alignment",
+          "label": "Alignment",
+          "default": "left",
+          "options": [
+            {"value": "left", "label": "Left"},
+            {"value": "center", "label": "Center"},
+            {"value": "right", "label": "Right"}
+          ]
+        }
+      ]
+    },
+    {
+      "type": "legal",
+      "name": "Legal",
+      "settings": [
+        {
+          "type": "text",
+          "id": "trigger_text",
+          "label": "Trigger text",
+          "default": "Legal"
+        },
+        {
+          "type": "richtext",
+          "id": "accordion_text",
+          "label": "Accordion text",
+          "default": "<p>Add legal content here.</p>"
+        },
+        {
+          "type": "color",
+          "id": "accordion_text_color",
+          "label": "Accordion text color",
+          "default": "#121212"
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Alignment",
+          "default": "left",
+          "options": [
+            {"value": "left", "label": "Left"},
+            {"value": "center", "label": "Center"},
+            {"value": "right", "label": "Right"}
+          ]
+        },
+        {
+          "type": "select",
+          "id": "column_span",
+          "label": "Tablet and desktop span",
+          "default": "2",
+          "options": [
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"}
+          ],
+          "info": "Uses the 6-column tablet grid and the 8-column desktop grid"
+        },
+        {
+          "type": "header",
+          "content": "Visibility"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_mobile",
+          "label": "Show on mobile",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_tablet",
+          "label": "Show on tablet",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_desktop",
+          "label": "Show on desktop",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Mobile"
+        },
+        {
+          "type": "select",
+          "id": "mobile_alignment",
+          "label": "Alignment",
+          "default": "left",
+          "options": [
+            {"value": "left", "label": "Left"},
+            {"value": "center", "label": "Center"},
+            {"value": "right", "label": "Right"}
+          ]
+        }
+      ]
+    },
+    {
+      "type": "logo",
+      "name": "Logo",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "range",
+          "id": "image_width",
+          "label": "Image width (in pixels)",
+          "min": 50,
+          "max": 400,
+          "step": 5,
+          "unit": "px",
+          "default": 150
+        },
+        {
+          "type": "select",
+          "id": "column_span",
+          "label": "Tablet and desktop span",
+          "default": "2",
+          "options": [
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"}
+          ],
+          "info": "Uses the 6-column tablet grid and the 8-column desktop grid"
+        },
+        {
+          "type": "header",
+          "content": "Visibility"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_mobile",
+          "label": "Show on mobile",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_tablet",
+          "label": "Show on tablet",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_desktop",
+          "label": "Show on desktop",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "socials",
+      "name": "Socials",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Edit your social settings and accounts in [Theme settings](/admin/themes/current/editor?context=theme)."
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Alignment",
+          "default": "left",
+          "options": [
+            {"value": "left", "label": "Left"},
+            {"value": "right", "label": "Right"}
+          ]
+        },
+        {
+          "type": "select",
+          "id": "column_span",
+          "label": "Tablet and desktop span",
+          "default": "2",
+          "options": [
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"}
+          ],
+          "info": "Uses the 6-column tablet grid and the 8-column desktop grid"
+        },
+        {
+          "type": "header",
+          "content": "Visibility"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_mobile",
+          "label": "Show on mobile",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_tablet",
+          "label": "Show on tablet",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_on_desktop",
+          "label": "Show on desktop",
+          "default": true
+        }
+      ]
     }
   ],
   "presets": [

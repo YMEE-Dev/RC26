@@ -1667,6 +1667,16 @@
         this.showCannotAddMoreInCart = true;
       }
 
+      if (maxInventoryReached === "true") {
+        if (this.cartDrawer) {
+          document.dispatchEvent(new CustomEvent("theme:product:added", { bubbles: true }));
+        }
+        if (button) {
+          button.disabled = false;
+        }
+        return;
+      }
+
       this.addToCart(formData, button);
     }
 
@@ -2668,7 +2678,7 @@
           countValue = "9+";
         }
 
-        this.innerText = countValue + " items";
+        this.innerText = countValue;
       }
     }
   }
@@ -3293,7 +3303,10 @@
 
       const gap = parseInt(window.getComputedStyle(slide).marginRight) || 0;
       const slideWidth = slide.offsetWidth + gap;
-      const targetPosition = slide.offsetLeft;
+      const isStorytellingModal = Boolean(this.slider.closest(".storytelling-modal"));
+      const targetPosition = isStorytellingModal
+        ? slide.offsetLeft - this.slider.clientWidth / 2 + slide.clientWidth / 2
+        : slide.offsetLeft;
       const direction = this.velX > 0 ? 1 : -1;
       const slidesToScroll = Math.floor(Math.abs(this.velX) / 100) || 1;
 
@@ -3498,9 +3511,14 @@
         goToSlide(slide) {
           if (!slide) return;
 
+          const isStorytellingModal = Boolean(this.closest(".storytelling-modal"));
+          const left = isStorytellingModal
+            ? slide.offsetLeft - this.slider.clientWidth / 2 + slide.clientWidth / 2
+            : slide.offsetLeft;
+
           this.slider.scrollTo({
             top: 0,
-            left: slide.offsetLeft,
+            left,
             behavior: "smooth",
           });
         }
@@ -3619,10 +3637,13 @@
           this.body = document.body;
           this.isCollectionTemplate = this.body.classList.contains("template-collection");
           this.isBlogTemplate = this.body.classList.contains("template-blog");
+          this.isArticleTemplate = this.body.classList.contains("template-article");
           this.isSearchTemplate = this.body.classList.contains("template-search");
+          this.isTimelinePage = this.body.id.includes("the-brand");
           this.isSpotlightCollectionTemplate =
             this.isCollectionTemplate &&
             Boolean(document.querySelector(".main-content--collection-spotlight, .collection--spotlight"));
+          this.hasAlwaysVisibleFixedHeader = this.isSpotlightCollectionTemplate || this.isTimelinePage;
           this.deadLinks = document.querySelectorAll('.navlink[href="#"]');
           this.resizeObserver = null;
           this.headerHideLayerTimeout = null;
@@ -3638,6 +3659,7 @@
           this.scrollHideEvent = (e) => this.toggleHeaderHideOnScroll(e);
 
           this.body.classList.toggle("has-header-sticky", this.isSticky);
+          this.body.classList.toggle("has-always-visible-fixed-header", this.hasAlwaysVisibleFixedHeader);
         }
 
         connectedCallback() {
@@ -3758,6 +3780,11 @@
           this.updateHeaderOffset = this.updateHeaderOffset.bind(this);
           this.scrollEvent = (e) => this.onScroll(e);
 
+          if (this.hasAlwaysVisibleFixedHeader) {
+            this.stickSimple();
+            return;
+          }
+
           this.listen();
           this.stickOnLoad();
         }
@@ -3778,10 +3805,37 @@
           const atTop = position <= 0;
           const goingDown = Boolean(e?.detail?.down);
           const goingUp = Boolean(e?.detail?.up);
+          const isMobileViewport = window.innerWidth < 960;
           const stickyThreshold = typeof this.headerOffset === "number" ? this.headerOffset : 0;
           const shouldShowRevealBlur = this.isSticky && goingUp && !atTop && position > stickyThreshold;
 
-          if ((this.isCollectionTemplate && !this.isSpotlightCollectionTemplate) || this.isSearchTemplate || this.isBlogTemplate) {
+          if (this.hasAlwaysVisibleFixedHeader) {
+            this.body.classList.remove("header-scroll-hide");
+            this.resetHeaderLayerHide();
+            this.shouldShowScrollRevealBlur = true;
+            this.syncScrollRevealBlur();
+            return;
+          }
+
+          if (isMobileViewport) {
+            if (atTop) {
+              this.body.classList.remove("header-scroll-hide");
+              this.resetHeaderLayerHide();
+            } else {
+              this.body.classList.add("header-scroll-hide");
+              this.resetHeaderLayerHide();
+            }
+            this.shouldShowScrollRevealBlur = false;
+            this.syncScrollRevealBlur();
+            return;
+          }
+
+          if (
+            (this.isCollectionTemplate && !this.isSpotlightCollectionTemplate) ||
+            this.isSearchTemplate ||
+            this.isBlogTemplate ||
+            this.isArticleTemplate
+          ) {
             if (atTop) {
               this.body.classList.remove("header-scroll-hide");
               this.resetHeaderLayerHide();
@@ -3924,6 +3978,7 @@
           this.resetHeaderLayerHide();
           document.removeEventListener("theme:scroll", this.scrollHideEvent);
           document.removeEventListener("theme:tmenu:state", this.handleTmenuState);
+          this.body.classList.remove("has-always-visible-fixed-header");
 
           if (this.isSticky) {
             document.removeEventListener("theme:scroll", this.scrollEvent);
@@ -6023,6 +6078,8 @@
     slide: "[data-hover-slide]",
     slideTouch: "[data-hover-slide-touch]",
     slider: "[data-hover-slider]",
+    progressBar: "[data-related-slider-progress]",
+    progressLine: ".related-slider-progress__line",
     recentlyViewed: "recently-viewed",
     video: "video",
     vimeo: '[data-host="vimeo"]',
@@ -6035,8 +6092,11 @@
 
       this.flkty = null;
       this.slider = this.querySelector(selectors$8.slider);
+      this.progressBar = this.querySelector(selectors$8.progressBar);
+      this.progressLine = this.progressBar?.querySelector(selectors$8.progressLine) || null;
       this.productItem = this.closest(selectors$8.productItem);
       this.handleScroll = this.handleScroll.bind(this);
+      this.updateProgressBar = this.updateProgressBar.bind(this);
       this.recentlyViewed = this.closest(selectors$8.recentlyViewed);
       this.hovered = false;
 
@@ -6051,6 +6111,7 @@
 
     connectedCallback() {
       this.addArrowClickHandler();
+      this.updateProgressBar();
 
       if (this.recentlyViewed) {
         this.recentlyViewed.addEventListener("theme:recently-viewed:loaded", () => {
@@ -6080,6 +6141,10 @@
         this.productItem.removeEventListener("mouseenter", this.productItemMouseEnterEvent);
         this.productItem.removeEventListener("mouseleave", this.productItemMouseLeaveEvent);
       }
+
+      if (this.slider) {
+        this.slider.removeEventListener("scroll", this.handleScroll);
+      }
     }
 
     initBasedOnDevice() {
@@ -6104,11 +6169,51 @@
     initTouch() {
       this.style.setProperty("--slides-count", this.querySelectorAll(selectors$8.slideTouch).length);
       this.slider.addEventListener("scroll", this.handleScroll);
+      this.updateProgressBar();
     }
 
     handleScroll() {
       const slideIndex = this.slider.scrollLeft / this.slider.clientWidth;
       this.style.setProperty("--slider-index", slideIndex);
+      this.updateProgressBar();
+    }
+
+    updateProgressBar() {
+      if (!this.progressBar) return;
+
+      const slideCount = window.theme.touch
+        ? this.querySelectorAll(selectors$8.slideTouch).length
+        : this.flkty?.cells?.length || this.querySelectorAll(selectors$8.slide).length;
+
+      if (slideCount <= 1) {
+        this.progressBar.hidden = true;
+        return;
+      }
+
+      let progress = 0;
+
+      if (window.theme.touch) {
+        const isScrollable = this.slider.scrollWidth > this.slider.clientWidth + 1;
+        this.progressBar.classList.toggle("hidden", !isScrollable);
+
+        if (!isScrollable) {
+          this.progressBar.style.setProperty("--related-slider-progress", "0%");
+          return;
+        }
+
+        const progressPercent = ((this.slider.scrollLeft + this.slider.clientWidth) / this.slider.scrollWidth) * 100;
+        progress = Math.max(0, Math.min(100, progressPercent));
+      } else if (this.flkty) {
+        const maxIndex = Math.max(slideCount - 1, 1);
+        progress = Math.max(0, Math.min(100, ((this.flkty.selectedIndex || 0) / maxIndex) * 100));
+        this.progressBar.classList.remove("hidden");
+      }
+
+      this.progressBar.hidden = false;
+      this.progressBar.style.setProperty("--related-slider-progress", `${progress}%`);
+      if (this.progressLine) {
+        this.progressLine.style.width = `${progress}%`;
+      }
     }
 
     initFlickity() {
@@ -6141,10 +6246,13 @@
 
       requestAnimationFrame(refreshFlickityLayout);
       this.flkty.pausePlayer();
+      this.updateProgressBar();
+      this.flkty.on("change", this.updateProgressBar);
 
       this.addEventListener("mouseenter", () => {
         refreshFlickityLayout();
         this.flkty.unpausePlayer();
+        this.updateProgressBar();
       });
 
       this.addEventListener("mouseleave", () => {
