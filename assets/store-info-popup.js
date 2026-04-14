@@ -3,6 +3,8 @@
   const COUNTRY_REDIRECT_SHOWN_ATTRIBUTE = "data-country-redirect-shown";
   const COUNTRY_REDIRECT_OPEN_EVENT = "theme:country-redirect:opened";
   const STORE_INFO_POPUP_COOKIE_HOURS = 90 * 24;
+  const STORE_INFO_POPUP_COOKIE_NAME = "store-info-popup";
+  const STORE_INFO_POPUP_LEGACY_COOKIE_PREFIX = "store-info-popup-";
 
   class StoreInfoPopupCookie {
     constructor(name, hoursToExpire = STORE_INFO_POPUP_COOKIE_HOURS) {
@@ -19,6 +21,18 @@
       if (!cookieValue) return false;
 
       return cookieValue.slice(cookiePrefix.length);
+    }
+
+    readLegacy() {
+      const hasLegacySeenCookie = document.cookie.split("; ").some((row) => {
+        if (!row.startsWith(STORE_INFO_POPUP_LEGACY_COOKIE_PREFIX)) return false;
+
+        const value = row.slice(row.indexOf("=") + 1);
+
+        return value === "seen";
+      });
+
+      return hasLegacySeenCookie ? "seen" : false;
     }
 
     write(value = "seen") {
@@ -48,11 +62,11 @@
 
         if (!this.dialog || !this.config?.enabled) return;
 
-        this.cookie = new StoreInfoPopupCookie(this.dialog.dataset.cookieName);
+        this.cookie = new StoreInfoPopupCookie(this.dialog.dataset.cookieName || STORE_INFO_POPUP_COOKIE_NAME);
 
         this.bindEvents();
 
-        if (this.cookie.read() !== false) {
+        if (this.cookie.read() !== false || this.cookie.readLegacy() !== false) {
           return;
         }
 
