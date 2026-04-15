@@ -1,0 +1,452 @@
+<!-- /sections/section-sticky-scroll-desktop.liquid -->
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+-%}
+
+{%- style -%}
+  #StickyScroll--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    --block-gap: {{ section.settings.block_gap }}px;
+  }
+
+  @media (max-width: 767px) {
+    #StickyScroll--{{ section.id }} {
+      display: none;
+    }
+  }
+{%- endstyle -%}
+
+<section
+  id="StickyScroll--{{ section.id }}"
+  class="sticky-scroll section-padding {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="sticky-scroll-desktop"
+  data-header-observer-mode="{{ section.settings.header_observer_mode }}"
+>
+  <div class="sticky-scroll__wrapper {{ section.settings.width }}">
+    <div class="sticky-scroll__blocks">
+      {%- for block in section.blocks -%}
+        <div
+          class="sticky-scroll__block sticky-scroll__block--{{ block.settings.content_order }}"
+          style="--sticky-index: {{ forloop.index0 }};"
+          {{ block.shopify_attributes }}
+        >
+          <div class="sticky-scroll__block-media">
+            <div class="sticky-scroll__image-wrapper" data-index="{{ forloop.index0 }}">
+              {%- if block.settings.image != blank -%}
+                {{
+                  block.settings.image
+                  | image_url: width: 800
+                  | image_tag: loading: 'lazy', class: 'sticky-scroll__image'
+                }}
+              {%- else -%}
+                <div class="sticky-scroll__placeholder">
+                  {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                </div>
+              {%- endif -%}
+            </div>
+          </div>
+
+          <div class="sticky-scroll__block-content">
+            {%- if block.settings.title != blank -%}
+              <h2 class="sticky-scroll__title">{{ block.settings.title }}</h2>
+            {%- endif -%}
+            {%- if block.settings.description != blank -%}
+              <div class="sticky-scroll__description body">{{ block.settings.description }}</div>
+            {%- endif -%}
+
+            {%- if block.settings.call_now_title != blank
+              or block.settings.call_now_text != blank
+              or block.settings.call_now_link != blank
+              or block.settings.send_email_title != blank
+              or block.settings.send_email_text != blank
+              or block.settings.send_email_link != blank
+            -%}
+              <div class="sticky-scroll__contacts">
+                {%- if block.settings.call_now_title != blank
+                  or block.settings.call_now_text != blank
+                  or block.settings.call_now_link != blank
+                -%}
+                  {%- if block.settings.call_now_link != blank -%}
+                    {%- assign call_now_href = block.settings.call_now_link | strip | remove: ' ' -%}
+                    {%- unless call_now_href contains 'tel:' -%}
+                      {%- assign call_now_href = 'tel:' | append: call_now_href -%}
+                    {%- endunless -%}
+                  {%- endif -%}
+                  <div class="sticky-scroll__contact">
+                    <a class="sticky-scroll__contact-link" href="{{ call_now_href }}">
+                      {%- render 'icon-phone' -%}
+                      {%- if block.settings.call_now_title != blank -%}
+                        <div class="sticky-scroll__contact-title">{{ block.settings.call_now_title }}</div>
+                      {%- endif -%}
+                      {%- if block.settings.call_now_text != blank -%}
+                        <div class="sticky-scroll__contact-text">{{ block.settings.call_now_text }}</div>
+                      {%- endif -%}
+                    </a>
+                  </div>
+                {%- endif -%}
+
+                {%- if block.settings.send_email_title != blank
+                  or block.settings.send_email_text != blank
+                  or block.settings.send_email_link != blank
+                -%}
+                  {%- if block.settings.send_email_link != blank -%}
+                    {%- assign send_email_href = block.settings.send_email_link | strip -%}
+                    {%- unless send_email_href contains 'mailto:' -%}
+                      {%- assign send_email_href = 'mailto:' | append: send_email_href -%}
+                    {%- endunless -%}
+                  {%- endif -%}
+                  <div class="sticky-scroll__contact">
+                    <a class="sticky-scroll__contact-link" href="{{ send_email_href }}">
+                      {%- render 'icon-email' -%}
+                      {%- if block.settings.send_email_title != blank -%}
+                        <div class="sticky-scroll__contact-title">{{ block.settings.send_email_title }}</div>
+                      {%- endif -%}
+                      {%- if block.settings.send_email_text != blank -%}
+                        <div class="sticky-scroll__contact-text">{{ block.settings.send_email_text }}</div>
+                      {%- endif -%}
+                    </a>
+                  </div>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .sticky-scroll {
+    position: relative;
+    width: 100%;
+  }
+
+  .sticky-scroll__wrapper {
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .sticky-scroll__wrapper.wrapper {
+    max-width: 1440px;
+    padding: 0 var(--outer);
+  }
+
+  .sticky-scroll__wrapper.wrapper--full-padded {
+    width: 100%;
+    padding: 0 40px;
+  }
+
+  .sticky-scroll__wrapper.wrapper--narrow {
+    max-width: 1200px;
+    padding: 0 var(--outer);
+  }
+
+  .sticky-scroll__blocks {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .sticky-scroll__block {
+    position: sticky;
+    top: calc(var(--header-height, 0px));
+    z-index: var(--sticky-index);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: 'image content';
+    gap: var(--block-gap);
+    align-items: flex-start;
+    min-height: 756px;
+    background-color: var(--bg);
+  }
+
+  .sticky-scroll__block-media {
+    grid-area: image;
+    width: 100%;
+    height: auto;
+    position: relative;
+    min-width: 0;
+  }
+
+  .sticky-scroll__block-content {
+    grid-area: content;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100%;
+  }
+
+  .sticky-scroll__image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .sticky-scroll__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  @media (max-width: 989px) {
+    .sticky-scroll__image {
+      height: auto;
+      aspect-ratio: 1/1;
+    }
+  }
+
+  .sticky-scroll__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+  }
+
+  .sticky-scroll__placeholder .placeholder-svg {
+    width: 50%;
+    height: auto;
+    opacity: 0.3;
+  }
+
+  .sticky-scroll__title {
+    margin: 0 0 13px;
+    color: var(--000000, #000);
+  }
+
+  .sticky-scroll__description {
+    width: 100%;
+  }
+
+  .sticky-scroll__contacts {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 32px;
+  }
+
+  .sticky-scroll__contact {
+    padding: 10px 0;
+    border-bottom: 1px solid #d6d6d6;
+  }
+
+  .sticky-scroll__contact-link {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    transition: opacity 0.3s ease;
+  }
+
+  .sticky-scroll__contact-title {
+    color: var(--000000, #000);
+    font-family: var(--FONT-STACK-NAV);
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
+
+  .sticky-scroll__contact-text {
+    color: #a7a7a7;
+    font-family: var(--FONT-STACK-NAV);
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px;
+  }
+
+  .sticky-scroll__contact-link {
+    color: #a7a7a7;
+    font-family: var(--FONT-STACK-NAV);
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px;
+    text-decoration: none;
+  }
+
+  .sticky-scroll__contact-link:hover {
+    opacity: 0.6;
+  }
+
+  .sticky-scroll__block--text-left {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: 'content image';
+  }
+
+  .sticky-scroll__block--text-left .sticky-scroll__block-media {
+    width: 100%;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Sticky scroll desktop",
+  "tag": "section",
+  "class": "section-sticky-scroll-desktop",
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Item",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Content",
+          "info": "Add content for this step. Image will be used in the sticky scroll effect on desktop, and WILL NOT SHOW UP ON MOBILE"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Step title"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description",
+          "default": "<p>Step description goes here</p>"
+        },
+        {
+          "type": "text",
+          "id": "call_now_title",
+          "label": "Call now title"
+        },
+        {
+          "type": "text",
+          "id": "call_now_text",
+          "label": "Call now text"
+        },
+        {
+          "type": "text",
+          "id": "call_now_link",
+          "label": "Call now link",
+          "default": "+1555123456"
+        },
+        {
+          "type": "text",
+          "id": "send_email_title",
+          "label": "Send email title"
+        },
+        {
+          "type": "text",
+          "id": "send_email_text",
+          "label": "Send email text"
+        },
+        {
+          "type": "text",
+          "id": "send_email_link",
+          "label": "Send email link"
+        },
+        {
+          "type": "select",
+          "id": "content_order",
+          "label": "Image and text order",
+          "default": "image-left",
+          "options": [
+            {
+              "value": "image-left",
+              "label": "Image left, text right"
+            },
+            {
+              "value": "text-left",
+              "label": "Text left, image right"
+            }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "block_gap",
+      "label": "Gap between blocks",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"},
+        {"value": "wrapper--narrow", "label": "Narrow"},
+        {"value": "wrapper--custom", "label": "Custom (max-width: 1232px)"}
+      ]
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 60
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sticky scroll desktop",
+      "category": "Image"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "aside", "footer"]
+  }
+}
+{% endschema %}
