@@ -55,6 +55,62 @@
             {%- if block.settings.description != blank -%}
               <div class="sticky-scroll__description body">{{ block.settings.description }}</div>
             {%- endif -%}
+
+            {%- if block.settings.call_now_title != blank
+              or block.settings.call_now_text != blank
+              or block.settings.call_now_link != blank
+              or block.settings.send_email_title != blank
+              or block.settings.send_email_text != blank
+              or block.settings.send_email_link != blank
+            -%}
+              <div class="sticky-scroll__contacts">
+                {%- if block.settings.call_now_title != blank
+                  or block.settings.call_now_text != blank
+                  or block.settings.call_now_link != blank
+                -%}
+                  {%- if block.settings.call_now_link != blank -%}
+                    {%- assign call_now_href = block.settings.call_now_link | strip | remove: ' ' -%}
+                    {%- unless call_now_href contains 'tel:' -%}
+                      {%- assign call_now_href = 'tel:' | append: call_now_href -%}
+                    {%- endunless -%}
+                  {%- endif -%}
+                  <div class="sticky-scroll__contact">
+                    <a class="sticky-scroll__contact-link" href="{{ call_now_href }}">
+                      {%- render 'icon-phone' -%}
+                      {%- if block.settings.call_now_title != blank -%}
+                        <div class="sticky-scroll__contact-title">{{ block.settings.call_now_title }}</div>
+                      {%- endif -%}
+                      {%- if block.settings.call_now_text != blank -%}
+                        <div class="sticky-scroll__contact-text">{{ block.settings.call_now_text }}</div>
+                      {%- endif -%}
+                    </a>
+                  </div>
+                {%- endif -%}
+
+                {%- if block.settings.send_email_title != blank
+                  or block.settings.send_email_text != blank
+                  or block.settings.send_email_link != blank
+                -%}
+                  {%- if block.settings.send_email_link != blank -%}
+                    {%- assign send_email_href = block.settings.send_email_link | strip -%}
+                    {%- unless send_email_href contains 'mailto:' -%}
+                      {%- assign send_email_href = 'mailto:' | append: send_email_href -%}
+                    {%- endunless -%}
+                  {%- endif -%}
+                  <div class="sticky-scroll__contact">
+                    <a class="sticky-scroll__contact-link" href="{{ send_email_href }}">
+                      {%- render 'icon-email' -%}
+                      {%- if block.settings.send_email_title != blank -%}
+                        <div class="sticky-scroll__contact-title">{{ block.settings.send_email_title }}</div>
+                      {%- endif -%}
+                      {%- if block.settings.send_email_text != blank -%}
+                        <div class="sticky-scroll__contact-text">{{ block.settings.send_email_text }}</div>
+                      {%- endif -%}
+                    </a>
+                  </div>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
           </div>
         </div>
       {%- endfor -%}
@@ -164,6 +220,64 @@
     color: var(--000000, #000);
   }
 
+  .sticky-scroll__description {
+    width: 100%;
+  }
+
+  .sticky-scroll__contacts {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 32px;
+  }
+
+  .sticky-scroll__contact {
+    padding: 10px 0;
+    border-bottom: 1px solid #d6d6d6;
+  }
+
+  .sticky-scroll__contact-link {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    transition: opacity 0.3s ease;
+  }
+
+  .sticky-scroll__contact-title {
+    color: var(--000000, #000);
+    font-family: var(--FONT-STACK-NAV);
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
+
+  .sticky-scroll__contact-text {
+    color: #a7a7a7;
+    font-family: var(--FONT-STACK-NAV);
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px;
+  }
+
+  .sticky-scroll__contact-link {
+    color: #a7a7a7;
+    font-family: var(--FONT-STACK-NAV);
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px;
+    text-decoration: none;
+  }
+
+  .sticky-scroll__contact-link:hover {
+    opacity: 0.6;
+  }
+
   .sticky-scroll__block--text-left {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-areas: 'content image';
@@ -195,6 +309,42 @@
           "id": "description",
           "label": "Description",
           "default": "<p>Step description goes here</p>"
+        },
+        {
+          "type": "text",
+          "id": "call_now_title",
+          "label": "Call now title",
+          "default": "Call now"
+        },
+        {
+          "type": "text",
+          "id": "call_now_text",
+          "label": "Call now text",
+          "default": "+1 555 123 456"
+        },
+        {
+          "type": "text",
+          "id": "call_now_link",
+          "label": "Call now link",
+          "default": "+1555123456"
+        },
+        {
+          "type": "text",
+          "id": "send_email_title",
+          "label": "Send email title",
+          "default": "Send email"
+        },
+        {
+          "type": "text",
+          "id": "send_email_text",
+          "label": "Send email text",
+          "default": "Get in touch by email"
+        },
+        {
+          "type": "text",
+          "id": "send_email_link",
+          "label": "Send email link",
+          "default": "hello@example.com"
         },
         {
           "type": "select",
