@@ -148,6 +148,7 @@
                         data-collapsible-content
                       >
                         {%- assign has_iubenda_links = false -%}
+                        {%- assign iubenda_policy_id = block.settings.iubenda_policy_id -%}
                         {%- for link in linklist.links -%}
                           {%- assign link_title_lower = link.title | downcase -%}
                           {%- assign is_iubenda_cookie = false -%}
@@ -163,9 +164,11 @@
                           {%- endif -%}
                           <li class="navlink">
                             {%- if is_iubenda_cookie -%}
-                              <a href="{{ link.url }}" target="_blank" class="iubenda-nostyle iubenda-noiframe iubenda-embed iubenda-noiframe" title="{{ link.title | escape }}">{{ link.title }}</a>
+                              {%- assign iubenda_href = 'https://www.iubenda.com/privacy-policy/' | append: iubenda_policy_id | append: '/cookie-policy' -%}
+                              <a href="{{ iubenda_href }}" target="_blank" class="iubenda-nostyle iubenda-noiframe iubenda-embed iubenda-noiframe" title="{{ link.title | escape }}">{{ link.title }}</a>
                             {%- elsif is_iubenda_privacy -%}
-                              <a href="{{ link.url }}" target="_blank" class="iubenda-nostyle iubenda-noiframe iubenda-embed iub-legal-only iubenda-noiframe" title="{{ link.title | escape }}">{{ link.title }}</a>
+                              {%- assign iubenda_href = 'https://www.iubenda.com/privacy-policy/' | append: iubenda_policy_id -%}
+                              <a href="{{ iubenda_href }}" target="_blank" class="iubenda-nostyle iubenda-noiframe iubenda-embed iub-legal-only iubenda-noiframe" title="{{ link.title | escape }}">{{ link.title }}</a>
                             {%- else -%}
                               <a href="{{ link.url }}">{{ link.title }}</a>
                             {%- endif -%}
@@ -489,6 +492,13 @@
           "label": "Enable accordion",
           "info": "Transform block into accordion element",
           "default": false
+        },
+        {
+          "type": "text",
+          "id": "iubenda_policy_id",
+          "label": "Iubenda policy ID",
+          "info": "Required for Cookie Policy and Privacy links. e.g. 32804813",
+          "default": "32804813"
         }
       ]
     },
