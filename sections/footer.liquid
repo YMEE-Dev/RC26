@@ -147,15 +147,37 @@
                         class="footer__quicklinks unstyled{% if enable_accordion %} accordion__content{% endif %}"
                         data-collapsible-content
                       >
+                        {%- assign has_iubenda_links = false -%}
                         {%- for link in linklist.links -%}
+                          {%- assign link_title_lower = link.title | downcase -%}
+                          {%- assign is_iubenda_cookie = false -%}
+                          {%- assign is_iubenda_privacy = false -%}
+                          {%- if link.url contains 'iubenda.com' or link.url == '#' -%}
+                            {%- if link_title_lower contains 'cookie' -%}
+                              {%- assign is_iubenda_cookie = true -%}
+                              {%- assign has_iubenda_links = true -%}
+                            {%- elsif link_title_lower contains 'privacy' -%}
+                              {%- assign is_iubenda_privacy = true -%}
+                              {%- assign has_iubenda_links = true -%}
+                            {%- endif -%}
+                          {%- endif -%}
                           <li class="navlink">
-                            <a href="{{ link.url }}">{{ link.title }}</a>
+                            {%- if is_iubenda_cookie -%}
+                              <a href="{{ link.url }}" target="_blank" class="iubenda-nostyle iubenda-noiframe iubenda-embed iubenda-noiframe" title="{{ link.title | escape }}">{{ link.title }}</a>
+                            {%- elsif is_iubenda_privacy -%}
+                              <a href="{{ link.url }}" target="_blank" class="iubenda-nostyle iubenda-noiframe iubenda-embed iub-legal-only iubenda-noiframe" title="{{ link.title | escape }}">{{ link.title }}</a>
+                            {%- else -%}
+                              <a href="{{ link.url }}">{{ link.title }}</a>
+                            {%- endif -%}
                           </li>
                         {%- endfor -%}
                       </ul>
                     </div>
                   {%- endif -%}
                 </details>
+                {%- if has_iubenda_links -%}
+                  <script type="text/javascript">(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);</script>
+                {%- endif -%}
 
               {%- when 'page' -%}
                 {%- assign page = pages[block.settings.page] -%}
