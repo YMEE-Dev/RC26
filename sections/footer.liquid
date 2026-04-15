@@ -167,8 +167,7 @@
                               {%- assign iubenda_href = 'https://www.iubenda.com/privacy-policy/' | append: iubenda_policy_id | append: '/cookie-policy' -%}
                               <a href="{{ iubenda_href }}" target="_blank" class="iubenda-nostyle iubenda-noiframe iubenda-embed iubenda-noiframe" title="{{ link.title | escape }}">{{ link.title }}</a>
                             {%- elsif is_iubenda_privacy -%}
-                              {%- assign iubenda_href = 'https://www.iubenda.com/privacy-policy/' | append: iubenda_policy_id -%}
-                              <a href="{{ iubenda_href }}" target="_blank" class="iubenda-nostyle iubenda-noiframe iubenda-embed iub-legal-only iubenda-noiframe" title="{{ link.title | escape }}">{{ link.title }}</a>
+                              <a href="#" class="iubenda-cs-preferences-link" title="{{ link.title | escape }}">{{ link.title }}</a>
                             {%- else -%}
                               <a href="{{ link.url }}">{{ link.title }}</a>
                             {%- endif -%}
@@ -179,7 +178,9 @@
                   {%- endif -%}
                 </details>
                 {%- if has_iubenda_links -%}
-                  <script type="text/javascript">(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);</script>
+                  <link rel="preconnect" href="https://cdn.iubenda.com" crossorigin>
+                  <link rel="dns-prefetch" href="https://cdn.iubenda.com">
+                  <script type="text/javascript" src="https://cdn.iubenda.com/iubenda.js" async></script>
                 {%- endif -%}
 
               {%- when 'page' -%}
