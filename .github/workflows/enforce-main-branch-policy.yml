@@ -15,7 +15,7 @@ jobs:
       - name: Checkout event
         uses: actions/checkout@v4
 
-      - name: Validate source branch or commit messages (whitelist Shopify bot)
+      - name: Validate source branch or commit messages (whitelist Shopify bot by login/name)
         env:
           GITHUB_EVENT_PATH: ${{ github.event_path }}
         run: |
@@ -38,15 +38,14 @@ jobs:
             print("PR source is 'dev' — allowed")
             sys.exit(0)
 
-          # Push events: allow if every commit is either from Shopify app OR has a message starting with 'hotfix:'
+          # Push events: allow if every commit is either from Shopify app (login/name) OR has a message starting with 'hotfix:'
           commits = event.get('commits', [])
           if not commits:
             print('No commit data in event payload; refusing push by default.')
             sys.exit(1)
 
-          # Known Shopify app identifiers (from your repo's commits)
+          # Known Shopify app identifiers (by login/name)
           BOT_LOGINS = {'shopify[bot]'}
-          BOT_EMAILS = {'79544226+shopify[bot]@users.noreply.github.com'}
           BOT_NAMES = {'shopify[bot]'}
 
           def commit_is_shopify(c):
@@ -54,16 +53,13 @@ jobs:
             author = c.get('author') or {}
             login = author.get('login') or author.get('username')
             name = author.get('name')
-            email = author.get('email')
             pusher = event.get('pusher') or {}
-            pusher_name = pusher.get('name') or pusher.get('email') or ''
+            pusher_name = pusher.get('name') or ''
             if login and login in BOT_LOGINS:
               return True
             if name and name in BOT_NAMES:
               return True
-            if email and email in BOT_EMAILS:
-              return True
-            if pusher_name and pusher_name in BOT_LOGINS.union(BOT_NAMES).union(BOT_EMAILS):
+            if pusher_name and pusher_name in BOT_LOGINS.union(BOT_NAMES):
               return True
             return False
 
