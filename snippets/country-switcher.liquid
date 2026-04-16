@@ -29,7 +29,7 @@
   assign show_change_on_language = false
   assign form_id = 'country-switcher-form-' | append: unique
 
-  if show_locale_selector and localization.available_languages.size > 1
+  if show_locale_selector and localization.available_languages.size > 0
     assign languages = true
   endif
 
@@ -169,7 +169,7 @@
                   </span>
                 {%- endif -%}
 
-                <span class="country-switcher__value">
+                <span class="country-switcher__value navlink">
                   {%- if show_locale_code -%}
                     {{ localization.language.iso_code }}
                   {%- else -%}
@@ -178,7 +178,7 @@
                 </span>
 
                 {%- if show_change_on_language -%}
-                  <span class="country-switcher__action">Change</span>
+                  <span class="country-switcher__action visually-hidden">Change</span>
                 {%- endif -%}
               </span>
             </button>
@@ -190,6 +190,33 @@
               data-scroll-lock-scrollable
             >
               {%- for language in localization.available_languages -%}
+                {%- assign language_code = language.iso_code | downcase | slice: 0, 2 -%}
+                {%- assign language_flag_country_codes = '' -%}
+                {%- case language_code -%}
+                  {%- when 'en' -%}
+                    {%- assign language_flag_country_codes = 'US|GB' -%}
+                  {%- when 'it' -%}
+                    {%- assign language_flag_country_codes = 'IT' -%}
+                  {%- when 'fr' -%}
+                    {%- assign language_flag_country_codes = 'FR' -%}
+                  {%- when 'es' -%}
+                    {%- assign language_flag_country_codes = 'ES' -%}
+                  {%- when 'pt' -%}
+                    {%- assign language_flag_country_codes = 'PT' -%}
+                  {%- when 'de' -%}
+                    {%- assign language_flag_country_codes = 'DE' -%}
+                {%- endcase -%}
+                {%- assign language_flag_country = localization.country -%}
+                {%- if language_flag_country_codes != blank -%}
+                  {%- assign language_flag_country_candidates = language_flag_country_codes | split: '|' -%}
+                  {%- for language_flag_country_code in language_flag_country_candidates -%}
+                    {%- assign candidate_country = localization.available_countries | where: 'iso_code', language_flag_country_code | first -%}
+                    {%- if candidate_country != blank -%}
+                      {%- assign language_flag_country = candidate_country -%}
+                      {%- break -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- endif -%}
                 <li class="popout-list__item{% if language.iso_code == localization.language.iso_code %} is-active{% endif %}">
                   <a
                     class="popout-list__option"
@@ -202,6 +229,14 @@
                     data-value="{{ language.iso_code }}"
                     data-popout-option
                   >
+                    {%- if language_flag_country != blank -%}
+                      {{
+                        language_flag_country
+                        | image_url: width: 40
+                        | image_tag: loading: 'lazy', class: 'country-switcher__flag country-switcher__flag--option'
+                      }}
+                    {%- endif -%}
+
                     <span>
                       {%- if show_locale_code -%}
                         {{ language.iso_code }}
@@ -244,8 +279,7 @@
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    column-gap: 10px;
-    row-gap: 8px;
+    column-gap: 8px;
   }
 
   .country-switcher__holder {
@@ -254,7 +288,8 @@
   }
 
   .country-switcher__popout {
-    display: block;
+    display: flex;
+    align-items: center;
   }
 
   .country-switcher__toggle {
@@ -265,7 +300,6 @@
     padding: 0;
     border: 0;
     background: transparent;
-    font-size: 0;
     line-height: 1;
     white-space: nowrap;
   }
@@ -278,7 +312,7 @@
   .country-switcher__toggle-text {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     min-width: 0;
   }
 
@@ -299,7 +333,8 @@
   }
 
   .country-switcher__value {
-    margin-left: 12px;
+    line-height: normal;
+    padding: 0;
   }
 
   .country-switcher__separator {
@@ -309,8 +344,6 @@
   }
 
   .country-switcher__action {
-    margin-left: 18px;
-
     text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 2px;
