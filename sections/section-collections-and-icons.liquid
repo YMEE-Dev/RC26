@@ -44,89 +44,61 @@
     {%- endif -%}
 
     {%- if section.blocks.size > 0 -%}
-      <div class="collections-and-icons__grid{% if description_first %} collections-and-icons__grid--reversed{% endif %}">
-        {%- if description_first -%}
-          {%- if section.settings.description != blank -%}
-            <div class="collections-and-icons__description caption rte">
+      <div class="collections-and-icons__grid{% if description_first %} collections-and-icons__grid--reverse-desktop{% endif %}">
+        <div class="collections-and-icons__content">
+          {%- for block in collection_blocks -%}
+            <div class="collections-and-icons__collection" {{ block.shopify_attributes }}>
+              {%- if block.settings.title != blank -%}
+                <span class="collections-and-icons__collection-title label">
+                  {{ block.settings.title }}
+                </span>
+              {%- endif -%}
+
+              {%- if block.settings.collection_list != blank -%}
+                <ul class="collections-and-icons__collection-list" role="list">
+                  {%- for collection in block.settings.collection_list -%}
+                    {%- if collection != blank -%}
+                      <li class="collections-and-icons__collection-item">
+                        <a class="collections-and-icons__collection-link navlink" href="{{ collection.url }}">
+                          {{ collection.title }}
+                        </a>
+                      </li>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+
+          {%- for block in icon_blocks -%}
+            <div
+              class="collections-and-icons__icons collections-and-icons__icons--full"
+              {{ block.shopify_attributes }}
+            >
+              {%- render 'custom-icons',
+                animation_anchor: animation_anchor,
+                animation_order: forloop.index,
+                enable_drawers: true
+              -%}
+            </div>
+          {%- endfor -%}
+        </div>
+
+        {%- if section.settings.description != blank -%}
+          <toggle-ellipsis class="collections-and-icons__mobile-accordion" data-height="240">
+            <div
+              class="collections-and-icons__mobile-accordion-content collections-and-icons__description caption rte"
+              data-content
+            >
               {{ section.settings.description }}
             </div>
-          {%- endif -%}
 
-          <div class="collections-and-icons__content">
-            {%- for block in collection_blocks -%}
-              <div class="collections-and-icons__collection" {{ block.shopify_attributes }}>
-                {%- if block.settings.title != blank -%}
-                  <span class="collections-and-icons__collection-title">
-                    {{ block.settings.title }}
-                  </span>
-                {%- endif -%}
-
-                {%- if block.settings.collection_list != blank -%}
-                  <ul class="collections-and-icons__collection-list" role="list">
-                    {%- for collection in block.settings.collection_list -%}
-                      {%- if collection != blank -%}
-                        <li class="collections-and-icons__collection-item">
-                          <a class="collections-and-icons__collection-link navlink" href="{{ collection.url }}">
-                            {{ collection.title }}
-                          </a>
-                        </li>
-                      {%- endif -%}
-                    {%- endfor -%}
-                  </ul>
-                {%- endif -%}
-              </div>
-            {%- endfor -%}
-
-            {%- for block in icon_blocks -%}
-              <div
-                class="collections-and-icons__icons collections-and-icons__icons--full"
-                {{ block.shopify_attributes }}
-              >
-                {%- render 'custom-icons', animation_anchor: animation_anchor, animation_order: forloop.index -%}
-              </div>
-            {%- endfor -%}
-          </div>
-        {%- else -%}
-          <div class="collections-and-icons__content">
-            {%- for block in collection_blocks -%}
-              <div class="collections-and-icons__collection" {{ block.shopify_attributes }}>
-                {%- if block.settings.title != blank -%}
-                  <span class="collections-and-icons__collection-title label">
-                    {{ block.settings.title }}
-                  </span>
-                {%- endif -%}
-
-                {%- if block.settings.collection_list != blank -%}
-                  <ul class="collections-and-icons__collection-list" role="list">
-                    {%- for collection in block.settings.collection_list -%}
-                      {%- if collection != blank -%}
-                        <li class="collections-and-icons__collection-item">
-                          <a class="collections-and-icons__collection-link navlink" href="{{ collection.url }}">
-                            {{ collection.title }}
-                          </a>
-                        </li>
-                      {%- endif -%}
-                    {%- endfor -%}
-                  </ul>
-                {%- endif -%}
-              </div>
-            {%- endfor -%}
-
-            {%- for block in icon_blocks -%}
-              <div
-                class="collections-and-icons__icons collections-and-icons__icons--full"
-                {{ block.shopify_attributes }}
-              >
-                {%- render 'custom-icons', animation_anchor: animation_anchor, animation_order: forloop.index -%}
-              </div>
-            {%- endfor -%}
-          </div>
-
-          {%- if section.settings.description != blank -%}
-            <div class="collections-and-icons__description caption rte">
-              {{ section.settings.description }}
+            <div class="toggle-ellipsis__actions collections-and-icons__mobile-accordion-actions" data-actions>
+              <button type="button" class="caps--link collections-and-icons__mobile-accordion-trigger" data-button>
+                <span>{{ 'products.general.read_more' | t }}</span>
+              </button>
             </div>
-          {%- endif -%}
+          </toggle-ellipsis>
         {%- endif -%}
       </div>
     {%- else -%}
@@ -152,16 +124,26 @@
   }
 
   .collections-and-icons__grid {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 40px;
     align-items: start;
   }
 
   @media (min-width: 990px) {
     .collections-and-icons__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      flex-direction: row;
       gap: clamp(32px, 5vw, 80px);
+    }
+
+    .collections-and-icons__grid--reverse-desktop {
+      flex-direction: row-reverse;
+    }
+
+    .collections-and-icons__content,
+    .collections-and-icons__mobile-accordion {
+      flex: 1 1 0;
+      min-width: 0;
     }
   }
 
@@ -217,7 +199,7 @@
   }
 
   .collections-and-icons__icons {
-    grid-column: 1 / -1;
+    width: 100%;
   }
 
   .collections-and-icons__description {
@@ -230,6 +212,39 @@
 
   .collections-and-icons__description p:last-child {
     margin-bottom: 0;
+  }
+
+  .collections-and-icons__mobile-accordion {
+    width: 100%;
+  }
+
+  @media only screen and (min-width: 750px) {
+    .collections-and-icons__mobile-accordion {
+      max-height: none !important;
+      overflow: visible;
+    }
+
+    .collections-and-icons__mobile-accordion .toggle-ellipsis__actions {
+      display: none !important;
+    }
+  }
+
+  @media only screen and (max-width: 749px) {
+    .collections-and-icons__mobile-accordion {
+      --height: 240px;
+    }
+
+    .collections-and-icons__mobile-accordion-actions {
+      text-align: left;
+      padding-top: 12px;
+    }
+
+    .collections-and-icons__mobile-accordion-trigger {
+      color: var(--text);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
   }
 
   @media (max-width: 749px) {
@@ -398,7 +413,15 @@
     {
       "type": "icons",
       "name": "Icons",
-      "settings": []
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "enable_drawers",
+          "label": "Enable drawers",
+          "default": false,
+          "info": "Render each icon as a side drawer trigger."
+        }
+      ]
     }
   ],
   "presets": [
