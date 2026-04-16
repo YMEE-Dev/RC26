@@ -110,6 +110,129 @@
   endif
 -%}
 
+<style>
+  .product__collection-section {
+    margin: var(--block-padding-bottom, 50px) 0;
+    --aspect-ratio: 1;
+  }
+
+  .product__collection-image {
+    position: relative;
+    overflow: clip;
+    background: #e8e8e8;
+    max-height: 80vh;
+  }
+
+  .product__collection-image .image-wrapper {
+    width: 100%;
+    height: 0;
+    padding-top: calc(1 / var(--aspect-ratio) * 100%);
+  }
+
+  .product__collection-image .image-wrapper img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    image-rendering: auto;
+  }
+
+  /* Responsive adjustments for collection image */
+  @media (max-width: 767px) {
+    .product__collection-image {
+      width: 100%;
+      max-height: 60vh;
+    }
+  }
+
+  .product__collection-title {
+    font-family: var(--FONT-STACK-HEADING);
+    font-style: var(--FONT-STYLE-HEADING);
+    font-weight: var(--FONT-WEIGHT-HEADING);
+    font-size: 40px;
+    line-height: 48px;
+    letter-spacing: 0;
+    text-transform: capitalize !important;
+    color: var(--COLOR-TEXT-DARK);
+    margin: 40px 0 20px;
+  }
+
+  .product__collection-description {
+    font-family: var(--FONT-STACK-BODY);
+    font-style: var(--FONT-STYLE-BODY);
+    font-weight: var(--FONT-WEIGHT-BODY);
+    font-size: var(--FONT-SIZE-BASE);
+    line-height: var(--LINE-HEIGHT-BODY);
+    color: var(--COLOR-TEXT-DARK);
+    max-width: 78ch;
+    margin-bottom: 0;
+  }
+
+  /* Read more functionality - mobile only */
+  @media only screen and (max-width: 749px) {
+    .product__collection-description[data-collection-description] {
+      position: relative;
+    }
+
+    .collection-description__content[data-description-content] {
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      transition: all 0.3s ease;
+    }
+
+    .product__collection-description[data-collection-description].expanded
+      .collection-description__content[data-description-content] {
+      -webkit-line-clamp: unset;
+      display: block;
+    }
+
+    .collection-description__read-more {
+      background: none;
+      border: none;
+      color: var(--COLOR-PRIMARY);
+      font-family: var(--FONT-STACK-BODY);
+      font-size: var(--FONT-SIZE-BASE);
+      cursor: pointer;
+      padding: 8px 0 0 0;
+      text-decoration: underline;
+      margin-top: 8px;
+    }
+
+    .collection-description__read-more:hover {
+      color: var(--COLOR-PRIMARY-HOVER);
+    }
+  }
+
+  /* Hide read more on desktop */
+  @media only screen and (min-width: 750px) {
+    .collection-description__read-more {
+      display: none;
+    }
+
+    .collection-description__content[data-description-content] {
+      -webkit-line-clamp: unset !important;
+      display: block !important;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .product__collection-section {
+      margin-top: 40px;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .product__collection-title {
+      margin-top: 22px;
+    }
+  }
+</style>
+
 {%- if found_storytelling != blank -%}
   {{ 'custom-collection.css' | asset_url | stylesheet_tag }}
 
@@ -175,226 +298,131 @@
   </div>
 
   <script src="{{ 'storytelling-lookup.js' | asset_url }}" defer></script>
+{%- endif -%}
 
-  <script>
-    (function () {
-      if (window.__pdpCollectionSectionInitialized) return;
-      window.__pdpCollectionSectionInitialized = true;
+<script>
+  (function () {
+    if (window.__pdpCollectionSectionInitialized) return;
+    window.__pdpCollectionSectionInitialized = true;
 
-      function updateProgress(slider, progressTrack, progressThumb) {
-        var maxScroll = Math.max(slider.scrollWidth - slider.clientWidth, 0);
-        if (maxScroll <= 0) {
-          progressTrack.classList.add('is-hidden');
-          progressThumb.style.width = '100%';
-          progressThumb.style.transform = 'translateX(0)';
-          return;
+    function updateProgress(slider, progressTrack, progressThumb) {
+      var maxScroll = Math.max(slider.scrollWidth - slider.clientWidth, 0);
+      if (maxScroll <= 0) {
+        progressTrack.classList.add('is-hidden');
+        progressThumb.style.width = '100%';
+        progressThumb.style.transform = 'translateX(0)';
+        return;
+      }
+      progressTrack.classList.remove('is-hidden');
+      var trackWidth = progressTrack.clientWidth;
+      if (!trackWidth) return;
+      var thumbWidth = Math.max((slider.clientWidth / slider.scrollWidth) * trackWidth, 18);
+      var offset = Math.max(trackWidth - thumbWidth, 0) * (slider.scrollLeft / maxScroll);
+      progressThumb.style.width = thumbWidth + 'px';
+      progressThumb.style.transform = 'translateX(' + offset + 'px)';
+    }
+
+    function bindProgress(modal) {
+      modal.querySelectorAll('.storytelling-modal__slider-shell').forEach(function (shell) {
+        var slider = shell.querySelector('[data-grid-slider]');
+        var track = shell.querySelector('[data-storytelling-slider-progress]');
+        var thumb = shell.querySelector('[data-storytelling-slider-progress-thumb]');
+        if (!slider || !track || !thumb || slider.__progressBound) return;
+        slider.__progressBound = true;
+        slider.addEventListener(
+          'scroll',
+          function () {
+            updateProgress(slider, track, thumb);
+          },
+          {passive: true}
+        );
+        if ('ResizeObserver' in window) {
+          var ro = new ResizeObserver(function () {
+            updateProgress(slider, track, thumb);
+          });
+          ro.observe(slider);
+          ro.observe(track);
         }
-        progressTrack.classList.remove('is-hidden');
-        var trackWidth = progressTrack.clientWidth;
-        if (!trackWidth) return;
-        var thumbWidth = Math.max((slider.clientWidth / slider.scrollWidth) * trackWidth, 18);
-        var offset = Math.max(trackWidth - thumbWidth, 0) * (slider.scrollLeft / maxScroll);
-        progressThumb.style.width = thumbWidth + 'px';
-        progressThumb.style.transform = 'translateX(' + offset + 'px)';
-      }
+        updateProgress(slider, track, thumb);
+      });
+    }
 
-      function bindProgress(modal) {
-        modal.querySelectorAll('.storytelling-modal__slider-shell').forEach(function (shell) {
-          var slider = shell.querySelector('[data-grid-slider]');
-          var track = shell.querySelector('[data-storytelling-slider-progress]');
-          var thumb = shell.querySelector('[data-storytelling-slider-progress-thumb]');
-          if (!slider || !track || !thumb || slider.__progressBound) return;
-          slider.__progressBound = true;
-          slider.addEventListener('scroll', function () { updateProgress(slider, track, thumb); }, { passive: true });
-          if ('ResizeObserver' in window) {
-            var ro = new ResizeObserver(function () { updateProgress(slider, track, thumb); });
-            ro.observe(slider);
-            ro.observe(track);
-          }
-          updateProgress(slider, track, thumb);
-        });
-      }
+    function closeModal(modal, trigger) {
+      if (typeof modal.close === 'function') modal.close();
+      else modal.removeAttribute('open');
+      document.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    }
 
-      function closeModal(modal, trigger) {
-        if (typeof modal.close === 'function') modal.close();
-        else modal.removeAttribute('open');
-        document.dispatchEvent(new CustomEvent('theme:scroll:unlock', { bubbles: true }));
-        if (trigger) trigger.setAttribute('aria-expanded', 'false');
-      }
+    function openModal(modal, trigger) {
+      if (modal.open) return;
+      if (typeof modal.showModal === 'function') modal.showModal();
+      else modal.setAttribute('open', '');
+      document.dispatchEvent(new CustomEvent('theme:scroll:lock', {bubbles: true}));
+      trigger.setAttribute('aria-expanded', 'true');
 
-      function openModal(modal, trigger) {
-        if (modal.open) return;
-        if (typeof modal.showModal === 'function') modal.showModal();
-        else modal.setAttribute('open', '');
-        document.dispatchEvent(new CustomEvent('theme:scroll:lock', { bubbles: true }));
-        trigger.setAttribute('aria-expanded', 'true');
-
+      requestAnimationFrame(function () {
         requestAnimationFrame(function () {
-          requestAnimationFrame(function () {
-            modal.querySelectorAll('grid-slider').forEach(function (gs) {
-              if (typeof gs.toggleSlider === 'function') gs.toggleSlider();
-              if (typeof gs.positionArrows === 'function') gs.positionArrows();
-            });
-            bindProgress(modal);
+          modal.querySelectorAll('grid-slider').forEach(function (gs) {
+            if (typeof gs.toggleSlider === 'function') gs.toggleSlider();
+            if (typeof gs.positionArrows === 'function') gs.positionArrows();
           });
+          bindProgress(modal);
         });
+      });
 
-        if (!modal.__pdpListenersBound) {
-          modal.__pdpListenersBound = true;
-          modal.addEventListener('click', function (e) {
-            if (e.target === modal) closeModal(modal, trigger);
+      if (!modal.__pdpListenersBound) {
+        modal.__pdpListenersBound = true;
+        modal.addEventListener('click', function (e) {
+          if (e.target === modal) closeModal(modal, trigger);
+        });
+        var closeBtn = modal.querySelector('[data-storytelling-modal-close]');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function () {
+            closeModal(modal, trigger);
           });
-          var closeBtn = modal.querySelector('[data-storytelling-modal-close]');
-          if (closeBtn) {
-            closeBtn.addEventListener('click', function () { closeModal(modal, trigger); });
-          }
         }
       }
+    }
 
-      function initCollectionSection() {
-        document.querySelectorAll('.product__collection-title').forEach(function (title) {
-          title.textContent = title.textContent.toLowerCase().replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+    function initCollectionSection() {
+      document.querySelectorAll('.product__collection-title').forEach(function (title) {
+        title.textContent = title.textContent.toLowerCase().replace(/\b\w/g, function (c) {
+          return c.toUpperCase();
         });
+      });
 
-        document.querySelectorAll('[data-read-more-btn]').forEach(function (button) {
-          button.addEventListener('click', function () {
-            var desc = this.closest('[data-collection-description]');
-            var more = this.querySelector('[data-read-more-text]');
-            var less = this.querySelector('[data-read-less-text]');
-            var expanded = desc.classList.toggle('expanded');
-            more.style.display = expanded ? 'none' : 'inline';
-            less.style.display = expanded ? 'inline' : 'none';
-          });
+      document.querySelectorAll('[data-read-more-btn]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          var desc = this.closest('[data-collection-description]');
+          var more = this.querySelector('[data-read-more-text]');
+          var less = this.querySelector('[data-read-less-text]');
+          var expanded = desc.classList.toggle('expanded');
+          more.style.display = expanded ? 'none' : 'inline';
+          less.style.display = expanded ? 'inline' : 'none';
         });
+      });
 
-        document.addEventListener('click', function (event) {
-          var trigger = event.target.closest('[data-storytelling-modal-trigger]');
-          if (!trigger || !trigger.closest('.product__collection-section')) return;
-          event.preventDefault();
-          event.stopPropagation();
-          var modal = document.getElementById(trigger.getAttribute('data-storytelling-modal-target'));
-          if (modal) openModal(modal, trigger);
-        });
-      }
+      document.addEventListener('click', function (event) {
+        var trigger = event.target.closest('[data-storytelling-modal-trigger]');
+        if (!trigger || !trigger.closest('.product__collection-section')) return;
+        event.preventDefault();
+        event.stopPropagation();
+        var modal = document.getElementById(trigger.getAttribute('data-storytelling-modal-target'));
+        if (modal) openModal(modal, trigger);
+      });
+    }
 
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initCollectionSection);
-      } else {
-        initCollectionSection();
-      }
-    })();
-  </script>
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initCollectionSection);
+    } else {
+      initCollectionSection();
+    }
+  })();
+</script>
 
+{%- if found_storytelling != blank -%}
   <style>
-    .product__collection-section {
-      margin: var(--block-padding-bottom, 50px) 0;
-      --aspect-ratio: 1;
-    }
-
-    .product__collection-image {
-      position: relative;
-      overflow: clip;
-      background: #e8e8e8;
-      max-height: 80vh;
-    }
-
-    .product__collection-image .image-wrapper {
-      width: 100%;
-      height: 0;
-      padding-top: calc(1 / var(--aspect-ratio) * 100%);
-    }
-
-    .product__collection-image .image-wrapper img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      image-rendering: auto;
-    }
-
-    /* Responsive adjustments for collection image */
-    @media (max-width: 767px) {
-      .product__collection-image {
-        width: 100%;
-        max-height: 60vh;
-      }
-    }
-
-    .product__collection-title {
-      font-family: var(--FONT-STACK-HEADING);
-      font-style: var(--FONT-STYLE-HEADING);
-      font-weight: var(--FONT-WEIGHT-HEADING);
-      font-size: 40px;
-      line-height: 48px;
-      letter-spacing: 0;
-      text-transform: capitalize !important;
-      color: var(--COLOR-TEXT-DARK);
-      margin: 40px 0 20px;
-    }
-
-    .product__collection-description {
-      font-family: var(--FONT-STACK-BODY);
-      font-style: var(--FONT-STYLE-BODY);
-      font-weight: var(--FONT-WEIGHT-BODY);
-      font-size: var(--FONT-SIZE-BASE);
-      line-height: var(--LINE-HEIGHT-BODY);
-      color: var(--COLOR-TEXT-DARK);
-      max-width: 78ch;
-      margin-bottom: 0;
-    }
-
-    /* Read more functionality - mobile only */
-    @media only screen and (max-width: 749px) {
-      .product__collection-description[data-collection-description] {
-        position: relative;
-      }
-
-      .collection-description__content[data-description-content] {
-        overflow: hidden;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        transition: all 0.3s ease;
-      }
-
-      .product__collection-description[data-collection-description].expanded
-        .collection-description__content[data-description-content] {
-        -webkit-line-clamp: unset;
-        display: block;
-      }
-
-      .collection-description__read-more {
-        background: none;
-        border: none;
-        color: var(--COLOR-PRIMARY);
-        font-family: var(--FONT-STACK-BODY);
-        font-size: var(--FONT-SIZE-BASE);
-        cursor: pointer;
-        padding: 8px 0 0 0;
-        text-decoration: underline;
-        margin-top: 8px;
-      }
-
-      .collection-description__read-more:hover {
-        color: var(--COLOR-PRIMARY-HOVER);
-      }
-    }
-
-    /* Hide read more on desktop */
-    @media only screen and (min-width: 750px) {
-      .collection-description__read-more {
-        display: none;
-      }
-
-      .collection-description__content[data-description-content] {
-        -webkit-line-clamp: unset !important;
-        display: block !important;
-      }
-    }
-
     /* Storytelling tile within product collection section */
     .product__collection-image--storytelling .product-storytelling {
       display: flex;
@@ -428,16 +456,6 @@
     }
 
     @media (max-width: 767px) {
-      .product__collection-section {
-        margin-top: 40px;
-        padding-left: 0;
-        padding-right: 0;
-      }
-
-      .product__collection-title {
-        margin-top: 22px;
-      }
-
       .product__collection-image--storytelling .grid-media__media-wrapper .btn {
         right: 50%;
         bottom: 20px;

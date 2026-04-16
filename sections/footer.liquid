@@ -147,15 +147,41 @@
                         class="footer__quicklinks unstyled{% if enable_accordion %} accordion__content{% endif %}"
                         data-collapsible-content
                       >
+                        {%- assign has_iubenda_links = false -%}
+                        {%- assign iubenda_policy_id = block.settings.iubenda_policy_id -%}
                         {%- for link in linklist.links -%}
+                          {%- assign link_title_lower = link.title | downcase -%}
+                          {%- assign is_iubenda_cookie = false -%}
+                          {%- assign is_iubenda_privacy = false -%}
+                          {%- if link.url contains 'iubenda.com' or link.url == '#' -%}
+                            {%- if link_title_lower contains 'cookie' -%}
+                              {%- assign is_iubenda_cookie = true -%}
+                              {%- assign has_iubenda_links = true -%}
+                            {%- elsif link_title_lower contains 'privacy' -%}
+                              {%- assign is_iubenda_privacy = true -%}
+                              {%- assign has_iubenda_links = true -%}
+                            {%- endif -%}
+                          {%- endif -%}
                           <li class="navlink">
-                            <a href="{{ link.url }}">{{ link.title }}</a>
+                            {%- if is_iubenda_cookie -%}
+                              {%- assign iubenda_href = 'https://www.iubenda.com/privacy-policy/' | append: iubenda_policy_id | append: '/cookie-policy' -%}
+                              <a href="{{ iubenda_href }}" target="_blank" class="iubenda-nostyle iubenda-noiframe iubenda-embed iubenda-noiframe" title="{{ link.title | escape }}">{{ link.title }}</a>
+                            {%- elsif is_iubenda_privacy -%}
+                              <a href="#" class="iubenda-cs-preferences-link" title="{{ link.title | escape }}">{{ link.title }}</a>
+                            {%- else -%}
+                              <a href="{{ link.url }}">{{ link.title }}</a>
+                            {%- endif -%}
                           </li>
                         {%- endfor -%}
                       </ul>
                     </div>
                   {%- endif -%}
                 </details>
+                {%- if has_iubenda_links -%}
+                  <link rel="preconnect" href="https://cdn.iubenda.com" crossorigin>
+                  <link rel="dns-prefetch" href="https://cdn.iubenda.com">
+                  <script type="text/javascript" src="https://cdn.iubenda.com/iubenda.js" async></script>
+                {%- endif -%}
 
               {%- when 'page' -%}
                 {%- assign page = pages[block.settings.page] -%}
@@ -467,6 +493,13 @@
           "label": "Enable accordion",
           "info": "Transform block into accordion element",
           "default": false
+        },
+        {
+          "type": "text",
+          "id": "iubenda_policy_id",
+          "label": "Iubenda policy ID",
+          "info": "Required for Cookie Policy and Privacy links. e.g. 32804813",
+          "default": "32804813"
         }
       ]
     },

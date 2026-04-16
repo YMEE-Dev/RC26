@@ -28,11 +28,12 @@
           id="hint-product-price"
           value="{{ product.selected_or_first_available_variant.price | money }}"
         >
-        {% if product.selected_or_first_available_variant.featured_image %}
+        {%- assign _hint_image = product.selected_or_first_available_variant.featured_image | default: product.featured_image -%}
+        {% if _hint_image %}
           <input
             type="hidden"
             id="hint-product-image"
-            value="{{ product.selected_or_first_available_variant.featured_image | image_url: width: 600 }}"
+            value="{{ _hint_image | image_url: width: 600 }}"
           >
         {% endif %}
       {% endif %}
@@ -152,9 +153,36 @@
 
     var messageTemplate = {{ 'products.product.hint_message_template' | t | json }};
     var productTitle = {{ product.title | json }};
-    var productPrice = {{ product.selected_or_first_available_variant.price | default: product.price | money | json }};
     var productUrl = {{ shop.url | append: product.url | json }};
     var shopCurrency = {{ shop.currency | json }};
+    var defaultVariantId = {{ product.selected_or_first_available_variant.id | json }};
+    var defaultProductImage = {{ product.featured_image | image_url: width: 600 | json }};
+
+    // All variants embedded from Liquid — used to look up title/price/image at submit time.
+    var allVariants = {{ product.variants | json }};
+    var variantsById = {};
+    for (var _i = 0; _i < allVariants.length; _i++) {
+      variantsById[String(allVariants[_i].id)] = allVariants[_i];
+    }
+
+    // Reads the current variant ID from the URL (both ymee and product-info.js always update it).
+    function getCurrentVariantId() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var v = params.get('variant');
+        if (v) return String(v);
+      } catch (e) {}
+      return String(defaultVariantId);
+    }
+
+    // Returns the full variant object for the currently selected variant.
+    function getCurrentVariant() {
+      var id = getCurrentVariantId();
+      var v = variantsById[id];
+      if (v) return v;
+      // Fallback to default
+      return variantsById[String(defaultVariantId)] || allVariants[0] || null;
+    }
 
     function isDrawerOpen() {
       var drawer = document.getElementById(DRAWER_ID);
@@ -273,11 +301,12 @@
           .replace(/\{\{\s*recipient\s*\}\}/g, safeRecipient)
           .replace(/\{\{\s*sender\s*\}\}/g, safeSender);
 
+        var lv = getCurrentVariant();
         message += '\n\nPRODUCT: ' + productTitle;
-        message += '\nPRICE: ' + productPrice;
+        message += '\nPRICE: ' + (lv ? (lv.price / 100).toLocaleString('en', { style: 'currency', currency: shopCurrency }) : '');
 
-        if (variantInput && variantInput.value) {
-          message += '\nVARIANT: ' + variantInput.value;
+        if (lv && lv.title && lv.title.toLowerCase() !== 'default title') {
+          message += '\nVARIANT: ' + lv.title;
         }
 
         message += '\nURL: ' + productUrl;
@@ -368,14 +397,29 @@
         }
         if (errorEl) errorEl.style.display = 'none';
 
-        var imageInput = document.getElementById('hint-product-image');
-        var priceInput = document.getElementById('hint-product-price');
+        // Read current variant from URL at submit time — the most reliable source.
+        var liveVariant = getCurrentVariant();
+        var variantId = liveVariant ? String(liveVariant.id) : '';
+        var variantTitle = liveVariant ? (liveVariant.title || '') : '';
+        if (variantTitle.toLowerCase() === 'default title') variantTitle = '';
+        var variantPrice = liveVariant
+          ? (liveVariant.price / 100).toLocaleString('en', { style: 'currency', currency: shopCurrency })
+          : '';
 
-        var variantIdInput = document.getElementById('hint-product-variant-id');
-        var variantId = variantIdInput ? variantIdInput.value : '';
         var fullProductUrl = productUrl;
         if (variantId) {
           fullProductUrl += (productUrl.indexOf('?') === -1 ? '?' : '&') + 'variant=' + variantId;
+        }
+
+        // Resolve image: variant featured image > gallery visible image > product image
+        var resolvedProductImage = '';
+        if (liveVariant && liveVariant.featured_image && liveVariant.featured_image.src) {
+          var imgSrc = liveVariant.featured_image.src;
+          resolvedProductImage = resizeImageSrc(imgSrc.startsWith('//') ? 'https:' + imgSrc : imgSrc);
+        }
+        if (!resolvedProductImage) {
+          resolvedProductImage = getGalleryImageSrc() || defaultProductImage || '';
+          if (resolvedProductImage) resolvedProductImage = resizeImageSrc(resolvedProductImage);
         }
 
         var formData = {
@@ -384,9 +428,9 @@
           senderName: senderName,
           productTitle: productTitle,
           productUrl: fullProductUrl,
-          productVariant: variantInput ? variantInput.value : '',
-          productPrice: priceInput ? priceInput.value : productPrice,
-          productImage: imageInput ? imageInput.value : '',
+          productVariant: variantTitle,
+          productPrice: variantPrice,
+          productImage: resolvedProductImage,
           message: buildMessage(recipientName, senderName)
         };
 
@@ -420,8 +464,39 @@
 
     document.addEventListener('DOMContentLoaded', initHintForm);
 
+    function resetHintForm() {
+      var form = document.getElementById('hint-form');
+      var successEl = document.getElementById('hint-form-success');
+      var errorEl = document.getElementById('hint-form-error');
+      var drawerEl = document.getElementById(DRAWER_ID);
+
+      if (form) {
+        form.reset();
+        form.style.display = '';
+        // Do NOT clear hintBound — submit listener must only be attached once.
+        // Clearing it would cause initHintForm() to re-bind on every drawer open,
+        // resulting in multiple Klaviyo requests per submit.
+      }
+      if (successEl) successEl.style.display = 'none';
+      if (errorEl) {
+        errorEl.style.display = 'none';
+        errorEl.textContent = '';
+      }
+      if (drawerEl) drawerEl.classList.remove('hint-is-success');
+
+      // Reset live preview name displays
+      var recipientDisplay = document.getElementById('recipient-name-display');
+      var senderDisplay = document.getElementById('sender-name-display');
+      if (recipientDisplay) recipientDisplay.textContent = 'NAME';
+      if (senderDisplay) senderDisplay.textContent = 'NAME';
+
+      var previewMessage = document.querySelector('#' + DRAWER_ID + ' .hint-preview-card__message');
+      if (previewMessage) previewMessage.classList.remove('hint-preview-card__message--visible');
+    }
+
     document.addEventListener('click', function(e) {
       if (e.target.closest('[data-drawer-open="send-hint"]')) {
+        resetHintForm();
         setTimeout(function() {
           initHintForm();
           syncHintImage();
@@ -429,18 +504,7 @@
       }
     });
 
-    document.addEventListener('theme:variant:change', function(e) {
-      var variant = e.detail && e.detail.variant;
-      if (!variant) return;
-
-      var variantInput = document.getElementById('hint-product-variant');
-      if (variantInput) variantInput.value = variant.title || '';
-
-      var priceInput = document.getElementById('hint-product-price');
-      if (priceInput && variant.price != null) {
-        priceInput.value = (variant.price / 100).toLocaleString('en', { style: 'currency', currency: shopCurrency });
-      }
-
+    document.addEventListener('theme:variant:change', function() {
       if (isDrawerOpen()) {
         setTimeout(syncHintImage, 300);
       }
