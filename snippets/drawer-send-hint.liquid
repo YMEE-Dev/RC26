@@ -305,7 +305,7 @@
         message += '\n\nPRODUCT: ' + productTitle;
         message += '\nPRICE: ' + (lv ? (lv.price / 100).toLocaleString('en', { style: 'currency', currency: shopCurrency }) : '');
 
-        if (lv && lv.title) {
+        if (lv && lv.title && lv.title.toLowerCase() !== 'default title') {
           message += '\nVARIANT: ' + lv.title;
         }
 
@@ -401,6 +401,7 @@
         var liveVariant = getCurrentVariant();
         var variantId = liveVariant ? String(liveVariant.id) : '';
         var variantTitle = liveVariant ? (liveVariant.title || '') : '';
+        if (variantTitle.toLowerCase() === 'default title') variantTitle = '';
         var variantPrice = liveVariant
           ? (liveVariant.price / 100).toLocaleString('en', { style: 'currency', currency: shopCurrency })
           : '';

@@ -60,10 +60,15 @@
     return decodeHtml(translations[key] || key);
   }
 
-  function submitBisSubscription(email, variantId) {
+  function submitBisSubscription(email, variantId, profileProperties) {
     if (!KLAVIYO_API_KEY) {
       console.error("[BIS Drawer] Klaviyo public API key is not configured.");
       return Promise.reject(new Error("Missing Klaviyo API key"));
+    }
+
+    var profileAttrs = { email: email };
+    if (profileProperties && typeof profileProperties === "object") {
+      profileAttrs.properties = profileProperties;
     }
 
     var payload = {
@@ -73,9 +78,7 @@
           profile: {
             data: {
               type: "profile",
-              attributes: {
-                email: email,
-              },
+              attributes: profileAttrs,
             },
           },
           channels: ["EMAIL"],
@@ -401,13 +404,22 @@
           }
         }
 
-        // Add product image
+        // Add product image — prefer selected variant image, fall back to product featured image
         if (product) {
           var imgSrc = null;
-          if (product.featured_image) {
+          if (product.variants) {
+            var imgVariant = product.variants.find(function (v) {
+              return String(v.id) === String(variantId);
+            });
+            if (imgVariant && imgVariant.featured_image && imgVariant.featured_image.src) {
+              imgSrc = imgVariant.featured_image.src;
+            }
+          }
+          if (!imgSrc && product.featured_image) {
             imgSrc = typeof product.featured_image === "string" ? product.featured_image : product.featured_image.src;
           }
           if (imgSrc) {
+            if (imgSrc.startsWith("//")) imgSrc = "https:" + imgSrc;
             properties.product_image = imgSrc.includes("cdn.shopify.com")
               ? imgSrc.split("?")[0] + "?width=600"
               : imgSrc;
@@ -426,8 +438,18 @@
 
         var submitPromise;
         if (config.useBisSubscription) {
-          // Use Klaviyo's native Back in Stock Subscription API for notify mode
-          submitPromise = submitBisSubscription(email.value, variantId);
+          // Use Klaviyo's native Back in Stock Subscription API for notify mode.
+          // Product properties are stored on the Klaviyo profile (accessible as {{ person.XXX }}
+          // in any flow) AND a companion custom event is fired (accessible as {{ event.XXX }}
+          // in flows triggered by the "Back In Stock Subscription" metric).
+          var bisProfileProps = {};
+          if (properties.product_image) bisProfileProps.last_bis_product_image = properties.product_image;
+          if (properties.product_title) bisProfileProps.last_bis_product_title = properties.product_title;
+          if (properties.variant_title) bisProfileProps.last_bis_variant_title = properties.variant_title;
+          submitPromise = submitBisSubscription(email.value, variantId, bisProfileProps).then(function (response) {
+            submitToKlaviyo("Back In Stock Subscription", email.value, properties).catch(function () {});
+            return response;
+          });
         } else {
           submitPromise = submitToKlaviyo(config.klaviyoMetric, email.value, properties);
         }
