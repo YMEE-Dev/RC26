@@ -441,8 +441,37 @@
 
     document.addEventListener('DOMContentLoaded', initHintForm);
 
+    function resetHintForm() {
+      var form = document.getElementById('hint-form');
+      var successEl = document.getElementById('hint-form-success');
+      var errorEl = document.getElementById('hint-form-error');
+      var drawerEl = document.getElementById(DRAWER_ID);
+
+      if (form) {
+        form.reset();
+        form.style.display = '';
+        form.dataset.hintBound = '';
+      }
+      if (successEl) successEl.style.display = 'none';
+      if (errorEl) {
+        errorEl.style.display = 'none';
+        errorEl.textContent = '';
+      }
+      if (drawerEl) drawerEl.classList.remove('hint-is-success');
+
+      // Reset live preview name displays
+      var recipientDisplay = document.getElementById('recipient-name-display');
+      var senderDisplay = document.getElementById('sender-name-display');
+      if (recipientDisplay) recipientDisplay.textContent = 'NAME';
+      if (senderDisplay) senderDisplay.textContent = 'NAME';
+
+      var previewMessage = document.querySelector('#' + DRAWER_ID + ' .hint-preview-card__message');
+      if (previewMessage) previewMessage.classList.remove('hint-preview-card__message--visible');
+    }
+
     document.addEventListener('click', function(e) {
       if (e.target.closest('[data-drawer-open="send-hint"]')) {
+        resetHintForm();
         setTimeout(function() {
           initHintForm();
           syncHintImage();
