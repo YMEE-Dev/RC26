@@ -210,7 +210,10 @@
                 {%- if language_flag_country_codes != blank -%}
                   {%- assign language_flag_country_candidates = language_flag_country_codes | split: '|' -%}
                   {%- for language_flag_country_code in language_flag_country_candidates -%}
-                    {%- assign candidate_country = localization.available_countries | where: 'iso_code', language_flag_country_code | first -%}
+                    {%- assign candidate_country = localization.available_countries
+                      | where: 'iso_code', language_flag_country_code
+                      | first
+                    -%}
                     {%- if candidate_country != blank -%}
                       {%- assign language_flag_country = candidate_country -%}
                       {%- break -%}
@@ -335,6 +338,7 @@
   .country-switcher__value {
     line-height: normal;
     padding: 0;
+    text-decoration: underline;
   }
 
   .country-switcher__separator {
