@@ -28,11 +28,12 @@
           id="hint-product-price"
           value="{{ product.selected_or_first_available_variant.price | money }}"
         >
-        {% if product.selected_or_first_available_variant.featured_image %}
+        {%- assign _hint_image = product.selected_or_first_available_variant.featured_image | default: product.featured_image -%}
+        {% if _hint_image %}
           <input
             type="hidden"
             id="hint-product-image"
-            value="{{ product.selected_or_first_available_variant.featured_image | image_url: width: 600 }}"
+            value="{{ _hint_image | image_url: width: 600 }}"
           >
         {% endif %}
       {% endif %}
@@ -368,7 +369,6 @@
         }
         if (errorEl) errorEl.style.display = 'none';
 
-        var imageInput = document.getElementById('hint-product-image');
         var priceInput = document.getElementById('hint-product-price');
 
         // Read the live variant ID from the product form's authoritative hidden input.
@@ -399,6 +399,32 @@
           } catch (e) {}
         }
 
+        // Resolve product image: prefer the variant's featured image from product JSON,
+        // then the gallery/sync'd hidden input, then the Liquid-rendered fallback.
+        var resolvedProductImage = '';
+        var imageInput = document.getElementById('hint-product-image');
+        if (productJsonEl && variantId) {
+          try {
+            var pdImg = JSON.parse(productJsonEl.textContent || '{}');
+            var pdImgVariants = pdImg.variants || [];
+            for (var ii = 0; ii < pdImgVariants.length; ii++) {
+              if (String(pdImgVariants[ii].id) === String(variantId)) {
+                var featMediaSrc = pdImgVariants[ii].featured_image && pdImgVariants[ii].featured_image.src;
+                if (featMediaSrc) {
+                  resolvedProductImage = resizeImageSrc(featMediaSrc.startsWith('//') ? 'https:' + featMediaSrc : featMediaSrc);
+                }
+                break;
+              }
+            }
+          } catch (e) {}
+        }
+        if (!resolvedProductImage) {
+          resolvedProductImage = (imageInput && imageInput.value)
+            || getGalleryImageSrc()
+            || '';
+          if (resolvedProductImage) resolvedProductImage = resizeImageSrc(resolvedProductImage);
+        }
+
         var formData = {
           recipientName: recipientName,
           recipientEmail: recipientEmail,
@@ -407,7 +433,7 @@
           productUrl: fullProductUrl,
           productVariant: resolvedVariantTitle,
           productPrice: priceInput ? priceInput.value : productPrice,
-          productImage: imageInput ? imageInput.value : '',
+          productImage: resolvedProductImage,
           message: buildMessage(recipientName, senderName)
         };
 
@@ -450,7 +476,9 @@
       if (form) {
         form.reset();
         form.style.display = '';
-        form.dataset.hintBound = '';
+        // Do NOT clear hintBound — submit listener must only be attached once.
+        // Clearing it would cause initHintForm() to re-bind on every drawer open,
+        // resulting in multiple Klaviyo requests per submit.
       }
       if (successEl) successEl.style.display = 'none';
       if (errorEl) {
