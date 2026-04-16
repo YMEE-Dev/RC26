@@ -371,11 +371,32 @@
         var imageInput = document.getElementById('hint-product-image');
         var priceInput = document.getElementById('hint-product-price');
 
-        var variantIdInput = document.getElementById('hint-product-variant-id');
-        var variantId = variantIdInput ? variantIdInput.value : '';
+        // Read the live variant ID from the product form's authoritative hidden input.
+        // Both ymee-variant-dropdown.js and product-info.js always keep this in sync
+        // when the user switches variants, making it more reliable than our own hidden inputs.
+        var liveFormVariantInput = document.querySelector('input[name="id"][form^="product-form-"]');
+        var variantId = (liveFormVariantInput && liveFormVariantInput.value)
+          || (document.getElementById('hint-product-variant-id') ? document.getElementById('hint-product-variant-id').value : '');
+
         var fullProductUrl = productUrl;
         if (variantId) {
           fullProductUrl += (productUrl.indexOf('?') === -1 ? '?' : '&') + 'variant=' + variantId;
+        }
+
+        // Resolve the variant title from the product JSON to match the live variant ID.
+        var resolvedVariantTitle = variantInput ? variantInput.value : '';
+        var productJsonEl = document.querySelector('[data-product-json]');
+        if (productJsonEl && variantId) {
+          try {
+            var pd = JSON.parse(productJsonEl.textContent || '{}');
+            var pdVariants = pd.variants || [];
+            for (var vi = 0; vi < pdVariants.length; vi++) {
+              if (String(pdVariants[vi].id) === String(variantId)) {
+                resolvedVariantTitle = pdVariants[vi].title || resolvedVariantTitle;
+                break;
+              }
+            }
+          } catch (e) {}
         }
 
         var formData = {
@@ -384,7 +405,7 @@
           senderName: senderName,
           productTitle: productTitle,
           productUrl: fullProductUrl,
-          productVariant: variantInput ? variantInput.value : '',
+          productVariant: resolvedVariantTitle,
           productPrice: priceInput ? priceInput.value : productPrice,
           productImage: imageInput ? imageInput.value : '',
           message: buildMessage(recipientName, senderName)
@@ -435,6 +456,9 @@
 
       var variantInput = document.getElementById('hint-product-variant');
       if (variantInput) variantInput.value = variant.title || '';
+
+      var variantIdInput = document.getElementById('hint-product-variant-id');
+      if (variantIdInput && variant.id != null) variantIdInput.value = variant.id;
 
       var priceInput = document.getElementById('hint-product-price');
       if (priceInput && variant.price != null) {
