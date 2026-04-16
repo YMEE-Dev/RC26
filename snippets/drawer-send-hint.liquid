@@ -153,9 +153,36 @@
 
     var messageTemplate = {{ 'products.product.hint_message_template' | t | json }};
     var productTitle = {{ product.title | json }};
-    var productPrice = {{ product.selected_or_first_available_variant.price | default: product.price | money | json }};
     var productUrl = {{ shop.url | append: product.url | json }};
     var shopCurrency = {{ shop.currency | json }};
+    var defaultVariantId = {{ product.selected_or_first_available_variant.id | json }};
+    var defaultProductImage = {{ product.featured_image | image_url: width: 600 | json }};
+
+    // All variants embedded from Liquid — used to look up title/price/image at submit time.
+    var allVariants = {{ product.variants | json }};
+    var variantsById = {};
+    for (var _i = 0; _i < allVariants.length; _i++) {
+      variantsById[String(allVariants[_i].id)] = allVariants[_i];
+    }
+
+    // Reads the current variant ID from the URL (both ymee and product-info.js always update it).
+    function getCurrentVariantId() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var v = params.get('variant');
+        if (v) return String(v);
+      } catch (e) {}
+      return String(defaultVariantId);
+    }
+
+    // Returns the full variant object for the currently selected variant.
+    function getCurrentVariant() {
+      var id = getCurrentVariantId();
+      var v = variantsById[id];
+      if (v) return v;
+      // Fallback to default
+      return variantsById[String(defaultVariantId)] || allVariants[0] || null;
+    }
 
     function isDrawerOpen() {
       var drawer = document.getElementById(DRAWER_ID);
@@ -274,11 +301,12 @@
           .replace(/\{\{\s*recipient\s*\}\}/g, safeRecipient)
           .replace(/\{\{\s*sender\s*\}\}/g, safeSender);
 
+        var lv = getCurrentVariant();
         message += '\n\nPRODUCT: ' + productTitle;
-        message += '\nPRICE: ' + productPrice;
+        message += '\nPRICE: ' + (lv ? (lv.price / 100).toLocaleString('en', { style: 'currency', currency: shopCurrency }) : '');
 
-        if (variantInput && variantInput.value) {
-          message += '\nVARIANT: ' + variantInput.value;
+        if (lv && lv.title) {
+          message += '\nVARIANT: ' + lv.title;
         }
 
         message += '\nURL: ' + productUrl;
@@ -369,59 +397,27 @@
         }
         if (errorEl) errorEl.style.display = 'none';
 
-        var priceInput = document.getElementById('hint-product-price');
-
-        // Read the live variant ID from the product form's authoritative hidden input.
-        // Both ymee-variant-dropdown.js and product-info.js always keep this in sync
-        // when the user switches variants, making it more reliable than our own hidden inputs.
-        var liveFormVariantInput = document.querySelector('input[name="id"][form^="product-form-"]');
-        var variantId = (liveFormVariantInput && liveFormVariantInput.value)
-          || (document.getElementById('hint-product-variant-id') ? document.getElementById('hint-product-variant-id').value : '');
+        // Read current variant from URL at submit time — the most reliable source.
+        var liveVariant = getCurrentVariant();
+        var variantId = liveVariant ? String(liveVariant.id) : '';
+        var variantTitle = liveVariant ? (liveVariant.title || '') : '';
+        var variantPrice = liveVariant
+          ? (liveVariant.price / 100).toLocaleString('en', { style: 'currency', currency: shopCurrency })
+          : '';
 
         var fullProductUrl = productUrl;
         if (variantId) {
           fullProductUrl += (productUrl.indexOf('?') === -1 ? '?' : '&') + 'variant=' + variantId;
         }
 
-        // Resolve the variant title from the product JSON to match the live variant ID.
-        var resolvedVariantTitle = variantInput ? variantInput.value : '';
-        var productJsonEl = document.querySelector('[data-product-json]');
-        if (productJsonEl && variantId) {
-          try {
-            var pd = JSON.parse(productJsonEl.textContent || '{}');
-            var pdVariants = pd.variants || [];
-            for (var vi = 0; vi < pdVariants.length; vi++) {
-              if (String(pdVariants[vi].id) === String(variantId)) {
-                resolvedVariantTitle = pdVariants[vi].title || resolvedVariantTitle;
-                break;
-              }
-            }
-          } catch (e) {}
-        }
-
-        // Resolve product image: prefer the variant's featured image from product JSON,
-        // then the gallery/sync'd hidden input, then the Liquid-rendered fallback.
+        // Resolve image: variant featured image > gallery visible image > product image
         var resolvedProductImage = '';
-        var imageInput = document.getElementById('hint-product-image');
-        if (productJsonEl && variantId) {
-          try {
-            var pdImg = JSON.parse(productJsonEl.textContent || '{}');
-            var pdImgVariants = pdImg.variants || [];
-            for (var ii = 0; ii < pdImgVariants.length; ii++) {
-              if (String(pdImgVariants[ii].id) === String(variantId)) {
-                var featMediaSrc = pdImgVariants[ii].featured_image && pdImgVariants[ii].featured_image.src;
-                if (featMediaSrc) {
-                  resolvedProductImage = resizeImageSrc(featMediaSrc.startsWith('//') ? 'https:' + featMediaSrc : featMediaSrc);
-                }
-                break;
-              }
-            }
-          } catch (e) {}
+        if (liveVariant && liveVariant.featured_image && liveVariant.featured_image.src) {
+          var imgSrc = liveVariant.featured_image.src;
+          resolvedProductImage = resizeImageSrc(imgSrc.startsWith('//') ? 'https:' + imgSrc : imgSrc);
         }
         if (!resolvedProductImage) {
-          resolvedProductImage = (imageInput && imageInput.value)
-            || getGalleryImageSrc()
-            || '';
+          resolvedProductImage = getGalleryImageSrc() || defaultProductImage || '';
           if (resolvedProductImage) resolvedProductImage = resizeImageSrc(resolvedProductImage);
         }
 
@@ -431,8 +427,8 @@
           senderName: senderName,
           productTitle: productTitle,
           productUrl: fullProductUrl,
-          productVariant: resolvedVariantTitle,
-          productPrice: priceInput ? priceInput.value : productPrice,
+          productVariant: variantTitle,
+          productPrice: variantPrice,
           productImage: resolvedProductImage,
           message: buildMessage(recipientName, senderName)
         };
@@ -507,21 +503,7 @@
       }
     });
 
-    document.addEventListener('theme:variant:change', function(e) {
-      var variant = e.detail && e.detail.variant;
-      if (!variant) return;
-
-      var variantInput = document.getElementById('hint-product-variant');
-      if (variantInput) variantInput.value = variant.title || '';
-
-      var variantIdInput = document.getElementById('hint-product-variant-id');
-      if (variantIdInput && variant.id != null) variantIdInput.value = variant.id;
-
-      var priceInput = document.getElementById('hint-product-price');
-      if (priceInput && variant.price != null) {
-        priceInput.value = (variant.price / 100).toLocaleString('en', { style: 'currency', currency: shopCurrency });
-      }
-
+    document.addEventListener('theme:variant:change', function() {
       if (isDrawerOpen()) {
         setTimeout(syncHintImage, 300);
       }
