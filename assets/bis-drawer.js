@@ -60,16 +60,13 @@
     return decodeHtml(translations[key] || key);
   }
 
-  function submitBisSubscription(email, variantId, profileProperties) {
+  function submitBisSubscription(email, variantId) {
     if (!KLAVIYO_API_KEY) {
       console.error("[BIS Drawer] Klaviyo public API key is not configured.");
       return Promise.reject(new Error("Missing Klaviyo API key"));
     }
 
     var profileAttrs = { email: email };
-    if (profileProperties && typeof profileProperties === "object") {
-      profileAttrs.properties = profileProperties;
-    }
 
     var payload = {
       data: {
@@ -109,6 +106,36 @@
         return response;
       }
       throw new Error("Klaviyo BIS API returned status " + response.status);
+    });
+  }
+
+  function updateKlaviyoProfile(email, profileProperties) {
+    if (!KLAVIYO_API_KEY || !profileProperties || !Object.keys(profileProperties).length) return Promise.resolve();
+
+    var payload = {
+      data: {
+        type: "profile",
+        attributes: {
+          email: email,
+          properties: profileProperties,
+        },
+      },
+    };
+
+    var url = "https://a.klaviyo.com/client/profiles/?company_id=" + encodeURIComponent(KLAVIYO_API_KEY);
+
+    return fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        revision: "2024-10-15",
+      },
+      body: JSON.stringify(payload),
+    }).then(function (response) {
+      if (response.ok || response.status === 200 || response.status === 201 || response.status === 202) {
+        return response;
+      }
+      throw new Error("Klaviyo profile update returned status " + response.status);
     });
   }
 
@@ -446,8 +473,8 @@
           if (properties.product_image) bisProfileProps.last_bis_product_image = properties.product_image;
           if (properties.product_title) bisProfileProps.last_bis_product_title = properties.product_title;
           if (properties.variant_title) bisProfileProps.last_bis_variant_title = properties.variant_title;
-          submitPromise = submitBisSubscription(email.value, variantId, bisProfileProps).then(function (response) {
-            submitToKlaviyo("Back In Stock Subscription", email.value, properties).catch(function () {});
+          submitPromise = submitBisSubscription(email.value, variantId).then(function (response) {
+            updateKlaviyoProfile(email.value, bisProfileProps).catch(function () {});
             return response;
           });
         } else {
