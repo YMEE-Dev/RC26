@@ -4,11 +4,19 @@
   assign animation_anchor = '#CollectionsAndIcons--' | append: section.id
   assign collection_blocks = section.blocks | where: 'type', 'links'
   assign icon_blocks = section.blocks | where: 'type', 'icons'
+  assign has_drawer_icons = false
   assign description_first = false
 
   if section.settings.content_order == 'description-first'
     assign description_first = true
   endif
+
+  for block in icon_blocks
+    if block.settings.enable_drawers
+      assign has_drawer_icons = true
+      break
+    endif
+  endfor
 -%}
 
 {%- style -%}
@@ -78,7 +86,7 @@
               {%- render 'custom-icons',
                 animation_anchor: animation_anchor,
                 animation_order: forloop.index,
-                enable_drawers: true
+                enable_drawers: block.settings.enable_drawers
               -%}
             </div>
           {%- endfor -%}
@@ -106,6 +114,84 @@
     {%- endif -%}
   </div>
 </section>
+
+{%- if has_drawer_icons -%}
+  <side-drawer
+    class="drawer"
+    data-drawer="drawer-free-shipping"
+    id="side-drawer-collections-free-shipping-{{ section.id }}"
+    data-drawer-size="40%"
+    data-drawer-direction="right-to-left"
+  >
+    <div class="drawer__inner" data-drawer-inner>
+      <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+        {% render 'icon-close' %}
+      </button>
+
+      <div class="drawer__body">
+        {%- render 'drawer-free-shipping' -%}
+      </div>
+    </div>
+    <span class="underlay drawer__underlay" data-drawer-underlay></span>
+  </side-drawer>
+
+  <side-drawer
+    class="drawer"
+    data-drawer="drawer-14-days-free-returns"
+    id="side-drawer-collections-14-days-free-returns-{{ section.id }}"
+    data-drawer-size="40%"
+    data-drawer-direction="right-to-left"
+  >
+    <div class="drawer__inner" data-drawer-inner>
+      <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+        {% render 'icon-close' %}
+      </button>
+
+      <div class="drawer__body">
+        {%- render 'drawer-14-days-free-returns' -%}
+      </div>
+    </div>
+    <span class="underlay drawer__underlay" data-drawer-underlay></span>
+  </side-drawer>
+
+  <side-drawer
+    class="drawer"
+    data-drawer="drawer-2-years-warranty"
+    id="side-drawer-collections-2-years-warranty-{{ section.id }}"
+    data-drawer-size="40%"
+    data-drawer-direction="right-to-left"
+  >
+    <div class="drawer__inner" data-drawer-inner>
+      <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+        {% render 'icon-close' %}
+      </button>
+
+      <div class="drawer__body">
+        {%- render 'drawer-2-years-warranty' -%}
+      </div>
+    </div>
+    <span class="underlay drawer__underlay" data-drawer-underlay></span>
+  </side-drawer>
+
+  <side-drawer
+    class="drawer"
+    data-drawer="drawer-gift-packaging"
+    id="side-drawer-collections-gift-packaging-{{ section.id }}"
+    data-drawer-size="40%"
+    data-drawer-direction="right-to-left"
+  >
+    <div class="drawer__inner" data-drawer-inner>
+      <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+        {% render 'icon-close' %}
+      </button>
+
+      <div class="drawer__body">
+        {%- render 'drawer-gift-packaging' -%}
+      </div>
+    </div>
+    <span class="underlay drawer__underlay" data-drawer-underlay></span>
+  </side-drawer>
+{%- endif -%}
 
 {% stylesheet %}
   .collections-and-icons__wrapper {
@@ -260,7 +346,7 @@
 
 {% schema %}
 {
-  "name": "Collections and icons",
+  "name": "description and icons",
   "tag": "section",
   "class": "section-collections-and-icons",
   "max_blocks": 3,
@@ -426,7 +512,7 @@
   ],
   "presets": [
     {
-      "name": "Collections and icons",
+      "name": "Description and icons",
       "category": "Custom",
       "blocks": [
         {
