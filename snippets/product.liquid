@@ -3260,10 +3260,14 @@
                       {%- endfor -%}
 
                       {%- comment -%} Custom drawer blocks {%- endcomment -%}
+                      {%- liquid
+                        assign concierge_label = 'products.product.ask_concierge_title' | t
+                        assign send_hint_label = 'products.product.send_hint_title' | t
+                      -%}
                       <div class="product__block product__custom-drawers-row">
                         <div class="product__custom-drawer">
                           {% render 'link-with-icon',
-                            text: 'products.product.ask_concierge_title' | t,
+                            text: concierge_label,
                             drawer_open: 'ask-concierge',
                             icon: 'icon-ask-our-concierge',
                             icon_position: 'left',
@@ -3273,7 +3277,7 @@
 
                         <div class="product__custom-drawer">
                           {% render 'link-with-icon',
-                            text: 'products.product.send_hint_title' | t,
+                            text: send_hint_label,
                             drawer_open: 'send-hint',
                             icon: 'icon-send-hint',
                             icon_position: 'left',
