@@ -3262,9 +3262,8 @@
                       {%- comment -%} Custom drawer blocks {%- endcomment -%}
                       <div class="product__block product__custom-drawers-row">
                         <div class="product__custom-drawer">
-                          {%- assign concierge_label = 'products.product.ask_concierge_title' | t -%}
                           {% render 'link-with-icon',
-                            text: concierge_label,
+                            text: 'products.product.ask_concierge_title' | t,
                             drawer_open: 'ask-concierge',
                             icon: 'icon-ask-our-concierge',
                             icon_position: 'left',
@@ -3273,9 +3272,8 @@
                         </div>
 
                         <div class="product__custom-drawer">
-                          {%- assign send_hint_label = 'products.product.send_hint_title' | t -%}
                           {% render 'link-with-icon',
-                            text: send_hint_label,
+                            text: 'products.product.send_hint_title' | t,
                             drawer_open: 'send-hint',
                             icon: 'icon-send-hint',
                             icon_position: 'left',
@@ -3379,11 +3377,17 @@
                               if drawer_id == blank
                                 assign drawer_id = block.id
                               endif
+                              assign drawer_slug = block.settings.drawer_snippet | remove: 'drawer-' | replace: '-', '_'
+                              assign drawer_locale_key = 'products.product.drawer_' | append: drawer_slug
+                              assign trigger_label = drawer_locale_key | t
+                              if trigger_label == drawer_locale_key
+                                assign trigger_label = block.settings.trigger_text
+                              endif
                             -%}
 
                             <div class="product__block" {{ block.shopify_attributes }}>
                               {% render 'link-with-icon',
-                                text: block.settings.trigger_text,
+                                text: trigger_label,
                                 drawer_open: drawer_id,
                                 icon: block.settings.trigger_icon,
                                 icon_position: block.settings.trigger_icon_position,
@@ -3396,7 +3400,7 @@
                         {%- liquid
                           assign ruby_sig_block = section.blocks | where: 'type', 'ruby-signature' | first
                           assign ruby_sig_show = true
-                          assign ruby_sig_text = "The Ruby — Roberto Coin's Signature"
+                          assign ruby_sig_text = 'products.product.ruby_title' | t
                           assign ruby_sig_hero = 'https://cdn.shopify.com/s/files/1/1007/1697/0327/files/roberto-coin-ruby-section.jpg?v=1775583563'
                           if ruby_sig_block != blank
                             assign ruby_sig_show = ruby_sig_block.settings.show
