@@ -362,6 +362,16 @@
           </div>
         {%- endif -%}
       </announcement-bar>
+
+      <button
+        type="button"
+        class="announcement__close"
+        data-announcement-close
+      >
+        <span class="visually-hidden">{{ 'general.accessibility.close' | t }}</span>
+        <span class="announcement__close-label" aria-hidden="true">close</span>
+        <span class="announcement__close-icon" aria-hidden="true">{% render 'icon-close' %}</span>
+      </button>
     {%- endif -%}
   {%- elsif is_top == false -%}
     {%- render 'no-blocks' -%}

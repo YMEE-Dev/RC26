@@ -7586,12 +7586,15 @@ hover-disclosure {
 }
 
 .header-sections {
+  position: relative;
   display: flex;
   flex-direction: column;
 }
 
 .header-sections .page-announcement {
   order: -1;
+  position: relative;
+  z-index: 6003;
 }
 
 .header__wrapper {
@@ -9117,11 +9120,16 @@ announcement-bar {
   --icon-offset: 0.2;
   --icon-size: max(var(--text-size) * 0.8, 18px);
   --btn-size: var(--icon-size);
-  position: relative;
+  display: flex;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
   overflow: hidden;
   background: var(--bg);
   line-height: var(--line-height-normal);
-  transition: opacity 0.5s ease;
+  transition: top 0.5s ease;
+  will-change: top;
 }
 
 .announcement__wrapper .free-shipping__graph svg {
@@ -9131,6 +9139,13 @@ announcement-bar {
 
 body:not(.is-loaded) .announcement__wrapper {
   opacity: 0;
+}
+
+.announcement__wrapper--closing {
+  top: -50px;
+  pointer-events: none;
+  border-top-width: 0;
+  border-bottom-width: 0;
 }
 
 .announcement__wrapper--top {
@@ -9539,7 +9554,9 @@ html.supports-touch ticker-bar[data-slide]:not([paused]) .ticker--animated {
 }
 
 .announcement__bar-outer {
-  width: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
 }
 
 @media only screen and (max-width: 749px) {
@@ -9553,6 +9570,44 @@ html.supports-touch ticker-bar[data-slide]:not([paused]) .ticker--animated {
   .announcement__bar-outer--mobile {
     padding-top: 0;
     padding-bottom: 0;
+  }
+}
+
+.announcement__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  gap: 0.5rem;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.announcement__close-label {
+  display: inline-block;
+}
+
+.announcement__close-icon {
+  display: none;
+}
+
+.announcement__close .icon {
+  width: var(--icon-size);
+  height: var(--icon-size);
+}
+
+@media only screen and (max-width: 749px) {
+  .announcement__close-label {
+    display: none;
+  }
+
+  .announcement__close-icon {
+    display: inline-flex;
   }
 }
 
