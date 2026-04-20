@@ -6,8 +6,8 @@
 {%- liquid
   assign ruby_content = nil
   assign default_image_url = 'https://cdn.shopify.com/s/files/1/0969/2990/7075/files/Jasmine_Ruby_2.png?v=1772635832'
-  assign ruby_title = 'The Ruby'
-  assign ruby_description_fallback = '<p>Roberto Coin chose the ruby as the hidden signature of his creations. Inspired by ancient cultures, where the ruby symbolized protection, vitality and passion, he transformed it into a discreet talisman worn close to the skin.</p><p>Set inside every jewel, the ruby is not meant to be seen — but to be felt. A quiet symbol of strength, courage and enduring beauty that connects each creation to its wearer.</p>'
+  assign ruby_title = 'products.product.ruby_title' | t
+  assign ruby_description_fallback = nil
 
   if shop.metafields.info.ruby_signature_info != blank
     assign ruby_content = shop.metafields.info.ruby_signature_info.value
@@ -36,7 +36,7 @@
       {%- if ruby_content != blank and ruby_content.description != blank -%}
         {{ ruby_content.description | metafield_tag }}
       {%- else -%}
-        {{ ruby_description_fallback }}
+        {{ 'products.product.ruby_description' | t | newline_to_br }}
       {%- endif -%}
     </div>
   </div>

@@ -3262,8 +3262,9 @@
                       {%- comment -%} Custom drawer blocks {%- endcomment -%}
                       <div class="product__block product__custom-drawers-row">
                         <div class="product__custom-drawer">
+                          {%- assign concierge_label = 'products.product.ask_concierge_title' | t -%}
                           {% render 'link-with-icon',
-                            text: 'Ask our concierge',
+                            text: concierge_label,
                             drawer_open: 'ask-concierge',
                             icon: 'icon-ask-our-concierge',
                             icon_position: 'left',
@@ -3272,8 +3273,9 @@
                         </div>
 
                         <div class="product__custom-drawer">
+                          {%- assign send_hint_label = 'products.product.send_hint_title' | t -%}
                           {% render 'link-with-icon',
-                            text: 'Send a hint',
+                            text: send_hint_label,
                             drawer_open: 'send-hint',
                             icon: 'icon-send-hint',
                             icon_position: 'left',
@@ -3297,7 +3299,8 @@
                       <style>
                         .product__custom-drawers-row {
                           display: flex;
-                          gap: 25px;
+                          flex-wrap: wrap;
+                          gap: 0px;
                           width: 100%;
                           margin-bottom: 50px;
                           margin-top: 30px;
@@ -3306,11 +3309,13 @@
                         .product__custom-drawer {
                           flex: 0 0 auto;
                         }
+                        .product__custom-drawer:first-child {
+                          padding-right: 10px;
+                        }
 
                         .product__custom-drawer .link-with-icon {
                           width: 100%;
                           justify-content: flex-start;
-                          margin-bottom: 0;
                         }
 
                         @media only screen and (max-width: 749px) {
