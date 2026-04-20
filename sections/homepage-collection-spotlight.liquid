@@ -11,6 +11,9 @@
   assign mobile_layout = section.settings.mobile_layout
   assign show_recently_viewed_indicator = settings.show_recently_viewed_indicator
   assign sizes = '(min-width: 960px) 360px, calc(50vw - 30px)'
+  assign button_label = section.settings.button_label | strip
+  assign button_link = section.settings.button_link
+  assign button_style = section.settings.button_style
   assign rendered_products_count = 0
 
   if image != blank and image.value != blank
@@ -109,8 +112,7 @@
 
                   {%- if hidden_product == false -%}
                     {%- assign rendered_products_count = rendered_products_count | plus: 1 -%}
-                    {%-
-                      render 'product-grid-item',
+                    {%- render 'product-grid-item',
                       product: product,
                       animation_delay: rendered_products_count | minus: 1,
                       animation_anchor: '#HomepageCollectionSpotlightSlider--' | append: section.id,
@@ -130,8 +132,7 @@
                         cycle 'Spotlight Product', 'Collection Piece'
                       endcapture
                     -%}
-                    {%-
-                      render 'onboarding-product-grid-item',
+                    {%- render 'onboarding-product-grid-item',
                       title: placeholder_title,
                       placeholder: placeholder,
                       index: forloop.index,
@@ -143,6 +144,17 @@
               </div>
             </grid-slider>
           </div>
+
+          {%- if button_label != blank and button_link != blank -%}
+            <div class="homepage-collection-spotlight__button-wrapper">
+              <a
+                href="{{ button_link }}"
+                class="btn {% if button_style == 'secondary' %}btn--secondary btn--outline{% else %}btn--primary btn--solid{% endif %} homepage-collection-spotlight__button"
+              >
+                <span>{{ button_label | escape }}</span>
+              </a>
+            </div>
+          {%- endif -%}
         </div>
 
         {%- assign animation_order = animation_order | plus: 1 -%}
@@ -152,6 +164,13 @@
           data-aos-anchor="{{ animation_anchor }}"
           data-aos-order="{{ animation_order }}"
         >
+          {%- if button_link != blank -%}
+            <a
+              href="{{ button_link }}"
+              class="homepage-collection-spotlight__media-link"
+              aria-label="{{ button_label | default: section_title | default: 'Collection spotlight' | escape }}"
+            >
+          {%- endif -%}
           {%- if image.width != blank -%}
             {{
               image
@@ -190,6 +209,9 @@
                 loading="lazy"
               >
             {%- endif -%}
+          {%- endif -%}
+          {%- if button_link != blank -%}
+            </a>
           {%- endif -%}
         </div>
       </div>
@@ -236,6 +258,31 @@
       "id": "description",
       "label": "Description",
       "default": "<p>Inspired by the luminous beauty of the Tiare flower, this Roberto Coin Tiara collection expresses effortless femininity, pure light, and feminine strength.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Label",
+      "default": "Shop collection"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "default": "primary",
+      "options": [
+        { "value": "primary", "label": "Primary" },
+        { "value": "secondary", "label": "Secondary" }
+      ]
     },
     {
       "type": "product_list",

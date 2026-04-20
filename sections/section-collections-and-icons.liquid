@@ -1,0 +1,539 @@
+<!-- /sections/section-collections-and-icons.liquid -->
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign animation_anchor = '#CollectionsAndIcons--' | append: section.id
+  assign collection_blocks = section.blocks | where: 'type', 'links'
+  assign icon_blocks = section.blocks | where: 'type', 'icons'
+  assign has_drawer_icons = false
+  assign description_first = false
+
+  if section.settings.content_order == 'description-first'
+    assign description_first = true
+  endif
+
+  for block in icon_blocks
+    if block.settings.enable_drawers
+      assign has_drawer_icons = true
+      break
+    endif
+  endfor
+-%}
+
+{%- style -%}
+  #CollectionsAndIcons--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    --PT-MOBILE: {{ section.settings.padding_top_mobile }}px;
+    --PB-MOBILE: {{ section.settings.padding_bottom_mobile }}px;
+    position: relative;
+    z-index: 10;
+  }
+{%- endstyle -%}
+
+<section
+  id="CollectionsAndIcons--{{ section.id }}"
+  class="collections-and-icons section-padding {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="collections-and-icons"
+>
+  <div class="collections-and-icons__wrapper {{ section.settings.width }}">
+    {%- if section.settings.title != blank -%}
+      <header class="collections-and-icons__header">
+        {%- liquid
+          assign heading_tag = 'h2'
+
+          unless section.settings.heading_tag == 'automatic' or section.settings.heading_tag == blank
+            assign heading_tag = section.settings.heading_tag
+          endunless
+        -%}
+
+        <{{ heading_tag }} class="collections-and-icons__heading">
+          {{ section.settings.title | downcase }}
+        </{{ heading_tag }}>
+      </header>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="collections-and-icons__grid{% if description_first %} collections-and-icons__grid--reverse-desktop{% endif %}">
+        <div class="collections-and-icons__content">
+          {%- for block in collection_blocks -%}
+            <div class="collections-and-icons__collection" {{ block.shopify_attributes }}>
+              {%- if block.settings.title != blank -%}
+                <span class="collections-and-icons__collection-title label">
+                  {{ block.settings.title }}
+                </span>
+              {%- endif -%}
+
+              {%- if block.settings.collection_list != blank -%}
+                <ul class="collections-and-icons__collection-list" role="list">
+                  {%- for collection in block.settings.collection_list -%}
+                    {%- if collection != blank -%}
+                      <li class="collections-and-icons__collection-item">
+                        <a class="collections-and-icons__collection-link navlink" href="{{ collection.url }}">
+                          {{ collection.title }}
+                        </a>
+                      </li>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+
+          {%- for block in icon_blocks -%}
+            <div
+              class="collections-and-icons__icons collections-and-icons__icons--full"
+              {{ block.shopify_attributes }}
+            >
+              {%- render 'custom-icons',
+                animation_anchor: animation_anchor,
+                animation_order: forloop.index,
+                enable_drawers: block.settings.enable_drawers
+              -%}
+            </div>
+          {%- endfor -%}
+        </div>
+
+        {%- if section.settings.description != blank -%}
+          <toggle-ellipsis class="collections-and-icons__mobile-accordion" data-height="240">
+            <div
+              class="collections-and-icons__mobile-accordion-content collections-and-icons__description caption rte"
+              data-content
+            >
+              {{ section.settings.description }}
+            </div>
+
+            <div class="toggle-ellipsis__actions collections-and-icons__mobile-accordion-actions" data-actions>
+              <button type="button" class="caps--link collections-and-icons__mobile-accordion-trigger" data-button>
+                <span>{{ 'products.general.read_more' | t }}</span>
+              </button>
+            </div>
+          </toggle-ellipsis>
+        {%- endif -%}
+      </div>
+    {%- else -%}
+      {%- render 'no-blocks' -%}
+    {%- endif -%}
+  </div>
+</section>
+
+{%- if has_drawer_icons -%}
+  <side-drawer
+    class="drawer"
+    data-drawer="drawer-free-shipping"
+    id="side-drawer-collections-free-shipping-{{ section.id }}"
+    data-drawer-size="40%"
+    data-drawer-direction="right-to-left"
+  >
+    <div class="drawer__inner" data-drawer-inner>
+      <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+        {% render 'icon-close' %}
+      </button>
+
+      <div class="drawer__body">
+        {%- render 'drawer-free-shipping' -%}
+      </div>
+    </div>
+    <span class="underlay drawer__underlay" data-drawer-underlay></span>
+  </side-drawer>
+
+  <side-drawer
+    class="drawer"
+    data-drawer="drawer-14-days-free-returns"
+    id="side-drawer-collections-14-days-free-returns-{{ section.id }}"
+    data-drawer-size="40%"
+    data-drawer-direction="right-to-left"
+  >
+    <div class="drawer__inner" data-drawer-inner>
+      <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+        {% render 'icon-close' %}
+      </button>
+
+      <div class="drawer__body">
+        {%- render 'drawer-14-days-free-returns' -%}
+      </div>
+    </div>
+    <span class="underlay drawer__underlay" data-drawer-underlay></span>
+  </side-drawer>
+
+  <side-drawer
+    class="drawer"
+    data-drawer="drawer-2-years-warranty"
+    id="side-drawer-collections-2-years-warranty-{{ section.id }}"
+    data-drawer-size="40%"
+    data-drawer-direction="right-to-left"
+  >
+    <div class="drawer__inner" data-drawer-inner>
+      <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+        {% render 'icon-close' %}
+      </button>
+
+      <div class="drawer__body">
+        {%- render 'drawer-2-years-warranty' -%}
+      </div>
+    </div>
+    <span class="underlay drawer__underlay" data-drawer-underlay></span>
+  </side-drawer>
+
+  <side-drawer
+    class="drawer"
+    data-drawer="drawer-gift-packaging"
+    id="side-drawer-collections-gift-packaging-{{ section.id }}"
+    data-drawer-size="40%"
+    data-drawer-direction="right-to-left"
+  >
+    <div class="drawer__inner" data-drawer-inner>
+      <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+        {% render 'icon-close' %}
+      </button>
+
+      <div class="drawer__body">
+        {%- render 'drawer-gift-packaging' -%}
+      </div>
+    </div>
+    <span class="underlay drawer__underlay" data-drawer-underlay></span>
+  </side-drawer>
+{%- endif -%}
+
+{% stylesheet %}
+  .collections-and-icons__wrapper {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .collections-and-icons__header {
+    margin-bottom: clamp(32px, 4vw, 56px);
+  }
+
+  .collections-and-icons__heading {
+    margin: 0;
+    text-transform: capitalize;
+  }
+
+  .collections-and-icons__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    align-items: start;
+  }
+
+  @media (min-width: 990px) {
+    .collections-and-icons__grid {
+      flex-direction: row;
+      gap: clamp(32px, 5vw, 80px);
+    }
+
+    .collections-and-icons__grid--reverse-desktop {
+      flex-direction: row-reverse;
+    }
+
+    .collections-and-icons__content,
+    .collections-and-icons__mobile-accordion {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+  }
+
+  .collections-and-icons__content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  @media (min-width: 750px) {
+    .collections-and-icons__content {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: clamp(32px, 4vw, 72px);
+      row-gap: 36px;
+    }
+  }
+
+  .collections-and-icons__collection {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .collections-and-icons__collection-title {
+    display: block;
+    margin-bottom: 15px;
+    color: #a7a7a7;
+  }
+
+  .collections-and-icons__collection-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .collections-and-icons__collection-item {
+    margin: 0;
+  }
+
+  .collections-and-icons__collection-link {
+    text-transform: uppercase;
+    color: var(--text);
+    text-decoration: none;
+    padding: 0;
+    transition: opacity 0.3s ease-in-out, color 0.3s ease-in-out;
+  }
+
+  .collections-and-icons__collection-link:hover {
+    opacity: 0.6;
+  }
+
+  .collections-and-icons__icons {
+    width: 100%;
+  }
+
+  .collections-and-icons__description {
+    margin: 0;
+  }
+
+  .collections-and-icons__description p {
+    margin: 0 0 1em;
+  }
+
+  .collections-and-icons__description p:last-child {
+    margin-bottom: 0;
+  }
+
+  .collections-and-icons__mobile-accordion {
+    width: 100%;
+  }
+
+  @media only screen and (min-width: 750px) {
+    .collections-and-icons__mobile-accordion {
+      max-height: none !important;
+      overflow: visible;
+    }
+
+    .collections-and-icons__mobile-accordion .toggle-ellipsis__actions {
+      display: none !important;
+    }
+  }
+
+  @media only screen and (max-width: 749px) {
+    .collections-and-icons__mobile-accordion {
+      --height: 240px;
+    }
+
+    .collections-and-icons__mobile-accordion-actions {
+      text-align: left;
+      padding-top: 12px;
+    }
+
+    .collections-and-icons__mobile-accordion-trigger {
+      color: var(--text);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+  }
+
+  @media (max-width: 749px) {
+    .collections-and-icons__header {
+      margin-bottom: 28px;
+    }
+
+    .collections-and-icons__collection-title {
+      margin-bottom: 14px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "description and icons",
+  "tag": "section",
+  "class": "section-collections-and-icons",
+  "max_blocks": 3,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Princess Star"
+    },
+    {
+      "type": "select",
+      "id": "heading_font_size",
+      "label": "Heading size",
+      "default": "heading-large",
+      "options": [
+        {"value": "heading-mini", "label": "Mini"},
+        {"value": "heading-x-small", "label": "Extra small"},
+        {"value": "heading-small", "label": "Small"},
+        {"value": "heading-medium", "label": "Medium"},
+        {"value": "heading-large", "label": "Large"},
+        {"value": "heading-x-large", "label": "Extra large"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading SEO tag",
+      "default": "automatic",
+      "options": [
+        {"value": "automatic", "label": "Automatic"},
+        {"value": "h1", "label": "H1"},
+        {"value": "h2", "label": "H2"},
+        {"value": "h3", "label": "H3"},
+        {"value": "h4", "label": "H4"},
+        {"value": "h5", "label": "H5"},
+        {"value": "h6", "label": "H6"}
+      ]
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>The creations of the Princess Star collection bring together two powerful symbols - stars and flowers - in a design that merges meaning with refined artistry.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "content_order",
+      "label": "Content order",
+      "default": "blocks-first",
+      "options": [
+        {"value": "blocks-first", "label": "Blocks then description"},
+        {"value": "description-first", "label": "Description then blocks"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Layout width",
+      "default": "wrapper--custom",
+      "options": [
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"},
+        {"value": "wrapper--wide", "label": "Wide"},
+        {"value": "wrapper--narrow", "label": "Narrow"},
+        {"value": "wrapper--custom", "label": "Custom (max-width: 1232px)"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Top (mobile)",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Bottom (mobile)",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Color"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "links",
+      "name": "Collection list",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "SHOP MORE"
+        },
+        {
+          "type": "collection_list",
+          "id": "collection_list",
+          "label": "Collections"
+        }
+      ]
+    },
+    {
+      "type": "icons",
+      "name": "Icons",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "enable_drawers",
+          "label": "Enable drawers",
+          "default": false,
+          "info": "Render each icon as a side drawer trigger."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Description and icons",
+      "category": "Custom",
+      "blocks": [
+        {
+          "type": "links",
+          "settings": {
+            "title": "SHOP MORE"
+          }
+        },
+        {
+          "type": "links",
+          "settings": {
+            "title": "IN OCCASION"
+          }
+        },
+        {
+          "type": "icons"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
