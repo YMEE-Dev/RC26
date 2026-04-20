@@ -25,6 +25,8 @@
     --PB: {{ section.settings.padding_bottom }}px;
     --PT-MOBILE: {{ section.settings.padding_top_mobile }}px;
     --PB-MOBILE: {{ section.settings.padding_bottom_mobile }}px;
+    position: relative;
+    z-index: 10;
   }
 {%- endstyle -%}
 
@@ -45,7 +47,7 @@
           endunless
         -%}
 
-        <{{ heading_tag }} class="collections-and-icons__heading {{ section.settings.heading_font_size }}">
+        <{{ heading_tag }} class="collections-and-icons__heading">
           {{ section.settings.title | downcase }}
         </{{ heading_tag }}>
       </header>
