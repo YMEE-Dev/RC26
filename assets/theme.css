@@ -10323,11 +10323,14 @@ header-search-popdown.is-open .search-popdown {
 
 [data-sliderule-pane].is-scrolling,
 [data-sliderule].is-scrolling,
-[data-sliderule-pane="0"],
 [data-sliderule-pane="1"] [data-sliderule="1"].is-visible,
 [data-sliderule-pane="2"] [data-sliderule="2"].is-visible {
   overflow-y: auto;
   overflow-x: hidden;
+}
+[data-sliderule-pane="0"] {
+  overflow: visible !important;
+  touch-action: pan-y !important;
 }
 
 [data-sliderule].is-hiding,
