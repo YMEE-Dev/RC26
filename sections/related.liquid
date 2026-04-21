@@ -436,13 +436,13 @@
               <ul class="tabs {{ heading_alignment }}">
                 {%- if related -%}
                   <li class="tab-link tab-link-0{% if related %} current{% endif %}" data-tab="0" tabindex="0">
-                    <span>More {{ current_collection_display_title | escape }}</span>
+                    <span>{{ 'products.product.more_from' | t: collection: current_collection_display_title }}</span>
                   </li>
                 {%- endif -%}
 
                 {%- if category -%}
                   <li class="tab-link tab-link-1{% if related == nil %} current{% endif %}" data-tab="1" tabindex="0">
-                    <span>More {{ current_category_display_title | escape }}</span>
+                    <span>{{ 'products.product.more_from' | t: collection: current_category_display_title }}</span>
                   </li>
                 {%- endif -%}
 
@@ -453,7 +453,7 @@
                     data-tab="2"
                     tabindex="0"
                   >
-                    <span>recently viewed</span>
+                    <span>{{ 'products.general.recently_viewed' | t }}</span>
                   </li>
                 {%- endif -%}
               </ul>
@@ -484,7 +484,7 @@
               data-aos-anchor="{{ animation_anchor }}"
               data-aos-order="1"
             >
-              More {{ current_collection_display_title | escape }}
+              {{ 'products.product.more_from' | t: collection: current_collection_display_title }}
             </h6>
           {%- endif -%}
 
@@ -505,7 +505,7 @@
               data-aos-anchor="{{ animation_anchor }}"
               data-aos-order="1"
             >
-              More {{ current_category_display_title | escape }}
+              {{ 'products.product.more_from' | t: collection: current_category_display_title }}
             </h6>
           {%- endif -%}
 
@@ -526,7 +526,7 @@
               data-aos-anchor="{{ animation_anchor }}"
               data-aos-order="1"
             >
-              recently viewed
+              {{ 'products.general.recently_viewed' | t }}
             </h6>
           {%- endif -%}
 

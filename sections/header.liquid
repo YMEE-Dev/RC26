@@ -999,25 +999,130 @@
 
     const rootSelector = '.tmenu_item.tmenu_item--root.tmenu_item_level_0.tmenu_item_submenu_type_mega';
     const tmenuActiveSelector = '.tmenu_item--root.tmenu_item_level_0.tmenu_item_active';
+    const mobileDrawerThirdLevelSubmenuSelector =
+      '.drawer__menu.tmenu_app .tmenu_item_level_0.tmenu_item_mobile > .tmenu_submenu--mobile.tmenu_submenu > li.tmenu_item_level_1.tmenu_item_mobile:nth-of-type(3) > .tmenu_submenu';
+    const mobileTouchSafeSubmenuSelector = [
+      'ul.tmenu_submenu_type_automatic.tmenu_submenu--mobile.tmenu_submenu',
+      mobileDrawerThirdLevelSubmenuSelector,
+    ].join(', ');
     let initialized = false;
     let tmenuIsActive = false;
     let tmenuScrollLocked = false;
+    let tmenuScrollLockTarget = null;
 
     const applyMenuOpenStyles = () => {
       initCollectionLabelMirroring();
       initMenuImages();
     };
 
-    const setTmenuScrollLock = (shouldLock) => {
-      if (shouldLock && !tmenuScrollLocked) {
-        document.dispatchEvent(new CustomEvent('theme:scroll:lock', {bubbles: true}));
-        tmenuScrollLocked = true;
+    const enableMobileSubmenuTouchScrollGuard = () => {
+      if (document.documentElement.dataset.tmenuMobileTouchScrollGuardBound === 'true') return;
+      document.documentElement.dataset.tmenuMobileTouchScrollGuardBound = 'true';
+
+      const getTouchScrollableSubmenu = (target) => {
+        if (!(target instanceof Element)) return null;
+        return target.closest(mobileTouchSafeSubmenuSelector);
+      };
+
+      const applyBoundaryScrollHack = (submenu) => {
+        if (!submenu) return;
+        if (submenu.scrollHeight <= submenu.clientHeight) return;
+
+        if (submenu.scrollTop <= 0) {
+          submenu.scrollTop = 1;
+          return;
+        }
+
+        if (submenu.scrollTop + submenu.clientHeight >= submenu.scrollHeight) {
+          submenu.scrollTop -= 1;
+        }
+      };
+
+      document.addEventListener(
+        'touchstart',
+        (event) => {
+          const submenu = getTouchScrollableSubmenu(event.target);
+          if (!submenu) return;
+
+          applyBoundaryScrollHack(submenu);
+          event.stopPropagation();
+        },
+        {capture: true, passive: true}
+      );
+
+      document.addEventListener(
+        'touchmove',
+        (event) => {
+          if (!getTouchScrollableSubmenu(event.target)) return;
+          event.stopPropagation();
+        },
+        {capture: true, passive: true}
+      );
+    };
+
+    const enableMobileSubmenuDownScroll = (submenu) => {
+      if (!submenu || submenu.dataset.mobileDownScrollEnabled === 'true') return;
+
+      submenu.dataset.mobileDownScrollEnabled = 'true';
+      submenu.style.touchAction = 'pan-y';
+      submenu.style.overscrollBehaviorY = 'contain';
+      submenu.style.webkitOverflowScrolling = 'touch';
+
+      submenu.addEventListener(
+        'touchmove',
+        (event) => {
+          event.stopPropagation();
+        },
+        {passive: true}
+      );
+    };
+
+    const getTmenuScrollLockTarget = () => {
+      const submenuCandidates = selectAll(mobileTouchSafeSubmenuSelector);
+      const activeSubmenu =
+        submenuCandidates.find((submenu) => submenu.closest('.tmenu_item_mobile.tmenu_item_active')) ||
+        submenuCandidates[0];
+
+      if (activeSubmenu) {
+        enableMobileSubmenuDownScroll(activeSubmenu);
+        return activeSubmenu;
       }
 
-      if (!shouldLock && tmenuScrollLocked) {
+      return document.querySelector('header-drawer.drawer--header .drawer__content__scroll');
+    };
+
+    enableMobileSubmenuTouchScrollGuard();
+
+    const setTmenuScrollLock = (shouldLock) => {
+      if (shouldLock) {
+        const nextScrollLockTarget = getTmenuScrollLockTarget();
+        const targetChanged = nextScrollLockTarget !== tmenuScrollLockTarget;
+
+        if (targetChanged && tmenuScrollLocked) {
+          document.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
+          tmenuScrollLocked = false;
+        }
+
+        if (!tmenuScrollLocked) {
+          document.dispatchEvent(
+            new CustomEvent('theme:scroll:lock', {
+              detail: nextScrollLockTarget || undefined,
+              bubbles: true,
+            })
+          );
+          tmenuScrollLocked = true;
+        }
+
+        tmenuScrollLockTarget = nextScrollLockTarget || null;
+        return;
+      }
+
+      if (tmenuScrollLocked) {
         document.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
         tmenuScrollLocked = false;
       }
+
+      tmenuScrollLockTarget = null;
     };
 
     const observeRoot = (root) => {
@@ -1030,8 +1135,13 @@
         if (activeNow && !tmenuIsActive) {
           applyMenuOpenStyles();
         }
+        if (activeNow) {
+          setTmenuScrollLock(true);
+        }
         if (activeNow !== tmenuIsActive) {
-          setTmenuScrollLock(activeNow);
+          if (!activeNow) {
+            setTmenuScrollLock(false);
+          }
           tmenuIsActive = activeNow;
           document.dispatchEvent(
             new CustomEvent('theme:tmenu:state', {

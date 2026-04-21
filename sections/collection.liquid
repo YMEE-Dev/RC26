@@ -281,9 +281,9 @@
             aria-pressed="false"
           >
             <span class="availability-filter__label availability-filter__label--count">
-              {{ collection.products_count }} Pieces
+              {{ collection.products_count }} {{ 'collections.general.pieces' | t }}
             </span>
-            <span class="availability-filter__label availability-filter__label--view-all"> View all </span>
+            <span class="availability-filter__label availability-filter__label--view-all">{{ 'collections.general.view_all' | t }}</span>
           </a>
         </div>
         {%- if sub_collection_links_html != blank -%}
@@ -297,9 +297,9 @@
               type="checkbox"
               class="availability-filter__checkbox"
               data-availability-filter-checkbox
-              aria-label="In Stock"
+              aria-label="{{ 'collections.general.in_stock' | t }}"
             >
-            <span>In Stock</span>
+            <span>{{ 'collections.general.in_stock' | t }}</span>
           </label>
           {%- if enable_filters -%}
             {%- liquid
