@@ -22,10 +22,12 @@
     assign justify_content = 'center'
   endif
   assign bar_markup = ''
+  assign mobile_marquee_markup = ''
   assign blocks_counter = 0
   assign block_count_desktop = 0
   assign block_count_mobile = 0
   assign announcement_height = 'max(calc(var(--font-' | append: text_font_size | append: ') * var(--line-height-normal)), 36px)'
+  assign announcement_cookie_name = 'announcement_bar_closed'
   assign announcement_modifier = ''
   assign style_root = ''
 -%}
@@ -211,29 +213,41 @@
       {%- endif -%}
     {%- endcapture -%}
 
-    {%- capture bar_html -%}
-      {%- if section.settings.layout == 'marquee' -%}
-        <div class="announcement__slide{{ target_device_class }}" style="{{ block_style }}" {{ block.shopify_attributes }}>
-          {{ block_content }}
-        </div>
-      {%- else -%}
-        <ticker-bar style="{{ block_style }}" {{ block_attributes }}>
-          <div data-ticker-frame class="announcement__message">
-            <div data-ticker-scale class="announcement__scale ticker--unloaded">
-              {%- if block.type == 'image' -%}
-                {{ block_content }}
-              {%- else -%}
-                <div data-ticker-text class="announcement__text">
-                  {{ block_content }}
-                </div>
-              {%- endif -%}
-            </div>
-          </div>
-        </ticker-bar>
-      {%- endif -%}
+    {%- capture bar_html_marquee -%}
+      <div
+        class="announcement__slide{{ target_device_class }}"
+        style="{{ block_style }}"
+        data-slide="{{ block.id }}"
+        data-block-id="{{ block.id }}"
+        {{ block.shopify_attributes }}
+      >
+        {{ block_content }}
+      </div>
     {%- endcapture -%}
 
-    {%- assign bar_markup = bar_markup | append: bar_html -%}
+    {%- capture bar_html_slider -%}
+      <ticker-bar style="{{ block_style }}" {{ block_attributes }}>
+        <div data-ticker-frame class="announcement__message">
+          <div data-ticker-scale class="announcement__scale ticker--unloaded">
+            {%- if block.type == 'image' -%}
+              {{ block_content }}
+            {%- else -%}
+              <div data-ticker-text class="announcement__text">
+                {{ block_content }}
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      </ticker-bar>
+    {%- endcapture -%}
+
+    {%- if section.settings.layout == 'slider' -%}
+      {%- assign bar_markup = bar_markup | append: bar_html_slider -%}
+      {%- assign mobile_marquee_markup = mobile_marquee_markup | append: bar_html_marquee -%}
+    {%- else -%}
+      {%- assign bar_markup = bar_markup | append: bar_html_marquee -%}
+    {%- endif -%}
+
     {%- assign blocks_counter = blocks_counter | plus: 1 -%}
   {%- endif -%}
 {%- endfor -%}
@@ -309,8 +323,9 @@
 
 <div
   id="Announcement--{{ section.id }}"
-  class="announcement__wrapper{% if is_top %} announcement__wrapper--top{% endif %}{% if show_border %} announcement__wrapper--borders{% endif %}"
+  class="announcement__wrapper announcement__wrapper--closing{% if is_top %} announcement__wrapper--top{% endif %}{% if show_border %} announcement__wrapper--borders{% endif %}"
   data-announcement-wrapper
+  data-announcement-cookie-name="{{ announcement_cookie_name }}"
   data-section-id="{{ section.id }}"
   data-section-type="announcement"
   style="{{ style }}"
@@ -328,7 +343,7 @@
         style="--padding-scrolling: {{ section.settings.message_spacing }}px;"
       >
         {%- if section.settings.layout == 'slider' -%}
-          <div class="announcement__bar-holder announcement__bar-holder--slider{% if show_arrows and section.blocks.size > 1 %} announcement__bar-holder--arrows{% endif %}">
+          <div class="announcement__bar-holder announcement__bar-holder--slider announcement__bar-holder--desktop-slider{% if show_arrows and section.blocks.size > 1 %} announcement__bar-holder--arrows{% endif %}">
             <slider-component
               class="announcement__slider"
               data-slider
@@ -337,6 +352,29 @@
               {{ bar_markup }}
             </slider-component>
           </div>
+
+          {%- if mobile_marquee_markup != blank -%}
+            <div class="announcement__bar-holder announcement__bar-holder--marquee announcement__bar-holder--mobile-marquee">
+              <div class="announcement__bar">
+                {%- comment -%}
+                  The "autoplay" attribute forces ticker to start playing by cloning its text elements 10 times
+                {%- endcomment -%}
+
+                <ticker-bar
+                  autoplay
+                  speed="{{ 100.0 | divided_by: section.settings.marquee_speed | times: marquee_time }}"
+                >
+                  <div data-ticker-frame class="announcement__message">
+                    <div data-ticker-scale class="announcement__scale ticker--unloaded">
+                      <div data-ticker-text class="announcement__text">
+                        {{ mobile_marquee_markup }}
+                      </div>
+                    </div>
+                  </div>
+                </ticker-bar>
+              </div>
+            </div>
+          {%- endif -%}
         {%- endif -%}
 
         {%- if section.settings.layout == 'marquee' -%}

@@ -19,15 +19,25 @@
       constructor() {
         super();
         this.slider = this.querySelector(selectors.slider);
-        this.slidesCount = this.querySelectorAll(selectors.tickerSlide).length;
+        const slideIds = [...this.querySelectorAll(selectors.tickerSlide)]
+          .map((slide) => slide.dataset.blockId || slide.dataset.slide)
+          .filter(Boolean);
+        this.slidesCount = slideIds.length ? new Set(slideIds).size : this.querySelectorAll(selectors.tickerSlide).length;
         this.wrapper = this.closest(selectors.wrapper);
         this.closeButton = this.wrapper?.querySelector(selectors.closeButton);
+        this.cookieName = this.wrapper?.dataset.announcementCookieName || "announcement_bar_closed";
         this.isClosing = false;
         this.resizeEvent = this.resize.bind(this);
         this.closeEvent = this.close.bind(this);
       }
 
       connectedCallback() {
+        if (this.hasDismissedCookie()) {
+          this.applyClosedState();
+        } else {
+          this.removeClosedState();
+        }
+
         this.addEventListener("theme:slider:loaded", () => {
           this.querySelectorAll(selectors.ticker)?.forEach((ticker) => {
             ticker.dispatchEvent(new CustomEvent("theme:ticker:refresh"));
@@ -74,7 +84,26 @@
         if (!this.wrapper || this.isClosing) return;
 
         this.isClosing = true;
-        this.wrapper.classList.add("announcement__wrapper--closing");
+        this.setDismissedCookie();
+        this.applyClosedState();
+      }
+
+      hasDismissedCookie() {
+        const prefix = `${this.cookieName}=`;
+
+        return document.cookie.split("; ").some((cookie) => cookie.startsWith(prefix));
+      }
+
+      setDismissedCookie() {
+        document.cookie = `${this.cookieName}=1; path=/; max-age=86400; samesite=lax`;
+      }
+
+      applyClosedState() {
+        this.wrapper?.classList.add("announcement__wrapper--closing");
+      }
+
+      removeClosedState() {
+        this.wrapper?.classList.remove("announcement__wrapper--closing");
       }
 
       removeSlide(slide) {
