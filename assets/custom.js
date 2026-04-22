@@ -36,6 +36,7 @@
   loadScriptOnce(dataset.headCountryRedirectSrc || "", "data-head-country-redirect-script");
   loadScriptOnce(dataset.blogHeaderVideoSrc || "", "data-blog-header-video-script");
   loadScriptOnce(dataset.giftGuideSliderSrc || "", "data-gift-guide-slider-script");
+  loadScriptOnce(dataset.gridSliderProgressSrc || "", "data-grid-slider-progress-script");
   loadScriptOnce(dataset.timelineSrc || "", "data-timeline-script");
   loadScriptOnce(dataset.socialVideosSrc || "", "data-social-videos-script");
   loadScriptOnce(dataset.rcTimelineSrc || "", "data-rc-timeline-script");
