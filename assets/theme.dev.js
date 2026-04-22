@@ -3647,9 +3647,11 @@
           this.deadLinks = document.querySelectorAll('.navlink[href="#"]');
           this.resizeObserver = null;
           this.headerHideLayerTimeout = null;
+          this.headerScrollIntentTimeout = null;
           this.checkWidth = this.checkWidth.bind(this);
           this.scheduleHeaderLayerHide = this.scheduleHeaderLayerHide.bind(this);
           this.resetHeaderLayerHide = this.resetHeaderLayerHide.bind(this);
+          this.commitHeaderScrollIntent = this.commitHeaderScrollIntent.bind(this);
           this.handleTmenuState = this.handleTmenuState.bind(this);
           this.header = this.querySelector("[data-header-height]");
           this.isScrollRevealBlurVisible = false;
@@ -3790,6 +3792,17 @@
         }
 
         initHeaderScrollHide() {
+          this.headerScrollHideBuffer = Number.parseInt(this.dataset.headerScrollHideBuffer, 10);
+          if (Number.isNaN(this.headerScrollHideBuffer)) {
+            this.headerScrollHideBuffer = 20;
+          }
+          this.headerScrollHideBuffer = Math.max(this.headerScrollHideBuffer, 0);
+          this.headerScrollIntentStart = window.scrollY;
+          this.headerScrollIntentEnd = window.scrollY;
+          this.headerScrollIntentDirection = null;
+          this.headerScrollIntentDelay = 0;
+          this.lastScrollPosition = window.scrollY;
+
           document.addEventListener("theme:scroll", this.scrollHideEvent);
           this.toggleHeaderHideOnScroll({
             detail: {
@@ -3805,59 +3818,148 @@
           const atTop = position <= 0;
           const goingDown = Boolean(e?.detail?.down);
           const goingUp = Boolean(e?.detail?.up);
-          const isMobileViewport = window.innerWidth < 960;
-          const stickyThreshold = typeof this.headerOffset === "number" ? this.headerOffset : 0;
-          const shouldShowRevealBlur = this.isSticky && goingUp && !atTop && position > stickyThreshold;
 
           if (this.hasAlwaysVisibleFixedHeader) {
-            this.body.classList.remove("header-scroll-hide");
-            this.resetHeaderLayerHide();
+            this.setHeaderScrollHidden(false);
             this.shouldShowScrollRevealBlur = true;
             this.syncScrollRevealBlur();
+            this.resetHeaderScrollIntent(position);
             return;
           }
 
-          if (isMobileViewport) {
-            if (atTop) {
-              this.body.classList.remove("header-scroll-hide");
-              this.resetHeaderLayerHide();
-            } else {
-              this.body.classList.add("header-scroll-hide");
-              this.resetHeaderLayerHide();
+          if (atTop) {
+            this.setHeaderScrollHidden(false);
+            this.shouldShowScrollRevealBlur = false;
+            this.syncScrollRevealBlur();
+            this.resetHeaderScrollIntent(position);
+            return;
+          }
+
+          if (!goingDown && !goingUp) {
+            if (window.innerWidth < 960) {
+              this.setHeaderScrollHidden(true);
             }
             this.shouldShowScrollRevealBlur = false;
             this.syncScrollRevealBlur();
             return;
           }
 
-          if (
+          if (goingDown) {
+            this.applyHeaderScrollIntent(position, "down");
+            this.resetHeaderScrollIntent(position);
+            return;
+          }
+
+          this.queueHeaderScrollIntent(position, goingDown, goingUp);
+        }
+
+        queueHeaderScrollIntent(position, goingDown, goingUp) {
+          let direction = null;
+
+          if (goingDown) {
+            direction = "down";
+          } else if (goingUp) {
+            direction = "up";
+          } else {
+            this.lastScrollPosition = position;
+            return;
+          }
+
+          if (this.headerScrollIntentDirection !== direction) {
+            this.headerScrollIntentDirection = direction;
+            this.headerScrollIntentStart = this.lastScrollPosition;
+          }
+
+          this.headerScrollIntentEnd = position;
+          this.lastScrollPosition = position;
+
+          if (this.headerScrollIntentTimeout) {
+            clearTimeout(this.headerScrollIntentTimeout);
+          }
+
+          this.headerScrollIntentTimeout = setTimeout(this.commitHeaderScrollIntent, this.headerScrollIntentDelay);
+        }
+
+        commitHeaderScrollIntent() {
+          this.headerScrollIntentTimeout = null;
+
+          const start = Number(this.headerScrollIntentStart);
+          const end = Number(this.headerScrollIntentEnd);
+
+          if (!Number.isFinite(start) || !Number.isFinite(end)) return;
+
+          const delta = end - start;
+          const distance = Math.abs(delta);
+
+          if (distance < this.headerScrollHideBuffer) {
+            this.headerScrollIntentStart = end;
+            this.headerScrollIntentDirection = null;
+            return;
+          }
+
+          const direction = delta > 0 ? "down" : "up";
+          this.applyHeaderScrollIntent(end, direction);
+
+          this.headerScrollIntentStart = end;
+          this.headerScrollIntentDirection = null;
+        }
+
+        applyHeaderScrollIntent(position, direction) {
+          const isMobileViewport = window.innerWidth < 960;
+          const stickyThreshold = typeof this.headerOffset === "number" ? this.headerOffset : 0;
+
+          if (isMobileViewport) {
+            this.setHeaderScrollHidden(true);
+            this.shouldShowScrollRevealBlur = false;
+            this.syncScrollRevealBlur();
+            return;
+          }
+
+          const isCollectionLikeTemplate =
             (this.isCollectionTemplate && !this.isSpotlightCollectionTemplate) ||
             this.isSearchTemplate ||
             this.isBlogTemplate ||
-            this.isArticleTemplate
-          ) {
-            if (atTop) {
-              this.body.classList.remove("header-scroll-hide");
-              this.resetHeaderLayerHide();
-            } else if (goingDown) {
-              this.body.classList.add("header-scroll-hide");
-              this.scheduleHeaderLayerHide();
+            this.isArticleTemplate;
+
+          if (isCollectionLikeTemplate) {
+            if (direction === "down") {
+              this.setHeaderScrollHidden(true, { layered: true });
             }
             this.shouldShowScrollRevealBlur = false;
             this.syncScrollRevealBlur();
             return;
           }
 
-          if (atTop || goingUp) {
-            this.body.classList.remove("header-scroll-hide");
-            this.resetHeaderLayerHide();
-          } else if (goingDown) {
-            this.body.classList.add("header-scroll-hide");
+          const shouldHide = direction === "down";
+          this.setHeaderScrollHidden(shouldHide, { layered: shouldHide });
+
+          this.shouldShowScrollRevealBlur =
+            this.isSticky && direction === "up" && position > stickyThreshold && !shouldHide;
+          this.syncScrollRevealBlur();
+        }
+
+        setHeaderScrollHidden(shouldHide, options = {}) {
+          const layered = Boolean(options.layered);
+
+          this.body.classList.toggle("header-scroll-hide", shouldHide);
+
+          if (shouldHide && layered) {
             this.scheduleHeaderLayerHide();
+          } else {
+            this.resetHeaderLayerHide();
+          }
+        }
+
+        resetHeaderScrollIntent(position = window.scrollY) {
+          if (this.headerScrollIntentTimeout) {
+            clearTimeout(this.headerScrollIntentTimeout);
+            this.headerScrollIntentTimeout = null;
           }
 
-          this.shouldShowScrollRevealBlur = shouldShowRevealBlur;
-          this.syncScrollRevealBlur();
+          this.headerScrollIntentStart = position;
+          this.headerScrollIntentEnd = position;
+          this.lastScrollPosition = position;
+          this.headerScrollIntentDirection = null;
         }
 
         handleTmenuState(event) {
@@ -3976,6 +4078,7 @@
           }
 
           this.resetHeaderLayerHide();
+          this.resetHeaderScrollIntent();
           document.removeEventListener("theme:scroll", this.scrollHideEvent);
           document.removeEventListener("theme:tmenu:state", this.handleTmenuState);
           this.body.classList.remove("has-always-visible-fixed-header");
