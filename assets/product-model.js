@@ -21,8 +21,20 @@
   };
 
   function initAllProductModels() {
+    // Determine layout once — use matchMedia with the same breakpoint as the CSS.
+    // This is more reliable than getComputedStyle at deferred-script execution time.
+    var isDesktop = window.matchMedia("(min-width: 990px)").matches;
+
     document.querySelectorAll("product-model").forEach(function (el) {
       if (el.getAttribute("loaded")) return;
+
+      // Skip the carousel that is currently hidden to avoid creating two WebGI
+      // viewer instances (same 3D media is rendered in both mobile and desktop carousels).
+      var carousel = el.closest(".pdp-embla--desktop, .pdp-embla--mobile");
+      if (carousel) {
+        if (isDesktop && carousel.classList.contains("pdp-embla--mobile")) return;
+        if (!isDesktop && carousel.classList.contains("pdp-embla--desktop")) return;
+      }
 
       var tpl = el.querySelector("template");
       if (!tpl || !tpl.content || !tpl.content.firstElementChild) return;
@@ -44,4 +56,8 @@
   } else {
     initAllProductModels();
   }
+
+  // Re-check when the layout switches between mobile and desktop breakpoints.
+  // The newly visible carousel's product-model won't have been initialised yet.
+  document.addEventListener("theme:resize:width", initAllProductModels);
 })();
