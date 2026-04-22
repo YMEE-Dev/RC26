@@ -191,6 +191,9 @@
               <div class="grid{% if layout_desktop == 'slider' %} grid--slider{% if related_count <= 4 %} grid--slider-disabled{% endif %}{% endif %}{% if layout_mobile == 'slider' or layout_mobile == nil %} grid--mobile-slider{% else %} grid--mobile-vertical{% endif %}" data-grid-slider id="RelatedProductsCollection--{{ section.id }}">
                 {{ related_products }}
               </div>
+              <div class="related-slider-progress" data-related-section-progress>
+                <span class="related-slider-progress__line"></span>
+              </div>
             </grid-slider>
           </div>
         {%- endcapture -%}
@@ -228,6 +231,9 @@
               <div class="grid{% if layout_desktop == 'slider' %} grid--slider{% if category_count <= 4 %} grid--slider-disabled{% endif %}{% endif %}{% if layout_mobile == 'slider' or layout_mobile == nil %} grid--mobile-slider{% else %} grid--mobile-vertical{% endif %}" data-grid-slider id="RelatedProductsCategory--{{ section.id }}">
                 {{ category_products }}
               </div>
+              <div class="related-slider-progress" data-related-section-progress>
+                <span class="related-slider-progress__line"></span>
+              </div>
             </grid-slider>
           </div>
         {%- endcapture -%}
@@ -256,6 +262,10 @@
   }
   #RelatedProducts--{{ section.id }} .tabs-wrapper {
     margin: 100px 0 0;
+  }
+  #RelatedProducts--{{ section.id }} .tabs-wrapper,
+  #RelatedProducts--{{ section.id }} .tabs__head {
+    overflow: visible;
   }
   #RelatedProducts--{{ section.id }} .tab-content {
     border-top: 1px solid #E5E5E5;
@@ -575,14 +585,20 @@
         return;
       }
 
-      let progress = gridSlider.querySelector('[data-related-slider-progress]');
+      let progress = gridSlider.querySelector(':scope > [data-related-section-progress]');
 
       if (!progress) {
         progress = document.createElement('div');
         progress.className = 'related-slider-progress';
-        progress.setAttribute('data-related-slider-progress', '');
+        progress.setAttribute('data-related-section-progress', '');
         progress.innerHTML = '<span class="related-slider-progress__line"></span>';
         gridSlider.append(progress);
+      }
+
+      const progressLine = progress.querySelector('.related-slider-progress__line');
+
+      if (!progressLine) {
+        return;
       }
 
       const syncSliderState = (items) => {
@@ -605,7 +621,7 @@
 
         if (items.length < 2) {
           progress.classList.add('hidden');
-          progress.style.setProperty('--related-slider-progress', '0%');
+          progressLine.style.setProperty('--related-slider-progress', '0%');
           return;
         }
 
@@ -613,14 +629,15 @@
         progress.classList.toggle('hidden', !isScrollable);
 
         if (!isScrollable) {
-          progress.style.setProperty('--related-slider-progress', '0%');
+          progressLine.style.setProperty('--related-slider-progress', '0%');
           return;
         }
 
-        const progressPercent = ((slider.scrollLeft + slider.clientWidth) / slider.scrollWidth) * 100;
+        const maxScroll = Math.max(slider.scrollWidth - slider.clientWidth, 1);
+        const progressPercent = (slider.scrollLeft / maxScroll) * 100;
         const safeProgress = Math.max(0, Math.min(100, progressPercent));
 
-        progress.style.setProperty('--related-slider-progress', `${safeProgress}%`);
+        progressLine.style.setProperty('--related-slider-progress', `${safeProgress}%`);
       };
 
       if (!slider.hasAttribute('data-related-progress-bound')) {
@@ -705,11 +722,15 @@
     };
 
     initProgress();
+    requestAnimationFrame(() => {
+      requestAnimationFrame(initProgress);
+    });
 
     section.addEventListener('theme:tab:change', initProgress);
     section.addEventListener('theme:grid-slider:init', initProgress);
     document.addEventListener('theme:resize:width', initProgress);
     window.addEventListener('resize', initProgress, {passive: true});
+    window.addEventListener('load', initProgress, {once: true, passive: true});
     section.querySelector('recently-viewed')?.addEventListener('theme:recently-viewed:loaded', initProgress);
   })();
 </script>
