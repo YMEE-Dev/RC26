@@ -109,19 +109,30 @@
         body: JSON.stringify({ model_id: modelId }),
       })
         .then(function (res) {
-          return res.json();
+          return res.json().then(function (data) { return { status: res.status, data: data }; });
         })
-        .then(function (data) {
-          if (!data.url) throw new Error("No signed URL returned");
-          console.log("[WebGI] Loading model from AWS signed URL:", data.url.split("?")[0]);
-          requestAnimationFrame(function () {
+        .then(function (result) {
+          if (result.data.url) {
+            console.log("[WebGI] Loading model from AWS signed URL:", result.data.url.split("?")[0]);
             requestAnimationFrame(function () {
-              startViewer(data.url);
+              requestAnimationFrame(function () {
+                startViewer(result.data.url);
+              });
             });
-          });
+            return;
+          }
+          // No GLB on AWS (404 or missing url) — fall back to Shopify CDN
+          if (result.status === 404) {
+            console.log("[WebGI] No model found on AWS, falling back to Shopify CDN");
+          } else {
+            console.warn("[WebGI] No signed URL returned, falling back to Shopify CDN");
+          }
+          throw new Error("fallback");
         })
         .catch(function (err) {
-          console.warn("[WebGI] Failed to get signed model URL (falling back to direct GLB):", err);
+          if (err && err.message !== "fallback") {
+            console.warn("[WebGI] Failed to get signed model URL (falling back to direct GLB):", err);
+          }
           // Fall back to the direct Shopify CDN URL — happens on local dev where
           // the Lambda API Gateway blocks the origin due to CORS.
           var fallbackUrl = container.dataset.webgiSrc;
