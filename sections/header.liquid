@@ -395,7 +395,7 @@
     {%- if template.name == 'product' or template contains 'collection' or template contains 'page' or template.name == 'search' -%}
       <div class="header__logo__meta">
         {%- if template.name == 'product' -%}
-          {%- assign current_collection = collection | default: product.collections.first -%}
+          {%- assign current_collection = collection | default: product.metafields.custom.collection -%}
           {%- assign has_collection = false -%}
           {%- if current_collection != blank -%}
             {%- assign has_collection = true -%}
@@ -407,7 +407,7 @@
           <h6 class="header__logo__meta__line">
             {%- if has_collection -%}
               <span class="header__logo__meta__collection">
-                {%- assign current_collection_title = current_collection.title -%}
+                {%- assign current_collection_title = current_collection.title | default: current_collection -%}
                 {%- if current_collection_title contains ' - ' -%}
                   {%- liquid
                     assign parent_collection_title = current_collection_title | split: ' - ' | first | strip
@@ -432,8 +432,12 @@
                   {%- else -%}
                     <a href="{{ current_collection.url }}">{{ current_collection.title }}</a>
                   {%- endif -%}
-                {%- else -%}
+                {%- elsif current_collection.url != blank -%}
                   <a href="{{ current_collection.url }}">{{ current_collection.title }}</a>
+                {%- else -%}
+                  {%- assign collection_handle = product.metafields.custom.collection | handleize -%}
+                  {%-  assign parent_collection_url = '/collections/' | append: collection_handle -%}
+                  <a href="{{ parent_collection_url }}">{{ product.metafields.custom.collection }}</a>
                 {%- endif -%}
               </span>
             {%- endif -%}
