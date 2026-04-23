@@ -288,7 +288,7 @@
 
     {%- if enable_sort or enable_filters -%}
       <nav
-        class="collection__nav {{ align_classes }}{% if is_media_only_collection_template %} collection__nav--media-only{% endif %}"
+        class="collection__nav {{ align_classes }}{% if is_media_only_collection_template %} collection__nav--media-only{% endif %} {%  unless has_available_products %} has-no-available-products{% endunless %}"
         data-collection-nav
         data-has-active-subcollection-link="{{ has_active_subcollection_link }}"
       >
@@ -306,7 +306,7 @@
               data-availability-products-count
               data-availability-products-label="{{ 'collections.general.pieces' | t }}"
             >
-              {{ collection.products_count }}
+              {{ collection.all_products_count }}
               {{ 'collections.general.pieces' | t }}
             </span>
             <span class="availability-filter__label availability-filter__label--view-all">
