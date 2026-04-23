@@ -326,6 +326,12 @@ a[aria-label="Directions (This link will open in a new tab)"] {
   bottom: -22px !important;
 }
 
+@media screen and (max-width: 1024px) {
+  #stockist-widget button ~ .stockist-search-field input {
+    bottom: 10px !important;
+  }
+}
+
 #stockist-widget .stockist-map {
   height: 100%;
   width: 100%;
@@ -641,13 +647,13 @@ a[aria-label="Directions (This link will open in a new tab)"] {
     padding: 16px !important;
     order: 2;
     width: 100% !important;
-    grid-area: 14 / 2 / 14 / 3 !important;
+    grid-area: 16 / 2 / auto / 3 !important;
   }
 
   #stockist-widget .stockist-result-panel {
     order: 3;
     width: 100% !important;
-    grid-area: 15 / 2 / 24 / 3 !important;
+    grid-area: 17 / 2 / 25 / 3 !important;
   }
 }
 
@@ -667,10 +673,14 @@ a[aria-label="Directions (This link will open in a new tab)"] {
   #stockist-widget .stockist-list-result .stockist-result-image img {
     display: none;
   }
+  #stockist-widget .leaflet-right .leaflet-control.leaflet-control-compact-attribution,
+  #stockist-widget .leaflet-touch .leaflet-bar {
+    display: none;
+  }
 }
 @media (max-width: 768px) {
   #stockist-widget .stockist-result-panel,
-  #stockist-widget .stockist-layout-desktop.stockist-layout-form-side.stockist-layout-results-right .stockist-search-form {
+  s #stockist-widget .stockist-layout-desktop.stockist-layout-form-side.stockist-layout-results-right .stockist-search-form {
     width: 100% !important;
   }
 
@@ -694,7 +704,7 @@ a[aria-label="Directions (This link will open in a new tab)"] {
     display: block !important;
     height: 100% !important;
     width: 100%;
-    grid-area: 1 / 1 / 25 / 10 !important;
+    grid-area: 1 / 1 / 23 / 10 !important;
   }
 
   #stockist-widget .stockist-search-form {
@@ -757,7 +767,7 @@ a[aria-label="Book an Appointment (This link will open in a new tab)"] {
 #stockist-widget .stockist-map-result .stockist-result-custom-field-m45evwn4 {
   display: none !important;
 }
-@media (max-width: 699px) {
+@media (max-width: 768px) {
   #stockist-widget .stockist-search-filter span {
     padding: 0 !important;
     padding-left: 5px !important;
@@ -770,6 +780,7 @@ a[aria-label="Book an Appointment (This link will open in a new tab)"] {
     grid-template-columns: 0.5fr 10fr 0.5fr;
     grid-template-rows: repeat(24, 1fr) !important;
     height: 97vh;
+    background-color: #e3e3e3;
   }
 
   #stockist-widget .stockist-search-filter-inputs {

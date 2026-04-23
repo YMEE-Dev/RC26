@@ -191,6 +191,9 @@
               <div class="grid{% if layout_desktop == 'slider' %} grid--slider{% if related_count <= 4 %} grid--slider-disabled{% endif %}{% endif %}{% if layout_mobile == 'slider' or layout_mobile == nil %} grid--mobile-slider{% else %} grid--mobile-vertical{% endif %}" data-grid-slider id="RelatedProductsCollection--{{ section.id }}">
                 {{ related_products }}
               </div>
+              <div class="related-slider-progress" data-grid-slider-progress>
+                <span class="related-slider-progress__line"></span>
+              </div>
             </grid-slider>
           </div>
         {%- endcapture -%}
@@ -228,6 +231,9 @@
               <div class="grid{% if layout_desktop == 'slider' %} grid--slider{% if category_count <= 4 %} grid--slider-disabled{% endif %}{% endif %}{% if layout_mobile == 'slider' or layout_mobile == nil %} grid--mobile-slider{% else %} grid--mobile-vertical{% endif %}" data-grid-slider id="RelatedProductsCategory--{{ section.id }}">
                 {{ category_products }}
               </div>
+              <div class="related-slider-progress" data-grid-slider-progress>
+                <span class="related-slider-progress__line"></span>
+              </div>
             </grid-slider>
           </div>
         {%- endcapture -%}
@@ -256,6 +262,10 @@
   }
   #RelatedProducts--{{ section.id }} .tabs-wrapper {
     margin: 100px 0 0;
+  }
+  #RelatedProducts--{{ section.id }} .tabs-wrapper,
+  #RelatedProducts--{{ section.id }} .tabs__head {
+    overflow: visible;
   }
   #RelatedProducts--{{ section.id }} .tab-content {
     border-top: 1px solid #E5E5E5;
@@ -329,7 +339,7 @@
     padding-bottom: 20px;
     margin-top: 80px;
   }
-  #RelatedProducts--{{ section.id }} .related-slider-progress {
+  #RelatedProducts--{{ section.id }} grid-slider > [data-grid-slider-progress] {
     position: absolute;
     left: 50%;
     bottom: 0;
@@ -348,10 +358,10 @@
   #RelatedProducts--{{ section.id }} .slider__button {
     pointer-events: none;
   }
-  #RelatedProducts--{{ section.id }} .related-slider-progress.hidden {
+  #RelatedProducts--{{ section.id }} grid-slider > [data-grid-slider-progress].hidden {
     display: none;
   }
-  #RelatedProducts--{{ section.id }} .related-slider-progress__line {
+  #RelatedProducts--{{ section.id }} grid-slider > [data-grid-slider-progress] .related-slider-progress__line {
     display: block;
     width: var(--related-slider-progress, 0%);
     height: 100%;
@@ -405,7 +415,7 @@
       padding-bottom: 20px;
     }
 
-    #RelatedProducts--{{ section.id }} .related-slider-progress__line {
+    #RelatedProducts--{{ section.id }} grid-slider > [data-grid-slider-progress] .related-slider-progress__line {
       width: var(--related-slider-progress, 0%);
     }
   }
@@ -418,6 +428,7 @@
   id="RelatedProducts--{{ section.id }}"
   data-section-id="{{ section.id }}"
   data-section-type="related"
+  data-grid-slider-progress-section
   style="{{ style }}"
 >
   {%- if related or category or has_recently_products -%}
@@ -540,179 +551,6 @@
     </div>
   {%- endif -%}
 </related-products>
-
-<script>
-  (() => {
-    const section = document.getElementById('RelatedProducts--{{ section.id }}');
-
-    if (!section) {
-      return;
-    }
-
-    const relatedSliderSelector = '[data-grid-slider]';
-    const gridItemSelector = '[data-grid-item]';
-
-    const getClosestSlideIndex = (items, slider) => {
-      let closestIndex = 0;
-      let minDistance = Number.POSITIVE_INFINITY;
-
-      items.forEach((item, index) => {
-        const distance = Math.abs(item.offsetLeft - slider.scrollLeft);
-
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestIndex = index;
-        }
-      });
-
-      return closestIndex;
-    };
-
-    const setupProgress = (gridSlider) => {
-      const slider = gridSlider.querySelector(relatedSliderSelector);
-
-      if (!slider) {
-        return;
-      }
-
-      let progress = gridSlider.querySelector('[data-related-slider-progress]');
-
-      if (!progress) {
-        progress = document.createElement('div');
-        progress.className = 'related-slider-progress';
-        progress.setAttribute('data-related-slider-progress', '');
-        progress.innerHTML = '<span class="related-slider-progress__line"></span>';
-        gridSlider.append(progress);
-      }
-
-      const syncSliderState = (items) => {
-        if (!slider.classList.contains('grid--slider')) {
-          return;
-        }
-
-        const shouldDisableSlider = items.length <= 4;
-        const isSliderDisabled = slider.classList.contains('grid--slider-disabled');
-
-        if (shouldDisableSlider != isSliderDisabled) {
-          slider.classList.toggle('grid--slider-disabled', shouldDisableSlider);
-          gridSlider.dispatchEvent(new CustomEvent('theme:grid-slider:init'));
-        }
-      };
-
-      const updateActive = () => {
-        const items = Array.from(slider.querySelectorAll(gridItemSelector));
-        syncSliderState(items);
-
-        if (items.length < 2) {
-          progress.classList.add('hidden');
-          progress.style.setProperty('--related-slider-progress', '0%');
-          return;
-        }
-
-        const isScrollable = slider.scrollWidth > slider.clientWidth + 1;
-        progress.classList.toggle('hidden', !isScrollable);
-
-        if (!isScrollable) {
-          progress.style.setProperty('--related-slider-progress', '0%');
-          return;
-        }
-
-        const progressPercent = ((slider.scrollLeft + slider.clientWidth) / slider.scrollWidth) * 100;
-        const safeProgress = Math.max(0, Math.min(100, progressPercent));
-
-        progress.style.setProperty('--related-slider-progress', `${safeProgress}%`);
-      };
-
-      if (!slider.hasAttribute('data-related-progress-bound')) {
-        slider.addEventListener(
-          'scroll',
-          () => {
-            requestAnimationFrame(updateActive);
-          },
-          {passive: true}
-        );
-        slider.setAttribute('data-related-progress-bound', 'true');
-      }
-
-      if (!slider.hasAttribute('data-related-progress-observer-bound')) {
-        const observer = new MutationObserver(() => {
-          requestAnimationFrame(updateActive);
-        });
-
-        observer.observe(slider, {childList: true, subtree: true});
-        slider.setAttribute('data-related-progress-observer-bound', 'true');
-      }
-
-      if (!slider.hasAttribute('data-related-progress-resize-bound') && window.ResizeObserver) {
-        const resizeObserver = new ResizeObserver(() => {
-          requestAnimationFrame(updateActive);
-        });
-
-        resizeObserver.observe(slider);
-        slider.setAttribute('data-related-progress-resize-bound', 'true');
-      }
-
-      if (!gridSlider.hasAttribute('data-related-arrow-bound')) {
-        gridSlider.addEventListener('click', (event) => {
-          const arrow = event.target.closest('[data-button-arrow]');
-          if (!arrow || !gridSlider.contains(arrow)) {
-            return;
-          }
-
-          const items = Array.from(slider.querySelectorAll(gridItemSelector));
-          if (items.length < 2) {
-            return;
-          }
-
-          const firstVisibleSlide = slider.querySelector(`${gridItemSelector}.is-visible`);
-          let currentIndex = firstVisibleSlide ? items.indexOf(firstVisibleSlide) : getClosestSlideIndex(items, slider);
-
-          if (currentIndex < 0) {
-            currentIndex = 0;
-          }
-
-          let targetIndex = currentIndex;
-          if (arrow.hasAttribute('data-button-prev')) {
-            targetIndex = Math.max(0, currentIndex - 1);
-          }
-
-          if (arrow.hasAttribute('data-button-next')) {
-            targetIndex = Math.min(items.length - 1, currentIndex + 1);
-          }
-
-          if (targetIndex == currentIndex) {
-            return;
-          }
-
-          event.preventDefault();
-          slider.scrollTo({
-            top: 0,
-            left: items[targetIndex].offsetLeft,
-            behavior: 'smooth',
-          });
-        });
-
-        gridSlider.setAttribute('data-related-arrow-bound', 'true');
-      }
-
-      updateActive();
-    };
-
-    const initProgress = () => {
-      section.querySelectorAll('grid-slider').forEach((gridSlider) => {
-        setupProgress(gridSlider);
-      });
-    };
-
-    initProgress();
-
-    section.addEventListener('theme:tab:change', initProgress);
-    section.addEventListener('theme:grid-slider:init', initProgress);
-    document.addEventListener('theme:resize:width', initProgress);
-    window.addEventListener('resize', initProgress, {passive: true});
-    section.querySelector('recently-viewed')?.addEventListener('theme:recently-viewed:loaded', initProgress);
-  })();
-</script>
 
 {% schema %}
 {

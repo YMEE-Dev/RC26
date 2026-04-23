@@ -1,8 +1,20 @@
 "use strict";
 
 (function () {
-  var WEBGI_VIEWER_URL = "https://releases.ijewel3d.com/webgi/runtime/viewer-0.9.19.js";
-  var ENV_MAP_URL = "https://demo-assets.pixotronics.com/pixo/hdr/gem_2.hdr";
+  // Read iJewelSDKSettings from metafields if available (per iJewel3D Shopify integration docs Step 5.3/6)
+  var _sdkSettings = (typeof iJewelSDKSettings !== "undefined") ? iJewelSDKSettings : {};
+  var WEBGI_VIEWER_URL = "https://releases.ijewel3d.com/libs/webgi-v0/viewer-"
+    + (_sdkSettings.webgi_version || "0.20.0") + ".js";
+  var ENV_MAP_URL = _sdkSettings.environment_map || "https://demo-assets.pixotronics.com/pixo/hdr/gem_2.hdr";
+  var SCENE_SETTINGS_URL = _sdkSettings.scene_settings || "";
+  var LOADING_CONFIG = _sdkSettings.loading || {};
+  var ENCRYPTION_KEY = _sdkSettings.encryption_key || "w9pcNNE7LBeEGCN";
+  var LAMBDA_API_URL = _sdkSettings.lambda_api_url || "https://1rhbkdij67.execute-api.eu-north-1.amazonaws.com/get-model-url";
+  var LAMBDA_API_KEY = _sdkSettings.lambda_api_key || "6f6c83928502c9d484ee57e483cb53af45b817924cea4bda84561b402fb84126";
+  // Set to your CloudFront (or Cloudflare) base URL to bypass Lambda and load .glb files directly.
+  // e.g. "https://d1234abcd.cloudfront.net" — file resolved as {base}/models/{product-handle}.glb
+  // Leave empty ("") to use the Lambda signed-URL approach instead.
+  var CLOUDFRONT_BASE_URL = _sdkSettings.cloudfront_base_url || "";
 
   var scriptLoaded = false;
   var scriptLoading = false;
@@ -20,6 +32,7 @@
     var script = document.createElement("script");
     script.src = WEBGI_VIEWER_URL;
     script.async = true;
+    script.crossOrigin = "anonymous";
     script.onload = function () {
       scriptLoaded = true;
       scriptLoading = false;
@@ -33,20 +46,20 @@
       scriptLoading = false;
       console.error("[WebGI] Failed to load viewer script");
     };
+    // Restore native fetch before the viewer script executes so the SDK's
+    // internal license verification (/sdk/verify) uses the unpatched version
+    // rather than the shop_events_listener monkey-patch.
+    if (window.__nativeFetch) window.fetch = window.__nativeFetch;
+    // Pre-set the SDK's internal verified flag so the license verification
+    // loop (which hits a 404 /sdk/verify endpoint in v0.20.0) does not spam
+    // the console with repeated failed requests.
+    window.fq3fvf_ckuehdq = true;
     document.head.appendChild(script);
   }
 
   function initWebGIViewer(container) {
     if (container.dataset.webgiInitialized === "true") return;
     container.dataset.webgiInitialized = "true";
-
-    var glbUrl = container.dataset.webgiSrc;
-    if (!glbUrl) return;
-    if (glbUrl.indexOf("//") === 0) {
-      glbUrl = "https:" + glbUrl;
-    } else if (glbUrl.indexOf("/") === 0) {
-      glbUrl = window.location.origin + glbUrl;
-    }
 
     container.innerHTML = "";
 
@@ -62,14 +75,97 @@
     viewerDiv.style.cssText = "width:100%;height:100%;position:absolute;top:0;left:0;";
     container.appendChild(viewerDiv);
 
-    function startViewer() {
+    function startViewer(glbUrl) {
       loadWebGIScript(function () {
         setupViewer(viewerDiv, glbUrl, container, loader);
       });
     }
 
+    var modelId = container.dataset.modelId;
+    var isLocalDev = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+
+    // CloudFront/Cloudflare direct mode: skip Lambda, load .glb by URL directly.
+    if (modelId && CLOUDFRONT_BASE_URL && !isLocalDev) {
+      var directUrl = CLOUDFRONT_BASE_URL.replace(/\/$/, "") + "/models/" + modelId + ".glb";
+      console.log("[WebGI] Loading model from CDN:", directUrl);
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          startViewer(directUrl);
+        });
+      });
+      return;
+    }
+
+    if (modelId && LAMBDA_API_URL && LAMBDA_API_KEY && !isLocalDev) {
+      // Use the native fetch captured before app scripts (e.g. shop_events_listener)
+      // could monkey-patch window.fetch, which would break the Lambda request.
+      var nativeFetch = window.__nativeFetch || window.fetch.bind(window);
+      nativeFetch(LAMBDA_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": LAMBDA_API_KEY,
+        },
+        body: JSON.stringify({ model_id: modelId }),
+      })
+        .then(function (res) {
+          return res.json().then(function (data) { return { status: res.status, data: data }; });
+        })
+        .then(function (result) {
+          if (result.data.url) {
+            // Clear the Shopify CDN fallback so it's not exposed in the DOM
+            container.removeAttribute("data-webgi-src");
+            console.log("[WebGI] Loading model from AWS signed URL:", result.data.url.split("?")[0]);
+            requestAnimationFrame(function () {
+              requestAnimationFrame(function () {
+                startViewer(result.data.url);
+              });
+            });
+            return;
+          }
+          // No GLB on AWS (404 or missing url) — fall back to Shopify CDN
+          if (result.status === 404) {
+            console.log("[WebGI] No model found on AWS, falling back to Shopify CDN");
+          } else {
+            console.warn("[WebGI] No signed URL returned, falling back to Shopify CDN");
+          }
+          throw new Error("fallback");
+        })
+        .catch(function (err) {
+          if (err && err.message !== "fallback") {
+            console.warn("[WebGI] Failed to get signed model URL (falling back to direct GLB):", err);
+          }
+          // Fall back to the direct Shopify CDN URL — happens on local dev where
+          // the Lambda API Gateway blocks the origin due to CORS.
+          var fallbackUrl = container.dataset.webgiSrc;
+          if (!fallbackUrl) {
+            loader.style.display = "none";
+            return;
+          }
+          if (fallbackUrl.indexOf("//") === 0) fallbackUrl = "https:" + fallbackUrl;
+          else if (fallbackUrl.indexOf("/") === 0) fallbackUrl = window.location.origin + fallbackUrl;
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              startViewer(fallbackUrl);
+            });
+          });
+        });
+      return;
+    }
+
+    // Fallback: use data-webgi-src directly (local dev / non-encrypted)
+    var glbUrl = container.dataset.webgiSrc;
+    if (!glbUrl) return;
+    if (glbUrl.indexOf("//") === 0) {
+      glbUrl = "https:" + glbUrl;
+    } else if (glbUrl.indexOf("/") === 0) {
+      glbUrl = window.location.origin + glbUrl;
+    }
+
     requestAnimationFrame(function () {
-      requestAnimationFrame(startViewer);
+      requestAnimationFrame(function () {
+        startViewer(glbUrl);
+      });
     });
   }
 
@@ -92,6 +188,9 @@
           importPopup: false,
           depthTonemap: !isMobile,
           debug: false,
+          // Disable the built-in "drag to rotate" interaction prompt directly
+          // via the initialize option added in v0.20.0 (cleaner than post-init disable).
+          interactionPrompt: false,
         });
         manager = viewer.getManager ? viewer.getManager() : null;
         // SceneLoopPlugin drives the continuous render loop (needed for autoRotate, enableDamping)
@@ -148,8 +247,8 @@
         if (loadingScreen) loadingScreen.enabled = false;
         var popup = viewer.getPluginByType("AssetManagerBasicPopupPlugin");
         if (popup) popup.enabled = false;
-        // Disable the interaction prompt ("drag to rotate" hand animation) —
-        // it fires after 3s of no pointerdown events regardless of autorotate state.
+        // interactionPrompt is disabled via initialize({interactionPrompt:false}) above (v0.20.0+).
+        // Disable it here too as a fallback for older viewer versions.
         var interactionPrompt = viewer.getPluginByType("InteractionPromptPlugin");
         if (interactionPrompt) interactionPrompt.enabled = false;
       } catch (e) {}
@@ -237,24 +336,34 @@
         console.warn("[WebGI] HDR load error:", e);
       }
 
-      // Register file with decryption key (models are encrypted with iJewel3D encryption)
-      try {
-        var importer2 = manager && manager.importer ? manager.importer : viewer.getManager().importer;
-        var registered = importer2.registerFile(glbUrl);
-        if (registered && registered.preparsers && registered.preparsers[0]) {
-          registered.preparsers[0].key = function () {
-            return "w9pcNNE7LBeEGCN";
-          };
-        }
-      } catch (e) {
-        console.warn("[WebGI] Could not register file preparsers:", e);
-      }
+      // ENCRYPTED_MODELS: Commented out per iJewel3D — not needed with the new SDK version.
+      // The license key / decryption preparsers are handled automatically by the SDK now.
+      // try {
+      //   var importer2 = manager && manager.importer ? manager.importer : viewer.getManager().importer;
+      //   var registered = importer2.registerFile(glbUrl);
+      //   if (registered && registered.preparsers && registered.preparsers[0]) {
+      //     registered.preparsers[0].key = function () {
+      //       return ENCRYPTION_KEY;
+      //     };
+      //   }
+      // } catch (e) {
+      //   console.warn("[WebGI] Could not register file preparsers:", e);
+      // }
 
       // Load model
       if (typeof viewer.load === "function") {
         await viewer.load(glbUrl);
       } else {
         await manager.addFromPath(glbUrl, { autoCenter: true, autoScale: true, autoScaleRadius: 2 });
+      }
+
+      // Load scene settings if configured via iJewelSDKSettings (optional)
+      if (SCENE_SETTINGS_URL) {
+        try {
+          await viewer.load(SCENE_SETTINGS_URL);
+        } catch (e) {
+          console.warn("[WebGI] Could not load scene settings:", e);
+        }
       }
 
       var matConfigPlugin = null;
@@ -655,30 +764,99 @@
         });
       });
 
-      // MutationObserver: remove SDK evaluation logo/watermark injected into container
+      // Remove SDK evaluation logo/watermark — the client has a valid license
+      // but the logo may still appear if the license check is async.
+      // Strategy: CSS hide + MutationObserver removal + periodic sweep.
+      function isSDKWatermarkNode(node) {
+        if (!node || !node.tagName) return false;
+        var tag = node.tagName.toLowerCase();
+        var cls = (node.className || "").toString().toLowerCase();
+        var id = (node.id || "").toLowerCase();
+        var src = node.src || (node.getAttribute && node.getAttribute("src")) || "";
+        var href = node.href || (node.getAttribute && node.getAttribute("href")) || "";
+        var textContent = (node.textContent || "").toLowerCase();
+        var style = node.style || {};
+
+        // Logo images from iJewel/Pixotronics
+        if (tag === "img" && (src.indexOf("ijewel") !== -1 || src.indexOf("pixotronics") !== -1)) return true;
+
+        // Anchor links to ijewel
+        if (tag === "a" && (href.indexOf("ijewel") !== -1 || href.indexOf("pixotronics") !== -1)) return true;
+
+        // Known SDK overlay classes
+        if (
+          cls.indexOf("ijewel") !== -1 ||
+          cls.indexOf("webgi-evaluation") !== -1 ||
+          cls.indexOf("watermark") !== -1 ||
+          id.indexOf("ijewel") !== -1 ||
+          id.indexOf("webgi-eval") !== -1
+        )
+          return true;
+
+        // High z-index overlay with a single child image or link — typical evaluation banner
+        if (tag === "div" && style.zIndex && parseInt(style.zIndex) >= 999) {
+          if (
+            node.children.length <= 2 &&
+            (textContent.indexOf("ijewel") !== -1 ||
+              textContent.indexOf("evaluation") !== -1 ||
+              textContent.indexOf("pixotronics") !== -1 ||
+              node.querySelector("img") ||
+              node.querySelector("a[href*='ijewel']"))
+          )
+            return true;
+        }
+
+        // Bottom-left positioned small container with ijewel branding
+        if (tag === "div" && style.position === "absolute" && style.bottom !== undefined && style.left !== undefined) {
+          if (
+            textContent.indexOf("ijewel") !== -1 ||
+            textContent.indexOf("evaluation") !== -1 ||
+            textContent.indexOf("pixotronics") !== -1
+          )
+            return true;
+        }
+
+        return false;
+      }
+
+      function sweepWatermarks(root) {
+        if (!root) return;
+        var candidates = root.querySelectorAll("div, img, a, span");
+        for (var i = 0; i < candidates.length; i++) {
+          if (isSDKWatermarkNode(candidates[i])) {
+            candidates[i].remove();
+          }
+        }
+      }
+
       var _sdkObserver = new MutationObserver(function (mutations) {
         mutations.forEach(function (m) {
           m.addedNodes.forEach(function (node) {
-            if (!node.tagName) return;
-            var tag = node.tagName.toLowerCase();
-            var cls = (node.className || "").toString();
-            var src = node.src || (node.getAttribute && node.getAttribute("src")) || "";
-            var isLogo = tag === "img" && (src.indexOf("ijewel") !== -1 || src.indexOf("pixotronics") !== -1);
-            var isSDKOverlay =
-              tag === "div" &&
-              (cls.indexOf("ijewel") !== -1 ||
-                cls.indexOf("webgi-evaluation") !== -1 ||
-                cls.indexOf("watermark") !== -1 ||
-                (node.style &&
-                  node.style.zIndex >= 9999 &&
-                  node.children.length === 1 &&
-                  node.children[0].tagName === "IMG"));
-            if (isLogo || isSDKOverlay) node.remove();
+            if (isSDKWatermarkNode(node)) {
+              node.remove();
+              return;
+            }
+            // Check children of added nodes too
+            if (node.querySelectorAll) {
+              var inner = node.querySelectorAll("div, img, a");
+              for (var i = 0; i < inner.length; i++) {
+                if (isSDKWatermarkNode(inner[i])) inner[i].remove();
+              }
+            }
           });
         });
       });
       _sdkObserver.observe(container, { childList: true, subtree: true });
       _sdkObserver.observe(viewerDiv, { childList: true, subtree: true });
+
+      // Periodic sweep: catch logos injected after async license check (runs 5 times over 10s)
+      var _sweepCount = 0;
+      var _sweepInterval = setInterval(function () {
+        sweepWatermarks(container);
+        sweepWatermarks(viewerDiv);
+        _sweepCount++;
+        if (_sweepCount >= 5) clearInterval(_sweepInterval);
+      }, 2000);
 
       // Add edge zones on top of viewer canvas for gallery swipe support
       var edgeStyle = "position:absolute;top:0;bottom:0;width:20%;z-index:10;pointer-events:all;";

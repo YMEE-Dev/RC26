@@ -121,7 +121,7 @@
           <span class="ymee-variant-dropdown__size">{{ ymee_size_value | escape }}</span>
           <span class="ymee-variant-dropdown__right">
             {%- if variant.available -%}
-              {%- if ymee_is_limited -%}
+              {%- if ymee_is_limited and cr_show_inquire == false -%}
                 <span class="ymee-variant-dropdown__note">
                   {{ 'products.product.limited_availability' | t }}
                 </span>
