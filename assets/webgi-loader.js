@@ -113,6 +113,8 @@
         })
         .then(function (result) {
           if (result.data.url) {
+            // Clear the Shopify CDN fallback so it's not exposed in the DOM
+            container.removeAttribute("data-webgi-src");
             console.log("[WebGI] Loading model from AWS signed URL:", result.data.url.split("?")[0]);
             requestAnimationFrame(function () {
               requestAnimationFrame(function () {
