@@ -19,6 +19,15 @@
       assign show_video_background = true
     endif
   endif
+  if show_video_background == false
+    if section.settings.mobile_video != blank
+      if section.settings.mobile_video.media_type == 'video'
+        assign show_video_background = true
+      elsif section.settings.mobile_video.sources != blank
+        assign show_video_background = true
+      endif
+    endif
+  endif
 -%}
 
 {%- capture style -%}
@@ -100,6 +109,12 @@
       "type": "video",
       "id": "video",
       "label": "Video"
+    },
+    {
+      "type": "video",
+      "id": "mobile_video",
+      "label": "Video",
+      "info": "Optional. Replaces the desktop background video on mobile screens."
     },
     {
       "type": "checkbox",

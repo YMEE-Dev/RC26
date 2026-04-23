@@ -1,3 +1,12 @@
+{% doc %}
+  Renders a hero-style background media layer with optional text and CTA content.
+
+  @param {object} [section] - Section or block context to read settings from
+  @param {string} [desktop_height] - Optional desktop height class override
+  @param {string} [mobile_height] - Optional mobile height class override
+  @param {boolean} [block_element] - Whether this snippet is rendered inside a block context
+{% enddoc %}
+
 {%- liquid
   assign block_settings = block_settings | default: section.settings
   assign block_element = block_element | default: false
@@ -7,19 +16,36 @@
   endif
   assign mobile_height = mobile_height | default: block_settings.mobile_height
   assign media = block_settings.video
-  assign has_background_video = false
+  assign mobile_media = block_settings.mobile_video
+  assign has_background_video_desktop = false
   if media != blank
     if media.media_type == 'video'
-      assign has_background_video = true
+      assign has_background_video_desktop = true
     elsif media.sources != blank
-      assign has_background_video = true
+      assign has_background_video_desktop = true
     endif
   endif
-  assign aspect_ratio = aspect_ratio | default: media.aspect_ratio
-  assign media_aspect_ratio = video_aspect_ratio | default: media.aspect_ratio | default: 1
+  assign has_background_video_mobile = false
+  if mobile_media != blank
+    if mobile_media.media_type == 'video'
+      assign has_background_video_mobile = true
+    elsif mobile_media.sources != blank
+      assign has_background_video_mobile = true
+    endif
+  endif
+  assign has_background_video = false
+  if has_background_video_desktop or has_background_video_mobile
+    assign has_background_video = true
+  endif
+  assign has_video_variants = false
+  if has_background_video_desktop and has_background_video_mobile
+    assign has_video_variants = true
+  endif
+  assign aspect_ratio = aspect_ratio | default: media.aspect_ratio | default: mobile_media.aspect_ratio
+  assign media_aspect_ratio = video_aspect_ratio | default: media.aspect_ratio | default: mobile_media.aspect_ratio | default: 1
   assign video_popup = block_settings.video_popup | default: block_settings.video_popup_social
-  assign image_desktop = block_settings.image | default: media.preview_image | default: media
-  assign image_mobile = block_settings.mobile_image
+  assign image_desktop = block_settings.image | default: media.preview_image | default: mobile_media.preview_image | default: media
+  assign image_mobile = block_settings.mobile_image | default: mobile_media.preview_image
   assign text_color = block_settings.color
   assign overlay_type = block_settings.overlay_type
   assign opacity_overlay = false
@@ -90,15 +116,28 @@
     <div class="video__poster">
       {{ video_poster }}
     </div>
-    <video-background
-      class="video__player is-loading"
-      data-video-player
-      data-video-id="{{ section.id }}-video-background"
-    >
-      <template data-video-template>
-        {{ media | video_tag: autoplay: true, image_size: '1085x', loop: true, muted: true, controls: false }}
-      </template>
-    </video-background>
+    {%- if has_background_video_desktop -%}
+      <video-background
+        class="video__player is-loading{% if has_video_variants %} video__player--desktop{% endif %}"
+        data-video-player
+        data-video-id="{{ section.id }}-video-background{% if has_video_variants %}-desktop{% endif %}"
+      >
+        <template data-video-template>
+          {{ media | video_tag: autoplay: true, image_size: '1085x', loop: true, muted: true, controls: false }}
+        </template>
+      </video-background>
+    {%- endif -%}
+    {%- if has_background_video_mobile -%}
+      <video-background
+        class="video__player is-loading{% if has_video_variants %} video__player--mobile{% endif %}"
+        data-video-player
+        data-video-id="{{ section.id }}-video-background{% if has_video_variants %}-mobile{% endif %}"
+      >
+        <template data-video-template>
+          {{ mobile_media | video_tag: autoplay: true, image_size: '1085x', loop: true, muted: true, controls: false }}
+        </template>
+      </video-background>
+    {%- endif -%}
   </div>
 {%- else -%}
   {{ video_poster }}
@@ -203,3 +242,17 @@
     </div>
   </div>
 {%- endif -%}
+
+{% stylesheet %}
+  @media only screen and (max-width: 749px) {
+    .video__player--desktop {
+      display: none;
+    }
+  }
+
+  @media only screen and (min-width: 750px) {
+    .video__player--mobile {
+      display: none;
+    }
+  }
+{% endstylesheet %}

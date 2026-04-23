@@ -173,6 +173,7 @@
 
 {%- paginate collection.products by product_limit -%}
   {%- assign featured_images_array = '' -%}
+  {%- assign has_available_products = false -%}
 
   {%- if paginate.current_page == 1 -%}
     {%- unless should_use_spotlight_images -%}
@@ -207,6 +208,26 @@
       {%- assign featured_images_array = featured_images_array | split: '@@' | sort | reject: '' -%}
     {%- endunless -%}
   {%- endif -%}
+
+  {%- for product in collection.products -%}
+    {%- liquid
+      assign product_storytelling = false
+
+      unless is_spotlight_collection_template
+        assign product_type = product.type | downcase
+        if product_type == 'storytelling' or product_type contains 'storytelling'
+          assign product_storytelling = true
+        endif
+      endunless
+    -%}
+
+    {%- if product_storytelling == false -%}
+      {%- if product.available -%}
+        {%- assign has_available_products = true -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
 
   <collection-component
     class="collection collection-products collection-{{ collection.handle }} section-padding {{ color_scheme }}{% if is_spotlight_collection_template %} collection--spotlight collection--spotlight-position-{{ spotlight_images_position }}{% endif %}"
@@ -280,10 +301,17 @@
             data-availability-view-all-default-active="false"
             aria-pressed="false"
           >
-            <span class="availability-filter__label availability-filter__label--count">
-              {{ collection.products_count }} {{ 'collections.general.pieces' | t }}
+            <span
+              class="availability-filter__label availability-filter__label--count"
+              data-availability-products-count
+              data-availability-products-label="{{ 'collections.general.pieces' | t }}"
+            >
+              {{ collection.products_count }}
+              {{ 'collections.general.pieces' | t }}
             </span>
-            <span class="availability-filter__label availability-filter__label--view-all">{{ 'collections.general.view_all' | t }}</span>
+            <span class="availability-filter__label availability-filter__label--view-all">
+              {{- 'collections.general.view_all' | t -}}
+            </span>
           </a>
         </div>
         {%- if sub_collection_links_html != blank -%}
@@ -292,15 +320,17 @@
           </div>
         {%- endif -%}
         <div class="popout_filters-wrapper">
-          <label class="availability-filter__button navlink" data-availability-filter-control>
-            <input
-              type="checkbox"
-              class="availability-filter__checkbox"
-              data-availability-filter-checkbox
-              aria-label="{{ 'collections.general.in_stock' | t }}"
-            >
-            <span>{{ 'collections.general.in_stock' | t }}</span>
-          </label>
+          {%- if has_available_products -%}
+            <label class="availability-filter__button navlink" data-availability-filter-control>
+              <input
+                type="checkbox"
+                class="availability-filter__checkbox"
+                data-availability-filter-checkbox
+                aria-label="{{ 'collections.general.in_stock' | t }}"
+              >
+              <span>{{ 'collections.general.in_stock' | t }}</span>
+            </label>
+          {%- endif -%}
           {%- if enable_filters -%}
             {%- liquid
               assign filter_active_count = 0
@@ -596,9 +626,20 @@
 
         const activeFilter = filterValue === 'available' ? 'available' : 'all';
         const items = component.querySelectorAll('[data-products-grid] [data-product-available]');
+        const availabilityCount = component.querySelector('[data-availability-products-count]');
+        let filterableItemsCount = 0;
+
         items.forEach((item) => {
+          const isStorytelling = item.hasAttribute('data-product-storytelling');
           const isAvailable = item.getAttribute('data-product-available') === 'true';
-          const showItem = activeFilter === 'all' || isAvailable;
+          let showItem = activeFilter === 'all';
+
+          if (isStorytelling) {
+            showItem = activeFilter === 'all';
+          } else {
+            filterableItemsCount += 1;
+            showItem = activeFilter === 'all' || isAvailable;
+          }
 
           item.hidden = !showItem;
           item.setAttribute('aria-hidden', showItem ? 'false' : 'true');
@@ -624,6 +665,11 @@
         if (viewAllButton) {
           viewAllButton.classList.toggle('is-active', isViewAllActive);
           viewAllButton.setAttribute('aria-pressed', isViewAllActive ? 'true' : 'false');
+        }
+
+        if (availabilityCount) {
+          const countLabel = availabilityCount.getAttribute('data-availability-products-label') || '';
+          availabilityCount.textContent = `${filterableItemsCount} ${countLabel}`.trim();
         }
       };
 
