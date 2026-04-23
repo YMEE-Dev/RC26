@@ -73,21 +73,27 @@
             endif
           -%}
 
-          {%- if hidden_product == false -%}
-            {%- if excluded_product == false -%}
-              {%- if tab_products_count < tab_products_limit -%}
-                {%- assign tab_products_count = tab_products_count | plus: 1 -%}
-                {%- render 'product-grid-item',
-                  product: selected_product,
-                  animation_delay: forloop.index0 | times: 1,
-                  animation_anchor: '#HomepageProductSlidersTab--' | append: section.id | append: '-' | append: rendered_tab_count,
-                  index: forloop.index,
-                  disable_image_hover: disable_image_hover,
-                  modifier_class: 'product-item--homepage-slider-scale'
-                -%}
-              {%- endif -%}
-            {%- endif -%}
+          {%- if hidden_product -%}
+            {%- continue -%}
           {%- endif -%}
+
+          {%- if excluded_product -%}
+            {%- continue -%}
+          {%- endif -%}
+
+          {%- if tab_products_count >= tab_products_limit -%}
+            {%- continue -%}
+          {%- endif -%}
+
+          {%- assign tab_products_count = tab_products_count | plus: 1 -%}
+          {%- render 'product-grid-item',
+            product: selected_product,
+            animation_delay: forloop.index0 | times: 1,
+            animation_anchor: '#HomepageProductSlidersTab--' | append: section.id | append: '-' | append: rendered_tab_count,
+            index: forloop.index,
+            disable_image_hover: disable_image_hover,
+            modifier_class: 'product-item--homepage-slider-scale'
+          -%}
         {%- endfor -%}
       {%- endif -%}
 
@@ -106,21 +112,27 @@
             endif
           -%}
 
-          {%- if hidden_product == false -%}
-            {%- if excluded_product == false -%}
-              {%- if tab_products_count < tab_products_limit -%}
-                {%- assign tab_products_count = tab_products_count | plus: 1 -%}
-                {%- render 'product-grid-item',
-                  product: selected_product,
-                  animation_delay: forloop.index0 | times: 1,
-                  animation_anchor: '#HomepageProductSlidersTab--' | append: section.id | append: '-' | append: rendered_tab_count,
-                  index: forloop.index,
-                  disable_image_hover: disable_image_hover,
-                  modifier_class: 'product-item--homepage-slider-scale'
-                -%}
-              {%- endif -%}
-            {%- endif -%}
+          {%- if hidden_product -%}
+            {%- continue -%}
           {%- endif -%}
+
+          {%- if excluded_product -%}
+            {%- continue -%}
+          {%- endif -%}
+
+          {%- if tab_products_count >= tab_products_limit -%}
+            {%- continue -%}
+          {%- endif -%}
+
+          {%- assign tab_products_count = tab_products_count | plus: 1 -%}
+          {%- render 'product-grid-item',
+            product: selected_product,
+            animation_delay: forloop.index0 | times: 1,
+            animation_anchor: '#HomepageProductSlidersTab--' | append: section.id | append: '-' | append: rendered_tab_count,
+            index: forloop.index,
+            disable_image_hover: disable_image_hover,
+            modifier_class: 'product-item--homepage-slider-scale'
+          -%}
         {%- endfor -%}
       {%- endif -%}
     {%- endcapture -%}
@@ -158,6 +170,9 @@
               >
                 {{ tab_products }}
               </div>
+              <div class="related-slider-progress" data-grid-slider-progress>
+                <span class="related-slider-progress__line"></span>
+              </div>
             </grid-slider>
           </div>
         </div>
@@ -184,6 +199,7 @@
   style="{{ style | strip }}"
   data-section-id="{{ section.id }}"
   data-section-type="homepage-product-sliders"
+  data-grid-slider-progress-section
   data-header-observer-mode="{{ section.settings.header_observer_mode }}"
 >
   {%- if rendered_tab_count > 0 -%}
