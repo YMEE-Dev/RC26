@@ -9,12 +9,16 @@
   var SCENE_SETTINGS_URL = _sdkSettings.scene_settings || "";
   var LOADING_CONFIG = _sdkSettings.loading || {};
   var ENCRYPTION_KEY = _sdkSettings.encryption_key || "w9pcNNE7LBeEGCN";
-  var LAMBDA_API_URL = _sdkSettings.lambda_api_url || "https://1rhbkdij67.execute-api.eu-north-1.amazonaws.com/get-model-url";
-  var LAMBDA_API_KEY = _sdkSettings.lambda_api_key || "6f6c83928502c9d484ee57e483cb53af45b817924cea4bda84561b402fb84126";
-  // Set to your CloudFront (or Cloudflare) base URL to bypass Lambda and load .glb files directly.
-  // e.g. "https://d1234abcd.cloudfront.net" — file resolved as {base}/models/{product-handle}.glb
-  // Leave empty ("") to use the Lambda signed-URL approach instead.
-  var CLOUDFRONT_BASE_URL = _sdkSettings.cloudfront_base_url || "";
+  // Sensitive values are injected server-side via the iJewelSDKSettings metafield (snippets/head.liquid)
+  // and intentionally have no hardcoded fallback in this static asset.
+  var LAMBDA_API_URL = _sdkSettings.lambda_api_url || "";
+  var LAMBDA_API_KEY = _sdkSettings.lambda_api_key || "";
+  // Base URL for CDN delivery — file resolved as {base}/models/{product-handle}.glb
+  var CLOUDFRONT_BASE_URL = _sdkSettings.cloudfront_base_url || "https://shop.us.robertocoin.com";
+  // Delivery mode — controlled via metafield "delivery_mode":
+  // "aws"  — Lambda signed-URL (secure, recommended) — current default
+  // "cdn"  — CLOUDFRONT_BASE_URL direct link (simpler, like US site)
+  var DELIVERY_MODE = (_sdkSettings.delivery_mode || "aws").toLowerCase();
 
   var scriptLoaded = false;
   var scriptLoading = false;
@@ -84,8 +88,8 @@
     var modelId = container.dataset.modelId;
     var isLocalDev = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
-    // CloudFront/Cloudflare direct mode: skip Lambda, load .glb by URL directly.
-    if (modelId && CLOUDFRONT_BASE_URL && !isLocalDev) {
+    // CDN direct mode: skip Lambda, load .glb by URL directly.
+    if (modelId && DELIVERY_MODE === "cdn" && CLOUDFRONT_BASE_URL && !isLocalDev) {
       var directUrl = CLOUDFRONT_BASE_URL.replace(/\/$/, "") + "/models/" + modelId + ".glb";
       console.log("[WebGI] Loading model from CDN:", directUrl);
       requestAnimationFrame(function () {
@@ -109,7 +113,9 @@
         body: JSON.stringify({ model_id: modelId }),
       })
         .then(function (res) {
-          return res.json().then(function (data) { return { status: res.status, data: data }; });
+          return res.json().then(function (data) {
+            return { status: res.status, data: data };
+          });
         })
         .then(function (result) {
           if (result.data.url) {
