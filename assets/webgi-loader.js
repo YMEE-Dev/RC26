@@ -61,6 +61,30 @@
     document.head.appendChild(script);
   }
 
+  function hide3DSlide(container) {
+    // Remove the placeholder URL from the DOM defensively
+    container.removeAttribute("data-webgi-src");
+
+    // Hide the gallery slide wrapper so no placeholder / loader is visible
+    var slide = container.closest("[data-slide]") || container.closest(".product__slide");
+    if (slide) {
+      slide.style.display = "none";
+      slide.setAttribute("aria-hidden", "true");
+
+      // Hide the matching thumbnail, if any (gallery nav ties thumbs to data-image-id)
+      var imageId = slide.getAttribute("data-image-id");
+      if (imageId) {
+        document
+          .querySelectorAll('[data-thumbnail-id="' + imageId + '"], [data-image-id="' + imageId + '"]')
+          .forEach(function (el) {
+            if (el !== slide) el.style.display = "none";
+          });
+      }
+    } else {
+      container.style.display = "none";
+    }
+  }
+
   function initWebGIViewer(container) {
     if (container.dataset.webgiInitialized === "true") return;
     container.dataset.webgiInitialized = "true";
@@ -101,6 +125,13 @@
     }
 
     if (modelId && LAMBDA_API_URL && LAMBDA_API_KEY && !isLocalDev) {
+      // In AWS mode the Shopify GLB is a trigger-only placeholder that must
+      // never be rendered — not even if AWS fails. If the signed URL cannot
+      // be obtained, we hide the 3D slide entirely rather than fall back
+      // to the placeholder model exposed via data-webgi-src.
+      // Clear the placeholder URL immediately so it's not exposed in the DOM.
+      container.removeAttribute("data-webgi-src");
+
       // Use the native fetch captured before app scripts (e.g. shop_events_listener)
       // could monkey-patch window.fetch, which would break the Lambda request.
       var nativeFetch = window.__nativeFetch || window.fetch.bind(window);
@@ -119,8 +150,6 @@
         })
         .then(function (result) {
           if (result.data.url) {
-            // Clear the Shopify CDN fallback so it's not exposed in the DOM
-            container.removeAttribute("data-webgi-src");
             console.log("[WebGI] Loading model from AWS signed URL:", result.data.url.split("?")[0]);
             requestAnimationFrame(function () {
               requestAnimationFrame(function () {
@@ -129,32 +158,20 @@
             });
             return;
           }
-          // No GLB on AWS (404 or missing url) — fall back to Shopify CDN
           if (result.status === 404) {
-            console.log("[WebGI] No model found on AWS, falling back to Shopify CDN");
+            console.warn("[WebGI] No model found on AWS for id:", modelId);
           } else {
-            console.warn("[WebGI] No signed URL returned, falling back to Shopify CDN");
+            console.warn("[WebGI] No signed URL returned from Lambda");
           }
-          throw new Error("fallback");
+          throw new Error("no-aws-model");
         })
         .catch(function (err) {
-          if (err && err.message !== "fallback") {
-            console.warn("[WebGI] Failed to get signed model URL (falling back to direct GLB):", err);
+          if (err && err.message !== "no-aws-model") {
+            console.warn("[WebGI] Failed to get signed model URL:", err);
           }
-          // Fall back to the direct Shopify CDN URL — happens on local dev where
-          // the Lambda API Gateway blocks the origin due to CORS.
-          var fallbackUrl = container.dataset.webgiSrc;
-          if (!fallbackUrl) {
-            loader.style.display = "none";
-            return;
-          }
-          if (fallbackUrl.indexOf("//") === 0) fallbackUrl = "https:" + fallbackUrl;
-          else if (fallbackUrl.indexOf("/") === 0) fallbackUrl = window.location.origin + fallbackUrl;
-          requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-              startViewer(fallbackUrl);
-            });
-          });
+          // AWS unavailable — hide the 3D slide so the placeholder GLB is
+          // never shown on the storefront.
+          hide3DSlide(container);
         });
       return;
     }
@@ -924,6 +941,9 @@
       resizeObserver.observe(container);
     } catch (err) {
       console.error("[WebGI] Error:", err);
+      // If the model failed to load/render, hide the slide so no broken
+      // viewer / placeholder is visible to the customer.
+      hide3DSlide(container);
     }
   }
 
