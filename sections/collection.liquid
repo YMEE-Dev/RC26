@@ -742,6 +742,14 @@
           : Number.NaN;
         const isActive = getAvailabilityActiveState(component);
 
+        if (hasServerAvailabilityFilter(component)) {
+          setAvailabilityFilterInputState(component, isActive);
+        } else {
+          if (isActive) {
+            applyLocalAvailabilityFilter(component, true);
+          }
+        }
+
         if (availabilityControl) {
           availabilityControl.classList.toggle('is-active', isActive);
         }
