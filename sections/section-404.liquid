@@ -1,16 +1,79 @@
-{%- assign color_scheme = 'color-' | append: section.settings.color_scheme -%}
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+-%}
 
-<section class="page-404 {{ color_scheme }}">
-  <h2 class="page__heading">{{ 'general.404.title' | t }}</h2>
-  <p class="center text--404">{{ 'general.404.subtext_html' | t }}</p>
+{%- style -%}
+  #Section404--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
 
-  {%- render 'search-form' -%}
+<section
+  id="Section404--{{ section.id }}"
+  class="page-404 section-padding {{ color_scheme }}"
+>
+  <div class="wrapper page-404__inner">
+    <h1 class="page-404__heading h1">{{ 'general.404.title' | t }}</h1>
+
+    <p class="page-404__subtext title">{{ section.settings.subtext | escape }}</p>
+
+    {%- if section.blocks.size > 0 -%}
+      <nav class="page-404__links" aria-label="{{ 'general.404.title' | t }}">
+        {%- for block in section.blocks -%}
+          {%- if block.settings.link_label != blank -%}
+            <a
+              href="{{ block.settings.link_url | default: '#' }}"
+              class="page-404__link navlink"
+              {{ block.shopify_attributes }}
+            >
+              {{- block.settings.link_label -}}
+            </a>
+          {%- endif -%}
+        {%- endfor -%}
+      </nav>
+    {%- endif -%}
+  </div>
 </section>
+
+{% stylesheet %}
+  .page-404 {
+    text-align: center;
+  }
+
+  .page-404__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 48px;
+  }
+
+  .page-404__heading {
+    margin: 0;
+  }
+
+  .page-404__links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px 56px;
+  }
+
+  .page-404__link:hover {
+    text-decoration: underline;
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "404",
   "settings": [
+    {
+      "type": "textarea",
+      "id": "subtext",
+      "label": "Subtext",
+      "default": "Here's a few useful shortcuts to help you find what you are looking for."
+    },
     {
       "type": "header",
       "content": "Colors"
@@ -20,6 +83,49 @@
       "id": "color_scheme",
       "default": "scheme_1",
       "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 300,
+      "step": 4,
+      "unit": "px",
+      "label": "Top",
+      "default": 160
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 300,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 160
+    }
+  ],
+  "blocks": [
+    {
+      "type": "link",
+      "name": "Link",
+      "settings": [
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Label",
+          "default": "Shop"
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "URL"
+        }
+      ]
     }
   ]
 }
