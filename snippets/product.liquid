@@ -2621,7 +2621,22 @@
                             elsif value.swatch.color
                               assign sticky_swatch = value.swatch.color
                             else
-                              assign sticky_swatch = 'transparent'
+                              # Fallback hex values mirror WEBGI_COLOR_MAP in assets/webgi-loader.js
+                              # so sticky swatches match the 3D model material colors.
+                              assign sticky_value_lower = value | append: '' | downcase
+                              if sticky_value_lower contains 'white gold' or sticky_value_lower contains 'white-gold'
+                                assign sticky_swatch = '#E5E1DA'
+                              elsif sticky_value_lower contains 'rose gold' or sticky_value_lower contains 'rose-gold'
+                                assign sticky_swatch = '#D3A08F'
+                              elsif sticky_value_lower contains 'yellow gold' or sticky_value_lower contains 'yellow-gold' or sticky_value_lower contains 'gold'
+                                assign sticky_swatch = '#D2AF63'
+                              elsif sticky_value_lower contains 'platinum'
+                                assign sticky_swatch = '#E5E4E2'
+                              elsif sticky_value_lower contains 'silver'
+                                assign sticky_swatch = '#C0C0C0'
+                              else
+                                assign sticky_swatch = 'transparent'
+                              endif
                             endif
                             assign sticky_swatch_style = '--swatch: ' | append: sticky_swatch | append: ';'
                           -%}
