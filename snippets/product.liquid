@@ -11,6 +11,19 @@
   assign featured_media = current_variant.featured_media | default: product.featured_media
   assign featured_media_aspect_ratio = featured_media.aspect_ratio | default: 1
   assign first_3d_model = product.media | where: 'media_type', 'model' | first
+  assign mobile_has_sticky_swatches = false
+
+  for option in product.options_with_values
+    for value in option.values
+      if value.swatch.color != blank or value.swatch.image != blank
+        assign mobile_has_sticky_swatches = true
+        break
+      endif
+    endfor
+    if mobile_has_sticky_swatches
+      break
+    endif
+  endfor
 
   if template.name == 'product' and featured_product == false
     if first_3d_model != blank
@@ -174,6 +187,7 @@
   {% if header_observer_mode != blank %}
     data-header-observer-mode="{{ header_observer_mode }}"
   {% endif %}
+  data-mobile-has-sticky-swatches="{{ mobile_has_sticky_swatches }}"
   data-overlay-header
   data-sticky-enabled="{{ product_sticky_enable }}"
   data-variant-image-scroll="{{ section.settings.variant_image_scroll }}"
@@ -671,16 +685,16 @@
         flex: 0 0 100% !important;
       }
 
-      /* Hide non-active 3D viewer content so it never appears in split view. */
-      #MainProduct--{{ section.id }} .pdp-embla__slide[data-media-type="model"]:not(.pdp-embla__slide--active) .product__media,
-      #MainProduct--{{ section.id }} .pdp-embla__slide[data-media-type="model"]:not(.pdp-embla__slide--active) .webgi-container {
+      /* Desktop only: hide non-active 3D viewer content to prevent split view. */
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-media-type="model"]:not(.pdp-embla__slide--active) .product__media,
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-media-type="model"]:not(.pdp-embla__slide--active) .webgi-container {
         opacity: 0 !important;
         visibility: hidden !important;
         pointer-events: none !important;
       }
 
-      #MainProduct--{{ section.id }} .pdp-embla__slide[data-media-type="model"].pdp-embla__slide--active .product__media,
-      #MainProduct--{{ section.id }} .pdp-embla__slide[data-media-type="model"].pdp-embla__slide--active .webgi-container {
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-media-type="model"].pdp-embla__slide--active .product__media,
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-media-type="model"].pdp-embla__slide--active .webgi-container {
         opacity: 1;
         visibility: visible;
         pointer-events: auto;
@@ -1210,7 +1224,7 @@
           padding: 12px 20px;
         }
 
-        #MainProduct--{{ section.id }} .product__content-columns .ymee-color-picker {
+        #MainProduct--{{ section.id }}[data-mobile-has-sticky-swatches="true"] .product__content-columns .ymee-color-picker {
           display: none;
         }
 
