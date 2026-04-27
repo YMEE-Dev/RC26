@@ -1220,6 +1220,11 @@
           height: calc(var(--full-height, 100svh) - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 60px) - var(--pdp-dropdown-height, 70px));
         }
 
+        /* Keep room for YMEE dropdown when the page is at the top on mobile. */
+        #MainProduct--{{ section.id }} .product__content-columns__aside .product__block--buttons.has-ymee-color-picker {
+          padding-top: var(--pdp-dropdown-height, 70px);
+        }
+
         #MainProduct--{{ section.id }} .product__sticky-bar {
           padding: 12px 20px;
         }
