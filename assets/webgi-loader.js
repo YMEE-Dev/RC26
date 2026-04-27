@@ -1,23 +1,23 @@
 "use strict";
 
 (function () {
-  // Read iJewelSDKSettings from metafields if available (per iJewel3D Shopify integration docs Step 5.3/6)
-  var _sdkSettings = (typeof iJewelSDKSettings !== "undefined") ? iJewelSDKSettings : {};
-  var WEBGI_VIEWER_URL = "https://releases.ijewel3d.com/libs/webgi-v0/viewer-"
-    + (_sdkSettings.webgi_version || "0.20.0") + ".js";
+  // The Shopify metafield is wrapped in an `ijewel3d_settings` key — unwrap it
+  // so flat lookups (_sdkSettings.lambda_api_url, etc.) work; also accept a flat shape.
+  var _sdkSettingsRaw = typeof iJewelSDKSettings !== "undefined" ? iJewelSDKSettings : {};
+  var _sdkSettings =
+    _sdkSettingsRaw && _sdkSettingsRaw.ijewel3d_settings ? _sdkSettingsRaw.ijewel3d_settings : _sdkSettingsRaw;
+  var WEBGI_VIEWER_URL =
+    "https://releases.ijewel3d.com/libs/webgi-v0/viewer-" + (_sdkSettings.webgi_version || "0.20.0") + ".js";
   var ENV_MAP_URL = _sdkSettings.environment_map || "https://demo-assets.pixotronics.com/pixo/hdr/gem_2.hdr";
   var SCENE_SETTINGS_URL = _sdkSettings.scene_settings || "";
   var LOADING_CONFIG = _sdkSettings.loading || {};
   var ENCRYPTION_KEY = _sdkSettings.encryption_key || "w9pcNNE7LBeEGCN";
-  // Sensitive values are injected server-side via the iJewelSDKSettings metafield (snippets/head.liquid)
-  // and intentionally have no hardcoded fallback in this static asset.
+  // Sensitive values come from the iJewelSDKSettings metafield — no hardcoded fallback.
   var LAMBDA_API_URL = _sdkSettings.lambda_api_url || "";
   var LAMBDA_API_KEY = _sdkSettings.lambda_api_key || "";
-  // Base URL for CDN delivery — file resolved as {base}/models/{product-handle}.glb
+  // CDN delivery resolves to {base}/models/{product-handle}.glb
   var CLOUDFRONT_BASE_URL = _sdkSettings.cloudfront_base_url || "https://shop.us.robertocoin.com";
-  // Delivery mode — controlled via metafield "delivery_mode":
-  // "aws"  — Lambda signed-URL (secure, recommended) — current default
-  // "cdn"  — CLOUDFRONT_BASE_URL direct link (simpler, like US site)
+  // "aws" = Lambda signed URL (default), "cdn" = direct CloudFront URL.
   var DELIVERY_MODE = (_sdkSettings.delivery_mode || "aws").toLowerCase();
 
   var scriptLoaded = false;
@@ -50,15 +50,33 @@
       scriptLoading = false;
       console.error("[WebGI] Failed to load viewer script");
     };
-    // Restore native fetch before the viewer script executes so the SDK's
-    // internal license verification (/sdk/verify) uses the unpatched version
-    // rather than the shop_events_listener monkey-patch.
+    // Restore native fetch so the SDK's /sdk/verify uses an unpatched fetch
+    // (shop_events_listener monkey-patches window.fetch).
     if (window.__nativeFetch) window.fetch = window.__nativeFetch;
-    // Pre-set the SDK's internal verified flag so the license verification
-    // loop (which hits a 404 /sdk/verify endpoint in v0.20.0) does not spam
-    // the console with repeated failed requests.
+    // Pre-mark license as verified — /sdk/verify 404s on v0.20.0 and would otherwise spam the console.
     window.fq3fvf_ckuehdq = true;
     document.head.appendChild(script);
+  }
+
+  // Hide the gallery slide + matching thumbnail so the placeholder GLB is never rendered.
+  function hide3DSlide(container) {
+    container.removeAttribute("data-webgi-src");
+
+    var slide = container.closest("[data-slide]") || container.closest(".product__slide");
+    if (!slide) {
+      container.style.display = "none";
+      return;
+    }
+    slide.style.display = "none";
+    slide.setAttribute("aria-hidden", "true");
+
+    var imageId = slide.getAttribute("data-image-id");
+    if (!imageId) return;
+    document
+      .querySelectorAll('[data-thumbnail-id="' + imageId + '"], [data-image-id="' + imageId + '"]')
+      .forEach(function (el) {
+        if (el !== slide) el.style.display = "none";
+      });
   }
 
   function initWebGIViewer(container) {
@@ -101,8 +119,11 @@
     }
 
     if (modelId && LAMBDA_API_URL && LAMBDA_API_KEY && !isLocalDev) {
-      // Use the native fetch captured before app scripts (e.g. shop_events_listener)
-      // could monkey-patch window.fetch, which would break the Lambda request.
+      // AWS mode: the Shopify GLB is trigger-only and must never render — strip its URL
+      // immediately and hide the slide entirely if the signed URL can't be fetched.
+      container.removeAttribute("data-webgi-src");
+
+      // Use the native fetch captured before shop_events_listener monkey-patched it.
       var nativeFetch = window.__nativeFetch || window.fetch.bind(window);
       nativeFetch(LAMBDA_API_URL, {
         method: "POST",
@@ -119,8 +140,6 @@
         })
         .then(function (result) {
           if (result.data.url) {
-            // Clear the Shopify CDN fallback so it's not exposed in the DOM
-            container.removeAttribute("data-webgi-src");
             console.log("[WebGI] Loading model from AWS signed URL:", result.data.url.split("?")[0]);
             requestAnimationFrame(function () {
               requestAnimationFrame(function () {
@@ -129,37 +148,36 @@
             });
             return;
           }
-          // No GLB on AWS (404 or missing url) — fall back to Shopify CDN
           if (result.status === 404) {
-            console.log("[WebGI] No model found on AWS, falling back to Shopify CDN");
+            console.warn("[WebGI] No model found on AWS for id:", modelId);
           } else {
-            console.warn("[WebGI] No signed URL returned, falling back to Shopify CDN");
+            console.warn("[WebGI] No signed URL returned from Lambda");
           }
-          throw new Error("fallback");
+          throw new Error("no-aws-model");
         })
         .catch(function (err) {
-          if (err && err.message !== "fallback") {
-            console.warn("[WebGI] Failed to get signed model URL (falling back to direct GLB):", err);
+          if (err && err.message !== "no-aws-model") {
+            console.warn("[WebGI] Failed to get signed model URL:", err);
           }
-          // Fall back to the direct Shopify CDN URL — happens on local dev where
-          // the Lambda API Gateway blocks the origin due to CORS.
-          var fallbackUrl = container.dataset.webgiSrc;
-          if (!fallbackUrl) {
-            loader.style.display = "none";
-            return;
-          }
-          if (fallbackUrl.indexOf("//") === 0) fallbackUrl = "https:" + fallbackUrl;
-          else if (fallbackUrl.indexOf("/") === 0) fallbackUrl = window.location.origin + fallbackUrl;
-          requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-              startViewer(fallbackUrl);
-            });
-          });
+          // AWS unavailable — hide the slide so the placeholder GLB never renders.
+          hide3DSlide(container);
         });
       return;
     }
 
-    // Fallback: use data-webgi-src directly (local dev / non-encrypted)
+    // Fallback: use data-webgi-src directly (local dev / non-encrypted).
+    // Production safety: if AWS mode is configured but the settings above are
+    // missing/incomplete (so neither the CDN nor the AWS branch ran), do NOT
+    // silently render the placeholder GLB exposed via data-webgi-src. Hide the
+    // slide instead, matching the AWS-failure behaviour.
+    if (!isLocalDev && DELIVERY_MODE === "aws") {
+      console.warn(
+        "[WebGI] AWS delivery mode is set but lambda_api_url/lambda_api_key are missing — hiding 3D slide to avoid showing the placeholder."
+      );
+      hide3DSlide(container);
+      return;
+    }
+
     var glbUrl = container.dataset.webgiSrc;
     if (!glbUrl) return;
     if (glbUrl.indexOf("//") === 0) {
@@ -924,6 +942,8 @@
       resizeObserver.observe(container);
     } catch (err) {
       console.error("[WebGI] Error:", err);
+      // Model failed to load/render — hide the slide so no broken viewer is shown.
+      hide3DSlide(container);
     }
   }
 
