@@ -2609,7 +2609,7 @@
                     -%}
                     {%- if sticky_has_swatches -%}
                       <div
-                        class="product__sticky-bar__swatches"
+                        class="swatches product__sticky-bar__swatches"
                         data-sticky-color-swatches
                         data-option-position="{{ option.position }}"
                       >
@@ -2622,13 +2622,13 @@
                               assign sticky_swatch = value.swatch.color
                             else
                                 assign sticky_value_lower = value | append: '' | downcase | handle
-                                if sticky_value_lower contains 'rose' or sticky_value_lower contains 'rose-gold'
+                                if sticky_value_lower contains 'rose-gold' or sticky_value_lower contains 'yellow-gold'
+                                  assign sticky_swatch = 'var(--gold)'
+                                elsif sticky_value_lower contains 'rose'
                                   assign sticky_swatch = 'var(--rose)'
-                                elsif sticky_value_lower contains 'pink' or sticky_value_lower contains 'hot-pink'
+                                elsif sticky_value_lower contains 'hot-pink' or sticky_value_lower contains 'pink'
                                   assign sticky_swatch = 'var(--pink)'
-                                elsif sticky_value_lower contains 'yellow'
-                                  assign sticky_swatch = 'var(--yellow)'
-                                elsif sticky_value_lower contains 'gold' or sticky_value_lower contains 'yellow-gold'
+                                elsif sticky_value_lower contains 'gold'
                                   assign sticky_swatch = 'var(--gold)'
                                 elsif sticky_value_lower contains 'white' or sticky_value_lower contains 'platinum'
                                   assign sticky_swatch = 'var(--white)'
