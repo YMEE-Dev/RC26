@@ -1437,6 +1437,7 @@
         <product-images
           class="{{ product_images_classlist }}"
           data-active-media="{{ section.id }}-{{ featured_media.id }}"
+          {% if first_3d_model != blank %}data-has-3d-model{% endif %}
         >
           {%- if template.name == 'product' and featured_product == false -%}
             <script src="{{ 'embla-carousel.umd.js' | asset_url }}" defer="defer"></script>
@@ -1946,12 +1947,16 @@
 
                   productImagesEl.addEventListener('theme:media:select', function (e) {
                     if (!e || !e.detail || !e.detail.id) return;
+                    var fromThumb =
+                      e.target && (e.target.closest('product-thumbs') || e.target.tagName === 'PRODUCT-THUMBS');
+                    // For 3D-model products: never let variant changes (or any
+                    // programmatic media-select) move the gallery off the 3D slide.
+                    // Only user-initiated thumb clicks may switch slides.
+                    if (productImagesEl.hasAttribute('data-has-3d-model') && !fromThumb) return;
                     // When our gallery filter is active, only allow user-initiated
                     // thumb clicks through. Block programmatic scrolls from variant
                     // change handlers (product-info updateMedia, etc.).
                     if (productImagesEl.getAttribute('data-gallery-filter-active') === 'true') {
-                      var fromThumb =
-                        e.target && (e.target.closest('product-thumbs') || e.target.tagName === 'PRODUCT-THUMBS');
                       if (!fromThumb) return;
                     }
                     var activeCarousel = getActiveCarousel();
@@ -2616,16 +2621,34 @@
                             elsif value.swatch.color
                               assign sticky_swatch = value.swatch.color
                             else
-                              assign sticky_value_name = value | append: ''
-                              for variant in product.variants
-                                assign sticky_variant_option_index = option.position | minus: 1
-                                if variant.options[sticky_variant_option_index] == sticky_value_name
-                                  if variant.featured_media
-                                    assign sticky_swatch = variant.featured_media.preview_image | image_url: width: 48 | prepend: 'url(' | append: ')'
-                                    break
-                                  endif
+                                assign sticky_value_lower = value | append: '' | downcase | handle
+                                if sticky_value_lower contains 'rose' or sticky_value_lower contains 'rose-gold'
+                                  assign sticky_swatch = 'var(--rose)'
+                                elsif sticky_value_lower contains 'pink' or sticky_value_lower contains 'hot-pink'
+                                  assign sticky_swatch = 'var(--pink)'
+                                elsif sticky_value_lower contains 'yellow'
+                                  assign sticky_swatch = 'var(--yellow)'
+                                elsif sticky_value_lower contains 'gold' or sticky_value_lower contains 'yellow-gold'
+                                  assign sticky_swatch = 'var(--gold)'
+                                elsif sticky_value_lower contains 'white' or sticky_value_lower contains 'platinum'
+                                  assign sticky_swatch = 'var(--white)'
+                                elsif sticky_value_lower contains 'silver'
+                                  assign sticky_swatch = 'var(--silver)'
+                                elsif sticky_value_lower contains 'black' or sticky_value_lower contains 'jet'
+                                  assign sticky_swatch = 'var(--black)'
+                                elsif sticky_value_lower contains 'red'
+                                  assign sticky_swatch = 'var(--red)'
+                                elsif sticky_value_lower contains 'blue'
+                                  assign sticky_swatch = 'var(--blue)'
+                                elsif sticky_value_lower contains 'green'
+                                  assign sticky_swatch = 'var(--green)'
+                                elsif sticky_value_lower contains 'brown' or sticky_value_lower contains 'bronze'
+                                  assign sticky_swatch = 'var(--brown)'
+                                elsif sticky_value_lower contains 'copper'
+                                  assign sticky_swatch = 'var(--copper)'
+                                else
+                                  assign sticky_swatch = 'var(--neutral)'
                                 endif
-                              endfor
                             endif
                             assign sticky_swatch_style = '--swatch: ' | append: sticky_swatch | append: ';'
                           -%}
