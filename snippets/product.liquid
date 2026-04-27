@@ -666,6 +666,26 @@
         flex: 0 0 100% !important;
       }
 
+      /* 3D products: keep desktop gallery one slide at a time. */
+      #MainProduct--{{ section.id }} .pdp-embla--desktop.pdp-embla--single-slide .pdp-embla__slide {
+        flex: 0 0 100% !important;
+      }
+
+      /* Hide non-active 3D viewer content so it never appears in split view. */
+      #MainProduct--{{ section.id }} .pdp-embla__slide[data-media-type="model"]:not(.pdp-embla__slide--active) .product__media,
+      #MainProduct--{{ section.id }} .pdp-embla__slide[data-media-type="model"]:not(.pdp-embla__slide--active) .webgi-container {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla__slide[data-media-type="model"].pdp-embla__slide--active .product__media,
+      #MainProduct--{{ section.id }} .pdp-embla__slide[data-media-type="model"].pdp-embla__slide--active .webgi-container {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+      }
+
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__viewport {
         overflow: hidden;
       }
@@ -1583,6 +1603,17 @@
                     return Array.prototype.indexOf.call(slideEls, slide);
                   }
 
+                  function setActiveSlideClass(carouselEl, index) {
+                    if (!carouselEl) return;
+                    var slides = getContainerSlides(carouselEl);
+                    slides.forEach(function (slide) {
+                      slide.classList.remove('pdp-embla__slide--active');
+                    });
+                    if (slides[index]) {
+                      slides[index].classList.add('pdp-embla__slide--active');
+                    }
+                  }
+
                   function makeCarousel(carouselEl) {
                     if (carouselEl && carouselEl.dataset && carouselEl.dataset.emblaInitialized === 'true') return null;
                     var viewport = carouselEl.querySelector('[data-embla-viewport]');
@@ -1830,14 +1861,7 @@
                       var activeCarousel = getActiveCarousel();
                       var index = embla.selectedScrollSnap();
 
-                      var slides = getContainerSlides(carouselEl);
-                      slides.forEach(function (slide) {
-                        slide.classList.remove('pdp-embla__slide--active');
-                      });
-
-                      if (slides[index]) {
-                        slides[index].classList.add('pdp-embla__slide--active');
-                      }
+                      setActiveSlideClass(carouselEl, index);
 
                       setActiveMediaByIndex(activeCarousel, index);
                       loadDeferredMediaByIndex(activeCarousel, index);
@@ -1990,6 +2014,7 @@
                     carousels.forEach(function (carousel) {
                       var startIndex = desiredIndexForCarousel(carousel);
                       carousel.embla.scrollTo(startIndex, true);
+                      setActiveSlideClass(carousel.el, startIndex);
 
                       if (carousel.el && carousel.el.offsetParent !== null) {
                         setActiveMediaByIndex(carousel, startIndex);
@@ -2051,6 +2076,7 @@
                       }
                       c.embla.reInit();
                       c.embla.scrollTo(0, true);
+                      setActiveSlideClass(c.el, 0);
                       c.updateArrows && c.updateArrows();
                     });
 
@@ -2181,7 +2207,7 @@
                 </div>
               </div>
 
-              <div class="pdp-embla pdp-embla--desktop" data-embla-carousel>
+              <div class="pdp-embla pdp-embla--desktop{% if first_3d_model != blank or has_aws_3d %} pdp-embla--single-slide{% endif %}" data-embla-carousel>
                 <div class="pdp-embla__viewport" data-embla-viewport>
                   <div class="pdp-embla__container">
                     {%- assign media_count = ordered_media.size -%}
