@@ -1,8 +1,14 @@
 "use strict";
 
 (function () {
-  // Read iJewelSDKSettings from metafields if available (per iJewel3D Shopify integration docs Step 5.3/6)
-  var _sdkSettings = (typeof iJewelSDKSettings !== "undefined") ? iJewelSDKSettings : {};
+  // Read iJewelSDKSettings from metafields if available (per iJewel3D Shopify integration docs Step 5.3/6).
+  // The Shopify metafield is in namespace `ijewel3d_settings` with a key of the
+  // same name, so `shop.metafields.ijewel3d_settings | json` outputs:
+  //   { "ijewel3d_settings": { delivery_mode, lambda_api_url, ... } }
+  // Unwrap that one level so existing flat lookups (e.g. _sdkSettings.lambda_api_url)
+  // continue to work. Also accept the already-flat shape.
+  var _sdkSettingsRaw = (typeof iJewelSDKSettings !== "undefined") ? iJewelSDKSettings : {};
+  var _sdkSettings = (_sdkSettingsRaw && _sdkSettingsRaw.ijewel3d_settings) ? _sdkSettingsRaw.ijewel3d_settings : _sdkSettingsRaw;
   var WEBGI_VIEWER_URL = "https://releases.ijewel3d.com/libs/webgi-v0/viewer-"
     + (_sdkSettings.webgi_version || "0.20.0") + ".js";
   var ENV_MAP_URL = _sdkSettings.environment_map || "https://demo-assets.pixotronics.com/pixo/hdr/gem_2.hdr";
@@ -176,7 +182,19 @@
       return;
     }
 
-    // Fallback: use data-webgi-src directly (local dev / non-encrypted)
+    // Fallback: use data-webgi-src directly (local dev / non-encrypted).
+    // Production safety: if AWS mode is configured but the settings above are
+    // missing/incomplete (so neither the CDN nor the AWS branch ran), do NOT
+    // silently render the placeholder GLB exposed via data-webgi-src. Hide the
+    // slide instead, matching the AWS-failure behaviour.
+    if (!isLocalDev && DELIVERY_MODE === "aws") {
+      console.warn(
+        "[WebGI] AWS delivery mode is set but lambda_api_url/lambda_api_key are missing — hiding 3D slide to avoid showing the placeholder."
+      );
+      hide3DSlide(container);
+      return;
+    }
+
     var glbUrl = container.dataset.webgiSrc;
     if (!glbUrl) return;
     if (glbUrl.indexOf("//") === 0) {
