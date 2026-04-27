@@ -2622,7 +2622,11 @@
                               assign sticky_swatch = value.swatch.color
                             else
                               assign sticky_value_lower = value | append: '' | downcase | handle
-                              if sticky_value_lower contains 'rose-gold' or sticky_value_lower contains 'yellow-gold'
+                              if sticky_value_lower contains 'white-gold'
+                                assign sticky_swatch = 'var(--ash)'
+                              elsif sticky_value_lower contains 'rose-gold'
+                                assign sticky_swatch = 'var(--rose)'
+                              elsif sticky_value_lower contains 'yellow-gold'
                                 assign sticky_swatch = 'var(--gold)'
                               elsif sticky_value_lower contains 'rose'
                                 assign sticky_swatch = 'var(--rose)'
