@@ -125,17 +125,19 @@
 
   if current_category_collection == blank
     if current_collection != blank
-      if current_collection.title contains ' - '
-        assign parent_collection_title = current_collection.title | split: ' - ' | first | strip
-        if parent_collection_title != blank
-          assign parent_collection_handle = parent_collection_title | handleize
-          assign parent_collection_obj = collections[parent_collection_handle]
+      assign current_collection_handle = current_collection.handle | default: ''
+      if current_collection_handle == blank and current_collection.url != blank
+        assign current_collection_handle = current_collection.url | split: '/collections/' | last | split: '?' | first | split: '/' | first
+      endif
 
-          if parent_collection_obj != blank
-            if parent_collection_obj.handle != current_collection.handle
-              assign current_category_collection = parent_collection_obj
-              assign current_category_display_title = parent_collection_obj.title
-            endif
+      if current_collection_handle != blank
+        assign parent_collection_handle = current_collection_handle | split: '-' | first
+        assign parent_collection_obj = collections[parent_collection_handle]
+
+        if parent_collection_obj != blank
+          if parent_collection_obj.handle != current_collection.handle
+            assign current_category_collection = parent_collection_obj
+            assign current_category_display_title = parent_collection_obj.title
           endif
         endif
       endif
