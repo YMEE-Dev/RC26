@@ -666,6 +666,26 @@
         flex: 0 0 100% !important;
       }
 
+      /* 3D products: keep desktop gallery one slide at a time. */
+      #MainProduct--{{ section.id }} .pdp-embla--desktop.pdp-embla--single-slide .pdp-embla__slide {
+        flex: 0 0 100% !important;
+      }
+
+      /* Desktop only: hide non-active 3D viewer content to prevent split view. */
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-media-type="model"]:not(.pdp-embla__slide--active) .product__media,
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-media-type="model"]:not(.pdp-embla__slide--active) .webgi-container {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-media-type="model"].pdp-embla__slide--active .product__media,
+      #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-media-type="model"].pdp-embla__slide--active .webgi-container {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+      }
+
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__viewport {
         overflow: hidden;
       }
@@ -1417,6 +1437,7 @@
         <product-images
           class="{{ product_images_classlist }}"
           data-active-media="{{ section.id }}-{{ featured_media.id }}"
+          {% if first_3d_model != blank %}data-has-3d-model{% endif %}
         >
           {%- if template.name == 'product' and featured_product == false -%}
             <script src="{{ 'embla-carousel.umd.js' | asset_url }}" defer="defer"></script>
@@ -1581,6 +1602,17 @@
                     var slide = mediaEl.closest('[data-embla-slide]');
                     if (!slide) return -1;
                     return Array.prototype.indexOf.call(slideEls, slide);
+                  }
+
+                  function setActiveSlideClass(carouselEl, index) {
+                    if (!carouselEl) return;
+                    var slides = getContainerSlides(carouselEl);
+                    slides.forEach(function (slide) {
+                      slide.classList.remove('pdp-embla__slide--active');
+                    });
+                    if (slides[index]) {
+                      slides[index].classList.add('pdp-embla__slide--active');
+                    }
                   }
 
                   function makeCarousel(carouselEl) {
@@ -1830,14 +1862,7 @@
                       var activeCarousel = getActiveCarousel();
                       var index = embla.selectedScrollSnap();
 
-                      var slides = getContainerSlides(carouselEl);
-                      slides.forEach(function (slide) {
-                        slide.classList.remove('pdp-embla__slide--active');
-                      });
-
-                      if (slides[index]) {
-                        slides[index].classList.add('pdp-embla__slide--active');
-                      }
+                      setActiveSlideClass(carouselEl, index);
 
                       setActiveMediaByIndex(activeCarousel, index);
                       loadDeferredMediaByIndex(activeCarousel, index);
@@ -1922,12 +1947,16 @@
 
                   productImagesEl.addEventListener('theme:media:select', function (e) {
                     if (!e || !e.detail || !e.detail.id) return;
+                    var fromThumb =
+                      e.target && (e.target.closest('product-thumbs') || e.target.tagName === 'PRODUCT-THUMBS');
+                    // For 3D-model products: never let variant changes (or any
+                    // programmatic media-select) move the gallery off the 3D slide.
+                    // Only user-initiated thumb clicks may switch slides.
+                    if (productImagesEl.hasAttribute('data-has-3d-model') && !fromThumb) return;
                     // When our gallery filter is active, only allow user-initiated
                     // thumb clicks through. Block programmatic scrolls from variant
                     // change handlers (product-info updateMedia, etc.).
                     if (productImagesEl.getAttribute('data-gallery-filter-active') === 'true') {
-                      var fromThumb =
-                        e.target && (e.target.closest('product-thumbs') || e.target.tagName === 'PRODUCT-THUMBS');
                       if (!fromThumb) return;
                     }
                     var activeCarousel = getActiveCarousel();
@@ -1990,6 +2019,7 @@
                     carousels.forEach(function (carousel) {
                       var startIndex = desiredIndexForCarousel(carousel);
                       carousel.embla.scrollTo(startIndex, true);
+                      setActiveSlideClass(carousel.el, startIndex);
 
                       if (carousel.el && carousel.el.offsetParent !== null) {
                         setActiveMediaByIndex(carousel, startIndex);
@@ -2051,6 +2081,7 @@
                       }
                       c.embla.reInit();
                       c.embla.scrollTo(0, true);
+                      setActiveSlideClass(c.el, 0);
                       c.updateArrows && c.updateArrows();
                     });
 
@@ -2181,7 +2212,7 @@
                 </div>
               </div>
 
-              <div class="pdp-embla pdp-embla--desktop" data-embla-carousel>
+              <div class="pdp-embla pdp-embla--desktop{% if first_3d_model != blank or has_aws_3d %} pdp-embla--single-slide{% endif %}" data-embla-carousel>
                 <div class="pdp-embla__viewport" data-embla-viewport>
                   <div class="pdp-embla__container">
                     {%- assign media_count = ordered_media.size -%}
@@ -2558,19 +2589,54 @@
                           break
                         endif
                       endfor
+                      if sticky_has_swatches == false
+                        for value in option.values
+                          assign sticky_value_name = value | append: ''
+                          for variant in product.variants
+                            assign sticky_variant_option_index = option.position | minus: 1
+                            if variant.options[sticky_variant_option_index] == sticky_value_name
+                              if variant.featured_media
+                                assign sticky_has_swatches = true
+                                break
+                              endif
+                            endif
+                          endfor
+                          if sticky_has_swatches
+                            break
+                          endif
+                        endfor
+                      endif
                     -%}
                     {%- if sticky_has_swatches -%}
                       <div
-                        class="product__sticky-bar__swatches"
+                        class="swatches product__sticky-bar__swatches"
                         data-sticky-color-swatches
                         data-option-position="{{ option.position }}"
                       >
                         {%- for value in option.values -%}
                           {%- liquid
+                            assign sticky_swatch = blank
                             if value.swatch.image
                               assign sticky_swatch = value.swatch.image | image_url: width: 48 | prepend: 'url(' | append: ')'
-                            else
+                            elsif value.swatch.color
                               assign sticky_swatch = value.swatch.color
+                            else
+                              # Fallback hex values mirror WEBGI_COLOR_MAP in assets/webgi-loader.js
+                              # so sticky swatches match the 3D model material colors.
+                              assign sticky_value_lower = value | append: '' | downcase
+                              if sticky_value_lower contains 'white gold' or sticky_value_lower contains 'white-gold'
+                                assign sticky_swatch = '#E5E1DA'
+                              elsif sticky_value_lower contains 'rose gold' or sticky_value_lower contains 'rose-gold'
+                                assign sticky_swatch = '#D3A08F'
+                              elsif sticky_value_lower contains 'yellow gold' or sticky_value_lower contains 'yellow-gold' or sticky_value_lower contains 'gold'
+                                assign sticky_swatch = '#D2AF63'
+                              elsif sticky_value_lower contains 'platinum'
+                                assign sticky_swatch = '#E5E4E2'
+                              elsif sticky_value_lower contains 'silver'
+                                assign sticky_swatch = '#C0C0C0'
+                              else
+                                assign sticky_swatch = 'transparent'
+                              endif
                             endif
                             assign sticky_swatch_style = '--swatch: ' | append: sticky_swatch | append: ';'
                           -%}

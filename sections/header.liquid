@@ -32,6 +32,8 @@
     assign transparent_header = true
   elsif template == 'index' and section.settings.transparent_home
     assign transparent_header = true
+  elsif template == '404'
+    assign transparent_header = true
   elsif template.name == 'page' and section.settings.transparent_page
     assign transparent_header = true
   elsif template.name == 'search' and section.settings.transparent_search
@@ -416,9 +418,17 @@
                   {%- if parent_collection_title != blank -%}
                     {%- if child_collection_title != blank -%}
                       {%- liquid
-                        assign parent_collection_handle = parent_collection_title | handleize
+                        assign parent_collection_handle = current_collection.handle | default: ''
+                        if parent_collection_handle == blank and current_collection.url != blank
+                          assign parent_collection_handle = current_collection.url | split: '/collections/' | last | split: '?' | first | split: '/' | first
+                        endif
+                        if parent_collection_handle != blank
+                          assign parent_collection_handle = parent_collection_handle | split: '-' | first
+                        elsif parent_collection_title != blank
+                          assign parent_collection_handle = parent_collection_title | handleize
+                        endif
                         assign parent_collection_obj = collections[parent_collection_handle]
-                        assign parent_collection_url = '/collections/' | append: parent_collection_handle
+                        assign parent_collection_url = current_collection.url
                         if parent_collection_obj != blank
                           assign parent_collection_url = parent_collection_obj.url
                         endif
@@ -443,7 +453,7 @@
             {%- endif -%}
           </h6>
         {%- elsif template contains 'collection' and collection -%}
-          <h6 class="header__logo__meta__collection">
+              <h6 class="header__logo__meta__collection">
             {%- assign collection_title = collection.title -%}
             {%- if collection_title contains ' - ' -%}
               {%- liquid
@@ -453,9 +463,15 @@
               {%- if parent_collection_title != blank -%}
                 {%- if child_collection_title != blank -%}
                   {%- liquid
-                    assign parent_collection_handle = parent_collection_title | handleize
+                    assign parent_collection_handle = collection.handle | default: ''
+                    if parent_collection_handle == blank and collection.url != blank
+                      assign parent_collection_handle = collection.url | split: '/collections/' | last | split: '?' | first | split: '/' | first
+                    endif
+                    if parent_collection_handle != blank
+                      assign parent_collection_handle = parent_collection_handle | split: '-' | first
+                    endif
                     assign parent_collection_obj = collections[parent_collection_handle]
-                    assign parent_collection_url = '/collections/' | append: parent_collection_handle
+                    assign parent_collection_url = collection.url
                     if parent_collection_obj != blank
                       assign parent_collection_url = parent_collection_obj.url
                     endif

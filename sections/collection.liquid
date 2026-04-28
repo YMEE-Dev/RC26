@@ -15,18 +15,18 @@
   assign has_active_subcollection_link = false
   assign parent_collection_url = collection.url
 
-  if collection.title contains ' - '
-    assign parent_collection_title = collection.title | split: ' - ' | first | strip
-    assign child_collection_title = collection.title | remove_first: parent_collection_title | remove_first: ' - ' | strip
+  assign collection_handle = collection.handle | default: ''
+  if collection_handle == blank and collection.url != blank
+    assign collection_handle = collection.url | split: '/collections/' | last | split: '?' | first | split: '/' | first
+  endif
 
-    if parent_collection_title != blank and child_collection_title != blank
-      assign parent_collection_handle = parent_collection_title | handleize
-      assign parent_collection_obj = collections[parent_collection_handle]
+  if collection_handle != blank
+    assign parent_collection_handle = collection_handle | split: '-' | first
+    assign parent_collection_obj = collections[parent_collection_handle]
 
-      if parent_collection_obj != blank
-        assign parent_collection_url = parent_collection_obj.url
-        assign has_active_subcollection_link = true
-      endif
+    if parent_collection_obj != blank and parent_collection_obj.handle != collection.handle
+      assign parent_collection_url = parent_collection_obj.url
+      assign has_active_subcollection_link = true
     endif
   endif
 

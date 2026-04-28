@@ -2,15 +2,13 @@
   Returns the current collection result count excluding storytelling products.
 
   The count is based on the current collection filter state. When a product type
-  filter exists, the snippet subtracts the storytelling count from the current
-  filtered result set unless storytelling is already excluded by an active
-  product type selection.
+  filter exists, the snippet subtracts the current storytelling bucket count
+  from the current filtered result set. If that bucket isn't exposed by Shopify,
+  it falls back to scanning the current collection slice.
 
   @param {collection} collection_obj - The collection to count
-  @param {number} [products_per_page] - Current collection page size for small-collection fallback
-
   @example
-  {% render 'collection-products-count', collection_obj: collection, products_per_page: section.settings.products_per_page %}
+  {% render 'collection-products-count', collection_obj: collection %}
 {% enddoc %}
 
 {%- liquid
@@ -19,64 +17,33 @@
   if collection_obj != blank
     assign display_products_count = collection_obj.products_count
     assign storytelling_products_count = 0
-    assign product_type_filter_found = false
+    assign storytelling_bucket_found = false
 
     for filter in collection_obj.filters
       if filter.param_name contains 'product_type'
-        assign product_type_filter_found = true
+        for filter_value in filter.values
+          assign filter_value_label = filter_value.label | downcase | strip
+          assign filter_value_value = filter_value.value | downcase | strip
 
-        if filter.active_values.size > 0
-          for filter_value in filter.active_values
-            assign filter_value_label = filter_value.label | downcase | strip
-            assign filter_value_value = filter_value.value | downcase | strip
-
-            if filter_value_label == 'storytelling'
-              assign storytelling_products_count = filter_value.count
-              break
-            endif
-
-            if filter_value_value == 'storytelling'
-              assign storytelling_products_count = filter_value.count
-              break
-            endif
-          endfor
-        else
-          for filter_value in filter.values
-            assign filter_value_label = filter_value.label | downcase | strip
-            assign filter_value_value = filter_value.value | downcase | strip
-
-            if filter_value_label == 'storytelling'
-              assign storytelling_products_count = filter_value.count
-              break
-            endif
-
-            if filter_value_value == 'storytelling'
-              assign storytelling_products_count = filter_value.count
-              break
-            endif
-          endfor
-        endif
+          if filter_value_label == 'storytelling' or filter_value_value == 'storytelling'
+            assign storytelling_products_count = filter_value.count
+            assign storytelling_bucket_found = true
+            break
+          endif
+        endfor
 
         break
       endif
     endfor
 
-    if product_type_filter_found == false
-      if products_per_page != blank
-        if collection_obj.products_count <= products_per_page
-          for product in collection_obj.products
-            assign product_type = product.type | downcase | strip
+    if storytelling_bucket_found == false
+      for product in collection_obj.products
+        assign product_type = product.type | downcase | strip
 
-            if product_type == 'storytelling'
-              assign storytelling_products_count = storytelling_products_count | plus: 1
-            else
-              if product_type contains 'storytelling'
-                assign storytelling_products_count = storytelling_products_count | plus: 1
-              endif
-            endif
-          endfor
+        if product_type contains 'storytelling'
+          assign storytelling_products_count = storytelling_products_count | plus: 1
         endif
-      endif
+      endfor
     endif
 
     assign display_products_count = collection_obj.products_count | minus: storytelling_products_count

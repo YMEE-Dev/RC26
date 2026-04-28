@@ -2,6 +2,7 @@
 {%- liquid
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign animation_anchor = '#CollectionsAndIcons--' | append: section.id
+  assign animation_order = 0
   assign collection_blocks = section.blocks | where: 'type', 'links'
   assign icon_blocks = section.blocks | where: 'type', 'icons'
   assign has_drawer_icons = false
@@ -57,7 +58,15 @@
       <div class="collections-and-icons__grid{% if description_first %} collections-and-icons__grid--reverse-desktop{% endif %}">
         <div class="collections-and-icons__content">
           {%- for block in collection_blocks -%}
-            <div class="collections-and-icons__collection" {{ block.shopify_attributes }}>
+            {%- assign animation_order = animation_order | plus: 1 -%}
+
+            <div
+              class="collections-and-icons__collection"
+              data-aos="hero"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-order="{{ animation_order }}"
+              {{ block.shopify_attributes }}
+            >
               {%- if block.settings.title != blank -%}
                 <span class="collections-and-icons__collection-title label">
                   {{ block.settings.title }}
@@ -95,7 +104,15 @@
         </div>
 
         {%- if section.settings.description != blank -%}
-          <toggle-ellipsis class="collections-and-icons__mobile-accordion" data-height="240">
+          {%- assign animation_order = animation_order | plus: 1 -%}
+
+          <toggle-ellipsis
+            class="collections-and-icons__mobile-accordion"
+            data-height="240"
+            data-aos="hero"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-order="{{ animation_order }}"
+          >
             <div
               class="collections-and-icons__mobile-accordion-content collections-and-icons__description caption rte"
               data-content
@@ -237,16 +254,8 @@
 
   .collections-and-icons__content {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 2fr 1fr;
     gap: 32px;
-  }
-
-  @media (min-width: 750px) {
-    .collections-and-icons__content {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      column-gap: clamp(32px, 4vw, 72px);
-      row-gap: 36px;
-    }
   }
 
   .collections-and-icons__collection {

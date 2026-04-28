@@ -1,6 +1,9 @@
 {%- liquid
   assign filters_default = search.filters | default: collection.filters
   assign default_open = section.settings.default_open
+  assign current_collection_handle = collection.handle | default: '' | downcase | strip
+  assign current_collection_url = collection.url | default: '' | downcase | strip
+  assign current_collection_title = collection.title | default: '' | downcase | strip
 
   capture swatch_button_style
     case settings.swatch_style
@@ -82,16 +85,39 @@
     {%- endunless -%}
 
     {%- for filter in filters_default -%}
-      {%- liquid
-        assign filter_check_active = filter.values | where: 'active', false
-        assign filter_check_count = filter.values | where: 'count', 0
-        assign filter_hidden = false
+    {%- liquid
+      assign filter_check_active = filter.values | where: 'active', false
+      assign filter_check_count = filter.values | where: 'count', 0
+      assign filter_hidden = false
+      assign filter_has_visible_values = false
 
-        if filter.type == 'list' and filter.values.size == filter_check_active.size and filter.values.size == filter_check_count.size
-          assign filter_hidden = true
+      if filter.type == 'list' and filter.values.size == filter_check_active.size and filter.values.size == filter_check_count.size
+        assign filter_hidden = true
+      endif
+
+      if collection != blank and filter.param_name contains 'collection'
+        if filter.type == 'list' or filter.type == 'boolean'
+          for filter_value in filter.values
+            assign filter_value_value = filter_value.value | default: '' | append: '' | downcase | strip
+            assign filter_value_label = filter_value.label | default: '' | downcase | strip
+
+            if filter_value_value == current_collection_handle or filter_value_value == current_collection_url or filter_value_label == current_collection_title
+              continue
+            endif
+
+            assign filter_has_visible_values = true
+            break
+          endfor
         endif
+      else
+        assign filter_has_visible_values = true
+      endif
 
-        assign animation_delay = animation_delay | plus: animation_delay_increment
+      if filter_has_visible_values == false
+        assign filter_hidden = true
+      endif
+
+      assign animation_delay = animation_delay | plus: animation_delay_increment
 
         if forloop.first and animation_delay == 50
           assign animation_delay = animation_delay | plus: 200
@@ -135,6 +161,16 @@
                 {%- when 'list', 'boolean' -%}
                   <ul class="collection-nav{% if filter.presentation == "image" %} collection-nav--image-grid{% endif %}">
                     {%- for filter_value in filter.values -%}
+                      {%- liquid
+                        assign filter_value_value = filter_value.value | default: '' | append: '' | downcase | strip
+                        assign filter_value_label = filter_value.label | default: '' | downcase | strip
+
+                        if collection != blank and filter.param_name contains 'collection'
+                          if filter_value_value == current_collection_handle or filter_value_value == current_collection_url or filter_value_label == current_collection_title
+                            continue
+                          endif
+                        endif
+                      -%}
                       <li
                         class="sidebar__item{% if filter_value.active %} sidebar__item--active link--remove{% elsif filter_value.count == 0 and filter_value.active == false %} link--disable{% else %} link--add{% endif %}{% if forloop.index > 15 %} hidden{% endif %}"
                         {% if forloop.index > 15 %}
