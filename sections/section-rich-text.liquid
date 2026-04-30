@@ -20,6 +20,16 @@
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
   }
+
+  @media only screen and (max-width: 768px) {
+    /* Prevent iOS/mobile font rendering from visually collapsing spaces in rich text */
+    #Rte--{{ section.id }} .hero__rte,
+    #Rte--{{ section.id }} .hero__rte p {
+      white-space: normal;
+      word-spacing: 0.02em;
+      font-variant-ligatures: none;
+    }
+  }
 {%- endstyle -%}
 
 <section
