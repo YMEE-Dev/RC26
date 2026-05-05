@@ -53,11 +53,13 @@
     endif
   endif
 
-  assign icon_asset = icon | default: ''
-  if icon_asset != blank
+  assign icon_asset_url = ''
+  if icon != blank
+    assign icon_asset = icon
     unless icon_asset contains '.svg'
       assign icon_asset = icon_asset | append: '.svg'
     endunless
+    assign icon_asset_url = icon_asset | asset_url
   endif
 
   assign text_margin_bottom_value = text_margin_bottom | default: 10
@@ -119,9 +121,9 @@
     {%- endif -%}
 
     <span class="link-with-icon__row">
-      {%- if icon_asset != blank -%}
-        <span class="link-with-icon__icon" aria-hidden="true" translate="no">
-          <img src="{{ icon_asset | asset_url }}" alt="" loading="lazy" width="25" height="25">
+      {%- if icon_asset_url != blank -%}
+        <span class="link-with-icon__icon notranslate" aria-hidden="true" translate="no" data-notranslate>
+          <img src="{{ icon_asset_url }}" alt="" loading="lazy" width="25" height="25" class="notranslate" translate="no" data-notranslate>
         </span>
       {%- endif -%}
 
@@ -176,9 +178,9 @@
     {%- endif -%}
 
     <span class="link-with-icon__row">
-      {%- if icon_asset != blank -%}
-        <span class="link-with-icon__icon" aria-hidden="true" translate="no">
-          <img src="{{ icon_asset | asset_url }}" alt="" loading="lazy" width="25" height="25">
+      {%- if icon_asset_url != blank -%}
+        <span class="link-with-icon__icon notranslate" aria-hidden="true" translate="no" data-notranslate>
+          <img src="{{ icon_asset_url }}" alt="" loading="lazy" width="25" height="25" class="notranslate" translate="no" data-notranslate>
         </span>
       {%- endif -%}
     </span>
