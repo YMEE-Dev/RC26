@@ -1019,12 +1019,18 @@
 
     const rootSelector = '.tmenu_item.tmenu_item--root.tmenu_item_level_0.tmenu_item_submenu_type_mega';
     const tmenuActiveSelector = '.tmenu_item--root.tmenu_item_level_0.tmenu_item_active';
+    const mobileDrawerMenuSelector = '.drawer__menu.tmenu_app';
+    const mobileDrawerActiveRootSelector =
+      '.drawer__menu.tmenu_app .tmenu_item_level_0.tmenu_item_mobile.tmenu_item_active';
     const mobileDrawerThirdLevelSubmenuSelector =
       '.drawer__menu.tmenu_app .tmenu_item_level_0.tmenu_item_mobile > .tmenu_submenu--mobile.tmenu_submenu > li.tmenu_item_level_1.tmenu_item_mobile:nth-of-type(3) > .tmenu_submenu';
+    const jewelryMobileThirdLevelSubmenuSelector =
+      '.drawer__menu.tmenu_app [title="JEWELRY"] + .tmenu_submenu--mobile.tmenu_submenu > li.tmenu_item_level_1.tmenu_item_mobile:nth-of-type(3) > .tmenu_submenu';
     const mobileTouchSafeSubmenuSelector = [
       'ul.tmenu_submenu_type_automatic.tmenu_submenu--mobile.tmenu_submenu',
       mobileDrawerThirdLevelSubmenuSelector,
     ].join(', ');
+    const mobileMenuLazyImageSelector = 'img[data-src], img[data-srcset]';
     let initialized = false;
     let tmenuIsActive = false;
     let tmenuScrollLocked = false;
@@ -1033,6 +1039,94 @@
     const applyMenuOpenStyles = () => {
       initCollectionLabelMirroring();
       initMenuImages();
+    };
+
+    const forceLoadImageFromDataset = (image) => {
+      if (!(image instanceof HTMLImageElement)) return;
+      if (image.dataset.tmenuForcedLoadDone === 'true') return;
+
+      const dataSrc = image.getAttribute('data-src');
+      const dataSrcset = image.getAttribute('data-srcset');
+
+      if (dataSrcset) {
+        image.setAttribute('srcset', dataSrcset);
+        image.removeAttribute('data-srcset');
+      }
+      if (dataSrc) {
+        image.setAttribute('src', dataSrc);
+        image.removeAttribute('data-src');
+      }
+
+      image.setAttribute('loading', 'eager');
+      image.setAttribute('decoding', 'async');
+      image.dataset.tmenuForcedLoadDone = 'true';
+
+      if (typeof image.decode === 'function') {
+        image.decode().catch(() => {});
+      }
+    };
+
+    const getMobileThirdPanels = () => {
+      const jewelryPanels = selectAll(jewelryMobileThirdLevelSubmenuSelector);
+      if (jewelryPanels.length) return jewelryPanels;
+      return selectAll(mobileDrawerThirdLevelSubmenuSelector);
+    };
+
+    const ensureMobileThirdPanelImagesLoaded = () => {
+      const mobileThirdPanels = getMobileThirdPanels();
+      if (!mobileThirdPanels.length) return;
+
+      mobileThirdPanels.forEach((panel) => {
+        selectAll(mobileMenuLazyImageSelector, panel).forEach(forceLoadImageFromDataset);
+
+        if (panel.dataset.mobileImageLoadObserverBound === 'true') return;
+        panel.dataset.mobileImageLoadObserverBound = 'true';
+
+        new MutationObserver(() => {
+          selectAll(mobileMenuLazyImageSelector, panel).forEach(forceLoadImageFromDataset);
+        }).observe(panel, {childList: true, subtree: true});
+      });
+    };
+
+    const bindMobileDrawerMenuObservers = () => {
+      if (document.documentElement.dataset.tmenuMobileDrawerObserversBound === 'true') return;
+      document.documentElement.dataset.tmenuMobileDrawerObserversBound = 'true';
+
+      const attachObservers = (menu) => {
+        if (!menu || menu.dataset.tmenuMobileMenuObserverBound === 'true') return;
+        menu.dataset.tmenuMobileMenuObserverBound = 'true';
+
+        const refreshMobileMenuState = () => {
+          ensureMobileThirdPanelImagesLoaded();
+
+          const mobileMenuIsOpen = Boolean(document.querySelector(mobileDrawerActiveRootSelector));
+          if (mobileMenuIsOpen) {
+            setTmenuScrollLock(true);
+          } else if (tmenuScrollLocked) {
+            setTmenuScrollLock(false);
+          }
+        };
+
+        new MutationObserver(refreshMobileMenuState).observe(menu, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['class'],
+        });
+
+        menu.addEventListener('scroll', refreshMobileMenuState, {passive: true});
+        menu.addEventListener('touchstart', refreshMobileMenuState, {passive: true});
+        menu.addEventListener('touchmove', refreshMobileMenuState, {passive: true});
+
+        refreshMobileMenuState();
+      };
+
+      selectAll(mobileDrawerMenuSelector).forEach(attachObservers);
+
+      new MutationObserver(() => {
+        selectAll(mobileDrawerMenuSelector).forEach(attachObservers);
+        ensureMobileThirdPanelImagesLoaded();
+      }).observe(document.body, {childList: true, subtree: true});
     };
 
     const enableMobileSubmenuTouchScrollGuard = () => {
@@ -1065,16 +1159,6 @@
           if (!submenu) return;
 
           applyBoundaryScrollHack(submenu);
-          event.stopPropagation();
-        },
-        {capture: true, passive: true}
-      );
-
-      document.addEventListener(
-        'touchmove',
-        (event) => {
-          if (!getTouchScrollableSubmenu(event.target)) return;
-          event.stopPropagation();
         },
         {capture: true, passive: true}
       );
@@ -1087,14 +1171,6 @@
       submenu.style.touchAction = 'pan-y';
       submenu.style.overscrollBehaviorY = 'contain';
       submenu.style.webkitOverflowScrolling = 'touch';
-
-      submenu.addEventListener(
-        'touchmove',
-        (event) => {
-          event.stopPropagation();
-        },
-        {passive: true}
-      );
     };
 
     const getTmenuScrollLockTarget = () => {
@@ -1110,8 +1186,6 @@
 
       return document.querySelector('header-drawer.drawer--header .drawer__content__scroll');
     };
-
-    enableMobileSubmenuTouchScrollGuard();
 
     const setTmenuScrollLock = (shouldLock) => {
       if (shouldLock) {
@@ -1145,18 +1219,25 @@
       tmenuScrollLockTarget = null;
     };
 
+    enableMobileSubmenuTouchScrollGuard();
+    ensureMobileThirdPanelImagesLoaded();
+    bindMobileDrawerMenuObservers();
+
     const observeRoot = (root) => {
       const handleMutations = () => {
         if (!initialized) {
           initialized = true;
           applyMenuOpenStyles();
+          ensureMobileThirdPanelImagesLoaded();
         }
         const activeNow = Boolean(document.querySelector(tmenuActiveSelector));
         if (activeNow && !tmenuIsActive) {
           applyMenuOpenStyles();
+          ensureMobileThirdPanelImagesLoaded();
         }
         if (activeNow) {
           setTmenuScrollLock(true);
+          ensureMobileThirdPanelImagesLoaded();
         }
         if (activeNow !== tmenuIsActive) {
           if (!activeNow) {
