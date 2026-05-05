@@ -20,6 +20,16 @@
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
   }
+
+  @media only screen and (max-width: 768px) {
+    /* Prevent iOS/mobile font rendering from visually collapsing spaces in rich text */
+    #Rte--{{ section.id }} .hero__rte,
+    #Rte--{{ section.id }} .hero__rte p {
+      white-space: normal;
+      word-spacing: 0.02em;
+      font-variant-ligatures: none;
+    }
+  }
 {%- endstyle -%}
 
 <section
@@ -98,6 +108,12 @@
                 {%- assign animation_order = animation_order | plus: 1 -%}
                 <div
                   class="hero__rte {{ block.settings.text_font_size }} block-padding"
+                  style="
+                    max-width: {{ block.settings.width }}px;
+                    {% if block.settings.text_alignment == "left" %} margin-left: 0; {% endif %}
+                    {% if block.settings.text_alignment == "center" %} margin-left: auto; margin-right: auto; {% endif %}
+                    {% if block.settings.text_alignment == "right" %} margin-right: 0; {% endif %}
+                  "
                   data-aos="hero"
                   data-aos-anchor="{{ animation_anchor }}"
                   data-aos-order="{{ animation_order }}"
@@ -207,10 +223,10 @@
             {%- when 'divider' -%}
               {%- assign animation_order = animation_order | plus: 1 -%}
               {%- capture attributes -%}
-                data-aos="hero"
-                data-aos-anchor="{{ animation_anchor }}"
-                data-aos-order="{{ animation_order }}"
-              {%- endcapture -%}
+                  data-aos="hero"
+                  data-aos-anchor="{{ animation_anchor }}"
+                  data-aos-order="{{ animation_order }}"
+                {%- endcapture -%}
 
               {%- render 'divider', block: block, attributes: attributes -%}
           {%- endcase -%}
@@ -428,7 +444,29 @@
             {"value": "body-small", "label": "Small"},
             {"value": "body-medium", "label": "Medium"},
             {"value": "body-large", "label": "Large"},
-            {"value": "body-x-large", "label": "Extra large"}
+            {"value": "body-x-large", "label": "Extra large"},
+            {"value": "caption", "label": "Caption"}
+          ]
+        },
+        {
+          "type": "range",
+          "id": "width",
+          "min": 0,
+          "max": 800,
+          "step": 50,
+          "unit": "px",
+          "label": "Width",
+          "default": 400
+        },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Text alignment",
+          "default": "left",
+          "options": [
+            {"value": "left", "label": "Left"},
+            {"value": "center", "label": "Center"},
+            {"value": "right", "label": "Right"}
           ]
         },
         {

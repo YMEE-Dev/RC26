@@ -40,6 +40,13 @@
   assign animation_duration = 500
 -%}
 
+{%- if collection != blank -%}
+  {%- capture collection_products_count_markup -%}
+    {% render 'collection-products-count', collection_obj: collection, products_per_page: section.settings.products_per_page %}
+  {%- endcapture -%}
+  {%- assign products_count = collection_products_count_markup | strip | plus: 0 -%}
+{%- endif -%}
+
 {%- capture filter_clears -%}
   {%- for filter in filters_default -%}
     {%- assign filter_active_count = filter_active_count | plus: filter.active_values.size -%}

@@ -181,9 +181,8 @@
           <img src="{{ icon_asset | asset_url }}" alt="" loading="lazy" width="25" height="25">
         </span>
       {%- endif -%}
-
-      <span class="link-with-icon__text">{{ link_text }}</span>
     </span>
+    <span class="link-with-icon__text">{{ link_text }}</span>
   </button>
 {%- endif -%}
 
@@ -247,8 +246,9 @@
   }
 
   .link-with-icon--has-hero {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
     width: 100%;
   }
 
@@ -257,6 +257,7 @@
     width: 100%;
     overflow: hidden;
     line-height: 0;
+    padding: 0 0 5px 0;
   }
 
   .link-with-icon--has-hero .link-with-icon__hero img {
@@ -273,7 +274,7 @@
   }
 
   .link-with-icon--has-hero .link-with-icon__row {
-    padding: 10px 0 0;
+    flex: 0 0 25px;
   }
 
   .link-with-icon__hero-placeholder {

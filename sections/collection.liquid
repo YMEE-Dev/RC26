@@ -15,18 +15,18 @@
   assign has_active_subcollection_link = false
   assign parent_collection_url = collection.url
 
-  if collection.title contains ' - '
-    assign parent_collection_title = collection.title | split: ' - ' | first | strip
-    assign child_collection_title = collection.title | remove_first: parent_collection_title | remove_first: ' - ' | strip
+  assign collection_handle = collection.handle | default: ''
+  if collection_handle == blank and collection.url != blank
+    assign collection_handle = collection.url | split: '/collections/' | last | split: '?' | first | split: '/' | first
+  endif
 
-    if parent_collection_title != blank and child_collection_title != blank
-      assign parent_collection_handle = parent_collection_title | handleize
-      assign parent_collection_obj = collections[parent_collection_handle]
+  if collection_handle != blank
+    assign parent_collection_handle = collection_handle | split: '-' | first
+    assign parent_collection_obj = collections[parent_collection_handle]
 
-      if parent_collection_obj != blank
-        assign parent_collection_url = parent_collection_obj.url
-        assign has_active_subcollection_link = true
-      endif
+    if parent_collection_obj != blank and parent_collection_obj.handle != collection.handle
+      assign parent_collection_url = parent_collection_obj.url
+      assign has_active_subcollection_link = true
     endif
   endif
 
@@ -174,6 +174,13 @@
 {%- paginate collection.products by product_limit -%}
   {%- assign featured_images_array = '' -%}
   {%- assign has_available_products = false -%}
+  {%- assign availability_filter_param_name = '' -%}
+  {%- assign availability_filter_true_value = '' -%}
+  {%- assign availability_filter_active = false -%}
+  {%- capture collection_products_count_markup -%}
+    {% render 'collection-products-count', collection_obj: collection, products_per_page: product_limit %}
+  {%- endcapture -%}
+  {%- assign collection_products_count = collection_products_count_markup | strip | plus: 0 -%}
 
   {%- if paginate.current_page == 1 -%}
     {%- unless should_use_spotlight_images -%}
@@ -224,6 +231,27 @@
     {%- if product_storytelling == false -%}
       {%- if product.available -%}
         {%- assign has_available_products = true -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- for filter in collection.filters -%}
+    {%- if filter.type == 'boolean' -%}
+      {%- if filter.param_name contains 'availability' -%}
+        {%- if filter.true_value != blank -%}
+          {%- assign availability_filter_param_name = filter.param_name -%}
+          {%- assign availability_filter_true_value = filter.true_value.value -%}
+
+          {%- if filter.true_value.active -%}
+            {%- assign availability_filter_active = true -%}
+          {%- endif -%}
+
+          {%- if filter.true_value.count > 0 -%}
+            {%- assign has_available_products = true -%}
+          {%- endif -%}
+        {%- endif -%}
+
         {%- break -%}
       {%- endif -%}
     {%- endif -%}
@@ -288,7 +316,7 @@
 
     {%- if enable_sort or enable_filters -%}
       <nav
-        class="collection__nav {{ align_classes }}{% if is_media_only_collection_template %} collection__nav--media-only{% endif %}"
+        class="collection__nav {{ align_classes }}{% if is_media_only_collection_template %} collection__nav--media-only{% endif %} {%  unless has_available_products %} has-no-available-products{% endunless %}"
         data-collection-nav
         data-has-active-subcollection-link="{{ has_active_subcollection_link }}"
       >
@@ -296,17 +324,17 @@
           <a
             href="{{ parent_collection_url }}"
             type="button"
-            class="availability-filter__button navlink"
+            class="availability-filter__button navlink{% unless availability_filter_active %} is-active{% endunless %}"
             data-availability-view-all
-            data-availability-view-all-default-active="false"
-            aria-pressed="false"
+            data-availability-view-all-default-active="{% unless availability_filter_active %}true{% else %}false{% endunless %}"
+            aria-pressed="{% unless availability_filter_active %}true{% else %}false{% endunless %}"
           >
             <span
               class="availability-filter__label availability-filter__label--count"
               data-availability-products-count
               data-availability-products-label="{{ 'collections.general.pieces' | t }}"
             >
-              {{ collection.products_count }}
+              {{ collection_products_count }}
               {{ 'collections.general.pieces' | t }}
             </span>
             <span class="availability-filter__label availability-filter__label--view-all">
@@ -321,12 +349,17 @@
         {%- endif -%}
         <div class="popout_filters-wrapper">
           {%- if has_available_products -%}
-            <label class="availability-filter__button navlink" data-availability-filter-control>
+            <label class="availability-filter__button navlink{% if availability_filter_active %} is-active{% endif %}" data-availability-filter-control>
               <input
                 type="checkbox"
                 class="availability-filter__checkbox"
                 data-availability-filter-checkbox
+                data-availability-filter-param-name="{{ availability_filter_param_name }}"
+                data-availability-filter-value="{{ availability_filter_true_value }}"
                 aria-label="{{ 'collections.general.in_stock' | t }}"
+                {% if availability_filter_active %}
+                  checked
+                {% endif %}
               >
               <span>{{ 'collections.general.in_stock' | t }}</span>
             </label>
@@ -432,6 +465,14 @@
       {%- endif -%}
 
       <div class="grid-outer" data-products-grid>
+        <div
+          hidden
+          data-collection-counts
+          data-collection-products-count="{{ collection_products_count }}"
+          data-availability-filter-active="{% if availability_filter_active %}true{% else %}false{% endif %}"
+          data-availability-filter-param-name="{{ availability_filter_param_name }}"
+          data-availability-filter-value="{{ availability_filter_true_value }}"
+        ></div>
         <{{ items_container_tag }}
           class="grid"
           {% if enable_infinity_scroll %}
@@ -612,47 +653,102 @@
         });
       };
 
-      const getActiveAvailabilityFilter = (component) => {
-        if (!component) return 'all';
+      const getCollectionCounts = (component) => {
+        if (!component) return null;
 
-        const availabilityCheckbox = component.querySelector('[data-availability-filter-checkbox]');
-        if (!availabilityCheckbox) return 'all';
-
-        return availabilityCheckbox.checked ? 'available' : 'all';
+        return component.querySelector('[data-collection-counts]');
       };
 
-      const filterItems = (component, filterValue) => {
+      const hasServerAvailabilityFilter = (component) => {
+        const countsData = getCollectionCounts(component);
+        if (!countsData) return false;
+
+        const paramName = countsData.getAttribute('data-availability-filter-param-name');
+        const filterValue = countsData.getAttribute('data-availability-filter-value');
+
+        return Boolean(paramName && filterValue);
+      };
+
+      const getAvailabilityActiveState = (component) => {
+        const countsData = getCollectionCounts(component);
+
+        if (hasServerAvailabilityFilter(component)) {
+          return countsData
+            ? countsData.getAttribute('data-availability-filter-active') === 'true'
+            : false;
+        }
+
+        return component.dataset.localAvailabilityFilterActive === 'true';
+      };
+
+      const updateAvailabilityCount = (component, countValue) => {
+        if (!component || Number.isNaN(countValue)) return;
+
+        const availabilityCount = component.querySelector('[data-availability-products-count]');
+        if (!availabilityCount) return;
+
+        const countLabel = availabilityCount.getAttribute('data-availability-products-label') || '';
+        availabilityCount.textContent = `${countValue} ${countLabel}`.trim();
+      };
+
+      const applyLocalAvailabilityFilter = (component, enabled) => {
         if (!component) return;
 
-        const activeFilter = filterValue === 'available' ? 'available' : 'all';
+        const countsData = getCollectionCounts(component);
         const items = component.querySelectorAll('[data-products-grid] [data-product-available]');
-        const availabilityCount = component.querySelector('[data-availability-products-count]');
-        let filterableItemsCount = 0;
+        const defaultCount = countsData
+          ? Number.parseInt(countsData.getAttribute('data-collection-products-count'), 10)
+          : Number.NaN;
+        let availableCount = 0;
 
         items.forEach((item) => {
           const isStorytelling = item.hasAttribute('data-product-storytelling');
           const isAvailable = item.getAttribute('data-product-available') === 'true';
-          let showItem = activeFilter === 'all';
+          let showItem = true;
 
-          if (isStorytelling) {
-            showItem = activeFilter === 'all';
-          } else {
-            filterableItemsCount += 1;
-            showItem = activeFilter === 'all' || isAvailable;
+          if (isStorytelling == false && isAvailable) {
+            availableCount += 1;
+          }
+
+          if (enabled) {
+            if (isStorytelling) {
+              showItem = false;
+            } else {
+              showItem = isAvailable;
+            }
           }
 
           item.hidden = !showItem;
           item.setAttribute('aria-hidden', showItem ? 'false' : 'true');
         });
 
+        component.dataset.localAvailabilityFilterActive = enabled ? 'true' : 'false';
+        updateAvailabilityCount(component, enabled ? availableCount : defaultCount);
+      };
+
+      const syncAvailabilityUi = (component) => {
+        if (!component) return;
+
+        const countsData = getCollectionCounts(component);
         const availabilityControl = component.querySelector('[data-availability-filter-control]');
         const availabilityCheckbox = component.querySelector('[data-availability-filter-checkbox]');
         const viewAllButton = component.querySelector('[data-availability-view-all]');
-        const isActive = activeFilter === 'available';
-        const viewAllDefaultActive = viewAllButton
-          ? viewAllButton.getAttribute('data-availability-view-all-default-active') === 'true'
-          : false;
-        const isViewAllActive = activeFilter === 'all' && viewAllDefaultActive;
+        const availabilityCount = component.querySelector('[data-availability-products-count]');
+        const countLabel = availabilityCount
+          ? availabilityCount.getAttribute('data-availability-products-label') || ''
+          : '';
+        const productsCount = countsData
+          ? Number.parseInt(countsData.getAttribute('data-collection-products-count'), 10)
+          : Number.NaN;
+        const isActive = getAvailabilityActiveState(component);
+
+        if (hasServerAvailabilityFilter(component)) {
+          setAvailabilityFilterInputState(component, isActive);
+        } else {
+          if (isActive) {
+            applyLocalAvailabilityFilter(component, true);
+          }
+        }
 
         if (availabilityControl) {
           availabilityControl.classList.toggle('is-active', isActive);
@@ -663,14 +759,86 @@
         }
 
         if (viewAllButton) {
-          viewAllButton.classList.toggle('is-active', isViewAllActive);
-          viewAllButton.setAttribute('aria-pressed', isViewAllActive ? 'true' : 'false');
+          viewAllButton.classList.toggle('is-active', !isActive);
+          viewAllButton.setAttribute('aria-pressed', !isActive ? 'true' : 'false');
         }
 
-        if (availabilityCount) {
-          const countLabel = availabilityCount.getAttribute('data-availability-products-label') || '';
-          availabilityCount.textContent = `${filterableItemsCount} ${countLabel}`.trim();
+        if (availabilityCount && !Number.isNaN(productsCount) && (hasServerAvailabilityFilter(component) || !isActive)) {
+          availabilityCount.textContent = `${productsCount} ${countLabel}`.trim();
         }
+      };
+
+      const setAvailabilityFilterInputState = (component, enabled) => {
+        if (!component) return false;
+
+        const countsData = getCollectionCounts(component);
+        const form = component.querySelector('[data-collection-filters-form]');
+        if (!countsData || !form) return false;
+
+        const paramName = countsData.getAttribute('data-availability-filter-param-name');
+        const filterValue = countsData.getAttribute('data-availability-filter-value');
+        if (!paramName || !filterValue) return false;
+
+        let input = null;
+        Array.from(form.elements).forEach((field) => {
+          if (input) return;
+          if (field.name !== paramName) return;
+          if (field.value !== filterValue) return;
+
+          input = field;
+        });
+
+        if (!input && enabled) {
+          input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = paramName;
+          input.value = filterValue;
+          input.setAttribute('data-generated-availability-filter-input', '');
+          form.appendChild(input);
+        }
+
+        form.querySelectorAll('[data-generated-availability-filter-input]').forEach((generatedInput) => {
+          if (!enabled) {
+            generatedInput.remove();
+          }
+        });
+
+        if (input) {
+          if (input.type === 'checkbox') {
+            input.checked = enabled;
+          } else if (!enabled) {
+            input.remove();
+          }
+        }
+
+        return true;
+      };
+
+      const submitAvailabilityFilter = (component, enabled) => {
+        if (!component) return;
+
+        const filtersForm = component.querySelector('collection-filters-form');
+        if (!filtersForm) {
+          applyLocalAvailabilityFilter(component, enabled);
+          syncAvailabilityUi(component);
+          return;
+        }
+
+        const didUpdateInput = setAvailabilityFilterInputState(component, enabled);
+        if (!didUpdateInput) {
+          applyLocalAvailabilityFilter(component, enabled);
+          syncAvailabilityUi(component);
+          return;
+        }
+
+        component.dataset.localAvailabilityFilterActive = 'false';
+        const countsData = getCollectionCounts(component);
+        if (countsData) {
+          countsData.setAttribute('data-availability-filter-active', enabled ? 'true' : 'false');
+        }
+
+        syncAvailabilityUi(component);
+        filtersForm.submitForm(new Event('change'));
       };
 
       const initComponent = (component) => {
@@ -679,14 +847,14 @@
         }
 
         component.dataset.availabilityFilterReady = 'true';
-        filterItems(component, getActiveAvailabilityFilter(component));
+        syncAvailabilityUi(component);
         updateCollectionNavStickyState(component);
 
         const productsGrid = component.querySelector('[data-products-grid]');
         if (!productsGrid) return;
 
         const observer = new MutationObserver(() => {
-          filterItems(component, getActiveAvailabilityFilter(component));
+          syncAvailabilityUi(component);
         });
 
         observer.observe(productsGrid, {childList: true, subtree: true});
@@ -701,14 +869,35 @@
         updateCollectionNavStickyState(scope);
       };
 
-      document.addEventListener('change', (event) => {
-        const checkbox = event.target.closest('[data-availability-filter-checkbox]');
-        if (!checkbox) return;
+      document.addEventListener('click', (event) => {
+        const availabilityControl = event.target.closest('[data-availability-filter-control]');
+        if (!availabilityControl) return;
 
-        const component = checkbox.closest('collection-component');
+        const component = availabilityControl.closest('collection-component');
         if (!component) return;
 
-        filterItems(component, checkbox.checked ? 'available' : 'all');
+        const checkbox = availabilityControl.querySelector('[data-availability-filter-checkbox]');
+        if (!checkbox) return;
+
+        event.preventDefault();
+        submitAvailabilityFilter(component, !getAvailabilityActiveState(component));
+      });
+
+      document.addEventListener('click', (event) => {
+        const viewAllButton = event.target.closest('[data-availability-view-all]');
+        if (!viewAllButton) return;
+
+        const component = viewAllButton.closest('collection-component');
+        if (!component) return;
+
+        const countsData = getCollectionCounts(component);
+        if (!countsData) return;
+
+        const isActive = getAvailabilityActiveState(component);
+        if (!isActive) return;
+
+        event.preventDefault();
+        submitAvailabilityFilter(component, false);
       });
 
       if (document.readyState === 'loading') {
