@@ -25,23 +25,48 @@
     {%- endif -%}
 
     <div class="pagination-custom__inner">
-      {%- assign first_page_to_show = paginate.current_page | minus: 2 -%}
-      {%- assign last_page_to_show = paginate.current_page | plus: 2 -%}
+      {%- assign previous_page_to_show = paginate.current_page | minus: 1 -%}
+      {%- assign next_page_to_show = paginate.current_page | plus: 1 -%}
+      {%- assign last_rendered_page = 0 -%}
 
       {%- for part in paginate.parts -%}
         {%- assign part_page = part.title | plus: 0 -%}
 
-        {%- if part.is_link -%}
-          {%- if part_page >= first_page_to_show -%}
-            {%- if part_page <= last_page_to_show -%}
-              <a href="{{ part.url }}" title="{{ part.title }}" class="pagination-custom__page">{{ part.title }}</a>
-            {%- endif -%}
+        {%- if part_page > 0 -%}
+          {%- assign render_part = false -%}
+
+          {%- if part_page == 1 -%}
+            {%- assign render_part = true -%}
+          {%- elsif part_page == paginate.pages -%}
+            {%- assign render_part = true -%}
+          {%- elsif part_page == previous_page_to_show -%}
+            {%- assign render_part = true -%}
+          {%- elsif part_page == paginate.current_page -%}
+            {%- assign render_part = true -%}
+          {%- elsif part_page == next_page_to_show -%}
+            {%- assign render_part = true -%}
           {%- endif -%}
-        {%- else -%}
-          {%- if part.title == paginate.current_page -%}
-            <span class="pagination-custom__page pagination-custom__page--active" aria-current="page">
-              {{- part.title -}}
-            </span>
+
+          {%- if render_part -%}
+            {%- assign page_gap = part_page | minus: last_rendered_page -%}
+
+            {%- if last_rendered_page > 0 -%}
+              {%- if page_gap > 1 -%}
+                <span class="pagination-custom__sep" aria-hidden="true">...</span>
+              {%- endif -%}
+            {%- endif -%}
+
+            {%- if part_page == paginate.current_page -%}
+              <span class="pagination-custom__page pagination-custom__page--active" aria-current="page">
+                {{- part.title -}}
+              </span>
+            {%- elsif part.is_link -%}
+              <a href="{{ part.url }}" title="{{ part.title }}" class="pagination-custom__page">{{ part.title }}</a>
+            {%- else -%}
+              <span class="pagination-custom__page">{{ part.title }}</span>
+            {%- endif -%}
+
+            {%- assign last_rendered_page = part_page -%}
           {%- endif -%}
         {%- endif -%}
       {%- endfor -%}
