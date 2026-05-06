@@ -1,45 +1,88 @@
-<!-- /snippets/pagination-custom.liquid -->
-{% comment %}
-  * This snippet renders a custom widget based on the current 'paginate' context,
-  {% render 'pagination-custom', paginate: paginate %}
-{% endcomment %}
+{% doc %}
+  Renders pagination controls with previous and next arrows plus nearby page numbers.
+
+  @param {object} paginate - The current paginate object.
+
+  @example
+  {% render 'pagination', paginate: paginate %}
+{% enddoc %}
 
 {% if paginate.pages > 1 %}
   <nav class="pagination-custom">
     {%- if paginate.previous -%}
-      <a class="pagination-custom__prev" href="{{ paginate.previous.url }}" title="{{ 'general.pagination.prev' | t }}">
-        <span>{{ 'general.pagination.prev' | t }}</span>
+      <a
+        class="pagination-custom__prev"
+        href="{{ paginate.previous.url }}"
+        title="{{ 'general.pagination.prev' | t }}"
+        aria-label="{{ 'general.pagination.prev' | t }}"
+      >
         {%- render 'icon-nav-arrow-left' -%}
       </a>
     {%- else -%}
-      <span class="pagination-custom__prev is-hidden">
-        <span>{{ 'general.pagination.prev' | t }}</span>
+      <span class="pagination-custom__prev is-hidden" aria-hidden="true">
         {%- render 'icon-nav-arrow-left' -%}
       </span>
     {%- endif -%}
 
     <div class="pagination-custom__inner">
+      {%- assign previous_page_to_show = paginate.current_page | minus: 1 -%}
+      {%- assign next_page_to_show = paginate.current_page | plus: 1 -%}
+      {%- assign last_rendered_page = 0 -%}
+
       {%- for part in paginate.parts -%}
-        {%- if part.is_link -%}
-          <a href="{{ part.url }}" title="{{ part.title }}" class="pagination-custom__page">{{ part.title }}</a>
-        {%- else -%}
-          {%- if part.title == paginate.current_page -%}
-            <span class="pagination-custom__page pagination-custom__page--active">{{ part.title }}</span>
-          {%- else -%}
-            <span class="pagination-custom__sep">{{ part.title }}</span>
+        {%- assign part_page = part.title | plus: 0 -%}
+
+        {%- if part_page > 0 -%}
+          {%- assign render_part = false -%}
+
+          {%- if part_page == 1 -%}
+            {%- assign render_part = true -%}
+          {%- elsif part_page == paginate.pages -%}
+            {%- assign render_part = true -%}
+          {%- elsif part_page == previous_page_to_show -%}
+            {%- assign render_part = true -%}
+          {%- elsif part_page == paginate.current_page -%}
+            {%- assign render_part = true -%}
+          {%- elsif part_page == next_page_to_show -%}
+            {%- assign render_part = true -%}
+          {%- endif -%}
+
+          {%- if render_part -%}
+            {%- assign page_gap = part_page | minus: last_rendered_page -%}
+
+            {%- if last_rendered_page > 0 -%}
+              {%- if page_gap > 1 -%}
+                <span class="pagination-custom__sep" aria-hidden="true">...</span>
+              {%- endif -%}
+            {%- endif -%}
+
+            {%- if part_page == paginate.current_page -%}
+              <span class="pagination-custom__page pagination-custom__page--active" aria-current="page">
+                {{- part.title -}}
+              </span>
+            {%- elsif part.is_link -%}
+              <a href="{{ part.url }}" title="{{ part.title }}" class="pagination-custom__page">{{ part.title }}</a>
+            {%- else -%}
+              <span class="pagination-custom__page">{{ part.title }}</span>
+            {%- endif -%}
+
+            {%- assign last_rendered_page = part_page -%}
           {%- endif -%}
         {%- endif -%}
       {%- endfor -%}
     </div>
 
     {%- if paginate.next -%}
-      <a class="pagination-custom__next" href="{{ paginate.next.url }}" title="{{ 'general.pagination.next' | t }}">
-        <span>{{ 'general.pagination.next' | t }}</span>
+      <a
+        class="pagination-custom__next"
+        href="{{ paginate.next.url }}"
+        title="{{ 'general.pagination.next' | t }}"
+        aria-label="{{ 'general.pagination.next' | t }}"
+      >
         {%- render 'icon-nav-arrow-right' -%}
       </a>
     {%- else -%}
-      <span class="pagination-custom__next is-hidden">
-        <span>{{ 'general.pagination.next' | t }}</span>
+      <span class="pagination-custom__next is-hidden" aria-hidden="true">
         {%- render 'icon-nav-arrow-right' -%}
       </span>
     {%- endif -%}

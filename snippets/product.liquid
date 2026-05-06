@@ -3458,6 +3458,17 @@
                               assign drawer_slug = block.settings.drawer_snippet | remove: 'drawer-' | replace: '-', '_'
                               assign drawer_locale_key = 'products.product.drawer_' | append: drawer_slug
                               assign trigger_label = drawer_locale_key | t
+                              assign trigger_icon = block.settings.trigger_icon
+                              case drawer_slug
+                                when 'free_shipping'
+                                  assign trigger_icon = 'icon-free-shipping'
+                                when '14_days_free_returns'
+                                  assign trigger_icon = 'icon-14-days-free-returns'
+                                when '2_years_warranty'
+                                  assign trigger_icon = 'icon-2-years-warranty'
+                                when 'gift_packaging'
+                                  assign trigger_icon = 'icon-gift-packaging'
+                              endcase
                               if trigger_label == drawer_locale_key
                                 assign trigger_label = block.settings.trigger_text
                               endif
@@ -3467,7 +3478,7 @@
                               {% render 'link-with-icon',
                                 text: trigger_label,
                                 drawer_open: drawer_id,
-                                icon: block.settings.trigger_icon,
+                                icon: trigger_icon,
                                 icon_position: block.settings.trigger_icon_position,
                                 content_alignment: block.settings.trigger_alignment
                               %}

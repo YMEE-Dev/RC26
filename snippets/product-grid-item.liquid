@@ -11,6 +11,8 @@
   - sizes: Image sizes
   - attributes: Accept html attributes
   - modifier_class: Accept custom class
+  - show_hover_slider: {Boolean} Render the hover slider inside .product-item__bg__under. When false, render the first product image instead.
+  - show_hover_slider_mobile: {Boolean} Keep the hover slider on mobile. When false, render the featured image on mobile and keep the slider on desktop.
 
   Usage:
   {% render 'product-grid-item', product: product, index: index, sizes: image_sizes, attributes: '', modifier_class: '' %}
@@ -53,6 +55,16 @@
   assign columns_small = 2
   assign columns_mobile = columns_mobile | default: section.settings.grid_mobile | plus: 0
   assign disable_image_hover = disable_image_hover | default: false
+  assign hover_slider_enabled = true
+  assign hover_slider_mobile_enabled = true
+
+  if show_hover_slider == false
+    assign hover_slider_enabled = false
+  endif
+
+  if show_hover_slider_mobile == false
+    assign hover_slider_mobile_enabled = false
+  endif
 
   if columns_desktop == 0
     assign columns_desktop = 4
@@ -708,72 +720,88 @@
           </div>
 
           {%- if double_img -%}
-            {%- liquid
-              assign has_common_model_hover_slide = false
+            {%- if hover_slider_enabled -%}
+              {%- liquid
+                assign has_common_model_hover_slide = false
 
-              for media in product.media limit: settings.image_hover_limit
-                assign media_alt = media.alt | default: '' | downcase | strip
+                for media in product.media limit: settings.image_hover_limit
+                  assign media_alt = media.alt | default: '' | downcase | strip
 
-                if media_alt contains 'common:model'
-                  assign has_common_model_hover_slide = true
-                  break
-                endif
-              endfor
-            -%}
+                  if media_alt contains 'common:model'
+                    assign has_common_model_hover_slide = true
+                    break
+                  endif
+                endfor
+              -%}
 
-            <hover-images class="product-item__bg__under">
-              <div class="product-item__bg__slider" data-hover-slider>
-                {%- for media in product.media limit: settings.image_hover_limit -%}
-                  {%- liquid
-                    assign hover_slide_attr = ''
-                    assign scale_class = ''
-                    assign media_alt = media.alt | default: '' | downcase | strip
+              <hover-images class="product-item__bg__under{% unless hover_slider_mobile_enabled %} product-item__bg__under--desktop-only{% endunless %}">
+                <div class="product-item__bg__slider" data-hover-slider>
+                  {%- for media in product.media limit: settings.image_hover_limit -%}
+                    {%- liquid
+                      assign hover_slide_attr = ''
+                      assign scale_class = ''
+                      assign media_alt = media.alt | default: '' | downcase | strip
 
-                    if has_common_model_hover_slide
-                      if media_alt contains 'common:model'
+                      if has_common_model_hover_slide
+                        if media_alt contains 'common:model'
+                          assign hover_slide_attr = ' data-hover-slide'
+                        endif
+                      else
                         assign hover_slide_attr = ' data-hover-slide'
+                        assign scale_class = ' product-item__bg__slide--scale'
                       endif
-                    else
-                      assign hover_slide_attr = ' data-hover-slide'
-                      assign scale_class = ' product-item__bg__slide--scale'
-                    endif
-                  -%}
-                  <div
-                    class="product-item__bg__slide{% if media.media_type == 'video' or media.media_type == 'external_video' %} deferred-media{% endif %}{{ scale_class }}"
-                    data-hover-slide-touch{{ hover_slide_attr }}
-                  >
-                    {%- if media.media_type == 'video' or media.media_type == 'external_video' -%}
-                      {%- liquid
-                        case media.media_type
-                          when 'video'
-                            echo media | media_tag: image_size: '1024x1024', class: 'media-video', autoplay: true, loop: true, controls: false, preload: 'none', muted: true
-                          when 'external_video'
-                            if media.host == 'youtube'
-                              echo media | external_video_url: autoplay: true, playsinline: true, loop: true, playlist: media.external_id, controls: false, mute: true, showinfo: false | external_video_tag: loading: 'lazy', data-host: media.host
-                            else
-                              echo media | external_video_url: autoplay: true, playsinline: true, loop: true, controls: false, muted: true | external_video_tag: data-host: media.host
-                            endif
-                        endcase
-                      -%}
-                    {%- else -%}
-                      {%- render 'image',
-                        image: media.preview_image,
-                        aspect_ratio: aspect_ratio,
-                        sizes: sizes,
-                        widths: widths,
-                        cover: true,
-                        loading: 'lazy',
-                        fetchpriority: 'high'
-                      -%}
-                    {%- endif -%}
-                  </div>
-                {%- endfor -%}
-              </div>
+                    -%}
+                    <div
+                      class="product-item__bg__slide{% if media.media_type == 'video' or media.media_type == 'external_video' %} deferred-media{% endif %}{{ scale_class }}"
+                      data-hover-slide-touch{{ hover_slide_attr }}
+                    >
+                      {%- if media.media_type == 'video' or media.media_type == 'external_video' -%}
+                        {%- liquid
+                          case media.media_type
+                            when 'video'
+                              echo media | media_tag: image_size: '1024x1024', class: 'media-video', autoplay: true, loop: true, controls: false, preload: 'none', muted: true
+                            when 'external_video'
+                              if media.host == 'youtube'
+                                echo media | external_video_url: autoplay: true, playsinline: true, loop: true, playlist: media.external_id, controls: false, mute: true, showinfo: false | external_video_tag: loading: 'lazy', data-host: media.host
+                              else
+                                echo media | external_video_url: autoplay: true, playsinline: true, loop: true, controls: false, muted: true | external_video_tag: data-host: media.host
+                              endif
+                          endcase
+                        -%}
+                      {%- else -%}
+                        {%- render 'image',
+                          image: media.preview_image,
+                          aspect_ratio: aspect_ratio,
+                          sizes: sizes,
+                          widths: widths,
+                          cover: true,
+                          loading: 'lazy',
+                          fetchpriority: 'high'
+                        -%}
+                      {%- endif -%}
+                    </div>
+                  {%- endfor -%}
+                </div>
 
-              <div class="related-slider-progress product-item__bg__progress-bar" data-related-slider-progress>
-                <span class="related-slider-progress__line"></span>
+                <div class="related-slider-progress product-item__bg__progress-bar" data-related-slider-progress>
+                  <span class="related-slider-progress__line"></span>
+                </div>
+              </hover-images>
+
+              {%- unless hover_slider_mobile_enabled -%}
+                <div class="product-item__bg__under product-item__bg__under--mobile-only">
+                  <div class="product-item__bg__slide{{ product_type_padding_class }}">
+                    {{ featured_image }}
+                  </div>
+                </div>
+              {%- endunless -%}
+            {%- else -%}
+              <div class="product-item__bg__under">
+                <div class="product-item__bg__slide{{ product_type_padding_class }}">
+                  {{ featured_image }}
+                </div>
               </div>
-            </hover-images>
+            {%- endif -%}
           {%- endif -%}
         {%- else -%}
           {%- comment -%} Show Empty image if product has no media {%- endcomment -%}
@@ -888,3 +916,17 @@
     </div>
   </grid-item>
 {%- endunless -%}
+
+{% stylesheet %}
+  @media screen and (max-width: 767px) {
+    .product-item__bg__under--desktop-only {
+      display: none;
+    }
+  }
+
+  @media screen and (min-width: 768px) {
+    .product-item__bg__under--mobile-only {
+      display: none;
+    }
+  }
+{% endstylesheet %}
