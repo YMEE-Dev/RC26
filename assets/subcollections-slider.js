@@ -17,7 +17,7 @@
     if (swiperInstances[sectionId]) return;
 
     swiperInstances[sectionId] = new Swiper(swiperElement, {
-      slidesPerView: 2.2,
+      slidesPerView: 2.4,
       breakpoints: {
         768: {
           slidesPerView: 3,
