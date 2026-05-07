@@ -164,10 +164,9 @@
                           {%- endif -%}
                           <li class="navlink">
                             {%- if is_iubenda_cookie -%}
-                              {%- assign iubenda_href = 'https://www.iubenda.com/privacy-policy/' | append: iubenda_policy_id | append: '/cookie-policy' -%}
-                              <a href="{{ iubenda_href }}" target="_blank" class="iubenda-nostyle iubenda-noiframe iubenda-embed iubenda-noiframe" title="{{ link.title | escape }}">{{ link.title }}</a>
+                              <a href="/pages/cookie-policy" title="{{ link.title | escape }}">{{ link.title }}</a>
                             {%- elsif is_iubenda_privacy -%}
-                              <a href="#" class="iubenda-cs-preferences-link" title="{{ link.title | escape }}">{{ link.title }}</a>
+                              <a href="/pages/privacy-policy" title="{{ link.title | escape }}">{{ link.title }}</a>
                             {%- else -%}
                               <a href="{{ link.url }}">{{ link.title }}</a>
                             {%- endif -%}
