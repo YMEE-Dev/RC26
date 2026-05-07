@@ -153,9 +153,13 @@
                           {%- assign link_title_lower = link.title | downcase -%}
                           {%- assign is_iubenda_cookie = false -%}
                           {%- assign is_iubenda_privacy = false -%}
+                          {%- assign is_iubenda_choices = false -%}
                           {%- if link.url contains 'iubenda.com' or link.url == '#' -%}
                             {%- if link_title_lower contains 'cookie' -%}
                               {%- assign is_iubenda_cookie = true -%}
+                              {%- assign has_iubenda_links = true -%}
+                            {%- elsif link_title_lower contains 'choices' -%}
+                              {%- assign is_iubenda_choices = true -%}
                               {%- assign has_iubenda_links = true -%}
                             {%- elsif link_title_lower contains 'privacy' -%}
                               {%- assign is_iubenda_privacy = true -%}
@@ -165,6 +169,8 @@
                           <li class="navlink">
                             {%- if is_iubenda_cookie -%}
                               <a href="/pages/cookie-policy" title="{{ link.title | escape }}">{{ link.title }}</a>
+                            {%- elsif is_iubenda_choices -%}
+                              <a href="#" class="iubenda-advertising-preferences-link" title="{{ link.title | escape }}">{{ link.title }}</a>
                             {%- elsif is_iubenda_privacy -%}
                               <a href="/pages/privacy-policy" title="{{ link.title | escape }}">{{ link.title }}</a>
                             {%- else -%}
