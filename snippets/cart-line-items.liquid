@@ -132,11 +132,13 @@
                 assign discounted = false
                 assign sale = false
 
-                if line_item.original_price > line_item.final_price
+                assign discount_diff = line_item.original_price | minus: line_item.final_price
+                if discount_diff >= 1
                   assign discounted = true
                 endif
 
-                if line_item.variant.compare_at_price > line_item.final_price
+                assign sale_diff = line_item.variant.compare_at_price | minus: line_item.final_price
+                if sale_diff >= 1
                   assign sale = true
                 endif
               -%}
@@ -267,6 +269,9 @@
 
       {%- if line_item.original_price > line_item.final_price -%}
         {%- for discount in line_item.line_level_discount_allocations -%}
+          {%- if discount.amount < 1 -%}
+            {%- continue -%}
+          {%- endif -%}
           <p class="cart__discount">
             {%- render 'icon-tags' -%}
 
