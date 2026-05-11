@@ -315,7 +315,13 @@
       articlesToShow.forEach((article) => {
         const image = article.image?.url || '';
         const tag = article.tags[0] || '';
-        const url = `/blogs/${article.blog.handle}/${article.handle}`;
+        let localeTag = '';
+        if (window.Shopify.locale !== 'en') {
+          localeTag = window.Shopify.locale;
+          console.log('localeTag:', localeTag);
+          console.log('article.blog.handle:', article.blog.handle);
+        }
+        const url = `/${localeTag}/blogs/${article.blog.handle}/${article.handle}`;
         const title = capitalizeTitle(article.title);
         const html = `
         <article class="blog-listing__card">
