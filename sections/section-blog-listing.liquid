@@ -191,11 +191,34 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     const SHOP_DOMAIN = '{{ shop.domain }}';
+    const DEFAULT_LOCALE = 'en';
+    const AVAILABLE_LOCALES = {{ localization.available_languages | map: 'iso_code' | json }};
+    const STOREFRONT_LANGUAGE_OVERRIDES = {
+      'pt-BR': 'PT_BR',
+      'pt-PT': 'PT_PT',
+      'zh-CN': 'ZH_CN',
+      'zh-TW': 'ZH_TW',
+    };
+    const currentPath = window.location.pathname;
+    const pathSegments = currentPath.split('/').filter(Boolean);
+    const pathLocale = AVAILABLE_LOCALES.find(
+      (locale) => locale.toLowerCase() === (pathSegments[0] || '').toLowerCase()
+    );
+    const currentLocale = pathLocale || DEFAULT_LOCALE;
+    const localePathPrefix = pathLocale ? `/${pathLocale}` : '';
+    const storefrontLanguage =
+      STOREFRONT_LANGUAGE_OVERRIDES[currentLocale] || currentLocale.replace('-', '_').toUpperCase();
+    const viewAllLink = document.querySelector('.blog-listing__view-all');
+
+    if (viewAllLink) {
+      viewAllLink.href = `${localePathPrefix}/blogs/all`;
+    }
+
     /* -----------------------------
   NAVIGATION (Blogs)
   ----------------------------- */
     const query = `
-    {
+    query BlogListingNav($language: LanguageCode!) @inContext(language: $language) {
       blogs(first: 50) {
         nodes {
           handle
@@ -211,7 +234,7 @@
         'Content-Type': 'application/json',
         'X-Shopify-Storefront-Access-Token': '',
       },
-      body: JSON.stringify({query}),
+      body: JSON.stringify({query, variables: {language: storefrontLanguage}}),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -225,7 +248,7 @@
         blogs.forEach((blog) => {
           // Create nav link
           const link = document.createElement('a');
-          link.href = `/blogs/${blog.handle}`;
+          link.href = `${localePathPrefix}/blogs/${blog.handle}`;
           link.className = 'main-blog__filter-tag';
           if (blog.handle === '{{ blog.handle }}') {
             link.classList.add('main-blog__filter-tag--active');
@@ -247,14 +270,13 @@
   ----------------------------- */
 
     // Get current blog handle from URL
-    const currentPath = window.location.pathname;
     const blogMatch = currentPath.match(/\/blogs\/([^\/]+)/);
     const currentBlogHandle = blogMatch ? blogMatch[1] : 'all';
     const isAllBlogs = currentBlogHandle === 'all';
 
     // Build GraphQL query based on blog
     const articleQuery = isAllBlogs
-      ? `{
+      ? `query BlogListingArticles($language: LanguageCode!) @inContext(language: $language) {
         articles(first: 250, sortKey: PUBLISHED_AT, reverse: true) {
           nodes {
             title
@@ -271,8 +293,8 @@
           }
         }
       }`
-      : `{
-        blog(handle: "${currentBlogHandle}") {
+      : `query BlogListingBlog($language: LanguageCode!, $handle: String!) @inContext(language: $language) {
+        blog(handle: $handle) {
           articles(first: 250, sortKey: PUBLISHED_AT, reverse: true) {
             nodes {
               title
@@ -290,6 +312,9 @@
           }
         }
       }`;
+    const articleVariables = isAllBlogs
+      ? {language: storefrontLanguage}
+      : {language: storefrontLanguage, handle: currentBlogHandle};
 
     let allArticles = [];
     let currentPage = 1;
@@ -315,7 +340,7 @@
       articlesToShow.forEach((article) => {
         const image = article.image?.url || '';
         const tag = article.tags[0] || '';
-        const url = `/blogs/${article.blog.handle}/${article.handle}`;
+        const url = `${localePathPrefix}/blogs/${article.blog.handle}/${article.handle}`;
         const title = capitalizeTitle(article.title);
         const html = `
         <article class="blog-listing__card">
@@ -353,7 +378,7 @@
         'Content-Type': 'application/json',
         'X-Shopify-Storefront-Access-Token': '',
       },
-      body: JSON.stringify({query: articleQuery}),
+      body: JSON.stringify({query: articleQuery, variables: articleVariables}),
     })
       .then((res) => res.json())
       .then((data) => {
