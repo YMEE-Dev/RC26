@@ -44,6 +44,23 @@
     const section = document.querySelector('[data-section-type="new-main-blog-banner"]');
     const container = document.getElementById('blogBannerContent');
     const SHOP_DOMAIN = "{{ shop.domain }}";
+    const DEFAULT_LOCALE = 'en';
+    const AVAILABLE_LOCALES = {{ localization.available_languages | map: 'iso_code' | json }};
+    const STOREFRONT_LANGUAGE_OVERRIDES = {
+      'pt-BR': 'PT_BR',
+      'pt-PT': 'PT_PT',
+      'zh-CN': 'ZH_CN',
+      'zh-TW': 'ZH_TW',
+    };
+    const currentPath = window.location.pathname;
+    const pathSegments = currentPath.split('/').filter(Boolean);
+    const pathLocale = AVAILABLE_LOCALES.find(
+      (locale) => locale.toLowerCase() === (pathSegments[0] || '').toLowerCase()
+    );
+    const currentLocale = pathLocale || DEFAULT_LOCALE;
+    const localePathPrefix = pathLocale ? `/${pathLocale}` : '';
+    const storefrontLanguage =
+      STOREFRONT_LANGUAGE_OVERRIDES[currentLocale] || currentLocale.replace('-', '_').toUpperCase();
 
     // Function to capitalize first letter of each word
     function capitalizeTitle(str) {
@@ -54,12 +71,11 @@
         .join(' ');
     }
     // Get current blog handle from URL
-    const currentPath = window.location.pathname;
     const blogMatch = currentPath.match(/\/blogs\/([^\/]+)/);
     const currentBlogHandle = blogMatch ? blogMatch[1] : 'all';
     const isAllBlogs = currentBlogHandle === 'all';
     const articleQuery = isAllBlogs
-    ? `{
+    ? `query MainBlogBannerArticle($language: LanguageCode!) @inContext(language: $language) {
         articles(first: 1, sortKey: PUBLISHED_AT, reverse: true) {
           nodes {
             title
@@ -76,8 +92,8 @@
           }
         }
       }`
-    : `{
-        blog(handle: "${currentBlogHandle}") {
+    : `query MainBlogBannerBlogArticle($language: LanguageCode!, $handle: String!) @inContext(language: $language) {
+        blog(handle: $handle) {
           articles(first: 250, sortKey: PUBLISHED_AT, reverse: true) {
             nodes {
               title
@@ -95,13 +111,16 @@
           }
         }
       }`;
+    const articleVariables = isAllBlogs
+      ? {language: storefrontLanguage}
+      : {language: storefrontLanguage, handle: currentBlogHandle};
     fetch(`https://${SHOP_DOMAIN}/api/2026-01/graphql.json`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "X-Shopify-Storefront-Access-Token": ""
       },
-      body: JSON.stringify({ query: articleQuery })
+      body: JSON.stringify({ query: articleQuery, variables: articleVariables })
     })
     .then(res => res.json())
     .then(data => {
@@ -119,7 +138,7 @@
         return;
       }
 
-      const articleUrl = `/blogs/${article.blog.handle}/${article.handle}`;
+      const articleUrl = `${localePathPrefix}/blogs/${article.blog.handle}/${article.handle}`;
 
       // Check if custom image exists, otherwise use article image
       const settingsImageUrl = '{{ section.settings.image | img_url: "master" }}';
