@@ -3794,7 +3794,7 @@
         initHeaderScrollHide() {
           this.headerScrollHideBuffer = Number.parseInt(this.dataset.headerScrollHideBuffer, 10);
           if (Number.isNaN(this.headerScrollHideBuffer)) {
-            this.headerScrollHideBuffer = 50;
+            this.headerScrollHideBuffer = 40;
           }
           this.headerScrollHideBuffer = Math.max(this.headerScrollHideBuffer, 0);
           this.headerScrollIntentStart = window.scrollY;
