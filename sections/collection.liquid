@@ -349,7 +349,10 @@
         {%- endif -%}
         <div class="popout_filters-wrapper">
           {%- if has_available_products -%}
-            <label class="availability-filter__button navlink{% if availability_filter_active %} is-active{% endif %}" data-availability-filter-control>
+            <label
+              class="availability-filter__button navlink{% if availability_filter_active %} is-active{% endif %}"
+              data-availability-filter-control
+            >
               <input
                 type="checkbox"
                 class="availability-filter__checkbox"
@@ -480,6 +483,27 @@
           {% endif %}
         >
           {%- if collection.products_count > 0 -%}
+            {% if collection.template_suffix contains 'naked-white-background' %}
+              <style>
+                grid-item.product-item {
+                  mix-blend-mode: initial;
+                }
+                grid-item.product-item .product-item__bg__featured,
+                grid-item.product-item .product-item__bg__featured figure {
+                  background-color: #f9f9f9;
+                }
+                grid-item.product-item .product-item__bg__featured figure img {
+                  mix-blend-mode: multiply;
+                }
+
+                grid-item.product-item .product-item__bg__slide figure {
+                  background-color: #f9f9f9;
+                }
+                grid-item.product-item .product-item__bg__slide figure img {
+                  mix-blend-mode: multiply;
+                }
+              </style>
+            {% endif %}
             {%- if should_use_spotlight_images -%}
               {%- liquid
                 assign counter_grid = 1
@@ -673,9 +697,7 @@
         const countsData = getCollectionCounts(component);
 
         if (hasServerAvailabilityFilter(component)) {
-          return countsData
-            ? countsData.getAttribute('data-availability-filter-active') === 'true'
-            : false;
+          return countsData ? countsData.getAttribute('data-availability-filter-active') === 'true' : false;
         }
 
         return component.dataset.localAvailabilityFilterActive === 'true';
@@ -763,7 +785,11 @@
           viewAllButton.setAttribute('aria-pressed', !isActive ? 'true' : 'false');
         }
 
-        if (availabilityCount && !Number.isNaN(productsCount) && (hasServerAvailabilityFilter(component) || !isActive)) {
+        if (
+          availabilityCount &&
+          !Number.isNaN(productsCount) &&
+          (hasServerAvailabilityFilter(component) || !isActive)
+        ) {
           availabilityCount.textContent = `${productsCount} ${countLabel}`.trim();
         }
       };
