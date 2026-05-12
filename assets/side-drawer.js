@@ -274,7 +274,8 @@
       this.triggerButton?.setAttribute('aria-expanded', true);
       this.classList.add(classes.open, classes.animated);
 
-      document.dispatchEvent(new CustomEvent('theme:scroll:lock', {bubbles: true}));
+      const scrollContainer = this.querySelector('.drawer__content-wrapper') || this.drawerInner;
+      document.dispatchEvent(new CustomEvent('theme:scroll:lock', {bubbles: true, detail: scrollContainer}));
 
       if (this.drawerInner && this.a11y) {
         this.a11y.removeTrapFocus();
