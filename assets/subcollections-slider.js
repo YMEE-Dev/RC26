@@ -3,21 +3,60 @@
   const MOBILE_BREAKPOINT = 960;
   const RETRY_DELAY = 120;
   const MAX_RETRIES = 40;
+  const HINT_CLASS = "subcollections__swiper--swipe-hint";
 
   const swiperInstances = window.__subcollectionsSwipers || {};
   window.__subcollectionsSwipers = swiperInstances;
   const pendingRetries = window.__subcollectionsSwiperRetries || {};
   window.__subcollectionsSwiperRetries = pendingRetries;
+  const interactedSections = window.__subcollectionsSwiperInteracted || {};
+  window.__subcollectionsSwiperInteracted = interactedSections;
 
   function isMobile() {
     return window.innerWidth < MOBILE_BREAKPOINT;
+  }
+
+  function enableSwipeHint(sectionId, swiperElement) {
+    const swiper = swiperInstances[sectionId];
+
+    if (!swiper || swiper.destroyed) {
+      return;
+    }
+
+    swiper.update();
+
+    const isScrollable = Math.abs(swiper.maxTranslate() - swiper.minTranslate()) > 1;
+
+    if (interactedSections[sectionId] || !isScrollable) {
+      swiperElement.classList.remove(HINT_CLASS);
+      return;
+    }
+
+    swiperElement.classList.add(HINT_CLASS);
+
+    if (swiperElement.dataset.subcollectionsHintStopBound === sectionId) {
+      return;
+    }
+
+    swiperElement.dataset.subcollectionsHintStopBound = sectionId;
+
+    const stopHint = function () {
+      if (interactedSections[sectionId]) return;
+
+      interactedSections[sectionId] = true;
+      swiperElement.classList.remove(HINT_CLASS);
+    };
+
+    ["pointerdown", "touchstart", "mousedown", "wheel"].forEach(function (eventName) {
+      swiperElement.addEventListener(eventName, stopHint, { once: true, passive: true });
+    });
   }
 
   function initSwiper(section, sectionId, swiperElement) {
     if (swiperInstances[sectionId]) return;
 
     swiperInstances[sectionId] = new Swiper(swiperElement, {
-      slidesPerView: 2.4,
+      slidesPerView: 2.2,
       breakpoints: {
         768: {
           slidesPerView: 3,
@@ -27,11 +66,14 @@
       freeMode: true,
       loop: false,
     });
+
+    enableSwipeHint(sectionId, swiperElement);
   }
 
   function destroySwiper(sectionId) {
     if (!swiperInstances[sectionId]) return;
 
+    swiperInstances[sectionId].el.classList.remove(HINT_CLASS);
     swiperInstances[sectionId].destroy(true, true);
     delete swiperInstances[sectionId];
   }

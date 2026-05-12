@@ -1,58 +1,70 @@
 <script type="text/javascript">
 var _iub = _iub || [];
-_iub.csConfiguration = {"askConsentAtCookiePolicyUpdate":true,"perPurposeConsent":true,"preferenceCookie":{"expireAfter":180},"siteId":3259824,"whitelabel":false,"cookiePolicyId":32804813,"banner":{"acceptButtonColor":"#397E70","acceptButtonDisplay":true,"backgroundColor":"#FFFFFF","closeButtonRejects":true,"customizeButtonColor":"#212121","customizeButtonDisplay":true,"explicitWithdrawal":true,"linksColor":"#000000","listPurposes":true,"logo":null,"position":"float-bottom-center","textColor":"#000000"}};
+_iub.csConfiguration = {"askConsentAtCookiePolicyUpdate":true,"perPurposeConsent":true,"preferenceCookie":{"expireAfter":180},"siteId":3259824,"whitelabel":false,"cookiePolicyId":32804813,"banner":{"acceptButtonColor":"#397E70","acceptButtonDisplay":true,"backgroundColor":"#FFFFFF","closeButtonDisplay":false,"customizeButtonColor":"#212121","customizeButtonDisplay":true,"explicitWithdrawal":true,"linksColor":"#000000","listPurposes":true,"logo":null,"position":"float-bottom-center","textColor":"#000000"}};
 _iub.csLangConfiguration = {"en-GB":{"cookiePolicyId":32804813}};
 <!-- code for Shopify (1 of 2) -->
-    var onPreferenceExpressedOrNotNeededCallback = function(prefs) {
-        var isPrefEmpty = !prefs || Object.keys(prefs).length === 0;
-        var consent = isPrefEmpty ? _iub.cs.api.getPreferences() : prefs;
-        var shopifyPurposes = {
-          "analytics": [4, 's'],
-          "marketing": [5, 'adv'],
-          "preferences": [2, 3],
-          "sale_of_data": ['s', 'sh'],
-        }
-        var expressedConsent = {};
-        Object.keys(shopifyPurposes).forEach(function(purposeItem) {
-          var purposeExpressed = null
-          shopifyPurposes[purposeItem].forEach(item => {
-            if (consent.purposes && typeof consent.purposes[item] === 'boolean') {
-              purposeExpressed = consent.purposes[item];
-            }
-            if (consent.uspr && typeof consent.uspr[item] === 'boolean' && purposeExpressed !== false) {
-              purposeExpressed = consent.uspr[item];
+      var onPreferenceExpressedOrNotNeededCallback = function(prefs) {
+          var isPrefEmpty = !prefs || Object.keys(prefs).length === 0;
+          var consent = isPrefEmpty ? _iub.cs.api.getPreferences() : prefs;
+          var shopifyPurposes = {
+            "analytics": [4, 's'],
+            "marketing": [5, 'adv'],
+            "preferences": [2, 3],
+            "sale_of_data": ['s', 'sh'],
+          }
+          var expressedConsent = {};
+          Object.keys(shopifyPurposes).forEach(function(purposeItem) {
+            var purposeExpressed = null
+            shopifyPurposes[purposeItem].forEach(item => {
+              if (consent.purposes && typeof consent.purposes[item] === 'boolean') {
+                purposeExpressed = consent.purposes[item];
+              }
+              if (consent.uspr && typeof consent.uspr[item] === 'boolean' && purposeExpressed !== false) {
+                purposeExpressed = consent.uspr[item];
+              }
+            })
+
+            if (typeof purposeExpressed === 'boolean') {
+              expressedConsent[purposeItem] = purposeExpressed;
             }
           })
- 
-          if (typeof purposeExpressed === 'boolean') {
-            expressedConsent[purposeItem] = purposeExpressed;
-          }
-        })
-        window.Shopify.customerPrivacy.setTrackingConsent(expressedConsent, function() {});
-    }
-    if (typeof _iub.csConfiguration.callback === 'object') {
-        _iub.csConfiguration.callback.onPreferenceExpressedOrNotNeeded = onPreferenceExpressedOrNotNeededCallback;
-    } else {
-        _iub.csConfiguration.callback = {
-            onPreferenceExpressedOrNotNeeded: onPreferenceExpressedOrNotNeededCallback
-        };
-    }
+          window.Shopify.customerPrivacy.setTrackingConsent(expressedConsent, function() {});
+      }
+      if (typeof _iub.csConfiguration.callback === 'object') {
+          _iub.csConfiguration.callback.onPreferenceExpressedOrNotNeeded = onPreferenceExpressedOrNotNeededCallback;
+      } else {
+          _iub.csConfiguration.callback = {
+              onPreferenceExpressedOrNotNeeded: onPreferenceExpressedOrNotNeededCallback
+          };
+      }
 </script>
+<style>
+  #iubenda-cs-banner #iubenda-cs-title {
+    font-family: inherit !important;
+  }
+  #purposes-content-container a,
+  #iubenda_policy a,
+  #iubenda-cs-banner .iubenda-banner-content a {
+    font-family: inherit !important;
+    color: #000 !important;
+    -webkit-text-fill-color: #000 !important;
+  }
+</style>
 <script type="text/javascript" src="//cs.iubenda.com/sync/3259824.js"></script>
-<script type="text/javascript" src="//cdn.iubenda.com/cs/iubenda_cs.js" charset="UTF-8" async></script>
+<script type="text/javascript" src="//cdn.iubenda.com/cs/iubenda_cs.js" charset="UTF-8" async>
 <!-- code for Shopify (2 of 2) - Tracking API -->
 <script type="text/javascript">
-window.Shopify.loadFeatures(
-  [
-    {
-      name: 'consent-tracking-api',
-      version: '0.1',
-    },
-  ],
-  function(error) {
-    if (error) {
-      throw error;
+  window.Shopify.loadFeatures(
+    [
+      {
+        name: 'consent-tracking-api',
+        version: '0.1',
+      },
+    ],
+    function (error) {
+      if (error) {
+        throw error;
+      }
     }
-  }
-);
+  );
 </script>
