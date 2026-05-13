@@ -196,6 +196,18 @@
     return normalizeColorCode(checked.value);
   }
 
+  // Returns the gallery filter color code for the current variant, using the
+  // media alt-text color (locale-independent) rather than the picker option
+  // value which may be translated and won't match English alt-text tokens.
+  function getGalleryColorCode(sectionRoot, sectionId) {
+    var variant = findVariantFromDOM(sectionRoot, sectionId);
+    if (variant) {
+      var mediaColor = getVariantColorCode(variant, sectionId);
+      if (mediaColor) return mediaColor;
+    }
+    return getColorFromPicker(sectionRoot);
+  }
+
   function applyGalleryFilter(sectionId, colorCode) {
     var productImagesEl = document.querySelector(
       "#MainProduct--" +
@@ -1155,7 +1167,7 @@
           document.dispatchEvent(new CustomEvent("theme:variant:change", { detail: { variant: variant } }));
         }
 
-        var colorCode = getColorFromPicker(sectionRoot);
+        var colorCode = getGalleryColorCode(sectionRoot, sectionId);
         // Only apply filter if we have a valid color code — an empty colorCode
         // would clear the existing filter (the picker may temporarily lose its
         // checked state when the theme replaces variant-selects DOM).
@@ -1355,7 +1367,7 @@
       }
 
       // Apply initial gallery filter based on selected color
-      var initColorCode = getColorFromPicker(sectionRoot);
+      var initColorCode = getGalleryColorCode(sectionRoot, sectionId);
       if (initColorCode) {
         applyGalleryFilterDeferred(sectionId, initColorCode);
       }
@@ -1415,7 +1427,7 @@
 
       // Apply initial gallery filter for standalone mode (only once)
       if (!picker.dataset.ymeeGalleryFilterApplied) {
-        var initStandaloneColor = getColorFromPicker(sectionRoot);
+        var initStandaloneColor = getGalleryColorCode(sectionRoot, sectionId);
         if (initStandaloneColor) {
           picker.dataset.ymeeGalleryFilterApplied = "true";
           applyGalleryFilterDeferred(sectionId, initStandaloneColor);
@@ -1572,7 +1584,7 @@
           }
         }
         // Apply gallery filter on color change
-        var galleryColorCode = normalizeColorCode(input.value);
+        var galleryColorCode = getGalleryColorCode(sectionRoot, sectionId);
         applyGalleryFilterDeferred(sectionId, galleryColorCode);
         return;
       }
@@ -1638,7 +1650,7 @@
         document.dispatchEvent(new CustomEvent("theme:variant:change", { detail: { variant: matchedVariant } }));
 
         // Apply gallery filter on color change
-        var standaloneGalleryColorCode = normalizeColorCode(input.value);
+        var standaloneGalleryColorCode = getGalleryColorCode(sectionRoot, sectionId);
         applyGalleryFilterDeferred(sectionId, standaloneGalleryColorCode);
       }
     },
