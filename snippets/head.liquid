@@ -777,9 +777,6 @@
 {%- if template.name == 'product' -%}
   {%- assign first_3d_model = product.media | where: 'media_type', 'model' | first -%}
   {%- if first_3d_model -%}
-    <script type="application/json" id="ProductJSON-{{ product.id }}">
-      {{ product.media | where: 'media_type', 'model' | json }}
-    </script>
     {%- if shop.metafields.ijewel3d_settings -%}
       <script>
         var iJewelSDKSettings = {{ shop.metafields.ijewel3d_settings | json }};
