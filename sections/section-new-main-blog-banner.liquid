@@ -44,8 +44,6 @@
     const section = document.querySelector('[data-section-type="new-main-blog-banner"]');
     const container = document.getElementById('blogBannerContent');
     const SHOP_DOMAIN = "{{ shop.domain }}";
-    const DEFAULT_LOCALE = 'en';
-    const AVAILABLE_LOCALES = {{ localization.available_languages | map: 'iso_code' | json }};
     const STOREFRONT_LANGUAGE_OVERRIDES = {
       'pt-BR': 'PT_BR',
       'pt-PT': 'PT_PT',
@@ -53,12 +51,8 @@
       'zh-TW': 'ZH_TW',
     };
     const currentPath = window.location.pathname;
-    const pathSegments = currentPath.split('/').filter(Boolean);
-    const pathLocale = AVAILABLE_LOCALES.find(
-      (locale) => locale.toLowerCase() === (pathSegments[0] || '').toLowerCase()
-    );
-    const currentLocale = pathLocale || DEFAULT_LOCALE;
-    const localePathPrefix = pathLocale ? `/${pathLocale}` : '';
+    const currentLocale = '{{ localization.language.iso_code }}';
+    const localePathPrefix = {{ localization.language.primary | json }} ? '' : `/${currentLocale}`;
     const storefrontLanguage =
       STOREFRONT_LANGUAGE_OVERRIDES[currentLocale] || currentLocale.replace('-', '_').toUpperCase();
 
