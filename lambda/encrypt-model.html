@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GLB Encryptor</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 540px; margin: 60px auto; padding: 0 20px; color: #111; }
+    h1 { font-size: 1.3rem; margin-bottom: 4px; }
+    p.sub { color: #555; margin: 0 0 32px; font-size: 0.9rem; }
+    label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.9rem; }
+    input[type="password"], input[type="file"] {
+      width: 100%; box-sizing: border-box; padding: 10px 12px;
+      border: 1px solid #ccc; border-radius: 6px; font-size: 1rem;
+      margin-bottom: 20px;
+    }
+    button {
+      width: 100%; padding: 12px; background: #111; color: #fff;
+      border: none; border-radius: 6px; font-size: 1rem; cursor: pointer;
+    }
+    button:disabled { background: #999; cursor: not-allowed; }
+    #status { margin-top: 20px; font-size: 0.9rem; color: #333; min-height: 24px; }
+    #status.error { color: #c00; }
+    #status.ok { color: #080; }
+  </style>
+</head>
+<body>
+  <h1>GLB Encryptor</h1>
+  <p class="sub">Encrypts a .glb model file for secure delivery via CloudFront.</p>
+
+  <label for="password">Encryption password</label>
+  <input type="password" id="password" placeholder="Enter the encryption password" autocomplete="off">
+
+  <label for="file">GLB file</label>
+  <input type="file" id="file" accept=".glb">
+
+  <button id="btn" disabled>Encrypt &amp; Download</button>
+  <div id="status"></div>
+
+  <script type="module">
+    const passwordEl = document.getElementById("password");
+    const fileEl = document.getElementById("file");
+    const btn = document.getElementById("btn");
+    const status = document.getElementById("status");
+
+    function updateBtn() {
+      btn.disabled = !passwordEl.value || !fileEl.files.length;
+    }
+    passwordEl.addEventListener("input", updateBtn);
+    fileEl.addEventListener("change", updateBtn);
+
+    // Mirrors getAesKeyBytes() in webgi-loader.js exactly
+    async function getAesKeyBytes(value) {
+      try {
+        const rawKey = Uint8Array.from(atob(value), c => c.charCodeAt(0));
+        if ([16, 24, 32].includes(rawKey.length)) return rawKey;
+      } catch {}
+      const textBytes = new TextEncoder().encode(value);
+      if ([16, 24, 32].includes(textBytes.length)) return textBytes;
+      const digest = await crypto.subtle.digest("SHA-256", textBytes);
+      return new Uint8Array(digest);
+    }
+
+    btn.addEventListener("click", async () => {
+      status.className = "";
+      status.textContent = "Encrypting…";
+      btn.disabled = true;
+
+      try {
+        const password = passwordEl.value;
+        const file = fileEl.files[0];
+        const plaintext = await file.arrayBuffer();
+
+        const keyBytes = await getAesKeyBytes(password);
+        const cryptoKey = await crypto.subtle.importKey(
+          "raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt"]
+        );
+
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const ciphertext = await crypto.subtle.encrypt(
+          { name: "AES-GCM", iv, tagLength: 128 }, cryptoKey, plaintext
+        );
+
+        const result = new Uint8Array(12 + ciphertext.byteLength);
+        result.set(iv, 0);
+        result.set(new Uint8Array(ciphertext), 12);
+
+        // Trigger download
+        const blob = new Blob([result], { type: "application/octet-stream" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = file.name;
+        a.click();
+        URL.revokeObjectURL(a.href);
+
+        status.className = "ok";
+        status.textContent = `Done — ${file.name} encrypted (${plaintext.byteLength.toLocaleString()} → ${result.length.toLocaleString()} bytes). Upload this file to S3.`;
+      } catch (err) {
+        status.className = "error";
+        status.textContent = "Error: " + err.message;
+      }
+
+      updateBtn();
+    });
+  </script>
+</body>
+</html>

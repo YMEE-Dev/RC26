@@ -194,6 +194,15 @@
             });
           })
           .catch(function (err) {
+            // OperationError means decryption failed — file is likely not encrypted yet.
+            // Fall back to loading the plain GLB so encrypted and unencrypted files both work.
+            if (err instanceof DOMException && err.name === "OperationError") {
+              console.warn("[WebGI] Decryption failed — loading as plain GLB:", glbUrl);
+              loadWebGIScript(function () {
+                setupViewer(viewerDiv, glbUrl, container, loader);
+              });
+              return;
+            }
             console.warn("[WebGI] Failed to load encrypted model:", err);
             hide3DSlide(container);
           });
