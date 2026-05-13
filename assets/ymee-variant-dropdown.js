@@ -196,6 +196,52 @@
     return normalizeColorCode(checked.value);
   }
 
+  // Returns the gallery filter color code using the media alt-text color
+  // (locale-independent) rather than the picker option value which may be
+  // translated and won't match English alt-text tokens.
+  //
+  // Pass inputValue + optionPos when the color swatch was just clicked and the
+  // form's variant input may not yet reflect the new selection (e.g. when
+  // Dawn's updateVariantInput() can't reach the input because it lives outside
+  // the <form> element). In that case we scan the product JSON directly for a
+  // variant whose option at optionPos matches the clicked value.
+  function getGalleryColorCode(sectionRoot, sectionId, inputValue, optionPos) {
+    var productImagesEl = document.querySelector(
+      "#MainProduct--" + cssEscape(sectionId) + " product-images, " +
+      "#MainProduct--" + cssEscape(sectionId) + " .product__images"
+    );
+
+    if (inputValue && !isNaN(optionPos) && productImagesEl) {
+      var pdEl = sectionRoot.querySelector("[data-product-json]");
+      if (pdEl) {
+        try {
+          var pd = JSON.parse(pdEl.textContent || "{}");
+          if (pd && pd.variants) {
+            var optIdx = optionPos - 1;
+            for (var i = 0; i < pd.variants.length; i++) {
+              var v = pd.variants[i];
+              if (v.options[optIdx] === inputValue && v.featured_media && v.featured_media.id) {
+                var mid = sectionId + "-" + v.featured_media.id;
+                var mel = productImagesEl.querySelector('[data-media-id="' + cssEscape(mid) + '"]');
+                if (mel && (mel.getAttribute("data-media-kind") || "").toLowerCase() === "variant") {
+                  var c = (mel.getAttribute("data-media-color") || "").toLowerCase();
+                  if (c) return c;
+                }
+              }
+            }
+          }
+        } catch (e) {}
+      }
+    }
+
+    var variant = findVariantFromDOM(sectionRoot, sectionId);
+    if (variant) {
+      var mediaColor = getVariantColorCode(variant, sectionId);
+      if (mediaColor) return mediaColor;
+    }
+    return getColorFromPicker(sectionRoot);
+  }
+
   function applyGalleryFilter(sectionId, colorCode) {
     var productImagesEl = document.querySelector(
       "#MainProduct--" +
@@ -1155,7 +1201,7 @@
           document.dispatchEvent(new CustomEvent("theme:variant:change", { detail: { variant: variant } }));
         }
 
-        var colorCode = getColorFromPicker(sectionRoot);
+        var colorCode = getGalleryColorCode(sectionRoot, sectionId);
         // Only apply filter if we have a valid color code — an empty colorCode
         // would clear the existing filter (the picker may temporarily lose its
         // checked state when the theme replaces variant-selects DOM).
@@ -1355,7 +1401,7 @@
       }
 
       // Apply initial gallery filter based on selected color
-      var initColorCode = getColorFromPicker(sectionRoot);
+      var initColorCode = getGalleryColorCode(sectionRoot, sectionId);
       if (initColorCode) {
         applyGalleryFilterDeferred(sectionId, initColorCode);
       }
@@ -1415,7 +1461,7 @@
 
       // Apply initial gallery filter for standalone mode (only once)
       if (!picker.dataset.ymeeGalleryFilterApplied) {
-        var initStandaloneColor = getColorFromPicker(sectionRoot);
+        var initStandaloneColor = getGalleryColorCode(sectionRoot, sectionId);
         if (initStandaloneColor) {
           picker.dataset.ymeeGalleryFilterApplied = "true";
           applyGalleryFilterDeferred(sectionId, initStandaloneColor);
@@ -1571,8 +1617,11 @@
             selectEl.dispatchEvent(new Event("change", { bubbles: true }));
           }
         }
-        // Apply gallery filter on color change
-        var galleryColorCode = normalizeColorCode(input.value);
+        // Apply gallery filter on color change — pass input.value + optionPos so
+        // getGalleryColorCode can find the new variant directly from product JSON
+        // without relying on the form input (which Dawn may not have updated yet
+        // because the hidden input lives outside the <form> element in this theme).
+        var galleryColorCode = getGalleryColorCode(sectionRoot, sectionId, input.value, optionPos);
         applyGalleryFilterDeferred(sectionId, galleryColorCode);
         return;
       }
@@ -1638,7 +1687,7 @@
         document.dispatchEvent(new CustomEvent("theme:variant:change", { detail: { variant: matchedVariant } }));
 
         // Apply gallery filter on color change
-        var standaloneGalleryColorCode = normalizeColorCode(input.value);
+        var standaloneGalleryColorCode = getGalleryColorCode(sectionRoot, sectionId, input.value, optionPos);
         applyGalleryFilterDeferred(sectionId, standaloneGalleryColorCode);
       }
     },
