@@ -54,6 +54,7 @@
     | append: ','
     | prepend: ','
   -%}
+  {%- assign translation_string_size = translation_string_size | append: 'size,ring-size,bracelet-size,' -%}
 
   {%- if translation_string_size contains option_name -%}
     {%- assign has_size_option = true -%}
@@ -219,6 +220,7 @@
               assign option_name = option.name | handle
               assign size_translation = 'general.size_chart.size' | t
               assign translation_string_size = size_translation | remove: ' ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
+              assign translation_string_size = translation_string_size | append: 'size,ring-size,bracelet-size,'
 
               if translation_string_size contains option_name
                 assign is_size_option = true
