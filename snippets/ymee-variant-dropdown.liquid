@@ -21,6 +21,7 @@
   assign ymee_size_option_index = -1
   assign size_translation = 'general.size_chart.size' | t
   assign translation_string_size = size_translation | remove: ' ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
+  assign translation_string_size = translation_string_size | append: 'size,ring-size,bracelet-size,'
 
   for option in product.options_with_values
     assign opt_handle = option.name | handle
