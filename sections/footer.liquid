@@ -168,12 +168,7 @@
                           {%- endif -%}
                           <li class="navlink">
                             {%- if is_iubenda_cookie -%}
-                              {%- assign iub_locale = request.locale.iso_code | downcase -%}
-                              {%- if iub_locale == 'it' or iub_locale contains 'it-' -%}
-                                <a href="https://www.iubenda.com/privacy-policy/71195821/cookie-policy" class="iubenda-nostyle iubenda-noiframe iubenda-embed iub-body-embed" title="{{ link.title | escape }}">{{ link.title }}</a>
-                              {%- else -%}
-                                <a href="{{ pages['cookie-policy'].url | default: '/pages/cookie-policy' }}" title="{{ link.title | escape }}">{{ link.title }}</a>
-                              {%- endif -%}
+                              <a href="{{ pages['cookie-policy'].url | default: '/pages/cookie-policy' }}" title="{{ link.title | escape }}">{{ link.title }}</a>
                             {%- elsif is_iubenda_choices -%}
                               <a href="#" class="iubenda-cs-preferences-link" title="{{ link.title | escape }}">{{ link.title }}</a>
                             {%- elsif is_iubenda_privacy -%}
