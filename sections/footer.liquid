@@ -158,7 +158,7 @@
                             {%- if link_title_lower contains 'cookie' -%}
                               {%- assign is_iubenda_cookie = true -%}
                               {%- assign has_iubenda_links = true -%}
-                            {%- elsif link_title_lower contains 'choices' -%}
+                            {%- elsif link_title_lower contains 'choices' or link_title_lower contains 'scelte' -%}
                               {%- assign is_iubenda_choices = true -%}
                               {%- assign has_iubenda_links = true -%}
                             {%- elsif link_title_lower contains 'privacy' -%}
@@ -168,11 +168,7 @@
                           {%- endif -%}
                           <li class="navlink">
                             {%- if is_iubenda_cookie -%}
-                              {%- if request.locale.iso_code == 'it' -%}
-                                <a href="https://www.iubenda.com/privacy-policy/71195821/cookie-policy" class="iubenda-nostyle iubenda-noiframe iubenda-embed iub-body-embed" title="{{ link.title | escape }}">{{ link.title }}</a>
-                              {%- else -%}
-                                <a href="/pages/cookie-policy" title="{{ link.title | escape }}">{{ link.title }}</a>
-                              {%- endif -%}
+                              <a href="/pages/cookie-policy" title="{{ link.title | escape }}">{{ link.title }}</a>
                             {%- elsif is_iubenda_choices -%}
                               <a href="#" class="iubenda-cs-preferences-link" title="{{ link.title | escape }}">{{ link.title }}</a>
                             {%- elsif is_iubenda_privacy -%}
