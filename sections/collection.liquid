@@ -42,6 +42,7 @@
   assign collection_template_suffix = collection.template_suffix | default: template.suffix | downcase | strip
   assign is_spotlight_collection_template = false
   assign is_media_only_collection_template = false
+  assign should_use_light_product_backgrounds = false
   assign should_use_spotlight_images = false
   assign spotlight_images = collection.metafields.custom.spotlight_collection_images.value
   assign spotlight_menu_color = collection.metafields.custom.spotlight_collection_menu_color.value
@@ -54,6 +55,10 @@
   if collection_template_suffix == 'media-only' or collection_template_suffix == 'naked'
     assign is_media_only_collection_template = true
   endif
+
+  unless is_spotlight_collection_template
+    assign should_use_light_product_backgrounds = true
+  endunless
 
   assign spotlight_images_position = collection.metafields.custom.spotlight_collection_images_position.value | default: 'left' | downcase | strip
 
@@ -483,7 +488,7 @@
           {% endif %}
         >
           {%- if collection.products_count > 0 -%}
-            {% if collection.template_suffix contains 'naked-white-background' %}
+            {% if should_use_light_product_backgrounds %}
               <style>
                 grid-item.product-item {
                   mix-blend-mode: initial;
