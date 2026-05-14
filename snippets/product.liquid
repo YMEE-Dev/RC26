@@ -278,6 +278,9 @@
       }
 
       @media (min-width: 990px) {
+        html.ja {
+          --content-max: 1320px;
+        }
 
         #MainProduct--{{ section.id }} .product__images {
           display: flex;
@@ -291,7 +294,7 @@
           margin: 0 auto;
           padding: 0;
           width: 100%;
-          max-width: min(var(--content-max), 1200px);
+          max-width: max(var(--content-max), 1200px);
         }
 
         #MainProduct--{{ section.id }} .product__sticky-bar {
@@ -310,7 +313,7 @@
           align-items: center;
           min-height: var(--pdp-sticky-bar-height);
           padding: 0;
-          max-width: min(var(--content-max), 1200px);
+          max-width: max(var(--content-max), 1200px);
           margin: 0 auto;
         }
 
@@ -319,7 +322,7 @@
         }
 
         #MainProduct--{{ section.id }} .form__width {
-          max-width: min(var(--content-max), 1200px);
+          max-width: max(var(--content-max), 1200px);
         }
 
         #MainProduct--{{ section.id }} .product__content-columns {
@@ -1444,7 +1447,9 @@
         <product-images
           class="{{ product_images_classlist }}"
           data-active-media="{{ section.id }}-{{ featured_media.id }}"
-          {% if first_3d_model != blank %}data-has-3d-model{% endif %}
+          {% if first_3d_model != blank %}
+            data-has-3d-model
+          {% endif %}
         >
           {%- if template.name == 'product' and featured_product == false -%}
             <script src="{{ 'embla-carousel.umd.js' | asset_url }}" defer="defer"></script>
@@ -1886,9 +1891,7 @@
                       if (progressBar) {
                         var slideCount = embla.scrollSnapList().length;
                         var scrollProgress = embla.scrollProgress();
-                        var segmentProgress = slideCount > 1
-                          ? (scrollProgress * (slideCount - 1) + 1) / slideCount
-                          : 1;
+                        var segmentProgress = slideCount > 1 ? (scrollProgress * (slideCount - 1) + 1) / slideCount : 1;
                         progressBar.style.width = Math.max(0, Math.min(1, segmentProgress)) * 100 + '%';
                         progressBar.style.left = '0%';
                         progressBar.style.transform = 'translateX(0)';
@@ -2110,7 +2113,7 @@
                       }
 
                       var vp = hintEl.querySelector('[data-embla-viewport]');
-                      if (vp) vp.addEventListener('pointerdown', removeHint, { once: true });
+                      if (vp) vp.addEventListener('pointerdown', removeHint, {once: true});
 
                       // Also stop when the user actually scrolls the carousel
                       function onScroll() {
@@ -2219,7 +2222,10 @@
                 </div>
               </div>
 
-              <div class="pdp-embla pdp-embla--desktop{% if first_3d_model != blank or has_aws_3d %} pdp-embla--single-slide{% endif %}" data-embla-carousel>
+              <div
+                class="pdp-embla pdp-embla--desktop{% if first_3d_model != blank or has_aws_3d %} pdp-embla--single-slide{% endif %}"
+                data-embla-carousel
+              >
                 <div class="pdp-embla__viewport" data-embla-viewport>
                   <div class="pdp-embla__container">
                     {%- assign media_count = ordered_media.size -%}
@@ -3395,7 +3401,6 @@
                         }
 
                         @media only screen and (max-width: 749px) {
-
                           .product__custom-drawers-row {
                             gap: 20px;
                             overflow: hidden;
@@ -3665,24 +3670,24 @@
 {%- comment -%} Custom drawers {%- endcomment -%}
 
 {% unless featured_product %}
-<side-drawer
-  class="drawer"
-  data-drawer="send-hint"
-  id="side-drawer-send-hint"
-  data-drawer-size="575px"
-  data-drawer-direction="right-to-left"
->
-  <div class="drawer__inner" data-drawer-inner>
-    <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
-      {% render 'icon-close' %}
-    </button>
+  <side-drawer
+    class="drawer"
+    data-drawer="send-hint"
+    id="side-drawer-send-hint"
+    data-drawer-size="575px"
+    data-drawer-direction="right-to-left"
+  >
+    <div class="drawer__inner" data-drawer-inner>
+      <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+        {% render 'icon-close' %}
+      </button>
 
-    <div class="drawer__body">
-      {% render 'drawer-send-hint' %}
+      <div class="drawer__body">
+        {% render 'drawer-send-hint' %}
+      </div>
     </div>
-  </div>
-  <span class="underlay drawer__underlay" data-drawer-underlay></span>
-</side-drawer>
+    <span class="underlay drawer__underlay" data-drawer-underlay></span>
+  </side-drawer>
 {% endunless %}
 
 <side-drawer

@@ -11,7 +11,7 @@
   var ENV_MAP_URL = _sdkSettings.environment_map || "https://demo-assets.pixotronics.com/pixo/hdr/gem_2.hdr";
   var SCENE_SETTINGS_URL = _sdkSettings.scene_settings || "";
   var LOADING_CONFIG = _sdkSettings.loading || {};
-  var ENCRYPTION_KEY = _sdkSettings.encryption_key || "w9pcNNE7LBeEGCN";
+  var ENCRYPTION_KEY = _sdkSettings.encryption_key;
   // Sensitive values come from the iJewelSDKSettings metafield — no hardcoded fallback.
   var LAMBDA_API_URL = _sdkSettings.lambda_api_url || "";
   var LAMBDA_API_KEY = _sdkSettings.lambda_api_key || "";
@@ -49,6 +49,16 @@
     script.onerror = function () {
       scriptLoading = false;
       console.error("[WebGI] Failed to load viewer script");
+      // Drain pending callbacks to avoid hanging
+      var cbs = pendingCallbacks.slice();
+      pendingCallbacks = [];
+      cbs.forEach(function (cb) {
+        try {
+          cb();
+        } catch (e) {
+          console.error("[WebGI] Callback error on script load failure:", e);
+        }
+      });
     };
     // Restore native fetch so the SDK's /sdk/verify uses an unpatched fetch
     // (shop_events_listener monkey-patches window.fetch).
@@ -56,6 +66,83 @@
     // Pre-mark license as verified — /sdk/verify 404s on v0.20.0 and would otherwise spam the console.
     window.fq3fvf_ckuehdq = true;
     document.head.appendChild(script);
+  }
+
+  function isEncryptedModel(container) {
+    return _sdkSettings.encrypted_password;
+  }
+
+  function decodeBase64ToBytes(base64) {
+    try {
+      var binary = atob(base64);
+      var bytes = new Uint8Array(binary.length);
+      for (var i = 0; i < binary.length; i += 1) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return bytes;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  async function getAesKeyBytes(value) {
+    var encoder = new TextEncoder();
+    var rawKey = decodeBase64ToBytes(value);
+    if (rawKey && (rawKey.length === 16 || rawKey.length === 24 || rawKey.length === 32)) {
+      return rawKey;
+    }
+    var textBytes = encoder.encode(value);
+    if (textBytes.length === 16 || textBytes.length === 24 || textBytes.length === 32) {
+      return textBytes;
+    }
+    var digest = await crypto.subtle.digest("SHA-256", textBytes);
+    return new Uint8Array(digest);
+  }
+
+  async function importAesGcmKey(keyBytes) {
+    return crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["decrypt"]);
+  }
+
+  async function decryptAesGcmPayload(payloadBytes, keyBytes) {
+    if (payloadBytes.byteLength < 13) {
+      throw new Error("invalid-encrypted-payload");
+    }
+    var iv = payloadBytes.slice(0, 12);
+    var ciphertext = payloadBytes.slice(12);
+    var cryptoKey = await importAesGcmKey(keyBytes);
+    return crypto.subtle.decrypt({ name: "AES-GCM", iv: iv, tagLength: 128 }, cryptoKey, ciphertext);
+  }
+
+  async function resolveModelPassword(passwordValue) {
+    if (!passwordValue) {
+      throw new Error("missing-password");
+    }
+    // Use the sitewide password directly as the model decryption key.
+    return passwordValue;
+  }
+
+  async function decryptGlbBuffer(buffer, password) {
+    var encryptedBytes = new Uint8Array(buffer);
+    var passwordKeyBytes = await getAesKeyBytes(password);
+    var decryptedBuffer = await decryptAesGcmPayload(encryptedBytes, passwordKeyBytes);
+    return decryptedBuffer;
+  }
+
+  function fetchWithNative(url) {
+    var nativeFetch = window.__nativeFetch || window.fetch.bind(window);
+    return nativeFetch(url, { credentials: "same-origin" });
+  }
+
+  async function loadEncryptedModel(glbUrl, encryptedPassword) {
+    var password = await resolveModelPassword(encryptedPassword);
+    var response = await fetchWithNative(glbUrl);
+    if (!response.ok) {
+      throw new Error("failed-to-download-glb:" + response.status);
+    }
+    var encryptedBuffer = await response.arrayBuffer();
+    var decryptedBuffer = await decryptGlbBuffer(encryptedBuffer, password);
+    var blobUrl = URL.createObjectURL(new Blob([decryptedBuffer], { type: "model/gltf-binary" }));
+    return blobUrl;
   }
 
   // Hide the gallery slide + matching thumbnail so the placeholder GLB is never rendered.
@@ -98,6 +185,30 @@
     container.appendChild(viewerDiv);
 
     function startViewer(glbUrl) {
+      var encryptedPassword = isEncryptedModel(container);
+      if (encryptedPassword) {
+        loadEncryptedModel(glbUrl, encryptedPassword)
+          .then(function (blobUrl) {
+            loadWebGIScript(function () {
+              setupViewer(viewerDiv, blobUrl, container, loader);
+            });
+          })
+          .catch(function (err) {
+            // OperationError means decryption failed — file is likely not encrypted yet.
+            // Fall back to loading the plain GLB so encrypted and unencrypted files both work.
+            if (err instanceof DOMException && err.name === "OperationError") {
+              console.warn("[WebGI] Decryption failed — loading as plain GLB:", glbUrl);
+              loadWebGIScript(function () {
+                setupViewer(viewerDiv, glbUrl, container, loader);
+              });
+              return;
+            }
+            console.warn("[WebGI] Failed to load encrypted model:", err);
+            hide3DSlide(container);
+          });
+        return;
+      }
+
       loadWebGIScript(function () {
         setupViewer(viewerDiv, glbUrl, container, loader);
       });

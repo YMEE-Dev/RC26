@@ -1,10 +1,30 @@
-import { S3Client, GetObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { S3Client, HeadObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/cloudfront-signer";
 
 const s3 = new S3Client({ region: process.env.AWS_REGION ?? "eu-north-1" });
 
 const BUCKET_NAME = process.env.BUCKET_NAME;
 const API_KEY = process.env.API_KEY;
+const CLOUDFRONT_DOMAIN = process.env.CLOUDFRONT_DOMAIN;
+const CLOUDFRONT_KEY_PAIR_ID = process.env.CLOUDFRONT_KEY_PAIR_ID;
+
+// Rebuild a valid PEM from whatever was stored in the env var.
+// Lambda console may strip or escape newlines — strip all whitespace from the
+// base64 body and reformat into standard 64-char lines so OpenSSL can parse it.
+function normalizePrivateKey(raw) {
+  const pem = (raw ?? "").replace(/\\n/g, "\n").trim();
+  const headerMatch = pem.match(/-----BEGIN ([\w ]+)-----/);
+  if (!headerMatch) throw new Error("CLOUDFRONT_PRIVATE_KEY is not a valid PEM");
+  const keyType = headerMatch[1];
+  const base64 = pem
+    .replace(/-----BEGIN [\w ]+-----/, "")
+    .replace(/-----END [\w ]+-----/, "")
+    .replace(/\s+/g, "");
+  const lines = base64.match(/.{1,64}/g) ?? [];
+  return [`-----BEGIN ${keyType}-----`, ...lines, `-----END ${keyType}-----`].join("\n");
+}
+const CLOUDFRONT_PRIVATE_KEY = normalizePrivateKey(process.env.CLOUDFRONT_PRIVATE_KEY);
+
 const URL_EXPIRY_SECONDS = 30 * 60; // 30 minutes
 
 // Comma-separated list of allowed origins.
@@ -54,6 +74,12 @@ export const handler = async (event) => {
     return respond(401, { error: "Unauthorized" }, origin);
   }
 
+  // Validate CloudFront config
+  if (!CLOUDFRONT_DOMAIN || !CLOUDFRONT_KEY_PAIR_ID || !CLOUDFRONT_PRIVATE_KEY) {
+    console.error("Missing CloudFront environment variables (CLOUDFRONT_DOMAIN, CLOUDFRONT_KEY_PAIR_ID, CLOUDFRONT_PRIVATE_KEY)");
+    return respond(500, { error: "Internal server error" }, origin);
+  }
+
   // Parse request body
   let modelId;
   try {
@@ -67,7 +93,7 @@ export const handler = async (event) => {
     return respond(400, { error: "model_id is required" }, origin);
   }
 
-  // Sanitize: only allow alphanumeric, hyphens (Shopify media ID format)
+  // Sanitize: only allow alphanumeric, hyphens (Shopify handle format)
   const sanitized = String(modelId).replace(/[^a-z0-9-]/g, "");
   if (!sanitized || sanitized !== String(modelId)) {
     return respond(400, { error: "Invalid model_id" }, origin);
@@ -76,11 +102,15 @@ export const handler = async (event) => {
   const s3Key = `models/${sanitized}.glb`;
 
   try {
-    // Verify the file exists before generating a signed URL
+    // Verify the file exists in S3 before generating a signed URL
     await s3.send(new HeadObjectCommand({ Bucket: BUCKET_NAME, Key: s3Key }));
 
-    const command = new GetObjectCommand({ Bucket: BUCKET_NAME, Key: s3Key });
-    const signedUrl = await getSignedUrl(s3, command, { expiresIn: URL_EXPIRY_SECONDS });
+    const signedUrl = getSignedUrl({
+      url: `https://${CLOUDFRONT_DOMAIN}/models/${sanitized}.glb`,
+      keyPairId: CLOUDFRONT_KEY_PAIR_ID,
+      privateKey: CLOUDFRONT_PRIVATE_KEY,
+      dateLessThan: new Date(Date.now() + URL_EXPIRY_SECONDS * 1000).toISOString(),
+    });
 
     return respond(200, { url: signedUrl }, origin);
   } catch (error) {
