@@ -149,40 +149,27 @@
                       >
                         {%- assign has_iubenda_links = false -%}
                         {%- assign iubenda_policy_id = block.settings.iubenda_policy_id -%}
-                        {%- assign locale_code = request.locale.iso_code | downcase -%}
-                        {%- assign is_italian_locale = false -%}
-                        {%- if locale_code == 'it' or locale_code contains 'it-' -%}
-                          {%- assign is_italian_locale = true -%}
-                        {%- endif -%}
                         {%- for link in linklist.links -%}
                           {%- assign link_title_lower = link.title | downcase -%}
                           {%- assign is_iubenda_cookie = false -%}
                           {%- assign is_iubenda_privacy = false -%}
                           {%- assign is_iubenda_choices = false -%}
-                          {%- assign iubenda_url_match = false -%}
                           {%- if link.url contains 'iubenda.com' or link.url == '#' -%}
-                            {%- assign iubenda_url_match = true -%}
-                          {%- endif -%}
-                          {%- if iubenda_url_match or is_italian_locale -%}
                             {%- if link_title_lower contains 'cookie' -%}
                               {%- assign is_iubenda_cookie = true -%}
                               {%- assign has_iubenda_links = true -%}
-                            {%- elsif link_title_lower contains 'choices' or link_title_lower contains 'scelte' -%}
-                              {%- if iubenda_url_match -%}
-                                {%- assign is_iubenda_choices = true -%}
-                                {%- assign has_iubenda_links = true -%}
-                              {%- endif -%}
+                            {%- elsif link_title_lower contains 'choices' -%}
+                              {%- assign is_iubenda_choices = true -%}
+                              {%- assign has_iubenda_links = true -%}
                             {%- elsif link_title_lower contains 'privacy' -%}
-                              {%- if iubenda_url_match -%}
-                                {%- assign is_iubenda_privacy = true -%}
-                                {%- assign has_iubenda_links = true -%}
-                              {%- endif -%}
+                              {%- assign is_iubenda_privacy = true -%}
+                              {%- assign has_iubenda_links = true -%}
                             {%- endif -%}
                           {%- endif -%}
                           <li class="navlink">
                             {%- if is_iubenda_cookie -%}
-                              {%- if is_italian_locale -%}
-                                <a href="https://www.iubenda.com/privacy-policy/71195821/cookie-policy" class="iubenda-nostyle iubenda-noiframe iubenda-embed" title="{{ link.title | escape }}">{{ link.title }}</a>
+                              {%- if request.locale.iso_code == 'it' -%}
+                                <a href="https://www.iubenda.com/privacy-policy/71195821/cookie-policy" class="iubenda-nostyle iubenda-noiframe iubenda-embed iub-body-embed" title="{{ link.title | escape }}">{{ link.title }}</a>
                               {%- else -%}
                                 <a href="/pages/cookie-policy" title="{{ link.title | escape }}">{{ link.title }}</a>
                               {%- endif -%}
