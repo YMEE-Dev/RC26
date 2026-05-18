@@ -60,6 +60,35 @@
   assign title = block_settings.title
   assign text = block_settings.text
   assign link_text = block_settings.link_text
+  assign heading_font_size_desktop = block_settings.heading_font_size | default: 'heading-medium' | strip
+  assign heading_font_size_mobile = block_settings.heading_font_size_mobile | default: heading_font_size_desktop | strip
+  assign heading_font_size_desktop_class = heading_font_size_desktop | replace: 'heading-', 'heading-desktop-'
+  assign heading_font_size_mobile_class = heading_font_size_mobile | replace: 'heading-', 'heading-mobile-'
+  assign flex_align_desktop = block_settings.flex_align_desktop | strip
+  assign flex_align_mobile = block_settings.flex_align_mobile | strip
+  assign button_align_desktop = block_settings.button_align_desktop | strip
+  assign button_align_mobile = block_settings.button_align_mobile | strip
+  assign button_vertical_position_mobile = block_settings.button_vertical_position_mobile | strip
+
+  if flex_align_desktop == blank
+    assign flex_align_desktop = block_settings.flex_align | default: 'align--middle-center' | append: '-desktop'
+  endif
+
+  if flex_align_mobile == blank
+    assign flex_align_mobile = block_settings.flex_align | default: 'align--middle-center' | append: '-mobile'
+  endif
+
+  if button_align_desktop == blank
+    assign button_align_desktop = 'button-group-align--center-desktop'
+  endif
+
+  if button_align_mobile == blank
+    assign button_align_mobile = 'button-group-align--center-mobile'
+  endif
+
+  if button_vertical_position_mobile == blank
+    assign button_vertical_position_mobile = 'button-position--top-mobile'
+  endif
 
   assign button_style = block_settings.button_style
   if button_style == 'btn--text' and block_settings.show_arrow
@@ -155,12 +184,12 @@
 
 {%- if title != blank or text != blank or link_text != blank or show_video_popup -%}
   <div
-    class="hero__content__wrapper frame__item {{ block_settings.flex_align }}{% if show_header_backdrop %} backdrop--linear{% endif %}"
+    class="hero__content__wrapper frame__item {{ flex_align_desktop }} {{ flex_align_mobile }}{% if show_header_backdrop %} backdrop--linear{% endif %}"
     id="Video--{{ section.id }}"
     style="{{ style }}"
   >
     <div
-      class="hero__content{% if hero_transparent %} hero__content--transparent{% endif %}{% if text_underlay %} backdrop--radial{% endif %}"
+      class="hero__content hero__content--video {{ button_vertical_position_mobile }}{% if hero_transparent %} hero__content--transparent{% endif %}{% if text_underlay %} backdrop--radial{% endif %}"
     >
       {%- if title != blank -%}
         {%- liquid
@@ -172,7 +201,7 @@
           endunless
         -%}
         <{{ heading_tag }}
-          class="hero__title {{ block_settings.heading_font_size | default: 'heading-medium' }}"
+          class="hero__title {{ heading_font_size_desktop_class }} {{ heading_font_size_mobile_class }}"
           data-aos="hero"
           data-aos-anchor="{{ animation_anchor }}"
           data-aos-order="{{ animation_order }}"
@@ -194,11 +223,11 @@
       {%- endif -%}
 
       {%- if link_text != blank or show_video_popup -%}
-        <div class="hero__button-group">
+        <div class="hero__button-group hero__button-group--video {{ button_align_desktop }} {{ button_align_mobile }}">
           {%- if link_text != blank -%}
             {%- assign animation_order = animation_order | plus: 1 -%}
             <div
-              class="hero__button"
+              class="hero__button hero__button--video"
               data-aos="hero"
               data-aos-anchor="{{ animation_anchor }}"
               data-aos-order="{{ animation_order }}"
@@ -223,7 +252,7 @@
             -%}
 
             <video-popup
-              class="hero__button"
+              class="hero__button hero__button--video"
               data-aos="hero"
               data-aos-anchor="{{ animation_anchor }}"
               data-aos-order="{{ animation_order }}"
@@ -244,6 +273,58 @@
 {%- endif -%}
 
 {% stylesheet %}
+  .hero__button-group--video {
+    justify-content: var(--video-button-justify-content, var(--alignment-justify-content, center));
+  }
+
+  .hero__button--video {
+    justify-content: var(--video-button-justify-content, var(--alignment-justify-content, flex-start));
+  }
+
+  @media only screen and (min-width: 750px) {
+    .button-group-align--left-desktop {
+      --video-button-justify-content: flex-start;
+    }
+
+    .button-group-align--center-desktop {
+      --video-button-justify-content: center;
+    }
+
+    .button-group-align--right-desktop {
+      --video-button-justify-content: flex-end;
+    }
+  }
+
+  @media only screen and (max-width: 749px) {
+    .button-group-align--left-mobile {
+      --video-button-justify-content: flex-start;
+    }
+
+    .button-group-align--center-mobile {
+      --video-button-justify-content: center;
+    }
+
+    .button-group-align--right-mobile {
+      --video-button-justify-content: flex-end;
+    }
+
+    .hero__content--video.button-position--bottom-mobile {
+      min-height: 100%;
+      width: 78%;
+    }
+
+    .hero__content--video.button-position--bottom-mobile .hero__button-group--video {
+      margin-top: auto;
+      margin-bottom: 0;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .hero__content--video.button-position--bottom-mobile .hero__button-group--video .hero__button,
+    .hero__content--video.button-position--bottom-mobile .hero__button-group--video .hero__button .btn {
+      width: 100%;
+    }
+  }
+
   @media only screen and (max-width: 749px) {
     .video__player--desktop {
       display: none;

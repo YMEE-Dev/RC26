@@ -80,6 +80,13 @@
     -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 58%, transparent 100%);
     mask-image: linear-gradient(180deg, #000 0%, #000 58%, transparent 100%);
   }
+  @media screen and (min-width: 960px) {
+    .hero__content__wrapper .hero__content {
+      --hero-content-width: 50%;
+      padding-left: 80px;
+      padding-bottom: 70px;
+    }
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -108,12 +115,12 @@
     {
       "type": "video",
       "id": "video",
-      "label": "Video"
+      "label": "Dektop video"
     },
     {
       "type": "video",
       "id": "mobile_video",
-      "label": "Video",
+      "label": "Mobile video",
       "info": "Optional. Replaces the desktop background video on mobile screens."
     },
     {
@@ -159,7 +166,21 @@
     {
       "type": "select",
       "id": "heading_font_size",
-      "label": "Heading size",
+      "label": "Heading size desktop",
+      "default": "heading-large",
+      "options": [
+        {"value": "heading-mini", "label": "Mini"},
+        {"value": "heading-x-small", "label": "Extra small"},
+        {"value": "heading-small", "label": "Small"},
+        {"value": "heading-medium", "label": "Medium"},
+        {"value": "heading-large", "label": "Large"},
+        {"value": "heading-x-large", "label": "Extra large"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "heading_font_size_mobile",
+      "label": "Heading size mobile",
       "default": "heading-large",
       "options": [
         {"value": "heading-mini", "label": "Mini"},
@@ -192,19 +213,36 @@
     },
     {
       "type": "select",
-      "id": "flex_align",
-      "label": "Text alignment",
-      "default": "align--middle-center",
+      "id": "flex_align_desktop",
+      "label": "Text alignment desktop",
+      "default": "align--middle-center-desktop",
       "options": [
-        {"value": "align--top-left", "label": "Top left"},
-        {"value": "align--top-center", "label": "Top center"},
-        {"value": "align--top-right", "label": "Top right"},
-        {"value": "align--middle-left", "label": "Middle left"},
-        {"value": "align--middle-center", "label": "Absolute center"},
-        {"value": "align--middle-right", "label": "Middle right"},
-        {"value": "align--bottom-left", "label": "Bottom left"},
-        {"value": "align--bottom-center", "label": "Bottom center"},
-        {"value": "align--bottom-right", "label": "Bottom right"}
+        {"value": "align--top-left-desktop", "label": "Top left"},
+        {"value": "align--top-center-desktop", "label": "Top center"},
+        {"value": "align--top-right-desktop", "label": "Top right"},
+        {"value": "align--middle-left-desktop", "label": "Middle left"},
+        {"value": "align--middle-center-desktop", "label": "Absolute center"},
+        {"value": "align--middle-right-desktop", "label": "Middle right"},
+        {"value": "align--bottom-left-desktop", "label": "Bottom left"},
+        {"value": "align--bottom-center-desktop", "label": "Bottom center"},
+        {"value": "align--bottom-right-desktop", "label": "Bottom right"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "flex_align_mobile",
+      "label": "Text alignment mobile",
+      "default": "align--middle-center-mobile",
+      "options": [
+        {"value": "align--top-left-mobile", "label": "Top left"},
+        {"value": "align--top-center-mobile", "label": "Top center"},
+        {"value": "align--top-right-mobile", "label": "Top right"},
+        {"value": "align--middle-left-mobile", "label": "Middle left"},
+        {"value": "align--middle-center-mobile", "label": "Absolute center"},
+        {"value": "align--middle-right-mobile", "label": "Middle right"},
+        {"value": "align--bottom-left-mobile", "label": "Bottom left"},
+        {"value": "align--bottom-center-mobile", "label": "Bottom center"},
+        {"value": "align--bottom-right-mobile", "label": "Bottom right"}
       ]
     },
     {
@@ -262,6 +300,38 @@
       "id": "show_arrow",
       "label": "Show arrow",
       "default": false
+    },
+    {
+      "type": "select",
+      "id": "button_align_desktop",
+      "label": "Button alignment desktop",
+      "default": "button-group-align--center-desktop",
+      "options": [
+        {"value": "button-group-align--left-desktop", "label": "Left"},
+        {"value": "button-group-align--center-desktop", "label": "Center"},
+        {"value": "button-group-align--right-desktop", "label": "Right"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_align_mobile",
+      "label": "Button alignment mobile",
+      "default": "button-group-align--center-mobile",
+      "options": [
+        {"value": "button-group-align--left-mobile", "label": "Left"},
+        {"value": "button-group-align--center-mobile", "label": "Center"},
+        {"value": "button-group-align--right-mobile", "label": "Right"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_vertical_position_mobile",
+      "label": "Button position mobile",
+      "default": "button-position--top-mobile",
+      "options": [
+        {"value": "button-position--top-mobile", "label": "Below text"},
+        {"value": "button-position--bottom-mobile", "label": "Bottom"}
+      ]
     },
     {
       "type": "header",
