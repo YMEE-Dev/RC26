@@ -11,7 +11,7 @@
   var ENV_MAP_URL = _sdkSettings.environment_map || "https://demo-assets.pixotronics.com/pixo/hdr/gem_2.hdr";
   var SCENE_SETTINGS_URL = _sdkSettings.scene_settings || "";
   var LOADING_CONFIG = _sdkSettings.loading || {};
-  var ENCRYPTION_KEY = _sdkSettings.encryption_key;
+  var ENCRYPTION_KEY = _sdkSettings.encryption_key || _sdkSettings.encrypted_password;
   // Sensitive values come from the iJewelSDKSettings metafield — no hardcoded fallback.
   var LAMBDA_API_URL = _sdkSettings.lambda_api_url || "";
   var LAMBDA_API_KEY = _sdkSettings.lambda_api_key || "";
@@ -141,7 +141,8 @@
     }
     var encryptedBuffer = await response.arrayBuffer();
     var decryptedBuffer = await decryptGlbBuffer(encryptedBuffer, password);
-    var blobUrl = URL.createObjectURL(new Blob([decryptedBuffer], { type: "model/gltf-binary" }));
+    // Append #model.glb so the WebGI SDK can infer the loader from the fragment extension.
+    var blobUrl = URL.createObjectURL(new Blob([decryptedBuffer], { type: "model/gltf-binary" })) + "#model.glb";
     return blobUrl;
   }
 
@@ -471,19 +472,21 @@
         console.warn("[WebGI] HDR load error:", e);
       }
 
-      // ENCRYPTED_MODELS: Commented out per iJewel3D — not needed with the new SDK version.
-      // The license key / decryption preparsers are handled automatically by the SDK now.
-      // try {
-      //   var importer2 = manager && manager.importer ? manager.importer : viewer.getManager().importer;
-      //   var registered = importer2.registerFile(glbUrl);
-      //   if (registered && registered.preparsers && registered.preparsers[0]) {
-      //     registered.preparsers[0].key = function () {
-      //       return ENCRYPTION_KEY;
-      //     };
-      //   }
-      // } catch (e) {
-      //   console.warn("[WebGI] Could not register file preparsers:", e);
-      // }
+      // Pass the encryption key to the iJewel3D SDK preparser so it silently decrypts
+      // iJewel3D-encrypted GLB files without showing a browser password prompt.
+      if (ENCRYPTION_KEY) {
+        try {
+          var importer2 = manager && manager.importer ? manager.importer : viewer.getManager().importer;
+          var registered = importer2.registerFile(glbUrl);
+          if (registered && registered.preparsers && registered.preparsers[0]) {
+            registered.preparsers[0].key = function () {
+              return ENCRYPTION_KEY;
+            };
+          }
+        } catch (e) {
+          console.warn("[WebGI] Could not register file preparsers:", e);
+        }
+      }
 
       // Load model
       if (typeof viewer.load === "function") {

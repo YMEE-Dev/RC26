@@ -99,14 +99,14 @@ export const handler = async (event) => {
     return respond(400, { error: "Invalid model_id" }, origin);
   }
 
-  const s3Key = `models/${sanitized}.glb`;
+  const s3Key = `int/${sanitized}.glb`;
 
   try {
     // Verify the file exists in S3 before generating a signed URL
     await s3.send(new HeadObjectCommand({ Bucket: BUCKET_NAME, Key: s3Key }));
 
     const signedUrl = getSignedUrl({
-      url: `https://${CLOUDFRONT_DOMAIN}/models/${sanitized}.glb`,
+      url: `https://${CLOUDFRONT_DOMAIN}/int/${sanitized}.glb`,
       keyPairId: CLOUDFRONT_KEY_PAIR_ID,
       privateKey: CLOUDFRONT_PRIVATE_KEY,
       dateLessThan: new Date(Date.now() + URL_EXPIRY_SECONDS * 1000).toISOString(),
