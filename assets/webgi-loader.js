@@ -141,7 +141,8 @@
     }
     var encryptedBuffer = await response.arrayBuffer();
     var decryptedBuffer = await decryptGlbBuffer(encryptedBuffer, password);
-    var blobUrl = URL.createObjectURL(new Blob([decryptedBuffer], { type: "model/gltf-binary" }));
+    // Append #model.glb so the WebGI SDK can infer the loader from the fragment extension.
+    var blobUrl = URL.createObjectURL(new Blob([decryptedBuffer], { type: "model/gltf-binary" })) + "#model.glb";
     return blobUrl;
   }
 
