@@ -1,5 +1,5 @@
 {% doc %}
-  Renders the footer newsletter Mailchimp form, including the modal title and description.
+  Renders the footer newsletter Klaviyo form, including the modal title and description.
 
   @param {object} section - Footer newsletter section object
 
@@ -9,23 +9,17 @@
 
 {%- liquid
   assign form_id = 'FooterNewsletterForm--' | append: section.id
-  assign action_url = section.settings.mailchimp_action_url | strip
-  assign user_id = section.settings.mailchimp_user_id | strip
-  assign audience_id = section.settings.mailchimp_audience_id | strip
-  assign tags = section.settings.mailchimp_tags | strip
-  assign first_name_field = section.settings.mailchimp_first_name_field | default: 'FNAME' | strip
-  assign last_name_field = section.settings.mailchimp_last_name_field | default: 'LNAME' | strip
-  assign email_field = section.settings.mailchimp_email_field | default: 'EMAIL' | strip
-  assign language_field = section.settings.mailchimp_language_field | default: 'LANGUAGE' | strip
-  assign consent_field = section.settings.mailchimp_consent_field | default: 'CONSENT' | strip
+  assign klaviyo_company_id = section.settings.klaviyo_company_id | default: settings.klaviyo_public_api_key | strip
+  assign klaviyo_list_id = section.settings.klaviyo_list_id | strip
+  assign klaviyo_source = section.settings.klaviyo_source | strip
   assign consent_copy = section.settings.consent_label
   assign policy_copy = section.settings.policy_text
   assign form_title = section.settings.form_title | strip
   assign heading_text = section.settings.heading_text
 -%}
 
-{%- if action_url != blank -%}
-  <script src="{{ 'mailchimp-subscribe.js' | asset_url }}" defer="defer"></script>
+{%- if klaviyo_company_id != blank and klaviyo_list_id != blank -%}
+  <script src="{{ 'klaviyo-subscribe.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 
 <div data-footer-newsletter-wrapper>
@@ -43,20 +37,13 @@
     id="{{ form_id }}"
     class="footer-newsletter-form"
     method="post"
-    action="{{ action_url }}"
+    action="#"
     accept-charset="UTF-8"
     data-footer-newsletter-form
+    data-klaviyo-company-id="{{ klaviyo_company_id }}"
+    data-klaviyo-list-id="{{ klaviyo_list_id }}"
+    data-klaviyo-source="{{ klaviyo_source }}"
   >
-    <input type="hidden" name="u" value="{{ user_id }}">
-    <input type="hidden" name="id" value="{{ audience_id }}">
-    {%- if tags != blank -%}
-      <input type="hidden" name="tags" value="{{ tags }}">
-    {%- endif -%}
-    {%- comment -%}Mailchimp bot-trap: must be present and kept empty — bots that fill it are rejected{%- endcomment -%}
-    <div aria-hidden="true" style="position:absolute;left:-5000px;">
-      <input type="text" name="b_{{ user_id }}_{{ audience_id }}" tabindex="-1" value="" autocomplete="off">
-    </div>
-
     <div class="footer-newsletter-form__fields">
       <div class="footer-newsletter-form__group">
         {%- if section.settings.required_fields_label != blank -%}
@@ -68,7 +55,7 @@
           id="FooterNewsletterFirstName--{{ section.id }}"
           class="footer-newsletter-form__field field label"
           type="text"
-          name="{{ first_name_field }}"
+          name="first_name"
           placeholder="Name"
           value="{% if customer %}{{ customer.first_name | escape }}{% endif %}"
           required
@@ -79,7 +66,7 @@
           id="FooterNewsletterLastName--{{ section.id }}"
           class="footer-newsletter-form__field field label"
           type="text"
-          name="{{ last_name_field }}"
+          name="last_name"
           placeholder="Surname"
           value="{% if customer %}{{ customer.last_name | escape }}{% endif %}"
           required
@@ -90,7 +77,7 @@
           id="FooterNewsletterEmail--{{ section.id }}"
           class="footer-newsletter-form__field field label"
           type="email"
-          name="{{ email_field }}"
+          name="email"
           placeholder="E-mail"
           value="{% if customer %}{{ customer.email | escape }}{% endif %}"
           autocorrect="off"
@@ -106,7 +93,7 @@
         <select
           id="FooterNewsletterLanguage--{{ section.id }}"
           class="footer-newsletter-form__field footer-newsletter-form__field--select label field"
-          name="{{ language_field }}"
+          name="language"
           required
         >
           <option value="English">English</option>
@@ -119,7 +106,7 @@
         <input
           id="FooterNewsletterConsent--{{ section.id }}"
           type="checkbox"
-          name="{{ consent_field }}"
+          name="consent"
           value="true"
           required
         >
