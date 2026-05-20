@@ -9,11 +9,19 @@
 
   var API_REVISION = "2024-10-15";
 
+  function initConsentErrors() {
+    var forms = document.querySelectorAll("[data-footer-newsletter-form]");
+    forms.forEach(function (form) {
+      hideConsentError(form);
+    });
+  }
+
   document.addEventListener("submit", function (event) {
     var form = event.target;
     if (!form.hasAttribute("data-footer-newsletter-form")) return;
 
     event.preventDefault();
+    hideConsentError(form);
 
     var companyId = (form.getAttribute("data-klaviyo-company-id") || "").trim();
     var listId = (form.getAttribute("data-klaviyo-list-id") || "").trim();
@@ -42,7 +50,7 @@
     }
 
     if (!hasConsent) {
-      showError(form, "Please confirm consent to continue.");
+      showConsentError(form);
       return;
     }
 
@@ -139,5 +147,45 @@
       errorEl.textContent = message;
       errorEl.removeAttribute("hidden");
     }
+  }
+
+  function showConsentError(form) {
+    var consentErrorEl = form.querySelector("[data-footer-newsletter-consent-error]");
+    if (consentErrorEl) {
+      consentErrorEl.removeAttribute("hidden");
+    }
+  }
+
+  function hideConsentError(form) {
+    var consentErrorEl = form.querySelector("[data-footer-newsletter-consent-error]");
+    if (consentErrorEl) {
+      consentErrorEl.setAttribute("hidden", "hidden");
+    }
+  }
+
+  document.addEventListener("change", function (event) {
+    var target = event.target;
+    if (!(target instanceof HTMLInputElement)) return;
+    if (target.name !== "consent") return;
+    if (!target.form || !target.form.hasAttribute("data-footer-newsletter-form")) return;
+
+    if (target.checked) {
+      hideConsentError(target.form);
+    }
+  });
+
+  document.addEventListener("invalid", function (event) {
+    var target = event.target;
+    if (!(target instanceof HTMLInputElement)) return;
+    if (target.name !== "consent") return;
+    if (!target.form || !target.form.hasAttribute("data-footer-newsletter-form")) return;
+
+    showConsentError(target.form);
+  }, true);
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initConsentErrors);
+  } else {
+    initConsentErrors();
   }
 })();
