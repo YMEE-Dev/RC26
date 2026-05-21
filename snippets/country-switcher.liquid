@@ -192,6 +192,7 @@
               {%- for language in localization.available_languages -%}
                 {%- assign language_code = language.iso_code | downcase | slice: 0, 2 -%}
                 {%- assign language_flag_country_codes = '' -%}
+                {%- assign language_flag_asset = '' -%}
                 {%- case language_code -%}
                   {%- when 'en' -%}
                     {%- assign language_flag_country_codes = 'US|GB' -%}
@@ -205,6 +206,8 @@
                     {%- assign language_flag_country_codes = 'PT' -%}
                   {%- when 'de' -%}
                     {%- assign language_flag_country_codes = 'DE' -%}
+                  {%- when 'zh' -%}
+                    {%- assign language_flag_asset = 'flag-cn.svg' -%}
                 {%- endcase -%}
                 {%- assign language_flag_country = localization.country -%}
                 {%- if language_flag_country_codes != blank -%}
@@ -232,7 +235,14 @@
                     data-value="{{ language.iso_code }}"
                     data-popout-option
                   >
-                    {%- if language_flag_country != blank -%}
+                    {%- if language_flag_asset != blank -%}
+                      <img
+                        src="{{ language_flag_asset | asset_url }}"
+                        alt=""
+                        class="country-switcher__flag country-switcher__flag--option"
+                        loading="lazy"
+                      >
+                    {%- elsif language_flag_country != blank -%}
                       {{
                         language_flag_country
                         | image_url: width: 40
