@@ -42,6 +42,7 @@
   assign animation_delay = animation_delay | default: 0
   assign aos_delay_default = animation_delay | times: 100
   assign aos_delay = aos_delay | default: aos_delay_default
+  assign card_animation = card_animation | default: ''
   assign aos_duration = 800
   assign show_recently_viewed_indicator = settings.show_recently_viewed_indicator
   assign layout_desktop = section.settings.layout_desktop
@@ -622,22 +623,27 @@
 -%}
 
 {%- capture image_animations -%}
+  {%- unless card_animation == 'plp' -%}
   data-aos="img-in"
   data-aos-delay="{{ aos_delay }}"
   data-aos-duration="{{ aos_duration }}"
   data-aos-anchor="{{ aos_anchor }}"
   data-aos-easing="ease-out-quart"
+  {%- endunless -%}
 {%- endcapture -%}
 
 {%- unless hidden_product -%}
   <grid-item
-    class="grid-item product-item {{ swatches_class }} {{ alignment_class }} {{ overlay_text_class }} {{ quickview_class }} {{ product_card_class }}{% if modifier_class != blank %} {{ modifier_class }}{% endif %}"
+    class="grid-item product-item {{ swatches_class }} {{ alignment_class }} {{ overlay_text_class }} {{ quickview_class }} {{ product_card_class }}{% if modifier_class != blank %} {{ modifier_class }}{% endif %}{% if card_animation == 'plp' %} plp-card-up{% endif %}"
     id="{{ item_unique }}"
     data-grid-item
     data-product-available="{{ product.available }}"
     data-url="{{ product.url }}"
     data-swap-id="true"
     {{ attributes }}
+    {%- if card_animation == 'plp' -%}
+    style="--plp-delay: {{ aos_delay }}ms"
+    {%- endif -%}
   >
     <div class="product-item__image{% if double_img %} double__image{% endif %}" data-product-image>
       <a

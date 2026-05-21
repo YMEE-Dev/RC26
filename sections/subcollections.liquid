@@ -60,6 +60,20 @@
         animation: none;
       }
     }
+
+    @media (min-width: 960px) {
+      #Subcollections--{{ section.id }} .plp-el-up {
+        opacity: 0;
+        transform: translateY(30px);
+        transition:
+          opacity 600ms cubic-bezier(0.70, 0, 0.3, 1),
+          transform 600ms 150ms cubic-bezier(0.05, 0, 0, 1);
+      }
+      #Subcollections--{{ section.id }} .plp-el-up.plp-el-up--visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   {%- endstyle -%}
 
   <section
@@ -89,7 +103,7 @@
         {%- capture sub_collection_html -%}
           {{ sub_collection_html }}
 
-          <div class="swiper-slide subcollection__item">
+          <div class="swiper-slide subcollection__item plp-el-up">
             <div class="subcollection__inner">
               <a
                 class="subcollection__link{% if sub_collection.handle == collection.handle %} is-active{% endif %}"
@@ -135,6 +149,47 @@
         </div>
       {%- endif -%}
     {%- endif -%}
+  <script>
+    (function () {
+      if (window.innerWidth < 960) return;
+
+      const section = document.getElementById('Subcollections--{{ section.id }}');
+      if (!section) return;
+      const swiper = section.querySelector('[data-subcollections-swiper]');
+      if (!swiper) return;
+      const items = Array.from(swiper.querySelectorAll('.subcollection__item'));
+      if (!items.length) return;
+
+      const animateItems = function () {
+        items.forEach(function (item, i) {
+          setTimeout(function () {
+            item.classList.add('plp-el-up--visible');
+            if (i === items.length - 1) {
+              document.dispatchEvent(new CustomEvent('theme:subcollections:animated'));
+            }
+          }, i * 160);
+        });
+      };
+
+      const imgs = Array.from(swiper.querySelectorAll('img'));
+
+      /* Wait for header animation to start first (top-to-bottom order on PLP) */
+      const waitForHeader = new Promise(function (resolve) {
+        if (document.body.classList.contains('plp-header-ready')) {
+          resolve();
+        } else {
+          document.addEventListener('theme:plp:header-ready', resolve, { once: true });
+          setTimeout(resolve, 3500); /* safety fallback aligned with collection.liquid */
+        }
+      });
+
+      Promise.all([
+        waitForHeader,
+        ...imgs.map(function (img) { return img.decode().catch(function () {}); })
+      ]).then(animateItems);
+    })();
+  </script>
+
   </section>
 {%- endif -%}
 
