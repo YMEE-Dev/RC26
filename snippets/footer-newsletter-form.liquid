@@ -57,7 +57,7 @@
             class="footer-newsletter-form__field field label"
             type="text"
             name="first_name"
-            placeholder="Name"
+            placeholder="FIRST NAME"
             value="{% if customer %}{{ customer.first_name | escape }}{% endif %}"
             required
           >
@@ -68,9 +68,18 @@
             class="footer-newsletter-form__field field label"
             type="text"
             name="last_name"
-            placeholder="Surname"
+            placeholder="LAST NAME"
             value="{% if customer %}{{ customer.last_name | escape }}{% endif %}"
             required
+          >
+
+          <label class="visually-hidden" for="FooterNewsletterBirthDate--{{ section.id }}"> Date of birth </label>
+          <input
+            id="FooterNewsletterBirthDate--{{ section.id }}"
+            class="footer-newsletter-form__field field label"
+            type="date"
+            name="date_of_birth"
+            placeholder="DATE OF BIRTH"
           >
 
           <label class="visually-hidden" for="FooterNewsletterEmail--{{ section.id }}"> Email </label>

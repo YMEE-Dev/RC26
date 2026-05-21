@@ -40,7 +40,8 @@
       first_name: getFieldValue(formData, "first_name"),
       last_name: getFieldValue(formData, "last_name"),
       properties: {
-        language: getFieldValue(formData, "language")
+        language: getFieldValue(formData, "language"),
+        date_of_birth: getFieldValue(formData, "date_of_birth")
       }
     };
 
