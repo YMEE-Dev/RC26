@@ -7620,6 +7620,12 @@ hover-disclosure {
   top: calc(0px - var(--announcement-height));
 }
 
+@media only screen and (max-width: 960px) {
+  .theme__header {
+    z-index: 100;
+  }
+}
+
 .theme__header .icon {
   --icons: currentcolor;
 }
@@ -8310,11 +8316,11 @@ body:not(.is-loaded) .header__desktop {
   z-index: 6000;
 }
 
-/* @media only screen and (max-width: 960px) {
+@media only screen and (max-width: 960px) {
   .js__header__stuck {
-    position: relative;
+    z-index: 100;
   }
-} */
+}
 
 body.header-drawer-is-open .js__header__stuck,
 body:has(.drawer--header.is-open) .js__header__stuck {
@@ -10596,7 +10602,7 @@ header-search-popdown.is-open .search-popdown {
   height: auto;
   width: auto;
   fill: var(--link);
-  z-index: 5999;
+  z-index: 100;
   transition:
     opacity 400ms cubic-bezier(0.34, 1.56, 0.64, 1),
     transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
