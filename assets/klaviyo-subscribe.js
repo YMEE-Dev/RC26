@@ -84,15 +84,22 @@
     var submitBtn = form.querySelector('[type="submit"]');
     if (submitBtn) submitBtn.disabled = true;
 
+    var controller = new AbortController();
+    var timeoutId = setTimeout(function () {
+      controller.abort();
+    }, 8000);
+
     fetch("https://a.klaviyo.com/client/subscriptions/?company_id=" + encodeURIComponent(companyId), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         revision: API_REVISION
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: controller.signal
     })
       .then(function (response) {
+        clearTimeout(timeoutId);
         if (response.ok || response.status === 202) {
           showSuccess(form);
           return null;
@@ -104,7 +111,12 @@
         });
       })
       .catch(function (error) {
-        showError(form, error.message || "Something went wrong. Please try again.");
+        clearTimeout(timeoutId);
+        if (error.name === "AbortError") {
+          showError(form, "Request timed out. Please try again.");
+        } else {
+          showError(form, error.message || "Something went wrong. Please try again.");
+        }
       })
       .finally(function () {
         if (submitBtn) submitBtn.disabled = false;

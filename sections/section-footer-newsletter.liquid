@@ -517,14 +517,16 @@
       window.removeEventListener('scroll', this.boundOnScroll);
     }
 
-    hideFloat() {
+    hideFloat(skipScrollUnlock = false) {
       if (!this.floatPopup) {
         return;
       }
       this.floatPopup.classList.remove('is-visible');
       this.floatPopup.setAttribute('aria-hidden', 'true');
       this.floatUnderlay?.classList.remove('is-visible');
-      window.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
+      if (!skipScrollUnlock) {
+        window.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
+      }
       window.removeEventListener('scroll', this.boundOnScroll);
     }
 
@@ -533,7 +535,7 @@
 
       if (withDelay) {
         window.setTimeout(() => {
-          this.hideFloat();
+          this.hideFloat(true);
         }, this.floatDismissDelayMs);
         return;
       }
