@@ -67,7 +67,17 @@
       loop: false,
     });
 
-    enableSwipeHint(sectionId, swiperElement);
+    /* Enable swipe hint after entrance animation completes + pause before bouncing */
+    document.addEventListener('theme:subcollections:animated', function () {
+      setTimeout(function () {
+        enableSwipeHint(sectionId, swiperElement);
+      }, 1500);
+    }, { once: true });
+
+    /* Fallback: show hint if animation event never fires (e.g. no header animation on page) */
+    setTimeout(function () {
+      enableSwipeHint(sectionId, swiperElement);
+    }, 7000);
   }
 
   function destroySwiper(sectionId) {

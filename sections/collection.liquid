@@ -962,8 +962,6 @@
 
   <script>
     (function () {
-      if (window.innerWidth < 960) return;
-
       /* Page exit fade */
       document.addEventListener('click', function (e) {
         const link = e.target.closest('a[href]');
@@ -1019,7 +1017,22 @@
 
       document.addEventListener('theme:subcollections:animated', function () {
         subcollectionsDone = true;
-        if (aboveFold.length) setTimeout(releaseAboveFold, 600);
+        if (!aboveFold.length) return;
+
+        /* Wait for the last visible category item's transform transition to actually finish,
+           then release cards. Fallback timeout in case transitionend never fires
+           (reduced motion, element off-screen, transition cancelled). */
+        const lastItem = document.querySelector('.subcollection__item.plp-el-up--visible:last-child')
+          || document.querySelector('.subcollection__item.plp-el-up--visible');
+        if (!lastItem) { releaseAboveFold(); return; }
+
+        var fallback = setTimeout(releaseAboveFold, 900);
+        lastItem.addEventListener('transitionend', function handler(e) {
+          if (e.propertyName !== 'transform') return;
+          clearTimeout(fallback);
+          lastItem.removeEventListener('transitionend', handler);
+          releaseAboveFold();
+        });
       }, { once: true });
 
       if (hasSubcollections) {
