@@ -1,0 +1,53 @@
+/*
+ * Stack-fade — Module B
+ *
+ *   • Each slide is full viewport width (max-width override on the wrapper).
+ *   • Back (covered) slide gets blurred + dimmed + scaled down as a single unit.
+ *   • Foreground slide stays sharp with its white background.
+ *
+ * Tunables:
+ *   --stack-max-blur    max blur radius at full cover     (default 12px)
+ *   --stack-max-dark    max overlay opacity at full cover (default 0.35)
+ *   --stack-max-scale   scale delta at full cover         (default 0.06 → shrinks to 0.94)
+ */
+
+/* Force full-width on the slider wrappers.
+   Use physical padding shorthand (not padding-inline) so it overrides the theme's
+   padding-left/padding-right physical properties reliably across all browsers. */
+.sticky-scroll__wrapper,
+.sticky-scroll-mobile__wrapper {
+  max-width: none !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sticky-scroll__block,
+  .sticky-scroll-mobile__block {
+    isolation: isolate;
+    overflow: hidden;
+    filter: blur(calc(var(--stack-cover, 0) * var(--stack-max-blur, 12px)));
+    transform: scale(calc(1 - var(--stack-cover, 0) * var(--stack-max-scale, 0.06)));
+    transition: filter 80ms linear, transform 80ms linear;
+    will-change: filter, transform;
+  }
+
+  /* Per-block dim overlay on the BACK slide only.
+     Explicit longhand + inset for Safari 14.0 compatibility. */
+  .sticky-scroll__block::after,
+  .sticky-scroll-mobile__block::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    inset: 0;
+    background-color: rgba(0, 0, 0, calc(var(--stack-cover, 0) * var(--stack-max-dark, 0.35)));
+    pointer-events: none;
+    z-index: 1;
+    transition: background-color 80ms linear;
+    will-change: background-color;
+  }
+}
