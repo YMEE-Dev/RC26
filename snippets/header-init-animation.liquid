@@ -12,6 +12,7 @@
 
 <style>
     @keyframes plp-header-from-top { from { transform: translateY(-200px); opacity: 0; } to { transform: none; opacity: 1; } }
+    @keyframes plp-header-fade-near { from { transform: translateY(-20px); opacity: 0; } to { transform: none; opacity: 1; } }
     @keyframes plp-header-from-left { from { transform: translateX(-200px); opacity: 0; } to { transform: none; opacity: 1; } }
     @keyframes plp-header-from-right { from { transform: translateX(200px); opacity: 0; } to { transform: none; opacity: 1; } }
 
@@ -20,16 +21,16 @@
         opacity: 0 !important;
       }
       body.plp-header-ready .header__desktop__bar__l .header__logo {
-        animation: plp-header-from-top 550ms 0ms cubic-bezier(0.05, 0, 0, 1) backwards;
+        animation: plp-header-from-top 550ms 200ms cubic-bezier(0.05, 0, 0, 1) backwards;
       }
       body.plp-header-ready .header__desktop__bar__l .header__logo__meta {
-        animation: plp-header-from-top 600ms 100ms cubic-bezier(0.05, 0, 0, 1) backwards;
+        animation: plp-header-fade-near 600ms 400ms cubic-bezier(0.05, 0, 0, 1) backwards;
       }
       body.plp-header-ready .header__desktop__bar__c {
-        animation: plp-header-from-left 700ms 700ms cubic-bezier(0.05, 0, 0, 1) backwards;
+        animation: plp-header-from-left 700ms 1000ms cubic-bezier(0.05, 0, 0, 1) backwards;
       }
       body.plp-header-ready .header__desktop__bar__r {
-        animation: plp-header-from-right 700ms 700ms cubic-bezier(0.05, 0, 0, 1) backwards;
+        animation: plp-header-from-right 700ms 1000ms cubic-bezier(0.05, 0, 0, 1) backwards;
       }
     }
   </style>
