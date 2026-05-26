@@ -27,6 +27,7 @@
   const WHEEL_MIN_DELTA  = 3;
   const SWIPE_MIN_PX     = 30;
   const SWIPE_MAX_MS     = 700;
+  const DISABLE_ANIMATION = true;
 
   const EASING = 'cubic-bezier(0.645,0.045,0.355,1.0)';
 
@@ -122,9 +123,9 @@
 
       requestAnimationFrame(() => {
         blocks.forEach((b) => {
-          b.style.transition =
-            `transform ${SNAP_DURATION_MS}ms ${EASING}, ` +
-            `filter ${SNAP_DURATION_MS}ms ${EASING}`;
+          b.style.transition = DISABLE_ANIMATION
+            ? "none"
+            : `transform ${SNAP_DURATION_MS}ms ${EASING}, ` + `filter ${SNAP_DURATION_MS}ms ${EASING}`;
         });
       });
 
@@ -217,12 +218,19 @@
       if (next >= slideCount)   { unlock(+1); return; }
       if (next === idx) return;
 
-      animating = true;
-      idx       = next;
+      if (!DISABLE_ANIMATION) {
+        animating = true;
+        idx = next;
 
-      applyState();
+        applyState();
 
-      setTimeout(() => { animating = false; }, SNAP_DURATION_MS + 100);
+        setTimeout(() => {
+          animating = false;
+        }, SNAP_DURATION_MS + 100);
+      } else {
+        idx = next;
+        applyState();
+      }
     };
 
     /* ── Wheel (locked) ───────────────────────────────────────────────────── */
@@ -299,7 +307,7 @@
     };
 
     const startWatch = () => {
-      if (watching) return;
+      if (watching || DISABLE_ANIMATION) return;
       watching   = true;
       lastTop    = null;
       lastBottom = null;
