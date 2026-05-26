@@ -1,20 +1,16 @@
 /*
- * Stack-fade — Module B
+ * Stack-fade — Module B (fullPage.js-style)
  *
- * Two responsibilities:
+ * Lock triggers:
+ *   • onWheelSnap  — intercepts wheel events when section top is within ±10 px (pre-emptive)
+ *   • onScrollCheck — crossing-detection fallback: fires whenever section top crosses 0,
+ *                     even if a single scroll tick jumps the section top by >10 px
  *
- *   1. Drives --stack-cover (per block) and --section-cover (per section) so the
- *      CSS in rc-stack-fade.css can run scale-down (back slide) and full-viewport
- *      darkening (during transition).
+ * Unlock visual fix:
+ *   scrollTo is called BEFORE clearing inline styles so the section is already
+ *   off-screen when transform resets to 0 — prevents flash of slide 0.
  *
- *   2. Snap-to-slide on wheel/swipe: while the section is "engaged" (first block
- *      pinned, last block not yet past), a single wheel tick or swipe advances
- *      exactly one slide. Smooth-scrolls to the target block's natural top via
- *      window.scrollTo({ behavior: 'smooth' }), so the cover ratios animate
- *      cleanly during the snap.
- *
- * Snap engages only inside the section's range. Above the section and after the
- * last slide, the wheel passes through to normal page scroll.
+ * Disabled under prefers-reduced-motion.
  */
 
 (() => {
@@ -27,187 +23,308 @@
     '[data-section-type="sticky-scroll-desktop"],[data-section-type="sticky-scroll-mobile"]';
   const BLOCK_SELECTOR = '.sticky-scroll__block, .sticky-scroll-mobile__block';
 
-  /* Snap config */
-  const SNAP_COOLDOWN_MS = 850;            /* min gap between snaps (covers smooth-scroll duration) */
-  const WHEEL_TRIGGER_DELTA = 5;           /* filter inertia micro-events */
-  const WHEEL_ACCUMULATE_THRESHOLD = 30;   /* total deltaY for a "small scroll" to snap */
-  const WHEEL_ACCUMULATE_RESET_MS = 300;   /* ms of wheel inactivity before accumulator resets */
-  const SWIPE_THRESHOLD_PX = 30;           /* min swipe distance */
-  const SWIPE_MAX_MS = 700;           /* max swipe duration */
-  const TOP_ENGAGE_THRESHOLD = 10;    /* first block must be within this many px of viewport top */
-  const BOTTOM_RELEASE_THRESHOLD = 100; /* last block's bottom must be at least this many px below top */
+  const SNAP_DURATION_MS = 700;
+  const WHEEL_MIN_DELTA  = 3;
+  const SWIPE_MIN_PX     = 30;
+  const SWIPE_MAX_MS     = 700;
+
+  const EASING = 'cubic-bezier(0.645,0.045,0.355,1.0)';
 
   const setupSection = (section) => {
     if (section.__rcStackFadeAttached) return;
     section.__rcStackFadeAttached = true;
 
-    const blocks = Array.from(section.querySelectorAll(BLOCK_SELECTOR));
-    if (blocks.length < 2) return;
+    const wrapper  = section.querySelector('.sticky-scroll__wrapper, .sticky-scroll-mobile__wrapper');
+    const blocksEl = section.querySelector('.sticky-scroll__blocks, .sticky-scroll-mobile__blocks');
+    const blocks   = Array.from(section.querySelectorAll(BLOCK_SELECTOR));
+    const innerEls = Array.from(section.querySelectorAll('.sticky-scroll__block-inner'));
 
-    let scheduled = false;
-    let active = false;
-    let lastSnapTime = 0;
-    let touchStartY = null;
-    let touchStartTime = 0;
-    let wheelAccumulator = 0;
-    let wheelAccumTimer = null;
+    /* Mobile pairs adjacent image_block + text_block into a single slide unit
+       so image and content are both visible in the viewport at once.          */
+    const isMobile       = section.matches('[data-section-type="sticky-scroll-mobile"]');
+    const blocksPerSlide = isMobile ? 2 : 1;
+    const slideCount     = Math.ceil(blocks.length / blocksPerSlide);
 
-    /* ── Cover-ratio updates ───────────────────────────────────────────────── */
-    /* Use layout coordinates (offsetTop) rather than getBoundingClientRect so the
-       cover ratio isn't affected by the transform: scale we apply to the back slide. */
-    const updateCovers = () => {
-      scheduled = false;
-      const viewportH = window.innerHeight || document.documentElement.clientHeight;
-      const scrollY = window.scrollY || window.pageYOffset;
-      for (let i = 0; i < blocks.length - 1; i++) {
-        const nextTop = blocks[i + 1].offsetTop;
-        /* Cover ratio = how far the next block's natural top has risen into the viewport,
-           normalized to a viewport height. 0 when next block is at viewport bottom,
-           1 when next block has reached viewport top. */
-        let ratio = (viewportH + scrollY - nextTop) / viewportH;
-        if (ratio < 0) ratio = 0;
-        else if (ratio > 1) ratio = 1;
-        blocks[i].style.setProperty('--stack-cover', ratio.toFixed(3));
-      }
+    if (!wrapper || !blocksEl || slideCount < 2) return;
+
+    let idx           = 0;
+    let locked        = false;
+    let animating     = false;
+    let cooldown      = false;
+    let watching      = false;
+    let ph            = null;
+    let sectionTop    = 0;
+    let naturalHeight = 0;   /* section height measured before fixed styles are applied */
+    let lastTop       = null; /* previous section top — used for down-from-above crossing */
+    let lastBottom    = null; /* previous section bottom — used for up-from-below crossing */
+    let touchY        = null;
+    let touchT        = 0;
+
+    /* ── State application ──────────────────────────────────────────────────
+       Each block belongs to a slide (slideIdx = floor(i / blocksPerSlide)).
+       For a block in slide s at current idx:
+         • --block-y:     0vh if s <= idx (in-place),     100vh if s > idx (off-screen below)
+         • --stack-cover: 1   if s <  idx (covered),       0     if s >= idx (sharp)
+       100vh translateY pushes both half-height mobile blocks fully off-screen
+       regardless of their top:0%/50% start position.                         */
+    const applyState = () => {
+      blocks.forEach((b, i) => {
+        const slideIdx = Math.floor(i / blocksPerSlide);
+        b.style.setProperty('--block-y',     slideIdx >  idx ? '100vh' : '0vh');
+        b.style.setProperty('--stack-cover', slideIdx <  idx ? '1'     : '0');
+      });
     };
 
-    const schedule = () => {
-      if (scheduled) return;
-      scheduled = true;
-      requestAnimationFrame(updateCovers);
-    };
+    /* ── Lock ─────────────────────────────────────────────────────────────── */
+    const lock = (startIdx = 0) => {
+      if (locked || cooldown) return;
+      locked        = true;
+      idx           = startIdx;
+      naturalHeight = section.offsetHeight; /* capture before fixed styles change it */
+      sectionTop    = window.scrollY + section.getBoundingClientRect().top;
 
-    /* ── Snap helpers ──────────────────────────────────────────────────────── */
-    const findActiveBlockIdx = () => {
-      const scrollY = window.scrollY;
-      for (let i = blocks.length - 1; i >= 0; i--) {
-        if (blocks[i].offsetTop <= scrollY + 10) return i;
-      }
-      return 0;
-    };
+      ph               = document.createElement('div');
+      ph.style.cssText = `height:${naturalHeight}px;`;
+      section.insertAdjacentElement('afterend', ph);
 
-    const snapToIdx = (idx) => {
-      if (idx < 0 || idx >= blocks.length) return false;
-      const targetY = blocks[idx].offsetTop;
-      if (Math.abs(window.scrollY - targetY) < 5) return false;
-      window.scrollTo({ top: targetY, behavior: 'smooth' });
-      return true;
-    };
+      /* Marker for CSS — all rc-stack-fade.css rules are scoped to this
+         attribute so the section renders natively when not engaged.        */
+      section.setAttribute('data-rc-stack-fade-locked', '');
 
-    const isSnapEngaged = () => {
-      const firstTop = blocks[0].getBoundingClientRect().top;
-      const lastBottom = blocks[blocks.length - 1].getBoundingClientRect().bottom;
-      return firstTop <= TOP_ENGAGE_THRESHOLD && lastBottom > BOTTOM_RELEASE_THRESHOLD;
-    };
+      section.style.cssText =
+        'position:fixed;top:0;left:0;width:100vw;height:100vh;overflow:hidden;z-index:200;padding:0;';
+      wrapper.style.cssText =
+        'position:relative;width:100%;height:100%;max-width:none;padding:0;margin:0;overflow:hidden;';
+      blocksEl.style.cssText =
+        'position:relative;width:100%;height:100%;';
 
-    /* ── Wheel handler ─────────────────────────────────────────────────────── */
-    const onWheel = (e) => {
-      if (!isSnapEngaged()) return;
-      if (Math.abs(e.deltaY) < WHEEL_TRIGGER_DELTA) return;
+      /* Each block: absolute, stacked by z-index, transformed via CSS vars.
+         Z-index = slideIdx so paired mobile blocks (image + text) share a
+         layer and overlay older slides as a unit.
+         On mobile: blocks within a pair stack vertically — first at top:0,
+         height:50%; second at top:50%, height:50%.
+         On desktop: each block fills the viewport (top:0, height:100%).      */
+      blocks.forEach((b, i) => {
+        const slideIdx        = Math.floor(i / blocksPerSlide);
+        const positionInSlide = i % blocksPerSlide;
+        const topPct          = isMobile ? positionInSlide * 50 : 0;
+        const heightPct       = isMobile ? 50 : 100;
+        b.style.cssText =
+          `position:absolute;left:0;width:100%;top:${topPct}%;height:${heightPct}%;` +
+          `z-index:${slideIdx};isolation:isolate;overflow:hidden;` +
+          'transform:translateY(var(--block-y,0vh)) scale(calc(1 - var(--stack-cover,0) * var(--stack-max-scale, 0.03)));' +
+          'filter:blur(calc(var(--stack-cover,0) * var(--stack-max-blur, 12px)));' +
+          'transition:none;';
+      });
+      innerEls.forEach((el) => { el.style.height = '100%'; });
 
-      const now = Date.now();
-      if (now - lastSnapTime < SNAP_COOLDOWN_MS) {
-        e.preventDefault();
-        return;
-      }
+      applyState();
 
-      const direction = e.deltaY > 0 ? 1 : -1;
-      const currentIdx = findActiveBlockIdx();
-      const targetIdx = currentIdx + direction;
-
-      /* At section boundary — let scroll pass through so user can exit */
-      if (targetIdx < 0 || targetIdx >= blocks.length) {
-        wheelAccumulator = 0;
-        clearTimeout(wheelAccumTimer);
-        return;
-      }
-
-      /* Accumulate delta; snap fires once the gesture crosses the threshold.
-         Mouse-wheel clicks (≥100 deltaY) snap immediately; trackpad requires
-         a short deliberate scroll gesture (~80px total). */
-      e.preventDefault();
-      wheelAccumulator += e.deltaY;
-      clearTimeout(wheelAccumTimer);
-      wheelAccumTimer = setTimeout(() => { wheelAccumulator = 0; }, WHEEL_ACCUMULATE_RESET_MS);
-
-      if (Math.abs(wheelAccumulator) < WHEEL_ACCUMULATE_THRESHOLD) return;
-
-      wheelAccumulator = 0;
-      clearTimeout(wheelAccumTimer);
-
-      if (snapToIdx(targetIdx)) {
-        lastSnapTime = now;
-      }
-    };
-
-    /* ── Touch handler (swipe to advance) ──────────────────────────────────── */
-    const onTouchStart = (e) => {
-      if (!isSnapEngaged()) {
-        touchStartY = null;
-        return;
-      }
-      touchStartY = e.touches[0].clientY;
-      touchStartTime = Date.now();
-    };
-
-    const onTouchEnd = (e) => {
-      if (touchStartY === null) return;
-      const elapsed = Date.now() - touchStartTime;
-      const deltaY = touchStartY - e.changedTouches[0].clientY;
-      touchStartY = null;
-
-      if (Math.abs(deltaY) < SWIPE_THRESHOLD_PX || elapsed > SWIPE_MAX_MS) return;
-      if (!isSnapEngaged()) return;
-
-      const now = Date.now();
-      if (now - lastSnapTime < SNAP_COOLDOWN_MS) return;
-
-      const currentIdx = findActiveBlockIdx();
-      const targetIdx = deltaY > 0 ? currentIdx + 1 : currentIdx - 1;
-
-      if (snapToIdx(targetIdx)) {
-        lastSnapTime = now;
-      }
-    };
-
-    /* ── Lifecycle ─────────────────────────────────────────────────────────── */
-    const enter = () => {
-      if (active) return;
-      active = true;
-      window.addEventListener('scroll', schedule, { passive: true });
-      window.addEventListener('resize', schedule, { passive: true });
-      window.addEventListener('wheel', onWheel, { passive: false });
-      window.addEventListener('touchstart', onTouchStart, { passive: true });
-      window.addEventListener('touchend', onTouchEnd, { passive: true });
-      schedule();
-    };
-
-    const leave = () => {
-      if (!active) return;
-      active = false;
-      window.removeEventListener('scroll', schedule);
-      window.removeEventListener('resize', schedule);
-      window.removeEventListener('wheel', onWheel);
-      window.removeEventListener('touchstart', onTouchStart);
-      window.removeEventListener('touchend', onTouchEnd);
-    };
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) enter();
-          else leave();
+      requestAnimationFrame(() => {
+        blocks.forEach((b) => {
+          b.style.transition =
+            `transform ${SNAP_DURATION_MS}ms ${EASING}, ` +
+            `filter ${SNAP_DURATION_MS}ms ${EASING}`;
         });
-      },
-      { rootMargin: '50% 0px 50% 0px' }
-    );
-    observer.observe(section);
+      });
+
+      window.addEventListener('wheel',      onWheel,      { passive: false });
+      window.addEventListener('touchstart', onTouchStart, { passive: true  });
+      window.addEventListener('touchend',   onTouchEnd,   { passive: true  });
+    };
+
+    /* ── Unlock ────────────────────────────────────────────────────────────── */
+    const unlock = (exitDir) => {
+      if (!locked) return;
+      locked    = false;
+      animating = false;
+      cooldown  = true;
+
+      window.removeEventListener('wheel',      onWheel);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchend',   onTouchEnd);
+
+      /* Final scroll target after all DOM mutations settle.
+         Margin must exceed onWheelSnap's ±10px lock zone — otherwise a
+         post-cooldown wheel gesture re-snaps the lock immediately, trapping
+         the user in the slider. 30px gives clear runway above the threshold. */
+      const EXIT_MARGIN = 30;
+      const finalTarget = exitDir > 0
+        ? sectionTop + naturalHeight + EXIT_MARGIN
+        : Math.max(0, sectionTop - EXIT_MARGIN);
+
+      /* Disable scroll-anchoring AND smooth-scroll behavior during the swap.
+         • overflow-anchor: none — stops the browser re-anchoring scroll to
+           keep visible content stable when the section returns to flow.
+           (Safari ignores scroll anchoring entirely, so it's a no-op there.)
+         • scroll-behavior: auto — overrides theme.css `scroll-behavior:smooth`
+           so window.scrollTo is synchronous on all browsers, including those
+           that don't yet support the behavior:'instant' option (older Safari,
+           Chrome <102). Without this, scrollTo animates and gets interrupted
+           by the DOM mutations below, leaving scrollY where it started.       */
+      const docEl = document.documentElement;
+      const prevAnchor   = docEl.style.overflowAnchor;
+      const prevBehavior = docEl.style.scrollBehavior;
+      docEl.style.overflowAnchor = 'none';
+      docEl.style.scrollBehavior = 'auto';
+
+      /* First scrollTo while section is still position:fixed — section stays
+         pinned at top:0 regardless of scrollY, so there is no visible jump.
+         behavior:'instant' overrides theme.css `scroll-behavior: smooth` —
+         without it scrollTo is animated and gets interrupted by the DOM
+         mutations below, leaving scrollY where it started.                   */
+      if (ph) ph.style.height = `${naturalHeight + window.innerHeight + 10}px`;
+      window.scrollTo({ top: finalTarget, left: 0, behavior: 'instant' });
+
+      /* Invalidate crossing references — prevents stale values
+         (left by onWheelSnap) from triggering a false re-lock after cooldown. */
+      lastTop = null;
+      lastBottom = null;
+
+      section.style.cssText  = '';
+      wrapper.style.cssText  = '';
+      blocksEl.style.cssText = '';
+      blocks.forEach((b) => {
+        b.style.cssText = '';
+        /* Explicitly remove custom properties — some browsers leave them set
+           after cssText='', which would re-apply blur/scale on next render. */
+        b.style.removeProperty('--block-y');
+        b.style.removeProperty('--stack-cover');
+      });
+      innerEls.forEach((el) => { el.style.height = ''; });
+
+      section.removeAttribute('data-rc-stack-fade-locked');
+
+      if (ph) { ph.remove(); ph = null; }
+
+      /* Re-assert scroll target after DOM mutations — corrects any drift
+         from layout shifts even with overflow-anchor disabled.              */
+      window.scrollTo({ top: finalTarget, left: 0, behavior: 'instant' });
+
+      /* Restore inline overrides on next frame so layout is settled first. */
+      requestAnimationFrame(() => {
+        docEl.style.overflowAnchor = prevAnchor;
+        docEl.style.scrollBehavior = prevBehavior;
+      });
+
+      setTimeout(() => { cooldown = false; }, 400);
+    };
+
+    /* ── Slide navigation ─────────────────────────────────────────────────── */
+    const goTo = (next) => {
+      if (animating) return;
+      if (next < 0)             { unlock(-1); return; }
+      if (next >= slideCount)   { unlock(+1); return; }
+      if (next === idx) return;
+
+      animating = true;
+      idx       = next;
+
+      applyState();
+
+      setTimeout(() => { animating = false; }, SNAP_DURATION_MS + 100);
+    };
+
+    /* ── Wheel (locked) ───────────────────────────────────────────────────── */
+    const onWheel = (e) => {
+      e.preventDefault();
+      if (animating || Math.abs(e.deltaY) < WHEEL_MIN_DELTA) return;
+      goTo(idx + (e.deltaY > 0 ? 1 : -1));
+    };
+
+    /* ── Touch ────────────────────────────────────────────────────────────── */
+    const onTouchStart = (e) => {
+      touchY = e.touches[0].clientY;
+      touchT = Date.now();
+    };
+    const onTouchEnd = (e) => {
+      if (touchY === null) return;
+      const dy      = touchY - e.changedTouches[0].clientY;
+      const elapsed = Date.now() - touchT;
+      touchY = null;
+      if (Math.abs(dy) < SWIPE_MIN_PX || elapsed > SWIPE_MAX_MS || animating) return;
+      goTo(idx + (dy > 0 ? 1 : -1));
+    };
+
+    /* ── Wheel snap (pre-lock, passive:false so we can preventDefault) ─────
+       Two snap zones:
+         • Down-from-above: section's TOP edge within ±10 px of viewport top
+         • Up-from-below:   section's BOTTOM edge within ±10 px of viewport bottom
+       Symmetric with onScrollCheck's two crossing triggers.                   */
+    const onWheelSnap = (e) => {
+      if (locked || cooldown) return;
+      if (Math.abs(e.deltaY) < WHEEL_MIN_DELTA) return;
+      const rect = section.getBoundingClientRect();
+      const top    = rect.top;
+      const bottom = rect.bottom;
+      const vh     = window.innerHeight;
+      const inTopZone    = Math.abs(top) <= 10;
+      const inBottomZone = Math.abs(bottom - vh) <= 10;
+      if (!inTopZone && !inBottomZone) return;
+      e.preventDefault();
+      lock(e.deltaY < 0 ? slideCount - 1 : 0);
+    };
+
+    /* ── Scroll watcher: crossing-detection lock ──────────────────────────
+       Fires on every scroll event and tracks direction via lastTop/lastBottom.
+       Catches fast scrollers who jump past the ±10 px wheel-snap window.
+
+       Asymmetric triggers handle tall sections (>viewport) correctly:
+         • Down-from-above: section's TOP edge crosses viewport top (top → 0)
+         • Up-from-below:   section's BOTTOM edge crosses viewport bottom
+                            (bottom → vh). Firing on top→0 would force the user
+                            to scroll up through the entire section's height
+                            (sticky CSS showing last block) before autoscroll
+                            engages — feels like "scrolling the slider twice."  */
+    const onScrollCheck = () => {
+      if (locked || cooldown) return;
+      const rect       = section.getBoundingClientRect();
+      const top        = rect.top;
+      const bottom     = rect.bottom;
+      const vh         = window.innerHeight;
+      const prevTop    = lastTop;
+      const prevBottom = lastBottom;
+      lastTop    = top;
+      lastBottom = bottom;
+
+      if (prevTop !== null && prevBottom !== null) {
+        /* Down-from-above: top edge enters viewport from above */
+        if (prevTop > 0 && top <= 0)        { lock(0);                return; }
+        /* Up-from-below: bottom edge enters viewport from below */
+        if (prevBottom < vh && bottom >= vh) { lock(slideCount - 1); return; }
+      }
+      /* Slow-scroll safety nets */
+      if (Math.abs(top) <= 1)               { lock(0);                return; }
+      if (Math.abs(bottom - vh) <= 1)       { lock(slideCount - 1); return; }
+    };
+
+    const startWatch = () => {
+      if (watching) return;
+      watching   = true;
+      lastTop    = null;
+      lastBottom = null;
+      window.addEventListener('scroll', onScrollCheck, { passive: true });
+      window.addEventListener('wheel',  onWheelSnap,   { passive: false });
+      onScrollCheck();
+    };
+
+    const stopWatch = () => {
+      if (!watching) return;
+      watching   = false;
+      lastTop    = null;
+      lastBottom = null;
+      window.removeEventListener('scroll', onScrollCheck);
+      window.removeEventListener('wheel',  onWheelSnap);
+      if (locked) unlock(0);
+    };
+
+    new IntersectionObserver(
+      (entries) => entries.forEach((e) => (e.isIntersecting ? startWatch() : stopWatch())),
+      { rootMargin: '100% 0px 100% 0px' }
+    ).observe(section);
   };
 
-  const init = () => {
-    const sections = document.querySelectorAll(SECTION_SELECTOR);
-    sections.forEach(setupSection);
-  };
+  const init = () => document.querySelectorAll(SECTION_SELECTOR).forEach(setupSection);
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init, { once: true });
@@ -215,14 +332,8 @@
     init();
   }
 
-  /* Re-init when theme editor swaps a section in */
-  document.addEventListener('shopify:section:load', (event) => {
-    const section = event.target;
-    if (section && section.matches && section.matches(SECTION_SELECTOR)) {
-      setupSection(section);
-    } else if (section && section.querySelector) {
-      const nested = section.querySelectorAll(SECTION_SELECTOR);
-      nested.forEach(setupSection);
-    }
+  document.addEventListener('shopify:section:load', ({ target }) => {
+    if (target?.matches?.(SECTION_SELECTOR)) setupSection(target);
+    else target?.querySelectorAll?.(SECTION_SELECTOR).forEach(setupSection);
   });
 })();
