@@ -94,8 +94,7 @@
 
       section.style.cssText =
         'position:fixed;top:0;left:0;width:100vw;height:100vh;overflow:hidden;z-index:200;padding:0;';
-      wrapper.style.cssText =
-        "position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;";
+      wrapper.style.cssText = 'position:relative;height:100%;';
       blocksEl.style.cssText = "position:relative;width:100%;height:100%;";
 
       /* Each block: absolute, stacked by z-index, transformed via CSS vars.
@@ -205,7 +204,17 @@
         docEl.style.scrollBehavior = prevBehavior;
       });
 
-      setTimeout(() => { cooldown = false; }, 400);
+      setTimeout(() => {
+        cooldown = false;
+        if (locked || animating) return;
+        /* If the user scrolled past the trigger zone during cooldown,
+           crossing detection will have missed it — catch it here with a
+           directional position check based on which way we just exited. */
+        const rect2 = section.getBoundingClientRect();
+        const vh2   = window.innerHeight;
+        if (exitDir > 0 && rect2.bottom >= vh2) { lock(slideCount - 1); return; }
+        if (exitDir < 0 && rect2.top   <= 0)   { lock(0); }
+      }, 400);
     };
 
     /* ── Slide navigation ─────────────────────────────────────────────────── */
@@ -282,7 +291,6 @@
                             (sticky CSS showing last block) before autoscroll
                             engages — feels like "scrolling the slider twice."  */
     const onScrollCheck = () => {
-      if (locked || cooldown || animating) return;
       const rect       = section.getBoundingClientRect();
       const top        = rect.top;
       const bottom     = rect.bottom;
@@ -290,18 +298,22 @@
       const prevTop    = lastTop;
       const prevBottom = lastBottom;
 
+      /* Always update — even during cooldown — so crossing detection has
+         accurate prev values the moment cooldown expires.                 */
+      lastTop    = top;
+      lastBottom = bottom;
+
+      if (locked || cooldown || animating) return;
+
       if (prevTop !== null && prevBottom !== null) {
         /* Down-from-above: top edge enters viewport from above */
-        if (prevTop > 0 && top <= 0)        { lock(0);                return; }
+        if (prevTop > 0 && top <= 0)        { lock(0);               return; }
         /* Up-from-below: bottom edge enters viewport from below */
         if (prevBottom < vh && bottom >= vh) { lock(slideCount - 1); return; }
       }
       /* Slow-scroll safety nets */
-      if (Math.abs(top) <= 1)               { lock(0);                return; }
+      if (Math.abs(top) <= 1)               { lock(0);               return; }
       if (Math.abs(bottom - vh) <= 1)       { lock(slideCount - 1); return; }
-
-      lastTop = top;
-      lastBottom = bottom;
     };
 
     const startWatch = () => {
