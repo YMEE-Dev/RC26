@@ -1894,13 +1894,13 @@ body:not(.is-focused) .flickity-button:focus {
 @keyframes slideInLeft {
   from {
     opacity: 0;
-    right: 100%;
+    transform: none;
     visibility: hidden;
   }
 
   to {
     opacity: 1;
-    right: 0;
+    transform: translateX(100%);
     visibility: unset;
   }
 }
@@ -1908,13 +1908,13 @@ body:not(.is-focused) .flickity-button:focus {
 @keyframes slideOutLeft {
   from {
     opacity: 1;
-    right: 0;
+    transform: translateX(100%);
     visibility: unset;
   }
 
   to {
     opacity: 0;
-    right: 100%;
+    transform: none;
     visibility: hidden;
   }
 }
@@ -3602,11 +3602,6 @@ details[open="true"] .underlay,
   opacity: var(--underlay-opacity);
   transition-duration: 0.3s, 0s;
   transition-delay: 0.1s, 0s;
-}
-
-.template-collection .drawer--header .underlay {
-  -webkit-backdrop-filter: blur(80px);
-  backdrop-filter: blur(80px);
 }
 
 dialog {
