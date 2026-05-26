@@ -93,6 +93,17 @@
       ph.style.cssText = `height:${naturalHeight}px;`;
       section.insertAdjacentElement('afterend', ph);
 
+      /* Set all CSS variables BEFORE enabling locked CSS rules so that when
+         data-rc-stack-fade-locked makes blocks position:absolute the correct
+         --block-y / --stack-cover values are already in place — prevents the
+         brief flash of the last (highest z-index) slide at lock time.        */
+      blocks.forEach((b, i) => {
+        const slideIdx = Math.floor(i / blocksPerSlide);
+        b.style.setProperty("--sticky-z-index", slideIdx);
+      });
+      section.setAttribute("data-rc-stack-fade-no-transition", "");
+      applyState();
+
       /* Marker for CSS — all rc-stack-fade.css rules are scoped to this
          attribute so the section renders natively when not engaged.        */
       section.setAttribute('data-rc-stack-fade-locked', '');
@@ -106,23 +117,9 @@
       wrapper.style.cssText = 'position:relative;height:100%;';
       blocksEl.style.cssText = "position:relative;width:100%;height:100%;";
 
-      /* Each block: absolute, stacked by z-index, transformed via CSS vars.
-         Z-index = slideIdx so paired mobile blocks (image + text) share a
-         layer and overlay older slides as a unit.
-         On mobile: blocks within a pair stack vertically — first at top:0,
-         height:50%; second at top:50%, height:50%.
-         On desktop: each block fills the viewport (top:0, height:100%).      */
-      blocks.forEach((b, i) => {
-        const slideIdx = Math.floor(i / blocksPerSlide);
-        b.style.setProperty("--sticky-z-index", slideIdx);
-      });
       innerEls.forEach((el) => {
         el.style.height = "100%";
       });
-
-      /* Apply initial state without transitions to avoid flashing wrong slides */
-      section.setAttribute("data-rc-stack-fade-no-transition", "");
-      applyState();
 
       /* Enable transitions on next frame if animations enabled */
       requestAnimationFrame(() => {
