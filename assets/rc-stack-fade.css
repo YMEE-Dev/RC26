@@ -1,0 +1,63 @@
+/*
+ * Stack-fade — Module B
+ *
+ *   • Active slide rises from below to cover the previous slide.
+ *   • Covered slide gets blurred + dimmed + scaled down as a single unit.
+ *   • Foreground slide stays sharp.
+ *
+ * All rules are scoped to [data-rc-stack-fade-locked] (set on the section by JS
+ * only while the slider is engaged) so the section renders with its native
+ * sticky styling — wrapper max-width, padding, block layout — everywhere else.
+ *
+ * Tunables (set inline on the section if you want per-instance control):
+ *   --stack-max-blur    max blur radius at full cover     (default 12px)
+ *   --stack-max-dark    max overlay opacity at full cover (default 0.35)
+ *   --stack-max-scale   scale delta at full cover         (default 0.06 → shrinks to 0.94)
+ */
+
+/* Force full-width on the slider wrappers only during lock — the inline cssText
+   in lock() already sets these, but keep the !important rule as a safety net in
+   case theme CSS specificity ever changes.
+   Exclude .wrapper--custom to preserve its custom max-width. */
+[data-rc-stack-fade-locked] .sticky-scroll__wrapper:not(.wrapper--custom),
+[data-rc-stack-fade-locked] .sticky-scroll-mobile__wrapper:not(.wrapper--custom) {
+  max-width: none !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* When locked, preserve the original block-inner layout and sizing so media/content
+   don't jump. Keep the exact same dimensions as unlocked state. */
+[data-rc-stack-fade-locked] .sticky-scroll__block-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas: 'image content';
+  gap: var(--block-gap);
+  align-items: center;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 var(--outer);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Per-block dim overlay on the BACK slide only — can't be inline (pseudo).
+     Block-level blur/scale/translateY are set inline in lock() so they don't
+     need a CSS rule here.                                                    */
+  [data-rc-stack-fade-locked] .sticky-scroll__block::after,
+  [data-rc-stack-fade-locked] .sticky-scroll-mobile__block::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    inset: 0;
+    background-color: rgba(0, 0, 0, calc(var(--stack-cover, 0) * var(--stack-max-dark, 0.35)));
+    pointer-events: none;
+    z-index: 1;
+    transition: background-color 700ms cubic-bezier(0.645, 0.045, 0.355, 1);
+    will-change: background-color;
+  }
+}

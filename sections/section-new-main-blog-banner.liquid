@@ -50,9 +50,13 @@
       'zh-CN': 'ZH_CN',
       'zh-TW': 'ZH_TW',
     };
+    const LOCALE_PATH_OVERRIDES = {
+      'zh-CN': 'zh',
+    };
     const currentPath = window.location.pathname;
     const currentLocale = '{{ localization.language.iso_code }}';
-    const localePathPrefix = {{ localization.language.primary | json }} ? '' : `/${currentLocale}`;
+    const localePathLocale = LOCALE_PATH_OVERRIDES[currentLocale] || currentLocale;
+    const localePathPrefix = {{ localization.language.primary | json }} ? '' : `/${localePathLocale}`;
     const storefrontLanguage =
       STOREFRONT_LANGUAGE_OVERRIDES[currentLocale] || currentLocale.replace('-', '_').toUpperCase();
 

@@ -1,0 +1,80 @@
+{% comment %}
+  Header init animation. Self-contained: includes its own CSS and JS.
+  Renders the bars + logo entrance animation (same offsets as scroll-up reveal).
+
+  Usage:
+    {% render 'header-init-animation' %}
+
+  Renders inline <style> and <script> — desktop and mobile. Idempotent: safe to
+  render multiple times. Dispatches `theme:plp:header-ready` event when the animation
+  triggers (other scripts can chain on it).
+{% endcomment %}
+
+<style>
+    @keyframes plp-header-from-top { from { transform: translateY(-200px); opacity: 0; } to { transform: none; opacity: 1; } }
+    @keyframes plp-header-fade-near { from { transform: translateY(-20px); opacity: 0; } to { transform: none; opacity: 1; } }
+    @keyframes plp-header-from-left { from { transform: translateX(-200px); opacity: 0; } to { transform: none; opacity: 1; } }
+    @keyframes plp-header-from-right { from { transform: translateX(200px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+    body.plp-header-loading .header__desktop,
+    body.plp-header-loading .header__mobile {
+      opacity: 0 !important;
+    }
+
+    /* Logo + breadcrumb — shared by desktop and mobile */
+    body.plp-header-ready .header__desktop__bar__l .header__logo,
+    body.plp-header-ready .header__mobile .header__logo {
+      animation: plp-header-from-top 550ms 200ms cubic-bezier(0.05, 0, 0, 1) backwards;
+    }
+    body.plp-header-ready .header__desktop__bar__l .header__logo__meta,
+    body.plp-header-ready .header__mobile .header__logo__meta {
+      animation: plp-header-fade-near 600ms 400ms cubic-bezier(0.05, 0, 0, 1) backwards;
+    }
+
+    /* Desktop-only: nav bars slide in from sides */
+    @media (min-width: 960px) {
+      body.plp-header-ready .header__desktop__bar__c {
+        animation: plp-header-from-left 700ms 1000ms cubic-bezier(0.05, 0, 0, 1) backwards;
+      }
+      body.plp-header-ready .header__desktop__bar__r {
+        animation: plp-header-from-right 700ms 1000ms cubic-bezier(0.05, 0, 0, 1) backwards;
+      }
+    }
+  </style>
+
+  <script>
+    (function () {
+      if (window.__plpHeaderAnimInit) return;
+      window.__plpHeaderAnimInit = true;
+
+      document.body.classList.add('plp-header-loading');
+      var trigger = function () {
+        if (document.body.classList.contains('plp-header-ready')) return;
+        /* Double rAF — guarantees at least one paint with `plp-header-loading` state
+           before the swap, otherwise on fully-cached reloads the trigger fires before
+           first paint and the animation appears to skip. */
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            document.body.classList.add('plp-header-ready');
+            document.body.classList.remove('plp-header-loading');
+            document.dispatchEvent(new CustomEvent('theme:plp:header-ready'));
+          });
+        });
+      };
+
+      /* BFCache: if the page is restored from bfcache, classes and __plpHeaderAnimInit
+         persist. Re-trigger so the animation plays again. */
+      window.addEventListener('pageshow', function (e) {
+        if (!e.persisted) return;
+        document.body.classList.remove('plp-header-ready');
+        document.body.classList.add('plp-header-loading');
+        trigger();
+      });
+      var headerImgs = Array.prototype.slice.call(document.querySelectorAll('.header__desktop img, .header__mobile img'));
+      var fontsReady = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+      Promise.all([fontsReady].concat(headerImgs.map(function (img) {
+        return img.decode().catch(function () {});
+      }))).then(trigger);
+      setTimeout(trigger, 3000);
+    })();
+  </script>

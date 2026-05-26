@@ -1,0 +1,286 @@
+{% comment %}
+  Page transition. Self-contained: inline <style> + <script>.
+
+  Outgoing fade: intercepts clicks on links whose pathname matches TRANSITION_TARGETS,
+  fades body opacity 100→0 (600ms), then navigates.
+
+  Incoming entrance: on /pages/product-care, plays a staggered reveal of page heading +
+  first sticky-scroll block (image, title, description) on both desktop and mobile section
+  variants. Existing header animation (header-init-animation.liquid) is not touched.
+
+  Render once near the top of <body> in layout/theme.liquid.
+  Idempotent: safe if rendered multiple times.
+
+  Disables under prefers-reduced-motion (both halves).
+  Dispatches `theme:page-care:entrance-ready` when entrance fires.
+
+  Renders `header-init-animation` globally so the staggered header entrance runs on every
+  page (was previously only invoked from sections/collection.liquid). The snippet itself is
+  idempotent (window.__plpHeaderAnimInit guard) and self-disables on mobile (< 960px).
+{% endcomment %}
+
+{% render 'header-init-animation' %}
+
+<style>
+  /* Outgoing fade — fixed full-viewport overlay fades in.
+     Smoother and uniform across browsers vs. animating body opacity
+     (which forces a full-page repaint each frame). */
+  .page-transition-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    inset: 0;
+    background-color: #ffffff;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 99999;
+    transition: opacity 600ms cubic-bezier(0.70, 0, 0.3, 1);
+    will-change: opacity;
+    transform: translate3d(0, 0, 0);   /* hint GPU compositor layer */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    perspective: 1000;
+  }
+
+  body.page-transition-leaving .page-transition-overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  body.page-transition-leaving {
+    pointer-events: none;            /* block additional clicks on content */
+    overflow: hidden;                /* prevent scroll during fade */
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page-transition-overlay,
+    body.page-transition-leaving .page-transition-overlay {
+      transition: none;
+      opacity: 0;
+    }
+  }
+
+  /* Incoming entrance — gated behind no-preference for defense in depth */
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes pt-fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes pt-slide-up-card {
+      from { transform: translate3d(0, 50px, 0); }
+      to { transform: translate3d(0, 0, 0); }
+    }
+    @keyframes pt-slide-up-element {
+      from { transform: translate3d(0, 30px, 0); }
+      to { transform: translate3d(0, 0, 0); }
+    }
+
+    /* Incoming page fade — plays on fresh load, forward nav, and BFCache restore.
+       CSS animations restart on BFCache, giving back/forward the same fade-in feel.
+       Excluded on product-care which has its own element-level entrance. */
+    body:not(#product-care) {
+      animation: pt-fade-in 400ms cubic-bezier(0.70, 0, 0.3, 1) both;
+    }
+
+    /* Loading state — hide targets pre-trigger to prevent FOUC */
+    body#product-care.page-care-loading .heading-image__heading,
+    body#product-care.page-care-loading .sticky-scroll__block:first-of-type .sticky-scroll__block-media,
+    body#product-care.page-care-loading .sticky-scroll__block:first-of-type .sticky-scroll__title,
+    body#product-care.page-care-loading .sticky-scroll__block:first-of-type .sticky-scroll__description,
+    body#product-care.page-care-loading .sticky-scroll-mobile__block--image:first-of-type,
+    body#product-care.page-care-loading .sticky-scroll-mobile__block--text:first-of-type .sticky-scroll-mobile__title,
+    body#product-care.page-care-loading .sticky-scroll-mobile__block--text:first-of-type .sticky-scroll-mobile__description {
+      opacity: 0;
+    }
+
+    /* Single knob to delay the entire entrance stagger after page-care-ready fires.
+       Lets header-init-animation establish itself before content reveals.
+       Header completes at ~1400ms (logo 550ms, meta 700ms, bars start at 700ms + 700ms duration). */
+    body#product-care.page-care-ready {
+      --pt-base-delay: 600ms;
+    }
+
+    /* Per-target stagger delays (relative to --pt-base-delay) */
+    body#product-care.page-care-ready .heading-image__heading {
+      --pt-delay: calc(var(--pt-base-delay) + 300ms);
+    }
+    body#product-care.page-care-ready .sticky-scroll__block:first-of-type .sticky-scroll__block-media,
+    body#product-care.page-care-ready .sticky-scroll-mobile__block--image:first-of-type {
+      --pt-delay: calc(var(--pt-base-delay) + 500ms);
+    }
+    body#product-care.page-care-ready .sticky-scroll__block:first-of-type .sticky-scroll__title,
+    body#product-care.page-care-ready .sticky-scroll-mobile__block--text:first-of-type .sticky-scroll-mobile__title {
+      --pt-delay: calc(var(--pt-base-delay) + 700ms);
+    }
+    body#product-care.page-care-ready .sticky-scroll__block:first-of-type .sticky-scroll__description,
+    body#product-care.page-care-ready .sticky-scroll-mobile__block--text:first-of-type .sticky-scroll-mobile__description {
+      --pt-delay: calc(var(--pt-base-delay) + 900ms);
+    }
+
+    /* Element pattern (30px y delta) */
+    body#product-care.page-care-ready .heading-image__heading,
+    body#product-care.page-care-ready .sticky-scroll__block:first-of-type .sticky-scroll__title,
+    body#product-care.page-care-ready .sticky-scroll__block:first-of-type .sticky-scroll__description,
+    body#product-care.page-care-ready .sticky-scroll-mobile__block--text:first-of-type .sticky-scroll-mobile__title,
+    body#product-care.page-care-ready .sticky-scroll-mobile__block--text:first-of-type .sticky-scroll-mobile__description {
+      animation:
+        pt-fade-in 600ms var(--pt-delay) cubic-bezier(0.70, 0, 0.3, 1) backwards,
+        pt-slide-up-element 600ms calc(var(--pt-delay) + 150ms) cubic-bezier(0.05, 0, 0, 1) backwards;
+    }
+
+    /* Card pattern (50px y delta) */
+    body#product-care.page-care-ready .sticky-scroll__block:first-of-type .sticky-scroll__block-media,
+    body#product-care.page-care-ready .sticky-scroll-mobile__block--image:first-of-type {
+      animation:
+        pt-fade-in 600ms var(--pt-delay) cubic-bezier(0.70, 0, 0.3, 1) backwards,
+        pt-slide-up-card 600ms calc(var(--pt-delay) + 150ms) cubic-bezier(0.05, 0, 0, 1) backwards;
+    }
+  }
+</style>
+
+<div class="page-transition-overlay" aria-hidden="true"></div>
+
+<script>
+  (function () {
+    if (window.__pageTransitionInit) return;
+    window.__pageTransitionInit = true;
+
+    var FADE_MS = 600;
+    /* To enable site-wide later: set TRANSITION_TARGETS to '*' and populate TRANSITION_EXCLUDE.
+       Example for site-wide:
+         TRANSITION_TARGETS = '*';
+         TRANSITION_EXCLUDE = ['/cart', '/search', /^\/account(\/|$)/, /^\/checkouts?(\/|$)/]; */
+    var TRANSITION_TARGETS = '*';
+    var TRANSITION_EXCLUDE = ['/cart', '/search', /^\/account(\/|$)/, /^\/checkouts?(\/|$)/];
+
+    var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function matchesTarget(pathname) {
+      for (var i = 0; i < TRANSITION_EXCLUDE.length; i++) {
+        var rule = TRANSITION_EXCLUDE[i];
+        if (typeof rule === 'string' && pathname === rule) return false;
+        if (rule instanceof RegExp && rule.test(pathname)) return false;
+      }
+      if (TRANSITION_TARGETS === '*') return true;
+      if (Array.isArray(TRANSITION_TARGETS)) return TRANSITION_TARGETS.indexOf(pathname) !== -1;
+      return false;
+    }
+
+    function shouldIntercept(event, link) {
+      if (event.defaultPrevented) return false;
+      if (event.button !== 0) return false;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false;
+      if (link.target && link.target !== '' && link.target !== '_self') return false;
+      if (prefersReduced) return false;
+      if (document.body.classList.contains('page-transition-leaving')) return false;
+
+      var url;
+      try { url = new URL(link.href, location.href); } catch (e) { return false; }
+      if (url.origin !== location.origin) return false;
+      if (url.pathname === location.pathname) return false;
+      return matchesTarget(url.pathname);
+    }
+
+    document.addEventListener('click', function (event) {
+      var link = event.target.closest && event.target.closest('a[href]');
+      if (!link) return;
+      if (!shouldIntercept(event, link)) return;
+
+      event.preventDefault();
+      document.body.classList.add('page-transition-leaving');
+
+      var destination = link.href;
+      setTimeout(function () {
+        /* Re-check at fire time: user may have hit back during the fade */
+        if (!document.body.classList.contains('page-transition-leaving')) return;
+        window.location.href = destination;
+      }, FADE_MS);
+    });
+
+    /* Clean overlay state BEFORE the page is stored to BFCache.
+       Setting display:none removes the element from the paint tree entirely,
+       so the BFCache snapshot has no visible overlay regardless of what opacity
+       the CSS transition left it at. Clearing only opacity/transition is not enough
+       because some browsers repaint the restored page before inline styles settle. */
+    window.addEventListener('pagehide', function () {
+      var overlay = document.querySelector('.page-transition-overlay');
+      if (overlay) {
+        overlay.style.transition = 'none';
+        overlay.style.opacity = '0';
+        overlay.style.display = 'none';
+      }
+      /* Remove ALL exit-state classes so BFCache snapshot has no opacity:0 on body */
+      document.body.classList.remove('page-transition-leaving', 'page-exit');
+    });
+
+    /* Defensive pageshow cleanup: restore overlay to CSS-default state so future
+       outgoing transitions can use it again.
+       Two-step: first set opacity:0 + no-transition while restoring display (one frame),
+       then clear all inline styles so CSS takes over — prevents a 1-frame white flash
+       that can occur when display:none is removed before opacity:0 is composited. */
+    window.addEventListener('pageshow', function () {
+      document.body.classList.remove('page-transition-leaving', 'page-exit');
+      var overlay = document.querySelector('.page-transition-overlay');
+      if (overlay) {
+        overlay.style.transition = 'none';
+        overlay.style.opacity = '0';
+        overlay.style.display = '';
+        requestAnimationFrame(function () {
+          overlay.style.transition = '';
+          overlay.style.opacity = '';
+        });
+      }
+    });
+
+    /* ── Incoming entrance, scoped to /pages/product-care ──────────────────── */
+    if (document.body.id === 'product-care' && !prefersReduced) {
+      document.body.classList.add('page-care-loading');
+
+      var triggered = false;
+      function triggerEntrance() {
+        if (triggered) return;
+        if (document.body.classList.contains('page-care-ready')) return;
+        triggered = true;
+        /* Double rAF — guarantees a paint with `page-care-loading` before the swap. */
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            document.body.classList.add('page-care-ready');
+            document.body.classList.remove('page-care-loading');
+            document.dispatchEvent(new CustomEvent('theme:page-care:entrance-ready'));
+          });
+        });
+      }
+
+      var firstImg = document.querySelector(
+        '.sticky-scroll__block:first-of-type .sticky-scroll__image, ' +
+        '.sticky-scroll-mobile__block--image:first-of-type .sticky-scroll-mobile__image'
+      );
+      var imgPromise = (firstImg && firstImg.decode)
+        ? firstImg.decode().catch(function () {})
+        : Promise.resolve();
+      var fontsReady = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+
+      Promise.all([fontsReady, imgPromise]).then(triggerEntrance);
+      setTimeout(triggerEntrance, 3000); /* safety fallback */
+
+      /* BFCache restore: do NOT re-hide elements and re-play the entrance.
+         The bfcache snapshot already has page-care-ready set with elements visible.
+         Replaying would hide the heading + first slide for ~1650ms on every browser
+         back, which the user reads as a white screen.
+
+         The original entrance animation only needs to play on FRESH navigation. */
+      window.addEventListener('pageshow', function (e) {
+        if (!e.persisted) return;
+        /* Defensive: if the snapshot was somehow stored mid-entrance (page-care-loading
+           still set), finish it instantly rather than restarting. */
+        if (document.body.classList.contains('page-care-loading')) {
+          document.body.classList.remove('page-care-loading');
+          document.body.classList.add('page-care-ready');
+        }
+      });
+    }
+  })();
+</script>
