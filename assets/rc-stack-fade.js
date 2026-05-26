@@ -27,7 +27,7 @@
   const WHEEL_MIN_DELTA  = 3;
   const SWIPE_MIN_PX     = 30;
   const SWIPE_MAX_MS     = 700;
-  const DISABLE_ANIMATION = true;
+  const DISABLE_ANIMATION = false;
 
   const EASING = 'cubic-bezier(0.645,0.045,0.355,1.0)';
 
@@ -95,9 +95,8 @@
       section.style.cssText =
         'position:fixed;top:0;left:0;width:100vw;height:100vh;overflow:hidden;z-index:200;padding:0;';
       wrapper.style.cssText =
-        'position:relative;width:100%;height:100%;max-width:none;padding:0;margin:0;overflow:hidden;';
-      blocksEl.style.cssText =
-        'position:relative;width:100%;height:100%;';
+        "position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;";
+      blocksEl.style.cssText = "position:relative;width:100%;height:100%;";
 
       /* Each block: absolute, stacked by z-index, transformed via CSS vars.
          Z-index = slideIdx so paired mobile blocks (image + text) share a
@@ -106,27 +105,22 @@
          height:50%; second at top:50%, height:50%.
          On desktop: each block fills the viewport (top:0, height:100%).      */
       blocks.forEach((b, i) => {
-        const slideIdx        = Math.floor(i / blocksPerSlide);
-        const positionInSlide = i % blocksPerSlide;
-        const topPct          = isMobile ? positionInSlide * 50 : 0;
-        const heightPct       = isMobile ? 50 : 100;
-        b.style.cssText =
-          `position:absolute;left:0;width:100%;top:${topPct}%;height:${heightPct}%;` +
-          `z-index:${slideIdx};isolation:isolate;overflow:hidden;` +
-          'transform:translateY(var(--block-y,0vh)) scale(calc(1 - var(--stack-cover,0) * var(--stack-max-scale, 0.03)));' +
-          'filter:blur(calc(var(--stack-cover,0) * var(--stack-max-blur, 12px)));' +
-          'transition:none;';
+        const slideIdx = Math.floor(i / blocksPerSlide);
+        b.style.setProperty("--sticky-z-index", slideIdx);
       });
-      innerEls.forEach((el) => { el.style.height = '100%'; });
+      innerEls.forEach((el) => {
+        el.style.height = "100%";
+      });
 
+      /* Apply initial state without transitions to avoid flashing wrong slides */
+      section.setAttribute("data-rc-stack-fade-no-transition", "");
       applyState();
 
+      /* Enable transitions on next frame if animations enabled */
       requestAnimationFrame(() => {
-        blocks.forEach((b) => {
-          b.style.transition = DISABLE_ANIMATION
-            ? "none"
-            : `transform ${SNAP_DURATION_MS}ms ${EASING}, ` + `filter ${SNAP_DURATION_MS}ms ${EASING}`;
-        });
+        if (!DISABLE_ANIMATION) {
+          section.removeAttribute("data-rc-stack-fade-no-transition");
+        }
       });
 
       window.addEventListener('wheel',      onWheel,      { passive: false });
@@ -140,6 +134,8 @@
       locked    = false;
       animating = false;
       cooldown  = true;
+      lastTop = null;
+      lastBottom = null;
 
       window.removeEventListener('wheel',      onWheel);
       window.removeEventListener('touchstart', onTouchStart);
@@ -186,15 +182,16 @@
       wrapper.style.cssText  = '';
       blocksEl.style.cssText = '';
       blocks.forEach((b) => {
-        b.style.cssText = '';
         /* Explicitly remove custom properties — some browsers leave them set
-           after cssText='', which would re-apply blur/scale on next render. */
-        b.style.removeProperty('--block-y');
-        b.style.removeProperty('--stack-cover');
+           after removing the data attribute, which would re-apply blur/scale. */
+        b.style.removeProperty("--block-y");
+        b.style.removeProperty("--stack-cover");
+        b.style.removeProperty("--sticky-z-index");
       });
       innerEls.forEach((el) => { el.style.height = ''; });
 
       section.removeAttribute('data-rc-stack-fade-locked');
+      section.removeAttribute("data-rc-stack-fade-no-transition");
 
       if (ph) { ph.remove(); ph = null; }
 
@@ -285,15 +282,13 @@
                             (sticky CSS showing last block) before autoscroll
                             engages — feels like "scrolling the slider twice."  */
     const onScrollCheck = () => {
-      if (locked || cooldown) return;
+      if (locked || cooldown || animating) return;
       const rect       = section.getBoundingClientRect();
       const top        = rect.top;
       const bottom     = rect.bottom;
       const vh         = window.innerHeight;
       const prevTop    = lastTop;
       const prevBottom = lastBottom;
-      lastTop    = top;
-      lastBottom = bottom;
 
       if (prevTop !== null && prevBottom !== null) {
         /* Down-from-above: top edge enters viewport from above */
@@ -304,6 +299,9 @@
       /* Slow-scroll safety nets */
       if (Math.abs(top) <= 1)               { lock(0);                return; }
       if (Math.abs(bottom - vh) <= 1)       { lock(slideCount - 1); return; }
+
+      lastTop = top;
+      lastBottom = bottom;
     };
 
     const startWatch = () => {
@@ -313,7 +311,7 @@
       lastBottom = null;
       window.addEventListener('scroll', onScrollCheck, { passive: true });
       window.addEventListener('wheel',  onWheelSnap,   { passive: false });
-      onScrollCheck();
+      requestAnimationFrame(onScrollCheck);
     };
 
     const stopWatch = () => {
