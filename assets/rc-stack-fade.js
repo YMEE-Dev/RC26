@@ -48,6 +48,11 @@
 
     if (!wrapper || !blocksEl || slideCount < 2) return;
 
+    /* Section padding — lock triggers adjusted so the block (not the section
+       top edge) is at the viewport edge at the moment of lock.               */
+    const pt = parseFloat(getComputedStyle(section).paddingTop)    || 0;
+    const pb = parseFloat(getComputedStyle(section).paddingBottom) || 0;
+
     let idx           = 0;
     let locked        = false;
     let animating     = false;
@@ -92,8 +97,12 @@
          attribute so the section renders natively when not engaged.        */
       section.setAttribute('data-rc-stack-fade-locked', '');
 
+      /* Use offsetWidth (= document content width, excludes scrollbar) instead
+         of 100vw (= full viewport including scrollbar) to avoid the ~15 px
+         rightward shift of wrapper centering on non-overlay-scrollbar systems. */
+      const sectionW = section.offsetWidth;
       section.style.cssText =
-        'position:fixed;top:0;left:0;width:100vw;height:100vh;overflow:hidden;z-index:200;padding:0;';
+        `position:fixed;top:0;left:0;width:${sectionW}px;height:100vh;overflow:hidden;z-index:200;padding:0;`;
       wrapper.style.cssText = 'position:relative;height:100%;';
       blocksEl.style.cssText = "position:relative;width:100%;height:100%;";
 
@@ -212,8 +221,8 @@
            directional position check based on which way we just exited. */
         const rect2 = section.getBoundingClientRect();
         const vh2   = window.innerHeight;
-        if (exitDir > 0 && rect2.bottom >= vh2) { lock(slideCount - 1); return; }
-        if (exitDir < 0 && rect2.top   <= 0)   { lock(0); }
+        if (exitDir > 0 && rect2.bottom >= vh2 + pb) { lock(slideCount - 1); return; }
+        if (exitDir < 0 && rect2.top   <= -pt)       { lock(0); }
       }, 400);
     };
 
@@ -272,8 +281,8 @@
       const top    = rect.top;
       const bottom = rect.bottom;
       const vh     = window.innerHeight;
-      const inTopZone    = Math.abs(top) <= 10;
-      const inBottomZone = Math.abs(bottom - vh) <= 10;
+      const inTopZone    = Math.abs(top + pt) <= 10;
+      const inBottomZone = Math.abs(bottom - vh - pb) <= 10;
       if (!inTopZone && !inBottomZone) return;
       e.preventDefault();
       lock(e.deltaY < 0 ? slideCount - 1 : 0);
@@ -306,14 +315,14 @@
       if (locked || cooldown || animating) return;
 
       if (prevTop !== null && prevBottom !== null) {
-        /* Down-from-above: top edge enters viewport from above */
-        if (prevTop > 0 && top <= 0)        { lock(0);               return; }
-        /* Up-from-below: bottom edge enters viewport from below */
-        if (prevBottom < vh && bottom >= vh) { lock(slideCount - 1); return; }
+        /* Down-from-above: block top crosses viewport top (section.top = -pt) */
+        if (prevTop > -pt && top <= -pt)              { lock(0);               return; }
+        /* Up-from-below: block bottom crosses viewport bottom (section.bottom = vh + pb) */
+        if (prevBottom < vh + pb && bottom >= vh + pb) { lock(slideCount - 1); return; }
       }
       /* Slow-scroll safety nets */
-      if (Math.abs(top) <= 1)               { lock(0);               return; }
-      if (Math.abs(bottom - vh) <= 1)       { lock(slideCount - 1); return; }
+      if (Math.abs(top + pt) <= 1)               { lock(0);               return; }
+      if (Math.abs(bottom - vh - pb) <= 1)       { lock(slideCount - 1); return; }
     };
 
     const startWatch = () => {
