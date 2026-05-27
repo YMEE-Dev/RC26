@@ -12,11 +12,102 @@
   comment
     Get each resource's result count
   endcomment
-  assign query_count = predictive_search.resources.queries.size
-  assign product_count = predictive_search.resources.products.size
-  assign collection_count = predictive_search.resources.collections.size
+  assign query_count = 0
+  assign product_count = 0
+  assign collection_count = 0
   assign article_count = predictive_search.resources.articles.size
   assign page_count = predictive_search.resources.pages.size
+
+  for query in predictive_search.resources.queries
+    assign exclude_suggestion = false
+    assign query_text = query.text | downcase
+    assign query_url = query.url | downcase
+    assign query_prefix_hyphen = query_text | slice: 0, 4
+    assign query_prefix_space = query_text | slice: 0, 3
+
+    if query_text contains 'storytelling'
+      assign exclude_suggestion = true
+    endif
+
+    if exclude_suggestion == false
+      if query_prefix_hyphen == 'st -'
+        assign exclude_suggestion = true
+      endif
+    endif
+
+    if exclude_suggestion == false
+      if query_prefix_space == 'st '
+        assign exclude_suggestion = true
+      endif
+    endif
+
+    if exclude_suggestion == false
+      if query_url contains 'storytelling'
+        assign exclude_suggestion = true
+      endif
+    endif
+
+    if exclude_suggestion == false
+      assign query_count = query_count | plus: 1
+    endif
+  endfor
+
+  for collection in predictive_search.resources.collections
+    assign exclude_suggestion = false
+    assign collection_title = collection.title | downcase
+    assign collection_url = collection.url | downcase
+
+    if collection_title contains 'storytelling'
+      assign exclude_suggestion = true
+    endif
+
+    if exclude_suggestion == false
+      if collection_url contains 'storytelling'
+        assign exclude_suggestion = true
+      endif
+    endif
+
+    if exclude_suggestion == false
+      assign collection_count = collection_count | plus: 1
+    endif
+  endfor
+
+  for product in predictive_search.resources.products
+    assign exclude_product = false
+    assign normalized_product_title = product.title | downcase | strip
+    assign product_title_prefix_hyphen = normalized_product_title | slice: 0, 4
+    assign product_title_prefix_space = normalized_product_title | slice: 0, 3
+
+    if product_title_prefix_hyphen == 'st -'
+      assign exclude_product = true
+    endif
+
+    if exclude_product == false
+      if product_title_prefix_space == 'st '
+        assign exclude_product = true
+      endif
+    endif
+
+    if exclude_product == false
+      if normalized_product_title contains 'storytelling'
+        assign exclude_product = true
+      endif
+    endif
+
+    if exclude_product == false
+      for tag in product.tags
+        assign normalized_tag = tag | downcase
+        if normalized_tag == 'storytelling'
+          assign exclude_product = true
+          break
+        endif
+      endfor
+    endif
+
+    if exclude_product == false
+      assign product_count = product_count | plus: 1
+    endif
+  endfor
 
   assign first_column_results_size = query_count | plus: collection_count | plus: page_count | plus: article_count
 
@@ -90,6 +181,37 @@
 
               {%- if query_count > 0 -%}
                 {%- for query in predictive_search.resources.queries -%}
+                  {%- assign exclude_suggestion = false -%}
+                  {%- assign query_text = query.text | downcase -%}
+                  {%- assign query_url = query.url | downcase -%}
+                  {%- assign query_prefix_hyphen = query_text | slice: 0, 4 -%}
+                  {%- assign query_prefix_space = query_text | slice: 0, 3 -%}
+
+                  {%- if query_text contains 'storytelling' -%}
+                    {%- assign exclude_suggestion = true -%}
+                  {%- endif -%}
+
+                  {%- if exclude_suggestion == false -%}
+                    {%- if query_prefix_hyphen == 'st -' -%}
+                      {%- assign exclude_suggestion = true -%}
+                    {%- endif -%}
+                  {%- endif -%}
+
+                  {%- if exclude_suggestion == false -%}
+                    {%- if query_prefix_space == 'st ' -%}
+                      {%- assign exclude_suggestion = true -%}
+                    {%- endif -%}
+                  {%- endif -%}
+
+                  {%- if exclude_suggestion == false -%}
+                    {%- if query_url contains 'storytelling' -%}
+                      {%- assign exclude_suggestion = true -%}
+                    {%- endif -%}
+                  {%- endif -%}
+
+                  {%- if exclude_suggestion -%}
+                    {%- continue -%}
+                  {%- endif -%}
                   <div
                     class="predictive-search__item"
                     id="predictive-search-option-query-{{ forloop.index }}"
@@ -105,6 +227,23 @@
 
               {%- if collection_count > 0 -%}
                 {%- for collection in predictive_search.resources.collections -%}
+                  {%- assign exclude_suggestion = false -%}
+                  {%- assign collection_title = collection.title | downcase -%}
+                  {%- assign collection_url = collection.url | downcase -%}
+
+                  {%- if collection_title contains 'storytelling' -%}
+                    {%- assign exclude_suggestion = true -%}
+                  {%- endif -%}
+
+                  {%- if exclude_suggestion == false -%}
+                    {%- if collection_url contains 'storytelling' -%}
+                      {%- assign exclude_suggestion = true -%}
+                    {%- endif -%}
+                  {%- endif -%}
+
+                  {%- if exclude_suggestion -%}
+                    {%- continue -%}
+                  {%- endif -%}
                   <div
                     class="predictive-search__item"
                     id="predictive-search-option-collection-{{ forloop.index }}"
@@ -191,9 +330,42 @@
             >
               <div class="grid">
                 {%- for product in predictive_search.resources.products -%}
-                  {%- comment -%} Exclude products whose title starts with "ST -"; the next-ranked result takes its place {%- endcomment -%}
-                  {%- assign product_title_prefix = product.title | slice: 0, 4 -%}
-                  {%- if product_title_prefix == 'ST -' -%}
+                  {%- comment -%}
+                    Exclude products whose title starts with "ST -" and products tagged "storytelling";
+                    the next-ranked result takes its place.
+                  {%- endcomment -%}
+                  {%- assign exclude_product = false -%}
+                  {%- assign normalized_product_title = product.title | downcase | strip -%}
+                  {%- assign product_title_prefix_hyphen = normalized_product_title | slice: 0, 4 -%}
+                  {%- assign product_title_prefix_space = normalized_product_title | slice: 0, 3 -%}
+
+                  {%- if product_title_prefix_hyphen == 'st -' -%}
+                    {%- assign exclude_product = true -%}
+                  {%- endif -%}
+
+                  {%- if exclude_product == false -%}
+                    {%- if product_title_prefix_space == 'st ' -%}
+                      {%- assign exclude_product = true -%}
+                    {%- endif -%}
+                  {%- endif -%}
+
+                  {%- if exclude_product == false -%}
+                    {%- if normalized_product_title contains 'storytelling' -%}
+                      {%- assign exclude_product = true -%}
+                    {%- endif -%}
+                  {%- endif -%}
+
+                  {%- if exclude_product == false -%}
+                    {%- for tag in product.tags -%}
+                      {%- assign normalized_tag = tag | downcase -%}
+                      {%- if normalized_tag == 'storytelling' -%}
+                        {%- assign exclude_product = true -%}
+                        {%- break -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+                  {%- endif -%}
+
+                  {%- if exclude_product -%}
                     {%- continue -%}
                   {%- endif -%}
                   {%- render 'search-product-item',
@@ -243,14 +415,14 @@
 
       <span class="hidden" data-predictive-search-live-region-count-value aria-live="polite">
         {%- liquid
-          assign total_results = predictive_search.resources.products.size | plus: first_column_results_size
+          assign total_results = product_count | plus: first_column_results_size
           if total_results == 0
             echo 'general.search.no_results' | t: terms: predictive_search.terms
           else
             echo 'general.search.results_with_count' | t: count: total_results | append: ': '
 
-            if predictive_search.resources.queries.size > 0
-              assign count = predictive_search.resources.queries.size | plus: predictive_search.resources.collections.size
+            assign count = query_count | plus: collection_count
+            if count > 0
               echo 'general.search.results_suggestions_with_count' | t: count: count | append: ', '
             endif
 
@@ -259,8 +431,8 @@
               echo 'general.search.results_pages_with_count' | t: count: count | append: ', '
             endif
 
-            if predictive_search.resources.products.size > 0
-              echo 'general.search.results_products_with_count' | t: count: predictive_search.resources.products.size
+            if product_count > 0
+              echo 'general.search.results_products_with_count' | t: count: product_count
             endif
           endif
         -%}
