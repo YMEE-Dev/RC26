@@ -150,7 +150,16 @@
                 <div class="predictive-search__group">
                   <div class="predictive-search__products__list grid-outer">
                     <div class="grid">
-                      {%- for product in empty_search_product_list limit: empty_search_product_list_size -%}
+                      {%- comment -%} Exclude products whose title starts with "ST -" and backfill from the rest of the list to keep the slot count {%- endcomment -%}
+                      {%- assign popular_products_rendered = 0 -%}
+                      {%- for product in empty_search_product_list -%}
+                        {%- if popular_products_rendered >= empty_search_product_list_size -%}
+                          {%- break -%}
+                        {%- endif -%}
+                        {%- assign product_title_prefix = product.title | slice: 0, 4 -%}
+                        {%- if product_title_prefix == 'ST -' -%}
+                          {%- continue -%}
+                        {%- endif -%}
                         {%- render 'search-product-item',
                           product: product,
                           animation_delay: animation_delay,
@@ -159,6 +168,7 @@
                           product_item_classes: product_item_classes,
                           focusable: true
                         -%}
+                        {%- assign popular_products_rendered = popular_products_rendered | plus: 1 -%}
                       {%- endfor -%}
                     </div>
                   </div>

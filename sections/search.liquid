@@ -69,6 +69,14 @@
             {%- else -%}
               {%- liquid
                 for item in search.results
+                  # Exclude products whose title starts with "ST -"
+                  if item.object_type == 'product'
+                    assign product_title_prefix = item.title | slice: 0, 4
+                    if product_title_prefix == 'ST -'
+                      continue
+                    endif
+                  endif
+
                   if item.tags contains 'hide'
                     assign hidden_products_count = hidden_products_count | plus: 1
                   endif

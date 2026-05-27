@@ -191,6 +191,11 @@
             >
               <div class="grid">
                 {%- for product in predictive_search.resources.products -%}
+                  {%- comment -%} Exclude products whose title starts with "ST -"; the next-ranked result takes its place {%- endcomment -%}
+                  {%- assign product_title_prefix = product.title | slice: 0, 4 -%}
+                  {%- if product_title_prefix == 'ST -' -%}
+                    {%- continue -%}
+                  {%- endif -%}
                   {%- render 'search-product-item',
                     product: product,
                     animation_delay: animation_delay,
