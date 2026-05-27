@@ -3756,6 +3756,26 @@
 
 <script>
   (function () {
+    var rubyDrawer = document.getElementById('side-drawer-ruby-signature');
+    if (rubyDrawer) {
+      var closeBtn = rubyDrawer.querySelector('.drawer__close');
+      if (closeBtn) {
+        closeBtn.addEventListener('touchstart', function (e) {
+          e.preventDefault();
+        }, { passive: false });
+        closeBtn.addEventListener('touchend', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          rubyDrawer.isAnimating = false;
+          rubyDrawer.hideDrawer();
+        }, { passive: false });
+      }
+    }
+  })();
+</script>
+
+<script>
+  (function () {
     var sectionId = '{{ section.id }}';
     var sectionEl = document.getElementById('MainProduct--' + sectionId);
     if (!sectionEl) return;
