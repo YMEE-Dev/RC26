@@ -150,7 +150,34 @@
                 <div class="predictive-search__group">
                   <div class="predictive-search__products__list grid-outer">
                     <div class="grid">
-                      {%- for product in empty_search_product_list limit: empty_search_product_list_size -%}
+                      {%- comment -%} Exclude products whose title starts with "ST -" and backfill from the rest of the list to keep the slot count {%- endcomment -%}
+                      {%- assign popular_products_rendered = 0 -%}
+                      {%- for product in empty_search_product_list -%}
+                        {%- if popular_products_rendered >= empty_search_product_list_size -%}
+                          {%- break -%}
+                        {%- endif -%}
+                        {%- assign normalized_title = product.title | downcase | strip -%}
+                        {%- assign product_title_prefix_hyphen = normalized_title | slice: 0, 4 -%}
+                        {%- assign product_title_prefix_space = normalized_title | slice: 0, 3 -%}
+                        {%- assign exclude_product = false -%}
+                        
+                        {%- if product_title_prefix_hyphen == 'st -' or product_title_prefix_space == 'st ' or normalized_title contains 'storytelling' -%}
+                          {%- assign exclude_product = true -%}
+                        {%- endif -%}
+                        
+                        {%- if exclude_product == false -%}
+                          {%- for tag in product.tags -%}
+                            {%- assign normalized_tag = tag | downcase -%}
+                            {%- if normalized_tag == 'storytelling' -%}
+                              {%- assign exclude_product = true -%}
+                              {%- break -%}
+                            {%- endif -%}
+                          {%- endfor -%}
+                        {%- endif -%}
+                        
+                        {%- if exclude_product -%}
+                          {%- continue -%}
+                        {%- endif -%}
                         {%- render 'search-product-item',
                           product: product,
                           animation_delay: animation_delay,
@@ -159,6 +186,7 @@
                           product_item_classes: product_item_classes,
                           focusable: true
                         -%}
+                        {%- assign popular_products_rendered = popular_products_rendered | plus: 1 -%}
                       {%- endfor -%}
                     </div>
                   </div>

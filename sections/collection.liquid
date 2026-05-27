@@ -975,6 +975,7 @@
       });
 
       /* PLP card animation — above-fold cards wait for subcollections, below-fold animate on scroll */
+      if (document.body.dataset.rcAnimations === 'false') return;
       const cards = Array.from(document.querySelectorAll('.plp-card-up'));
       if (!cards.length) return;
 
