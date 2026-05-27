@@ -12,6 +12,7 @@
     id="{{ page.handle | default: template.name | handle }}"
     class="template-{{ template.name | handle }} grid-{{ settings.grid_style }}{% if customer %} customer-logged-in{% endif %}{% if settings.animations_enable %} aos-initialized{% endif %}{% if settings.product_grid_outline %} has-line-design{% endif %}{% unless settings.btn_hover_slide %} btn-hover--instant{% endunless %}"
     data-animations="{{ settings.animations_enable }}"
+    data-rc-animations="{{ settings.rc_animations_enable }}"
   >
     {% render 'page-transition' %}
     {%- render 'loading' -%}

@@ -18,7 +18,7 @@
   window.__rcStackFadeInit = true;
 
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  if (document.body.dataset.animations === 'false') return;
+  if (document.body.dataset.rcAnimations === 'false') return;
 
   const SECTION_SELECTOR =
     '[data-section-type="sticky-scroll-desktop"],[data-section-type="sticky-scroll-mobile"]';
