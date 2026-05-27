@@ -18,6 +18,7 @@
   window.__rcStackFadeInit = true;
 
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (document.body.dataset.animations === 'false') return;
 
   const SECTION_SELECTOR =
     '[data-section-type="sticky-scroll-desktop"],[data-section-type="sticky-scroll-mobile"]';
@@ -27,7 +28,6 @@
   const WHEEL_MIN_DELTA  = 3;
   const SWIPE_MIN_PX     = 30;
   const SWIPE_MAX_MS     = 700;
-  const DISABLE_ANIMATION = false;
 
   const EASING = 'cubic-bezier(0.645,0.045,0.355,1.0)';
 
@@ -47,6 +47,10 @@
     const slideCount     = Math.ceil(blocks.length / blocksPerSlide);
 
     if (!wrapper || !blocksEl || slideCount < 2) return;
+
+    /* Per-section animation toggle — controlled via theme customizer.
+       Reads the data attribute written by the Liquid template.          */
+    const DISABLE_ANIMATION = section.dataset.rcAnimation === 'false';
 
     /* Section padding — lock triggers adjusted so the block (not the section
        top edge) is at the viewport edge at the moment of lock.               */

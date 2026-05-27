@@ -23,6 +23,7 @@
   data-section-id="{{ section.id }}"
   data-section-type="sticky-scroll-desktop"
   data-header-observer-mode="{{ section.settings.header_observer_mode }}"
+  data-rc-animation="{{ section.settings.enable_animation }}"
 >
   <div class="sticky-scroll__wrapper {{ section.settings.width }}">
     <div class="sticky-scroll__blocks">
@@ -395,6 +396,17 @@
         {"value": "light", "label": "Light"},
         {"value": "dark", "label": "Dark"}
       ]
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_animation",
+      "label": "Enable scroll animation",
+      "default": true,
+      "info": "Uncheck to disable the fullscreen slide animation and show normal sticky scroll instead."
     },
     {
       "type": "header",

@@ -47,6 +47,8 @@
       if (window.__plpHeaderAnimInit) return;
       window.__plpHeaderAnimInit = true;
 
+      if (document.body.dataset.animations === 'false') return;
+
       document.body.classList.add('plp-header-loading');
       var trigger = function () {
         if (document.body.classList.contains('plp-header-ready')) return;
