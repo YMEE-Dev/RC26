@@ -27,7 +27,7 @@
   const WHEEL_MIN_DELTA  = 3;
   const SWIPE_MIN_PX     = 30;
   const SWIPE_MAX_MS     = 700;
-  const DISABLE_ANIMATION = true;
+  const DISABLE_ANIMATION = false;
 
   const EASING = 'cubic-bezier(0.645,0.045,0.355,1.0)';
 
@@ -47,6 +47,11 @@
     const slideCount     = Math.ceil(blocks.length / blocksPerSlide);
 
     if (!wrapper || !blocksEl || slideCount < 2) return;
+
+    /* Section padding — lock triggers adjusted so the block (not the section
+       top edge) is at the viewport edge at the moment of lock.               */
+    const pt = parseFloat(getComputedStyle(section).paddingTop)    || 0;
+    const pb = parseFloat(getComputedStyle(section).paddingBottom) || 0;
 
     let idx           = 0;
     let locked        = false;
@@ -88,45 +93,39 @@
       ph.style.cssText = `height:${naturalHeight}px;`;
       section.insertAdjacentElement('afterend', ph);
 
+      /* Set all CSS variables BEFORE enabling locked CSS rules so that when
+         data-rc-stack-fade-locked makes blocks position:absolute the correct
+         --block-y / --stack-cover values are already in place — prevents the
+         brief flash of the last (highest z-index) slide at lock time.        */
+      blocks.forEach((b, i) => {
+        const slideIdx = Math.floor(i / blocksPerSlide);
+        b.style.setProperty("--sticky-z-index", slideIdx);
+      });
+      section.setAttribute("data-rc-stack-fade-no-transition", "");
+      applyState();
+
       /* Marker for CSS — all rc-stack-fade.css rules are scoped to this
          attribute so the section renders natively when not engaged.        */
       section.setAttribute('data-rc-stack-fade-locked', '');
 
+      /* Use offsetWidth (= document content width, excludes scrollbar) instead
+         of 100vw (= full viewport including scrollbar) to avoid the ~15 px
+         rightward shift of wrapper centering on non-overlay-scrollbar systems. */
+      const sectionW = section.offsetWidth;
       section.style.cssText =
-        'position:fixed;top:0;left:0;width:100vw;height:100vh;overflow:hidden;z-index:200;padding:0;';
-      wrapper.style.cssText =
-        'position:relative;width:100%;height:100%;max-width:none;padding:0;margin:0;overflow:hidden;';
-      blocksEl.style.cssText =
-        'position:relative;width:100%;height:100%;';
+        `position:fixed;top:0;left:0;width:${sectionW}px;height:100vh;overflow:hidden;z-index:200;padding:0;`;
+      wrapper.style.cssText = 'position:relative;height:100%;';
+      blocksEl.style.cssText = "position:relative;width:100%;height:100%;";
 
-      /* Each block: absolute, stacked by z-index, transformed via CSS vars.
-         Z-index = slideIdx so paired mobile blocks (image + text) share a
-         layer and overlay older slides as a unit.
-         On mobile: blocks within a pair stack vertically — first at top:0,
-         height:50%; second at top:50%, height:50%.
-         On desktop: each block fills the viewport (top:0, height:100%).      */
-      blocks.forEach((b, i) => {
-        const slideIdx        = Math.floor(i / blocksPerSlide);
-        const positionInSlide = i % blocksPerSlide;
-        const topPct          = isMobile ? positionInSlide * 50 : 0;
-        const heightPct       = isMobile ? 50 : 100;
-        b.style.cssText =
-          `position:absolute;left:0;width:100%;top:${topPct}%;height:${heightPct}%;` +
-          `z-index:${slideIdx};isolation:isolate;overflow:hidden;` +
-          'transform:translateY(var(--block-y,0vh)) scale(calc(1 - var(--stack-cover,0) * var(--stack-max-scale, 0.03)));' +
-          'filter:blur(calc(var(--stack-cover,0) * var(--stack-max-blur, 12px)));' +
-          'transition:none;';
+      innerEls.forEach((el) => {
+        el.style.height = "100%";
       });
-      innerEls.forEach((el) => { el.style.height = '100%'; });
 
-      applyState();
-
+      /* Enable transitions on next frame if animations enabled */
       requestAnimationFrame(() => {
-        blocks.forEach((b) => {
-          b.style.transition = DISABLE_ANIMATION
-            ? "none"
-            : `transform ${SNAP_DURATION_MS}ms ${EASING}, ` + `filter ${SNAP_DURATION_MS}ms ${EASING}`;
-        });
+        if (!DISABLE_ANIMATION) {
+          section.removeAttribute("data-rc-stack-fade-no-transition");
+        }
       });
 
       window.addEventListener('wheel',      onWheel,      { passive: false });
@@ -140,6 +139,8 @@
       locked    = false;
       animating = false;
       cooldown  = true;
+      lastTop = null;
+      lastBottom = null;
 
       window.removeEventListener('wheel',      onWheel);
       window.removeEventListener('touchstart', onTouchStart);
@@ -186,15 +187,16 @@
       wrapper.style.cssText  = '';
       blocksEl.style.cssText = '';
       blocks.forEach((b) => {
-        b.style.cssText = '';
         /* Explicitly remove custom properties — some browsers leave them set
-           after cssText='', which would re-apply blur/scale on next render. */
-        b.style.removeProperty('--block-y');
-        b.style.removeProperty('--stack-cover');
+           after removing the data attribute, which would re-apply blur/scale. */
+        b.style.removeProperty("--block-y");
+        b.style.removeProperty("--stack-cover");
+        b.style.removeProperty("--sticky-z-index");
       });
       innerEls.forEach((el) => { el.style.height = ''; });
 
       section.removeAttribute('data-rc-stack-fade-locked');
+      section.removeAttribute("data-rc-stack-fade-no-transition");
 
       if (ph) { ph.remove(); ph = null; }
 
@@ -208,7 +210,17 @@
         docEl.style.scrollBehavior = prevBehavior;
       });
 
-      setTimeout(() => { cooldown = false; }, 400);
+      setTimeout(() => {
+        cooldown = false;
+        if (locked || animating) return;
+        /* If the user scrolled past the trigger zone during cooldown,
+           crossing detection will have missed it — catch it here with a
+           directional position check based on which way we just exited. */
+        const rect2 = section.getBoundingClientRect();
+        const vh2   = window.innerHeight;
+        if (exitDir > 0 && rect2.bottom >= vh2 + pb) { lock(slideCount - 1); return; }
+        if (exitDir < 0 && rect2.top   <= -pt)       { lock(0); }
+      }, 400);
     };
 
     /* ── Slide navigation ─────────────────────────────────────────────────── */
@@ -266,8 +278,8 @@
       const top    = rect.top;
       const bottom = rect.bottom;
       const vh     = window.innerHeight;
-      const inTopZone    = Math.abs(top) <= 10;
-      const inBottomZone = Math.abs(bottom - vh) <= 10;
+      const inTopZone    = Math.abs(top + pt) <= 10;
+      const inBottomZone = Math.abs(bottom - vh - pb) <= 10;
       if (!inTopZone && !inBottomZone) return;
       e.preventDefault();
       lock(e.deltaY < 0 ? slideCount - 1 : 0);
@@ -285,25 +297,29 @@
                             (sticky CSS showing last block) before autoscroll
                             engages — feels like "scrolling the slider twice."  */
     const onScrollCheck = () => {
-      if (locked || cooldown) return;
       const rect       = section.getBoundingClientRect();
       const top        = rect.top;
       const bottom     = rect.bottom;
       const vh         = window.innerHeight;
       const prevTop    = lastTop;
       const prevBottom = lastBottom;
+
+      /* Always update — even during cooldown — so crossing detection has
+         accurate prev values the moment cooldown expires.                 */
       lastTop    = top;
       lastBottom = bottom;
 
+      if (locked || cooldown || animating) return;
+
       if (prevTop !== null && prevBottom !== null) {
-        /* Down-from-above: top edge enters viewport from above */
-        if (prevTop > 0 && top <= 0)        { lock(0);                return; }
-        /* Up-from-below: bottom edge enters viewport from below */
-        if (prevBottom < vh && bottom >= vh) { lock(slideCount - 1); return; }
+        /* Down-from-above: block top crosses viewport top (section.top = -pt) */
+        if (prevTop > -pt && top <= -pt)              { lock(0);               return; }
+        /* Up-from-below: block bottom crosses viewport bottom (section.bottom = vh + pb) */
+        if (prevBottom < vh + pb && bottom >= vh + pb) { lock(slideCount - 1); return; }
       }
       /* Slow-scroll safety nets */
-      if (Math.abs(top) <= 1)               { lock(0);                return; }
-      if (Math.abs(bottom - vh) <= 1)       { lock(slideCount - 1); return; }
+      if (Math.abs(top + pt) <= 1)               { lock(0);               return; }
+      if (Math.abs(bottom - vh - pb) <= 1)       { lock(slideCount - 1); return; }
     };
 
     const startWatch = () => {
@@ -313,7 +329,7 @@
       lastBottom = null;
       window.addEventListener('scroll', onScrollCheck, { passive: true });
       window.addEventListener('wheel',  onWheelSnap,   { passive: false });
-      onScrollCheck();
+      requestAnimationFrame(onScrollCheck);
     };
 
     const stopWatch = () => {
