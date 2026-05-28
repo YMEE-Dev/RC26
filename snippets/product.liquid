@@ -3633,10 +3633,28 @@
     if drawer_id == blank
       assign drawer_id = block.id
     endif
+
+    # Determine if this drawer needs padding
+    assign needs_padding = false
+    case block.settings.drawer_snippet
+      when 'drawer-free-shipping'
+        assign needs_padding = true
+      when 'drawer-gift-packaging'
+        assign needs_padding = true
+      when 'drawer-2-years-warranty'
+        assign needs_padding = true
+      when 'drawer-14-days-free-returns'
+        assign needs_padding = true
+    endcase
+
+    assign drawer_classes = 'drawer'
+    if needs_padding
+      assign drawer_classes = drawer_classes | append: ' drawer--padded'
+    endif
   -%}
 
   <side-drawer
-    class="drawer"
+    class="{{ drawer_classes }}"
     data-drawer="{{ drawer_id }}"
     id="side-drawer-{{ block.id }}"
     data-drawer-size="{{ block.settings.drawer_size }}"

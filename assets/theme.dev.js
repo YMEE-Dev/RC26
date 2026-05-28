@@ -6198,10 +6198,21 @@
       this.progressBar = this.querySelector(selectors$8.progressBar);
       this.progressLine = this.progressBar?.querySelector(selectors$8.progressLine) || null;
       this.productItem = this.closest(selectors$8.productItem);
+      this.productLink = this.closest(selectors$8.productLink);
       this.handleScroll = this.handleScroll.bind(this);
       this.updateProgressBar = this.updateProgressBar.bind(this);
       this.recentlyViewed = this.closest(selectors$8.recentlyViewed);
       this.hovered = false;
+      this.productLinkArrowClickHandler = (event) => {
+        const clickTarget = event.target;
+        if (!(clickTarget instanceof Element)) return;
+
+        const arrowButton = clickTarget.closest(selectors$8.flickityButton);
+        if (!arrowButton) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+      };
 
       this.mouseEnterEvent = () => this.mouseEnterActions();
       this.mouseLeaveEvent = () => this.mouseLeaveActions();
@@ -6245,6 +6256,10 @@
         this.productItem.removeEventListener("mouseleave", this.productItemMouseLeaveEvent);
       }
 
+      if (this.productLink) {
+        this.productLink.removeEventListener("click", this.productLinkArrowClickHandler);
+      }
+
       if (this.slider) {
         this.slider.removeEventListener("scroll", this.handleScroll);
       }
@@ -6259,13 +6274,8 @@
     }
 
     addArrowClickHandler() {
-      const productLink = this.closest(selectors$8.productLink);
-      if (productLink) {
-        productLink.addEventListener("click", (e) => {
-          if (e.target.matches(selectors$8.flickityButton)) {
-            e.preventDefault();
-          }
-        });
+      if (this.productLink) {
+        this.productLink.addEventListener("click", this.productLinkArrowClickHandler);
       }
     }
 
