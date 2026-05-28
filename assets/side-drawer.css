@@ -261,14 +261,15 @@ side-drawer .drawer__close svg {
 }
 
 side-drawer .drawer__content-wrapper {
-  padding: 40px;
+  padding: 0;
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-#side-drawer-ruby-signature .drawer__content-wrapper {
-  padding: 0px;
+/* Padded drawer variant - for simple content drawers that need spacing */
+side-drawer.drawer--padded .drawer__content-wrapper {
+  padding: 40px;
 }
 
 side-drawer .drawer-content__main {
@@ -824,12 +825,8 @@ side-drawer[aria-hidden="false"] .drawer__underlay {
 }
 
 @media only screen and (max-width: 749px) {
-  side-drawer .drawer__content-wrapper {
+  side-drawer.drawer--padded .drawer__content-wrapper {
     padding: 20px;
-  }
-
-  #side-drawer-ruby-signature .drawer__content-wrapper {
-    padding: 0px;
   }
 
   side-drawer .drawer__close {
