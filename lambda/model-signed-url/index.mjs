@@ -7,6 +7,7 @@ const BUCKET_NAME = process.env.BUCKET_NAME;
 const API_KEY = process.env.API_KEY;
 const CLOUDFRONT_DOMAIN = process.env.CLOUDFRONT_DOMAIN;
 const CLOUDFRONT_KEY_PAIR_ID = process.env.CLOUDFRONT_KEY_PAIR_ID;
+const MODEL_FOLDER = (process.env.MODEL_FOLDER ?? "int").replace(/^\/|\/$/g, "");
 
 // Rebuild a valid PEM from whatever was stored in the env var.
 // Lambda console may strip or escape newlines — strip all whitespace from the
@@ -99,14 +100,14 @@ export const handler = async (event) => {
     return respond(400, { error: "Invalid model_id" }, origin);
   }
 
-  const s3Key = `int/${sanitized}.glb`;
+  const s3Key = `${MODEL_FOLDER}/${sanitized}.glb`;
 
   try {
     // Verify the file exists in S3 before generating a signed URL
     await s3.send(new HeadObjectCommand({ Bucket: BUCKET_NAME, Key: s3Key }));
 
     const signedUrl = getSignedUrl({
-      url: `https://${CLOUDFRONT_DOMAIN}/int/${sanitized}.glb`,
+      url: `https://${CLOUDFRONT_DOMAIN}/${MODEL_FOLDER}/${sanitized}.glb`,
       keyPairId: CLOUDFRONT_KEY_PAIR_ID,
       privateKey: CLOUDFRONT_PRIVATE_KEY,
       dateLessThan: new Date(Date.now() + URL_EXPIRY_SECONDS * 1000).toISOString(),
