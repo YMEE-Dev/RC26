@@ -544,7 +544,7 @@
                     capture spotlight_product_attributes
                       echo 'style="--spotlight-stack-index: ' | append: counter_grid | append: ';"'
                     endcapture
-                    render 'product-grid-item', product: product, index: forloop.index, sizes: image_sizes, attributes: spotlight_product_attributes
+                    render 'product-grid-item', product: product, index: forloop.index, sizes: image_sizes, attributes: spotlight_product_attributes, card_animation: 'plp'
                   endif
 
                   assign counter_grid = counter_grid | plus: 1
@@ -593,7 +593,7 @@
                   if product_storytelling
                     render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false
                   else
-                    render 'product-grid-item', product: product, index: forloop.index, sizes: image_sizes
+                    render 'product-grid-item', product: product, index: forloop.index, sizes: image_sizes, card_animation: 'plp'
                   endif
                 endfor
               -%}
@@ -615,7 +615,7 @@
                   if product_storytelling
                     render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false
                   else
-                    render 'product-grid-item', product: product, animation_delay: animation_delay, index: forloop.index, sizes: image_sizes
+                    render 'product-grid-item', product: product, animation_delay: animation_delay, index: forloop.index, sizes: image_sizes, card_animation: 'plp'
                   endif
                 endfor
               -%}
@@ -955,6 +955,104 @@
           updateCollectionNavStickyState(event.target);
         });
       });
+    })();
+  </script>
+
+  {% render 'header-init-animation' %}
+
+  <script>
+    (function () {
+      /* Page exit fade */
+      document.addEventListener('click', function (e) {
+        const link = e.target.closest('a[href]');
+        if (!link) return;
+        const href = link.getAttribute('href');
+        if (!href || href.startsWith('#') || href.startsWith('javascript') || link.target === '_blank') return;
+        if (link.origin && link.origin !== location.origin) return;
+        e.preventDefault();
+        document.body.classList.add('page-exit');
+        setTimeout(function () { window.location.href = href; }, 600);
+      });
+
+      /* PLP card animation — above-fold cards wait for subcollections, below-fold animate on scroll */
+      if (document.body.dataset.rcAnimations === 'false') return;
+      const cards = Array.from(document.querySelectorAll('.plp-card-up'));
+      if (!cards.length) return;
+
+      let subcollectionsDone = false;
+      const aboveFold = [];
+      const belowFold = [];
+
+      const partitionCards = function () {
+        const vh = window.innerHeight;
+        cards.forEach(function (card) {
+          if (card.getBoundingClientRect().top < vh) {
+            aboveFold.push(card);
+          } else {
+            belowFold.push(card);
+          }
+        });
+      };
+
+      const scrollObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          scrollObserver.unobserve(entry.target);
+          entry.target.classList.add('plp-card-up--visible');
+        });
+      }, { threshold: 0, rootMargin: '0px' });
+
+      const releaseAboveFold = function () {
+        aboveFold.forEach(function (card) {
+          card.classList.add('plp-card-up--visible');
+        });
+      };
+
+      const init = function () {
+        partitionCards();
+        belowFold.forEach(function (card) { scrollObserver.observe(card); });
+        if (subcollectionsDone) releaseAboveFold();
+      };
+
+      const hasSubcollections = !!document.querySelector('[data-section-type="subcollections"]');
+
+      document.addEventListener('theme:subcollections:animated', function () {
+        subcollectionsDone = true;
+        if (!aboveFold.length) return;
+
+        /* Wait for the last visible category item's transform transition to actually finish,
+           then release cards. Fallback timeout in case transitionend never fires
+           (reduced motion, element off-screen, transition cancelled). */
+        const lastItem = document.querySelector('.subcollection__item.plp-el-up--visible:last-child')
+          || document.querySelector('.subcollection__item.plp-el-up--visible');
+        if (!lastItem) { releaseAboveFold(); return; }
+
+        var fallback = setTimeout(releaseAboveFold, 900);
+        lastItem.addEventListener('transitionend', function handler(e) {
+          if (e.propertyName !== 'transform') return;
+          clearTimeout(fallback);
+          lastItem.removeEventListener('transitionend', handler);
+          releaseAboveFold();
+        });
+      }, { once: true });
+
+      if (hasSubcollections) {
+        setTimeout(function () {
+          if (!subcollectionsDone) {
+            subcollectionsDone = true;
+            if (aboveFold.length) releaseAboveFold();
+          }
+        }, 3000);
+      } else {
+        subcollectionsDone = true;
+      }
+
+      const scheduleInit = function () { requestAnimationFrame(init); };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', scheduleInit, { once: true });
+      } else {
+        scheduleInit();
+      }
     })();
   </script>
 

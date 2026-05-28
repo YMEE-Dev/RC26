@@ -23,6 +23,7 @@
   data-section-id="{{ section.id }}"
   data-section-type="sticky-scroll-mobile"
   data-header-observer-mode="{{ section.settings.header_observer_mode }}"
+  data-rc-animation="{{ section.settings.enable_animation }}"
 >
   <div class="sticky-scroll-mobile__wrapper {{ section.settings.width }}">
     <div class="sticky-scroll-mobile__blocks">
@@ -126,6 +127,9 @@
     </div>
   </div>
 </section>
+
+<link rel="stylesheet" href="{{ 'rc-stack-fade.css' | asset_url }}" media="all">
+<script src="{{ 'rc-stack-fade.js' | asset_url }}" defer="defer"></script>
 
 {% stylesheet %}
   .sticky-scroll-mobile {
@@ -364,6 +368,17 @@
         {"value": "light", "label": "Light"},
         {"value": "dark", "label": "Dark"}
       ]
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_animation",
+      "label": "Enable scroll animation",
+      "default": true,
+      "info": "Uncheck to disable the fullscreen slide animation and show normal sticky scroll instead."
     },
     {
       "type": "header",

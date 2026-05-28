@@ -43,6 +43,12 @@
           data-aos-delay="{{ animation_delay }}"
           data-aos-duration="{{ animation_duration }}"
           data-aos-anchor="{{ animation_anchor }}">
+          <img
+            class="search-results-item__placeholder-logo"
+            src="{{ 'RC_LOGO_dark.svg' | asset_url }}"
+            alt=""
+            loading="lazy"
+          >
         </div>
 
         <span class="badge-box {{ badge_alignment }}"
@@ -72,3 +78,17 @@
     </a>
   </div>
 </div>
+
+{% stylesheet %}
+  .search-results-item__bg.image--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .search-results-item__placeholder-logo {
+    width: 60%;
+    max-width: 140px;
+    height: auto;
+  }
+{% endstylesheet %}

@@ -69,6 +69,32 @@
             {%- else -%}
               {%- liquid
                 for item in search.results
+                  # Exclude products whose title starts with "ST -"
+                  if item.object_type == 'product'
+                    assign normalized_title = item.title | downcase | strip
+                    assign product_title_prefix_hyphen = normalized_title | slice: 0, 4
+                    assign product_title_prefix_space = normalized_title | slice: 0, 3
+                    assign exclude_product = false
+                    
+                    if product_title_prefix_hyphen == 'st -' or product_title_prefix_space == 'st ' or normalized_title contains 'storytelling'
+                      assign exclude_product = true
+                    endif
+                    
+                    if exclude_product == false
+                      for tag in item.tags
+                        assign normalized_tag = tag | downcase
+                        if normalized_tag == 'storytelling'
+                          assign exclude_product = true
+                          break
+                        endif
+                      endfor
+                    endif
+                    
+                    if exclude_product
+                      continue
+                    endif
+                  endif
+
                   if item.tags contains 'hide'
                     assign hidden_products_count = hidden_products_count | plus: 1
                   endif

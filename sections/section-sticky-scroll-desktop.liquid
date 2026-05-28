@@ -23,6 +23,7 @@
   data-section-id="{{ section.id }}"
   data-section-type="sticky-scroll-desktop"
   data-header-observer-mode="{{ section.settings.header_observer_mode }}"
+  data-rc-animation="{{ section.settings.enable_animation }}"
 >
   <div class="sticky-scroll__wrapper {{ section.settings.width }}">
     <div class="sticky-scroll__blocks">
@@ -32,8 +33,9 @@
           style="--sticky-index: {{ forloop.index0 }};"
           {{ block.shopify_attributes }}
         >
-          <div class="sticky-scroll__block-media">
-            <div class="sticky-scroll__image-wrapper" data-index="{{ forloop.index0 }}">
+          <div class="sticky-scroll__block-inner">
+            <div class="sticky-scroll__block-media">
+              <div class="sticky-scroll__image-wrapper" data-index="{{ forloop.index0 }}">
               {%- if block.settings.image != blank -%}
                 {{
                   block.settings.image
@@ -112,11 +114,15 @@
               </div>
             {%- endif -%}
           </div>
+          </div>
         </div>
       {%- endfor -%}
     </div>
   </div>
 </section>
+
+<link rel="stylesheet" href="{{ 'rc-stack-fade.css' | asset_url }}" media="all">
+<script src="{{ 'rc-stack-fade.js' | asset_url }}" defer="defer"></script>
 
 {% stylesheet %}
   .sticky-scroll {
@@ -152,15 +158,25 @@
 
   .sticky-scroll__block {
     position: sticky;
-    top: calc(var(--header-height, 0px));
+    top: 0;
     z-index: var(--sticky-index);
+    min-height: 100vh;
+    min-height: 100svh;
+    background-color: var(--bg);
+    display: flex;
+    align-items: stretch;
+  }
+
+  .sticky-scroll__block-inner {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-areas: 'image content';
     gap: var(--block-gap);
-    align-items: flex-start;
-    min-height: 756px;
-    background-color: var(--bg);
+    align-items: center;
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 var(--outer);
   }
 
   .sticky-scroll__block-media {
@@ -279,13 +295,8 @@
     opacity: 0.6;
   }
 
-  .sticky-scroll__block--text-left {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  .sticky-scroll__block--text-left .sticky-scroll__block-inner {
     grid-template-areas: 'content image';
-  }
-
-  .sticky-scroll__block--text-left .sticky-scroll__block-media {
-    width: 100%;
   }
 {% endstylesheet %}
 
@@ -385,6 +396,17 @@
         {"value": "light", "label": "Light"},
         {"value": "dark", "label": "Dark"}
       ]
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_animation",
+      "label": "Enable scroll animation",
+      "default": true,
+      "info": "Uncheck to disable the fullscreen slide animation and show normal sticky scroll instead."
     },
     {
       "type": "header",

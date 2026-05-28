@@ -1,0 +1,89 @@
+/*
+ * Stack-fade — Module B
+ *
+ *   • Active slide rises from below to cover the previous slide.
+ *   • Covered slide gets blurred + dimmed + scaled down as a single unit.
+ *   • Foreground slide stays sharp.
+ *
+ * All rules are scoped to [data-rc-stack-fade-locked] (set on the section by JS
+ * only while the slider is engaged) so the section renders with its native
+ * sticky styling — wrapper max-width, padding, block layout — everywhere else.
+ *
+ * Tunables (set inline on the section if you want per-instance control):
+ *   --stack-max-blur    max blur radius at full cover     (default 12px)
+ *   --stack-max-dark    max overlay opacity at full cover (default 0.35)
+ *   --stack-max-scale   scale delta at full cover         (default 0.06 → shrinks to 0.94)
+ */
+
+/* Block positioning during lock — blocks fill wrapper exactly as in normal scroll */
+[data-rc-stack-fade-locked] .sticky-scroll__block,
+[data-rc-stack-fade-locked] .sticky-scroll-mobile__block {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  z-index: var(--sticky-z-index, 0);
+  isolation: isolate;
+  overflow: hidden;
+  transform: translateY(var(--block-y, 0vh));
+  backdrop-filter: blur(calc(var(--stack-cover, 0) * var(--stack-max-blur, 12px)));
+}
+
+[data-rc-stack-fade-locked] .sticky-scroll__block {
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: stretch;
+}
+
+[data-rc-stack-fade-locked] .sticky-scroll-mobile__block--image {
+  top: 0;
+  height: 50%;
+}
+
+[data-rc-stack-fade-locked] .sticky-scroll-mobile__block--text {
+  top: 50%;
+  height: 50%;
+}
+
+/* Apply blur and scale to block-inner for covered slides */
+[data-rc-stack-fade-locked] .sticky-scroll__block-inner {
+  transform: scale(calc(1 - var(--stack-cover, 0) * var(--stack-max-scale, 0.06)));
+  filter: blur(calc(var(--stack-cover, 0) * var(--stack-max-blur, 12px)));
+}
+
+/* Preserve text-left layout during lock */
+[data-rc-stack-fade-locked] .sticky-scroll__block--text-left .sticky-scroll__block-inner {
+  grid-template-areas: 'content image';
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Block animations with transitions — disabled when DISABLE_ANIMATION flag is set */
+  [data-rc-stack-fade-locked]:not([data-rc-stack-fade-no-transition]) .sticky-scroll__block,
+  [data-rc-stack-fade-locked]:not([data-rc-stack-fade-no-transition]) .sticky-scroll-mobile__block {
+    transition: transform 700ms cubic-bezier(0.645, 0.045, 0.355, 1), filter 700ms cubic-bezier(0.645, 0.045, 0.355, 1);
+    will-change: transform, filter;
+  }
+
+  [data-rc-stack-fade-locked]:not([data-rc-stack-fade-no-transition]) .sticky-scroll__block-inner {
+    transition: transform 700ms cubic-bezier(0.645, 0.045, 0.355, 1), filter 700ms cubic-bezier(0.645, 0.045, 0.355, 1);
+  }
+
+  /* When animations are disabled, remove transitions */
+  [data-rc-stack-fade-no-transition] .sticky-scroll__block,
+  [data-rc-stack-fade-no-transition] .sticky-scroll-mobile__block {
+    transition: none;
+  }
+
+  /* Per-block dark overlay on covered slides */
+  /* [data-rc-stack-fade-locked] .sticky-scroll__block::after,
+  [data-rc-stack-fade-locked] .sticky-scroll-mobile__block::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, calc(var(--stack-cover, 0) * var(--stack-max-dark, 0.35)));
+    pointer-events: none;
+    z-index: 1;
+    transition: background-color 700ms cubic-bezier(0.645, 0.045, 0.355, 1);
+    will-change: background-color;
+  } */
+}
