@@ -883,6 +883,28 @@
         });
 
         observer.observe(productsGrid, {childList: true, subtree: true});
+
+        const animObserver = new MutationObserver(function() {
+          var newCards = Array.from(productsGrid.querySelectorAll('.plp-card-up:not(.plp-card-up--visible)'));
+          if (!newCards.length) return;
+          var vh = window.innerHeight;
+          var scrollObs = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+              if (!entry.isIntersecting) return;
+              scrollObs.unobserve(entry.target);
+              entry.target.classList.add('plp-card-up--visible');
+            });
+          }, { threshold: 0 });
+          newCards.forEach(function(card) {
+            if (card.getBoundingClientRect().top < vh) {
+              card.classList.add('plp-card-up--visible');
+            } else {
+              scrollObs.observe(card);
+            }
+          });
+        });
+
+        animObserver.observe(productsGrid, {childList: true, subtree: false});
       };
 
       const initAll = (root) => {
