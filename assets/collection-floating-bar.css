@@ -1,6 +1,3 @@
-/* ── Collection Floating Bar ── */
-/* Mobile-only floating filter/sort bar fixed to bottom of viewport */
-
 .main-content--collection-super-naked .collection-floating-bar__filter {
   display: none;
 }
@@ -14,8 +11,6 @@
 }
 
 @media only screen and (max-width: 960px) {
-  /* ── Hide the original filters wrapper on mobile ── */
-  body .collection__nav .popout--group,
   body .collection__nav .popout--sort {
     display: none !important;
   }
@@ -72,7 +67,6 @@
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.08));
   }
 
-  /* ── Shared button reset ── */
   .collection-floating-bar__filter,
   .collection-floating-bar__sort,
   .collection-floating-bar__menu {
@@ -90,7 +84,6 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* ── Filter button (110px) ── */
   .collection-floating-bar__filter {
     flex: 0 0 110px;
     gap: 5px;
@@ -118,7 +111,6 @@
     text-transform: var(--BTN-UPPERCASE);
   }
 
-  /* ── Sort button (fill remaining) ── */
   .collection-floating-bar__sort {
     flex: 1 1 auto;
     gap: 5px;
@@ -147,7 +139,6 @@
     text-transform: var(--BTN-UPPERCASE);
   }
 
-  /* ── Sort slide-out sidebar ── */
   .collection-floating-bar__sort-sidebar {
     position: fixed;
     top: 0;
@@ -268,7 +259,6 @@
     box-shadow: inset 0 0 0 2px var(--COLOR-BG);
   }
 
-  /* ── Sort overlay ── */
   .collection-floating-bar__sort-overlay {
     position: fixed;
     top: 0;
@@ -291,7 +281,6 @@
     visibility: visible;
   }
 
-  /* ── Menu button (76px) ── */
   .collection-floating-bar__menu {
     flex: 0 0 76px;
     color: var(--COLOR-TEXT, #000);
@@ -307,5 +296,131 @@
 @media only screen and (min-width: 750px) and (max-width: 989px) {
   .collection-floating-bar__menu {
     transform: translateX(-7px);
+  }
+}
+
+@media only screen and (max-width: 960px) {
+
+  .collection__nav {
+    z-index: 6001;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  body:has(.collection__nav.is-stuck) .header-sections {
+    display: none;
+  }
+
+  .collection__nav.is-stuck .availability_filter-wrapper [data-availability-view-all] .availability-filter__label--count {
+    display: inline !important;
+  }
+  .collection__nav.is-stuck .availability_filter-wrapper [data-availability-view-all] .availability-filter__label--view-all {
+    display: none !important;
+  }
+
+  .collection__nav.is-stuck .availability_filter-wrapper {
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: auto !important;
+    pointer-events: auto !important;
+  }
+
+  .collection__nav .subcollection_links-wrapper {
+    display: none;
+  }
+
+  .collection__nav .popout_filters-wrapper {
+    display: contents;
+  }
+
+  .collection__nav .availability-filter__button {
+    margin-left: 0;
+    padding-left: 20px;
+  }
+
+  .collection__nav .popout--group .popout__toggle {
+    padding-right: 20px;
+  }
+}
+
+@media only screen and (max-width: 960px) {
+  body:has(.collection__sidebar__slide-out.expanded) .header__mobile__button {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+@media only screen and (max-width: 960px) {
+  body .collection__nav .popout--group {
+    display: flex;
+    align-items: center;
+    padding-right: 10px;
+  }
+
+  body .collection__nav .popout--group .popout__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 10px;
+    height: 100%;
+    font-size: inherit;
+    font-family: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: var(--text);
+    border: 0;
+    background: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  body .collection__nav .popout--group .icon-filter {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media only screen and (min-width: 750px) and (max-width: 960px) {
+  .has-header-sticky .collection__sidebar__slider {
+    top: 0 !important;
+    height: 100% !important;
+  }
+}
+
+@media only screen and (max-width: 960px) {
+  body:has(.collection__sidebar__slide-out.expanded) .header-sections {
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 960px) {
+  .collection__sidebar__slide-out {
+    overscroll-behavior: contain;
+  }
+}
+
+.collection__sidebar .filter-group__heading {
+  color: var(--text, #212121);
+}
+
+.collection-filter-sort {
+  display: none;
+}
+
+.collection__sidebar__close {
+  z-index: 10;
+}
+
+@media only screen and (max-width: 960px) {
+  .collection-filter-sort {
+    display: block;
+    border-top: 1px solid #e5e5e5;
+    position: relative;
+    z-index: 0;
+  }
+
+  .collection-filter-sort .collection-floating-bar__sort-sidebar__head {
+    padding-right: var(--inner);
   }
 }
