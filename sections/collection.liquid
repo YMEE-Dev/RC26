@@ -426,25 +426,14 @@
       </nav>
     {%- endif -%}
 
-    {%- render 'collection-floating-bar' -%}
+    {%- if section.settings.show_collection_floating_bar -%}
+      {%- render 'collection-floating-bar' -%}
+    {%- endif -%}
 
     <div class="collection__products">
       {%- if enable_filters -%}
         <div class="{{ collection_sidebar_class }}" id="filter-groups" data-collection-sidebar>
           <div class="collection__sidebar__head{% unless filter_layout == 'slide-out' %} mobile{% endunless %}">
-            {% comment %}
-              <h3>
-                {{- 'collections.general.filters' | t -}}
-
-                <span
-                  class="filter-count{% if filter_active_count < 1 %} hidden{% endif %}"
-                  data-active-filters
-                >
-                  {{- filter_active_count -}}
-                </span>
-              </h3>
-            {% endcomment %}
-
             <a
               href="#filters-group"
               class="collection__sidebar__close"
@@ -454,6 +443,10 @@
               {%- render 'icon-close' -%}
             </a>
           </div>
+
+          {%- if enable_sort -%}
+            {%- render 'collection-filter-sort' -%}
+          {%- endif -%}
 
           {%- render 'collection-filters-sidebar', section: section -%}
         </div>
@@ -974,7 +967,6 @@
         setTimeout(function () { window.location.href = href; }, 600);
       });
 
-      /* PLP card animation — above-fold cards wait for subcollections, below-fold animate on scroll */
       if (document.body.dataset.rcAnimations === 'false') return;
       const cards = Array.from(document.querySelectorAll('.plp-card-up'));
       if (!cards.length) return;
@@ -1020,9 +1012,6 @@
         subcollectionsDone = true;
         if (!aboveFold.length) return;
 
-        /* Wait for the last visible category item's transform transition to actually finish,
-           then release cards. Fallback timeout in case transitionend never fires
-           (reduced motion, element off-screen, transition cancelled). */
         const lastItem = document.querySelector('.subcollection__item.plp-el-up--visible:last-child')
           || document.querySelector('.subcollection__item.plp-el-up--visible');
         if (!lastItem) { releaseAboveFold(); return; }
@@ -1062,6 +1051,9 @@
   {%- endif -%}
 
   <script src="{{ 'collection-floating-bar.js' | asset_url }}" defer="defer"></script>
+  {%- if enable_sort -%}
+    <script src="{{ 'collection-filter-sort.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
 
   {%- if settings.quickview_enable -%}
     <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
@@ -1085,6 +1077,13 @@
       "id": "enable_sort",
       "label": "Show sorting",
       "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_collection_floating_bar",
+      "label": "Enable collection floating bar (mobile)",
+      "info": "Legacy mobile bottom bar. When off, the filter button shows in the collection bar and Sort by moves into the filter panel.",
+      "default": false
     },
     {
       "type": "checkbox",
