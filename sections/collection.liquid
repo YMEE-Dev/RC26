@@ -611,7 +611,7 @@
               {%- liquid
                 for product in collection.products
                   assign grid_int = section.settings.grid | times: 1
-                  assign animation_delay = forloop.index0 | modulo: grid_int | times: 1
+                  assign animation_delay = 7 | plus: (forloop.index0 | modulo: grid_int)
 
                   assign product_storytelling = false
                   unless is_spotlight_collection_template
