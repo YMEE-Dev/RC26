@@ -1,6 +1,7 @@
 
 {{ 'custom-collection.css' | asset_url | stylesheet_tag }}
 {{ 'collection-floating-bar.css' | asset_url | stylesheet_tag }}
+{{ 'section-cento-diamond-comparison.css' | asset_url | stylesheet_tag }}
 
 {%- liquid
   assign enable_infinity_scroll = settings.enable_infinity_scroll
@@ -189,29 +190,45 @@
   {%- if paginate.current_page == 1 -%}
     {%- unless should_use_spotlight_images -%}
       {%- for block in section.blocks -%}
-        {%- capture current_featured_image -%}
-          {%- liquid
-            assign featured_image = block.settings.featured_image
-            assign featured_image_position = block.settings.position
-            assign featured_image_order = featured_image_position | append: '-' | append: forloop.index
-
-            if featured_image_position < 10
-              assign featured_image_order = featured_image_order | prepend: '0'
-            endif
-          -%}
-          {%- render 'collection-featured-image' block: block -%}
-        {%- endcapture -%}
-
-        {%- assign featured_images_array = featured_images_array
-          | append: featured_image_order
-          | append: '#featured_image_position#'
-          | append: featured_image_position
-          | append: '#featured_image_html#'
-          | append: current_featured_image
-          | append: '#featured_image#'
-          | append: featured_image
-          | append: '@@'
+        {%- liquid
+          assign block_position = block.settings.position
+          assign block_order = block_position | append: '-' | append: forloop.index
+          if block_position < 10
+            assign block_order = block_order | prepend: '0'
+          endif
         -%}
+        {%- if block.type == 'cento_comparison' -%}
+          {%- capture current_featured_image -%}
+            {%- render 'collection-cento-comparison', block: block -%}
+          {%- endcapture -%}
+          {%- assign featured_images_array = featured_images_array
+            | append: block_order
+            | append: '#featured_image_position#'
+            | append: block_position
+            | append: '#featured_image_html#'
+            | append: current_featured_image
+            | append: '#featured_image#'
+            | append: ''
+            | append: '@@'
+          -%}
+        {%- else -%}
+          {%- capture current_featured_image -%}
+            {%- liquid
+              assign featured_image = block.settings.featured_image
+            -%}
+            {%- render 'collection-featured-image' block: block -%}
+          {%- endcapture -%}
+          {%- assign featured_images_array = featured_images_array
+            | append: block_order
+            | append: '#featured_image_position#'
+            | append: block_position
+            | append: '#featured_image_html#'
+            | append: current_featured_image
+            | append: '#featured_image#'
+            | append: featured_image
+            | append: '@@'
+          -%}
+        {%- endif -%}
       {%- endfor -%}
     {%- endunless -%}
 
@@ -1089,6 +1106,7 @@
   {%- endif -%}
 {%- endpaginate -%}
 
+
 {% schema %}
 {
   "name": "Collection products",
@@ -1215,6 +1233,53 @@
     }
   ],
   "blocks": [
+    {
+      "type": "cento_comparison",
+      "name": "Cento Diamond Comparison",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "range",
+          "id": "position",
+          "label": "Position in grid",
+          "info": "Insert after this many products. Use 3 for after row 1 on desktop.",
+          "min": 1,
+          "max": 24,
+          "step": 1,
+          "default": 3
+        },
+        {
+          "type": "header",
+          "content": "Cento Diamond"
+        },
+        {
+          "type": "text",
+          "id": "row1_title",
+          "label": "Title",
+          "default": "Cento Diamond"
+        },
+        {
+          "type": "richtext",
+          "id": "row1_description",
+          "label": "Description"
+        },
+        {
+          "type": "header",
+          "content": "Standard Diamond"
+        },
+        {
+          "type": "text",
+          "id": "row2_title",
+          "label": "Title",
+          "default": "Standard Diamond"
+        },
+        {
+          "type": "richtext",
+          "id": "row2_description",
+          "label": "Description"
+        }
+      ]
+    },
     {
       "type": "featured_image",
       "limit": 8,
