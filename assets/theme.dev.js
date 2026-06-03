@@ -3909,7 +3909,8 @@
           const stickyThreshold = typeof this.headerOffset === "number" ? this.headerOffset : 0;
 
           if (isMobileViewport) {
-            this.setHeaderScrollHidden(true);
+            const shouldHide = direction === "down";
+            this.setHeaderScrollHidden(shouldHide);
             this.shouldShowScrollRevealBlur = false;
             this.syncScrollRevealBlur();
             return;
