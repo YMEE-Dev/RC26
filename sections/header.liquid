@@ -582,45 +582,63 @@
 -%}
 
 {%- capture minimal -%}
+  <div class="header__mobile__button">
+    <button
+      class="header__mobile__hamburger{% if show_icons == false %} navlink navlink--toplevel{% endif %}{% if settings.type_nav_caps %} caps{% endif %}"
+      data-drawer-toggle="hamburger"
+      data-open-label="{{ 'general.accessibility.show_menu' | t | escape }}"
+      data-close-label="{{ 'general.accessibility.close' | t | escape }}"
+      aria-label="{{ 'general.accessibility.show_menu' | t }}"
+      aria-haspopup="true"
+      aria-expanded="false"
+      aria-controls="header-menu"
+    >
+      <span class="header__mobile__hamburger-icon header__mobile__hamburger-icon--menu" aria-hidden="true">
+        {%- render 'icon-menu' -%}
+      </span>
+      <span class="header__mobile__hamburger-icon header__mobile__hamburger-icon--close" aria-hidden="true">
+        {%- render 'icon-cancel' -%}
+      </span>
+    </button>
+  </div>
+
   {{ logos }}
 
-  {% comment %}
-    <div class="header__mobile__right{% if settings.type_nav_caps %} caps{% endif %}">
-      {{ cta }}
+  <div class="header__mobile__right{% if settings.type_nav_caps %} caps{% endif %}">
+    {{ cta }}
 
-      {%- if header_popouts -%}
-        {%- assign unique = section.id | append: '-header-mobile-top' -%}
-        <div class="header__mobile__button desktop">
-          {%- render 'localization',
-            unique: unique,
-            show_locale_selector: show_locale_selector,
-            show_locale_code: show_locale_code,
-            show_globe_icon: show_globe_icon,
-            show_country_selector: show_country_selector,
-            show_country_flag: show_country_flag,
-            show_country_name: show_country_name,
-            class: 'header',
-            unique: section.id -%}
-        </div>
-      {%- endif -%}
+    {%- if header_popouts -%}
+      {%- assign unique = section.id | append: '-header-mobile-top' -%}
+      <div class="header__mobile__button desktop">
+        {%- render 'localization',
+          unique: unique,
+          show_locale_selector: show_locale_selector,
+          show_locale_code: show_locale_code,
+          show_globe_icon: show_globe_icon,
+          show_country_selector: show_country_selector,
+          show_country_flag: show_country_flag,
+          show_country_name: show_country_name,
+          class: 'header',
+          unique: section.id -%}
+      </div>
+    {%- endif -%}
 
-      {%- if shop.customer_accounts_enabled -%}
-        <div class="header__mobile__button">
-          <a href="{{ routes.account_url }}" class="navlink{% if show_icons == false %} navlink--toplevel{% endif %}">
-            {%- render 'icon-profile-circled' -%}
-            <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.account' | t }}</span>
-          </a>
-        </div>
-      {%- endif -%}
-
-
+    {% comment %} {%- if shop.customer_accounts_enabled -%}
       <div class="header__mobile__button">
-        <a href="{{ routes.cart_url }}" class="navlink {{ navlink_cart_classes }}" data-cart-toggle>
-          {{ cart_status }}
+        <a href="{{ routes.account_url }}" class="navlink{% if show_icons == false %} navlink--toplevel{% endif %}">
+          {%- render 'icon-profile-circled' -%}
+          <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.account' | t }}</span>
         </a>
       </div>
+    {%- endif -%} {% endcomment %}
+
+
+    <div class="header__mobile__button">
+      <a href="{{ routes.cart_url }}" class="navlink {{ navlink_cart_classes }}" data-cart-toggle>
+        {{ cart_status }}
+      </a>
     </div>
-  {% endcomment %}
+  </div>
 
   {%- if secondary_menu_linklist != blank and linklists[secondary_menu_linklist].links.size > 0 -%}
     <div class="header__mobile__bottom">
@@ -738,18 +756,6 @@
     {%- endif -%}
 
     <div class="section-padding">
-      <div class="header__mobile__button">
-        <button
-          class="header__mobile__hamburger{% if show_icons == false %} navlink navlink--toplevel{% endif %}{% if settings.type_nav_caps %} caps{% endif %}"
-          data-drawer-toggle="hamburger"
-          aria-label="{{ 'general.accessibility.show_menu' | t }}"
-          aria-haspopup="true"
-          aria-expanded="false"
-          aria-controls="header-menu"
-        >
-          {%- render 'icon-menu' -%}
-        </button>
-      </div>
       <div
         class="header__mobile"
         style="--globaltext: {{ header_default_link }}; --text: {{ header_default_link }}; --link: {{ header_default_link }}; --link-hover: {{ header_default_link_hover }};"
@@ -897,16 +903,52 @@
     const selectAll = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
 
     /* Mobile hamburger press animation */
-    const hamburgerButtons = selectAll('.header__mobile__hamburger');
-    hamburgerButtons.forEach((btn) => {
-      const triggerPress = () => {
-        btn.classList.remove('is-pressed');
-        void btn.offsetWidth; // restart animation
-        btn.classList.add('is-pressed');
+    // const hamburgerButtons = selectAll('.header__mobile__hamburger');
+    // hamburgerButtons.forEach((btn) => {
+    //   const triggerPress = () => {
+    //     btn.classList.remove('is-pressed');
+    //     void btn.offsetWidth; // restart animation
+    //     btn.classList.add('is-pressed');
+    //   };
+    //   btn.addEventListener('click', triggerPress);
+    //   btn.addEventListener('animationend', () => btn.classList.remove('is-pressed'));
+    // });
+
+    const syncHamburgerDrawerLabel = () => {
+      const drawer = document.querySelector('header-drawer.drawer--header');
+      const buttons = selectAll('.header__mobile__hamburger[data-drawer-toggle="hamburger"]');
+      if (!drawer || !buttons.length) return;
+
+      const setLabels = () => {
+        const drawerVisible =
+          document.body.classList.contains('header-drawer-is-open') ||
+          drawer.classList.contains('is-open') ||
+          drawer.classList.contains('is-closing');
+
+        buttons.forEach((button) => {
+          const label = drawerVisible ? button.dataset.closeLabel : button.dataset.openLabel;
+          button.classList.toggle('is-drawer-open', drawerVisible);
+
+          if (label) {
+            button.setAttribute('aria-label', label);
+          }
+        });
       };
-      btn.addEventListener('click', triggerPress);
-      btn.addEventListener('animationend', () => btn.classList.remove('is-pressed'));
-    });
+
+      setLabels();
+
+      new MutationObserver(setLabels).observe(drawer, {
+        attributes: true,
+        attributeFilter: ['class'],
+      });
+
+      new MutationObserver(setLabels).observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class'],
+      });
+    };
+
+    syncHamburgerDrawerLabel();
 
     /* Scroll animation for header visibility is handled in assets/theme.dev.js */
 
