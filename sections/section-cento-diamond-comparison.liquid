@@ -58,6 +58,46 @@
   {%- endif -%}
 </section>
 
+<script>
+  (function () {
+    var section = document.getElementById('CentoDiamondComparison--{{ section.id }}');
+    if (!section) return;
+
+    function insertBanner() {
+      var grid = document.querySelector('.collection-cento .grid');
+      if (!grid) return;
+      var products = grid.querySelectorAll('.grid-item.product-item');
+      var columnsDesktop = parseInt(getComputedStyle(grid).getPropertyValue('--COLUMNS')) || 3;
+      var columnsMobile = parseInt(getComputedStyle(grid).getPropertyValue('--COLUMNS-MOBILE')) || 2;
+      var columns = window.innerWidth < 750 ? columnsMobile : columnsDesktop;
+      var insertAfterIndex = columns - 1;
+      var target = products[insertAfterIndex];
+      if (!target) {
+        grid.appendChild(section);
+      } else if (target.nextSibling) {
+        grid.insertBefore(section, target.nextSibling);
+      } else {
+        grid.appendChild(section);
+      }
+      section.style.gridColumn = '1 / -1';
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', insertBanner);
+    } else {
+      insertBanner();
+    }
+
+    var productsGrid = document.querySelector('[data-products-grid]');
+    if (productsGrid) {
+      var reinsertObserver = new MutationObserver(function () {
+        if (!grid || !grid.contains(section)) insertBanner();
+      });
+      reinsertObserver.observe(productsGrid, { childList: true });
+    }
+  })();
+</script>
+
 {% stylesheet %}
   .cento-comparison {
     position: relative;
