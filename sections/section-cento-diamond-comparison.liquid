@@ -7,8 +7,6 @@
   #CentoDiamondComparison--{{ section.id }} {
     background-color: {{ section.settings.bg_color }};
     --cento-bg: url({{ 'cento-diamond-comparison-bg.jpg' | asset_url }});
-    padding-top: {{ section.settings.padding_top | default: 150 }}px;
-    padding-bottom: {{ section.settings.padding_bottom | default: 150 }}px;
   }
 {%- endstyle -%}
 
@@ -91,7 +89,7 @@
     var productsGrid = document.querySelector('[data-products-grid]');
     if (productsGrid) {
       var reinsertObserver = new MutationObserver(function () {
-        if (!grid || !grid.contains(section)) insertBanner();
+        requestAnimationFrame(insertBanner);
       });
       reinsertObserver.observe(productsGrid, { childList: true });
     }
@@ -99,172 +97,8 @@
 </script>
 
 {% stylesheet %}
-  .cento-comparison {
-    position: relative;
-    overflow: hidden;
-    max-width: 1232px;
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: clamp(20px, 8vw, 200px);
-    padding-right: clamp(20px, 8vw, 200px);
-  }
-
   .cento-comparison__bg {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    border-bottom: 1px solid #e5e5e5;
     background: var(--cento-bg) lightgray 0px -132.752px / 160.866% 134.653% no-repeat;
-    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
-    filter: blur(25px);
-  }
-
-  .cento-comparison__wrapper {
-    width: 100%;
-    padding: 0;
-    margin: 0 auto;
-    position: relative;
-    z-index: 2;
-  }
-
-  .cento-comparison__row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 2fr;
-    gap: 40px 20px;
-    align-items: center;
-  }
-
-  .cento-comparison__title-col {
-    display: flex;
-    align-items: center;
-  }
-
-  .cento-comparison__title {
-    max-width: min-content;
-    text-wrap: balance;
-    color: #ffffff;
-    font-family: var(--FONT-STACK-HEADING);
-    font-size: var(--FONT-DISPLAY-S);
-    line-height: var(--FONT-DISPLAY-M);
-    margin: 0;
-    font-weight: var(--FONT-WEIGHT-HEADING);
-    font-style: var(--FONT-STYLE-HEADING);
-    letter-spacing: var(--LETTER-SPACING-HEADING);
-    text-transform: var(--FONT-UPPERCASE-HEADING, none);
-  }
-
-  .cento-comparison__image-col {
-    display: flex;
-    align-items: flex-start;
-    gap: 7.66px;
-  }
-
-  .cento-comparison__svg-wrap {
-    display: block;
-    width: 72px;
-    height: 72px;
-    flex-shrink: 0;
-  }
-
-  .cento-comparison__svg-wrap svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
-
-  .cento-comparison__desc-col {
-    display: flex;
-    align-items: center;
-  }
-
-  .cento-comparison__description {
-    color: #ffffff;
-    font-family: var(--FONT-STACK-BODY);
-    font-size: 12px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 20px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  .cento-comparison__description p {
-    margin: 0 0 0.8em;
-  }
-
-  .cento-comparison__description p:last-child {
-    margin-bottom: 0;
-  }
-
-  .cento-comparison__description strong {
-    font-weight: 600;
-  }
-
-  .cento-comparison__divider {
-    display: flex;
-    align-items: center;
-    gap: 40px;
-    padding: 40px 0;
-  }
-
-  .cento-comparison__divider-line {
-    flex: 1;
-    height: 1px;
-    background: rgba(255, 255, 255, 1);
-    display: block;
-  }
-
-  .cento-comparison__vs {
-    color: #ffffff;
-    font-family: var(--FONT-STACK-HEADING);
-    font-size: var(--FONT-DISPLAY-S);
-    line-height: var(--FONT-DISPLAY-M);
-    font-weight: var(--FONT-WEIGHT-HEADING);
-    letter-spacing: 0.15em;
-    white-space: nowrap;
-    flex-shrink: 0;
-    font-style: var(--FONT-STYLE-HEADING);
-    text-transform: var(--FONT-UPPERCASE-HEADING, none);
-  }
-
-  @media only screen and (max-width: 749px) {
-    .cento-comparison {
-      padding-left: var(--outer, 20px);
-      padding-right: var(--outer, 20px);
-    }
-
-    .cento-comparison__row {
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
-
-    .cento-comparison__image-col {
-      order: -1;
-      gap: 16px;
-    }
-
-    .cento-comparison__svg-wrap {
-      width: 120px;
-      height: 120px;
-    }
-
-    .cento-comparison__title-col {
-      order: 0;
-    }
-
-    .cento-comparison__desc-col {
-      order: 1;
-    }
-
-    .cento-comparison__divider {
-      padding: 32px 0;
-      gap: 20px;
-    }
-
-    .cento-comparison__description {
-      font-size: 11px;
-    }
   }
 {% endstylesheet %}
 
