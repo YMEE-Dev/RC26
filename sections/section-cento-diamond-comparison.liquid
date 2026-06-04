@@ -87,7 +87,11 @@
       section.style.display = 'block';
     }
 
-    insertBanner();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', insertBanner);
+    } else {
+      insertBanner();
+    }
 
     var productsGrid = document.querySelector('[data-products-grid]');
     if (productsGrid) {
