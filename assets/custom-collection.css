@@ -18,16 +18,14 @@
   display: none;
 }
 
-/* PLP scroll-up overlap fix (desktop): when the header re-reveals on upward
-   scroll it returns to position:fixed/top:0/z-index:6000 — identical to the
-   sticky collection nav — so they overlap. Offset the stuck nav below the
-   header only while the header is actually revealed (has-header-sticky AND not
-   in the scrolled-down "layered hide" state, where the header sits at z-index:-1
-   and no offset is wanted). Mobile already hides the header when the nav sticks. */
-@media only screen and (min-width: 960px) {
-  body.has-header-sticky:not(.header-scroll-hide-layered) .collection__nav.is-stuck {
-    top: var(--header-height);
-  }
+/* PLP scroll-up overlap fix: when the header re-reveals on upward scroll it
+   returns to position:fixed/top:0 and overlaps the sticky collection nav.
+   Offset the stuck nav below the header while it is revealed.
+   On mobile, other collections rely on :has() to hide the header when the nav
+   sticks, but on cento the banner layout reflow disrupts that cycle — so we
+   apply the same top offset on mobile for the cento collection. */
+body.has-header-sticky:not(.header-scroll-hide-layered) .collection__nav.is-stuck {
+  top: var(--header-height);
 }
 
 /* PLP mobile: the fixed header overlay sits on top of the collection nav and its
