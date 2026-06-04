@@ -9657,6 +9657,16 @@ html.supports-touch ticker-bar[data-slide]:not([paused]) .ticker--animated {
   z-index: 6001;
 }
 
+/* Lock page scroll while the mobile menu drawer is open. The JS scroll-lock
+   (theme:scroll:lock) doesn't engage reliably for this drawer, so key the lock
+   off the drawer's own open state. The drawer is position:fixed with its own
+   scrollable region (data-scroll-lock-scrollable), so it stays scrollable. */
+html:has(header-drawer.drawer--header.is-open),
+html:has(header-drawer.drawer--header.is-open) body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 .drawer--header .drawer__inner {
   left: auto;
   right: 100%;
@@ -9667,14 +9677,8 @@ html.supports-touch ticker-bar[data-slide]:not([paused]) .ticker--animated {
   opacity: 80% !important;
 }
 
-@media only screen and (max-width: 749px) {
-  .drawer--header .drawer__inner {
-    border-right: none;
-  }
-}
-
 .drawer--header.is-open .drawer__inner {
-  animation: slideInLeft 1s cubic-bezier(0.7, 0, 0.3, 1);
+  animation: slideInLeft 0.3s ease;
   animation-fill-mode: forwards;
 }
 
@@ -9687,6 +9691,7 @@ html.supports-touch ticker-bar[data-slide]:not([paused]) .ticker--animated {
   display: flex;
   flex-direction: row-reverse;
   border: 0;
+  margin-bottom: 20px;
   padding: 0 !important;
   height: calc(var(--HEADER-HEIGHT-MOBILE) + var(--announcement-height, 36px));
   justify-content: center;
@@ -10042,11 +10047,18 @@ mobile-menu .drawer__head-search summary.navlink--search {
   gap: 4px;
 }
 
-mobile-menu .drawer__head-search .navtext {
-  display: block;
-  font-size: 0.7em;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+mobile-menu .drawer__head-search .drawer__head-search__trigger {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+mobile-menu .drawer__head-search .drawer__head-search__summary {
+  display: none;
 }
 
 mobile-menu .predictive-search__layout {
@@ -10586,6 +10598,7 @@ header-search-popdown.is-open .search-popdown {
 } */
 
 .header__mobile__hamburger {
+  position: relative;
   transform-origin: center;
   cursor: pointer;
   height: auto;
@@ -10606,14 +10619,25 @@ header-search-popdown.is-open .search-popdown {
   line-height: 0;
   color: currentColor;
   padding-top: 2px;
+  pointer-events: none;
+  transition: opacity 0.25s ease-in-out;
 }
 
 .header__mobile__hamburger-icon svg {
   display: block;
+  stroke-width: 1px;
+}
+
+/* Crossfade the two icons: the menu icon stays in flow (sizing the button) while
+   the close icon overlays it. Toggling opacity instead of display lets them fade. */
+.header__mobile__hamburger-icon--menu {
+  opacity: 1;
 }
 
 .header__mobile__hamburger-icon--close {
-  display: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
 }
 
 /* .header__mobile__hamburger:active {
@@ -10636,31 +10660,27 @@ body:has(.drawer--header.is-open) .header__mobile__hamburger {
   pointer-events: none;
 } */
 
-body:has(.drawer--header:not(.is-open)) .header__mobile__hamburger {
-  opacity: 1;
-  pointer-events: auto;
-}
-
 body.header-drawer-is-open .header__mobile__hamburger,
-body .header__mobile__hamburger.is-drawer-open,
-body:has(header-drawer.drawer--header.is-open) .header__mobile__hamburger,
-body:has(header-drawer.drawer--header.is-closing) .header__mobile__hamburger {
+.header__mobile__hamburger.is-drawer-open {
   opacity: 1;
   pointer-events: auto;
 }
 
-body.header-drawer-is-open .header__mobile__hamburger-icon--menu,
-body .header__mobile__hamburger.is-drawer-open .header__mobile__hamburger-icon--menu,
-body:has(header-drawer.drawer--header.is-open) .header__mobile__hamburger-icon--menu,
-body:has(header-drawer.drawer--header.is-closing) .header__mobile__hamburger-icon--menu {
-  display: none;
+/* Crossfade the two icons. Key off .is-drawer-open — a class toggled directly on
+   the button by the MutationObserver in header.liquid (syncHamburgerDrawerLabel),
+   applied on the SAME synchronous frame the drawer opens/closes. The previous
+   [aria-expanded] hook flipped inside a setTimeout(0) batched with a body:has(...)
+   match that recalcs the button's whole subtree on the opacity-flip frame, so the
+   browser never captured a transitionable start value and the fade snapped.
+   [aria-expanded] is kept only as an accessibility fallback. */
+.header__mobile__hamburger.is-drawer-open .header__mobile__hamburger-icon--menu,
+.header__mobile__hamburger[aria-expanded="true"] .header__mobile__hamburger-icon--menu {
+  opacity: 0;
 }
 
-body.header-drawer-is-open .header__mobile__hamburger-icon--close,
-body .header__mobile__hamburger.is-drawer-open .header__mobile__hamburger-icon--close,
-body:has(header-drawer.drawer--header.is-open) .header__mobile__hamburger-icon--close,
-body:has(header-drawer.drawer--header.is-closing) .header__mobile__hamburger-icon--close {
-  display: flex;
+.header__mobile__hamburger.is-drawer-open .header__mobile__hamburger-icon--close,
+.header__mobile__hamburger[aria-expanded="true"] .header__mobile__hamburger-icon--close {
+  opacity: 1;
 }
 
 @media only screen and (min-width: 960px) {

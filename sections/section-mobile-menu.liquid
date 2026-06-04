@@ -342,17 +342,22 @@
       <header class="drawer__head">
         <div class="drawer__head-search">
           <header-search-popdown>
-            <details>
-              <summary
-                class="navlink navlink--search"
-                aria-haspopup="dialog"
-                title="{{ 'general.search.search' | t }}"
-              >
-                {%- render 'icon-search' -%}
-                {%- render 'icon-cancel' -%}
-                <span class="navlink">{{- 'layout.header.search' | t -}}</span>
-              </summary>
+            <a
+              href="#"
+              class="navlink navlink--search drawer__head-search__trigger"
+              tmenu-disabled-link
+              data-search-trigger
+              target="_self"
+              aria-haspopup="dialog"
+              title="{{ 'general.search.search' | t }}"
+            >
+              {%- render 'icon-search' -%}
+              {%- render 'icon-cancel' -%}
+              <span class="navtext">{{- 'layout.header.search' | t -}}</span>
+            </a>
 
+            <details>
+              <summary class="drawer__head-search__summary" tabindex="-1" aria-hidden="true"></summary>
               {%- render 'header-search-popdown', unique: drawer_head_search_id -%}
             </details>
           </header-search-popdown>
@@ -397,6 +402,37 @@
     <span class="underlay drawer__underlay" data-drawer-underlay></span>
   </header-drawer>
 </mobile-menu>
+
+{% javascript %}
+  (() => {
+    const init = () => {
+      const trigger = document.querySelector('.drawer__head-search [data-search-trigger]');
+      if (!trigger) return;
+
+      const popdown = trigger.closest('header-search-popdown');
+      const details = popdown && popdown.querySelector('details');
+      if (!details) return;
+
+      trigger.addEventListener('click', (event) => {
+        // preventDefault cancels the "#" navigation; we drive the popdown manually.
+        event.preventDefault();
+
+        if (details.open) {
+          const closeBtn = details.querySelector('[data-popdown-close]');
+          if (closeBtn) closeBtn.click();
+        } else {
+          details.setAttribute('open', '');
+        }
+      });
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+{% endjavascript %}
 
 {% schema %}
 {

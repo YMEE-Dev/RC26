@@ -4344,7 +4344,7 @@
             } else {
               this.isAnimating = false;
             }
-          }, 500);
+          }, 0);
         }
 
         hideDrawer() {
