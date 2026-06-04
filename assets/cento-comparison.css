@@ -1,4 +1,4 @@
-/* v2 */
+/* v3 */
 
 .collection-cento-comparison-banner {
   grid-column: 1 / -1;
@@ -185,5 +185,21 @@
 
   .cento-comparison__description {
     font-size: 11px;
+  }
+}
+
+/* Sticky-nav scroll-to-top fix (cento only).
+   When the collection nav pins, the theme sets `.header-sections` to `display: none`.
+   That element is `position: relative` / in normal flow at the top of the page, so
+   removing it deletes its height — and because cento has little content above the nav
+   (subcollections is disabled), the page snaps back to scrollTop:0. The nav can never
+   stay pinned, which reads as "not sticky / jumps to top."
+   Fix: preserve the header's box/height with `visibility: hidden` instead of removing
+   it. No height change = no scroll snap = the nav pins normally. `visibility: hidden`
+   (not `display: flex` alone) keeps it from covering the nav. Scoped to .collection-cento. */
+@media only screen and (max-width: 960px) {
+  body:has(.collection-cento .collection__nav.is-stuck) .header-sections {
+    display: flex !important;
+    visibility: hidden !important;
   }
 }
