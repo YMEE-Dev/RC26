@@ -10,21 +10,46 @@
   text-decoration: none;
 }
 
-.collection__nav.is-stuck .availability_filter-wrapper [data-availability-view-all] .availability-filter__label--count {
+/* Client request: hide the "view all" availability control entirely once the
+   collection nav becomes sticky (replaces the earlier stuck-state label swap).
+   `display: none` on the element also hides its label children, so it wins over
+   the mobile label !important rules in collection-floating-bar.css. */
+.collection__nav.is-stuck .availability_filter-wrapper [data-availability-view-all] {
   display: none;
 }
 
-.collection__nav.is-stuck .availability_filter-wrapper [data-availability-view-all] .availability-filter__label--view-all {
-  display: inline;
+/* PLP scroll-up overlap fix (desktop): when the header re-reveals on upward
+   scroll it returns to position:fixed/top:0/z-index:6000 — identical to the
+   sticky collection nav — so they overlap. Offset the stuck nav below the
+   header only while the header is actually revealed (has-header-sticky AND not
+   in the scrolled-down "layered hide" state, where the header sits at z-index:-1
+   and no offset is wanted). Mobile already hides the header when the nav sticks. */
+@media only screen and (min-width: 960px) {
+  body.has-header-sticky:not(.header-scroll-hide-layered) .collection__nav.is-stuck {
+    top: var(--header-height);
+  }
 }
 
-.collection__nav.is-stuck[data-has-active-subcollection-link="false"] .availability_filter-wrapper [data-availability-view-all] {
-  text-decoration: underline;
-  text-underline-offset: 23px;
+/* PLP mobile: the fixed header overlay sits on top of the collection nav and its
+   large, mostly-empty area was swallowing clicks meant for the nav controls
+   (filters/sort/subcollection links) beneath it. Let pointer events pass through
+   the header bar's non-interactive area to the nav, while keeping the logo,
+   menu toggle, breadcrumb links, search and any header controls clickable.
+   Scoped to the mobile header state (.js__show__mobile) and to .theme__header
+   so the desktop mega-menu and the drawer/underlay (outside .theme__header) are
+   unaffected. */
+body.template-collection .js__show__mobile .theme__header,
+body.template-collection .js__show__mobile .theme__header .section-padding,
+body.template-collection .js__show__mobile .theme__header .header__mobile {
+  pointer-events: none;
 }
 
-.collection__nav.is-stuck[data-has-active-subcollection-link="true"] .availability_filter-wrapper [data-availability-view-all] {
-  text-decoration: none;
+body.template-collection .js__show__mobile .theme__header a,
+body.template-collection .js__show__mobile .theme__header button,
+body.template-collection .js__show__mobile .theme__header summary,
+body.template-collection .js__show__mobile .theme__header input,
+body.template-collection .js__show__mobile .theme__header label {
+  pointer-events: auto;
 }
 
 .collection__nav.collection__nav--media-only .subcollection_links-wrapper {
