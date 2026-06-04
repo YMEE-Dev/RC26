@@ -11,8 +11,8 @@
 }
 
 @media only screen and (max-width: 960px) {
-  body .collection__nav .popout--sort {
-    display: none !important;
+  .collection__nav .availability_filter-wrapper {
+    display: none;
   }
 
   .collection-floating-bar {
@@ -305,6 +305,20 @@
     z-index: 6001;
     padding-left: 0;
     padding-right: 0;
+    justify-content: flex-start;
+  }
+
+  .collection__nav [data-availability-filter-control] {
+    order: 1;
+  }
+
+  .collection__nav .popout--sort {
+    order: 2;
+    margin-left: auto;
+  }
+
+  .collection__nav .popout--group {
+    order: 3;
   }
 
   body:has(.collection__nav.is-stuck) .header-sections {
@@ -335,7 +349,8 @@
 
   .collection__nav .availability-filter__button {
     margin-left: auto;
-    padding-left: 20px;
+    padding-left: 0px;
+    margin-left: 20px;
   }
 
   .collection__nav .popout--group .popout__toggle {
