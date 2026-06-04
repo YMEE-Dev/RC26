@@ -1,4 +1,3 @@
-
 {{ 'custom-collection.css' | asset_url | stylesheet_tag }}
 {{ 'collection-floating-bar.css' | asset_url | stylesheet_tag }}
 {{ 'cento-comparison.css' | asset_url | stylesheet_tag }}
@@ -902,18 +901,21 @@
 
         observer.observe(productsGrid, {childList: true, subtree: true});
 
-        const animObserver = new MutationObserver(function() {
+        const animObserver = new MutationObserver(function () {
           var newCards = Array.from(productsGrid.querySelectorAll('.plp-card-up:not(.plp-card-up--visible)'));
           if (!newCards.length) return;
           var vh = window.innerHeight;
-          var scrollObs = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-              if (!entry.isIntersecting) return;
-              scrollObs.unobserve(entry.target);
-              entry.target.classList.add('plp-card-up--visible');
-            });
-          }, { threshold: 0 });
-          newCards.forEach(function(card) {
+          var scrollObs = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (entry) {
+                if (!entry.isIntersecting) return;
+                scrollObs.unobserve(entry.target);
+                entry.target.classList.add('plp-card-up--visible');
+              });
+            },
+            {threshold: 0}
+          );
+          newCards.forEach(function (card) {
             if (card.getBoundingClientRect().top < vh) {
               card.classList.add('plp-card-up--visible');
             } else {
@@ -1003,7 +1005,9 @@
         if (link.origin && link.origin !== location.origin) return;
         e.preventDefault();
         document.body.classList.add('page-exit');
-        setTimeout(function () { window.location.href = href; }, 600);
+        setTimeout(function () {
+          window.location.href = href;
+        }, 600);
       });
 
       if (document.body.dataset.rcAnimations === 'false') return;
@@ -1025,13 +1029,16 @@
         });
       };
 
-      const scrollObserver = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (!entry.isIntersecting) return;
-          scrollObserver.unobserve(entry.target);
-          entry.target.classList.add('plp-card-up--visible');
-        });
-      }, { threshold: 0, rootMargin: '0px' });
+      const scrollObserver = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            scrollObserver.unobserve(entry.target);
+            entry.target.classList.add('plp-card-up--visible');
+          });
+        },
+        {threshold: 0, rootMargin: '0px'}
+      );
 
       const releaseAboveFold = function () {
         aboveFold.forEach(function (card) {
@@ -1041,28 +1048,38 @@
 
       const init = function () {
         partitionCards();
-        belowFold.forEach(function (card) { scrollObserver.observe(card); });
+        belowFold.forEach(function (card) {
+          scrollObserver.observe(card);
+        });
         if (subcollectionsDone) releaseAboveFold();
       };
 
       const hasSubcollections = !!document.querySelector('[data-section-type="subcollections"]');
 
-      document.addEventListener('theme:subcollections:animated', function () {
-        subcollectionsDone = true;
-        if (!aboveFold.length) return;
+      document.addEventListener(
+        'theme:subcollections:animated',
+        function () {
+          subcollectionsDone = true;
+          if (!aboveFold.length) return;
 
-        const lastItem = document.querySelector('.subcollection__item.plp-el-up--visible:last-child')
-          || document.querySelector('.subcollection__item.plp-el-up--visible');
-        if (!lastItem) { releaseAboveFold(); return; }
+          const lastItem =
+            document.querySelector('.subcollection__item.plp-el-up--visible:last-child') ||
+            document.querySelector('.subcollection__item.plp-el-up--visible');
+          if (!lastItem) {
+            releaseAboveFold();
+            return;
+          }
 
-        var fallback = setTimeout(releaseAboveFold, 900);
-        lastItem.addEventListener('transitionend', function handler(e) {
-          if (e.propertyName !== 'transform') return;
-          clearTimeout(fallback);
-          lastItem.removeEventListener('transitionend', handler);
-          releaseAboveFold();
-        });
-      }, { once: true });
+          var fallback = setTimeout(releaseAboveFold, 900);
+          lastItem.addEventListener('transitionend', function handler(e) {
+            if (e.propertyName !== 'transform') return;
+            clearTimeout(fallback);
+            lastItem.removeEventListener('transitionend', handler);
+            releaseAboveFold();
+          });
+        },
+        {once: true}
+      );
 
       if (hasSubcollections) {
         setTimeout(function () {
@@ -1075,9 +1092,11 @@
         subcollectionsDone = true;
       }
 
-      const scheduleInit = function () { requestAnimationFrame(init); };
+      const scheduleInit = function () {
+        requestAnimationFrame(init);
+      };
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', scheduleInit, { once: true });
+        document.addEventListener('DOMContentLoaded', scheduleInit, {once: true});
       } else {
         scheduleInit();
       }
@@ -1106,7 +1125,6 @@
     <script src="{{ 'grid-item.js' | asset_url }}" defer></script>
   {%- endif -%}
 {%- endpaginate -%}
-
 
 {% schema %}
 {
