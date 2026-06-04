@@ -96,7 +96,9 @@
     var productsGrid = document.querySelector('[data-products-grid]');
     if (productsGrid) {
       var reinsertObserver = new MutationObserver(function () {
-        requestAnimationFrame(insertBanner);
+        if (!productsGrid.contains(section)) {
+          requestAnimationFrame(insertBanner);
+        }
       });
       reinsertObserver.observe(productsGrid, { childList: true });
     }
