@@ -187,20 +187,3 @@
     font-size: 11px;
   }
 }
-
-/* Mobile sticky-nav jump fix (cento only).
-   The theme hides `.header-sections` with `display: none` when the collection nav
-   becomes sticky. But `.header-sections` is `position: relative` / in-flow, so
-   `display: none` removes its height and shifts the page up at the exact sticky
-   threshold; because the sticky toggle is layout-driven, it oscillates — the jump.
-   This is only noticeable on cento, where subcollections is disabled so the sticky
-   point sits high in the page.
-   Fix: keep the header's box in flow (constant height, no shift, no oscillation) but
-   make it invisible with `visibility: hidden` — so it neither jumps nor covers the
-   stuck nav. Scoped to `.collection-cento` so all other collections are untouched. */
-@media only screen and (max-width: 960px) {
-  body:has(.collection-cento .collection__nav.is-stuck) .header-sections {
-    display: flex;
-    visibility: hidden;
-  }
-}
