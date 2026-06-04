@@ -101,7 +101,8 @@
         {%- capture sub_collection_html -%}
           {{ sub_collection_html }}
 
-          {%- assign subcoll_delay = forloop.index0 | modulo: 3 | plus: 6 -%}
+          {%- assign subcoll_delay_mod = forloop.index0 | modulo: 3 -%}
+          {%- assign subcoll_delay = subcoll_delay_mod | plus: 6 -%}
           <div class="swiper-slide subcollection__item plp-el-up" style="--plp-delay: {{ subcoll_delay }}00ms">
             <div class="subcollection__inner">
               <a
@@ -148,63 +149,68 @@
         </div>
       {%- endif -%}
     {%- endif -%}
-  <script>
-    (function () {
-      const section = document.getElementById('Subcollections--{{ section.id }}');
-      if (!section) return;
-      const swiper = section.querySelector('[data-subcollections-swiper]');
-      if (!swiper) return;
-      const items = Array.from(swiper.querySelectorAll('.subcollection__item'));
-      if (!items.length) return;
-      if (document.body.dataset.rcAnimations === 'false') return;
+    <script>
+      (function () {
+        const section = document.getElementById('Subcollections--{{ section.id }}');
+        if (!section) return;
+        const swiper = section.querySelector('[data-subcollections-swiper]');
+        if (!swiper) return;
+        const items = Array.from(swiper.querySelectorAll('.subcollection__item'));
+        if (!items.length) return;
+        if (document.body.dataset.rcAnimations === 'false') return;
 
-      const animateItems = function () {
-        items.forEach(function (item, i) {
-          setTimeout(function () {
-            item.classList.add('plp-el-up--visible');
-            if (i === items.length - 1) {
-              document.dispatchEvent(new CustomEvent('theme:subcollections:animated'));
-            }
-          }, i * 160);
+        const animateItems = function () {
+          items.forEach(function (item, i) {
+            setTimeout(function () {
+              item.classList.add('plp-el-up--visible');
+              if (i === items.length - 1) {
+                document.dispatchEvent(new CustomEvent('theme:subcollections:animated'));
+              }
+            }, i * 160);
+          });
+        };
+
+        const imgs = Array.from(swiper.querySelectorAll('img'));
+
+        /* Wait for header animation to start first (top-to-bottom order on PLP) */
+        const waitForHeader = new Promise(function (resolve) {
+          if (document.body.classList.contains('plp-header-ready')) {
+            resolve();
+          } else {
+            document.addEventListener('theme:plp:header-ready', resolve, {once: true});
+            setTimeout(resolve, 3500); /* safety fallback aligned with collection.liquid */
+          }
         });
-      };
 
-      const imgs = Array.from(swiper.querySelectorAll('img'));
-
-      /* Wait for header animation to start first (top-to-bottom order on PLP) */
-      const waitForHeader = new Promise(function (resolve) {
-        if (document.body.classList.contains('plp-header-ready')) {
-          resolve();
-        } else {
-          document.addEventListener('theme:plp:header-ready', resolve, { once: true });
-          setTimeout(resolve, 3500); /* safety fallback aligned with collection.liquid */
-        }
-      });
-
-      Promise.all([
-        waitForHeader,
-        ...imgs.map(function (img) { return img.decode().catch(function () {}); })
-      ]).then(function () {
-        /* Wait for the last header element's CSS animation to actually finish before categories enter.
+        Promise.all([
+          waitForHeader,
+          ...imgs.map(function (img) {
+            return img.decode().catch(function () {});
+          }),
+        ]).then(function () {
+          /* Wait for the last header element's CSS animation to actually finish before categories enter.
            Desktop: last bar (.header__desktop__bar__r) finishes last.
            Mobile: breadcrumb (.header__mobile .header__logo__meta) finishes last.
            Fallback timeout covers reduced-motion / no-animation cases. */
-        var lastHeaderEl = window.innerWidth >= 960
-          ? document.querySelector('.header__desktop__bar__r')
-          : document.querySelector('.header__mobile .header__logo__meta');
+          var lastHeaderEl =
+            window.innerWidth >= 960
+              ? document.querySelector('.header__desktop__bar__r')
+              : document.querySelector('.header__mobile .header__logo__meta');
 
-        if (!lastHeaderEl) { animateItems(); return; }
+          if (!lastHeaderEl) {
+            animateItems();
+            return;
+          }
 
-        var fallback = setTimeout(animateItems, 1800);
-        lastHeaderEl.addEventListener('animationend', function handler() {
-          clearTimeout(fallback);
-          lastHeaderEl.removeEventListener('animationend', handler);
-          animateItems();
+          var fallback = setTimeout(animateItems, 1800);
+          lastHeaderEl.addEventListener('animationend', function handler() {
+            clearTimeout(fallback);
+            lastHeaderEl.removeEventListener('animationend', handler);
+            animateItems();
+          });
         });
-      });
-    })();
-  </script>
-
+      })();
+    </script>
   </section>
 {%- endif -%}
 
