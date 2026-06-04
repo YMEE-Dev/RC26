@@ -101,7 +101,7 @@
         {%- capture sub_collection_html -%}
           {{ sub_collection_html }}
 
-          {%- assign subcoll_delay = 6 | plus: (forloop.index0 | modulo: 3) -%}
+          {%- assign subcoll_delay = forloop.index0 | modulo: 3 | plus: 6 -%}
           <div class="swiper-slide subcollection__item plp-el-up" style="--plp-delay: {{ subcoll_delay }}00ms">
             <div class="subcollection__inner">
               <a
