@@ -76,7 +76,6 @@
         (target ? section.previousElementSibling === target : grid.firstElementChild === section);
       if (alreadyPlaced) return;
 
-      var scrollY = window.scrollY;
       if (!target) {
         grid.appendChild(section);
       } else if (target.nextSibling) {
@@ -86,9 +85,6 @@
       }
       section.style.gridColumn = '1 / -1';
       section.style.display = 'block';
-      if (window.scrollY !== scrollY) {
-        window.scrollTo(0, scrollY);
-      }
     }
 
     if (document.readyState === 'loading') {
