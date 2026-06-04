@@ -202,12 +202,19 @@
             return;
           }
 
-          var fallback = setTimeout(animateItems, 1800);
-          lastHeaderEl.addEventListener('animationend', function handler() {
+          var handler = function (event) {
+            if (event.target !== lastHeaderEl) return;
             clearTimeout(fallback);
             lastHeaderEl.removeEventListener('animationend', handler);
             animateItems();
-          });
+          };
+
+          var fallback = setTimeout(function () {
+            lastHeaderEl.removeEventListener('animationend', handler);
+            animateItems();
+          }, 1800);
+
+          lastHeaderEl.addEventListener('animationend', handler);
         });
       })();
     </script>
