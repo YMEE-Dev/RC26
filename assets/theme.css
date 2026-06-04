@@ -10628,8 +10628,6 @@ header-search-popdown.is-open .search-popdown {
   stroke-width: 1px;
 }
 
-/* Crossfade the two icons: the menu icon stays in flow (sizing the button) while
-   the close icon overlays it. Toggling opacity instead of display lets them fade. */
 .header__mobile__hamburger-icon--menu {
   opacity: 1;
 }
@@ -10640,25 +10638,11 @@ header-search-popdown.is-open .search-popdown {
   opacity: 0;
 }
 
-/* .header__mobile__hamburger:active {
-  transform: translate(-50%, 10px) scale(0.96);
-} */
-
-/* .header__mobile__hamburger.is-pressed {
-  animation: hamburger-press 1000ms ease-in-out forwards;
-} */
-
 @media only screen and (min-width: 960px) {
   .header__mobile__hamburger {
     display: none;
   }
 }
-
-/* body:has(.drawer--header.is-open) .header__mobile__right,
-body:has(.drawer--header.is-open) .header__mobile__hamburger {
-  opacity: 0;
-  pointer-events: none;
-} */
 
 body.header-drawer-is-open .header__mobile__hamburger,
 .header__mobile__hamburger.is-drawer-open {
@@ -10666,13 +10650,6 @@ body.header-drawer-is-open .header__mobile__hamburger,
   pointer-events: auto;
 }
 
-/* Crossfade the two icons. Key off .is-drawer-open — a class toggled directly on
-   the button by the MutationObserver in header.liquid (syncHamburgerDrawerLabel),
-   applied on the SAME synchronous frame the drawer opens/closes. The previous
-   [aria-expanded] hook flipped inside a setTimeout(0) batched with a body:has(...)
-   match that recalcs the button's whole subtree on the opacity-flip frame, so the
-   browser never captured a transitionable start value and the fade snapped.
-   [aria-expanded] is kept only as an accessibility fallback. */
 .header__mobile__hamburger.is-drawer-open .header__mobile__hamburger-icon--menu,
 .header__mobile__hamburger[aria-expanded="true"] .header__mobile__hamburger-icon--menu {
   opacity: 0;

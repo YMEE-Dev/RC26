@@ -4834,15 +4834,19 @@
         constructor() {
           super();
 
-          this.scrollbar = this.querySelector(selectors$c.scrollbar);
-          this.arrowNext = this.querySelector(selectors$c.scrollbarArrowNext);
-          this.arrowPrev = this.querySelector(selectors$c.scrollbarArrowPrev);
           this.toggleNextArrow = this.toggleNextArrow.bind(this);
           this.addEventListener("theme:swatches:loaded", this.toggleNextArrow);
         }
 
         connectedCallback() {
+          this.scrollbar = this.querySelector(selectors$c.scrollbar);
+          this.arrowNext = this.querySelector(selectors$c.scrollbarArrowNext);
+          this.arrowPrev = this.querySelector(selectors$c.scrollbarArrowPrev);
           document.addEventListener("theme:resize", this.toggleNextArrow);
+
+          if (!this.scrollbar) {
+            return;
+          }
 
           if (this.scrollbar.hasAttribute(attributes$9.scrollbarSlider)) {
             this.scrollToVisibleElement();
@@ -4878,6 +4882,8 @@
         }
 
         goToNext() {
+          if (!this.scrollbar || !this.arrowPrev) return;
+
           const moveWith = this.scrollbar.hasAttribute(attributes$9.scrollbarSlideFullWidth)
             ? this.scrollbar.getBoundingClientRect().width
             : this.scrollbar.getBoundingClientRect().width / 2;
@@ -4891,6 +4897,8 @@
         }
 
         goToPrev() {
+          if (!this.scrollbar || !this.arrowNext) return;
+
           const moveWith = this.scrollbar.hasAttribute(attributes$9.scrollbarSlideFullWidth)
             ? this.scrollbar.getBoundingClientRect().width
             : this.scrollbar.getBoundingClientRect().width / 2;
@@ -4904,6 +4912,8 @@
         }
 
         toggleNextArrow() {
+          if (!this.scrollbar) return;
+
           requestAnimationFrame(() => {
             this.arrowNext?.classList.toggle(
               classes$9.hidden,
@@ -4914,12 +4924,16 @@
         }
 
         togglePrevArrow() {
+          if (!this.scrollbar || !this.arrowPrev) return;
+
           requestAnimationFrame(() => {
             this.arrowPrev.classList.toggle(classes$9.hidden, this.scrollbar.scrollLeft <= 0);
           });
         }
 
         scrollToVisibleElement() {
+          if (!this.scrollbar) return;
+
           [].forEach.call(this.scrollbar.children, (element) => {
             element.addEventListener("click", (event) => {
               event.preventDefault();
@@ -4930,6 +4944,8 @@
         }
 
         move(offsetLeft, behavior = "smooth") {
+          if (!this.scrollbar) return;
+
           this.scrollbar.scrollTo({
             top: 0,
             left: offsetLeft,
