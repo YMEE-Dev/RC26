@@ -24,7 +24,7 @@
   </defs>
 </svg>
 
-<div class="collection-floating-bar" data-collection-floating-bar>
+<div class="collection-floating-bar" data-collection-floating-bar data-availability-filter-active="{{ availability_filter_active }}">
   <div class="collection-floating-bar__inner">
     <div class="collection-floating-bar__blur" aria-hidden="true"></div>
 
@@ -59,11 +59,10 @@
 
     <button
       type="button"
-      class="collection-floating-bar__filter"
-      data-collection-floating-bar-filter
+      class="collection-floating-bar__instock{% if availability_filter_active %} is-active{% endif %}"
+      data-collection-floating-bar-instock
     >
-      {%- render 'icon-filter' -%}
-      <span>{{ 'collections.general.filters' | t }}</span>
+      <span>{{ 'collections.general.in_stock' | t }}</span>
     </button>
 
     <button
@@ -79,14 +78,11 @@
 
     <button
       type="button"
-      class="collection-floating-bar__menu"
-      data-collection-floating-bar-menu
-      aria-label="Menu"
+      class="collection-floating-bar__filter"
+      data-collection-floating-bar-filter
     >
-      <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
-        <line x1="4" y1="8.5" x2="22" y2="8.5" stroke="black"/>
-        <line x1="4" y1="16.5" x2="22" y2="16.5" stroke="black"/>
-      </svg>
+      {%- render 'icon-filter' -%}
+      <span>{{ 'collections.general.filters' | t }}</span>
     </button>
   </div>
 
