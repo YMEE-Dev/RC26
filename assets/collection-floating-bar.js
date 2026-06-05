@@ -40,15 +40,20 @@
 
       var paramName = checkbox.getAttribute("data-availability-filter-param-name");
       var paramValue = checkbox.getAttribute("data-availability-filter-value");
-      if (!paramName) return;
 
-      var url = new URL(window.location.href);
-      if (checkbox.checked) {
-        url.searchParams.delete(paramName);
+      if (paramName) {
+        var url = new URL(window.location.href);
+        if (checkbox.checked) {
+          url.searchParams.delete(paramName);
+        } else {
+          url.searchParams.set(paramName, paramValue);
+        }
+        window.location.href = url.toString();
       } else {
-        url.searchParams.set(paramName, paramValue);
+        checkbox.checked = !checkbox.checked;
+        checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+        instockBtn.classList.toggle("is-active", checkbox.checked);
       }
-      window.location.href = url.toString();
     });
   }
 
