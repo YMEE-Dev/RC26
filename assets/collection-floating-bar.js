@@ -36,11 +36,19 @@
   if (instockBtn) {
     instockBtn.addEventListener("click", function () {
       var checkbox = document.querySelector("[data-availability-filter-checkbox]");
-      if (checkbox) {
-        checkbox.checked = !checkbox.checked;
-        checkbox.dispatchEvent(new Event("change", { bubbles: true }));
-        instockBtn.classList.toggle("is-active", checkbox.checked);
+      if (!checkbox) return;
+
+      var paramName = checkbox.getAttribute("data-availability-filter-param-name");
+      var paramValue = checkbox.getAttribute("data-availability-filter-value");
+      if (!paramName) return;
+
+      var url = new URL(window.location.href);
+      if (checkbox.checked) {
+        url.searchParams.delete(paramName);
+      } else {
+        url.searchParams.set(paramName, paramValue);
       }
+      window.location.href = url.toString();
     });
   }
 
