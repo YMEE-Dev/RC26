@@ -9004,6 +9004,14 @@ body.grid-classic .grandparent .menu__blocks:last-child .menu__block:last-child 
   display: flex;
   align-items: center;
   gap: 10px;
+  transition: color 0.25s ease-in-out;
+}
+
+/* While the mobile menu drawer is open, the cart (text + icon) is always white,
+   matching the burger/close icon. Keyed off the body class toggled on open/close
+   in header.liquid (syncHamburgerDrawerLabel / drawer MutationObserver). */
+body.header-drawer-is-open .header__mobile .navlink__cart__content {
+  color: #fff !important;
 }
 
 .header__cart__status__holder {
@@ -26225,7 +26233,7 @@ predictive-search[loading] .predictive-search__loader {
 .predictive-search {
   position: absolute;
   z-index: 4000;
-  top: 100%;
+  top: 102%;
   right: 0;
   left: 0;
   width: calc(100% + 20px);
