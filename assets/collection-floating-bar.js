@@ -35,25 +35,10 @@
   var instockBtn = bar.querySelector("[data-collection-floating-bar-instock]");
   if (instockBtn) {
     instockBtn.addEventListener("click", function () {
-      var checkbox = document.querySelector("[data-availability-filter-checkbox]");
-      if (!checkbox) return;
-
-      var paramName = checkbox.getAttribute("data-availability-filter-param-name");
-      var paramValue = checkbox.getAttribute("data-availability-filter-value");
-
-      if (paramName) {
-        var url = new URL(window.location.href);
-        if (checkbox.checked) {
-          url.searchParams.delete(paramName);
-        } else {
-          url.searchParams.set(paramName, paramValue);
-        }
-        window.location.href = url.toString();
-      } else {
-        checkbox.checked = !checkbox.checked;
-        checkbox.dispatchEvent(new Event("change", { bubbles: true }));
-        instockBtn.classList.toggle("is-active", checkbox.checked);
-      }
+      var control = document.querySelector("[data-availability-filter-control]");
+      if (!control) return;
+      control.click();
+      instockBtn.classList.toggle("is-active");
     });
   }
 
