@@ -188,6 +188,23 @@
   }
 }
 
+/* Sticky-nav fix (cento only) — root cause of the mobile "jump + nav disappears".
+   The theme hides the collection nav when it sticks IF the collection has no
+   "available now" products: `.collection__nav.is-stuck.has-no-available-products
+   { display: none }` (theme.css, @media max-width:768px). Cento has no available-
+   filter matches, so the nav gets `has-no-available-products` and is set to
+   display:none the instant it pins. That collapses its 60px height, which (a) makes
+   the nav invisible — reads as "not sticky" — and (b) removes 60px of document above
+   the scroll position, snapping the page up by 60px — the jump.
+   Other collections have available products, so they never get the class.
+   Fix: keep the nav visible when stuck on cento. Verified via DevTools: scroll no
+   longer snaps back and the nav stays 60px tall and pinned. */
+@media only screen and (max-width: 768px) {
+  .collection-cento .collection__nav.is-stuck.has-no-available-products {
+    display: flex !important;
+  }
+}
+
 /* Sticky-nav scroll-to-top fix (cento only).
    When the collection nav pins, the theme sets `.header-sections` to `display: none`.
    That element is `position: relative` / in normal flow at the top of the page, so
