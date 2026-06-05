@@ -442,7 +442,7 @@
     {%- endif -%}
 
     {%- if section.settings.show_collection_floating_bar -%}
-      {%- render 'collection-floating-bar' -%}
+      {%- render 'collection-floating-bar', availability_filter_active: availability_filter_active, has_available_products: has_available_products -%}
     {%- endif -%}
 
     <div class="collection__products">
@@ -1132,8 +1132,7 @@
       "type": "checkbox",
       "id": "show_collection_floating_bar",
       "label": "Enable collection floating bar (mobile)",
-      "info": "Legacy mobile bottom bar. When off, the filter button shows in the collection bar and Sort by moves into the filter panel.",
-      "default": false
+      "default": true
     },
     {
       "type": "checkbox",
