@@ -8268,7 +8268,7 @@ body:not(.is-loaded) .header__desktop {
 
 .header__mobile__hamburger,
 .header__logo__link {
-  color: var(--globaltext);
+  color: currentColor;
   transition: color 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 
@@ -9007,10 +9007,13 @@ body.grid-classic .grandparent .menu__blocks:last-child .menu__block:last-child 
   transition: color 0.25s ease-in-out;
 }
 
-/* While the mobile menu drawer is open, the cart (text + icon) is always white,
-   matching the burger/close icon. Keyed off the body class toggled on open/close
-   in header.liquid (syncHamburgerDrawerLabel / drawer MutationObserver). */
-body.header-drawer-is-open .header__mobile .navlink__cart__content {
+/* While the mobile menu drawer is open, the cart (text, counter + icon) is always
+   white, matching the burger/close icon. Keyed off the body class toggled on
+   open/close in header.liquid (syncHamburgerDrawerLabel / drawer MutationObserver).
+   The counter needs its own selector because .header__cart__status pins
+   color: var(--link) at higher specificity. */
+body.header-drawer-is-open .header__mobile .navlink__cart__content,
+body.header-drawer-is-open .header__mobile .header__cart__status {
   color: #fff !important;
 }
 
@@ -9085,6 +9088,7 @@ body.header-drawer-is-open .header__mobile .navlink__cart__content {
   background: transparent;
   font-size: 12px;
   line-height: var(--FONT-SIZE-NAV);
+  transition: color 0.25s ease-in-out;
   /* display: none; */
 }
 
@@ -10615,13 +10619,18 @@ header-search-popdown.is-open .search-popdown {
   cursor: pointer;
   height: auto;
   width: auto;
-  /* fill: var(--link); */
+  /* Follow --link (the scroll-observer-driven color) like the cart icon, so all
+     header icons change color in sync. Previously the icon inherited --globaltext,
+     which the observer never updates on the header, leaving it stuck. */
+  color: var(--link);
   z-index: 5999;
   padding-left: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.3s ease-in-out;
+  transition:
+    opacity 0.3s ease-in-out,
+    color 0.25s ease-in-out;
 }
 
 .header__mobile__hamburger-icon {
@@ -10629,7 +10638,7 @@ header-search-popdown.is-open .search-popdown {
   align-items: center;
   justify-content: center;
   line-height: 0;
-  color: currentColor;
+  color: var(--link);
   padding-top: 2px;
   pointer-events: none;
   transition:
