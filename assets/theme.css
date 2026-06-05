@@ -7773,6 +7773,10 @@ body:has(.main-content--collection-super-naked) .header__backfill {
   color: var(--link);
 }
 
+.header__logo__meta__collection {
+  text-align: center;
+}
+
 .header__logo__meta__separator {
   color: var(--link);
 }
@@ -10620,7 +10624,9 @@ header-search-popdown.is-open .search-popdown {
   color: currentColor;
   padding-top: 2px;
   pointer-events: none;
-  transition: opacity 0.25s ease-in-out;
+  transition:
+    opacity 0.25s ease-in-out,
+    color 0.25s ease-in-out;
 }
 
 .header__mobile__hamburger-icon svg {
@@ -10658,6 +10664,13 @@ body.header-drawer-is-open .header__mobile__hamburger,
 .header__mobile__hamburger.is-drawer-open .header__mobile__hamburger-icon--close,
 .header__mobile__hamburger[aria-expanded="true"] .header__mobile__hamburger-icon--close {
   opacity: 1;
+}
+
+/* While the drawer is open the icon is always white, overriding the
+   background-driven --link/currentColor the header normally uses. */
+.header__mobile__hamburger.is-drawer-open .header__mobile__hamburger-icon,
+.header__mobile__hamburger[aria-expanded="true"] .header__mobile__hamburger-icon {
+  color: #fff !important;
 }
 
 @media only screen and (min-width: 960px) {
