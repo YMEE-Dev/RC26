@@ -35,8 +35,12 @@
   var instockBtn = bar.querySelector("[data-collection-floating-bar-instock]");
   if (instockBtn) {
     instockBtn.addEventListener("click", function () {
-      var control = document.querySelector("[data-availability-filter-control]");
-      if (control) control.click();
+      var checkbox = document.querySelector("[data-availability-filter-checkbox]");
+      if (checkbox) {
+        checkbox.checked = !checkbox.checked;
+        checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+        instockBtn.classList.toggle("is-active", checkbox.checked);
+      }
     });
   }
 
