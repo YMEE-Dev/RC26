@@ -28,6 +28,15 @@
   body.has-header-sticky:not(.header-scroll-hide-layered) .collection__nav.is-stuck {
     top: var(--header-height);
   }
+
+  /* PLP scroll-down overlap fix (desktop): header-scroll-hide applies
+     translateX(±200px) to the desktop bars (z-index 6002). The JS layered class
+     that drops them to z-index:-1 has a 300ms delay, so during the slide-out
+     transition the header content sweeps visibly over the stuck nav. Raising the
+     stuck nav above the header (6002) makes the header slide behind it instead. */
+  .collection__nav.is-stuck {
+    z-index: 6003;
+  }
 }
 
 /* PLP mobile: the fixed header overlay sits on top of the collection nav and its
