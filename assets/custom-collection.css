@@ -10,21 +10,46 @@
   text-decoration: none;
 }
 
-.collection__nav.is-stuck .availability_filter-wrapper [data-availability-view-all] .availability-filter__label--count {
+/* Client request: hide the "view all" availability control entirely once the
+   collection nav becomes sticky (replaces the earlier stuck-state label swap).
+   `display: none` on the element also hides its label children, so it wins over
+   the mobile label !important rules in collection-floating-bar.css. */
+.collection__nav.is-stuck .availability_filter-wrapper [data-availability-view-all] {
   display: none;
 }
 
-.collection__nav.is-stuck .availability_filter-wrapper [data-availability-view-all] .availability-filter__label--view-all {
-  display: inline;
+/* PLP scroll-up overlap fix (desktop): when the header re-reveals on upward
+   scroll it returns to position:fixed/top:0/z-index:6000 — identical to the
+   sticky collection nav — so they overlap. Offset the stuck nav below the
+   header only while the header is actually revealed (has-header-sticky AND not
+   in the scrolled-down "layered hide" state, where the header sits at z-index:-1
+   and no offset is wanted). Mobile already hides the header when the nav sticks. */
+@media only screen and (min-width: 960px) {
+  body.has-header-sticky:not(.header-scroll-hide-layered) .collection__nav.is-stuck {
+    top: var(--header-height);
+  }
 }
 
-.collection__nav.is-stuck[data-has-active-subcollection-link="false"] .availability_filter-wrapper [data-availability-view-all] {
-  text-decoration: underline;
-  text-underline-offset: 23px;
+/* PLP mobile: the fixed header overlay sits on top of the collection nav and its
+   large, mostly-empty area was swallowing clicks meant for the nav controls
+   (filters/sort/subcollection links) beneath it. Let pointer events pass through
+   the header bar's non-interactive area to the nav, while keeping the logo,
+   menu toggle, breadcrumb links, search and any header controls clickable.
+   Scoped to the mobile header state (.js__show__mobile) and to .theme__header
+   so the desktop mega-menu and the drawer/underlay (outside .theme__header) are
+   unaffected. */
+body.template-collection .js__show__mobile .theme__header,
+body.template-collection .js__show__mobile .theme__header .section-padding,
+body.template-collection .js__show__mobile .theme__header .header__mobile {
+  pointer-events: none;
 }
 
-.collection__nav.is-stuck[data-has-active-subcollection-link="true"] .availability_filter-wrapper [data-availability-view-all] {
-  text-decoration: none;
+body.template-collection .js__show__mobile .theme__header a,
+body.template-collection .js__show__mobile .theme__header button,
+body.template-collection .js__show__mobile .theme__header summary,
+body.template-collection .js__show__mobile .theme__header input,
+body.template-collection .js__show__mobile .theme__header label {
+  pointer-events: auto;
 }
 
 .collection__nav.collection__nav--media-only .subcollection_links-wrapper {
@@ -39,7 +64,7 @@
    Scoped to RC animations on — when disabled, nav is always visible. */
 body[data-rc-animations="true"].template-collection .collection__nav {
   transition:
-    opacity 600ms 400ms cubic-bezier(0.70, 0, 0.3, 1),
+    opacity 600ms 400ms cubic-bezier(0.7, 0, 0.3, 1),
     transform 600ms 550ms cubic-bezier(0.05, 0, 0, 1);
 }
 
@@ -54,7 +79,7 @@ body[data-rc-animations="true"] .plp-el-up {
   opacity: 0;
   transform: translateY(30px);
   transition:
-    opacity 600ms var(--plp-delay) cubic-bezier(0.70, 0, 0.3, 1),
+    opacity 600ms var(--plp-delay) cubic-bezier(0.7, 0, 0.3, 1),
     transform 600ms calc(var(--plp-delay) + 150ms) cubic-bezier(0.05, 0, 0, 1);
 }
 
@@ -68,7 +93,7 @@ body[data-rc-animations="true"] .plp-card-up {
   opacity: 0;
   transform: translateY(50px);
   transition:
-    opacity 600ms var(--plp-delay) cubic-bezier(0.70, 0, 0.3, 1),
+    opacity 600ms var(--plp-delay) cubic-bezier(0.7, 0, 0.3, 1),
     transform 600ms calc(var(--plp-delay) + 150ms) cubic-bezier(0.05, 0, 0, 1);
 }
 
@@ -79,7 +104,7 @@ body[data-rc-animations="true"] .plp-card-up.plp-card-up--visible {
 
 body.page-exit {
   opacity: 0 !important;
-  transition: opacity 600ms cubic-bezier(0.70, 0, 0.3, 1) !important;
+  transition: opacity 600ms cubic-bezier(0.7, 0, 0.3, 1) !important;
   pointer-events: none;
 }
 
@@ -687,4 +712,39 @@ body.page-exit {
     margin-top: 12px;
     margin-bottom: 10px;
   }
+}
+
+/* PLP cover: extra spacing between the header logo and the collection breadcrumb,
+   plus a short description sourced from the `custom.plp_short_description` metafield
+   rendered directly under the breadcrumb. Scoped to collection templates so other
+   templates that share `.header__logo` / `.header__logo__meta` are unaffected. */
+body.template-collection .header__logo {
+  gap: 24px;
+}
+
+body.template-collection .header__logo__meta {
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.header__logo__meta__description {
+  margin: 0;
+  max-width: 362px;
+  font-size: 12px;
+  line-height: 20px;
+  letter-spacing: 0;
+  text-align: center;
+  text-transform: none;
+}
+
+@media only screen and (min-width: 769px) {
+  body.template-collection .header__logo {
+    gap: 40px;
+  }
+}
+
+/* Filter bar sits below the header (z-index 6002) but remains clickable at scrollTop 0 via pointer-events toggling on body.template-collection .js__show__mobile .theme__header and positioning adjustments on .collection__nav.is-stuck */
+.collection__nav {
+  z-index: 6000;
 }

@@ -1,0 +1,37 @@
+{%- assign sort_options = search.sort_options | default: collection.sort_options -%}
+{%- assign sort_options = sort_options
+  | reject: 'value', 'created-ascending'
+  | reject: 'value', 'created-descending'
+-%}
+{%- assign sort_by = search.sort_by | default: collection.sort_by -%}
+{%- assign currently_selected = sort_options | where: 'value', sort_by | first -%}
+{%- if currently_selected == blank and sort_options.size > 0 -%}
+  {%- assign currently_selected = sort_options.first -%}
+  {%- assign sort_by = currently_selected.value -%}
+{%- endif -%}
+
+{%- if sort_options.size > 0 -%}
+  <div class="collection-filter-sort">
+    <div class="collection-floating-bar__sort-sidebar__head">
+      <h3>{{ 'collections.general.sort' | t }}</h3>
+    </div>
+    <div class="collection-floating-bar__sort-sidebar__body">
+      <ul class="collection-floating-bar__sort-list">
+        {%- for option in sort_options -%}
+          <li class="collection-floating-bar__sort-item{% if sort_by == option.value %} is-active{% endif %}">
+            <a
+              href="#"
+              data-plp-sort-option
+              data-value="{{ option.value }}"
+              {% if sort_by == option.value %}
+                aria-current="true"
+              {% endif %}
+            >
+              {{ option.name }}
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+  </div>
+{%- endif -%}

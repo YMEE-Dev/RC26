@@ -1,0 +1,55 @@
+{% doc %}
+  Renders the Cento Diamond Comparison banner inline within the collection product grid.
+  All content is sourced from the cento_comparison block settings on the collection section.
+
+  Accepts:
+  - block: {Object} Block object with shopify_attributes (required)
+{% enddoc %}
+
+{%- assign bg_url = 'cento-diamond-comparison-bg.jpg' | asset_url -%}
+
+<div class="collection-cento-comparison-banner" {{ block.shopify_attributes }}>
+  <div class="cento-comparison">
+    <div class="cento-comparison__bg" style="background: url('{{ bg_url }}') lightgray 0px -132.752px / 160.866% 134.653% no-repeat;"></div>
+
+    <div class="cento-comparison__wrapper">
+
+      <div class="cento-comparison__row">
+        <div class="cento-comparison__title-col">
+          <h3 class="cento-comparison__title">{{ block.settings.row1_title }}</h3>
+        </div>
+        <div class="cento-comparison__image-col">
+          <span class="cento-comparison__svg-wrap">{{ 'cento-diamond-facets.svg' | inline_asset_content }}</span>
+          <span class="cento-comparison__svg-wrap">{{ 'cento-diamond-side.svg' | inline_asset_content }}</span>
+        </div>
+        {%- if block.settings.row1_description != blank -%}
+          <div class="cento-comparison__desc-col">
+            <div class="cento-comparison__description rte">{{ block.settings.row1_description }}</div>
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div class="cento-comparison__divider">
+        <span class="cento-comparison__divider-line"></span>
+        <span class="cento-comparison__vs">vs</span>
+        <span class="cento-comparison__divider-line"></span>
+      </div>
+
+      <div class="cento-comparison__row">
+        <div class="cento-comparison__title-col">
+          <h3 class="cento-comparison__title">{{ block.settings.row2_title }}</h3>
+        </div>
+        <div class="cento-comparison__image-col">
+          <span class="cento-comparison__svg-wrap">{{ 'standard-diamond-facets.svg' | inline_asset_content }}</span>
+          <span class="cento-comparison__svg-wrap">{{ 'standard-diamond-side.svg' | inline_asset_content }}</span>
+        </div>
+        {%- if block.settings.row2_description != blank -%}
+          <div class="cento-comparison__desc-col">
+            <div class="cento-comparison__description rte">{{ block.settings.row2_description }}</div>
+          </div>
+        {%- endif -%}
+      </div>
+
+    </div>
+  </div>
+</div>

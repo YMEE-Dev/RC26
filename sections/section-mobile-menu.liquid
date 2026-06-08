@@ -6,7 +6,7 @@
   assign animation_delay_increment = 50
   assign block_index_pinned = 1
   assign block_index_dynamic = 1
-  assign search_id = 'mobile--' | append: section.id
+  assign drawer_head_search_id = 'mobile-drawer-head--' | append: section.id
   assign color_scheme = 'color-' | append: section.settings.color_scheme
 
   capture section_style
@@ -18,9 +18,6 @@
   assign logo_width_15x = logo_width | times: 1.5 | round
   assign logo_width_2x = logo_width | times: 2 | round
   assign logo_widths = logo_width | append: ',' | append: logo_width_15x | append: ',' | append: logo_width_2x | append: ',' | append: logo_width | append: ',' | append: logo_width_15x | append: ',' | append: logo_width_2x
-
-  assign search_block = section.blocks | where: 'type', 'search'
-  assign search_block = search_block[0]
 
   assign cart_item_count = cart.item_count
 
@@ -35,41 +32,6 @@
   data-section-type="mobile-menu"
   style="{{ section_style }}"
 >
-  {%- if search_block -%}
-    {%- liquid
-      assign animation_delay = block_index_dynamic | times: animation_delay_increment | plus: animation_delay_initial
-      assign block_index_dynamic = block_index_dynamic | plus: 1
-
-      capture style
-        echo '--block-padding-bottom: ' | append: search_block.settings.padding_bottom | append: 'px;'
-      endcapture
-    -%}
-
-    {%- capture dynamic_blocks -%}
-      <div class="mobile-menu__block mobile-menu__block--search block-padding"
-        data-animation="{{ animation_name }}"
-        data-animation-duration="{{ animation_duration }}"
-        data-animation-delay="{{ animation_delay }}"
-        style="{{ style }}"
-        {{ search_block.shopify_attributes }}>
-
-        <div class="mobile-menu__block-search">
-          <header-search-popdown>
-            <details>
-              <summary class="navlink navlink--search" aria-haspopup="dialog" title="{{ 'general.search.search' | t }}">
-                {%- render 'icon-search' -%}
-                {%- render 'icon-cancel' -%}
-                <span class="visually-hidden">{{ 'layout.header.search' | t }}</span>
-              </summary>
-
-              {%- render 'header-search-popdown', unique: search_id -%}
-            </details>
-          </header-search-popdown>
-        </div>
-      </div>
-    {%- endcapture -%}
-  {%- endif -%}
-
   {%- for block in section.blocks -%}
     {%- liquid
       assign bg_color = block.settings.bg_color
@@ -362,7 +324,7 @@
 
     <span class="header__cart__status__holder">
       {%- render 'icon-cart' -%}
-      
+
       <cart-count class="header__cart__status navtext" data-status-separator=": " data-cart-count="{{ cart.item_count }}" data-limit="10">
         {{ cart_item_count }}
       </cart-count>
@@ -378,6 +340,29 @@
   >
     <div class="drawer__inner" data-drawer-inner>
       <header class="drawer__head">
+        <div class="drawer__head-search">
+          <header-search-popdown>
+            <a
+              href="#"
+              class="navlink navlink--search drawer__head-search__trigger"
+              tmenu-disabled-link
+              data-search-trigger
+              target="_self"
+              aria-haspopup="dialog"
+              title="{{ 'general.search.search' | t }}"
+            >
+              {%- render 'icon-search' -%}
+              {%- render 'icon-cancel' -%}
+              <span class="navtext">{{- 'layout.header.search' | t -}}</span>
+            </a>
+
+            <details>
+              <summary class="drawer__head-search__summary" tabindex="-1" aria-hidden="true"></summary>
+              {%- render 'header-search-popdown', unique: drawer_head_search_id -%}
+            </details>
+          </header-search-popdown>
+        </div>
+
         {% comment %}
           {%- if logo != blank -%}
             <a
@@ -400,49 +385,6 @@
             {{ dynamic_blocks }}
           </div>
         </div>
-        <div class="drawer__floating-menu" data-drawer-floating-menu>
-          {% comment %} search {% endcomment %}
-          <div class="drawer__floating__left">
-            <div class="drawer__floating__button{% if settings.type_nav_caps %} caps{% endif %}">
-              <header-search-popdown>
-                <details>
-                  <summary
-                    class="navlink navlink--search"
-                    aria-haspopup="dialog"
-                    title="{{ 'general.search.search' | t }}"
-                  >
-                    {%- render 'icon-search' -%}
-                    {%- render 'icon-cancel' -%}
-                    <span class="navtext">{{ 'layout.header.search' | t }}</span>
-                  </summary>
-
-                  {%- render 'header-search-popdown', unique: 'mobile' -%}
-
-                  <span class="underlay" data-popdown-underlay></span>
-                </details>
-              </header-search-popdown>
-            </div>
-          </div>
-          {% comment %} close button {% endcomment %}
-          <button
-            class="drawer__close"
-            data-drawer-close
-            aria-label="{{ 'general.accessibility.show_menu' | t }}"
-            aria-haspopup="true"
-            aria-expanded="true"
-            aria-controls="mobile-menu-{{ section.id }}"
-          >
-            {%- render 'icon-cancel' -%}
-          </button>
-          {% comment %} cart {% endcomment %}
-          <div class="drawer__floating__right{% if settings.type_nav_caps %} caps{% endif %}">
-            <div class="drawer__floating__button">
-              <a href="{{ routes.cart_url }}" class="navlink navlink--cart navlink--cart--icon" data-cart-toggle>
-                {{ cart_status }}
-              </a>
-            </div>
-          </div>
-        </div>
       </div>
 
       {%- if pinned_blocks != blank -%}
@@ -460,6 +402,37 @@
     <span class="underlay drawer__underlay" data-drawer-underlay></span>
   </header-drawer>
 </mobile-menu>
+
+{% javascript %}
+  (() => {
+    const init = () => {
+      const trigger = document.querySelector('.drawer__head-search [data-search-trigger]');
+      if (!trigger) return;
+
+      const popdown = trigger.closest('header-search-popdown');
+      const details = popdown && popdown.querySelector('details');
+      if (!details) return;
+
+      trigger.addEventListener('click', (event) => {
+        // preventDefault cancels the "#" navigation; we drive the popdown manually.
+        event.preventDefault();
+
+        if (details.open) {
+          const closeBtn = details.querySelector('[data-popdown-close]');
+          if (closeBtn) closeBtn.click();
+        } else {
+          details.setAttribute('open', '');
+        }
+      });
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+{% endjavascript %}
 
 {% schema %}
 {
@@ -510,11 +483,11 @@
           "info": "Automatically generated by the base size.",
           "default": "body-large",
           "options": [
-            { "value": "body-x-small", "label": "Extra small" },
-            { "value": "body-small", "label": "Small" },
-            { "value": "body-medium", "label": "Medium" },
-            { "value": "body-large", "label": "Large" },
-            { "value": "body-x-large", "label": "Extra large" }
+            {"value": "body-x-small", "label": "Extra small"},
+            {"value": "body-small", "label": "Small"},
+            {"value": "body-medium", "label": "Medium"},
+            {"value": "body-large", "label": "Large"},
+            {"value": "body-x-large", "label": "Extra large"}
           ]
         },
         {
@@ -578,11 +551,11 @@
           "info": "Automatically generated by the base size. Applies only when content in Text field is set to Paragraph.",
           "default": "body-large",
           "options": [
-            { "value": "body-x-small", "label": "Extra small" },
-            { "value": "body-small", "label": "Small" },
-            { "value": "body-medium", "label": "Medium" },
-            { "value": "body-large", "label": "Large" },
-            { "value": "body-x-large", "label": "Extra large" }
+            {"value": "body-x-small", "label": "Extra small"},
+            {"value": "body-small", "label": "Small"},
+            {"value": "body-medium", "label": "Medium"},
+            {"value": "body-large", "label": "Large"},
+            {"value": "body-x-large", "label": "Extra large"}
           ]
         },
         {
@@ -649,9 +622,9 @@
           "label": "Image alignment",
           "default": "left",
           "options": [
-            { "label": "Left", "value": "left" },
-            { "label": "Center", "value": "center" },
-            { "label": "Right", "value": "right" }
+            {"label": "Left", "value": "left"},
+            {"label": "Center", "value": "center"},
+            {"label": "Right", "value": "right"}
           ]
         },
         {
@@ -674,16 +647,16 @@
           "label": "Top-level menu item",
           "default": "1",
           "options": [
-            { "value": "1", "label": "1" },
-            { "value": "2", "label": "2" },
-            { "value": "3", "label": "3" },
-            { "value": "4", "label": "4" },
-            { "value": "5", "label": "5" },
-            { "value": "6", "label": "6" },
-            { "value": "7", "label": "7" },
-            { "value": "8", "label": "8" },
-            { "value": "9", "label": "9" },
-            { "value": "10", "label": "10" }
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"},
+            {"value": "3", "label": "3"},
+            {"value": "4", "label": "4"},
+            {"value": "5", "label": "5"},
+            {"value": "6", "label": "6"},
+            {"value": "7", "label": "7"},
+            {"value": "8", "label": "8"},
+            {"value": "9", "label": "9"},
+            {"value": "10", "label": "10"}
           ]
         },
         {
@@ -693,17 +666,17 @@
           "info": "Choose the submenu position under the selected top-level item. Set to None to place at the top level.",
           "default": "0",
           "options": [
-            { "value": "0", "label": "None (top level)" },
-            { "value": "1", "label": "1" },
-            { "value": "2", "label": "2" },
-            { "value": "3", "label": "3" },
-            { "value": "4", "label": "4" },
-            { "value": "5", "label": "5" },
-            { "value": "6", "label": "6" },
-            { "value": "7", "label": "7" },
-            { "value": "8", "label": "8" },
-            { "value": "9", "label": "9" },
-            { "value": "10", "label": "10" }
+            {"value": "0", "label": "None (top level)"},
+            {"value": "1", "label": "1"},
+            {"value": "2", "label": "2"},
+            {"value": "3", "label": "3"},
+            {"value": "4", "label": "4"},
+            {"value": "5", "label": "5"},
+            {"value": "6", "label": "6"},
+            {"value": "7", "label": "7"},
+            {"value": "8", "label": "8"},
+            {"value": "9", "label": "9"},
+            {"value": "10", "label": "10"}
           ]
         },
         {
@@ -742,45 +715,45 @@
           "label": "Icon",
           "default": "icon-award",
           "options": [
-            { "label": "Award", "value": "icon-award" },
-            { "label": "Box", "value": "icon-box" },
-            { "label": "Chat", "value": "icon-chat" },
-            { "label": "Check", "value": "icon-check" },
-            { "label": "Check circle", "value": "icon-check-circle" },
-            { "label": "Cloud", "value": "icon-cloud" },
-            { "label": "Diameter", "value": "icon-diameter" },
-            { "label": "Discount", "value": "icon-discount" },
-            { "label": "Donation", "value": "icon-donation" },
-            { "label": "Droplet", "value": "icon-droplet" },
-            { "label": "Info", "value": "icon-info-empty" },
-            { "label": "Email", "value": "icon-email" },
-            { "label": "Fast shipment", "value": "icon-fast-shipment" },
-            { "label": "Flare", "value": "icon-flare" },
-            { "label": "Flower", "value": "icon-flower" },
-            { "label": "Gift", "value": "icon-gift" },
-            { "label": "Green shipment", "value": "icon-green-shipment" },
-            { "label": "Heart", "value": "icon-heart" },
-            { "label": "Leaf", "value": "icon-leaf" },
-            { "label": "Lightening", "value": "icon-lightening" },
-            { "label": "Location", "value": "icon-location" },
-            { "label": "Mail", "value": "icon-mail" },
-            { "label": "Notes", "value": "icon-notes" },
-            { "label": "Pants", "value": "icon-pants" },
-            { "label": "Peace", "value": "icon-peace" },
-            { "label": "Pin", "value": "icon-pin" },
-            { "label": "Planet", "value": "icon-planet" },
-            { "label": "Phone", "value": "icon-phone" },
-            { "label": "Recycle", "value": "icon-recycle" },
-            { "label": "Ruler", "value": "icon-ruler" },
-            { "label": "Shield", "value": "icon-shield" },
-            { "label": "Smile", "value": "icon-smile" },
-            { "label": "Star", "value": "icon-star" },
-            { "label": "Tree", "value": "icon-tree" },
-            { "label": "Trophy", "value": "icon-trophy" },
-            { "label": "Truck", "value": "icon-truck" },
-            { "label": "Vegan", "value": "icon-vegan" },
-            { "label": "Wash", "value": "icon-wash" },
-            { "label": "Washing machine", "value": "icon-washing-machine" }
+            {"label": "Award", "value": "icon-award"},
+            {"label": "Box", "value": "icon-box"},
+            {"label": "Chat", "value": "icon-chat"},
+            {"label": "Check", "value": "icon-check"},
+            {"label": "Check circle", "value": "icon-check-circle"},
+            {"label": "Cloud", "value": "icon-cloud"},
+            {"label": "Diameter", "value": "icon-diameter"},
+            {"label": "Discount", "value": "icon-discount"},
+            {"label": "Donation", "value": "icon-donation"},
+            {"label": "Droplet", "value": "icon-droplet"},
+            {"label": "Info", "value": "icon-info-empty"},
+            {"label": "Email", "value": "icon-email"},
+            {"label": "Fast shipment", "value": "icon-fast-shipment"},
+            {"label": "Flare", "value": "icon-flare"},
+            {"label": "Flower", "value": "icon-flower"},
+            {"label": "Gift", "value": "icon-gift"},
+            {"label": "Green shipment", "value": "icon-green-shipment"},
+            {"label": "Heart", "value": "icon-heart"},
+            {"label": "Leaf", "value": "icon-leaf"},
+            {"label": "Lightening", "value": "icon-lightening"},
+            {"label": "Location", "value": "icon-location"},
+            {"label": "Mail", "value": "icon-mail"},
+            {"label": "Notes", "value": "icon-notes"},
+            {"label": "Pants", "value": "icon-pants"},
+            {"label": "Peace", "value": "icon-peace"},
+            {"label": "Pin", "value": "icon-pin"},
+            {"label": "Planet", "value": "icon-planet"},
+            {"label": "Phone", "value": "icon-phone"},
+            {"label": "Recycle", "value": "icon-recycle"},
+            {"label": "Ruler", "value": "icon-ruler"},
+            {"label": "Shield", "value": "icon-shield"},
+            {"label": "Smile", "value": "icon-smile"},
+            {"label": "Star", "value": "icon-star"},
+            {"label": "Tree", "value": "icon-tree"},
+            {"label": "Trophy", "value": "icon-trophy"},
+            {"label": "Truck", "value": "icon-truck"},
+            {"label": "Vegan", "value": "icon-vegan"},
+            {"label": "Wash", "value": "icon-wash"},
+            {"label": "Washing machine", "value": "icon-washing-machine"}
           ]
         },
         {
@@ -822,11 +795,11 @@
           "info": "Automatically generated by the base size. Applies only when content in Text field is set to Paragraph.",
           "default": "body-medium",
           "options": [
-            { "value": "body-x-small", "label": "Extra small" },
-            { "value": "body-small", "label": "Small" },
-            { "value": "body-medium", "label": "Medium" },
-            { "value": "body-large", "label": "Large" },
-            { "value": "body-x-large", "label": "Extra large" }
+            {"value": "body-x-small", "label": "Extra small"},
+            {"value": "body-small", "label": "Small"},
+            {"value": "body-medium", "label": "Medium"},
+            {"value": "body-large", "label": "Large"},
+            {"value": "body-x-large", "label": "Extra large"}
           ]
         },
         {
@@ -871,8 +844,8 @@
           "label": "Text alignment",
           "default": "text-left",
           "options": [
-            { "value": "text-left", "label": "Left" },
-            { "value": "text-center", "label": "Centered" }
+            {"value": "text-left", "label": "Left"},
+            {"value": "text-center", "label": "Centered"}
           ]
         },
         {
@@ -882,11 +855,11 @@
           "info": "Automatically generated by the base size. Applies only when content in Text field is set to Paragraph.",
           "default": "body-large",
           "options": [
-            { "value": "body-x-small", "label": "Extra small" },
-            { "value": "body-small", "label": "Small" },
-            { "value": "body-medium", "label": "Medium" },
-            { "value": "body-large", "label": "Large" },
-            { "value": "body-x-large", "label": "Extra large" }
+            {"value": "body-x-small", "label": "Extra small"},
+            {"value": "body-small", "label": "Small"},
+            {"value": "body-medium", "label": "Medium"},
+            {"value": "body-large", "label": "Large"},
+            {"value": "body-x-large", "label": "Extra large"}
           ]
         },
         {
@@ -926,10 +899,10 @@
           "label": "Color",
           "default": "btn--primary",
           "options": [
-            { "value": "btn--black", "label": "Black" },
-            { "value": "btn--white", "label": "White" },
-            { "value": "btn--primary", "label": "Primary" },
-            { "value": "btn--secondary", "label": "Secondary" }
+            {"value": "btn--black", "label": "Black"},
+            {"value": "btn--white", "label": "White"},
+            {"value": "btn--primary", "label": "Primary"},
+            {"value": "btn--secondary", "label": "Secondary"}
           ]
         },
         {
@@ -938,9 +911,9 @@
           "label": "Size",
           "default": "",
           "options": [
-            { "label": "Small", "value": "btn--small" },
-            { "label": "Medium", "value": "" },
-            { "label": "Large", "value": "btn--large" }
+            {"label": "Small", "value": "btn--small"},
+            {"label": "Medium", "value": ""},
+            {"label": "Large", "value": "btn--large"}
           ]
         },
         {
@@ -949,9 +922,9 @@
           "label": "Style",
           "default": "btn--solid",
           "options": [
-            { "label": "Solid", "value": "btn--solid" },
-            { "label": "Outline", "value": "btn--outline" },
-            { "label": "Text", "value": "btn--text" }
+            {"label": "Solid", "value": "btn--solid"},
+            {"label": "Outline", "value": "btn--outline"},
+            {"label": "Text", "value": "btn--text"}
           ]
         },
         {
@@ -1016,11 +989,11 @@
           "info": "Automatically generated by the base size.",
           "default": "body-large",
           "options": [
-            { "value": "body-x-small", "label": "Extra small" },
-            { "value": "body-small", "label": "Small" },
-            { "value": "body-medium", "label": "Medium" },
-            { "value": "body-large", "label": "Large" },
-            { "value": "body-x-large", "label": "Extra large" }
+            {"value": "body-x-small", "label": "Extra small"},
+            {"value": "body-small", "label": "Small"},
+            {"value": "body-medium", "label": "Medium"},
+            {"value": "body-large", "label": "Large"},
+            {"value": "body-x-large", "label": "Extra large"}
           ]
         },
         {
@@ -1136,8 +1109,8 @@
           "label": "Width",
           "default": "full",
           "options": [
-            { "label": "Full width", "value": "full" },
-            { "label": "Half", "value": "half" }
+            {"label": "Full width", "value": "full"},
+            {"label": "Half", "value": "half"}
           ]
         },
         {
@@ -1177,8 +1150,8 @@
           "label": "Width",
           "default": "full",
           "options": [
-            { "label": "Full width", "value": "full" },
-            { "label": "Half", "value": "half" }
+            {"label": "Full width", "value": "full"},
+            {"label": "Half", "value": "half"}
           ]
         },
         {
@@ -1239,11 +1212,11 @@
           "info": "Automatically generated by the base size.",
           "default": "body-medium",
           "options": [
-            { "value": "body-x-small", "label": "Extra small" },
-            { "value": "body-small", "label": "Small" },
-            { "value": "body-medium", "label": "Medium" },
-            { "value": "body-large", "label": "Large" },
-            { "value": "body-x-large", "label": "Extra large" }
+            {"value": "body-x-small", "label": "Extra small"},
+            {"value": "body-small", "label": "Small"},
+            {"value": "body-medium", "label": "Medium"},
+            {"value": "body-large", "label": "Large"},
+            {"value": "body-x-large", "label": "Extra large"}
           ]
         },
         {
@@ -1324,11 +1297,11 @@
           "info": "Automatically generated by the base size.",
           "default": "body-medium",
           "options": [
-            { "value": "body-x-small", "label": "Extra small" },
-            { "value": "body-small", "label": "Small" },
-            { "value": "body-medium", "label": "Medium" },
-            { "value": "body-large", "label": "Large" },
-            { "value": "body-x-large", "label": "Extra large" }
+            {"value": "body-x-small", "label": "Extra small"},
+            {"value": "body-small", "label": "Small"},
+            {"value": "body-medium", "label": "Medium"},
+            {"value": "body-large", "label": "Large"},
+            {"value": "body-x-large", "label": "Extra large"}
           ]
         },
         {
@@ -1383,27 +1356,6 @@
           "label": "Show line",
           "default": true
         },
-        {
-          "type": "header",
-          "content": "Block spacing"
-        },
-        {
-          "type": "range",
-          "id": "padding_bottom",
-          "min": 0,
-          "max": 50,
-          "step": 2,
-          "unit": "px",
-          "label": "Padding bottom",
-          "default": 14
-        }
-      ]
-    },
-    {
-      "type": "search",
-      "name": "Search bar",
-      "limit": 1,
-      "settings": [
         {
           "type": "header",
           "content": "Block spacing"

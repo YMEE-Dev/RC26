@@ -11,6 +11,11 @@
 {% endcomment %}
 
 <style>
+    /* Prevent horizontal scrollbar flash while bar__r animates in from translateX(200px).
+       Use clip (not hidden): hidden makes html a scroll container which breaks
+       pointer events on position:fixed + transform children in iOS Safari. */
+    @supports (overflow: clip) { html { overflow-x: clip; } }
+
     @keyframes plp-header-from-top { from { transform: translateY(-200px); opacity: 0; } to { transform: none; opacity: 1; } }
     @keyframes plp-header-fade-near { from { transform: translateY(-20px); opacity: 0; } to { transform: none; opacity: 1; } }
     @keyframes plp-header-from-left { from { transform: translateX(-200px); opacity: 0; } to { transform: none; opacity: 1; } }
@@ -21,23 +26,40 @@
       opacity: 0 !important;
     }
 
-    /* Logo + breadcrumb — shared by desktop and mobile */
+    /* Logo + breadcrumb — shared by desktop and mobile.
+       The mobile selectors are additionally gated behind :not(.plp-header-anim-done)
+       so the entrance plays only once per load. On a collection PLP the mobile header
+       is hidden with display:none while the nav is stuck and re-shown on scroll back to
+       the top — and re-showing a display:none element restarts its CSS animation, which
+       made the header re-drop-in on every scroll-to-top. The one-shot flag (added ~1.8s
+       after the entrance, reset on BFCache restore) stops that replay. Desktop hides via
+       z-index, not display, so it never replays and is left ungated. */
     body.plp-header-ready .header__desktop__bar__l .header__logo,
-    body.plp-header-ready .header__mobile .header__logo {
+    body.plp-header-ready:not(.plp-header-anim-done) .header__mobile .header__logo {
       animation: plp-header-from-top 550ms 200ms cubic-bezier(0.05, 0, 0, 1) backwards;
     }
     body.plp-header-ready .header__desktop__bar__l .header__logo__meta,
-    body.plp-header-ready .header__mobile .header__logo__meta {
+    body.plp-header-ready:not(.plp-header-anim-done) .header__mobile .header__logo__meta {
       animation: plp-header-fade-near 600ms 400ms cubic-bezier(0.05, 0, 0, 1) backwards;
     }
 
     /* Desktop-only: nav bars slide in from sides */
     @media (min-width: 960px) {
       body.plp-header-ready .header__desktop__bar__c {
-        animation: plp-header-from-left 700ms 1000ms cubic-bezier(0.05, 0, 0, 1) backwards;
+        animation: plp-header-from-left 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
       }
       body.plp-header-ready .header__desktop__bar__r {
-        animation: plp-header-from-right 700ms 1000ms cubic-bezier(0.05, 0, 0, 1) backwards;
+        animation: plp-header-from-right 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+      }
+    }
+
+    /* Mobile-only: left/right bars slide in from sides */
+    @media (max-width: 959px) {
+      body.plp-header-ready .header__mobile .header__mobile__left {
+        animation: plp-header-from-left 550ms 300ms cubic-bezier(0.05, 0, 0, 1) backwards;
+      }
+      body.plp-header-ready .header__mobile .header__mobile__right {
+        animation: plp-header-from-right 550ms 300ms cubic-bezier(0.05, 0, 0, 1) backwards;
       }
     }
   </style>
@@ -48,6 +70,12 @@
       window.__plpHeaderAnimInit = true;
 
       if (document.body.dataset.rcAnimations === 'false') return;
+
+      /* Once the entrance has finished, flag it done so it plays only on load.
+         Must exceed the longest mobile entrance (meta: 400ms delay + 600ms = 1000ms);
+         use a margin so the flag never lands mid-animation and cut it short. */
+      var ANIM_DONE_MS = 1800;
+      var doneTimer;
 
       document.body.classList.add('plp-header-loading');
       var trigger = function () {
@@ -60,15 +88,21 @@
             document.body.classList.add('plp-header-ready');
             document.body.classList.remove('plp-header-loading');
             document.dispatchEvent(new CustomEvent('theme:plp:header-ready'));
+            clearTimeout(doneTimer);
+            doneTimer = setTimeout(function () {
+              document.body.classList.add('plp-header-anim-done');
+            }, ANIM_DONE_MS);
           });
         });
       };
 
       /* BFCache: if the page is restored from bfcache, classes and __plpHeaderAnimInit
-         persist. Re-trigger so the animation plays again. */
+         persist. Re-trigger so the animation plays again — clearing the done flag so
+         the entrance is allowed to replay on this fresh-feeling restore. */
       window.addEventListener('pageshow', function (e) {
         if (!e.persisted) return;
         document.body.classList.remove('plp-header-ready');
+        document.body.classList.remove('plp-header-anim-done');
         document.body.classList.add('plp-header-loading');
         trigger();
       });

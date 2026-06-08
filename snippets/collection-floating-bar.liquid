@@ -24,10 +24,8 @@
   </defs>
 </svg>
 
-<div class="collection-floating-bar" data-collection-floating-bar>
+<div class="collection-floating-bar" data-collection-floating-bar data-availability-filter-active="{{ availability_filter_active }}">
   <div class="collection-floating-bar__inner">
-    <div class="collection-floating-bar__blur" aria-hidden="true"></div>
-
     <svg
       class="collection-floating-bar__bg"
       viewBox="0 0 362 50"
@@ -57,14 +55,15 @@
       <path d="M326.761 50C339.354 50 349.39 34.7756 358.149 28.529L361.5 26.1286V23.882L358.149 21.4731C349.381 15.2245 339.345 0 326.761 0L34.7301 0C22.1376 0 12.1019 15.2244 3.34241 21.471L0 23.8799V26.1265L3.34241 28.5269C12.1104 34.7734 22.1461 49.9979 34.7301 49.9979H326.761V50Z" fill="none" stroke="#E5E5E5" stroke-width="0.5"/>
     </svg>
 
-    <button
-      type="button"
-      class="collection-floating-bar__filter"
-      data-collection-floating-bar-filter
-    >
-      {%- render 'icon-filter' -%}
-      <span>{{ 'collections.general.filters' | t }}</span>
-    </button>
+    {%- if has_available_products -%}
+      <button
+        type="button"
+        class="collection-floating-bar__instock{% if availability_filter_active %} is-active{% endif %}"
+        data-collection-floating-bar-instock
+      >
+        <span>{{ 'collections.general.in_stock' | t }}</span>
+      </button>
+    {%- endif -%}
 
     <button
       type="button"
@@ -79,14 +78,11 @@
 
     <button
       type="button"
-      class="collection-floating-bar__menu"
-      data-collection-floating-bar-menu
-      aria-label="Menu"
+      class="collection-floating-bar__filter"
+      data-collection-floating-bar-filter
     >
-      <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
-        <line x1="4" y1="8.5" x2="22" y2="8.5" stroke="black"/>
-        <line x1="4" y1="16.5" x2="22" y2="16.5" stroke="black"/>
-      </svg>
+      {%- render 'icon-filter' -%}
+      <span>{{ 'collections.general.filters' | t }}</span>
     </button>
   </div>
 
