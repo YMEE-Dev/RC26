@@ -7,11 +7,7 @@ const BUCKET_NAME = process.env.BUCKET_NAME;
 const API_KEY = process.env.API_KEY;
 const CLOUDFRONT_DOMAIN = process.env.CLOUDFRONT_DOMAIN;
 const CLOUDFRONT_KEY_PAIR_ID = process.env.CLOUDFRONT_KEY_PAIR_ID;
-const MODEL_FOLDER = (() => {
-  const folder = (process.env.MODEL_FOLDER ?? "int").replace(/^\/|\/$/g, "");
-  if (!folder) throw new Error("MODEL_FOLDER cannot be empty after sanitization");
-  return folder;
-})();
+const MODEL_FOLDER = (process.env.MODEL_FOLDER ?? "int").replace(/^\/|\/$/g, "");
 
 // Rebuild a valid PEM from whatever was stored in the env var.
 // Lambda console may strip or escape newlines — strip all whitespace from the
@@ -44,9 +40,7 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ?? process.env.ALLOWED_ORIG
 function isOriginAllowed(origin) {
   if (!origin) return false;
   const lower = origin.toLowerCase();
-  return ALLOWED_ORIGINS.some(
-    (allowed) => lower === allowed || lower.startsWith(allowed + ":")
-  );
+  return ALLOWED_ORIGINS.some((allowed) => lower === allowed || lower.startsWith(allowed + ":"));
 }
 
 function getCorsHeaders(origin) {
@@ -81,7 +75,9 @@ export const handler = async (event) => {
 
   // Validate CloudFront config
   if (!CLOUDFRONT_DOMAIN || !CLOUDFRONT_KEY_PAIR_ID || !CLOUDFRONT_PRIVATE_KEY) {
-    console.error("Missing CloudFront environment variables (CLOUDFRONT_DOMAIN, CLOUDFRONT_KEY_PAIR_ID, CLOUDFRONT_PRIVATE_KEY)");
+    console.error(
+      "Missing CloudFront environment variables (CLOUDFRONT_DOMAIN, CLOUDFRONT_KEY_PAIR_ID, CLOUDFRONT_PRIVATE_KEY)"
+    );
     return respond(500, { error: "Internal server error" }, origin);
   }
 
