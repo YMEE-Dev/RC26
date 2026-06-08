@@ -7,7 +7,11 @@ const BUCKET_NAME = process.env.BUCKET_NAME;
 const API_KEY = process.env.API_KEY;
 const CLOUDFRONT_DOMAIN = process.env.CLOUDFRONT_DOMAIN;
 const CLOUDFRONT_KEY_PAIR_ID = process.env.CLOUDFRONT_KEY_PAIR_ID;
-const MODEL_FOLDER = (process.env.MODEL_FOLDER ?? "int").replace(/^\/|\/$/g, "");
+const MODEL_FOLDER = (() => {
+  const folder = (process.env.MODEL_FOLDER ?? "int").replace(/^\/|\/$/g, "");
+  if (!folder) throw new Error("MODEL_FOLDER cannot be empty after sanitization");
+  return folder;
+})();
 
 // Rebuild a valid PEM from whatever was stored in the env var.
 // Lambda console may strip or escape newlines — strip all whitespace from the

@@ -15,9 +15,33 @@
     <div class="collection-floating-bar__sort-sidebar__body">
       <ul class="collection-floating-bar__sort-list">
         {%- for option in sort_options -%}
+          {%- liquid
+            assign sort_url = request.path
+            if request.query_string contains 'sort_by='
+              assign query_parts = request.query_string | split: '&'
+              assign new_query = ''
+              for part in query_parts
+                unless part contains 'sort_by='
+                  if new_query != blank
+                    assign new_query = new_query | append: '&'
+                  endif
+                  assign new_query = new_query | append: part
+                endunless
+              endfor
+              if new_query != blank
+                assign sort_url = sort_url | append: '?' | append: new_query | append: '&sort_by=' | append: option.value
+              else
+                assign sort_url = sort_url | append: '?sort_by=' | append: option.value
+              endif
+            elsif request.query_string != blank
+              assign sort_url = sort_url | append: '?' | append: request.query_string | append: '&sort_by=' | append: option.value
+            else
+              assign sort_url = sort_url | append: '?sort_by=' | append: option.value
+            endif
+          -%}
           <li class="collection-floating-bar__sort-item{% if sort_by == option.value %} is-active{% endif %}">
             <a
-              href="#"
+              href="{{ sort_url }}"
               data-plp-sort-option
               data-value="{{ option.value }}"
               {% if sort_by == option.value %}aria-current="true"{% endif %}
