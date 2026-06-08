@@ -748,3 +748,13 @@ body.template-collection .header__logo__meta {
 .collection__nav {
   z-index: 6000;
 }
+
+/* Prevent jump oscillation on collections with no available-products filter.
+   theme.css hides the stuck nav with display:none when has-no-available-products,
+   collapsing its 60px height and snapping the page up — identical to the cento bug
+   fixed in cento-comparison.css. Override for all collection templates on mobile. */
+@media only screen and (max-width: 768px) {
+  body.template-collection .collection__nav.is-stuck.has-no-available-products {
+    display: flex !important;
+  }
+}
