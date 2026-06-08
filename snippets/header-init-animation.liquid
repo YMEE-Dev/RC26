@@ -11,11 +11,6 @@
 {% endcomment %}
 
 <style>
-    /* Prevent horizontal scrollbar flash while bar__r animates in from translateX(200px).
-       Use clip (not hidden): hidden makes html a scroll container which breaks
-       pointer events on position:fixed + transform children in iOS Safari. */
-    @supports (overflow: clip) { html { overflow-x: clip; } }
-
     @keyframes plp-header-from-top { from { transform: translateY(-200px); opacity: 0; } to { transform: none; opacity: 1; } }
     @keyframes plp-header-fade-near { from { transform: translateY(-20px); opacity: 0; } to { transform: none; opacity: 1; } }
     @keyframes plp-header-from-left { from { transform: translateX(-200px); opacity: 0; } to { transform: none; opacity: 1; } }
