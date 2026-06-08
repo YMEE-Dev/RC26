@@ -301,12 +301,13 @@
     pointer-events: none;
   }
 
-  .collection__nav.is-stuck .availability_filter-wrapper [data-availability-view-all] .availability-filter__label--count {
-    display: inline !important;
-  }
-
-  .collection__nav.is-stuck .availability_filter-wrapper [data-availability-view-all] .availability-filter__label--view-all {
-    display: none !important;
+  /* When stuck and there are no subcollection links, the nav has nothing visible
+     to show (availability wrapper is hidden by theme.css, popout filters are
+     off-screen when floating bar is active). Hide it visually but preserve its
+     layout height to avoid scroll oscillation from height collapse. */
+  body:has(.collection-floating-bar) .collection__nav.is-stuck:not(:has(.subcollection_links-wrapper)) {
+    visibility: hidden;
+    pointer-events: none;
   }
 }
 
