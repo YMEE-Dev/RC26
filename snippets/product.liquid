@@ -1317,7 +1317,7 @@
           text-transform: uppercase;
           cursor: pointer;
           width: 100%;
-          max-width: 362px;
+          max-width: none;
           margin-left: 0;
         }
 
@@ -3348,7 +3348,11 @@
                   {%- if aside_has_content -%}
                     <div class="product__content-columns__aside">
                       {%- if buttons_block != blank -%}
-                        {%- render 'ymee-color-picker', product: product, current_variant: product.selected_or_first_available_variant, section_id: section.id -%}
+                        {%- render 'ymee-color-picker',
+                          product: product,
+                          current_variant: product.selected_or_first_available_variant,
+                          section_id: section.id
+                        -%}
                       {%- endif -%}
 
                       {%- for block in section.blocks -%}
@@ -3777,7 +3781,11 @@
   data-drawer-direction="right-to-left"
 >
   <div class="drawer__inner" data-drawer-inner>
-    <button class="drawer__close" data-drawer-close="ruby-signature" aria-label="{{ 'general.accessibility.close' | t }}">
+    <button
+      class="drawer__close"
+      data-drawer-close="ruby-signature"
+      aria-label="{{ 'general.accessibility.close' | t }}"
+    >
       {% render 'icon-close' %}
     </button>
 
@@ -3796,15 +3804,23 @@
     if (rubyDrawer) {
       var closeBtn = rubyDrawer.querySelector('.drawer__close');
       if (closeBtn) {
-        closeBtn.addEventListener('touchstart', function (e) {
-          e.preventDefault();
-        }, { passive: false });
-        closeBtn.addEventListener('touchend', function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          rubyDrawer.isAnimating = false;
-          rubyDrawer.hideDrawer();
-        }, { passive: false });
+        closeBtn.addEventListener(
+          'touchstart',
+          function (e) {
+            e.preventDefault();
+          },
+          {passive: false}
+        );
+        closeBtn.addEventListener(
+          'touchend',
+          function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            rubyDrawer.isAnimating = false;
+            rubyDrawer.hideDrawer();
+          },
+          {passive: false}
+        );
       }
     }
   })();
@@ -3898,7 +3914,9 @@
     }
 
     apply(mq.matches);
-    mq.addEventListener('change', function (e) { apply(e.matches); });
+    mq.addEventListener('change', function (e) {
+      apply(e.matches);
+    });
   })();
 </script>
 

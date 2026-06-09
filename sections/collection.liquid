@@ -442,7 +442,10 @@
     {%- endif -%}
 
     {%- if section.settings.show_collection_floating_bar -%}
-      {%- render 'collection-floating-bar', availability_filter_active: availability_filter_active, has_available_products: has_available_products -%}
+      {%- render 'collection-floating-bar',
+        availability_filter_active: availability_filter_active,
+        has_available_products: has_available_products
+      -%}
     {%- endif -%}
 
     <div class="collection__products">
@@ -509,6 +512,7 @@
 
                 grid-item.product-item .product-item__bg__slide figure {
                   background-color: #f9f9f9;
+                  height: 95%;
                 }
                 grid-item.product-item .product-item__bg__slide figure img {
                   mix-blend-mode: multiply;
