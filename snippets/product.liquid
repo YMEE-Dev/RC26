@@ -2162,6 +2162,7 @@
             </script>
 
             {%- if product.media.size > 0 -%}
+              {%- if section.settings.enable_zoom -%}<zoom-images>{%- endif -%}
               <div class="pdp-embla pdp-embla--mobile" data-embla-carousel>
                 <div class="pdp-embla__viewport" data-embla-viewport>
                   <div class="pdp-embla__container">
@@ -2229,7 +2230,9 @@
                   <div class="pdp-embla__progress__bar" data-embla-progress-bar></div>
                 </div>
               </div>
+              {%- if section.settings.enable_zoom -%}</zoom-images>{%- endif -%}
 
+              {%- if section.settings.enable_zoom -%}<zoom-images>{%- endif -%}
               <div
                 class="pdp-embla pdp-embla--desktop{% if first_3d_model != blank or has_aws_3d %} pdp-embla--single-slide{% endif %}"
                 data-embla-carousel
@@ -2361,6 +2364,11 @@
                   <div class="pdp-embla__progress__bar" data-embla-progress-bar></div>
                 </div>
               </div>
+              {%- if section.settings.enable_zoom -%}
+                </zoom-images>
+                <script src="{{ 'load-photoswipe.js' | asset_url }}" defer="defer"></script>
+                <script src="{{ 'zoom.js' | asset_url }}" defer="defer"></script>
+              {%- endif -%}
 
               {%- if thumbnails_enabled -%}
                 <product-thumbs class="product__thumbs pdp-thumbs--mobile">
@@ -2429,7 +2437,12 @@
                 data-product-media-list
               {%- endcapture -%}
 
-              <div {{ product_slides_attributes }}>
+              {%- if section.settings.enable_zoom -%}
+                <zoom-images {{ product_slides_attributes }}>
+              {%- else -%}
+                <div {{ product_slides_attributes }}>
+              {%- endif -%}
+
                 {%- for media in ordered_media -%}
                   {%- render 'media',
                     media: media,
@@ -2440,7 +2453,14 @@
                     cover: true
                   -%}
                 {%- endfor -%}
-              </div>
+
+              {%- if section.settings.enable_zoom -%}
+                </zoom-images>
+                <script src="{{ 'load-photoswipe.js' | asset_url }}" defer="defer"></script>
+                <script src="{{ 'zoom.js' | asset_url }}" defer="defer"></script>
+              {%- else -%}
+                </div>
+              {%- endif -%}
 
               {%- if thumbnails_enabled -%}
                 <product-thumbs class="product__thumbs">
