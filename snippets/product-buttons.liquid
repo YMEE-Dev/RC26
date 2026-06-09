@@ -41,7 +41,6 @@
   assign show_newsletter = settings.show_newsletter
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign section_id = unique | default: section.id
-  assign relocate_to_main = relocate_to_main | default: false
 
   assign form_qty = current_variant.quantity_rule.min
   assign cart_qty = cart | item_count_for_variant: current_variant.id
@@ -355,11 +354,40 @@
 {%- endcapture -%}
 
 {%- if product != blank -%}
-  {%- capture ymee_flags -%}{%- render 'ymee-product-flags', product: product -%}{%- endcapture -%}
-  {%- assign ymee_has_size = false -%}
-  {%- assign ymee_has_color_picker = false -%}
-  {%- if ymee_flags contains 'has_size' -%}{%- assign ymee_has_size = true -%}{%- endif -%}
-  {%- if ymee_flags contains 'has_color_picker'-%}{%- assign ymee_has_color_picker = true -%}{%- endif -%}
+  {%- liquid
+    assign ymee_has_size = false
+    assign ymee_has_color_picker = false
+    assign ymee_size_t = 'general.size_chart.size' | t
+    assign ymee_size_list = ymee_size_t | remove: ' ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
+    assign ymee_size_list = ymee_size_list | append: 'ring-size,bracelet-size,'
+    for opt in product.options_with_values
+      assign opt_h = opt.name | handle
+      if ymee_size_list contains opt_h
+        assign ymee_has_size = true
+      else
+        assign has_real_images = false
+        for value in opt.values
+          assign value_name = value | append: ''
+          for variant in product.variants
+            assign variant_option_index = opt.position | minus: 1
+            assign variant_option_value = variant.options[variant_option_index]
+            if variant_option_value == value_name
+              if variant.featured_media
+                assign has_real_images = true
+                break
+              endif
+            endif
+          endfor
+          if has_real_images
+            break
+          endif
+        endfor
+        if has_real_images
+          assign ymee_has_color_picker = true
+        endif
+      endif
+    endfor
+  -%}
 {%- endif -%}
 
 <div
@@ -368,9 +396,7 @@
   {{ block.shopify_attributes }}
 >
   {%- if product != blank -%}
-    {%- unless relocate_to_main -%}
-      {%- render 'ymee-color-picker', product: product, current_variant: current_variant, section_id: section_id -%}
-    {%- endunless -%}
+    {%- render 'ymee-color-picker', product: product, current_variant: current_variant, section_id: section_id -%}
 
     <div data-geo-buyform>
     {%- if cr_show_inquire -%}
@@ -401,7 +427,7 @@
         </div>
       {%- endif -%}
     {%- elsif cr_hide_atc -%}
-
+      {%- comment -%} Japan market: hide entire buy form {%- endcomment -%}
     {%- else -%}
       {%- if ymee_has_size -%}
         {%- render 'ymee-variant-dropdown',
@@ -415,33 +441,31 @@
       {%- endif -%}
 
       {%- unless ymee_has_size -%}
-        {%- unless relocate_to_main -%}
-          <div
-            class="ymee-variant-dropdown ymee-variant-dropdown--form-only"
-            data-ymee-variant-dropdown-form-only
-            data-section-id="{{ section_id }}"
-          >
-            <div class="ymee-variant-dropdown__toggle ymee-variant-dropdown__toggle--form-only">
-              <svg
-                class="ymee-variant-dropdown__toggle-bg"
-                viewBox="0 0 362 50"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-                preserveAspectRatio="none"
-              >
-                <defs>
-                  <mask id="ymee-toggle-mask-form" maskUnits="userSpaceOnUse" x="0" y="0" width="362" height="50">
-                    <path d="M326.761 50C339.354 50 349.39 34.7756 358.149 28.529L361.5 26.1286V23.882L358.149 21.4731C349.381 15.2245 339.345 0 326.761 0L34.7301 0C22.1376 0 12.1019 15.2244 3.34241 21.471L0 23.8799V26.1265L3.34241 28.5269C12.1104 34.7734 22.1461 49.9979 34.7301 49.9979H326.761V50Z" fill="white"/>
-                  </mask>
-                </defs>
-                <g mask="url(#ymee-toggle-mask-form)">
-                  <rect width="286" height="50" fill="black"/>
-                  <rect x="286" width="76" height="50" fill="white"/>
-                </g>
-                <path d="M326.761 50C339.354 50 349.39 34.7756 358.149 28.529L361.5 26.1286V23.882L358.149 21.4731C349.381 15.2245 339.345 0 326.761 0L34.7301 0C22.1376 0 12.1019 15.2244 3.34241 21.471L0 23.8799V26.1265L3.34241 28.5269C12.1104 34.7734 22.1461 49.9979 34.7301 49.9979H326.761V50Z" fill="none" stroke="#E5E5E5" stroke-width="1"/>
-              </svg>
-              <span class="ymee-variant-dropdown__toggle-label ymee-variant-dropdown__toggle-label--form-only">
-        {%- endunless -%}
+        <div
+          class="ymee-variant-dropdown ymee-variant-dropdown--form-only"
+          data-ymee-variant-dropdown-form-only
+          data-section-id="{{ section_id }}"
+        >
+          <div class="ymee-variant-dropdown__toggle ymee-variant-dropdown__toggle--form-only">
+            <svg
+              class="ymee-variant-dropdown__toggle-bg"
+              viewBox="0 0 362 50"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <mask id="ymee-toggle-mask-form" maskUnits="userSpaceOnUse" x="0" y="0" width="362" height="50">
+                  <path d="M326.761 50C339.354 50 349.39 34.7756 358.149 28.529L361.5 26.1286V23.882L358.149 21.4731C349.381 15.2245 339.345 0 326.761 0L34.7301 0C22.1376 0 12.1019 15.2244 3.34241 21.471L0 23.8799V26.1265L3.34241 28.5269C12.1104 34.7734 22.1461 49.9979 34.7301 49.9979H326.761V50Z" fill="white"/>
+                </mask>
+              </defs>
+              <g mask="url(#ymee-toggle-mask-form)">
+                <rect width="286" height="50" fill="black"/>
+                <rect x="286" width="76" height="50" fill="white"/>
+              </g>
+              <path d="M326.761 50C339.354 50 349.39 34.7756 358.149 28.529L361.5 26.1286V23.882L358.149 21.4731C349.381 15.2245 339.345 0 326.761 0L34.7301 0C22.1376 0 12.1019 15.2244 3.34241 21.471L0 23.8799V26.1265L3.34241 28.5269C12.1104 34.7734 22.1461 49.9979 34.7301 49.9979H326.761V50Z" fill="none" stroke="#E5E5E5" stroke-width="1"/>
+            </svg>
+            <span class="ymee-variant-dropdown__toggle-label ymee-variant-dropdown__toggle-label--form-only">
       {%- endunless -%}
 
       <product-form
@@ -547,20 +571,18 @@
       </product-form>
 
       {%- unless ymee_has_size -%}
-        {%- unless relocate_to_main -%}
-          </span>
-          <span class="ymee-variant-dropdown__toggle-icon" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
-              <line x1="4" y1="8.5" x2="22" y2="8.5" stroke="black"/>
-              <line x1="4" y1="16.5" x2="22" y2="16.5" stroke="black"/>
-            </svg>
-          </span>
-          </div>
-          </div>
-        {%- endunless -%}
+        </span>
+        <span class="ymee-variant-dropdown__toggle-icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
+            <line x1="4" y1="8.5" x2="22" y2="8.5" stroke="black"/>
+            <line x1="4" y1="16.5" x2="22" y2="16.5" stroke="black"/>
+          </svg>
+        </span>
+        </div>
+        </div>
       {%- endunless -%}
     {%- endif -%}
-    </div>
+    </div>{%- comment -%} /data-geo-buyform {%- endcomment -%}
 
   {%- else -%}
     <div class="product-form">
@@ -597,11 +619,12 @@
 </div>
 
 {% stylesheet %}
-
+  /* Hide AMP BIS trigger button - we'll use our custom button instead */
   #BIS_trigger {
     display: none !important;
   }
 
+  /* Apply ATC button styling to notify button */
   [id^='MainProduct--'] .product__submit__buttons > .product__submit__item > .btn[data-bis-drawer-open] {
     font-size: var(--BTN-FONT-SIZE);
     font-weight: var(--BTN-FONT-WEIGHT);
@@ -640,6 +663,7 @@
     fill: #fff;
   }
 
+  /* BIS button hover styles to match ymee-variant-dropdown */
   #BIS_trigger:hover,
   .bis_custom_trigger:hover {
     background-color: #27574d;
@@ -647,6 +671,11 @@
     color: #fff;
   }
 
+  /* ── Coordinated button visibility (no size dropdown) ── */
+  /* Notify / Available Soon buttons hidden by default.
+     JS toggles the [data-notify-active] attribute on the container
+     to swap between ATC and Notify – independent of the theme's
+     transient disabled state on [data-add-to-cart]. */
   .product__submit__item > .btn[data-bis-drawer-open='notify'],
   .product__submit__item > .btn[data-bis-drawer-open='available_soon'] {
     display: none !important;
