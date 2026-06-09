@@ -571,11 +571,14 @@
       @media only screen and (max-width: 989px) {
 
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: auto;
-          aspect-ratio: 4/5;
-          /* Leave room for colors + title + price above the fixed floating button */
-          max-height: calc(100svh - var(--header-height, 60px) - var(--pdp-dropdown-height, 90px) - 150px);
+          height: calc(var(--full-height, 100svh) - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 60px) - var(--pdp-dropdown-height, 70px));
           padding-top: 10px;
+        }
+
+        #MainProduct--{{ section.id }} .pdp-embla--mobile .pdp-embla__slide {
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         /* Scroll room so the fixed floating button never covers the bottom of content */
