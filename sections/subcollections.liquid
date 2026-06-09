@@ -12,6 +12,7 @@
   assign sub_collection_html = ''
   assign sub_collection_counter = 0
   assign sub_collection_limit = 6
+  assign plp_short_description = collection.metafields.custom.plp_short_description.value
 -%}
 
 {%- if linklists[collection.handle].links.size > 0 -%}
@@ -71,6 +72,20 @@
     body[data-rc-animations="true"] #Subcollections--{{ section.id }} .plp-el-up.plp-el-up--visible {
       opacity: 1;
       transform: translateY(0);
+    }
+
+    /* PLP short description, moved here from the header. Styles mirror the former
+       .header__logo__meta__description rule so it reads identically, scoped to the
+       section so it doesn't depend on custom-collection.css being present. */
+    #Subcollections--{{ section.id }} .subcollections__description {
+      margin: 20px auto 0;
+      max-width: 320px;
+      font-size: 12px;
+      line-height: 20px;
+      letter-spacing: 0;
+      text-align: center;
+      text-transform: none;
+      color: var(--globaltext);
     }
   {%- endstyle -%}
 
@@ -142,6 +157,9 @@
 
       {%- if sub_collection_html != '' and template.suffix != 'media-only' -%}
         <script src="{{ 'subcollections-slider.js' | asset_url }}" defer></script>
+        {%- if plp_short_description != blank -%}
+          <p class="subcollections__description">{{ plp_short_description | newline_to_br }}</p>
+        {%- endif -%}
         <div class="subcollections__swiper swiper" data-subcollections-swiper>
           <div class="swiper-wrapper">
             {{ sub_collection_html }}

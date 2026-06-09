@@ -422,6 +422,20 @@
           if (closeBtn) closeBtn.click();
         } else {
           details.setAttribute('open', '');
+
+          // Move focus to the search input synchronously, inside this user-gesture
+          // tick, so iOS Safari opens the virtual keyboard. The popdown is hidden
+          // with `visibility: hidden` (not display:none) and only becomes visible
+          // when `is-open` is added on a later requestAnimationFrame, while the
+          // input is focused for accessibility from the popdown's 0.5s transitionend
+          // callback. Both happen outside the original tap, so the keyboard never
+          // opens on touch. We reveal the popdown and focus the input now instead.
+          popdown.classList.add('is-open');
+
+          const input = details.querySelector('input[type="search"]:not([type="hidden"])');
+          if (input) {
+            input.focus({ preventScroll: true });
+          }
         }
       });
     };
