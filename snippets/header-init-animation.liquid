@@ -76,11 +76,12 @@
 
       if (document.body.dataset.rcAnimations === 'false') return;
 
-      /* Once the entrance has finished, flag it done so it plays only on load.
-         Must exceed the longest mobile entrance (meta: 400ms delay + 600ms = 1000ms);
-         use a margin so the flag never lands mid-animation and cut it short. */
-      var ANIM_DONE_MS = 1800;
       var doneTimer;
+
+      var markDone = function () {
+        clearTimeout(doneTimer);
+        document.body.classList.add('plp-header-anim-done');
+      };
 
       document.body.classList.add('plp-header-loading');
       var trigger = function () {
@@ -94,9 +95,9 @@
             document.body.classList.remove('plp-header-loading');
             document.dispatchEvent(new CustomEvent('theme:plp:header-ready'));
             clearTimeout(doneTimer);
-            doneTimer = setTimeout(function () {
-              document.body.classList.add('plp-header-anim-done');
-            }, ANIM_DONE_MS);
+            var rightBar = document.querySelector('.header__mobile .header__mobile__right');
+            if (rightBar) rightBar.addEventListener('animationend', markDone, { once: true });
+            doneTimer = setTimeout(markDone, 1050);
           });
         });
       };
