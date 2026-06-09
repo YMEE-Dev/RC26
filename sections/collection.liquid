@@ -977,6 +977,10 @@
         initAll(document);
       }
 
+      window.addEventListener('load', () => {
+        requestAnimationFrame(() => updateCollectionNavStickyState(document));
+      });
+
       document.addEventListener('theme:scroll', () => {
         updateCollectionNavStickyState(document);
       });

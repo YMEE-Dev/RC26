@@ -37,6 +37,14 @@
   .collection__nav.is-stuck {
     z-index: 6003;
   }
+
+  /* On desktop the subcollection links (BRACELETS, EARRINGS, etc.) are always
+     relevant navigation — show them whenever the nav is on-screen, not only
+     when it has the JS is-stuck class. The theme hides them by default to avoid
+     showing them on mobile before the nav scrolls into sticky position. */
+  .collection__nav .subcollection_links-wrapper {
+    display: flex;
+  }
 }
 
 /* PLP mobile: the fixed header overlay sits on top of the collection nav and its
