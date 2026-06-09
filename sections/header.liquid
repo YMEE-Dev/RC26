@@ -288,8 +288,12 @@
     backdrop-filter: blur(0);
   }
 
-  .template-collection .theme__header__scroll-blur {
-    display: none;
+  /* Desktop collection pages keep the scroll-reveal blur off; on mobile (< 960px) it is
+     allowed so the header reveal blur shows on every template (driven by theme.dev.js). */
+  @media only screen and (min-width: 960px) {
+    .template-collection .theme__header__scroll-blur {
+      display: none;
+    }
   }
 
   {%- if logo_asset != blank -%}
