@@ -57,10 +57,7 @@
        children on iOS Safari, so we clip at .section-padding (inside the fixed header)
        during the animation window. Removed once plp-header-anim-done is set (~1.8s). */
     @media (max-width: 959px) {
-      /* Permanent clip — the mobile left/right bars translate ±200px off-screen both
-         during the entrance animation and on every scroll-hide reveal. Without this,
-         the translated bar extends past the viewport and creates a horizontal scrollbar. */
-      .theme__header .section-padding {
+      body.plp-header-ready:not(.plp-header-anim-done) .theme__header .section-padding {
         overflow-x: hidden;
       }
       body.plp-header-ready:not(.plp-header-anim-done) .header__mobile .header__mobile__left {
@@ -79,19 +76,11 @@
 
       if (document.body.dataset.rcAnimations === 'false') return;
 
+      /* Once the entrance has finished, flag it done so it plays only on load.
+         Must exceed the longest mobile entrance (meta: 400ms delay + 600ms = 1000ms);
+         use a margin so the flag never lands mid-animation and cut it short. */
+      var ANIM_DONE_MS = 1800;
       var doneTimer;
-
-      /* Set plp-header-anim-done as soon as the right bar animation ends rather
-         than waiting a fixed 1800ms. Leaving the CSS animation rule active after
-         the animation completes lets the browser restart it on the next style
-         recalculation (triggered by header-scroll-hide being toggled on scroll),
-         causing the entrance animation to replay on quick scroll. Using animationend
-         on the right bar (550ms + 300ms delay = 850ms) closes that window immediately.
-         Fallback timer (1050ms) covers desktop and cases where animationend doesn't fire. */
-      var markDone = function () {
-        clearTimeout(doneTimer);
-        document.body.classList.add('plp-header-anim-done');
-      };
 
       document.body.classList.add('plp-header-loading');
       var trigger = function () {
@@ -105,9 +94,9 @@
             document.body.classList.remove('plp-header-loading');
             document.dispatchEvent(new CustomEvent('theme:plp:header-ready'));
             clearTimeout(doneTimer);
-            var rightBar = document.querySelector('.header__mobile .header__mobile__right');
-            if (rightBar) rightBar.addEventListener('animationend', markDone, { once: true });
-            doneTimer = setTimeout(markDone, 1050);
+            doneTimer = setTimeout(function () {
+              document.body.classList.add('plp-header-anim-done');
+            }, ANIM_DONE_MS);
           });
         });
       };
