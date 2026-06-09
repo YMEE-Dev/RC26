@@ -265,6 +265,7 @@
         letter-spacing: var(--LETTER-SPACING-NAV);
         text-transform: uppercase;
         color: var(--COLOR-TEXT-DARK);
+        margin: 0;
       }
 
       #MainProduct--{{ section.id }} .product__title-price .price-item,
@@ -570,9 +571,19 @@
       @media only screen and (max-width: 989px) {
 
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: auto;
-          aspect-ratio: 4/5;
+          height: calc(var(--full-height, 100svh) - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 60px) - var(--pdp-dropdown-height, 70px));
           padding-top: 10px;
+        }
+
+        #MainProduct--{{ section.id }} .pdp-embla--mobile .pdp-embla__slide {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        /* Scroll room so the fixed floating button never covers the bottom of content */
+        #MainProduct--{{ section.id }} .product__content {
+          padding-bottom: var(--pdp-dropdown-height, 90px);
         }
       }
 
@@ -3854,14 +3865,6 @@
 <script>
   (function () {
     if (!window.matchMedia || !window.matchMedia('(max-width: 1024px)').matches) return;
-
-    // Always hide the flower (hamburger button) on mobile PDP
-    var hamburger = document.querySelector('.header__mobile__hamburger');
-    var flowerBtn = hamburger ? hamburger.closest('.header__mobile__button') : null;
-    if (flowerBtn) {
-      flowerBtn.style.visibility = 'hidden';
-      flowerBtn.style.opacity = '0';
-    }
 
     // Smooth hide dropdown when footer enters viewport, show when it leaves
     function initFooterObserver() {
