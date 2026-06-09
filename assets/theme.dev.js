@@ -3778,7 +3778,17 @@
 
           this.isStuck = false;
           this.cls = this.classList;
-          this.headerOffset = document.querySelector(".page-header")?.offsetTop;
+          // Collection-like templates pin the header from the very top (offset 0) so the
+          // slide-out animation plays on the first downscroll while the header is fixed.
+          // Otherwise the header scrolls away as a position:absolute element and only
+          // re-pins (and animates out) once you cross the sticky threshold — that re-pin
+          // read as "the page jumps back up to show the header animation".
+          this.stickFromTop =
+            (this.isCollectionTemplate && !this.isSpotlightCollectionTemplate) ||
+            this.isSearchTemplate ||
+            this.isBlogTemplate ||
+            this.isArticleTemplate;
+          this.headerOffset = this.stickFromTop ? 0 : document.querySelector(".page-header")?.offsetTop || 0;
           this.updateHeaderOffset = this.updateHeaderOffset.bind(this);
           this.scrollEvent = (e) => this.onScroll(e);
 
@@ -4024,7 +4034,7 @@
 
           // Update header offset after any "Header group" section has been changed
           setTimeout(() => {
-            this.headerOffset = document.querySelector(".page-header")?.offsetTop;
+            this.headerOffset = this.stickFromTop ? 0 : document.querySelector(".page-header")?.offsetTop;
           });
         }
 
