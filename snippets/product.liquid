@@ -573,10 +573,12 @@
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
           height: auto;
           aspect-ratio: 4/5;
+          /* Leave room for colors + title + price above the fixed floating button */
+          max-height: calc(100svh - var(--header-height, 60px) - var(--pdp-dropdown-height, 90px) - 150px);
           padding-top: 10px;
         }
 
-        /* Space below content so the fixed floating button never covers title/price */
+        /* Scroll room so the fixed floating button never covers the bottom of content */
         #MainProduct--{{ section.id }} .product__content {
           padding-bottom: var(--pdp-dropdown-height, 90px);
         }
