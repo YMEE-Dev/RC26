@@ -2612,6 +2612,7 @@
                 {%- liquid
                   assign sticky_size_translation = 'general.size_chart.size' | t
                   assign sticky_translation_string_size = sticky_size_translation | remove: ' ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
+                  assign sticky_translation_string_size = sticky_translation_string_size | append: 'size,ring-size,bracelet-size,'
                 -%}
                 {%- for option in product.options_with_values -%}
                   {%- liquid
