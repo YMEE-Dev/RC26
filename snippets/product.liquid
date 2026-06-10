@@ -208,14 +208,17 @@
         --bg: transparent;
       }
 
-      @media only screen and (max-width: 989px) {
+      /* ── PDP mobile/tablet: gallery fills behind transparent header ── */
 
+      @media only screen and (max-width: 989px) {
+        /* Pull gallery up under header, pad to keep slides in place */
         #MainProduct--{{ section.id }} .product__images {
           background-color: var(--bg-color);
           margin-top: 0;
           padding-top: var(--header-height, 60px);
         }
 
+        /* Sections below ATF stay white */
         #MainProduct--{{ section.id }} .product__content,
         #MainProduct--{{ section.id }} .product__sticky-bar {
           background-color: var(--COLOR-BG);
@@ -262,6 +265,7 @@
         letter-spacing: var(--LETTER-SPACING-NAV);
         text-transform: uppercase;
         color: var(--COLOR-TEXT-DARK);
+        margin: 0;
       }
 
       #MainProduct--{{ section.id }} .product__title-price .price-item,
@@ -381,25 +385,9 @@
           background: transparent;
         }
 
-        #MainProduct--{{ section.id }}.pdp-buyform-in-title .product__title-price {
-          align-items: center;
-          gap: 24px;
-        }
-
-        #MainProduct--{{ section.id }}.pdp-buyform-in-title .product__title-price .product__title {
-          flex: 1 1 auto;
-        }
-
-        #MainProduct--{{ section.id }}.pdp-buyform-in-title .product__title-price > .product__block--buttons {
-          margin: 0;
-          flex: 0 0 auto;
-          width: 280px;
-          max-width: 40%;
-        }
-
-        #MainProduct--{{ section.id }} .product__content-columns__aside > .ymee-color-picker {
-          margin-top: calc(var(--pdp-sticky-bar-height, 100px) * -1 - 26px);
-        }
+        /* ── Desktop dropdown-slide animation (scrollTop === 0) ── */
+        /* Inline: color picker shifts LEFT, dropdown moves UP to sit right of it.
+           Title-price shrinks to give room. On scroll: all animate back to default. */
 
         body.template-product {
           overflow-x: hidden;
@@ -409,11 +397,13 @@
           overflow: hidden;
         }
 
+        /* Before JS measures: hide dropdown to avoid flash at wrong position */
         #MainProduct--{{ section.id }}.pdp-dropdown-inline:not(.pdp-dropdown-measured) .product__content-columns__aside .ymee-variant-dropdown,
         #MainProduct--{{ section.id }}.pdp-dropdown-inline:not(.pdp-dropdown-measured) .product__content-columns__aside .ymee-variant-dropdown--form-only {
           opacity: 0;
         }
 
+        /* After JS measures: picker and dropdown animate; title-price snaps (no reflow lag) */
         #MainProduct--{{ section.id }}.pdp-dropdown-measured .product__title-price {
           max-width: var(--pdp-title-default-width, 100%);
         }
@@ -428,6 +418,7 @@
                       opacity 0.3s ease;
         }
 
+        /* Inline state (scrollTop === 0) */
         #MainProduct--{{ section.id }}.pdp-dropdown-measured.pdp-dropdown-inline .product__title-price {
           max-width: var(--pdp-title-inline-width, 100%);
         }
@@ -580,9 +571,19 @@
       @media only screen and (max-width: 989px) {
 
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: auto;
-          aspect-ratio: 4/5;
+          height: calc(var(--full-height, 100svh) - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 60px) - var(--pdp-dropdown-height, 70px));
           padding-top: 10px;
+        }
+
+        #MainProduct--{{ section.id }} .pdp-embla--mobile .pdp-embla__slide {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        /* Scroll room so the fixed floating button never covers the bottom of content */
+        #MainProduct--{{ section.id }} .product__content {
+          padding-bottom: var(--pdp-dropdown-height, 90px);
         }
       }
 
@@ -613,6 +614,7 @@
         }
       }
 
+      /* Swipe hint: nudges the active slide image left and bounces it back (mobile + tablet) */
       @keyframes pdp-swipe-hint-bounce-{{ section.id }} {
         0%   { transform: translateX(0); }
         15%  { transform: translateX(-28px); }
@@ -673,10 +675,12 @@
         flex: 0 0 100% !important;
       }
 
+      /* 3D products: keep desktop gallery one slide at a time. */
       #MainProduct--{{ section.id }} .pdp-embla--desktop.pdp-embla--single-slide .pdp-embla__slide {
         flex: 0 0 100% !important;
       }
 
+      /* Desktop only: hide non-active 3D viewer content to prevent split view. */
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-media-type="model"]:not(.pdp-embla__slide--active) .product__media,
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-media-type="model"]:not(.pdp-embla__slide--active) .webgi-container {
         opacity: 0 !important;
@@ -691,6 +695,8 @@
         pointer-events: auto;
       }
 
+      /* Animate the 3D model content in and out so switching 3D → gallery fades
+         smoothly instead of snapping to invisible mid-scroll. */
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-media-type="model"] .product__media,
       #MainProduct--{{ section.id }} .pdp-embla--desktop .pdp-embla__slide[data-media-type="model"] .webgi-container {
         transition: opacity 0.35s ease, visibility 0.35s ease;
@@ -1281,62 +1287,20 @@
           max-width: 100%;
         }
 
+        /* flatten wrappers so children participate in same grid */
         #MainProduct--{{ section.id }} .product__content-columns__main,
         #MainProduct--{{ section.id }} .product__content-columns__aside {
           display: contents;
         }
 
+        /* IMPORTANT: aside sticky must be disabled on mobile */
         #MainProduct--{{ section.id }} .product__content-columns__aside {
           position: static;
           top: auto;
           z-index: auto;
         }
 
-        #MainProduct--{{ section.id }} .product__content-columns__main .ymee-variant-dropdown {
-          position: relative !important;
-          bottom: auto !important;
-          left: auto !important;
-          right: auto !important;
-          z-index: auto !important;
-          padding: 0 !important;
-          width: 100% !important;
-          max-width: 362px;
-        }
-
-        #MainProduct--{{ section.id }} .product__content-columns__main .ymee-variant-dropdown__toggle {
-          background: var(--COLOR-TEXT, #000);
-          color: #fff;
-          border: none;
-          height: 50px;
-          padding: 0 24px;
-          justify-content: center;
-          font-family: var(--BTN-FONT-STACK);
-          font-size: var(--BTN-FONT-SIZE);
-          font-weight: var(--BTN-FONT-WEIGHT, 400);
-          letter-spacing: var(--BTN-LETTER-SPACING);
-          text-transform: uppercase;
-          cursor: pointer;
-          width: 100%;
-          max-width: 362px;
-          margin-left: 0;
-        }
-
-        #MainProduct--{{ section.id }} .product__content-columns__main .ymee-variant-dropdown__toggle-bg,
-        #MainProduct--{{ section.id }} .product__content-columns__main .ymee-variant-dropdown__toggle-icon {
-          display: none;
-        }
-
-        #MainProduct--{{ section.id }} .product__content-columns__main .ymee-variant-dropdown__toggle-label {
-          position: static;
-          color: #fff;
-          z-index: auto;
-        }
-
-        #MainProduct--{{ section.id }} .product__content-columns__main [data-add-to-cart] {
-          height: 50px;
-          min-height: 50px;
-        }
-
+        /* map real blocks to areas */
         #MainProduct--{{ section.id }} .product__description {
           grid-area: description;
           min-width: 0;
@@ -1382,6 +1346,7 @@
           padding-right: 20px;
         }
 
+        /* Hide variant-selects on mobile only when YMEE dropdown is active */
         #MainProduct--{{ section.id }}[data-ymee-variant-dropdown-enabled="true"] .product__content-columns__main .product__form__holder {
           position: absolute;
           width: 1px;
@@ -1402,6 +1367,7 @@
 
       }
 
+      /* Mobile + tablet: show progress bar, hide arrows */
       @media only screen and (max-width: 989px) {
         #MainProduct--{{ section.id }} .pdp-embla__arrows {
           display: none;
@@ -1578,6 +1544,7 @@
                       return;
                     }
 
+                    // Segment-based progress: 1/N on first slide so bar is always partially visible
                     var segmentProgress = (index + 1) / slideCount;
 
                     // Update progress bar
@@ -1682,6 +1649,7 @@
                       containScroll: 'trimSnaps',
                       slidesToScroll: 1,
                       watchDrag: function (emblaApi, event) {
+                        // Disable drag in intro state — slide 1 is 100% and Embla snap points are wrong
                         if (hasIntroStage && !carouselStarted) return false;
                         if (introTransitioning) return false;
 
@@ -1749,9 +1717,11 @@
                         if (e.propertyName === 'flex-basis') finishTransition();
                       }
                       if (firstSlide) firstSlide.addEventListener('transitionend', onTransitionEnd);
+                      // Fallback in case transitionend doesn't fire
                       setTimeout(finishTransition, 350);
                     }
 
+                    // Detect swipe/drag on the viewport for intro stage transitions
                     if (hasIntroStage) {
                       var introSwipeStartX = 0;
                       viewport.addEventListener('pointerdown', function (e) {
@@ -1760,9 +1730,11 @@
                       viewport.addEventListener('pointerup', function (e) {
                         if (introTransitioning) return;
                         var diff = introSwipeStartX - e.clientX;
+                        // Swipe left (intro → started)
                         if (!carouselStarted && diff > 30) {
                           setCarouselStarted(true, 0);
                         }
+                        // Swipe right at index 0 (started → intro)
                         if (carouselStarted && diff < -30 && embla.selectedScrollSnap() === 0) {
                           setCarouselStarted(false, 0);
                         }
@@ -1780,6 +1752,7 @@
                         canPrev = true;
                       }
 
+                      // Disable next if at the last slide or last unique snap position
                       if (isDesktopCarousel) {
                         var slideCount = getContainerSlides(carouselEl).length;
                         if (selectedIndex >= slideCount - 1) {
@@ -1807,6 +1780,7 @@
                           setCarouselStarted(false, 0);
                           return;
                         }
+                        // Skip merged snaps (trimSnaps can merge last few snaps to same position)
                         if (isDesktopCarousel && idx > 0) {
                           var snaps = embla.scrollSnapList();
                           var currentPos = snaps[idx];
@@ -1916,6 +1890,7 @@
                     });
 
                     embla.on('scroll', function () {
+                      // Update progress bar during scroll (segment-based, consistent with select handler)
                       if (progressBar) {
                         var slideCount = embla.scrollSnapList().length;
                         var scrollProgress = embla.scrollProgress();
@@ -1926,6 +1901,8 @@
                       }
                     });
 
+                    // Disable WebGI canvas pointer events during carousel drag to prevent
+                    // the 3D orbit controls from fighting Embla and causing lag
                     embla.on('pointerDown', function () {
                       var webgiCanvases = carouselEl.querySelectorAll('.webgi-container canvas');
                       webgiCanvases.forEach(function (c) {
@@ -1939,6 +1916,7 @@
                       });
                     });
 
+                    // WebGI edge zone swipe: scroll carousel when user swipes on 3D model edges
                     carouselEl.addEventListener('webgi:edge:swipe', function (e) {
                       if (!e.detail) return;
                       if (e.detail.direction === 'next') {
@@ -1948,6 +1926,7 @@
                       }
                     });
 
+                    // Initial desktop thumb setup
                     updateDesktopThumbs();
 
                     embla.on('reInit', function () {
@@ -1983,7 +1962,13 @@
                     if (!e || !e.detail || !e.detail.id) return;
                     var fromThumb =
                       e.target && (e.target.closest('product-thumbs') || e.target.tagName === 'PRODUCT-THUMBS');
+                    // For 3D-model products: never let variant changes (or any
+                    // programmatic media-select) move the gallery off the 3D slide.
+                    // Only user-initiated thumb clicks may switch slides.
                     if (productImagesEl.hasAttribute('data-has-3d-model') && !fromThumb) return;
+                    // When our gallery filter is active, only allow user-initiated
+                    // thumb clicks through. Block programmatic scrolls from variant
+                    // change handlers (product-info updateMedia, etc.).
                     if (productImagesEl.getAttribute('data-gallery-filter-active') === 'true') {
                       if (!fromThumb) return;
                     }
@@ -2008,12 +1993,14 @@
                       getContainerSlides(activeCarousel.el)[0].getAttribute('data-media-type') !== 'model';
 
                     if (carouselHasIntroStage && isDesktop && !isStarted && targetIndex >= 1) {
+                      // Intro → started: ensure clicked slide is visible in 2-slide view
                       var scrollTarget = Math.max(0, targetIndex - 1);
                       activeCarousel.setCarouselStarted(true, scrollTarget);
                       return;
                     }
 
                     if (carouselHasIntroStage && isDesktop && isStarted && targetIndex === 0) {
+                      // Started → intro: smooth scroll to 0 first, then expand slide 1
                       if (currentIndex > 0) {
                         activeCarousel.embla.scrollTo(0);
                         var onSettle = function () {
@@ -2027,6 +2014,7 @@
                       return;
                     }
 
+                    // Normal smooth scroll
                     activeCarousel.embla.scrollTo(targetIndex);
                     activeCarousel.updateArrows && activeCarousel.updateArrows();
                   });
@@ -2052,6 +2040,7 @@
                         carousel.updateArrows && carousel.updateArrows();
                         updateProgressByIndex(carousel, startIndex);
 
+                        // Update thumbnails based on carousel type
                         if (carousel.el.classList.contains('pdp-embla--desktop')) {
                           var thumbsHolder = productImagesEl.querySelector(
                             '.pdp-thumbs--desktop .product__thumbs__holder'
@@ -2093,9 +2082,12 @@
                             }
                           }
                         }
+                        // Mobile: product-thumbs observer handles is-active via data-active-media
                       }
                     });
 
+                    // The initial gallery filter may have run before Embla loaded,
+                    // so _resetToIntro + reInit ensures Embla picks up the filtered state.
                     carousels.forEach(function (c) {
                       if (c.el._resetToIntro) {
                         c.el._resetToIntro();
@@ -2106,6 +2098,8 @@
                       c.updateArrows && c.updateArrows();
                     });
 
+                    // Mobile swipe hint: repeat the peek animation until the user actually
+                    // scrolls the gallery. Stop on either a pointer touch or the first scroll.
                     carousels.forEach(function (carousel) {
                       if (carousel.el.classList.contains('pdp-embla--desktop')) return;
                       var slideCount = carousel.embla.scrollSnapList().length;
@@ -2124,6 +2118,7 @@
                       var vp = hintEl.querySelector('[data-embla-viewport]');
                       if (vp) vp.addEventListener('pointerdown', removeHint, {once: true});
 
+                      // Also stop when the user actually scrolls the carousel
                       function onScroll() {
                         removeHint();
                         carousel.embla.off('scroll', onScroll);
@@ -2663,6 +2658,8 @@
                             elsif value.swatch.color
                               assign sticky_swatch = value.swatch.color
                             else
+                              # Fallback hex values mirror WEBGI_COLOR_MAP in assets/webgi-loader.js
+                              # so sticky swatches match the 3D model material colors.
                               assign sticky_value_lower = value | append: '' | downcase
                               if sticky_value_lower contains 'white gold' or sticky_value_lower contains 'white-gold'
                                 assign sticky_swatch = '#E5E1DA'
@@ -2721,8 +2718,10 @@
               data-form-wrapper
             >
               <div class="form__width">
+                {% comment %} The input with name="id" submits to cart {% endcomment %}
                 <input type="hidden" name="id" value="{{ current_variant.id }}" form="{{ product_form_id }}">
 
+                {% comment %} Depending whether the product variant is a preorder or not, we will submit a line item property: "preorder" in the cart {% endcomment %}
                 <input
                   type="hidden"
                   name="properties[{{ 'products.product.sale_type' | t }}]"
@@ -2769,33 +2768,10 @@
                     assign description_block_style = '--block-padding-bottom: ' | append: description_block.settings.padding_bottom | append: 'px;'
                     assign description_block_style = 'style="' | append: description_block_style | append: '"'
                   endif
-
-                  assign pdp_has_size = false
-                  if buttons_block != blank
-                    capture pdp_ymee_flags
-                      render 'ymee-product-flags', product: product
-                    endcapture
-                    if pdp_ymee_flags contains 'has_size'
-                      assign pdp_has_size = true
-                    endif
-                  endif
                 -%}
 
                 <div class="product__content-columns">
                   <div class="product__content-columns__main">
-                    {%- if buttons_block != blank -%}
-                      {%- render 'product-buttons',
-                        block: buttons_block,
-                        block_style: buttons_block_style,
-                        product: product,
-                        product_form_id: product_form_id,
-                        preorder: preorder,
-                        onboarding_product: onboarding_product,
-                        ring_sizing_link: buttons_block.settings.ring_sizing_link,
-                        bracelet_sizing_link: buttons_block.settings.bracelet_sizing_link,
-                        relocate_to_main: true
-                      -%}
-                    {%- endif -%}
                     {%- if description_block != blank -%}
                       {%- render 'product-description',
                         product: product,
@@ -3369,7 +3345,16 @@
                   {%- if aside_has_content -%}
                     <div class="product__content-columns__aside">
                       {%- if buttons_block != blank -%}
-                        {%- render 'ymee-color-picker', product: product, current_variant: product.selected_or_first_available_variant, section_id: section.id -%}
+                        {%- render 'product-buttons',
+                          block: buttons_block,
+                          block_style: buttons_block_style,
+                          product: product,
+                          product_form_id: product_form_id,
+                          preorder: preorder,
+                          onboarding_product: onboarding_product,
+                          ring_sizing_link: buttons_block.settings.ring_sizing_link,
+                          bracelet_sizing_link: buttons_block.settings.bracelet_sizing_link
+                        -%}
                       {%- endif -%}
 
                       {%- for block in section.blocks -%}
@@ -3852,10 +3837,12 @@
 
       if (dropdown) {
         var dropdownHeight = dropdown.getBoundingClientRect().height;
+        // 20px = bottom offset of the fixed dropdown
         sectionEl.style.setProperty('--pdp-dropdown-height', dropdownHeight + 20 + 'px');
       }
     }
 
+    // Re-check mobile on resize
     if (window.matchMedia) {
       window.matchMedia('(max-width: 989px)').addEventListener('change', function (e) {
         isMobile = e.matches;
@@ -3863,12 +3850,14 @@
       });
     }
 
+    // Initial measurement
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', updateStickyBarHeight);
     } else {
       updateStickyBarHeight();
     }
 
+    // Watch for size changes
     var resizeObserver = new ResizeObserver(function () {
       updateStickyBarHeight();
     });
@@ -3881,11 +3870,13 @@
       resizeObserver.observe(stickyBar);
     }
 
+    // Also watch the inner content since buttons might change
     var stickyBarInner = sectionEl.querySelector('.product__sticky-bar__inner');
     if (stickyBarInner) {
       resizeObserver.observe(stickyBarInner);
     }
 
+    // Watch the dropdown for height changes
     if (dropdown) {
       resizeObserver.observe(dropdown);
     }
@@ -3894,46 +3885,15 @@
 
 <script>
   (function () {
-    var sectionEl = document.getElementById('MainProduct--{{ section.id }}');
-    if (!sectionEl || !window.matchMedia) return;
-
-    var titlePrice = sectionEl.querySelector('.product__title-price');
-    var buyBlock = sectionEl.querySelector('.product__content-columns__main > .product__block--buttons');
-    if (!titlePrice || !buyBlock) return;
-
-    var anchor = document.createComment('pdp-buyform-anchor');
-    buyBlock.parentNode.insertBefore(anchor, buyBlock);
-
-    var mq = window.matchMedia('(min-width: 990px)');
-
-    function apply(matches) {
-      if (matches) {
-        if (buyBlock.parentNode !== titlePrice) titlePrice.appendChild(buyBlock);
-        sectionEl.classList.add('pdp-buyform-in-title');
-      } else {
-        if (anchor.parentNode && buyBlock.previousSibling !== anchor) {
-          anchor.parentNode.insertBefore(buyBlock, anchor.nextSibling);
-        }
-        sectionEl.classList.remove('pdp-buyform-in-title');
-      }
-    }
-
-    apply(mq.matches);
-    mq.addEventListener('change', function (e) { apply(e.matches); });
-  })();
-</script>
-
-<script>
-  (function () {
     if (!window.matchMedia || !window.matchMedia('(max-width: 1024px)').matches) return;
 
+    // Smooth hide dropdown when footer enters viewport, show when it leaves
     function initFooterObserver() {
       var dropdown =
         document.querySelector('[data-ymee-variant-dropdown]') ||
         document.querySelector('[data-ymee-variant-dropdown-form-only]');
       var footer = document.querySelector('.site-footer-wrapper');
       if (!dropdown || !footer || !('IntersectionObserver' in window)) return;
-      if (window.getComputedStyle(dropdown).position !== 'fixed') return;
       var observer = new IntersectionObserver(
         function (entries) {
           entries.forEach(function (entry) {
@@ -3957,6 +3917,11 @@
 </script>
 
 <script>
+  /* ── Desktop dropdown-slide animation ──
+     Class pdp-dropdown-inline is ON by default (added in Liquid).
+     JS measures the layout and sets CSS vars, then removes the class on scroll.
+     No grid changes. Title-price shrinks via max-width. Dropdown slides via transform.
+     Dropdown & color picker keep their original size. */
   (function () {
     if (document.documentElement.hasAttribute('data-geo-hidden')) return;
 
@@ -3976,6 +3941,7 @@
     var measured = false;
     var resizeTimer;
 
+    /* Cached DOM refs (set once in measure) */
     var titlePrice = null;
     var stickyInner = null;
 
@@ -3999,6 +3965,7 @@
       if (!titlePrice) titlePrice = sectionEl.querySelector('.product__title-price');
       if (!stickyInner) stickyInner = sectionEl.querySelector('.product__sticky-bar__inner');
 
+      /* Disable transitions, measure in default (stacked) state */
       var els = [titlePrice, colorPicker, dropdown].filter(Boolean);
       els.forEach(function (el) {
         el.style.transition = 'none';
