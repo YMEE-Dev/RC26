@@ -33,6 +33,14 @@
     background: #fff;
   }
 
+  /* iOS Safari: constrain to visual viewport height so gallery doesn't extend behind browser chrome */
+  @supports (-webkit-touch-callout: none) {
+    .pswp[data-pswp-option-classes*="pswp-zoom-gallery"],
+    .pswp-zoom-gallery {
+      height: -webkit-fill-available;
+    }
+  }
+
   /* Offset scroll-wrap top so PhotoSwipe centers the image in the visible area below the caption/title bar */
   @media only screen and (min-width: 990px) {
     .pswp[data-pswp-option-classes*="pswp-zoom-gallery"] .pswp__scroll-wrap,
@@ -54,7 +62,7 @@
     position: absolute;
     top: 0;
     width: 5vw;
-    height: 100vh;
+    height: 100%;
     margin-top: 0;
     border: 0;
     display: flex;
@@ -63,6 +71,7 @@
     color: inherit;
     transition: opacity 0.2s ease;
     z-index: 3;
+    -webkit-tap-highlight-color: transparent;
   }
 
   @media only screen and (max-width: 768px) {
