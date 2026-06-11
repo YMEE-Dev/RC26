@@ -149,6 +149,36 @@
 {%- endif -%}
 
 {%- if has_background_video -%}
+  {%- liquid
+    comment
+      Shopify transcodes hosted videos into a rendition ladder (e.g. 1080p /
+      720p / 480p mp4 + HLS). video_tag lists every source and browsers grab
+      the heaviest mp4 — 6.5MB+ for a 1080p hero. A ~720p rendition is plenty
+      for a muted background loop, so pick the best mp4 capped at 720p and
+      render the <video> ourselves. Falls back to video_tag when no capped
+      mp4 rendition exists.
+    endcomment
+    assign desktop_video_source = nil
+    if has_background_video_desktop
+      for source in media.sources
+        if source.format == 'mp4' and source.height <= 720
+          if desktop_video_source == nil or source.height > desktop_video_source.height
+            assign desktop_video_source = source
+          endif
+        endif
+      endfor
+    endif
+    assign mobile_video_source = nil
+    if has_background_video_mobile
+      for source in mobile_media.sources
+        if source.format == 'mp4' and source.height <= 720
+          if mobile_video_source == nil or source.height > mobile_video_source.height
+            assign mobile_video_source = source
+          endif
+        endif
+      endfor
+    endif
+  -%}
   <div
     class="video-background {{ desktop_height }} {{ mobile_height }}"
     style="--aspect-ratio: {{ media_aspect_ratio }};"
@@ -163,7 +193,13 @@
         data-video-id="{{ section.id }}-video-background{% if has_video_variants %}-desktop{% endif %}"
       >
         <template data-video-template>
-          {{ media | video_tag: autoplay: true, image_size: '1085x', loop: true, muted: true, controls: false }}
+          {%- if desktop_video_source -%}
+            <video autoplay loop muted playsinline>
+              <source src="{{ desktop_video_source.url }}" type="{{ desktop_video_source.mime_type }}">
+            </video>
+          {%- else -%}
+            {{ media | video_tag: autoplay: true, image_size: '1085x', loop: true, muted: true, controls: false }}
+          {%- endif -%}
         </template>
       </video-background>
     {%- endif -%}
@@ -174,7 +210,13 @@
         data-video-id="{{ section.id }}-video-background{% if has_video_variants %}-mobile{% endif %}"
       >
         <template data-video-template>
-          {{ mobile_media | video_tag: autoplay: true, image_size: '1085x', loop: true, muted: true, controls: false }}
+          {%- if mobile_video_source -%}
+            <video autoplay loop muted playsinline>
+              <source src="{{ mobile_video_source.url }}" type="{{ mobile_video_source.mime_type }}">
+            </video>
+          {%- else -%}
+            {{ mobile_media | video_tag: autoplay: true, image_size: '1085x', loop: true, muted: true, controls: false }}
+          {%- endif -%}
         </template>
       </video-background>
     {%- endif -%}
