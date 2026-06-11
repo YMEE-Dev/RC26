@@ -36,9 +36,22 @@
     z-index: 0;
   }
 
-  /* Immediate white background on open — prevents page content bleeding through during pswp__bg fade-in */
-  .pswp[data-pswp-option-classes*="pswp-zoom-gallery"],
-  .pswp-zoom-gallery {
+  /* White gallery background — overrides var(--bg) from any colour scheme class that
+     PhotoSwipe adds to .pswp at open time (e.g. color-scheme-2 with grey section_bg).
+     Use the broadest possible selector so it wins regardless of attribute timing. */
+  .pswp.pswp--open .pswp__bg {
+    background: #fff !important;
+  }
+
+  /* Fallback for before pswp--open is added (loader phase) */
+  .pswp[data-pswp-option-classes] .pswp__bg {
+    background: #fff !important;
+  }
+
+  /* Container itself also white so nothing bleeds through during pswp__bg fade-in */
+  .pswp.pswp--open,
+  .pswp[data-pswp-option-classes] {
+    --bg: #fff;
     background: #fff;
   }
 
@@ -59,11 +72,11 @@
     }
   }
 
-  .pswp[data-pswp-option-classes*="pswp-zoom-gallery"] .pswp__bg,
-  .pswp-zoom-gallery .pswp__bg,
   .pswp[data-pswp-option-classes*="pswp-zoom-gallery"] .pswp__img,
   .pswp-zoom-gallery .pswp__img {
-    background: #fff;
+    background: transparent !important;
+    -webkit-filter: brightness(0.98);
+    filter: brightness(0.98);
   }
 
   .pswp[data-pswp-option-classes*="pswp-zoom-gallery"] .pswp__button--arrow--right,
