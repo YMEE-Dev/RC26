@@ -1,0 +1,35 @@
+{%- liquid
+  assign ymee_has_size = false
+  assign ymee_has_color_picker = false
+  assign ymee_size_t = 'general.size_chart.size' | t
+  assign ymee_size_list = ymee_size_t | remove: ' ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
+  assign ymee_size_list = ymee_size_list | append: 'size,ring-size,bracelet-size,'
+  for opt in product.options_with_values
+    assign opt_h = opt.name | handle
+    if ymee_size_list contains opt_h
+      assign ymee_has_size = true
+    else
+      assign has_real_images = false
+      for value in opt.values
+        assign value_name = value | append: ''
+        for variant in product.variants
+          assign variant_option_index = opt.position | minus: 1
+          assign variant_option_value = variant.options[variant_option_index]
+          if variant_option_value == value_name
+            if variant.featured_media
+              assign has_real_images = true
+              break
+            endif
+          endif
+        endfor
+        if has_real_images
+          break
+        endif
+      endfor
+      if has_real_images
+        assign ymee_has_color_picker = true
+      endif
+    endif
+  endfor
+-%}
+{%- if ymee_has_size -%}has_size {% endif %}{%- if ymee_has_color_picker -%}has_color_picker{% endif %}
