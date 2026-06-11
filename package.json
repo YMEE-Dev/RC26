@@ -1,0 +1,13 @@
+{
+  "name": "rc26-theme",
+  "private": true,
+  "description": "Build tooling for the RC26 Shopify theme (see minify.mjs). `npm run minify` regenerates the minified production assets from their editable sources, `npm run watch` rebuilds them on every save, `npm run dev` also starts `shopify theme dev --store coin26` for a live preview.",
+  "scripts": {
+    "minify": "node minify.mjs",
+    "watch": "node minify.mjs --watch",
+    "dev": "node minify.mjs --watch --shopify"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

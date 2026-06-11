@@ -630,9 +630,11 @@
   <link rel="preload" as="font" href="{{ settings.type_btn_font | font_url }}" type="font/woff2" crossorigin>
 {%- endunless -%}
 
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 
-{{ 'theme.css' | asset_url | stylesheet_tag }}
+{%- comment -%} theme.min.css is generated — edit theme.css, then run `npm run minify` {%- endcomment -%}
+{{ 'theme.min.css' | asset_url | stylesheet_tag }}
 {{ 'rc-typography.css' | asset_url | stylesheet_tag }}
 
 {%- if settings.show_siblings or settings.enable_swatches -%}
@@ -750,7 +752,7 @@
 
 <!-- Theme Javascript ============================================================== -->
 <script src="{{ 'vendor.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'theme.dev.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
 <script
   src="{{ 'custom.js' | asset_url }}"
   defer="defer"
@@ -803,9 +805,14 @@
 {%- comment -%}
   If you need to do some edits in Theme JS use theme.dev.js file
 
-  *** DO NOT EDIT theme.js file ***
+  *** DO NOT EDIT theme.js or theme.min.css directly ***
 
-  Then call theme.dev.js file by editing the row above from:
+  theme.js and theme.min.css are GENERATED from theme.dev.js and theme.css by
+  running `npm run minify` (see package.json; one-time `npm install` first).
+  Run it after every change to the source files so production stays in sync.
+
+  For local debugging you can temporarily load the unminified source by
+  changing the script row above from:
   <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
   to
   <script src="{{ 'theme.dev.js' | asset_url }}" defer="defer"></script>
