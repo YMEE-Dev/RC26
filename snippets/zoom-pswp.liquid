@@ -302,13 +302,31 @@
 
 <script>
   (function () {
+    // Caption-close: trigger gallery close on touch (PhotoSwipe touch handler requires BUTTON tagName,
+    // but closeElClasses path only fires for mouse — so we proxy to the registered close button)
     var captionClose = document.querySelector('.pswp__caption-close');
-    if (!captionClose) return;
-    captionClose.addEventListener('touchend', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      var closeBtn = document.querySelector('.pswp__button--close');
-      if (closeBtn) closeBtn.click();
-    }, { passive: false });
+    if (captionClose) {
+      captionClose.addEventListener('touchend', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var closeBtn = document.querySelector('.pswp__button--close');
+        if (closeBtn) closeBtn.click();
+      }, { passive: false });
+    }
+
+    // Sync theme scroll-lock state with gallery open/close
+    var pswpEl = document.querySelector('.pswp');
+    if (pswpEl) {
+      var lockedByGallery = false;
+      new MutationObserver(function () {
+        if (pswpEl.classList.contains('pswp--open')) {
+          document.documentElement.setAttribute('data-scroll-locked', '');
+          lockedByGallery = true;
+        } else if (lockedByGallery) {
+          document.documentElement.removeAttribute('data-scroll-locked');
+          lockedByGallery = false;
+        }
+      }).observe(pswpEl, { attributes: true, attributeFilter: ['class'] });
+    }
   })();
 </script>
