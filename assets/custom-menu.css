@@ -527,6 +527,52 @@ body:has(header-drawer.drawer--header.is-open) .theme__header {
     display: none !important;
   }
 
+  /* Small staggered fade/slide when the VIEW ALL reveal opens. The items come
+     from display:none, so a keyframe animation is used instead of a transition
+     (animations start the moment an element is first rendered). The
+     `view-all-open` class is ours alone — set on that one level-1 <li> by
+     sections/header.liquid — so these shorter selectors stay scoped to this
+     item. `backwards` keeps each staggered item invisible until its delay
+     elapses. */
+  li.tmenu_item_level_1.view-all-open ul li:not(.jewelry-view-all-trigger-item) {
+    animation: jewelry-view-all-reveal 0.3s ease-out backwards;
+  }
+  li.tmenu_item_level_1.view-all-open ul li:nth-child(2) {
+    animation-delay: 0.04s;
+  }
+  li.tmenu_item_level_1.view-all-open ul li:nth-child(3) {
+    animation-delay: 0.08s;
+  }
+  li.tmenu_item_level_1.view-all-open ul li:nth-child(4) {
+    animation-delay: 0.12s;
+  }
+  li.tmenu_item_level_1.view-all-open ul li:nth-child(5) {
+    animation-delay: 0.16s;
+  }
+  li.tmenu_item_level_1.view-all-open ul li:nth-child(6) {
+    animation-delay: 0.2s;
+  }
+  li.tmenu_item_level_1.view-all-open ul li:nth-child(n + 7) {
+    animation-delay: 0.24s;
+  }
+
+  @keyframes jewelry-view-all-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    li.tmenu_item_level_1.view-all-open ul li:not(.jewelry-view-all-trigger-item) {
+      animation: none;
+    }
+  }
+
   .drawer__menu.tmenu_app
     .tmenu_item_level_0.tmenu_item_mobile
     [title="JEWELRY"]
