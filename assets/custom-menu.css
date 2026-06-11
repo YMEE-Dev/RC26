@@ -488,6 +488,45 @@ body:has(header-drawer.drawer--header.is-open) .theme__header {
     grid-row: 2;
   }
 
+  /* "VIEW ALL" reveal: 4th level-1 item under JEWELRY in the mobile drawer.
+
+     The list itself contains an app-rendered "VIEW ALL" link
+     (a[title="VIEW ALL"]); JS in sections/header.liquid tags its <li> with
+     .jewelry-view-all-trigger-item. By default that trigger item is the only
+     visible entry in the nested list — every other list item is hidden.
+     Tapping VIEW ALL (navigation prevented in JS) adds `view-all-open` to the
+     level-1 <li>, which (a) hides the trigger item and (b) — thanks to the
+     :not(.view-all-open) gate below — stops suppressing the other items,
+     letting the app's own natural display styles take over (no restore value
+     to guess). The reveal is one-way; it only resets when the drawer itself
+     closes (JS removes the class).
+
+     The list selector below is the merchant's verbatim DevTools selector for
+     this item's inner list: it ends in a plain descendant `ul` (NOT
+     `> .tmenu_submenu`), because the 4th item is structured differently from
+     the 3rd. Trust it exactly. */
+  .drawer__menu.tmenu_app
+    .tmenu_item_level_0.tmenu_item_mobile
+    [title="JEWELRY"]
+    + .tmenu_submenu--mobile.tmenu_submenu
+    > li.tmenu_item_level_1.tmenu_item_mobile:nth-of-type(4):not(.view-all-open)
+    ul
+    li:not(.jewelry-view-all-trigger-item) {
+    display: none !important;
+  }
+
+  /* Once opened, hide the VIEW ALL trigger item for good (the class is
+     one-way per drawer session). */
+  .drawer__menu.tmenu_app
+    .tmenu_item_level_0.tmenu_item_mobile
+    [title="JEWELRY"]
+    + .tmenu_submenu--mobile.tmenu_submenu
+    > li.tmenu_item_level_1.tmenu_item_mobile:nth-of-type(4).view-all-open
+    ul
+    li.jewelry-view-all-trigger-item {
+    display: none !important;
+  }
+
   .drawer__menu.tmenu_app
     .tmenu_item_level_0.tmenu_item_mobile
     [title="JEWELRY"]
@@ -531,7 +570,8 @@ body:has(header-drawer.drawer--header.is-open) .theme__header {
     [title="JEWELRY"]
     + .tmenu_submenu--mobile.tmenu_submenu
     > li.tmenu_item_level_1.tmenu_item_mobile:nth-of-type(2)
-    [tmenu-disabled-link],
+    [tmenu-disabled-link]
+    span,
   .drawer__menu.tmenu_app
     .tmenu_item_level_0.tmenu_item_mobile
     [title="JEWELRY"]

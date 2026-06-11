@@ -1065,6 +1065,22 @@
       '.drawer__menu.tmenu_app .tmenu_item_level_0.tmenu_item_mobile > .tmenu_submenu--mobile.tmenu_submenu > li.tmenu_item_level_1.tmenu_item_mobile:nth-of-type(3) > .tmenu_submenu';
     const jewelryMobileThirdLevelSubmenuSelector =
       '.drawer__menu.tmenu_app [title="JEWELRY"] + .tmenu_submenu--mobile.tmenu_submenu > li.tmenu_item_level_1.tmenu_item_mobile:nth-of-type(3) > .tmenu_submenu';
+    // "VIEW ALL" reveal for the 4th level-1 item under JEWELRY in the mobile
+    // drawer. The app renders a "VIEW ALL" link (a[title="VIEW ALL"]) as one
+    // of the list's own entries; we tag its <li> so CSS (custom-menu.css) can
+    // keep only that entry visible while the rest of the list is hidden.
+    // Tapping it (navigation prevented) adds the one-way `view-all-open`
+    // class to the level-1 <li> (hides the trigger item, un-suppresses the
+    // rest). The state resets only when the drawer closes. The tmenu markup
+    // is app-injected, so tagging + binding are idempotent and re-run via the
+    // MutationObserver refresh to survive the app re-rendering the menu DOM.
+    const jewelryViewAllItemSelector =
+      '.drawer__menu.tmenu_app [title="JEWELRY"] + .tmenu_submenu--mobile.tmenu_submenu > li.tmenu_item_level_1.tmenu_item_mobile:nth-of-type(4)';
+    // The item's nested list is located via a plain descendant `ul` (the
+    // merchant's verbatim selector ends in ` ul`, NOT `> .tmenu_submenu` —
+    // the 4th item is structured differently from the 3rd).
+    const jewelryViewAllTriggerLinkSelector = 'a[title="VIEW ALL"]';
+    const jewelryViewAllTriggerItemClass = 'jewelry-view-all-trigger-item';
     const mobileTouchSafeSubmenuSelector = [
       'ul.tmenu_submenu_type_automatic.tmenu_submenu--mobile.tmenu_submenu',
       mobileDrawerThirdLevelSubmenuSelector,
@@ -1137,6 +1153,7 @@
 
         const refreshMobileMenuState = () => {
           ensureMobileThirdPanelImagesLoaded();
+          ensureJewelryViewAllTrigger();
 
           const mobileMenuIsOpen = Boolean(document.querySelector(mobileDrawerActiveRootSelector));
           if (mobileMenuIsOpen) {
@@ -1258,6 +1275,118 @@
       tmenuScrollLockTarget = null;
     };
 
+    // Tag the app-rendered "VIEW ALL" link's <li> inside the 4th JEWELRY item
+    // so CSS can keep it visible while the rest of the list is hidden, and
+    // keep its aria state in sync. Runs from the menu's MutationObserver,
+    // which watches class attributes — so every DOM write below MUST be
+    // conditional on an actual change. classList.add/setAttribute rewrite the
+    // attribute even when the value is unchanged, which queues a fresh
+    // mutation record and loops the observer forever (frozen page).
+    const ensureJewelryViewAllTrigger = () => {
+      selectAll(jewelryViewAllItemSelector).forEach((item, index) => {
+        const trigger = item.querySelector(jewelryViewAllTriggerLinkSelector);
+        if (!trigger) return;
+        const isOpen = item.classList.contains('view-all-open');
+
+        const triggerItem = trigger.closest('li');
+        if (triggerItem && triggerItem !== item && !triggerItem.classList.contains(jewelryViewAllTriggerItemClass)) {
+          triggerItem.classList.add(jewelryViewAllTriggerItemClass);
+        }
+
+        // Wire aria-controls to the nested list (verbatim selector panel).
+        const panel = item.querySelector(':scope ul');
+        if (panel) {
+          if (!panel.id) {
+            panel.id = 'jewelry-view-all-panel-' + index;
+          }
+          if (trigger.getAttribute('aria-controls') !== panel.id) {
+            trigger.setAttribute('aria-controls', panel.id);
+          }
+        }
+
+        // One-way: aria-expanded becomes "true" right before the trigger hides.
+        const expanded = isOpen ? 'true' : 'false';
+        if (trigger.getAttribute('aria-expanded') !== expanded) {
+          trigger.setAttribute('aria-expanded', expanded);
+        }
+      });
+    };
+
+    // Reset the reveal whenever the drawer closes, so the next open starts
+    // collapsed with "VIEW ALL" shown again. Write-only-on-change for the
+    // same observer-loop reason as ensureJewelryViewAllTrigger above.
+    const resetJewelryViewAll = () => {
+      selectAll(jewelryViewAllItemSelector).forEach((item) => {
+        if (item.classList.contains('view-all-open')) {
+          item.classList.remove('view-all-open');
+        }
+        const trigger = item.querySelector(jewelryViewAllTriggerLinkSelector);
+        if (trigger && trigger.getAttribute('aria-expanded') !== 'false') {
+          trigger.setAttribute('aria-expanded', 'false');
+        }
+      });
+    };
+
+    const enableJewelryViewAll = () => {
+      if (document.documentElement.dataset.jewelryViewAllBound === 'true') return;
+      document.documentElement.dataset.jewelryViewAllBound = 'true';
+
+      // Delegated capture-phase click so the binding survives the app
+      // re-rendering the menu AND runs before the menu app's own click
+      // handlers (capture + stopPropagation keeps the app from reacting to
+      // this tap at all).
+      document.addEventListener(
+        'click',
+        (event) => {
+          if (!(event.target instanceof Element)) return;
+          const trigger = event.target.closest(jewelryViewAllTriggerLinkSelector);
+          if (!trigger) return;
+          // Only act on the VIEW ALL link inside the 4th JEWELRY item — any
+          // other VIEW ALL link elsewhere in the menu navigates normally.
+          const item = trigger.closest(jewelryViewAllItemSelector);
+          if (!item) return;
+          // Suppress the link's navigation; the tap only reveals the list.
+          // One-way: only ever add the class, never remove on click.
+          event.preventDefault();
+          event.stopPropagation();
+          trigger.setAttribute('aria-expanded', 'true');
+          item.classList.add('view-all-open');
+        },
+        true
+      );
+
+      // Reset on drawer close. The drawer is `header-drawer.drawer--header`;
+      // its open state is `is-open` on the element (mirrored by the
+      // `header-drawer-is-open` class on <body>). Observe both for the
+      // open -> closed transition.
+      const drawer = document.querySelector('header-drawer.drawer--header');
+      const isDrawerOpen = () =>
+        document.body.classList.contains('header-drawer-is-open') ||
+        Boolean(drawer && drawer.classList.contains('is-open'));
+
+      let drawerWasOpen = isDrawerOpen();
+      const handleDrawerStateChange = () => {
+        const openNow = isDrawerOpen();
+        if (drawerWasOpen && !openNow) {
+          resetJewelryViewAll();
+        }
+        drawerWasOpen = openNow;
+      };
+
+      if (drawer) {
+        new MutationObserver(handleDrawerStateChange).observe(drawer, {
+          attributes: true,
+          attributeFilter: ['class'],
+        });
+      }
+      new MutationObserver(handleDrawerStateChange).observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class'],
+      });
+    };
+
+    enableJewelryViewAll();
+    ensureJewelryViewAllTrigger();
     enableMobileSubmenuTouchScrollGuard();
     ensureMobileThirdPanelImagesLoaded();
     bindMobileDrawerMenuObservers();
