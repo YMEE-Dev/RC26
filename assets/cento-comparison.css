@@ -1,0 +1,222 @@
+/* v3 */
+
+.collection-cento-comparison-banner {
+  grid-column: 1 / -1;
+}
+
+.collection-cento .grid {
+  grid-auto-flow: dense;
+}
+
+.cento-comparison {
+  position: relative;
+  overflow: hidden;
+  max-width: 1232px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 60px;
+  margin-bottom: 60px;
+  padding-left: clamp(20px, 8vw, 200px);
+  padding-right: clamp(20px, 8vw, 200px);
+  padding-top: 80px;
+  padding-bottom: 80px;
+  background-color: #142038;
+}
+
+.cento-comparison__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-bottom: 1px solid #e5e5e5;
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+  filter: blur(25px);
+}
+
+.cento-comparison__wrapper {
+  width: 100%;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.cento-comparison__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr;
+  gap: 40px 20px;
+  align-items: center;
+}
+
+.cento-comparison__title-col {
+  display: flex;
+  align-items: center;
+}
+
+@media only screen and (min-width: 750px) {
+  .cento-comparison__title {
+    max-width: min-content;
+    text-wrap: balance;
+  }
+}
+
+.cento-comparison__title {
+  color: #ffffff;
+  font-family: var(--FONT-STACK-HEADING);
+  font-size: var(--FONT-DISPLAY-S);
+  line-height: var(--FONT-DISPLAY-M);
+  margin: 0;
+  font-weight: var(--FONT-WEIGHT-HEADING);
+  font-style: var(--FONT-STYLE-HEADING);
+  letter-spacing: var(--LETTER-SPACING-HEADING);
+  text-transform: var(--FONT-UPPERCASE-HEADING, none);
+}
+
+.cento-comparison__image-col {
+  display: flex;
+  align-items: flex-start;
+  gap: 7.66px;
+}
+
+.cento-comparison__svg-wrap {
+  display: block;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+}
+
+.cento-comparison__svg-wrap svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.cento-comparison__desc-col {
+  display: flex;
+  align-items: center;
+}
+
+.cento-comparison__description {
+  color: #ffffff;
+  font-family: var(--FONT-STACK-BODY);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.cento-comparison__description p {
+  margin: 0 0 0.8em;
+}
+
+.cento-comparison__description p:last-child {
+  margin-bottom: 0;
+}
+
+.cento-comparison__description strong {
+  font-weight: 600;
+}
+
+.cento-comparison__divider {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  padding: 40px 0;
+}
+
+.cento-comparison__divider-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 1);
+  display: block;
+}
+
+.cento-comparison__vs {
+  color: #ffffff;
+  font-family: var(--FONT-STACK-HEADING);
+  font-size: var(--FONT-DISPLAY-S);
+  line-height: var(--FONT-DISPLAY-M);
+  font-weight: var(--FONT-WEIGHT-HEADING);
+  letter-spacing: 0.15em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-style: var(--FONT-STYLE-HEADING);
+  text-transform: var(--FONT-UPPERCASE-HEADING, none);
+}
+
+@media only screen and (max-width: 749px) {
+  .cento-comparison {
+    padding-left: var(--outer, 20px);
+    padding-right: var(--outer, 20px);
+    padding-top: 40px;
+    padding-bottom: 40px;
+    margin-top: 40px;
+    margin-bottom: 40px;
+  }
+
+  .cento-comparison__row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .cento-comparison__image-col {
+    order: -1;
+    gap: 16px;
+  }
+
+  .cento-comparison__svg-wrap {
+    width: 80px;
+    height: 80px;
+  }
+
+  .cento-comparison__title-col {
+    order: 0;
+  }
+
+  .cento-comparison__desc-col {
+    order: 1;
+  }
+
+  .cento-comparison__divider {
+    padding: 24px 0;
+    gap: 16px;
+  }
+
+  .cento-comparison__description {
+    font-size: 11px;
+  }
+}
+
+/* Sticky-nav fix (cento only) — root cause of the mobile "jump + nav disappears".
+   The theme hides the collection nav when it sticks IF the collection has no
+   "available now" products: `.collection__nav.is-stuck.has-no-available-products
+   { display: none }` (theme.css, @media max-width:768px). Cento has no available-
+   filter matches, so the nav gets `has-no-available-products` and is set to
+   display:none the instant it pins. That collapses its 60px height, which (a) makes
+   the nav invisible — reads as "not sticky" — and (b) removes 60px of document above
+   the scroll position, snapping the page up by 60px — the jump.
+   Other collections have available products, so they never get the class.
+   Fix: keep the nav visible when stuck on cento. Verified via DevTools: scroll no
+   longer snaps back and the nav stays 60px tall and pinned. */
+@media only screen and (max-width: 768px) {
+  .collection-cento .collection__nav.is-stuck.has-no-available-products {
+    display: flex !important;
+  }
+}
+
+/* Sticky-nav scroll-to-top fix (cento only).
+   When the collection nav pins, the theme sets `.header-sections` to `display: none`.
+   That element is `position: relative` / in normal flow at the top of the page, so
+   removing it deletes its height — and because cento has little content above the nav
+   (subcollections is disabled), the page snaps back to scrollTop:0. The nav can never
+   stay pinned, which reads as "not sticky / jumps to top."
+   Fix: preserve the header's box/height with `visibility: hidden` instead of removing
+   it. No height change = no scroll snap = the nav pins normally. `visibility: hidden`
+   (not `display: flex` alone) keeps it from covering the nav. Scoped to .collection-cento. */
+@media only screen and (max-width: 960px) {
+  body:has(.collection-cento .collection__nav.is-stuck) .header-sections {
+    display: flex !important;
+    visibility: hidden !important;
+  }
+}

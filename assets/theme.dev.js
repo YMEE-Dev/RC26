@@ -3778,7 +3778,17 @@
 
           this.isStuck = false;
           this.cls = this.classList;
-          this.headerOffset = document.querySelector(".page-header")?.offsetTop;
+          // Collection-like templates pin the header from the very top (offset 0) so the
+          // slide-out animation plays on the first downscroll while the header is fixed.
+          // Otherwise the header scrolls away as a position:absolute element and only
+          // re-pins (and animates out) once you cross the sticky threshold — that re-pin
+          // read as "the page jumps back up to show the header animation".
+          this.stickFromTop =
+            (this.isCollectionTemplate && !this.isSpotlightCollectionTemplate) ||
+            this.isSearchTemplate ||
+            this.isBlogTemplate ||
+            this.isArticleTemplate;
+          this.headerOffset = this.stickFromTop ? 0 : document.querySelector(".page-header")?.offsetTop || 0;
           this.updateHeaderOffset = this.updateHeaderOffset.bind(this);
           this.scrollEvent = (e) => this.onScroll(e);
 
@@ -3794,7 +3804,7 @@
         initHeaderScrollHide() {
           this.headerScrollHideBuffer = Number.parseInt(this.dataset.headerScrollHideBuffer, 10);
           if (Number.isNaN(this.headerScrollHideBuffer)) {
-            this.headerScrollHideBuffer = 40;
+            this.headerScrollHideBuffer = 30;
           }
           this.headerScrollHideBuffer = Math.max(this.headerScrollHideBuffer, 0);
           this.headerScrollIntentStart = window.scrollY;
@@ -3908,24 +3918,33 @@
           const isMobileViewport = window.innerWidth < 960;
           const stickyThreshold = typeof this.headerOffset === "number" ? this.headerOffset : 0;
 
-          if (isMobileViewport) {
-            this.setHeaderScrollHidden(true);
-            this.shouldShowScrollRevealBlur = false;
-            this.syncScrollRevealBlur();
-            return;
-          }
-
           const isCollectionLikeTemplate =
             (this.isCollectionTemplate && !this.isSpotlightCollectionTemplate) ||
             this.isSearchTemplate ||
             this.isBlogTemplate ||
             this.isArticleTemplate;
 
+          // Collection-like templates (collection, search, blog, article): the header hides on
+          // down-scroll and STAYS hidden while scrolled — it must NOT reappear on up-scroll in
+          // the middle of the page, on mobile or desktop. Only the atTop branch shows it again.
+          // Checked before the mobile branch so the mobile up-scroll never re-reveals it.
+          // No reveal blur here: the header is hidden whenever scrolled, and the blur only
+          // belongs to a visible header (enforced centrally in syncScrollRevealBlur).
           if (isCollectionLikeTemplate) {
             if (direction === "down") {
-              this.setHeaderScrollHidden(true, { layered: true });
+              this.setHeaderScrollHidden(true, { layered: !isMobileViewport });
             }
             this.shouldShowScrollRevealBlur = false;
+            this.syncScrollRevealBlur();
+            return;
+          }
+
+          if (isMobileViewport) {
+            const shouldHide = direction === "down";
+            this.setHeaderScrollHidden(shouldHide);
+            // Non-collection templates reveal the header on up-scroll; show the blur with it.
+            this.shouldShowScrollRevealBlur =
+              this.isSticky && direction === "up" && position > stickyThreshold && !shouldHide;
             this.syncScrollRevealBlur();
             return;
           }
@@ -3968,7 +3987,11 @@
         }
 
         syncScrollRevealBlur() {
-          this.setScrollRevealBlur(this.shouldShowScrollRevealBlur && !this.isTmenuOpen);
+          // The reveal blur belongs to a visible header only. While the header is hidden on
+          // scroll (body.header-scroll-hide is the class that drives the scroll hide), never
+          // paint the blur — otherwise it shows with no header behind it.
+          const headerScrollHidden = this.body.classList.contains("header-scroll-hide");
+          this.setScrollRevealBlur(this.shouldShowScrollRevealBlur && !this.isTmenuOpen && !headerScrollHidden);
         }
 
         setScrollRevealBlur(shouldShow) {
@@ -4023,7 +4046,7 @@
 
           // Update header offset after any "Header group" section has been changed
           setTimeout(() => {
-            this.headerOffset = document.querySelector(".page-header")?.offsetTop;
+            this.headerOffset = this.stickFromTop ? 0 : document.querySelector(".page-header")?.offsetTop;
           });
         }
 
@@ -4343,7 +4366,7 @@
             } else {
               this.isAnimating = false;
             }
-          }, 500);
+          }, 0);
         }
 
         hideDrawer() {
@@ -4833,15 +4856,19 @@
         constructor() {
           super();
 
-          this.scrollbar = this.querySelector(selectors$c.scrollbar);
-          this.arrowNext = this.querySelector(selectors$c.scrollbarArrowNext);
-          this.arrowPrev = this.querySelector(selectors$c.scrollbarArrowPrev);
           this.toggleNextArrow = this.toggleNextArrow.bind(this);
           this.addEventListener("theme:swatches:loaded", this.toggleNextArrow);
         }
 
         connectedCallback() {
+          this.scrollbar = this.querySelector(selectors$c.scrollbar);
+          this.arrowNext = this.querySelector(selectors$c.scrollbarArrowNext);
+          this.arrowPrev = this.querySelector(selectors$c.scrollbarArrowPrev);
           document.addEventListener("theme:resize", this.toggleNextArrow);
+
+          if (!this.scrollbar) {
+            return;
+          }
 
           if (this.scrollbar.hasAttribute(attributes$9.scrollbarSlider)) {
             this.scrollToVisibleElement();
@@ -4877,6 +4904,8 @@
         }
 
         goToNext() {
+          if (!this.scrollbar || !this.arrowPrev) return;
+
           const moveWith = this.scrollbar.hasAttribute(attributes$9.scrollbarSlideFullWidth)
             ? this.scrollbar.getBoundingClientRect().width
             : this.scrollbar.getBoundingClientRect().width / 2;
@@ -4890,6 +4919,8 @@
         }
 
         goToPrev() {
+          if (!this.scrollbar || !this.arrowNext) return;
+
           const moveWith = this.scrollbar.hasAttribute(attributes$9.scrollbarSlideFullWidth)
             ? this.scrollbar.getBoundingClientRect().width
             : this.scrollbar.getBoundingClientRect().width / 2;
@@ -4903,6 +4934,8 @@
         }
 
         toggleNextArrow() {
+          if (!this.scrollbar) return;
+
           requestAnimationFrame(() => {
             this.arrowNext?.classList.toggle(
               classes$9.hidden,
@@ -4913,12 +4946,16 @@
         }
 
         togglePrevArrow() {
+          if (!this.scrollbar || !this.arrowPrev) return;
+
           requestAnimationFrame(() => {
             this.arrowPrev.classList.toggle(classes$9.hidden, this.scrollbar.scrollLeft <= 0);
           });
         }
 
         scrollToVisibleElement() {
+          if (!this.scrollbar) return;
+
           [].forEach.call(this.scrollbar.children, (element) => {
             element.addEventListener("click", (event) => {
               event.preventDefault();
@@ -4929,6 +4966,8 @@
         }
 
         move(offsetLeft, behavior = "smooth") {
+          if (!this.scrollbar) return;
+
           this.scrollbar.scrollTo({
             top: 0,
             left: offsetLeft,

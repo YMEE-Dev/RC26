@@ -214,8 +214,8 @@
         /* Pull gallery up under header, pad to keep slides in place */
         #MainProduct--{{ section.id }} .product__images {
           background-color: var(--bg-color);
-          margin-top: calc(-1 * var(--header-height, 80px));
-          padding-top: var(--header-height, 80px);
+          margin-top: 0;
+          padding-top: var(--header-height, 60px);
         }
 
         /* Sections below ATF stay white */
@@ -265,6 +265,7 @@
         letter-spacing: var(--LETTER-SPACING-NAV);
         text-transform: uppercase;
         color: var(--COLOR-TEXT-DARK);
+        margin: 0;
       }
 
       #MainProduct--{{ section.id }} .product__title-price .price-item,
@@ -523,7 +524,7 @@
 
       #MainProduct--{{ section.id }} .pdp-embla--mobile {
         display: block;
-        padding-top: var(--header-height);
+        padding-top: 0;
       }
 
       #MainProduct--{{ section.id }} .pdp-thumbs--desktop {
@@ -567,17 +568,22 @@
         }
       }
 
-      @media only screen and (min-width: 750px) and (max-width: 989px) {
+      @media only screen and (max-width: 989px) {
 
         #MainProduct--{{ section.id }} .pdp-embla__viewport {
           height: calc(var(--full-height, 100svh) - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 60px) - var(--pdp-dropdown-height, 70px));
+          padding-top: 10px;
         }
-      }
 
-      @media only screen and (max-width: 749px) {
+        #MainProduct--{{ section.id }} .pdp-embla--mobile .pdp-embla__slide {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
 
-        #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: calc(var(--full-height, 100svh) - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 60px) - var(--pdp-dropdown-height, 70px));
+        /* Scroll room so the fixed floating button never covers the bottom of content */
+        #MainProduct--{{ section.id }} .product__content {
+          padding-bottom: var(--pdp-dropdown-height, 90px);
         }
       }
 
@@ -1211,10 +1217,6 @@
       }
 
       @media only screen and (max-width: 989px) {
-        /* Mobile: gallery + sticky bar = full-height minus header and fixed dropdown space */
-        #MainProduct--{{ section.id }} .pdp-embla__viewport {
-          height: calc(var(--full-height, 100svh) - var(--header-height, 0px) - var(--pdp-sticky-bar-height, 60px) - var(--pdp-dropdown-height, 70px));
-        }
 
         #MainProduct--{{ section.id }} .product__sticky-bar {
           padding: 12px 20px;
@@ -1339,6 +1341,7 @@
         }
         #MainProduct--{{ section.id }} .product__content {
           margin: 0;
+          padding-top: 0px;
           padding-left: 20px;
           padding-right: 20px;
         }
@@ -1357,7 +1360,7 @@
         }
 
         product-info.index-product .product__content {
-          margin-top: 16px;
+          margin-top: 0px;
           padding-left: 20px;
           padding-right: 20px;
         }
@@ -2154,6 +2157,7 @@
             </script>
 
             {%- if product.media.size > 0 -%}
+              {%- if section.settings.enable_zoom -%}<zoom-images>{%- endif -%}
               <div class="pdp-embla pdp-embla--mobile" data-embla-carousel>
                 <div class="pdp-embla__viewport" data-embla-viewport>
                   <div class="pdp-embla__container">
@@ -2221,7 +2225,9 @@
                   <div class="pdp-embla__progress__bar" data-embla-progress-bar></div>
                 </div>
               </div>
+              {%- if section.settings.enable_zoom -%}</zoom-images>{%- endif -%}
 
+              {%- if section.settings.enable_zoom -%}<zoom-images>{%- endif -%}
               <div
                 class="pdp-embla pdp-embla--desktop{% if first_3d_model != blank or has_aws_3d %} pdp-embla--single-slide{% endif %}"
                 data-embla-carousel
@@ -2353,6 +2359,11 @@
                   <div class="pdp-embla__progress__bar" data-embla-progress-bar></div>
                 </div>
               </div>
+              {%- if section.settings.enable_zoom -%}
+                </zoom-images>
+                <script src="{{ 'load-photoswipe.js' | asset_url }}" defer="defer"></script>
+                <script src="{{ 'zoom.js' | asset_url }}" defer="defer"></script>
+              {%- endif -%}
 
               {%- if thumbnails_enabled -%}
                 <product-thumbs class="product__thumbs pdp-thumbs--mobile">
@@ -2421,7 +2432,12 @@
                 data-product-media-list
               {%- endcapture -%}
 
-              <div {{ product_slides_attributes }}>
+              {%- if section.settings.enable_zoom -%}
+                <zoom-images {{ product_slides_attributes }}>
+              {%- else -%}
+                <div {{ product_slides_attributes }}>
+              {%- endif -%}
+
                 {%- for media in ordered_media -%}
                   {%- render 'media',
                     media: media,
@@ -2432,7 +2448,14 @@
                     cover: true
                   -%}
                 {%- endfor -%}
-              </div>
+
+              {%- if section.settings.enable_zoom -%}
+                </zoom-images>
+                <script src="{{ 'load-photoswipe.js' | asset_url }}" defer="defer"></script>
+                <script src="{{ 'zoom.js' | asset_url }}" defer="defer"></script>
+              {%- else -%}
+                </div>
+              {%- endif -%}
 
               {%- if thumbnails_enabled -%}
                 <product-thumbs class="product__thumbs">
@@ -2584,6 +2607,7 @@
                 {%- liquid
                   assign sticky_size_translation = 'general.size_chart.size' | t
                   assign sticky_translation_string_size = sticky_size_translation | remove: ' ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
+                  assign sticky_translation_string_size = sticky_translation_string_size | append: 'size,ring-size,bracelet-size,'
                 -%}
                 {%- for option in product.options_with_values -%}
                   {%- liquid
@@ -3811,7 +3835,6 @@
       var stickyBarHeight = stickyBar.getBoundingClientRect().height;
       sectionEl.style.setProperty('--pdp-sticky-bar-height', stickyBarHeight + 'px');
 
-      // Dropdown is always fixed on mobile — reserve its space via a separate variable
       if (dropdown) {
         var dropdownHeight = dropdown.getBoundingClientRect().height;
         // 20px = bottom offset of the fixed dropdown
@@ -3863,14 +3886,6 @@
 <script>
   (function () {
     if (!window.matchMedia || !window.matchMedia('(max-width: 1024px)').matches) return;
-
-    // Always hide the flower (hamburger button) on mobile PDP
-    var hamburger = document.querySelector('.header__mobile__hamburger');
-    var flowerBtn = hamburger ? hamburger.closest('.header__mobile__button') : null;
-    if (flowerBtn) {
-      flowerBtn.style.visibility = 'hidden';
-      flowerBtn.style.opacity = '0';
-    }
 
     // Smooth hide dropdown when footer enters viewport, show when it leaves
     function initFooterObserver() {

@@ -4482,8 +4482,8 @@ body * {
 
 @media only screen and (max-width: 749px) {
   .section-padding {
-    --padding-top: calc(var(--PT) * 0.7);
-    --padding-bottom: calc(var(--PB) * 0.7);
+    --padding-top: calc(var(--PT) * 0.5);
+    --padding-bottom: 0px;
     padding-top: var(--PT-MOBILE, var(--padding-top));
   }
 }
@@ -5184,8 +5184,9 @@ hr.hr--color,
   fill: currentcolor;
 }
 
-.icon-cancel {
+svg.icon.icon-cancel {
   pointer-events: none;
+  stroke-width: 1px !important;
 }
 
 /*============================================================================
@@ -7620,12 +7621,6 @@ hover-disclosure {
   top: calc(0px - var(--announcement-height));
 }
 
-@media only screen and (max-width: 960px) {
-  .theme__header {
-    z-index: 100;
-  }
-}
-
 .theme__header .icon {
   --icons: currentcolor;
 }
@@ -7768,7 +7763,7 @@ body:has(.main-content--collection-super-naked) .header__backfill {
 
 @media only screen and (max-width: 768px) {
   .header__logo {
-    gap: 16px;
+    gap: 0;
   }
 }
 
@@ -7776,6 +7771,12 @@ body:has(.main-content--collection-super-naked) .header__backfill {
   display: flex;
   flex-direction: row;
   color: var(--link);
+}
+
+.header__logo__meta__collection {
+  text-align: center;
+  width: 100%;
+  display: block;
 }
 
 .header__logo__meta__separator {
@@ -7807,9 +7808,9 @@ body:has(.main-content--collection-super-naked) .header__backfill {
   isolation: isolate;
 }
 
-.header__logo--image .header__logo__link {
+/* .header__logo--image .header__logo__link {
   padding-bottom: calc(var(--logo-padding) / 2);
-}
+} */
 
 .header__logo--image.header__logo--small .header__logo__link {
   padding-bottom: var(--logo-padding_product);
@@ -7902,6 +7903,7 @@ body:has(.main-content--collection-super-naked) .header__backfill {
 
 .header__mobile__right {
   margin-right: -9px;
+  height: fit-content;
 }
 
 @media only screen and (min-width: 750px) {
@@ -7913,9 +7915,9 @@ body:has(.main-content--collection-super-naked) .header__backfill {
 .header__mobile__left,
 .header__mobile__left .header__mobile__button .navlink {
   justify-content: flex-start;
+  height: fit-content;
 }
 
-.header__mobile__right,
 .header__mobile__right .header__mobile__button .navlink {
   justify-content: flex-end;
 }
@@ -8268,7 +8270,7 @@ body:not(.is-loaded) .header__desktop {
 
 .header__mobile__hamburger,
 .header__logo__link {
-  color: var(--globaltext);
+  color: currentcolor;
   transition: color 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 
@@ -8316,11 +8318,11 @@ body:not(.is-loaded) .header__desktop {
   z-index: 6000;
 }
 
-@media only screen and (max-width: 960px) {
+/* @media only screen and (max-width: 960px) {
   .js__header__stuck {
-    z-index: 100;
+    position: relative;
   }
-}
+} */
 
 body.header-drawer-is-open .js__header__stuck,
 body:has(.drawer--header.is-open) .js__header__stuck {
@@ -8525,6 +8527,20 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
   transform: translateY(-5000px);
   width: 1400px;
   visibility: hidden;
+}
+
+.js__show__mobile .theme__header .header__mobile .header__mobile__left,
+.js__show__mobile .theme__header .header__mobile .header__mobile__right {
+  padding-top: 10px;
+}
+
+.js__show__mobile .theme__header .header__mobile {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 20px;
 }
 
 .js__show__mobile .header__mobile,
@@ -8991,6 +9007,17 @@ body.grid-classic .grandparent .menu__blocks:last-child .menu__block:last-child 
   display: flex;
   align-items: center;
   gap: 10px;
+  transition: color 0.25s ease-in-out;
+}
+
+/* While the mobile menu drawer is open, the cart (text, counter + icon) is always
+   white, matching the burger/close icon. Keyed off the body class toggled on
+   open/close in header.liquid (syncHamburgerDrawerLabel / drawer MutationObserver).
+   The counter needs its own selector because .header__cart__status pins
+   color: var(--link) at higher specificity. */
+body.header-drawer-is-open .header__mobile .navlink__cart__content,
+body.header-drawer-is-open .header__mobile .header__cart__status {
+  color: #fff !important;
 }
 
 .header__cart__status__holder {
@@ -9064,6 +9091,7 @@ body.grid-classic .grandparent .menu__blocks:last-child .menu__block:last-child 
   background: transparent;
   font-size: 12px;
   line-height: var(--FONT-SIZE-NAV);
+  transition: color 0.25s ease-in-out;
   /* display: none; */
 }
 
@@ -9648,6 +9676,16 @@ html.supports-touch ticker-bar[data-slide]:not([paused]) .ticker--animated {
   z-index: 6001;
 }
 
+/* Lock page scroll while the mobile menu drawer is open. The JS scroll-lock
+   (theme:scroll:lock) doesn't engage reliably for this drawer, so key the lock
+   off the drawer's own open state. The drawer is position:fixed with its own
+   scrollable region (data-scroll-lock-scrollable), so it stays scrollable. */
+html:has(header-drawer.drawer--header.is-open),
+html:has(header-drawer.drawer--header.is-open) body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 .drawer--header .drawer__inner {
   left: auto;
   right: 100%;
@@ -9658,14 +9696,8 @@ html.supports-touch ticker-bar[data-slide]:not([paused]) .ticker--animated {
   opacity: 80% !important;
 }
 
-@media only screen and (max-width: 749px) {
-  .drawer--header .drawer__inner {
-    border-right: none;
-  }
-}
-
 .drawer--header.is-open .drawer__inner {
-  animation: slideInLeft 1s cubic-bezier(0.7, 0, 0.3, 1);
+  animation: slideInLeft 0.3s ease;
   animation-fill-mode: forwards;
 }
 
@@ -9678,8 +9710,11 @@ html.supports-touch ticker-bar[data-slide]:not([paused]) .ticker--animated {
   display: flex;
   flex-direction: row-reverse;
   border: 0;
+  margin-bottom: 20px;
   padding: 0 !important;
   height: calc(var(--HEADER-HEIGHT-MOBILE) + var(--announcement-height, 36px));
+  justify-content: center;
+  align-items: flex-end;
 }
 
 .drawer--header .drawer__close {
@@ -9866,16 +9901,6 @@ html.supports-touch ticker-bar[data-slide]:not([paused]) .ticker--animated {
   flex-direction: column;
 }
 
-mobile-menu:has(header-search-popdown.is-open) .mobile-menu__block:not(.mobile-menu__block--search) {
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(50px);
-  transition:
-    opacity 0.3s ease,
-    transform 0.3s,
-    visibility 0.3s;
-}
-
 .mobile-menu__block--half {
   max-width: calc(50% - var(--inner));
 }
@@ -9987,25 +10012,8 @@ mobile-menu .drawer__inner .block__icon__container {
   padding: 0;
 }
 
-mobile-menu .drawer__head {
-  justify-content: space-between;
-  align-items: center;
-}
-
 mobile-menu .header__logo__link {
   --logo-width: var(--logo-width-mobile);
-}
-
-mobile-menu .drawer__close {
-  top: 0;
-  color: #fff;
-  transform: none;
-}
-
-@media (hover: hover) {
-  mobile-menu .drawer__close:hover {
-    color: #fff;
-  }
 }
 
 mobile-menu .drawer__text {
@@ -10038,28 +10046,45 @@ mobile-menu .drawer__foot__scroll:has(.popout-list--visible) {
   overflow: visible;
 }
 
-mobile-menu header-search-popdown {
-  min-height: 34px;
-}
-
-mobile-menu .search-popdown .wrapper {
-  padding: 0 var(--inner);
-}
-
-mobile-menu .navlink--search {
-  position: initial;
+mobile-menu .drawer__head-search {
+  min-width: 0;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  width: 100%;
-  gap: 10px;
+  justify-content: center;
+  color: var(--globaltext);
+}
+
+mobile-menu .drawer__head-search header-search-popdown,
+mobile-menu .drawer__head-search header-search-popdown > details {
+  height: auto;
+}
+
+mobile-menu .drawer__head-search summary.navlink--search {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+
+mobile-menu .drawer__head-search .drawer__head-search__trigger {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+mobile-menu .drawer__head-search .drawer__head-search__summary {
+  display: none;
 }
 
 mobile-menu .predictive-search__layout {
   grid-template-columns: minmax(0, 1fr);
 }
 
-mobile-menu .search-popdown {
+mobile-menu .drawer__head-search .search-popdown {
   --bg: inherit;
   --text: inherit;
   --text-dark: inherit;
@@ -10067,14 +10092,25 @@ mobile-menu .search-popdown {
   --link-hover: inherit;
   box-shadow: none;
   transform: none;
-  transition: all 0.22s ease;
+  top: 60%;
+  transition:
+    opacity 0.5s ease,
+    visibility 0s linear 0.5s;
 }
 
-mobile-menu .search-popdown__main {
-  height: 44px;
+mobile-menu .drawer__head-search .search-popdown > .wrapper {
+  padding: 0 20px;
 }
 
-mobile-menu .search-popdown__main::after {
+mobile-menu .drawer__head-search .search-popdown__main {
+  position: relative;
+  height: 100%;
+  min-height: 44px;
+  background: transparent;
+  border-bottom: 1px solid var(--border);
+}
+
+/* mobile-menu .drawer__head-search .search-popdown__main::after {
   content: "";
   height: 1px;
   position: absolute;
@@ -10082,27 +10118,23 @@ mobile-menu .search-popdown__main::after {
   right: var(--inner);
   bottom: 0;
   background: var(--border);
+} */
+
+mobile-menu .drawer__head-search .search-form {
+  position: relative;
 }
 
-mobile-menu .search-form input[type="search"] {
+mobile-menu .drawer__head-search .search-form input[type="search"] {
   padding: 8px;
 }
 
-mobile-menu .drawer:has(header-search-popdown.is-open) .drawer__content__scroll {
-  overflow: hidden;
+mobile-menu .drawer__head-search .predictive-search--empty {
+  display: none;
 }
 
-mobile-menu .drawer:has(header-search-popdown.is-open) .drawer__content {
-  height: 100%;
-}
-
-mobile-menu .drawer:has(header-search-popdown.is-open) .drawer__body {
-  min-height: calc(100vh - (var(--HEADER-HEIGHT-MOBILE) + var(--announcement-height, 36px)));
-}
-
-mobile-menu .drawer:has(header-search-popdown.is-open) .drawer__foot {
-  pointer-events: none;
-  overflow: hidden;
+mobile-menu .drawer__head-search .predictive-search {
+  height: auto;
+  max-height: calc(100vh - (var(--HEADER-HEIGHT-MOBILE) + var(--announcement-height, 36px)));
 }
 
 .drawer__search {
@@ -10157,12 +10189,6 @@ header-search-popdown > details {
   background: var(--bg);
 }
 
-@media only screen and (max-width: 960px) {
-  .search-popdown {
-    top: -82vh;
-  }
-}
-
 .search-popdown .search-form {
   position: static;
 }
@@ -10213,11 +10239,6 @@ header-search-popdown > details {
   visibility: hidden;
 }
 
-body:has(mobile-menu header-search-popdown.is-open) header.theme__header {
-  display: none;
-  visibility: hidden;
-}
-
 header-search-popdown.is-open .search-popdown {
   opacity: 1;
   transform: none;
@@ -10231,6 +10252,14 @@ header-search-popdown.is-open .search-popdown {
     --text: #fff;
     margin-top: 55px;
     padding-top: 20px;
+    position: absolute;
+    z-index: 6002;
+  }
+
+  mobile-menu .drawer__head-search header-search-popdown.is-open .search-popdown {
+    top: 60%;
+    margin-top: 0;
+    padding-top: 0;
   }
 }
 
@@ -10588,33 +10617,51 @@ header-search-popdown.is-open .search-popdown {
 } */
 
 .header__mobile__hamburger {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  left: 50%;
-  bottom: 0;
-  top: 85svh;
-  transform: translate(-50%, 10px);
+  position: relative;
   transform-origin: center;
   cursor: pointer;
   height: auto;
   width: auto;
-  fill: var(--link);
-  z-index: 100;
+  /* Follow --link (the scroll-observer-driven color) like the cart icon, so all
+     header icons change color in sync. Previously the icon inherited --globaltext,
+     which the observer never updates on the header, leaving it stuck. */
+  color: var(--link);
+  z-index: 5999;
+  padding-left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition:
-    opacity 400ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
-  will-change: transform, opacity;
+    opacity 0.3s ease-in-out,
+    color 0.25s ease-in-out;
 }
 
-.header__mobile__hamburger:active {
-  transform: translate(-50%, 10px) scale(0.96);
+.header__mobile__hamburger-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  color: var(--link);
+  padding-top: 2px;
+  pointer-events: none;
+  transition:
+    opacity 0.25s ease-in-out,
+    color 0.25s ease-in-out;
 }
 
-.header__mobile__hamburger.is-pressed {
-  animation: hamburger-press 1000ms ease-in-out forwards;
+.header__mobile__hamburger-icon svg {
+  display: block;
+  stroke-width: 1px;
+}
+
+.header__mobile__hamburger-icon--menu {
+  opacity: 1;
+}
+
+.header__mobile__hamburger-icon--close {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
 }
 
 @media only screen and (min-width: 960px) {
@@ -10623,14 +10670,27 @@ header-search-popdown.is-open .search-popdown {
   }
 }
 
-body:has(.drawer--header.is-open) .header__mobile__hamburger {
-  opacity: 0;
-  pointer-events: none;
-}
-
-body:has(.drawer--header:not(.is-open)) .header__mobile__hamburger {
+body.header-drawer-is-open .header__mobile__hamburger,
+.header__mobile__hamburger.is-drawer-open {
   opacity: 1;
   pointer-events: auto;
+}
+
+.header__mobile__hamburger.is-drawer-open .header__mobile__hamburger-icon--menu,
+.header__mobile__hamburger[aria-expanded="true"] .header__mobile__hamburger-icon--menu {
+  opacity: 0;
+}
+
+.header__mobile__hamburger.is-drawer-open .header__mobile__hamburger-icon--close,
+.header__mobile__hamburger[aria-expanded="true"] .header__mobile__hamburger-icon--close {
+  opacity: 1;
+}
+
+/* While the drawer is open the icon is always white, overriding the
+   background-driven --link/currentColor the header normally uses. */
+.header__mobile__hamburger.is-drawer-open .header__mobile__hamburger-icon,
+.header__mobile__hamburger[aria-expanded="true"] .header__mobile__hamburger-icon {
+  color: #fff !important;
 }
 
 @media only screen and (min-width: 960px) {
@@ -10644,7 +10704,7 @@ body:has(.drawer--header:not(.is-open)) .header__mobile__hamburger {
 
 @media only screen and (max-width: 960px) {
   .header__mobile__hamburger.navlink {
-    display: block;
+    display: flex;
   }
 }
 
@@ -10652,7 +10712,7 @@ body:has(.drawer--header:not(.is-open)) .header__mobile__hamburger {
   --icon-size: 24px;
 }
 
-@keyframes hamburger-press {
+/* @keyframes hamburger-press {
   0% {
     transform: translate(-50%, 10px) scale(1);
     opacity: 1;
@@ -10672,7 +10732,7 @@ body:has(.drawer--header:not(.is-open)) .header__mobile__hamburger {
     transform: translate(-50%, 10px) scale(1);
     opacity: 0;
   }
-}
+} */
 
 @media only screen and (max-width: 749px) {
   .header__mobile__button .navlink__cart__content > .navtext {
@@ -10686,77 +10746,6 @@ body:has(.drawer--header:not(.is-open)) .header__mobile__hamburger {
     display: none;
   }
 }
-
-/*====== start floating mobile nav ======*/
-.drawer__floating-menu {
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 80vh;
-  bottom: auto;
-  z-index: 5601;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  height: 50px;
-  transform: translate(0, -50%);
-  padding: 0 var(--inner);
-  align-items: center;
-  color: var(--globaltext);
-}
-
-.drawer__floating-menu > * {
-  flex: 1 1 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.drawer__floating-menu .icon {
-  color: var(--globaltext);
-  stroke: var(--globaltext);
-}
-
-.drawer__floating-menu .drawer__close svg {
-  stroke-width: 1px !important;
-}
-
-.drawer__floating__button {
-  width: 100%;
-  display: flex;
-}
-
-.drawer__floating__button .navlink {
-  text-transform: uppercase;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 20px;
-  letter-spacing: 1.2px;
-}
-
-/* Safari override: keep previous positioning */
-@supports (font: -apple-system-body) {
-  .drawer__floating-menu {
-    top: 90svh;
-    bottom: auto;
-  }
-
-  .header__mobile__hamburger {
-    top: 85svh;
-    bottom: auto;
-  }
-}
-
-.drawer__floating__left .drawer__floating__button {
-  justify-content: flex-start;
-}
-
-.drawer__floating__right .drawer__floating__button,
-.drawer__floating__right .drawer__floating__button .navlink {
-  justify-content: flex-end;
-}
-
-/*====== end floating mobile nav ======*/
 
 /*====== Header toolbar ======*/
 ticker-bar {
@@ -15472,6 +15461,7 @@ hover-images .related-slider-progress__line {
   -webkit-user-select: none;
   user-select: none;
   -webkit-user-drag: none;
+  background-color: #fff;
 }
 
 .supports-touch hover-images .product-item__bg__slider::-webkit-scrollbar {
@@ -21481,7 +21471,6 @@ ul.widget__links li {
   position: relative;
   display: flex;
   align-items: flex-start;
-  background: #f9f9f9;
 }
 
 body.has-line-design.grid-compact .collection__products .grid,
@@ -26256,10 +26245,10 @@ predictive-search[loading] .predictive-search__loader {
 .predictive-search {
   position: absolute;
   z-index: 4000;
-  top: 100%;
+  top: 102%;
   right: 0;
   left: 0;
-  width: 100%;
+  width: calc(100% + 100px);
   height: 100vh;
   opacity: 0;
   visibility: hidden;

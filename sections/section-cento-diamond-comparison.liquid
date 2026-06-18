@@ -1,0 +1,210 @@
+<!-- /sections/section-cento-diamond-comparison.liquid -->
+{%- liquid
+  assign item_blocks = section.blocks | where: 'type', 'item'
+-%}
+
+{%- style -%}
+  #CentoDiamondComparison--{{ section.id }} {
+    background-color: {{ section.settings.bg_color }};
+    --cento-bg: url({{ 'cento-diamond-comparison-bg.jpg' | asset_url }});
+    --cento-padding-top: {{ section.settings.padding_top }}px;
+    --cento-padding-bottom: {{ section.settings.padding_bottom }}px;
+    padding-top: var(--cento-padding-top);
+    padding-bottom: var(--cento-padding-bottom);
+  }
+{%- endstyle -%}
+
+<section
+  id="CentoDiamondComparison--{{ section.id }}"
+  class="cento-comparison section-padding1"
+  data-section-id="{{ section.id }}"
+  data-section-type="cento-comparison"
+>
+  <div class="cento-comparison__bg"></div>
+
+  {%- if item_blocks.size > 0 -%}
+    <div class="cento-comparison__wrapper">
+      {%- for block in item_blocks -%}
+        {%- unless forloop.first -%}
+          <div class="cento-comparison__divider">
+            <span class="cento-comparison__divider-line"></span>
+            <span class="cento-comparison__vs">vs</span>
+            <span class="cento-comparison__divider-line"></span>
+          </div>
+        {%- endunless -%}
+        <div class="cento-comparison__row" {{ block.shopify_attributes }}>
+          <div class="cento-comparison__title-col">
+            <h3 class="cento-comparison__title">{{ block.settings.title }}</h3>
+          </div>
+          <div class="cento-comparison__image-col">
+            {%- if forloop.index0 == 0 -%}
+              <span class="cento-comparison__svg-wrap">{{ 'cento-diamond-facets.svg' | inline_asset_content }}</span>
+              <span class="cento-comparison__svg-wrap">{{ 'cento-diamond-side.svg' | inline_asset_content }}</span>
+            {%- else -%}
+              <span class="cento-comparison__svg-wrap">{{ 'standard-diamond-facets.svg' | inline_asset_content }}</span>
+              <span class="cento-comparison__svg-wrap">{{ 'standard-diamond-side.svg' | inline_asset_content }}</span>
+            {%- endif -%}
+          </div>
+          {%- if block.settings.description != blank -%}
+            <div class="cento-comparison__desc-col">
+              <div class="cento-comparison__description rte">
+                {{ block.settings.description }}
+              </div>
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+  {%- else -%}
+    {%- render 'no-blocks' -%}
+  {%- endif -%}
+</section>
+
+<script>
+  (function () {
+    var section = document.getElementById('CentoDiamondComparison--{{ section.id }}');
+    if (!section) return;
+
+    function insertBanner() {
+      var grid = document.querySelector('.collection-cento .grid');
+      if (!grid) return;
+      var products = grid.querySelectorAll('.grid-item.product-item');
+      var columnsDesktop = parseInt(getComputedStyle(grid).getPropertyValue('--COLUMNS')) || 3;
+      var columnsMobile = parseInt(getComputedStyle(grid).getPropertyValue('--COLUMNS-MOBILE')) || 2;
+      var columns = window.innerWidth < 750 ? columnsMobile : columnsDesktop;
+      var insertAfterIndex = columns - 1;
+      var target = products[insertAfterIndex];
+
+      var alreadyPlaced = section.parentElement === grid &&
+        (target ? section.previousElementSibling === target : grid.firstElementChild === section);
+      if (alreadyPlaced) return;
+
+      if (!target) {
+        grid.appendChild(section);
+      } else if (target.nextSibling) {
+        grid.insertBefore(section, target.nextSibling);
+      } else {
+        grid.appendChild(section);
+      }
+      section.style.gridColumn = '1 / -1';
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', insertBanner);
+    } else {
+      insertBanner();
+    }
+
+    var productsGrid = document.querySelector('[data-products-grid]');
+    if (productsGrid) {
+      var reinsertObserver = new MutationObserver(function () {
+        if (!productsGrid.contains(section)) {
+          requestAnimationFrame(insertBanner);
+        }
+      });
+      reinsertObserver.observe(productsGrid, { childList: true });
+    }
+  })();
+</script>
+
+{% stylesheet %}
+  .cento-comparison__bg {
+    background: var(--cento-bg) lightgray 0px -132.752px / 160.866% 134.653% no-repeat;
+  }
+
+  body .cento-comparison {
+    margin-top: 60px;
+    margin-bottom: 60px;
+  }
+
+  @media only screen and (max-width: 749px) {
+    body .cento-comparison {
+      margin-top: 40px;
+      margin-bottom: 40px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Cento Diamond Comparison",
+  "tag": "section",
+  "class": "section-cento-comparison",
+  "settings": [
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#142038"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Top",
+      "default": 150
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 150
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Diamond type",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Cento Diamond"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Cento Diamond Comparison",
+      "category": "Custom",
+      "blocks": [
+        {
+          "type": "item",
+          "settings": {
+            "title": "Cento Diamond",
+            "description": "<p><strong>9-fold symmetry = 100 facets</strong> designed to display more light. More “fire”</p><p>Floral pattern. 12-15 hours to cut by hand. <strong>Certified</strong></p><p>Laser inscribed and <strong>Conflict free</strong></p>"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "title": "Standard Diamond",
+            "description": "<p><strong>8-fold symmetry = 57/58 facets.</strong> Low light display. Less “fire”</p><p>No pattern. 6-8 hours to cut by hand. <strong>May or may not be Certified</strong></p><p>May or may not be laser inscribed and <strong>may or may not be Conflict free</strong></p>"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "aside", "footer"]
+  }
+}
+{% endschema %}

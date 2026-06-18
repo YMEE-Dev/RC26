@@ -21,15 +21,20 @@
         "video_popup_social": "",
         "title": "",
         "heading_font_size": "heading-large",
+        "heading_font_size_mobile": "heading-large",
         "text": "",
         "text_font_size": "body-medium",
-        "flex_align": "align--middle-center",
+        "flex_align_desktop": "align--middle-center-desktop",
+        "flex_align_mobile": "align--middle-center-mobile",
         "link_text": "",
         "link": "",
         "button_type": "btn--primary",
         "button_size": "",
         "button_style": "btn--solid",
         "show_arrow": false,
+        "button_align_desktop": "button-group-align--center-desktop",
+        "button_align_mobile": "button-group-align--center-mobile",
+        "button_vertical_position_mobile": "button-position--top-mobile",
         "image": "{{ collection.metafields.custom.media_only_file.value }}",
         "desktop_height": "four-fifty-height-hero",
         "mobile_height": "screen-height-one-half--mobile",
@@ -43,52 +48,13 @@
         "heading_tag": "automatic"
       }
     },
-    "section_image_title_description_awxyVe": {
-      "type": "section-image-title-description",
-      "blocks": {
-        "item_f9dQa7": {
-          "type": "item",
-          "settings": {
-            "image": "shopify://shop_images/100_Diamond_RC.png",
-            "title": "Cento Diamond",
-            "description": "<p><strong>9-fold symmetry = 100 facets. </strong>Designed to display more light. More “fire”</p><p>Floral pattern. 12-15 hours to cut by hand. <strong>Certified</strong></p><p>Laser inscribed and<strong> Conflict free</strong></p>",
-            "logo_text": "",
-            "button_url": "",
-            "button_target": "_blank"
-          }
-        },
-        "item_JyVxTe": {
-          "type": "item",
-          "settings": {
-            "image": "shopify://shop_images/Standard_Diamond_RC.png",
-            "title": "Standard Diamond",
-            "description": "<p><strong>8-fold symmetry = 57/58 facets. </strong>Low light display. Less “fire”</p><p>No pattern. 6-8 hours to cut by hand. <strong>May or may not be Certified</strong></p><p>May or may not be laser inscribed and <strong>may or</strong> <strong>may</strong> <strong>not be Conflict free</strong></p>",
-            "logo_text": "",
-            "button_url": "",
-            "button_target": "_blank"
-          }
-        }
-      },
-      "block_order": [
-        "item_f9dQa7",
-        "item_JyVxTe"
-      ],
-      "name": "Image, title & text",
-      "settings": {
-        "description": "<p>Why Cento? <br/>The 100-FACET DIAMOND</p>",
-        "width": "wrapper",
-        "padding_top": 60,
-        "padding_bottom": 60,
-        "color_scheme": ""
-      }
-    },
     "section_hero_nqeM7C": {
       "type": "section-hero",
       "disabled": true,
       "name": "Image banner",
       "settings": {
         "header_observer_mode": "dark",
-        "image_1": "{{ collection.metafields.custom.media_only_file.value }}",
+        "image_1": "shopify://shop_images/Compressed_0015_roberto-coin-cento.jpg",
         "link": "",
         "width": "wrapper--full",
         "height": "screen-height-one-third",
@@ -267,6 +233,7 @@
         },
         "featured_image_QfFQ9y": {
           "type": "featured_image",
+          "disabled": true,
           "settings": {
             "position": 1,
             "featured_heading": "Featured link",
@@ -291,6 +258,7 @@
       ],
       "settings": {
         "enable_sort": true,
+        "show_collection_floating_bar": true,
         "enable_filters": true,
         "filter_layout": "slide-out",
         "default_open": true,
@@ -302,6 +270,35 @@
         "collection_grid_background": "#ffffff",
         "padding_top": 0,
         "padding_bottom": 0
+      }
+    },
+    "section_cento_diamond_comparison": {
+      "type": "section-cento-diamond-comparison",
+      "blocks": {
+        "item_cento": {
+          "type": "item",
+          "settings": {
+            "title": "Cento Diamond",
+            "description": "<p><strong>9-fold symmetry = 100 facets</strong> designed to display more light. More “fire”</p><p>Floral pattern. 12-15 hours to cut by hand. <strong>Certified</strong></p><p>Laser inscribed and <strong>Conflict free</strong></p>"
+          }
+        },
+        "item_standard": {
+          "type": "item",
+          "settings": {
+            "title": "Standard Diamond",
+            "description": "<p><strong>8-fold symmetry = 57/58 facets.</strong> Low light display. Less “fire”</p><p>No pattern. 6-8 hours to cut by hand. <strong>May or may not be Certified</strong></p><p>May or may not be laser inscribed and <strong>may or may not be Conflict free</strong></p>"
+          }
+        }
+      },
+      "block_order": [
+        "item_cento",
+        "item_standard"
+      ],
+      "name": "Cento Diamond Comparison",
+      "settings": {
+        "bg_color": "#142038",
+        "padding_top": 150,
+        "padding_bottom": 150
       }
     },
     "section_collections_and_icons_yVcbhR": {
@@ -430,12 +427,12 @@
   },
   "order": [
     "section_video_MNyp6e",
-    "section_image_title_description_awxyVe",
     "section_hero_nqeM7C",
     "collection-image-with-title",
     "section-highlights",
     "subcollections",
     "collection",
+    "section_cento_diamond_comparison",
     "section_collections_and_icons_yVcbhR",
     "section_custom_content_cacBcY"
   ]
