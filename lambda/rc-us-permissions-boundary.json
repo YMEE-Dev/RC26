@@ -1,0 +1,83 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "S3UsFolderOnly",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::robertocoin-3d-models",
+        "arn:aws:s3:::robertocoin-3d-models/us/*"
+      ],
+      "Condition": {
+        "StringLikeIfExists": {
+          "s3:prefix": ["us/*", "us"]
+        }
+      }
+    },
+    {
+      "Sid": "LambdaUsFunctionOnly",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:GetFunction",
+        "lambda:GetFunctionConfiguration",
+        "lambda:GetFunctionUrlConfig",
+        "lambda:UpdateFunctionCode",
+        "lambda:UpdateFunctionConfiguration",
+        "lambda:UpdateFunctionUrlConfig",
+        "lambda:InvokeFunction",
+        "lambda:ListVersionsByFunction",
+        "lambda:PublishVersion"
+      ],
+      "Resource": "arn:aws:lambda:*:*:function:model-signed-url-us*"
+    },
+    {
+      "Sid": "CloudFrontReadAndInvalidate",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:GetDistribution",
+        "cloudfront:GetDistributionConfig",
+        "cloudfront:ListDistributions",
+        "cloudfront:CreateInvalidation",
+        "cloudfront:GetInvalidation",
+        "cloudfront:ListInvalidations",
+        "cloudfront:ListKeyGroups",
+        "cloudfront:ListPublicKeys"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "LogsForUsFunction",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:GetLogEvents",
+        "logs:FilterLogEvents",
+        "logs:DescribeLogGroups",
+        "logs:DescribeLogStreams"
+      ],
+      "Resource": "arn:aws:logs:*:*:log-group:/aws/lambda/model-signed-url-us*"
+    },
+    {
+      "Sid": "ReadOnlyVisibility",
+      "Effect": "Allow",
+      "Action": [
+        "iam:ListUsers",
+        "iam:GetUser",
+        "iam:ListAttachedUserPolicies",
+        "iam:ListUserPolicies",
+        "lambda:ListFunctions",
+        "s3:ListAllMyBuckets",
+        "s3:GetBucketLocation"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

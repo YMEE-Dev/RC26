@@ -1,0 +1,70 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ManageUsLambdaOnly",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:GetFunction",
+        "lambda:GetFunctionConfiguration",
+        "lambda:GetFunctionUrlConfig",
+        "lambda:UpdateFunctionCode",
+        "lambda:UpdateFunctionConfiguration",
+        "lambda:UpdateFunctionUrlConfig",
+        "lambda:InvokeFunction",
+        "lambda:ListVersionsByFunction",
+        "lambda:PublishVersion"
+      ],
+      "Resource": "arn:aws:lambda:*:376129434684:function:model-signed-url-us*"
+    },
+    {
+      "Sid": "LambdaConsoleReadOnlyVisibility",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:ListFunctions",
+        "lambda:GetAccountSettings"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "LambdaUsLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:GetLogEvents",
+        "logs:FilterLogEvents",
+        "logs:DescribeLogGroups",
+        "logs:DescribeLogStreams"
+      ],
+      "Resource": "arn:aws:logs:*:376129434684:log-group:/aws/lambda/model-signed-url-us*"
+    },
+    {
+      "Sid": "CloudFrontReadAndInvalidateOnly",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:GetDistribution",
+        "cloudfront:GetDistributionConfig",
+        "cloudfront:ListDistributions",
+        "cloudfront:CreateInvalidation",
+        "cloudfront:GetInvalidation",
+        "cloudfront:ListInvalidations",
+        "cloudfront:ListKeyGroups",
+        "cloudfront:ListPublicKeys"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyEditingAnyDistributionConfig",
+      "Effect": "Deny",
+      "Action": [
+        "cloudfront:UpdateDistribution",
+        "cloudfront:DeleteDistribution",
+        "cloudfront:CreateDistribution",
+        "cloudfront:UpdateKeyGroup",
+        "cloudfront:DeleteKeyGroup",
+        "cloudfront:CreatePublicKey",
+        "cloudfront:DeletePublicKey"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
