@@ -38,7 +38,7 @@
       "Resource": "arn:aws:logs:*:376129434684:log-group:/aws/lambda/model-signed-url-us*"
     },
     {
-      "Sid": "CloudFrontReadAndInvalidateOnly",
+      "Sid": "CloudFrontReadAndInvalidate",
       "Effect": "Allow",
       "Action": [
         "cloudfront:GetDistribution",
@@ -53,10 +53,18 @@
       "Resource": "*"
     },
     {
-      "Sid": "DenyEditingAnyDistributionConfig",
-      "Effect": "Deny",
+      "Sid": "EditUsDistributionOnly",
+      "Effect": "Allow",
       "Action": [
         "cloudfront:UpdateDistribution",
+        "cloudfront:GetDistributionConfig"
+      ],
+      "Resource": "arn:aws:cloudfront::376129434684:distribution/E3EUVBA4G3QTXZ"
+    },
+    {
+      "Sid": "DenyCreatingOrDeletingDistributionsAndKeys",
+      "Effect": "Deny",
+      "Action": [
         "cloudfront:DeleteDistribution",
         "cloudfront:CreateDistribution",
         "cloudfront:UpdateKeyGroup",
