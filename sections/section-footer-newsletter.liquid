@@ -236,8 +236,8 @@
 
   .footer-newsletter-form__dob-trigger {
     position: absolute;
-    right: 4px;
-    bottom: 7px;
+    right: 30px;
+    bottom: 10px;
     width: 22px;
     height: 22px;
     border: 0;
@@ -253,6 +253,32 @@
   .footer-newsletter-form__dob-field input[type='date']::-webkit-calendar-picker-indicator {
     opacity: 0;
     pointer-events: none;
+  }
+
+  .footer-newsletter-form__dob-placeholder {
+    position: absolute;
+    left: 0;
+    right: 34px;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    font-size: var(--FONT-SIZE-LABEL);
+    line-height: var(--LINE-HEIGHT-LABEL);
+    color: var(--text-a80, var(--text));
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  /* Hide the native empty-date text while the custom placeholder is shown */
+  .footer-newsletter-form__dob-field:not(.has-value):not(:focus-within) input[type='date']::-webkit-datetime-edit {
+    color: transparent;
+  }
+
+  /* Hide the custom placeholder once a value is set or the field is focused */
+  .footer-newsletter-form__dob-field.has-value .footer-newsletter-form__dob-placeholder,
+  .footer-newsletter-form__dob-field:focus-within .footer-newsletter-form__dob-placeholder {
+    display: none;
   }
 
   .footer-newsletter-form__consent {

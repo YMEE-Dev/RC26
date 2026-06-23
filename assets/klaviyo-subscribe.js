@@ -10,28 +10,28 @@
   var API_REVISION = "2024-10-15";
   var DOB_SELECTOR = "input[data-footer-newsletter-dob]";
 
+  function syncBirthDatePlaceholder(input) {
+    if (!(input instanceof HTMLInputElement)) return;
+    var wrapper = input.closest(".footer-newsletter-form__dob-field");
+    if (!wrapper) return;
+    wrapper.classList.toggle("has-value", Boolean(input.value));
+  }
+
   function initBirthDateInputs() {
     var inputs = document.querySelectorAll(DOB_SELECTOR);
     inputs.forEach(function (input) {
-      if (!(input instanceof HTMLInputElement)) return;
-      if (input.value) {
-        input.type = "date";
-      } else {
-        input.type = "text";
-      }
+      syncBirthDatePlaceholder(input);
     });
   }
 
   function activateBirthDateInput(input) {
     if (!(input instanceof HTMLInputElement)) return;
-    if (input.type !== "date") {
-      input.type = "date";
-    }
     if (typeof input.showPicker === "function") {
       try {
         input.showPicker();
       } catch (error) {
         // no-op: some browsers gate showPicker behind user gestures
+        // (mobile opens the native picker on tap regardless)
       }
     }
   }
@@ -223,14 +223,6 @@
     showConsentError(target.form);
   }, true);
 
-  document.addEventListener("focusin", function (event) {
-    var target = event.target;
-    if (!(target instanceof HTMLInputElement)) return;
-    if (!target.matches(DOB_SELECTOR)) return;
-
-    activateBirthDateInput(target);
-  });
-
   document.addEventListener("click", function (event) {
     var target = event.target;
     var trigger = target instanceof Element ? target.closest("[data-footer-newsletter-dob-trigger]") : null;
@@ -249,14 +241,12 @@
     activateBirthDateInput(target);
   });
 
-  document.addEventListener("focusout", function (event) {
+  document.addEventListener("change", function (event) {
     var target = event.target;
     if (!(target instanceof HTMLInputElement)) return;
     if (!target.matches(DOB_SELECTOR)) return;
 
-    if (!target.value) {
-      target.type = "text";
-    }
+    syncBirthDatePlaceholder(target);
   });
 
   if (document.readyState === "loading") {
