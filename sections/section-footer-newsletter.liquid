@@ -69,6 +69,37 @@
   </div>
 
   <div class="underlay" data-newsletter-drawer-close></div>
+
+  {%- unless customer -%}
+    <aside
+      class="footer-newsletter-float"
+      data-newsletter-float
+      aria-hidden="true"
+      data-newsletter-float-delay="{{ section.settings.float_delay_seconds | default: 3 }}"
+    >
+      <button
+        type="button"
+        class="footer-newsletter-float__close"
+        data-newsletter-float-close
+        aria-label="{{ 'general.accessibility.close' | t }}"
+      >
+        {%- render 'icon-close' -%}
+      </button>
+      <p class="footer-newsletter-float__title h4">
+        {{ section.settings.float_title | default: 'Sign up to our Newsletter' | escape }}
+      </p>
+      <button
+        type="button"
+        class="btn btn--primary btn--solid btn--full footer-newsletter-float__cta"
+        data-newsletter-drawer-open
+        data-newsletter-float-signup
+        aria-controls="FooterNewsletterDrawer--{{ section.id }}"
+      >
+        {{ section.settings.float_button_text | default: 'SIGN UP' | escape }}
+      </button>
+    </aside>
+    <div class="underlay footer-newsletter-float__underlay" data-newsletter-float-underlay></div>
+  {%- endunless -%}
 </footer-newsletter-drawer>
 
 {% stylesheet %}
@@ -119,12 +150,18 @@
   .footer-newsletter__drawer-body {
     flex: 1;
     overflow-y: auto;
-    padding: 0 var(--inner) var(--inner);
+    padding: 0 30px 30px;
+  }
+
+  .footer-newsletter__drawer-body > [data-footer-newsletter-wrapper] {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
   }
 
   .footer-newsletter__drawer-body .modal__description p {
     margin: 0;
-    padding-bottom: 40px;
+    padding-bottom: 80px;
     font-family: 'Inter', sans-serif;
     font-size: 14px;
     font-style: normal;
@@ -141,6 +178,11 @@
   .footer-newsletter-form {
     width: 100%;
     max-width: 62rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
   }
 
   .footer-newsletter__drawer .footer-newsletter-form select.field,
@@ -155,11 +197,16 @@
     display: flex;
     flex-direction: column;
     gap: 40px;
+    flex: 1 1 auto;
+    min-height: 0;
   }
 
   .footer-newsletter-form__group {
     display: flex;
     flex-direction: column;
+  }
+  .footer-newsletter-form__group--language {
+    padding-top: 14px;
   }
 
   .footer-newsletter-form__eyebrow {
@@ -176,6 +223,36 @@
 
   .footer-newsletter-form__field--select {
     color: var(--text);
+  }
+
+  .footer-newsletter-form__dob-field {
+    position: relative;
+  }
+
+  .footer-newsletter-form__dob-field .footer-newsletter-form__field {
+    padding-right: 34px;
+    height: 30px;
+  }
+
+  .footer-newsletter-form__dob-trigger {
+    position: absolute;
+    right: 4px;
+    bottom: 7px;
+    width: 22px;
+    height: 22px;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: currentColor;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .footer-newsletter-form__dob-field input[type='date']::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    pointer-events: none;
   }
 
   .footer-newsletter-form__consent {
@@ -202,10 +279,24 @@
     margin: 0;
     text-align: left;
     font-family: 'Inter', sans-serif;
-    font-size: 14px;
+    font-size: 11px;
     font-style: normal;
     font-weight: 400;
-    line-height: 22px;
+    line-height: 16px;
+  }
+
+  .footer-newsletter-form__consent-error {
+    display: block;
+    margin-top: 8px;
+    color: #c0392b;
+    font-size: 12px;
+    line-height: 1.4;
+    text-transform: none;
+    padding-left: 30px;
+  }
+
+  .footer-newsletter-form__consent-error[hidden] {
+    display: none !important;
   }
 
   .footer-newsletter-form__policy,
@@ -217,6 +308,62 @@
 
   .footer-newsletter-form__submit {
     margin-top: 25px;
+  }
+
+  .footer-newsletter-form__group--submit {
+    margin-top: auto;
+  }
+
+  .footer-newsletter-float {
+    position: fixed;
+    right: 40px;
+    bottom: 32px;
+    z-index: 102;
+    width: min(420px, calc(100vw - 80px));
+    padding: 26px 24px 22px;
+    background: #fff;
+    color: #111;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
+    transform: translate3d(0, 120%, 0);
+    opacity: 0;
+    visibility: hidden;
+    transition: transform 0.45s ease, opacity 0.3s ease, visibility 0s linear 0.45s;
+  }
+
+  .footer-newsletter-float.is-visible {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+    visibility: visible;
+    transition: transform 0.45s ease, opacity 0.3s ease;
+  }
+
+  .footer-newsletter-float__close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 28px;
+    height: 28px;
+    border: 0;
+    background: transparent;
+    color: currentColor;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .footer-newsletter-float__close .icon {
+    width: 12px;
+    height: 12px;
+  }
+
+  .footer-newsletter-float__title {
+    margin: 0 0 20px;
+    padding-right: 18px;
+  }
+
+  .footer-newsletter-float__cta {
+    min-height: 44px;
   }
 
   @media only screen and (max-width: 767px) {
@@ -232,6 +379,45 @@
     .footer-newsletter__trigger {
       grid-column: 1;
     }
+
+    .footer-newsletter-float {
+      top: 50%;
+      left: 50%;
+      right: auto;
+      bottom: auto;
+      width: calc(100% - 32px);
+      max-width: 420px;
+      padding: 22px 18px 16px;
+      border-top: 0;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      transform: translate3d(-50%, calc(-50% + 40px), 0);
+    }
+
+    .footer-newsletter-float.is-visible {
+      transform: translate3d(-50%, -50%, 0);
+    }
+
+    .footer-newsletter-float__title {
+      margin-bottom: 16px;
+      padding-right: 22px;
+    }
+
+    .footer-newsletter-float__underlay {
+      position: fixed;
+      inset: 0;
+      z-index: 101;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+    }
+
+    .footer-newsletter-float__underlay.is-visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transition: opacity 0.3s ease;
+    }
   }
 {% endstylesheet %}
 
@@ -239,11 +425,36 @@
   class FooterNewsletterDrawer extends HTMLElement {
     connectedCallback() {
       this.drawer = this.querySelector('[data-newsletter-drawer]');
-      this.trigger = this.querySelector('[data-newsletter-drawer-open]');
+      this.openTriggers = Array.from(this.querySelectorAll('[data-newsletter-drawer-open]'));
       this.scrollableEl = this.querySelector('[data-scroll-lock-scrollable]');
+      this.floatPopup = this.querySelector('[data-newsletter-float]');
+      this.floatClose = this.querySelector('[data-newsletter-float-close]');
+      this.floatSignup = this.querySelector('[data-newsletter-float-signup]');
+      this.floatUnderlay = this.querySelector('[data-newsletter-float-underlay]');
       this.lastFocusedElement = null;
+      this.dismissCookie = 'footer_newsletter_float_dismissed';
+      this.mobileQuery = window.matchMedia('(max-width: 767px)');
+      this.hasShownFloat = false;
+      this.floatDelayMs = Number(this.floatPopup?.dataset.newsletterFloatDelay || 3) * 1000;
+      this.floatDismissDelayMs = 260;
+      this.boundOnScroll = () => this.onScroll();
 
-      this.trigger?.addEventListener('click', () => this.open());
+      this.openTriggers.forEach((trigger) => {
+        trigger.addEventListener('click', (event) => {
+          const fromFloat = event.currentTarget?.hasAttribute('data-newsletter-float-signup');
+          if (fromFloat) {
+            this.dismissFloat(true);
+          }
+          this.open();
+        });
+      });
+
+      this.floatClose?.addEventListener('click', () => {
+        this.dismissFloat();
+      });
+      this.floatUnderlay?.addEventListener('click', () => {
+        this.dismissFloat();
+      });
 
       this.querySelectorAll('[data-newsletter-drawer-close]').forEach((el) => {
         el.addEventListener('click', () => this.close());
@@ -254,6 +465,8 @@
           this.close();
         }
       });
+
+      this.setupFloatPopup();
     }
 
     focusWithoutScroll(element) {
@@ -274,7 +487,7 @@
 
     open() {
       this.lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-      this.trigger?.setAttribute('aria-expanded', 'true');
+      this.openTriggers.forEach((trigger) => trigger.setAttribute('aria-expanded', 'true'));
 
       const removeExpanding = () => {
         this.drawer.classList.remove('expanding');
@@ -296,7 +509,7 @@
     }
 
     close() {
-      this.trigger?.setAttribute('aria-expanded', 'false');
+      this.openTriggers.forEach((trigger) => trigger.setAttribute('aria-expanded', 'false'));
       this.drawer.classList.remove('expanded');
       window.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
 
@@ -307,9 +520,94 @@
       const focusTarget =
         this.lastFocusedElement instanceof HTMLElement && this.lastFocusedElement.isConnected
           ? this.lastFocusedElement
-          : this.trigger;
+          : this.openTriggers[0];
 
       this.focusWithoutScroll(focusTarget);
+    }
+
+    setupFloatPopup() {
+      if (!this.floatPopup || this.readCookie(this.dismissCookie) === '1') {
+        return;
+      }
+
+      if (this.mobileQuery.matches) {
+        window.addEventListener('scroll', this.boundOnScroll, {passive: true});
+        this.onScroll();
+        return;
+      }
+
+      window.setTimeout(() => {
+        if (this.readCookie(this.dismissCookie) === '1' || this.hasShownFloat) {
+          return;
+        }
+        this.showFloat();
+      }, this.floatDelayMs);
+    }
+
+    onScroll() {
+      if (!this.floatPopup || this.hasShownFloat || this.readCookie(this.dismissCookie) === '1') {
+        return;
+      }
+      if (window.scrollY > 80) {
+        this.showFloat();
+      }
+    }
+
+    showFloat() {
+      if (!this.floatPopup) {
+        return;
+      }
+      this.floatPopup.classList.add('is-visible');
+      this.floatPopup.setAttribute('aria-hidden', 'false');
+      if (this.mobileQuery.matches) {
+        this.floatUnderlay?.classList.add('is-visible');
+        window.dispatchEvent(new CustomEvent('theme:scroll:lock'));
+      }
+      this.hasShownFloat = true;
+      window.removeEventListener('scroll', this.boundOnScroll);
+    }
+
+    hideFloat(skipScrollUnlock = false) {
+      if (!this.floatPopup) {
+        return;
+      }
+      this.floatPopup.classList.remove('is-visible');
+      this.floatPopup.setAttribute('aria-hidden', 'true');
+      this.floatUnderlay?.classList.remove('is-visible');
+      if (!skipScrollUnlock) {
+        window.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
+      }
+      window.removeEventListener('scroll', this.boundOnScroll);
+    }
+
+    dismissFloat(withDelay = false) {
+      this.writeCookie(this.dismissCookie, '1', 24);
+
+      if (withDelay) {
+        window.setTimeout(() => {
+          this.hideFloat(true);
+        }, this.floatDismissDelayMs);
+        return;
+      }
+
+      this.hideFloat();
+    }
+
+    writeCookie(name, value, hours) {
+      const maxAge = Math.max(0, Number(hours) * 60 * 60);
+      document.cookie = `${name}=${encodeURIComponent(value)};path=/;max-age=${maxAge};SameSite=Lax`;
+    }
+
+    readCookie(name) {
+      const key = `${name}=`;
+      const parts = document.cookie ? document.cookie.split(';') : [];
+      for (const part of parts) {
+        const cookie = part.trim();
+        if (cookie.startsWith(key)) {
+          return decodeURIComponent(cookie.substring(key.length));
+        }
+      }
+      return '';
     }
   }
 
@@ -332,6 +630,32 @@
       "id": "trigger_label",
       "label": "Trigger button label",
       "default": "Join newsletter"
+    },
+    {
+      "type": "header",
+      "content": "Floating popup"
+    },
+    {
+      "type": "text",
+      "id": "float_title",
+      "label": "Popup title",
+      "default": "Sign up to our Newsletter"
+    },
+    {
+      "type": "text",
+      "id": "float_button_text",
+      "label": "Popup button text",
+      "default": "SIGN UP"
+    },
+    {
+      "type": "range",
+      "id": "float_delay_seconds",
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "unit": "s",
+      "label": "Desktop popup delay",
+      "default": 3
     },
     {
       "type": "header",
@@ -379,65 +703,27 @@
     },
     {
       "type": "header",
-      "content": "Mailchimp"
-    },
-    {
-      "type": "url",
-      "id": "mailchimp_action_url",
-      "label": "Action URL",
-      "info": "Paste the Mailchimp form action URL from your hosted or embedded form."
+      "content": "Klaviyo"
     },
     {
       "type": "text",
-      "id": "mailchimp_user_id",
-      "label": "User ID",
-      "info": "The hidden 'u' value from Mailchimp."
+      "id": "klaviyo_company_id",
+      "label": "Company ID (public API key)",
+      "info": "Optional override. Leave blank to use Theme settings > Klaviyo public API key."
     },
     {
       "type": "text",
-      "id": "mailchimp_audience_id",
-      "label": "Embed ID / Audience ID",
-      "info": "The hidden 'id' value from Mailchimp."
+      "id": "klaviyo_list_id",
+      "label": "List ID",
+      "default": "UAE2Jy",
+      "info": "Klaviyo list ID to subscribe profiles to."
     },
     {
       "type": "text",
-      "id": "mailchimp_tags",
-      "label": "Tags",
-      "info": "Optional Mailchimp tags hidden input value."
-    },
-    {
-      "type": "header",
-      "content": "Mailchimp field names"
-    },
-    {
-      "type": "text",
-      "id": "mailchimp_first_name_field",
-      "label": "First name field name",
-      "default": "FNAME"
-    },
-    {
-      "type": "text",
-      "id": "mailchimp_last_name_field",
-      "label": "Last name field name",
-      "default": "LNAME"
-    },
-    {
-      "type": "text",
-      "id": "mailchimp_email_field",
-      "label": "Email field name",
-      "default": "EMAIL"
-    },
-    {
-      "type": "text",
-      "id": "mailchimp_language_field",
-      "label": "Language field name",
-      "default": "LANGUAGE"
-    },
-    {
-      "type": "text",
-      "id": "mailchimp_consent_field",
-      "label": "Consent field name",
-      "default": "CONSENT"
+      "id": "klaviyo_source",
+      "label": "Source label",
+      "default": "Footer Newsletter",
+      "info": "Optional source string saved in Klaviyo profile properties."
     },
     {
       "type": "header",
