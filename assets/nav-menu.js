@@ -1,0 +1,251 @@
+/* =========================================================================
+   Roberto Coin — hardcoded navigation behaviour (replaces Qikify Smart Menu)
+   Desktop: 180ms hover-intent mega-menu, fade-as-one, image crossfade reveal,
+            cursor parallax. Mobile/tablet: drill-down slide stack + scroll tint.
+   ========================================================================= */
+(function () {
+  'use strict';
+
+  var DWELL = 180;
+  var FADE = 300;
+  var root = document.querySelector('.rc-nav');
+  if (!root) return;
+
+  var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var coarse = window.matchMedia && window.matchMedia('(hover: none), (pointer: coarse)').matches;
+  var motionOK = !prefersReduced && !coarse;
+
+  /* ---------------------------------------------------------------------
+     SHARED — search / newsletter / close helpers
+     --------------------------------------------------------------------- */
+  function openSearch() {
+    // Prefer the theme's existing search popdown if present, else go to /search.
+    var summary = document.querySelector('header-search-popdown details > summary');
+    if (summary) { summary.click(); return; }
+    var url = root.getAttribute('data-search-url') || '/search';
+    window.location.href = url;
+  }
+  function openNewsletter(e) {
+    // Fire a documented event the popup can listen for; fall back to footer signup.
+    document.dispatchEvent(new CustomEvent('rc:newsletter-open'));
+    var input = document.querySelector('[data-rc-newsletter-target] input, .footer__newsletter input[type="email"], form[action*="/contact#"] input[type="email"]');
+    if (input) { if (e) e.preventDefault(); input.focus({ preventScroll: false }); input.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  }
+  document.querySelectorAll('[data-rc-search]').forEach(function (el) {
+    el.addEventListener('click', function (e) { e.preventDefault(); openSearch(); });
+  });
+  document.querySelectorAll('[data-rc-newsletter]').forEach(function (el) {
+    el.addEventListener('click', function (e) { openNewsletter(e); });
+  });
+
+  /* =====================================================================
+     DESKTOP mega-menu
+     ===================================================================== */
+  var desktop = root.querySelector('.rc-desktop');
+  var panelsWrap = root.querySelector('[data-rc-panels]');
+
+  if (desktop && panelsWrap) {
+    var triggers = root.querySelectorAll('[data-rc-trigger]');
+    var panels = {};
+    panelsWrap.querySelectorAll('[data-panel]').forEach(function (p) { panels[p.getAttribute('data-panel')] = p; });
+
+    var openKey = null;     // active (drives fade-in)
+    var shownKey = null;    // rendered (persists through fade-out)
+    var hiTimer = null, closeTimer = null, revealTimer = null;
+
+    function showPanel(key) {
+      shownKey = key;
+      Object.keys(panels).forEach(function (k) {
+        panels[k].setAttribute('data-shown', k === key ? '1' : '0');
+      });
+      // reset reveal image to this panel's default
+      resetReveal();
+    }
+    function markActiveTrigger(key) {
+      triggers.forEach(function (t) {
+        t.setAttribute('data-active', t.getAttribute('data-rc-trigger') === key ? '1' : '0');
+      });
+    }
+    function openNow(key) {
+      clearTimeout(hiTimer); clearTimeout(closeTimer); clearTimeout(revealTimer);
+      if (!panels[key]) return;
+      openKey = key;
+      root.setAttribute('data-open', '1');
+      markActiveTrigger(key);
+      showPanel(key);
+    }
+    function hoverIntent(key) {
+      clearTimeout(hiTimer);
+      hiTimer = setTimeout(function () { if (key) openNow(key); else close(); }, DWELL);
+    }
+    function cancelIntent() { clearTimeout(hiTimer); }
+    function close() {
+      clearTimeout(hiTimer); clearTimeout(revealTimer);
+      if (!openKey) return;
+      openKey = null;
+      root.setAttribute('data-open', '0');
+      markActiveTrigger(null);
+      clearTimeout(closeTimer);
+      closeTimer = setTimeout(function () { if (!openKey) showPanel(null); }, FADE);
+    }
+
+    triggers.forEach(function (t) {
+      var key = t.getAttribute('data-rc-trigger');
+      t.addEventListener('mouseenter', function () { hoverIntent(key); });
+      t.addEventListener('mouseleave', function () { cancelIntent(); });
+      t.addEventListener('focus', function () { openNow(key); });
+      t.addEventListener('click', function (e) { e.preventDefault(); openNow(key); });
+    });
+
+    // closing surfaces: logo / utility / bag / search icon + leaving the desktop header zone
+    root.querySelectorAll('[data-rc-close]').forEach(function (el) {
+      el.addEventListener('mouseenter', close);
+      el.addEventListener('focus', close);
+    });
+    desktop.addEventListener('mouseleave', close);
+    // leaving the veil region (downwards onto the homepage strip) closes too
+    panelsWrap.addEventListener('mouseleave', function () { hoverIntent(null); });
+    panelsWrap.addEventListener('mouseenter', function () { clearTimeout(hiTimer); clearTimeout(closeTimer); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+
+    /* ---- image crossfade reveal (Jewelry featured voices) ---- */
+    var jewelPanel = panels['jewelry'];
+    var frontLayer = jewelPanel && jewelPanel.querySelector('[data-rc-img-front]');
+    var backLayer = jewelPanel && jewelPanel.querySelector('[data-rc-img-back]');
+    var frontVisible = true;
+    var curImg = frontLayer ? frontLayer.getAttribute('data-default') : '';
+
+    function setImage(src) {
+      if (!frontLayer || !backLayer || !src || src === curImg) return;
+      curImg = src;
+      if (frontVisible) {
+        backLayer.style.backgroundImage = "url('" + src + "')";
+        backLayer.style.backgroundPosition = 'center';
+        requestAnimationFrame(function () { frontLayer.style.opacity = '0'; backLayer.style.opacity = '1'; });
+        frontVisible = false;
+      } else {
+        frontLayer.style.backgroundImage = "url('" + src + "')";
+        frontLayer.style.backgroundPosition = 'center';
+        requestAnimationFrame(function () { frontLayer.style.opacity = '1'; backLayer.style.opacity = '0'; });
+        frontVisible = true;
+      }
+    }
+    function resetReveal() {
+      if (!frontLayer) return;
+      var def = frontLayer.getAttribute('data-default');
+      setImage(def);
+    }
+    if (jewelPanel) {
+      jewelPanel.querySelectorAll('[data-rc-reveal]').forEach(function (a) {
+        a.addEventListener('mouseenter', function () {
+          clearTimeout(revealTimer);
+          var img = a.getAttribute('data-rc-reveal');
+          revealTimer = setTimeout(function () { setImage(img); }, DWELL);
+        });
+        a.addEventListener('mouseleave', function () {
+          clearTimeout(revealTimer);
+          revealTimer = setTimeout(resetReveal, DWELL);
+        });
+      });
+    }
+
+    /* ---- cursor parallax across the open menu ---- */
+    if (motionOK) {
+      var px = 0, py = 0, tx = 0, ty = 0, MAX = 32;
+      panelsWrap.addEventListener('mousemove', function (e) {
+        var r = panelsWrap.getBoundingClientRect();
+        tx = (((e.clientX - r.left) / r.width) - 0.5) * 2 * MAX;
+        ty = (((e.clientY - r.top) / r.height) - 0.5) * 2 * MAX;
+      });
+      panelsWrap.addEventListener('mouseleave', function () { tx = 0; ty = 0; });
+      (function tick() {
+        requestAnimationFrame(tick);
+        var active = !!openKey;
+        var dx = active ? tx : 0, dy = active ? ty : 0;
+        px += (dx - px) * 0.07; py += (dy - py) * 0.07;
+        if (!shownKey) return;
+        var p = panels[shownKey];
+        if (!p) return;
+        var t = 'translate(' + px.toFixed(2) + 'px,' + py.toFixed(2) + 'px)';
+        p.querySelectorAll('[data-rc-parallax]').forEach(function (el) { el.style.transform = t; });
+      })();
+    }
+  }
+
+  /* =====================================================================
+     MOBILE / TABLET drawer
+     ===================================================================== */
+  var drawer = root.querySelector('[data-rc-drawer]');
+  if (drawer) {
+    var scroller = drawer.querySelector('[data-rc-scroll]');
+    var header = drawer.querySelector('[data-rc-drawer-header]');
+    var panelsM = {};
+    drawer.querySelectorAll('[data-node]').forEach(function (p) { panelsM[p.getAttribute('data-node')] = p; });
+    var stack = ['root'];
+    var animating = false;
+
+    function activeNode() { return stack[stack.length - 1]; }
+    function showNode(node) {
+      Object.keys(panelsM).forEach(function (k) {
+        var el = panelsM[k];
+        if (k === node) { el.hidden = false; el.setAttribute('data-active', '1'); }
+        else { el.hidden = true; el.removeAttribute('data-active'); el.removeAttribute('data-anim'); }
+      });
+    }
+    function updateScrollTint() {
+      if (!scroller) return;
+      var scrolled = scroller.scrollTop > (scroller.clientWidth - 104);
+      drawer.setAttribute('data-scrolled', scrolled ? '1' : '0');
+    }
+    function slide(node, dir) {
+      var el = panelsM[node];
+      if (!el) return;
+      animating = true;
+      if (scroller) scroller.scrollTop = 0;
+      showNode(node);
+      el.setAttribute('data-anim', dir === 'back' ? 'back-start' : 'fwd-start');
+      requestAnimationFrame(function () { requestAnimationFrame(function () {
+        el.setAttribute('data-anim', 'in');
+        setTimeout(function () { el.removeAttribute('data-anim'); animating = false; }, 500);
+      }); });
+      updateScrollTint();
+    }
+    function drill(node) { if (animating || !panelsM[node]) return; stack.push(node); slide(node, 'fwd'); }
+    function back() { if (animating || stack.length <= 1) return; stack.pop(); slide(activeNode(), 'back'); }
+
+    function openDrawer() {
+      stack = ['root'];
+      showNode('root');
+      if (scroller) scroller.scrollTop = 0;
+      drawer.setAttribute('data-open', '1');
+      drawer.setAttribute('aria-hidden', 'false');
+      document.documentElement.classList.add('rc-drawer-open');
+      updateScrollTint();
+    }
+    function closeDrawer() {
+      drawer.setAttribute('data-open', '0');
+      drawer.setAttribute('aria-hidden', 'true');
+      document.documentElement.classList.remove('rc-drawer-open');
+    }
+
+    drawer.querySelectorAll('[data-rc-drill]').forEach(function (b) {
+      b.addEventListener('click', function () { drill(b.getAttribute('data-rc-drill')); });
+    });
+    drawer.querySelectorAll('[data-rc-back]').forEach(function (b) {
+      b.addEventListener('click', back);
+    });
+    drawer.querySelectorAll('[data-rc-drawer-close]').forEach(function (b) {
+      b.addEventListener('click', closeDrawer);
+    });
+    if (scroller) scroller.addEventListener('scroll', updateScrollTint, { passive: true });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDrawer(); });
+
+    // external open triggers (hamburger added in header integration)
+    document.querySelectorAll('[data-rc-drawer-open]').forEach(function (b) {
+      b.addEventListener('click', function (e) { e.preventDefault(); openDrawer(); });
+    });
+    // expose for theme code / hamburger reuse
+    root.rcOpenDrawer = openDrawer;
+    root.rcCloseDrawer = closeDrawer;
+  }
+})();

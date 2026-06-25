@@ -1,0 +1,41 @@
+{%- comment -%}
+  nav-header — mount point for the hardcoded Roberto Coin navigation (replaces Qikify).
+  Renders the closed mobile bar, the desktop transparent header + mega-menu, and the drill-down drawer.
+  Transparent overlay on the homepage hero; solid house-green bar on inner pages.
+{%- endcomment -%}
+
+{{ 'nav-menu.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'nav-menu.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign rc_transparent = 0
+  if template == 'index'
+    assign rc_transparent = 1
+  endif
+-%}
+
+<div class="rc-nav" data-transparent="{{ rc_transparent }}" data-open="0" data-search-url="{{ routes.search_url }}">
+  <div class="rc-nav__bar-wrap">
+
+    {%- comment -%} closed mobile / tablet bar {%- endcomment -%}
+    <div class="rc-mobile-bar">
+      <div class="rc-mobile-bar__slot">
+        <button type="button" data-rc-drawer-open aria-label="Open menu">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M3 9h18M3 15h18" stroke="currentColor" stroke-width="1.3"></path></svg>
+        </button>
+      </div>
+      <a class="rc-mobile-bar__slot" href="{{ routes.root_url }}" aria-label="{{ shop.name }} — home">
+        <img class="rc-mobile-bar__logo" src="{{ 'nav-RC_LOGO_light.svg' | asset_url }}" alt="{{ shop.name }}" width="120" height="27">
+      </a>
+      <div class="rc-mobile-bar__slot">
+        <a href="{{ routes.cart_url }}" data-cart-toggle aria-label="{{ 'cart.general.title' | t | default: 'Cart' }}">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 8h12l-1 12H7L6 8z" stroke="currentColor" stroke-width="1.2"></path><path d="M9 8V6.5a3 3 0 0 1 6 0V8" stroke="currentColor" stroke-width="1.2"></path></svg>
+        </a>
+      </div>
+    </div>
+
+    {%- render 'nav-mega-desktop' -%}
+  </div>
+
+  {%- render 'nav-drawer-mobile' -%}
+</div>

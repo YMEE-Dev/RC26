@@ -1,0 +1,234 @@
+{%- comment -%}
+  nav-mega-desktop — hardcoded Roberto Coin desktop header + hover mega-menu.
+  Replaces the Qikify Smart Menu. Interaction in assets/nav-menu.js, styles in assets/nav-menu.css.
+  Reuses theme hooks: data-cart-toggle + cart-count (cart drawer), data-rc-search (search), routes.* (account).
+{%- endcomment -%}
+
+{%- liquid
+  assign logo = 'nav-RC_LOGO_light.svg' | asset_url
+  assign jewelry_spotlight = 'nav-jewelry-hero.png' | asset_url
+-%}
+
+<div class="rc-desktop">
+  {%- comment -%} ---------- transparent header ---------- {%- endcomment -%}
+  <div class="rc-d-bar">
+    <div class="rc-d-bar__grid">
+
+      {%- comment -%} left: search + primary stack {%- endcomment -%}
+      <div class="rc-d-left">
+        <button type="button" class="rc-d-icon" data-rc-search aria-label="{{ 'general.search.title' | t | default: 'Search' }}">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.2"></circle><path d="M20 20l-4-4" stroke="currentColor" stroke-width="1.2"></path></svg>
+        </button>
+        <nav class="rc-d-stack rc-d-stack--primary" aria-label="Primary">
+          <a class="rc-d-link" href="{% render 'nav-url', key: 'bestsellers' %}">Best Sellers</a>
+          <a class="rc-d-link" href="{% render 'nav-url', key: 'jewelry-bestsellers' %}" data-rc-trigger="jewelry" aria-haspopup="true">Jewelry</a>
+          <a class="rc-d-link" href="{% render 'nav-url', key: 'gift-ideas' %}" data-rc-trigger="occasions" aria-haspopup="true">Occasions</a>
+          <a class="rc-d-link" href="{% render 'nav-url', key: 'the-brand' %}" data-rc-trigger="maison" aria-haspopup="true">Maison</a>
+        </nav>
+      </div>
+
+      {%- comment -%} center: wordmark {%- endcomment -%}
+      <a class="rc-d-logo" href="{{ routes.root_url }}" data-rc-close aria-label="{{ shop.name }} — home">
+        <img src="{{ logo }}" alt="{{ shop.name }}" width="180" height="50">
+      </a>
+
+      {%- comment -%} right: utility stack + bag {%- endcomment -%}
+      <div class="rc-d-right">
+        <nav class="rc-d-stack rc-d-stack--utility" aria-label="Utility">
+          <a class="rc-d-link" href="{% render 'nav-url', key: 'find-a-boutique' %}" data-rc-close>Find a Boutique</a>
+          <a class="rc-d-link" href="{% render 'nav-url', key: 'concierge' %}" data-rc-close>Concierge</a>
+          <a class="rc-d-link" href="{% render 'nav-url', key: 'login' %}" data-rc-close>Log In</a>
+          <a class="rc-d-link" href="{% render 'nav-url', key: 'keep-in-touch' %}" data-rc-newsletter data-rc-close>Keep in Touch</a>
+        </nav>
+        <a class="rc-d-bag" href="{{ routes.cart_url }}" data-cart-toggle data-rc-close aria-label="{{ 'cart.general.title' | t | default: 'Cart' }}">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 8h12l-1 12H7L6 8z" stroke="currentColor" stroke-width="1.2"></path><path d="M9 8V6.5a3 3 0 0 1 6 0V8" stroke="currentColor" stroke-width="1.2"></path></svg>
+          <cart-count class="rc-d-bag__count" data-cart-count="{{ cart.item_count }}"{% if cart.item_count == 0 %} hidden{% endif %}>{{ cart.item_count }}</cart-count>
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  {%- comment -%} ---------- mega-menu panels (green veil) ---------- {%- endcomment -%}
+  <div class="rc-d-panels" data-rc-panels>
+
+    {%- comment -%} ===== JEWELRY ===== {%- endcomment -%}
+    <div class="rc-d-panel" data-panel="jewelry">
+      <div class="rc-d-panel__inner">
+
+        {%- comment -%} anchored single 1:1 image with serif crossfade reveal {%- endcomment -%}
+        <div class="rc-d-imgzone">
+          <div class="rc-d-imgzone__inner" data-rc-parallax>
+            <div class="rc-d-imgzone__layer" data-rc-img-back></div>
+            <div class="rc-d-imgzone__layer" data-rc-img-front data-default="{{ jewelry_spotlight }}" style="background-image:url('{{ jewelry_spotlight }}'); background-position:center 12%;"></div>
+          </div>
+          <div class="rc-d-imgzone__scrim"></div>
+          <div class="rc-d-imgzone__caption">
+            <span class="rc-eyebrow" style="display:block;color:rgba(255,255,255,0.85);margin-bottom:6px;">Discover Our</span>
+            <div class="rc-display">Jewelry</div>
+          </div>
+        </div>
+
+        <div class="rc-d-left-area" data-layout="jewelry">
+          <div class="rc-d-cells">
+
+            {%- comment -%} cell 1 — Our Selection + Shop by Category {%- endcomment -%}
+            <div class="rc-d-cell">
+              <div class="rc-d-sec">
+                <span class="rc-label rc-d-sec__head">Our Selection</span>
+                <div class="rc-d-links">
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'jewelry-bestsellers' %}"><span>Best Sellers</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'timeless-pieces' %}"><span>Timeless Pieces</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'newly-coined' %}"><span>Newly Coined</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                </div>
+              </div>
+              <div class="rc-d-sec">
+                <span class="rc-label rc-d-sec__head">Shop by Category</span>
+                <div class="rc-d-links">
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'rings' %}"><span>Rings</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'earrings' %}"><span>Earrings</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'necklaces' %}"><span>Necklaces</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'pendants' %}"><span>Pendants</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'bracelets' %}"><span>Bracelets</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'bangles' %}"><span>Bangles</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="rc-d-vdiv"></div>
+
+            {%- comment -%} cell 2 — Featured (serif, drives image reveal) {%- endcomment -%}
+            <div class="rc-d-cell">
+              <div class="rc-d-sec">
+                <span class="rc-label rc-d-sec__head">Featured</span>
+                <div class="rc-d-links">
+                  <a class="rc-d-voice rc-d-voice--serif" href="{% render 'nav-url', key: 'venetian-princess' %}" data-rc-reveal="{{ 'nav-jewelry-carousel.png' | asset_url }}"><span>Venetian Princess</span>{% render 'nav-arrow', size: 'lg' %}</a>
+                  <a class="rc-d-voice rc-d-voice--serif" href="{% render 'nav-url', key: 'princess-flower' %}" data-rc-reveal="{{ 'nav-maison-cover.jpg' | asset_url }}"><span>Princess Flower</span>{% render 'nav-arrow', size: 'lg' %}</a>
+                  <a class="rc-d-voice rc-d-voice--serif" href="{% render 'nav-url', key: 'love-in-verona' %}" data-rc-reveal="{{ 'nav-product-earrings.png' | asset_url }}"><span>Love in Verona</span>{% render 'nav-arrow', size: 'lg' %}</a>
+                  <a class="rc-d-voice rc-d-voice--serif" href="{% render 'nav-url', key: 'tiare' %}" data-rc-reveal="{{ 'nav-occasions-1.png' | asset_url }}"><span>Tiaré</span>{% render 'nav-arrow', size: 'lg' %}</a>
+                  <a class="rc-d-voice rc-d-voice--serif" href="{% render 'nav-url', key: 'cento' %}" data-rc-reveal="{{ 'nav-cento-diamond-comparison-bg.jpg' | asset_url }}"><span>Cento</span>{% render 'nav-arrow', size: 'lg' %}</a>
+                  <a class="rc-d-voice rc-d-voice--serif" href="{% render 'nav-url', key: 'sauvage-prive' %}" data-rc-reveal="{{ 'nav-concierge.jpg' | asset_url }}"><span>Sauvage Privé</span>{% render 'nav-arrow', size: 'lg' %}</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="rc-d-vdiv"></div>
+
+            {%- comment -%} cell 3 — All Collections (two sub-columns, alphabetized; Pois Moi omitted) {%- endcomment -%}
+            <div class="rc-d-cell rc-d-cell--grow">
+              <div class="rc-d-sec">
+                <span class="rc-label rc-d-sec__head">All Collections</span>
+                <div class="rc-d-links rc-d-links--two" style="grid-template-rows:repeat(6,auto);">
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'animalier' %}"><span>Animalier</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'art-deco' %}"><span>Art Deco</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'carousel' %}"><span>Carousel</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'desert-flower' %}"><span>Desert Flower</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'diamond-princess' %}"><span>Diamond Princess</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'domino' %}"><span>Domino</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'jasmine' %}"><span>Jasmine</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'navarra' %}"><span>Navarra</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'princess' %}"><span>Princess</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'princess-star' %}"><span>Princess Star</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'tiny-treasure' %}"><span>Tiny Treasure</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'venetian-medallions' %}"><span>Venetian Medallions</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {%- comment -%} ===== OCCASIONS ===== {%- endcomment -%}
+    <div class="rc-d-panel" data-panel="occasions">
+      <div class="rc-d-panel__inner">
+        <div class="rc-d-imgzone rc-d-imgzone--wide">
+          <div class="rc-d-dual">
+            <a class="rc-d-tile" href="{% render 'nav-url', key: 'gift-ideas' %}">
+              <div class="rc-d-tile__bg" data-rc-parallax style="background-image:url('{{ 'nav-occasions-1.png' | asset_url }}');"></div>
+              <div class="rc-d-tile__scrim"></div>
+              <div class="rc-d-tile__caption"><span class="rc-eyebrow" style="display:block;color:rgba(255,255,255,0.85);margin-bottom:6px;">Discover</span><div class="rc-display">Gift Ideas</div></div>
+            </a>
+            <a class="rc-d-tile" href="{% render 'nav-url', key: 'beyond-jewels' %}">
+              <div class="rc-d-tile__bg" data-rc-parallax style="background-image:url('{{ 'nav-occasions-2.png' | asset_url }}');"></div>
+              <div class="rc-d-tile__scrim"></div>
+              <div class="rc-d-tile__caption"><span class="rc-eyebrow" style="display:block;color:rgba(255,255,255,0.85);margin-bottom:6px;">Discover</span><div class="rc-display">Beyond Jewels</div></div>
+            </a>
+          </div>
+        </div>
+
+        <div class="rc-d-left-area" data-layout="occasions">
+          <div class="rc-d-cells">
+            <div class="rc-d-cell rc-d-cell--fixed">
+              <div class="rc-d-sec">
+                <span class="rc-label rc-d-sec__head">Gift Ideas</span>
+                <div class="rc-d-links">
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'beyond-jewels' %}"><span>Beyond Jewels</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'everyday-treasures' %}"><span>Everyday Treasures</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'gift-ideas-under-1500' %}"><span>€1,500 &amp; Under</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                </div>
+              </div>
+              <div class="rc-d-sec">
+                <span class="rc-label rc-d-sec__head">By Occasion</span>
+                <div class="rc-d-links">
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'anniversary' %}"><span>Anniversary</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'birthday' %}"><span>Birthday</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'promises' %}"><span>Promises</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {%- comment -%} ===== MAISON ===== {%- endcomment -%}
+    {%- liquid
+      assign maison_article = blogs['brand'].articles.first
+      assign maison_img = 'nav-maison-blog-cover.png' | asset_url
+      if maison_article.image
+        assign maison_img = maison_article.image | image_url: width: 1200
+      endif
+      assign maison_href = maison_article.url | default: blogs['brand'].url
+      assign maison_title = maison_article.title | default: 'Discover the Maison'
+    -%}
+    <div class="rc-d-panel" data-panel="maison">
+      <div class="rc-d-panel__inner">
+        <div class="rc-d-imgzone rc-d-imgzone--wide">
+          <a class="rc-d-tile" href="{{ maison_href }}">
+            <div class="rc-d-tile__bg" data-rc-parallax style="background-image:url('{{ maison_img }}');"></div>
+            <div class="rc-d-tile__scrim"></div>
+            <div class="rc-d-tile__caption"><span class="rc-eyebrow" style="display:block;color:rgba(255,255,255,0.85);margin-bottom:6px;">Latest in #Brand</span><div class="rc-display">{{ maison_title | escape }}</div></div>
+          </a>
+        </div>
+
+        <div class="rc-d-left-area" data-layout="maison">
+          <div class="rc-d-cells">
+            <div class="rc-d-cell rc-d-cell--fixed">
+              <div class="rc-d-sec">
+                <span class="rc-label rc-d-sec__head">The Maison</span>
+                <div class="rc-d-links">
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'the-brand' %}"><span>The Brand</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'our-commitment' %}"><span>Our Commitment</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'prestige-service' %}"><span>Prestige Service</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                </div>
+              </div>
+              <div class="rc-d-sec">
+                <span class="rc-label rc-d-sec__head">Stories</span>
+                <div class="rc-d-links">
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'stories-brand' %}"><span>#Brand</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'stories-celebrity' %}"><span>#Celebrity</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'stories-occasion' %}"><span>#Occasion</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'stories-style' %}"><span>#Style</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                  <a class="rc-d-voice rc-d-voice--body" href="{% render 'nav-url', key: 'stories-all' %}"><span>View All</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

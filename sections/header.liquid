@@ -721,6 +721,10 @@
   <script src="{{ 'ticker.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 
+{%- comment -%} === Hardcoded Roberto Coin navigation — replaces the Qikify Smart Menu. Legacy header kept in DOM but hidden. === {%- endcomment -%}
+{% render 'nav-header' %}
+<style>.header__wrapper { display: none !important; }</style>
+
 <header-component
   class="header__wrapper"
   data-header-wrapper
