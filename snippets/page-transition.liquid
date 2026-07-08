@@ -85,9 +85,17 @@
        to a compositing/backdrop root, which breaks the mobile menu underlay's
        backdrop-filter blur on every page (page content bleeds through the open menu
        instead of being blurred). The header/menu live OUTSIDE .main-content, so scoping
-       the fade here keeps the menu blur intact while preserving the page entrance fade. */
+       the fade here keeps the menu blur intact while preserving the page entrance fade.
+
+       IMPORTANT: no `forwards` fill mode here. While an opacity animation applies, it
+       promotes .main-content to its own stacking context; a `forwards` fill keeps that
+       context alive permanently, trapping the fixed-position drawers rendered inside
+       #MainContent (e.g. PLP info drawers) below the header and pre-footer newsletter
+       bar, which live outside .main-content. Without a fill mode the animation stops
+       applying after 400ms and opacity reverts to the base value of 1 — visually
+       identical, but the stacking context dissolves so drawers stack correctly. */
     body:not(#product-care)[data-rc-animations="true"] .main-content {
-      animation: pt-fade-in 400ms cubic-bezier(0.70, 0, 0.3, 1) forwards;
+      animation: pt-fade-in 400ms cubic-bezier(0.70, 0, 0.3, 1);
     }
 
     /* Loading state — hide targets pre-trigger to prevent FOUC */
