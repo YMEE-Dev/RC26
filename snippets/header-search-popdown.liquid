@@ -39,6 +39,14 @@
   endif
 -%}
 
+{%- style -%}
+  /* Close the 2% gap from theme.css .predictive-search { top: 102% } — the dark
+     page underlay showed through it as a black line above the results */
+  .search-popdown .predictive-search {
+    top: 100%;
+  }
+{%- endstyle -%}
+
 <div class="search-popdown" aria-label="{{ 'general.search.search' | t }}" data-popdown>
   <div class="wrapper">
     <div class="search-popdown__main">
