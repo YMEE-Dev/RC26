@@ -721,6 +721,10 @@
   <script src="{{ 'ticker.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 
+{%- comment -%} === Hardcoded Roberto Coin navigation — replaces the Qikify Smart Menu. Legacy header kept in DOM but hidden. === {%- endcomment -%}
+{% render 'nav-header' %}
+<style>.header__wrapper { display: none !important; }</style>
+
 <header-component
   class="header__wrapper"
   data-header-wrapper
@@ -1777,6 +1781,20 @@
       "info": "Optional menu displayed on the right side of the desktop header."
     },
     {
+      "type": "header",
+      "content": "Roberto Coin navigation"
+    },
+    {
+      "type": "paragraph",
+      "content": "Drives the left/primary bar of the RC mega-menu. Top-level items become the bar; add a \"Mega menu panel\" block to give an item a dropdown."
+    },
+    {
+      "type": "link_list",
+      "label": "RC main menu (left)",
+      "id": "rc_menu_linklist",
+      "default": "main-menu"
+    },
+    {
       "type": "checkbox",
       "id": "enable_call_to_action",
       "label": "Show call to action",
@@ -1963,6 +1981,59 @@
     }
   ],
   "blocks": [
+    {
+      "name": "Mega menu panel",
+      "type": "rc_panel",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Adds a dropdown to one item of the RC main menu. Panel links come from the menu below: its top-level items are column headings, their sub-items are the links."
+        },
+        {
+          "type": "select",
+          "id": "position",
+          "label": "Attach to main menu item",
+          "info": "Which top-level RC main menu item opens this panel.",
+          "default": "2",
+          "options": [
+            {"value": "1", "label": "Item 1"},
+            {"value": "2", "label": "Item 2"},
+            {"value": "3", "label": "Item 3"},
+            {"value": "4", "label": "Item 4"},
+            {"value": "5", "label": "Item 5"},
+            {"value": "6", "label": "Item 6"},
+            {"value": "7", "label": "Item 7"},
+            {"value": "8", "label": "Item 8"},
+            {"value": "9", "label": "Item 9"},
+            {"value": "10", "label": "Item 10"}
+          ]
+        },
+        {
+          "type": "link_list",
+          "id": "panel_menu",
+          "label": "Panel menu",
+          "info": "Top-level items = column headings. Their nested items = links."
+        },
+        {
+          "type": "select",
+          "id": "panel_style",
+          "label": "Imagery style",
+          "info": "Chooses the hardcoded panel imagery/layout.",
+          "default": "jewelry",
+          "options": [
+            {"value": "jewelry", "label": "Jewelry (single spotlight image)"},
+            {"value": "occasions", "label": "Occasions (two image tiles)"},
+            {"value": "maison", "label": "Maison (blog cover tile)"}
+          ]
+        },
+        {
+          "type": "text",
+          "id": "panel_heading",
+          "label": "Panel heading",
+          "info": "Overlaid on the imagery. Defaults to the imagery style name."
+        }
+      ]
+    },
     {
       "name": "Image",
       "type": "image",

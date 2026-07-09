@@ -1,0 +1,135 @@
+{%- comment -%}
+  nav-drawer-mobile — Roberto Coin mobile + tablet drill-down drawer.
+  Root rows come from the `rc_menu` link list (top level). Any top item that has a
+  matching `rc_panel` section block becomes a drill row into a menu-driven node.
+  Node link groups come from the block's `panel_menu` (level-1 = heading, level-2 = links).
+  Spotlight imagery + utility rows stay hardcoded. Interaction in assets/nav-menu.js.
+
+  @param {string} [rc_menu] - Handle of the main (left) link list
+  @param {block[]} [blocks] - The section blocks (defaults to section.blocks)
+{%- endcomment -%}
+
+{%- liquid
+  assign logo = 'nav-RC_LOGO_light.svg' | asset_url
+  assign img_root = 'nav-maison-cover.jpg' | asset_url
+  assign img_jewelry = 'nav-jewelry-hero.png' | asset_url
+  assign img_occasions = 'nav-occasions-1.png' | asset_url
+  assign img_maison = 'nav-concierge.jpg' | asset_url
+
+  assign rc_menu = rc_menu | default: section.settings.rc_menu_linklist | default: 'main-menu'
+  assign nav_blocks = blocks | default: section.blocks
+-%}
+
+<div class="rc-drawer" data-rc-drawer aria-hidden="true">
+  <div class="rc-drawer__scrim"></div>
+
+  {%- comment -%} shared header {%- endcomment -%}
+  <div class="rc-drawer__header" data-rc-drawer-header>
+    <div class="rc-drawer__hslot">
+      <button type="button" data-rc-drawer-close aria-label="Close menu">
+        <svg width="23" height="23" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="#fff" stroke-width="1.2"></path></svg>
+      </button>
+    </div>
+    <img class="rc-drawer__logo" src="{{ logo }}" alt="{{ shop.name }}" width="120" height="27">
+    <div class="rc-drawer__hslot rc-drawer__hslot--end">
+      <a href="{{ routes.cart_url }}" data-cart-toggle aria-label="{{ 'cart.general.title' | t | default: 'Cart' }}">
+        {%- render 'icon-cart' -%}
+      </a>
+    </div>
+  </div>
+
+  <div class="rc-drawer__scroll" data-rc-scroll>
+
+    {%- comment -%} ===== ROOT (menu-driven primary + hardcoded utility) ===== {%- endcomment -%}
+    <div class="rc-panel" data-node="root" data-active="1">
+      <div class="rc-m-spot">
+        <div class="rc-m-cover rc-m-cover--zoom" style="background-image:url('{{ img_root }}');background-position:74% center;"></div>
+        <div class="rc-m-spot__scrim"></div>
+        <div class="rc-m-cap">
+          <div class="rc-eyebrow rc-m-cap__eyebrow">Collection Spotlight</div>
+          <div class="rc-m-cap__title">Princess Flower</div>
+        </div>
+      </div>
+      <div class="rc-m-body">
+        <button type="button" class="rc-m-search" data-rc-search>
+          {%- render 'icon-search' -%}
+          <span>Search</span>
+        </button>
+        <nav class="rc-m-nav" aria-label="Primary">
+          {%- for link in linklists[rc_menu].links -%}
+            {%- liquid
+              assign pos = forloop.index | append: ''
+              assign panel_key = ''
+              for block in nav_blocks
+                if block.type == 'rc_panel' and block.settings.position == pos
+                  assign panel_key = 'rcp-' | append: pos
+                  break
+                endif
+              endfor
+            -%}
+            {%- if panel_key != '' -%}
+              <button type="button" class="rc-m-row" data-rc-drill="{{ panel_key }}"><span class="rc-m-row__label">{{ link.title | strip_html | escape }}</span>{% render 'nav-chevron' %}</button>
+            {%- else -%}
+              <a class="rc-m-row" href="{{ link.url }}"><span class="rc-m-row__label">{{ link.title | strip_html | escape }}</span></a>
+            {%- endif -%}
+          {%- endfor -%}
+        </nav>
+        <nav class="rc-m-util" aria-label="Utility">
+          <a class="rc-m-util__item" href="{% render 'nav-url', key: 'find-a-boutique' %}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" stroke="rgba(255,255,255,0.88)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Find a Boutique</span></a>
+          <a class="rc-m-util__item" href="{% render 'nav-url', key: 'concierge' %}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 5.5h16v10H8.5L4.5 19.5V5.5z M8 9.5h8 M8 12.5h5" stroke="rgba(255,255,255,0.88)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Concierge</span></a>
+          <a class="rc-m-util__item" href="{% render 'nav-url', key: 'login' %}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z M5 20c0-3.3 3.1-5.5 7-5.5s7 2.2 7 5.5" stroke="rgba(255,255,255,0.88)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Log In</span></a>
+          <a class="rc-m-util__item" href="{% render 'nav-url', key: 'keep-in-touch' %}" data-rc-newsletter><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 6h18v12H3z M3.5 7l8.5 6 8.5-6" stroke="rgba(255,255,255,0.88)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Keep in Touch</span></a>
+        </nav>
+      </div>
+    </div>
+
+    {%- comment -%} ===== PANEL NODES (one per rc_panel block) ===== {%- endcomment -%}
+    {%- for block in nav_blocks -%}
+      {%- if block.type != 'rc_panel' -%}{%- continue -%}{%- endif -%}
+      {%- liquid
+        assign panel_key = 'rcp-' | append: block.settings.position
+        assign panel_menu = block.settings.panel_menu
+        case block.settings.panel_style
+          when 'occasions'
+            assign node_img = img_occasions
+            assign node_eyebrow = 'Discover Our'
+          when 'maison'
+            assign node_img = img_maison
+            assign node_eyebrow = 'Discover The'
+          else
+            assign node_img = img_jewelry
+            assign node_eyebrow = 'Discover Our'
+        endcase
+        assign node_title = block.settings.panel_heading
+        if node_title == blank
+          assign node_title = block.settings.panel_style | capitalize
+        endif
+      -%}
+      <div class="rc-panel" data-node="{{ panel_key }}" {{ block.shopify_attributes }} hidden>
+        <div class="rc-m-spot">
+          <div class="rc-m-cover rc-m-cover--zoom" style="background-image:url('{{ node_img }}');"></div>
+          <div class="rc-m-spot__scrim"></div>
+          <div class="rc-m-cap"><div class="rc-eyebrow rc-m-cap__eyebrow">{{ node_eyebrow }}</div><div class="rc-m-cap__title">{{ node_title | escape }}</div></div>
+        </div>
+        <button type="button" class="rc-m-back rc-m-back--sticky" data-rc-back><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="rgba(255,255,255,0.9)" stroke-width="1.2"></path></svg><span>Back</span></button>
+        <div class="rc-m-cat-body">
+          <div class="rc-m-groups">
+            {%- for group in linklists[panel_menu].links -%}
+              <div class="rc-m-group">
+                {%- if group.title != blank -%}
+                  <div class="rc-label rc-m-group__head">{{ group.title | strip_html | escape }}</div>
+                {%- endif -%}
+                {%- for l in group.links -%}
+                  <a class="rc-m-grow" href="{{ l.url }}"><span class="rc-m-grow__label">{{ l.title | strip_html | escape }}</span></a>
+                {%- else -%}
+                  <a class="rc-m-grow" href="{{ group.url }}"><span class="rc-m-grow__label">{{ group.title | strip_html | escape }}</span></a>
+                {%- endfor -%}
+              </div>
+            {%- endfor -%}
+          </div>
+        </div>
+      </div>
+    {%- endfor -%}
+
+  </div>
+</div>
