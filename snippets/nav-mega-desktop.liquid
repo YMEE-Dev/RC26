@@ -5,14 +5,14 @@
   level-1 items are the column headings and level-2 items are the links.
   Panel imagery/layout stays hardcoded and is chosen per block via `panel_style`.
   Utility stack (right side) is intentionally hardcoded — some items trigger JS.
-  Interaction in assets/nav-menu.js, styles in assets/nav-menu.css.
+  Interaction + styles live in the javascript / stylesheet tags of snippets/nav-header.liquid.
 
   @param {string} [rc_menu] - Handle of the main (left) link list
   @param {block[]} [blocks] - The section blocks (defaults to section.blocks)
 {%- endcomment -%}
 
 {%- liquid
-  assign logo = 'nav-RC_LOGO_light.svg' | asset_url
+  assign logo = 'nav-rc-logo-light.svg' | asset_url
   assign jewelry_spotlight = 'nav-jewelry-hero.png' | asset_url
 
   assign rc_menu = rc_menu | default: section.settings.rc_menu_linklist | default: 'main-menu'
@@ -156,9 +156,9 @@
                         {%- endif -%}
                         <div class="rc-d-links">
                           {%- for l in group.links -%}
-                            <a class="rc-d-voice rc-d-voice--body" href="{{ l.url }}"><span>{{ l.title | strip_html | downcase | escape }}</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                            <a class="rc-d-voice rc-d-voice--body" href="{{ l.url }}"><span>{{ l.title | strip_html | downcase | escape }}</span>{% render 'icon-nav-arrow', size: 'sm' %}</a>
                           {%- else -%}
-                            <a class="rc-d-voice rc-d-voice--body" href="{{ group.url }}"><span>{{ group.title | strip_html | downcase | escape }}</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                            <a class="rc-d-voice rc-d-voice--body" href="{{ group.url }}"><span>{{ group.title | strip_html | downcase | escape }}</span>{% render 'icon-nav-arrow', size: 'sm' %}</a>
                           {%- endfor -%}
                         </div>
                       </div>
@@ -178,9 +178,9 @@
                         {%- endif -%}
                         <div class="rc-d-links">
                           {%- for l in group.links -%}
-                            <a class="rc-d-voice rc-d-voice--body" href="{{ l.url }}"><span>{{ l.title | strip_html | downcase | escape }}</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                            <a class="rc-d-voice rc-d-voice--body" href="{{ l.url }}"><span>{{ l.title | strip_html | downcase | escape }}</span>{% render 'icon-nav-arrow', size: 'sm' %}</a>
                           {%- else -%}
-                            <a class="rc-d-voice rc-d-voice--body" href="{{ group.url }}"><span>{{ group.title | strip_html | downcase | escape }}</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                            <a class="rc-d-voice rc-d-voice--body" href="{{ group.url }}"><span>{{ group.title | strip_html | downcase | escape }}</span>{% render 'icon-nav-arrow', size: 'sm' %}</a>
                           {%- endfor -%}
                         </div>
                       </div>
@@ -200,9 +200,9 @@
                         {%- endif -%}
                         <div class="rc-d-links rc-d-links--two">
                           {%- for l in group.links -%}
-                            <a class="rc-d-voice rc-d-voice--body" href="{{ l.url }}"><span>{{ l.title | strip_html | downcase | escape }}</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                            <a class="rc-d-voice rc-d-voice--body" href="{{ l.url }}"><span>{{ l.title | strip_html | downcase | escape }}</span>{% render 'icon-nav-arrow', size: 'sm' %}</a>
                           {%- else -%}
-                            <a class="rc-d-voice rc-d-voice--body" href="{{ group.url }}"><span>{{ group.title | strip_html | downcase | escape }}</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                            <a class="rc-d-voice rc-d-voice--body" href="{{ group.url }}"><span>{{ group.title | strip_html | downcase | escape }}</span>{% render 'icon-nav-arrow', size: 'sm' %}</a>
                           {%- endfor -%}
                         </div>
                       </div>
@@ -224,9 +224,9 @@
                       {%- endif -%}
                       <div class="rc-d-links">
                         {%- for l in group.links -%}
-                          <a class="rc-d-voice rc-d-voice--body" href="{{ l.url }}"><span>{{ l.title | strip_html | downcase | escape }}</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                          <a class="rc-d-voice rc-d-voice--body" href="{{ l.url }}"><span>{{ l.title | strip_html | downcase | escape }}</span>{% render 'icon-nav-arrow', size: 'sm' %}</a>
                         {%- else -%}
-                          <a class="rc-d-voice rc-d-voice--body" href="{{ group.url }}"><span>{{ group.title | strip_html | downcase | escape }}</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                          <a class="rc-d-voice rc-d-voice--body" href="{{ group.url }}"><span>{{ group.title | strip_html | downcase | escape }}</span>{% render 'icon-nav-arrow', size: 'sm' %}</a>
                         {%- endfor -%}
                       </div>
                     </div>
@@ -246,10 +246,10 @@
                       {%- endif -%}
                       <div class="rc-d-links">
                         {%- for l in group.links -%}
-                          <a class="rc-d-voice rc-d-voice--body" href="{{ l.url }}"><span>{{ l.title | strip_html | downcase | escape }}</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                          <a class="rc-d-voice rc-d-voice--body" href="{{ l.url }}"><span>{{ l.title | strip_html | downcase | escape }}</span>{% render 'icon-nav-arrow', size: 'sm' %}</a>
                         {%- else -%}
                           {%- comment -%} heading has no children — render it as a direct link {%- endcomment -%}
-                          <a class="rc-d-voice rc-d-voice--body" href="{{ group.url }}"><span>{{ group.title | strip_html | downcase | escape }}</span>{% render 'nav-arrow', size: 'sm' %}</a>
+                          <a class="rc-d-voice rc-d-voice--body" href="{{ group.url }}"><span>{{ group.title | strip_html | downcase | escape }}</span>{% render 'icon-nav-arrow', size: 'sm' %}</a>
                         {%- endfor -%}
                       </div>
                     </div>

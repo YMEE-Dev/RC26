@@ -3,14 +3,14 @@
   Root rows come from the `rc_menu` link list (top level). Any top item that has a
   matching `rc_panel` section block becomes a drill row into a menu-driven node.
   Node link groups come from the block's `panel_menu` (level-1 = heading, level-2 = links).
-  Spotlight imagery + utility rows stay hardcoded. Interaction in assets/nav-menu.js.
+  Spotlight imagery + utility rows stay hardcoded. Interaction lives in the javascript tag of snippets/nav-header.liquid.
 
   @param {string} [rc_menu] - Handle of the main (left) link list
   @param {block[]} [blocks] - The section blocks (defaults to section.blocks)
 {%- endcomment -%}
 
 {%- liquid
-  assign logo = 'nav-RC_LOGO_light.svg' | asset_url
+  assign logo = 'nav-rc-logo-light.svg' | asset_url
   assign img_root = 'nav-maison-cover.jpg' | asset_url
   assign img_jewelry = 'nav-jewelry-hero.png' | asset_url
   assign img_occasions = 'nav-occasions-1.png' | asset_url
@@ -68,7 +68,7 @@
               endfor
             -%}
             {%- if panel_key != '' -%}
-              <button type="button" class="rc-m-row" data-rc-drill="{{ panel_key }}"><span class="rc-m-row__label">{{ link.title | strip_html | escape }}</span>{% render 'nav-chevron' %}</button>
+              <button type="button" class="rc-m-row" data-rc-drill="{{ panel_key }}"><span class="rc-m-row__label">{{ link.title | strip_html | escape }}</span>{% render 'icon-nav-chevron' %}</button>
             {%- else -%}
               <a class="rc-m-row" href="{{ link.url }}"><span class="rc-m-row__label">{{ link.title | strip_html | escape }}</span></a>
             {%- endif -%}

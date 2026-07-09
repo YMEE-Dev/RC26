@@ -94,6 +94,40 @@
   height: 17px;
 }
 
+/* Light/dark switcher — nav-menu.js sets data-scheme on .rc-nav from the section
+   under the bar (sections opt in with [data-header-observer-mode="dark"]).
+   dark = dark text/icons/logo over a light background. While a mega panel is open
+   the dark veil is behind the bar, so it stays white regardless of scheme. */
+.rc-nav .rc-d-link,
+.rc-nav .rc-d-icon,
+.rc-nav .rc-d-bag,
+.rc-nav .rc-d-bag__count,
+.rc-nav .rc-mobile-bar a,
+.rc-nav .rc-mobile-bar button,
+.rc-nav .rc-d-logo img,
+.rc-nav .rc-mobile-bar__logo {
+  transition: color 0.3s ease, filter 0.3s ease;
+}
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-link,
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-icon,
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-bag,
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-bag__count,
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .icon,
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-mobile-bar a,
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-mobile-bar button {
+  color: #000;
+}
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-icon svg [stroke]:not([stroke="none"]),
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-bag svg [stroke]:not([stroke="none"]),
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-mobile-bar svg [stroke]:not([stroke="none"]) {
+  stroke: #000;
+}
+/* recolor the white nav logo to black without a second asset */
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-logo img,
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-mobile-bar__logo {
+  filter: brightness(0);
+}
+
 /* shared type helpers */
 .rc-display {
   font-family: var(--rc-display);
@@ -136,6 +170,37 @@
     transform: translateY(0);
   }
 }
+/* header bar entrance — left slides in from the left, right from the right, logo drops in from above */
+@keyframes rcBarInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes rcBarInRight {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes rcBarInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 
 /* =========================================================================
    DESKTOP — transparent header + hover mega-menu
@@ -167,12 +232,14 @@
     display: flex;
     align-items: flex-start;
     gap: 24px;
+    animation: rcBarInLeft 0.7s var(--rc-ease) both;
   }
   .rc-d-right {
     display: flex;
     align-items: flex-start;
     gap: 24px;
     justify-content: flex-end;
+    animation: rcBarInRight 0.7s var(--rc-ease) both;
   }
   .rc-d-icon {
     display: flex;
@@ -219,6 +286,7 @@
   .rc-d-logo {
     display: inline-flex;
     align-items: center;
+    animation: rcBarInDown 0.7s var(--rc-ease) both 0.05s;
   }
   .rc-d-logo img {
     height: 50px;

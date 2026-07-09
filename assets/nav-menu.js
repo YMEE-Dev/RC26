@@ -19,14 +19,22 @@
      SHARED — search / newsletter / close helpers
      --------------------------------------------------------------------- */
   function openSearch() {
-    // Prefer the theme's existing search popdown if present, else go to /search.
-    var summary = document.querySelector('header-search-popdown details > summary');
+    // Open the theme's real search popdown (relocated into .rc-nav). Native <details> toggle.
+    var summary = document.querySelector('[data-rc-search-summary]') ||
+                  document.querySelector('header-search-popdown details > summary');
     if (summary) { summary.click(); return; }
     var url = root.getAttribute('data-search-url') || '/search';
     window.location.href = url;
   }
   function openNewsletter(e) {
-    // Fire a documented event the popup can listen for; fall back to footer signup.
+    // Open the theme's footer newsletter drawer via its public open() API.
+    var drawerEl = document.querySelector('footer-newsletter-drawer');
+    if (drawerEl && typeof drawerEl.open === 'function') {
+      if (e) e.preventDefault();
+      drawerEl.open();
+      return;
+    }
+    // Fallback: fire a documented event + focus the footer signup input.
     document.dispatchEvent(new CustomEvent('rc:newsletter-open'));
     var input = document.querySelector('[data-rc-newsletter-target] input, .footer__newsletter input[type="email"], form[action*="/contact#"] input[type="email"]');
     if (input) { if (e) e.preventDefault(); input.focus({ preventScroll: false }); input.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
@@ -248,4 +256,44 @@
     root.rcOpenDrawer = openDrawer;
     root.rcCloseDrawer = closeDrawer;
   }
+
+  /* =====================================================================
+     LIGHT/DARK SWITCHER — reuses the theme's header-observer section markers.
+     A section opts in with [data-header-observer-mode="dark"] to request dark
+     nav text/logo where it sits under the transparent bar. Default stays light
+     (white) so the bar is unchanged over dark heroes. Colors live in CSS keyed
+     on .rc-nav[data-scheme]. Decoupled from the (fragile) legacy header JS.
+     ===================================================================== */
+  (function initScheme() {
+    var sections = [].slice.call(document.querySelectorAll('[data-header-observer-mode]'));
+    if (!sections.length) return;
+
+    function headerHeight() {
+      var bar = root.querySelector('.rc-d-bar__grid');
+      if (bar && bar.offsetParent !== null) return bar.offsetHeight;
+      var mbar = root.querySelector('.rc-mobile-bar');
+      return mbar ? mbar.offsetHeight : 104;
+    }
+    function activeMode() {
+      var center = headerHeight() / 2;
+      for (var i = 0; i < sections.length; i++) {
+        var r = sections[i].getBoundingClientRect();
+        if (r.top <= center && r.bottom >= center) {
+          return sections[i].getAttribute('data-header-observer-mode') === 'dark' ? 'dark' : 'light';
+        }
+      }
+      return 'light';
+    }
+    var raf = null;
+    function update() {
+      raf = null;
+      var mode = activeMode();
+      if (root.getAttribute('data-scheme') !== mode) root.setAttribute('data-scheme', mode);
+    }
+    function schedule() { if (raf === null) raf = window.requestAnimationFrame(update); }
+
+    update();
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule, { passive: true });
+  })();
 })();
