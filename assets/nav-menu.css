@@ -106,7 +106,9 @@
 .rc-nav .rc-mobile-bar button,
 .rc-nav .rc-d-logo img,
 .rc-nav .rc-mobile-bar__logo {
-  transition: color 0.3s ease, filter 0.3s ease;
+  transition:
+    color 0.3s ease,
+    filter 0.3s ease;
 }
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-link,
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-icon,
@@ -126,6 +128,176 @@
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-logo img,
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-mobile-bar__logo {
   filter: brightness(0);
+}
+
+/* Scroll-reveal blur — 1:1 copy of the theme's `.theme__header__scroll-blur`
+   (sections/header.liquid): a masked, fading frosted overlay rather than a hard
+   box. nav-menu.js sets data-stuck="1" once scrolled past the bar; it shows only
+   when the header is on-screen (body without header-scroll-hide) and no mega
+   panel is open. Rendered as a ::before on the fixed bar-wrap so it sits behind
+   the bar content but above the page. */
+.rc-nav__bar-wrap::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: -72px; /* fade tail below the bar */
+  z-index: -4;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(180deg, rgba(249, 249, 249, 0.25) 0%, rgba(249, 249, 249, 0) 100%);
+  -webkit-backdrop-filter: blur(0px);
+  backdrop-filter: blur(0px);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 58%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 58%, transparent 100%);
+  transition:
+    opacity 0.35s ease,
+    -webkit-backdrop-filter 0.35s ease,
+    backdrop-filter 0.35s ease;
+  will-change: opacity, backdrop-filter;
+}
+body:not(.header-scroll-hide) .rc-nav[data-stuck="1"]:not([data-open="1"]) .rc-nav__bar-wrap::before {
+  opacity: 1;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+/* =========================================================================
+   Spotlight collection (+ timeline) — replicate the legacy header treatment.
+   HeaderComponent sets body.has-always-visible-fixed-header on these templates
+   and keeps header-scroll-hide false; the rules below mirror what the theme does
+   to .header__desktop__bar__* / .theme__header__scroll-blur for the RC nav.
+   ========================================================================= */
+/* Always visible — never let the regions slide out even if header-scroll-hide is
+   ever set (matches theme.css: body.has-always-visible-fixed-header.header-scroll-hide …). */
+body.has-always-visible-fixed-header.header-scroll-hide .rc-d-left,
+body.has-always-visible-fixed-header.header-scroll-hide .rc-d-logo,
+body.has-always-visible-fixed-header.header-scroll-hide .rc-d-right {
+  transform: none !important;
+}
+/* No scroll-reveal blur on spotlight collections (theme hides .theme__header__scroll-blur). */
+body.template-collection:has(.collection--spotlight) .rc-nav__bar-wrap::before {
+  display: none;
+}
+/* Whole nav goes DARK on spotlight collections (spotlight backgrounds are light).
+   The one region over the spotlight image is overridden with the metafield color below. */
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-d-link,
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-d-icon,
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-d-bag,
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-d-bag__count,
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .icon,
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-mobile-bar a,
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-mobile-bar button {
+  color: #000;
+}
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-d-icon svg [stroke]:not([stroke="none"]),
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-d-bag svg [stroke]:not([stroke="none"]),
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-mobile-bar svg [stroke]:not([stroke="none"]) {
+  stroke: #000;
+}
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-d-logo img,
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-mobile-bar__logo {
+  filter: brightness(0);
+}
+/* Except: the region over the spotlight image uses the collection's metafield color
+   (--spotlight-collection-menu-link), mirroring custom-collection.css bar__c / bar__r.
+   Higher specificity than the dark rules above, so it wins for that region only. */
+body.template-collection:has(.collection--spotlight.collection--spotlight-position-left) .rc-nav:not([data-open="1"]) .rc-d-left .rc-d-link,
+body.template-collection:has(.collection--spotlight.collection--spotlight-position-left) .rc-nav:not([data-open="1"]) .rc-d-left .rc-d-icon,
+body.template-collection:has(.collection--spotlight.collection--spotlight-position-left) .rc-nav:not([data-open="1"]) .rc-d-left .icon,
+body.template-collection:has(.collection--spotlight.collection--spotlight-position-right) .rc-nav:not([data-open="1"]) .rc-d-right .rc-d-link,
+body.template-collection:has(.collection--spotlight.collection--spotlight-position-right) .rc-nav:not([data-open="1"]) .rc-d-right .rc-d-bag,
+body.template-collection:has(.collection--spotlight.collection--spotlight-position-right) .rc-nav:not([data-open="1"]) .rc-d-right .rc-d-bag__count,
+body.template-collection:has(.collection--spotlight.collection--spotlight-position-right) .rc-nav:not([data-open="1"]) .rc-d-right .icon {
+  color: var(--spotlight-collection-menu-link, #fff);
+}
+body.template-collection:has(.collection--spotlight.collection--spotlight-position-left) .rc-nav:not([data-open="1"]) .rc-d-left .rc-d-icon svg [stroke]:not([stroke="none"]),
+body.template-collection:has(.collection--spotlight.collection--spotlight-position-right) .rc-nav:not([data-open="1"]) .rc-d-right .rc-d-bag svg [stroke]:not([stroke="none"]) {
+  stroke: var(--spotlight-collection-menu-link, #fff);
+}
+
+/* =========================================================================
+   Naked / super-naked collections — content clears the fixed header on desktop
+   and the nav renders in dark mode over the light product layout.
+   (<main> carries .main-content--collection-naked / --collection-super-naked
+   from layout/theme.liquid.)
+   ========================================================================= */
+@media (min-width: 1024px) {
+  .main-content--collection-naked,
+  .main-content--collection-super-naked {
+    padding-top: 150px;
+  }
+}
+body:has(:is(.main-content--collection-naked, .main-content--collection-super-naked)) .rc-nav:not([data-open="1"])
+  :is(.rc-d-link, .rc-d-icon, .rc-d-bag, .rc-d-bag__count, .icon, .rc-mobile-bar a, .rc-mobile-bar button) {
+  color: #000;
+}
+body:has(:is(.main-content--collection-naked, .main-content--collection-super-naked)) .rc-nav:not([data-open="1"])
+  :is(.rc-d-icon, .rc-d-bag, .rc-mobile-bar) svg [stroke]:not([stroke="none"]) {
+  stroke: #000;
+}
+body:has(:is(.main-content--collection-naked, .main-content--collection-super-naked)) .rc-nav:not([data-open="1"])
+  :is(.rc-d-logo img, .rc-mobile-bar__logo) {
+  filter: brightness(0);
+}
+
+/* =========================================================================
+   Blog pages + generic site pages — nav in dark mode. Generic pages also get a
+   150px desktop padding-top so content clears the fixed header (they have no
+   full-bleed hero behind the transparent bar).
+   ========================================================================= */
+@media (min-width: 1024px) {
+  .main-content--blog,
+  .main-content--page {
+    padding-top: 150px;
+  }
+}
+body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"])
+  :is(.rc-d-link, .rc-d-icon, .rc-d-bag, .rc-d-bag__count, .icon, .rc-mobile-bar a, .rc-mobile-bar button) {
+  color: #000;
+}
+body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-icon, .rc-d-bag, .rc-mobile-bar) svg [stroke]:not([stroke="none"]) {
+  stroke: #000;
+}
+body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-logo img, .rc-mobile-bar__logo) {
+  filter: brightness(0);
+}
+
+/* Search popdown — relocated out of .theme__header into .rc-nav. Two fixes:
+   1) Pin it to the viewport top, full width (the theme's .theme__header is-open
+      width/position rules no longer apply, so it was mispositioned/half off-screen).
+   2) Force an opaque surface + dark text. The theme drives these from
+      var(--COLOR-SUBMENU-*), but if those settings are blank on the live theme the
+      vars are defined-but-empty, so a var() fallback never triggers → transparent
+      panel + white (invisible) text under .rc-nav. Hard values guarantee the look. */
+.rc-nav .rc-search-popdown .search-popdown {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100vw;
+  --bg: #fcfbf9;
+  --text: #222222;
+  --link: #222222;
+  --link-hover: #000000;
+  --text-light: #6f6f6f;
+  background: #fcfbf9;
+  color: #222222;
+  display: BLOCK;
+  width: 100%;
+  z-index: 6006;
+  height: 50px;
+  padding: 80px;
+}
+.rc-nav .rc-search-popdown .search-popdown__main {
+  background: #fcfbf9;
+}
+/* popdown glyphs (search / submit / close) dark on the light surface — overrides
+   the nav's white .icon rule and the data-scheme icon rule */
+.rc-nav .rc-search-popdown .search-popdown .icon,
+.rc-nav[data-scheme="dark"] .rc-search-popdown .search-popdown .icon {
+  color: #222222;
 }
 
 /* shared type helpers */
@@ -170,35 +342,36 @@
     transform: translateY(0);
   }
 }
-/* header bar entrance — left slides in from the left, right from the right, logo drops in from above */
-@keyframes rcBarInLeft {
+/* header entrance — same offsets + timing as the theme's header-init-animation
+   (plp-header-*): logo drops from the top first, then the side bars slide in. */
+@keyframes rcHeaderFromTop {
   from {
+    transform: translateY(-200px);
     opacity: 0;
-    transform: translateX(-24px);
   }
   to {
-    opacity: 1;
     transform: none;
+    opacity: 1;
   }
 }
-@keyframes rcBarInRight {
+@keyframes rcHeaderFromLeft {
   from {
+    transform: translateX(-200px);
     opacity: 0;
-    transform: translateX(24px);
   }
   to {
-    opacity: 1;
     transform: none;
+    opacity: 1;
   }
 }
-@keyframes rcBarInDown {
+@keyframes rcHeaderFromRight {
   from {
+    transform: translateX(200px);
     opacity: 0;
-    transform: translateY(-20px);
   }
   to {
-    opacity: 1;
     transform: none;
+    opacity: 1;
   }
 }
 
@@ -228,18 +401,39 @@
     height: 160px;
     padding: 0 40px;
   }
+  /* header entrance + scroll hide/reveal: regions slide fully off-screen when
+     body.header-scroll-hide is present (left→left, logo→top, right→right) and
+     slide back when it's removed. nav-menu.js toggles the class by scroll
+     direction; calc(±(100% + 80px)) guarantees off-screen at any width. */
+  body.header-scroll-hide .rc-d-left {
+    transform: translateX(calc(-100% - 80px));
+  }
+  body.header-scroll-hide .rc-d-logo {
+    transform: translateY(calc(-100% - 80px));
+  }
+  body.header-scroll-hide .rc-d-right {
+    transform: translateX(calc(100% + 80px));
+  }
+  /* while hidden the empty fixed bar must not intercept clicks on content below it */
+  body.header-scroll-hide .rc-d-bar {
+    pointer-events: none;
+  }
   .rc-d-left {
     display: flex;
     align-items: flex-start;
     gap: 24px;
-    animation: rcBarInLeft 0.7s var(--rc-ease) both;
+    transition: transform 0.8s var(--rc-ease);
+    will-change: transform;
+    animation: rcHeaderFromLeft 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
   }
   .rc-d-right {
     display: flex;
     align-items: flex-start;
     gap: 24px;
     justify-content: flex-end;
-    animation: rcBarInRight 0.7s var(--rc-ease) both;
+    transition: transform 0.8s var(--rc-ease);
+    will-change: transform;
+    animation: rcHeaderFromRight 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
   }
   .rc-d-icon {
     display: flex;
@@ -286,7 +480,9 @@
   .rc-d-logo {
     display: inline-flex;
     align-items: center;
-    animation: rcBarInDown 0.7s var(--rc-ease) both 0.05s;
+    transition: transform 0.8s var(--rc-ease);
+    will-change: transform;
+    animation: rcHeaderFromTop 550ms 200ms cubic-bezier(0.05, 0, 0, 1) backwards;
   }
   .rc-d-logo img {
     height: 50px;
@@ -1045,11 +1241,11 @@
    HEADER MOUNT — transparent overlay (hero templates) vs solid (inner pages)
    ========================================================================= */
 .rc-nav__bar-wrap {
-  position: absolute; /* transparent: overlay the hero */
+  position: fixed; /* pinned overlay: stays reachable so it can hide/reveal on scroll */
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
+  z-index: 6005;
 }
 .rc-nav[data-transparent="0"] .rc-nav__bar-wrap {
   position: sticky; /* solid: occupy space + stick on scroll */

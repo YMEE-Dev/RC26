@@ -296,4 +296,42 @@
     window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule, { passive: true });
   })();
+
+  /* =====================================================================
+     HEADER SCROLL HIDE/REVEAL — recycled from the theme.
+     The theme's <header-component> (HeaderComponent in theme.js) already toggles
+     `body.header-scroll-hide` on scroll, with intent buffering and per-template
+     rules (collection/blog stay hidden while scrolled; spotlight/timeline stay
+     visible). It still runs on the hidden legacy header, so we let it be the
+     single source of truth — our CSS keys the RC nav's slide on that same class.
+     The landing entrance is a pure-CSS keyframe (rcHeaderFrom*, same timing as
+     the theme's header-init-animation), so no JS is needed for it.
+     ===================================================================== */
+
+  /* =====================================================================
+     SCROLL-REVEAL FROST — rebuilt for the RC nav.
+     The theme's reveal blur (isScrollRevealBlurVisible) writes CSS vars onto the
+     hidden legacy header, so it's inert here. We reproduce its intent with a
+     `data-stuck` flag on .rc-nav = "scrolled past the bar". CSS frosts the bar
+     when the header is shown (not header-scroll-hide) while stuck. This is a
+     distinct signal from header-scroll-hide (which the theme owns), not a copy.
+     ===================================================================== */
+  (function initScrollFrost() {
+    function headerHeight() {
+      var bar = root.querySelector('.rc-d-bar__grid');
+      if (bar && bar.offsetParent !== null) return bar.offsetHeight;
+      var mbar = root.querySelector('.rc-mobile-bar');
+      return (mbar && mbar.offsetHeight) || 104;
+    }
+    var raf = null;
+    function update() {
+      raf = null;
+      var stuck = window.pageYOffset > headerHeight() ? '1' : '0';
+      if (root.getAttribute('data-stuck') !== stuck) root.setAttribute('data-stuck', stuck);
+    }
+    function schedule() { if (raf === null) raf = window.requestAnimationFrame(update); }
+    update();
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule, { passive: true });
+  })();
 })();
