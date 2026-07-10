@@ -227,12 +227,17 @@
       if (scroller) scroller.scrollTop = 0;
       drawer.setAttribute('data-open', '1');
       drawer.setAttribute('aria-hidden', 'false');
+      // mark the nav as "overlay open" too, so every page-scheme dark rule
+      // (guarded by .rc-nav:not([data-open="1"])) switches off — the drawer's
+      // icons/text stay white regardless of the header observer.
+      root.setAttribute('data-open', '1');
       document.documentElement.classList.add('rc-drawer-open');
       updateScrollTint();
     }
     function closeDrawer() {
       drawer.setAttribute('data-open', '0');
       drawer.setAttribute('aria-hidden', 'true');
+      root.setAttribute('data-open', '0');
       document.documentElement.classList.remove('rc-drawer-open');
     }
 

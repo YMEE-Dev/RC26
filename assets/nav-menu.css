@@ -233,6 +233,15 @@ body.template-collection:has(.collection--spotlight.collection--spotlight-positi
    (<main> carries .main-content--collection-naked / --collection-super-naked
    from layout/theme.liquid.)
    ========================================================================= */
+/* mobile: same pages get a smaller top offset to clear the fixed header */
+@media (max-width: 1023px) {
+  .main-content--collection-naked,
+  .main-content--collection-super-naked,
+  .main-content--blog,
+  .main-content--page {
+    padding-top: 75px;
+  }
+}
 @media (min-width: 1024px) {
   .main-content--collection-naked,
   .main-content--collection-super-naked {
@@ -889,7 +898,7 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
 .rc-drawer {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: 6006;
   background: var(--rc-green);
   color: var(--rc-white);
   display: flex;
@@ -925,8 +934,8 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
   left: 0;
   right: 0;
   z-index: 5;
-  height: 104px;
-  padding: 56px 20px 0;
+  height: 72px;
+  padding: 20px 20px 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -948,8 +957,9 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
   justify-content: flex-end;
 }
 .rc-drawer__logo {
-  height: 27px;
   width: auto;
+  height: auto;
+  max-width: min(230px, 62vw); /* match the site mobile bar logo exactly */
 }
 
 .rc-drawer__scroll {
@@ -1024,7 +1034,7 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
 .rc-m-cap__title {
   font-family: var(--rc-display);
   font-weight: 500;
-  font-size: 26px;
+  font-size: 24px;
   line-height: 32px;
   margin-top: 6px;
 }
@@ -1048,7 +1058,7 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
 }
 
 /* sticky back row under spotlight */
-.rc-m-back {
+.rc-nav .rc-m-back {
   display: flex;
   align-items: center;
   gap: 9px;
@@ -1060,10 +1070,10 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
 }
 .rc-m-back--sticky {
   position: sticky;
-  top: 104px;
+  top: 72px;
   z-index: 4;
 }
-.rc-m-back--top {
+.rc-nav .rc-m-back--top {
   padding: 6px 22px 14px;
   background: none;
   border: 0;
@@ -1083,11 +1093,13 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
   padding: 24px 22px 48px;
 }
 
-.rc-m-search {
+/* scoped under .rc-nav so the `.rc-nav button { padding:0; border:0 }` reset
+   (higher specificity) doesn't strip the padding/separator from the <button> rows */
+.rc-nav .rc-m-search {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 0;
+  padding: 22px 0;
   border-bottom: 1px solid var(--rc-hair-strong);
   width: 100%;
   text-align: left;
@@ -1103,21 +1115,22 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
   display: flex;
   flex-direction: column;
 }
-.rc-m-row {
+.rc-nav .rc-m-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 18px 0;
+  padding: 16px 0;
   border-bottom: 1px solid var(--rc-hair-strong);
   text-align: left;
 }
 .rc-m-row__label {
   font-family: var(--rc-display);
   font-weight: 500;
-  font-size: 25px;
-  line-height: 30px;
+  font-size: 22px;
+  line-height: 22px;
   color: var(--rc-white);
+  text-transform: capitalize; /* normalize menu casing to Title Case (paired with | downcase) */
 }
 
 .rc-m-util {
@@ -1212,8 +1225,11 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
 /* ---- tablet portrait re-layout (834px) ---- */
 @media (min-width: 768px) and (max-width: 1023px) {
   .rc-drawer__header {
-    height: 96px;
-    padding: 40px 40px 0;
+    height: 76px;
+    padding: 24px 40px 0;
+  }
+  .rc-drawer__logo {
+    max-width: 340px;
   }
   .rc-m-body {
     padding: 8px 40px 56px;
@@ -1227,7 +1243,7 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
     bottom: 30px;
   }
   .rc-m-back--sticky {
-    top: 96px;
+    top: 76px;
     padding: 20px 40px;
   }
   .rc-m-row__label {
@@ -1279,8 +1295,8 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 104px;
-  padding: 56px 20px 0;
+  height: 72px;
+  padding: 20px 20px 0;
   color: var(--rc-white);
 }
 @media (min-width: 1024px) {
@@ -1288,13 +1304,30 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
     display: none;
   }
 }
+/* equal-width side slots (hamburger + cart) so the natural-width centre logo
+   sits dead-centre; the logo slot keeps its auto width */
 .rc-mobile-bar__slot {
   display: flex;
   align-items: center;
 }
+.rc-mobile-bar__slot:first-child,
+.rc-mobile-bar__slot:last-child {
+  flex: 0 0 36px;
+}
+.rc-mobile-bar__slot:last-child {
+  justify-content: flex-end;
+}
+.rc-mobile-bar__slot:nth-child(2) {
+  flex: 0 1 auto;
+  min-width: 0;
+  justify-content: center;
+}
+/* cap the (very wide) wordmark so it never overruns the equal side slots;
+   height:auto keeps the aspect ratio (no squish) */
 .rc-mobile-bar__logo {
-  height: 27px;
   width: auto;
+  height: auto;
+  max-width: min(230px, 62vw);
 }
 .rc-mobile-bar a,
 .rc-mobile-bar button {
@@ -1303,11 +1336,11 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
 }
 @media (min-width: 768px) and (max-width: 1023px) {
   .rc-mobile-bar {
-    height: 96px;
-    padding: 48px 40px 0;
+    height: 76px;
+    padding: 24px 40px 0;
   }
   .rc-mobile-bar__logo {
-    height: 34px;
+    max-width: 340px;
   }
 }
 
