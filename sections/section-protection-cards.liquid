@@ -107,7 +107,23 @@
                       </div>
                     </div>
                   {%- else -%}
-                    {%- if block.settings.card_link != blank -%}
+                    {%- assign drawer_target = block.settings.drawer_target | default: 'none' -%}
+                    {%- if drawer_target != 'none' -%}
+                      <div
+                        class="grid-item protection-card"
+                        data-grid-item
+                        data-aos="hero"
+                        data-aos-anchor="{{ animation_anchor }}"
+                        data-aos-order="{{ animation_order }}"
+                        {{ block.shopify_attributes }}
+                      >
+                        <button
+                          type="button"
+                          class="protection-card__overlay-link"
+                          data-drawer-open="{{ drawer_target }}"
+                          aria-label="{{ block.settings.title | escape }}"
+                        ></button>
+                    {%- elsif block.settings.card_link != blank -%}
                       <a
                         href="{{ block.settings.card_link }}"
                         class="grid-item protection-card protection-card--linked"
@@ -144,7 +160,7 @@
                         <p class="protection-card__description">{{ block.settings.description }}</p>
                       {%- endif -%}
                     </div>
-                    {%- if block.settings.card_link != blank -%}
+                    {%- if drawer_target == 'none' and block.settings.card_link != blank -%}
                       </a>
                     {%- else -%}
                       </div>
@@ -172,6 +188,61 @@
     {%- endif -%}
   </div>
 </section>
+
+{%- liquid
+  assign needs_warranty_drawer = false
+  assign needs_gift_drawer = false
+  for block in section.blocks
+    case block.settings.drawer_target
+      when 'drawer-2-years-warranty'
+        assign needs_warranty_drawer = true
+      when 'drawer-gift-packaging'
+        assign needs_gift_drawer = true
+    endcase
+  endfor
+-%}
+
+{%- if needs_warranty_drawer -%}
+  <side-drawer
+    class="drawer drawer--padded"
+    data-drawer="drawer-2-years-warranty"
+    id="side-drawer-protection-2-years-warranty-{{ section.id }}"
+    data-drawer-size="40%"
+    data-drawer-direction="right-to-left"
+  >
+    <div class="drawer__inner" data-drawer-inner>
+      <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+        {% render 'icon-close' %}
+      </button>
+
+      <div class="drawer__body">
+        {%- render 'drawer-2-years-warranty' -%}
+      </div>
+    </div>
+    <span class="underlay drawer__underlay" data-drawer-underlay></span>
+  </side-drawer>
+{%- endif -%}
+
+{%- if needs_gift_drawer -%}
+  <side-drawer
+    class="drawer drawer--padded"
+    data-drawer="drawer-gift-packaging"
+    id="side-drawer-protection-gift-packaging-{{ section.id }}"
+    data-drawer-size="40%"
+    data-drawer-direction="right-to-left"
+  >
+    <div class="drawer__inner" data-drawer-inner>
+      <button class="drawer__close" data-drawer-close aria-label="{{ 'general.accessibility.close' | t }}">
+        {% render 'icon-close' %}
+      </button>
+
+      <div class="drawer__body">
+        {%- render 'drawer-gift-packaging' -%}
+      </div>
+    </div>
+    <span class="underlay drawer__underlay" data-drawer-underlay></span>
+  </side-drawer>
+{%- endif -%}
 
 <script>
   (function () {
@@ -502,6 +573,19 @@
           "id": "card_link",
           "label": "Card link",
           "info": "Makes the entire card clickable."
+        },
+        {
+          "type": "select",
+          "id": "drawer_target",
+          "label": "Open drawer on click",
+          "info": "Overrides the card link. Not applied on the Concierge page.",
+          "default": "none",
+          "options": [
+            {"value": "none", "label": "None"},
+            {"value": "ask-concierge", "label": "Ask our concierge"},
+            {"value": "drawer-2-years-warranty", "label": "Two years warranty"},
+            {"value": "drawer-gift-packaging", "label": "Gift packaging"}
+          ]
         }
       ]
     }
