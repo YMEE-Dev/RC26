@@ -460,6 +460,24 @@
       endif
     endif
 
+    comment
+      "New in" badge is independent of stock status — requires it on
+      products that launch with no inventory, so it is computed outside the
+      sold-out branch and rendered outside the product.available check below.
+    endcomment
+    if settings.show_automatic_new_badge and preorder == false
+      assign product_created_timestamp = product.created_at | date: '%s' | plus: 0
+      assign days_in_seconds = settings.badge_new_date_limit | times: 24 | times: 60 | times: 60
+      assign current_date_timestamp = "now" | date: '%s'
+      assign check_date_timestamp = current_date_timestamp | minus: days_in_seconds
+
+      if product_created_timestamp > check_date_timestamp
+        assign new_badge_text = 'products.product.new' | t
+      endif
+
+      assign new_badge_class = badge_class | append: ' new-box'
+    endif
+
     if settings.show_sold_out_badge and product.available == false
       assign sold_badge_text = 'products.product.sold_out' | t
       assign sold_badge_class = badge_class | append: ' sold-box'
@@ -475,19 +493,6 @@
         endif
 
         assign custom_badge_class = badge_class | append: ' custom-box'
-      endif
-
-      if settings.show_automatic_new_badge and preorder == false
-        assign product_created_timestamp = product.created_at | date: '%s' | plus: 0
-        assign days_in_seconds = settings.badge_new_date_limit | times: 24 | times: 60 | times: 60
-        assign current_date_timestamp = "now" | date: '%s'
-        assign check_date_timestamp = current_date_timestamp | minus: days_in_seconds
-
-        if product_created_timestamp > check_date_timestamp
-          assign new_badge_text = 'products.product.new' | t
-        endif
-
-        assign new_badge_class = badge_class | append: ' new-box'
       endif
 
       if product.compare_at_price > product.price and settings.sale_tags_enable
@@ -547,13 +552,13 @@
         render 'product-badge', badge_class: sold_badge_class, badge_text: sold_badge_text, aos_delay: aos_delay, aos_duration: aos_duration, aos_anchor: aos_anchor
       endif
 
+      if new_badge_text != blank and preorder == false
+        render 'product-badge', badge_class: new_badge_class, badge_text: new_badge_text, aos_delay: aos_delay, aos_duration: aos_duration, aos_anchor: aos_anchor
+      endif
+
       if product.available
         if custom_badge_text != blank
           render 'product-badge', badge_class: custom_badge_class, badge_text: custom_badge_text, aos_delay: aos_delay, aos_duration: aos_duration, aos_anchor: aos_anchor
-        endif
-
-        if new_badge_text != blank and preorder == false
-          render 'product-badge', badge_class: new_badge_class, badge_text: new_badge_text, aos_delay: aos_delay, aos_duration: aos_duration, aos_anchor: aos_anchor
         endif
 
         if sale_badge_text != blank
