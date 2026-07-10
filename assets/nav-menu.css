@@ -212,8 +212,18 @@ body.template-collection:has(.collection--spotlight.collection--spotlight-positi
 body.template-collection:has(.collection--spotlight.collection--spotlight-position-right) .rc-nav:not([data-open="1"]) .rc-d-right .icon {
   color: var(--spotlight-collection-menu-link, #fff);
 }
-body.template-collection:has(.collection--spotlight.collection--spotlight-position-left) .rc-nav:not([data-open="1"]) .rc-d-left .rc-d-icon svg [stroke]:not([stroke="none"]),
-body.template-collection:has(.collection--spotlight.collection--spotlight-position-right) .rc-nav:not([data-open="1"]) .rc-d-right .rc-d-bag svg [stroke]:not([stroke="none"]) {
+body.template-collection:has(.collection--spotlight.collection--spotlight-position-left)
+  .rc-nav:not([data-open="1"])
+  .rc-d-left
+  .rc-d-icon
+  svg
+  [stroke]:not([stroke="none"]),
+body.template-collection:has(.collection--spotlight.collection--spotlight-position-right)
+  .rc-nav:not([data-open="1"])
+  .rc-d-right
+  .rc-d-bag
+  svg
+  [stroke]:not([stroke="none"]) {
   stroke: var(--spotlight-collection-menu-link, #fff);
 }
 
@@ -229,16 +239,19 @@ body.template-collection:has(.collection--spotlight.collection--spotlight-positi
     padding-top: 150px;
   }
 }
-body:has(:is(.main-content--collection-naked, .main-content--collection-super-naked)) .rc-nav:not([data-open="1"])
+body:has(:is(.main-content--collection-naked, .main-content--collection-super-naked))
+  .rc-nav:not([data-open="1"])
   :is(.rc-d-link, .rc-d-icon, .rc-d-bag, .rc-d-bag__count, .icon, .rc-mobile-bar a, .rc-mobile-bar button) {
   color: #000;
 }
-body:has(:is(.main-content--collection-naked, .main-content--collection-super-naked)) .rc-nav:not([data-open="1"])
-  :is(.rc-d-icon, .rc-d-bag, .rc-mobile-bar) svg [stroke]:not([stroke="none"]) {
+body:has(:is(.main-content--collection-naked, .main-content--collection-super-naked))
+  .rc-nav:not([data-open="1"])
+  :is(.rc-d-icon, .rc-d-bag, .rc-mobile-bar)
+  svg
+  [stroke]:not([stroke="none"]) {
   stroke: #000;
 }
-body:has(:is(.main-content--collection-naked, .main-content--collection-super-naked)) .rc-nav:not([data-open="1"])
-  :is(.rc-d-logo img, .rc-mobile-bar__logo) {
+body:has(:is(.main-content--collection-naked, .main-content--collection-super-naked)) .rc-nav:not([data-open="1"]) :is(.rc-d-logo img, .rc-mobile-bar__logo) {
   filter: brightness(0);
 }
 
@@ -253,7 +266,8 @@ body:has(:is(.main-content--collection-naked, .main-content--collection-super-na
     padding-top: 150px;
   }
 }
-body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"])
+body:is(.template-blog, .template-page)
+  .rc-nav:not([data-open="1"])
   :is(.rc-d-link, .rc-d-icon, .rc-d-bag, .rc-d-bag__count, .icon, .rc-mobile-bar a, .rc-mobile-bar button) {
   color: #000;
 }
@@ -289,6 +303,11 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
   z-index: 6006;
   height: 50px;
   padding: 80px;
+}
+@media (max-width: 1024px) {
+  .rc-nav .rc-search-popdown .search-popdown {
+    padding: 30px 0;
+  }
 }
 .rc-nav .rc-search-popdown .search-popdown__main {
   background: #fcfbf9;
@@ -1296,6 +1315,13 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
 html.rc-drawer-open,
 html.rc-drawer-open body {
   overflow: hidden;
+}
+
+/* Hide the closed mobile bar while the drawer is open — the fixed bar-wrap sits
+   above the drawer (z-index 6005 vs 100), so otherwise its logo/hamburger/cart
+   would stack on top of the drawer's own header. */
+html.rc-drawer-open .rc-mobile-bar {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
