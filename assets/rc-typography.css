@@ -223,12 +223,15 @@ body#our-commitment .image-title-desc__media img {
 /* ── "New in" badge ─────────────────────────────────────────────── */
 /* Client-approved design: Inter regular 16px, all caps, Roberto Coin green */
 
+/* Font size mirrors the PLP product title: base size on desktop,
+   input-label size on mobile (see title override in Mobile overrides). */
 .badge-box.new-box {
   --text: #ffffff;
   --bg: #0b8070;
-  font-size: 16px;
+  font-size: var(--FONT-SIZE-BASE);
   font-weight: 400;
   text-transform: uppercase;
+  padding: 5px 10px;
 }
 
 .badge-box-container {
@@ -248,6 +251,12 @@ body#our-commitment .image-title-desc__media img {
   .product-item__title {
     font-size: var(--FONT-SIZE-INPUT-LABEL);
     line-height: var(--LINE-HEIGHT-INPUT-LABEL);
+  }
+
+  /* "New in" badge matches product title size on mobile */
+  .badge-box.new-box {
+    font-size: var(--FONT-SIZE-INPUT-LABEL);
+    padding: 4px 10px;
   }
 
   /* PLP / Search PLP product prices: 11/16 */
