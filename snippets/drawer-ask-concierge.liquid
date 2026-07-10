@@ -39,13 +39,14 @@
       </button>
     </div>
     <div class="drawer-concierge__calendly">
-      <!-- Calendly inline widget begin -->
+      <!-- Calendly inline widget begin: ~2.5MB of booking assets, so the
+           data-url + widget script are only wired up when the drawer is first
+           opened (see the hydration script at the bottom of this snippet) -->
       <div
         class="calendly-inline-widget"
-        data-url="https://calendly.com/annalisa-ymee?hide_event_type_details=1&hide_landing_page_details=1&hide_gdpr_banner=1&primary_color=000000&text_color=000000&background_color=ffffff&branding=false"
+        data-calendly-url="https://calendly.com/annalisa-ymee?hide_event_type_details=1&hide_landing_page_details=1&hide_gdpr_banner=1&primary_color=000000&text_color=000000&background_color=ffffff&branding=false"
         style="min-width:320px;height:700px;"
       ></div>
-      <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
       <!-- Calendly inline widget end -->
     </div>
   </div>
@@ -53,7 +54,7 @@
   <div class="drawer__content drawer-content__main">
     <div class="drawer__image">
       <img
-        src="https://cdn.shopify.com/s/files/1/0969/2990/7075/files/roberto-concierge_header_V2.jpg?v=1771364672"
+        data-src="https://cdn.shopify.com/s/files/1/0969/2990/7075/files/roberto-concierge_header_V2.jpg?v=1771364672&width=900"
         alt="Roberto Coin Concierge"
         loading="lazy"
         width="600"
@@ -227,6 +228,39 @@
 {% endstylesheet %}
 
 <script>
+  (function () {
+    // Lazy hydration: the Calendly widget (~2.5MB of booking CSS/JS) and the
+    // header image are loaded on the first drawer open instead of page load.
+    var sideDrawer = document.getElementById('side-drawer-ask-concierge');
+    if (!sideDrawer) return;
+
+    sideDrawer.addEventListener('theme:drawer:open', function hydrate() {
+      sideDrawer.removeEventListener('theme:drawer:open', hydrate);
+
+      sideDrawer.querySelectorAll('img[data-src]').forEach(function (img) {
+        img.setAttribute('src', img.getAttribute('data-src'));
+        img.removeAttribute('data-src');
+      });
+
+      var widget = sideDrawer.querySelector('.calendly-inline-widget[data-calendly-url]');
+      if (!widget) return;
+      widget.setAttribute('data-url', widget.getAttribute('data-calendly-url'));
+      widget.removeAttribute('data-calendly-url');
+
+      var script = document.createElement('script');
+      script.src = 'https://assets.calendly.com/assets/external/widget.js';
+      script.async = true;
+      script.onload = function () {
+        // widget.js auto-scans on load; this is a fallback for versions that
+        // only scan at DOMContentLoaded (already passed by the time we inject).
+        if (window.Calendly && window.Calendly.initInlineWidgets) {
+          window.Calendly.initInlineWidgets();
+        }
+      };
+      document.head.appendChild(script);
+    });
+  })();
+
   (function () {
     var videoTrigger = document.querySelector('[data-drawer-open="video-appointment"]');
     var videoPanel = document.getElementById('drawer-video-panel');

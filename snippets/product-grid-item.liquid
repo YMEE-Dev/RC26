@@ -165,7 +165,7 @@
 
 {%- if settings.show_grid_swatches -%}
   {%- assign has_colors = false -%}
-  {%- assign swatch_translation = 'general.swatches.color' | t -%}
+  {%- assign swatch_translation = 'general.swatches.color' | t | append: ',Metal color' -%}
   {%- assign swatch_labels = swatch_translation | append: ',' | split: ',' -%}
 
   {%- capture swatches -%}
@@ -205,7 +205,7 @@
           >
 
             {%- for option in product.options_with_values -%}
-              {%- assign swatch_color_label = 'general.swatches.color' | t -%}
+              {%- assign swatch_color_label = 'general.swatches.color' | t | append: ',Metal color' -%}
               {%- if swatch_color_label contains option.name -%}
                 {%- liquid
                    assign count = option.values.size

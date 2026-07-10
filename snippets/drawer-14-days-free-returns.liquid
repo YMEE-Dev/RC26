@@ -1,5 +1,5 @@
 {% doc %}
-  Renders 14 days free returns information in a drawer.
+  Renders 14 days returns information in a drawer.
   This snippet uses metaobjects for content management.
 {% enddoc %}
 
@@ -7,7 +7,7 @@
   {%- comment -%}
     Get returns content from dedicated metafields
   {%- endcomment -%}
-  {%- assign returns_content = nil -%}
+  {%- assign returns_content = null -%}
 
   {%- if product and product.metafields.info.fourteen_days_free_returns != blank -%}
     {%- assign returns_content = product.metafields.info.fourteen_days_free_returns.value -%}
@@ -73,7 +73,7 @@
     </div>
   {%- else -%}
     <div class="returns__default">
-      <h2>14-Days Free Returns</h2>
+      <h2>14-Days Returns</h2>
       <p>Returns information will appear here once configured.</p>
     </div>
   {%- endif -%}
