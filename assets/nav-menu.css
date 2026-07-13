@@ -173,7 +173,8 @@ body:not(.header-scroll-hide) .rc-nav[data-stuck="1"]:not([data-open="1"]) .rc-n
    ever set (matches theme.css: body.has-always-visible-fixed-header.header-scroll-hide …). */
 body.has-always-visible-fixed-header.header-scroll-hide .rc-d-left,
 body.has-always-visible-fixed-header.header-scroll-hide .rc-d-logo,
-body.has-always-visible-fixed-header.header-scroll-hide .rc-d-right {
+body.has-always-visible-fixed-header.header-scroll-hide .rc-d-right,
+body.has-always-visible-fixed-header.header-scroll-hide .rc-mobile-bar {
   transform: none !important;
 }
 /* No scroll-reveal blur on spotlight collections (theme hides .theme__header__scroll-blur). */
@@ -569,7 +570,6 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
 
   .rc-d-panel__inner {
     position: relative;
-    max-width: 1920px;
     margin: 0 auto;
     padding: 176px 84px 0;
     height: 100%;
@@ -1298,6 +1298,12 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
   height: 72px;
   padding: 20px 20px 0;
   color: var(--rc-white);
+  transition: transform 0.4s var(--rc-ease);
+}
+/* mobile: slide the bar up out of the top on scroll-down (theme's header-scroll-hide),
+   mirroring the desktop logo's upward exit */
+body.header-scroll-hide .rc-mobile-bar {
+  transform: translateY(-100%);
 }
 @media (min-width: 1024px) {
   .rc-mobile-bar {
