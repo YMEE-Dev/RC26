@@ -721,6 +721,10 @@
   <script src="{{ 'ticker.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 
+{%- comment -%} === Hardcoded Roberto Coin navigation — replaces the Qikify Smart Menu. Legacy header kept in DOM but hidden. === {%- endcomment -%}
+{% render 'nav-header' %}
+<style>.header__wrapper { display: none !important; }</style>
+
 <header-component
   class="header__wrapper"
   data-header-wrapper
@@ -1676,142 +1680,18 @@
       "default": false
     },
     {
-      "type": "checkbox",
-      "id": "enable_search",
-      "default": true,
-      "label": "Show search"
-    },
-    {
       "type": "header",
-      "content": "Style"
+      "content": "Roberto Coin navigation"
     },
     {
-      "type": "select",
-      "id": "header_style",
-      "label": "Header",
-      "default": "logo_beside",
-      "options": [
-        {"value": "logo_above", "label": "Logo above menu"},
-        {"value": "logo_beside", "label": "Logo beside menu"},
-        {"value": "drawer", "label": "Mobile drawer menu"},
-        {"value": "logo_center_menu_left", "label": "Logo center menu left"}
-      ]
-    },
-    {
-      "type": "checkbox",
-      "id": "show_separator_line",
-      "label": "Show border",
-      "default": false
-    },
-    {
-      "type": "color",
-      "id": "header_border_color",
-      "label": "Border color",
-      "info": "Not applied to Transparent headers",
-      "alpha": true
-    },
-    {
-      "type": "range",
-      "id": "separator_opacity",
-      "label": "Border opacity",
-      "unit": "%",
-      "min": 0,
-      "max": 100,
-      "step": 5,
-      "default": 50
-    },
-    {
-      "type": "header",
-      "content": "Icons"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_icons",
-      "label": "Show icons",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "icon_as_circle",
-      "label": "Show cart icon as circle",
-      "default": false
-    },
-    {
-      "type": "select",
-      "id": "cart_icon_family",
-      "label": "Cart icon",
-      "default": "bag",
-      "options": [
-        {"value": "bag", "label": "Bag"},
-        {"value": "cart", "label": "Cart"}
-      ]
-    },
-    {
-      "type": "header",
-      "content": "Logo"
-    },
-    {
-      "type": "select",
-      "id": "logo_variant",
-      "label": "Asset logo",
-      "info": "Select the light or dark logo that ships with the theme.",
-      "default": "dark",
-      "options": [
-        {"value": "light", "label": "Light"},
-        {"value": "dark", "label": "Dark"}
-      ]
-    },
-    {
-      "type": "header",
-      "content": "Desktop"
+      "type": "paragraph",
+      "content": "Drives the left/primary bar of the RC mega-menu. Top-level items become the bar; add a \"Mega menu panel\" block to give an item a dropdown."
     },
     {
       "type": "link_list",
-      "label": "Main menu",
-      "id": "main_menu_linklist"
-    },
-    {
-      "type": "link_list",
-      "label": "Right menu (desktop)",
-      "id": "right_menu_linklist",
-      "info": "Optional menu displayed on the right side of the desktop header."
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_call_to_action",
-      "label": "Show call to action",
-      "default": false
-    },
-    {
-      "type": "text",
-      "id": "button_text",
-      "visible_if": "{{ section.settings.enable_call_to_action }}",
-      "label": "Text"
-    },
-    {
-      "type": "url",
-      "id": "button_link",
-      "visible_if": "{{ section.settings.enable_call_to_action }}",
-      "label": "Link"
-    },
-    {
-      "type": "select",
-      "id": "button_type",
-      "visible_if": "{{ section.settings.enable_call_to_action }}",
-      "label": "Color",
-      "default": "btn--primary",
-      "options": [
-        {"value": "btn--black", "label": "Black"},
-        {"value": "btn--white", "label": "White"},
-        {"value": "btn--primary", "label": "Primary"},
-        {"value": "btn--secondary", "label": "Secondary"}
-      ]
-    },
-    {
-      "type": "checkbox",
-      "id": "show_social_icons",
-      "default": true,
-      "label": "Show social icons"
+      "label": "RC main menu (left)",
+      "id": "rc_menu_linklist",
+      "default": "main-menu"
     },
     {
       "type": "header",
@@ -1820,69 +1700,6 @@
     {
       "type": "paragraph",
       "content": "Configure the hamburger menu in the Mobile menu section"
-    },
-    {
-      "type": "header",
-      "content": "Language selector",
-      "info": "To add a language, go to your [language settings.](/admin/settings/languages)"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_locale_selector",
-      "label": "Show language selector",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "show_locale_code",
-      "label": "Show language code only",
-      "default": false
-    },
-    {
-      "type": "checkbox",
-      "id": "show_globe_icon",
-      "label": "Show globe icon",
-      "default": true
-    },
-    {
-      "type": "header",
-      "content": "Country/Region selector",
-      "info": "To add a country/region, go to your [markets settings](/admin/settings/markets)."
-    },
-    {
-      "type": "checkbox",
-      "id": "show_country_selector",
-      "label": "Show country/region selector",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "show_country_name",
-      "label": "Show country name",
-      "default": false
-    },
-    {
-      "type": "checkbox",
-      "id": "show_country_flag",
-      "label": "Show country flag",
-      "default": true
-    },
-    {
-      "type": "header",
-      "content": "Highlight link"
-    },
-    {
-      "type": "text",
-      "id": "highlight_item",
-      "label": "Menu item",
-      "default": "Sale"
-    },
-    {
-      "type": "color",
-      "id": "highlight_item_color",
-      "label": "Color",
-      "default": "#D02E2E",
-      "alpha": true
     },
     {
       "type": "header",
@@ -1964,6 +1781,98 @@
   ],
   "blocks": [
     {
+      "name": "Mega menu panel",
+      "type": "rc_panel",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Adds a dropdown to one item of the RC main menu. Panel links come from the menu below: its top-level items are column headings, their sub-items are the links."
+        },
+        {
+          "type": "select",
+          "id": "position",
+          "label": "Attach to main menu item",
+          "info": "Which top-level RC main menu item opens this panel.",
+          "default": "2",
+          "options": [
+            {
+              "value": "1",
+              "label": "Item 1"
+            },
+            {
+              "value": "2",
+              "label": "Item 2"
+            },
+            {
+              "value": "3",
+              "label": "Item 3"
+            },
+            {
+              "value": "4",
+              "label": "Item 4"
+            },
+            {
+              "value": "5",
+              "label": "Item 5"
+            },
+            {
+              "value": "6",
+              "label": "Item 6"
+            },
+            {
+              "value": "7",
+              "label": "Item 7"
+            },
+            {
+              "value": "8",
+              "label": "Item 8"
+            },
+            {
+              "value": "9",
+              "label": "Item 9"
+            },
+            {
+              "value": "10",
+              "label": "Item 10"
+            }
+          ]
+        },
+        {
+          "type": "link_list",
+          "id": "panel_menu",
+          "label": "Panel menu",
+          "info": "Top-level items = column headings. Their nested items = links."
+        },
+        {
+          "type": "select",
+          "id": "panel_style",
+          "label": "Imagery style",
+          "info": "Chooses the hardcoded panel imagery/layout.",
+          "default": "jewelry",
+          "options": [
+            {
+              "value": "jewelry",
+              "label": "Jewelry (single spotlight image)"
+            },
+            {
+              "value": "occasions",
+              "label": "Occasions (two image tiles)"
+            },
+            {
+              "value": "maison",
+              "label": "Maison (blog cover tile)"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "panel_heading",
+          "label": "Panel heading",
+          "info": "Overlaid on the imagery. Defaults to the imagery style name."
+        }
+      ]
+    },
+    {
       "name": "Image",
       "type": "image",
       "settings": [
@@ -1973,16 +1882,46 @@
           "label": "Link position in main menu",
           "default": "1",
           "options": [
-            {"value": "1", "label": "Item 1"},
-            {"value": "2", "label": "Item 2"},
-            {"value": "3", "label": "Item 3"},
-            {"value": "4", "label": "Item 4"},
-            {"value": "5", "label": "Item 5"},
-            {"value": "6", "label": "Item 6"},
-            {"value": "7", "label": "Item 7"},
-            {"value": "8", "label": "Item 8"},
-            {"value": "9", "label": "Item 9"},
-            {"value": "10", "label": "Item 10"}
+            {
+              "value": "1",
+              "label": "Item 1"
+            },
+            {
+              "value": "2",
+              "label": "Item 2"
+            },
+            {
+              "value": "3",
+              "label": "Item 3"
+            },
+            {
+              "value": "4",
+              "label": "Item 4"
+            },
+            {
+              "value": "5",
+              "label": "Item 5"
+            },
+            {
+              "value": "6",
+              "label": "Item 6"
+            },
+            {
+              "value": "7",
+              "label": "Item 7"
+            },
+            {
+              "value": "8",
+              "label": "Item 8"
+            },
+            {
+              "value": "9",
+              "label": "Item 9"
+            },
+            {
+              "value": "10",
+              "label": "Item 10"
+            }
           ]
         },
         {
@@ -2018,9 +1957,18 @@
           "label": "Overlay type",
           "default": "text",
           "options": [
-            {"value": "disabled", "label": "Disabled"},
-            {"value": "opacity", "label": "Opacity overlay"},
-            {"value": "text", "label": "Text underlay"}
+            {
+              "value": "disabled",
+              "label": "Disabled"
+            },
+            {
+              "value": "opacity",
+              "label": "Opacity overlay"
+            },
+            {
+              "value": "text",
+              "label": "Text underlay"
+            }
           ]
         },
         {
@@ -2038,12 +1986,30 @@
           "label": "Heading size",
           "default": "heading-medium",
           "options": [
-            {"value": "heading-mini", "label": "Mini"},
-            {"value": "heading-x-small", "label": "Extra small"},
-            {"value": "heading-small", "label": "Small"},
-            {"value": "heading-medium", "label": "Medium"},
-            {"value": "heading-large", "label": "Large"},
-            {"value": "heading-x-large", "label": "Extra large"}
+            {
+              "value": "heading-mini",
+              "label": "Mini"
+            },
+            {
+              "value": "heading-x-small",
+              "label": "Extra small"
+            },
+            {
+              "value": "heading-small",
+              "label": "Small"
+            },
+            {
+              "value": "heading-medium",
+              "label": "Medium"
+            },
+            {
+              "value": "heading-large",
+              "label": "Large"
+            },
+            {
+              "value": "heading-x-large",
+              "label": "Extra large"
+            }
           ]
         },
         {
@@ -2058,11 +2024,26 @@
           "info": "Automatically generated by the base size.",
           "default": "body-medium",
           "options": [
-            {"value": "body-x-small", "label": "Extra small"},
-            {"value": "body-small", "label": "Small"},
-            {"value": "body-medium", "label": "Medium"},
-            {"value": "body-large", "label": "Large"},
-            {"value": "body-x-large", "label": "Extra large"}
+            {
+              "value": "body-x-small",
+              "label": "Extra small"
+            },
+            {
+              "value": "body-small",
+              "label": "Small"
+            },
+            {
+              "value": "body-medium",
+              "label": "Medium"
+            },
+            {
+              "value": "body-large",
+              "label": "Large"
+            },
+            {
+              "value": "body-x-large",
+              "label": "Extra large"
+            }
           ]
         },
         {
@@ -2070,7 +2051,6 @@
           "id": "link",
           "label": "Link"
         },
-
         {
           "type": "header",
           "content": "Color"
@@ -2232,7 +2212,9 @@
     }
   ],
   "enabled_on": {
-    "groups": ["header"]
+    "groups": [
+      "header"
+    ]
   }
 }
 {% endschema %}

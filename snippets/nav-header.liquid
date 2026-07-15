@@ -1,0 +1,54 @@
+{%- comment -%}
+  nav-header — mount point for the hardcoded Roberto Coin navigation (replaces Qikify).
+  Renders the closed mobile bar, the desktop transparent header + mega-menu, and the drill-down drawer.
+  Transparent overlay on every template (the bar sits over the page hero — no green band).
+{%- endcomment -%}
+
+{{ 'nav-menu.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign rc_transparent = 1
+  assign rc_menu = section.settings.rc_menu_linklist | default: 'main-menu'
+  assign rc_blocks = section.blocks
+-%}
+
+<div class="rc-nav" data-transparent="{{ rc_transparent }}" data-open="0" data-search-url="{{ routes.search_url }}">
+  <div class="rc-nav__bar-wrap">
+
+    {%- comment -%} closed mobile / tablet bar {%- endcomment -%}
+    <div class="rc-mobile-bar">
+      <div class="rc-mobile-bar__slot">
+        <button type="button" data-rc-drawer-open aria-label="Open menu">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M3 9h18M3 15h18" stroke="currentColor" stroke-width="1.3"></path></svg>
+        </button>
+      </div>
+      <a class="rc-mobile-bar__slot" href="{{ routes.root_url }}" aria-label="{{ shop.name }} — home">
+        <img class="rc-mobile-bar__logo" src="{{ 'nav-rc-logo-light.svg' | asset_url }}" alt="{{ shop.name }}" width="120" height="27">
+      </a>
+      <div class="rc-mobile-bar__slot">
+        <a href="{{ routes.cart_url }}" data-cart-toggle aria-label="{{ 'cart.general.title' | t | default: 'Cart' }}">
+          {%- render 'icon-cart' -%}
+        </a>
+      </div>
+    </div>
+
+    {%- render 'nav-mega-desktop', rc_menu: rc_menu, blocks: rc_blocks -%}
+  </div>
+
+  {%- render 'nav-drawer-mobile', rc_menu: rc_menu, blocks: rc_blocks -%}
+
+  {%- comment -%}
+    Search popdown, relocated here (out of the hidden legacy header) so `data-rc-search`
+    can open the theme's real .search-popdown. The summary is the native <details> toggle;
+    nav-menu.js clicks it. unique:'rc' keeps element IDs distinct.
+  {%- endcomment -%}
+  <header-search-popdown class="rc-search-popdown">
+    <details>
+      <summary class="rc-search-popdown__summary visually-hidden" data-rc-search-summary aria-haspopup="dialog" title="{{ 'general.search.search' | t }}">
+        {%- render 'icon-search' -%}
+      </summary>
+      {%- render 'header-search-popdown', unique: 'rc' -%}
+      <span class="underlay" data-popdown-underlay></span>
+    </details>
+  </header-search-popdown>
+</div>

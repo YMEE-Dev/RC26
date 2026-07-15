@@ -1,0 +1,1373 @@
+/* =========================================================================
+   Roberto Coin — hardcoded navigation (replaces Qikify Smart Menu)
+   Desktop hover mega-menu + mobile/tablet drill-down drawer.
+   Spec: _claude-nav-package/design_handoff_roberto_coin_menu/README.md
+   ========================================================================= */
+
+.rc-nav {
+  /* --- tokens (scoped) --- */
+  --rc-green: #27574d; /* house green ground */
+  --rc-accent: #377d71; /* site accent */
+  --rc-accent-dark: #1a4d44; /* accent hover */
+  --rc-veil: rgba(55, 125, 113, 0.8);
+  --rc-ink: #212121;
+  --rc-ink-2: #646464;
+  --rc-white: #ffffff;
+  --rc-hair-strong: rgba(255, 255, 255, 0.26);
+  --rc-hair-med: rgba(255, 255, 255, 0.18);
+  --rc-hair-light: rgba(255, 255, 255, 0.16);
+  --rc-overline: rgba(255, 255, 255, 0.58);
+  --rc-soft: rgba(255, 255, 255, 0.92);
+
+  --rc-display: var(--FONT-STACK-HEADING, "Portrait LS", Georgia, serif);
+  --rc-body: var(--FONT-STACK-BODY, Inter, system-ui, sans-serif);
+
+  --rc-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --rc-dur-fast: 0.18s;
+
+  font-family: var(--rc-body);
+  color: #fff; /* default nav color is white; `inherit` below resolves to this */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.rc-nav *,
+.rc-nav *::before,
+.rc-nav *::after {
+  box-sizing: border-box;
+}
+
+.rc-nav button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.rc-nav a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* force pure white for header items + icons (default state) regardless of theme
+   variables / inherited dark text. Hover stays opacity-based, so it's preserved. */
+.rc-nav .rc-d-link,
+.rc-nav .rc-d-icon,
+.rc-nav .rc-d-bag,
+.rc-nav .rc-d-bag__count,
+.rc-nav .rc-mobile-bar a,
+.rc-nav .rc-mobile-bar button {
+  color: #fff;
+}
+.rc-nav .rc-d-icon svg [stroke]:not([stroke="none"]),
+.rc-nav .rc-d-bag svg [stroke]:not([stroke="none"]),
+.rc-nav .rc-mobile-bar svg [stroke]:not([stroke="none"]) {
+  stroke: #fff;
+}
+
+/* theme icon glyphs reused in the nav (icon-search / icon-bag): white, sized per context.
+   They ship with hardcoded fill="white" / stroke="#000", so force both to currentColor. */
+.rc-nav .icon {
+  display: block;
+  width: 20px;
+  height: 20px;
+  color: #fff;
+}
+.rc-nav .icon [stroke]:not([stroke="none"]) {
+  stroke: currentColor;
+}
+.rc-nav .icon [fill]:not([fill="none"]) {
+  fill: currentColor;
+}
+.rc-nav .rc-mobile-bar .icon-cart {
+  width: 22px;
+  height: 22px;
+}
+.rc-nav .rc-drawer__hslot .icon-cart {
+  width: 22px;
+  height: 22px;
+}
+.rc-nav .rc-m-search .icon-search {
+  width: 17px;
+  height: 17px;
+}
+
+/* Light/dark switcher — nav-menu.js sets data-scheme on .rc-nav from the section
+   under the bar (sections opt in with [data-header-observer-mode="dark"]).
+   dark = dark text/icons/logo over a light background. While a mega panel is open
+   the dark veil is behind the bar, so it stays white regardless of scheme. */
+.rc-nav .rc-d-link,
+.rc-nav .rc-d-icon,
+.rc-nav .rc-d-bag,
+.rc-nav .rc-d-bag__count,
+.rc-nav .rc-mobile-bar a,
+.rc-nav .rc-mobile-bar button,
+.rc-nav .rc-d-logo img,
+.rc-nav .rc-mobile-bar__logo {
+  transition:
+    color 0.3s ease,
+    filter 0.3s ease;
+}
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-link,
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-icon,
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-bag,
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-bag__count,
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .icon,
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-mobile-bar a,
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-mobile-bar button {
+  color: #000;
+}
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-icon svg [stroke]:not([stroke="none"]),
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-bag svg [stroke]:not([stroke="none"]),
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-mobile-bar svg [stroke]:not([stroke="none"]) {
+  stroke: #000;
+}
+/* recolor the white nav logo to black without a second asset */
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-logo img,
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-mobile-bar__logo {
+  filter: brightness(0);
+}
+
+/* Scroll-reveal blur — 1:1 copy of the theme's `.theme__header__scroll-blur`
+   (sections/header.liquid): a masked, fading frosted overlay rather than a hard
+   box. nav-menu.js sets data-stuck="1" once scrolled past the bar; it shows only
+   when the header is on-screen (body without header-scroll-hide) and no mega
+   panel is open. Rendered as a ::before on the fixed bar-wrap so it sits behind
+   the bar content but above the page. */
+.rc-nav__bar-wrap::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: -72px; /* fade tail below the bar */
+  z-index: -4;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(180deg, rgba(249, 249, 249, 0.25) 0%, rgba(249, 249, 249, 0) 100%);
+  -webkit-backdrop-filter: blur(0px);
+  backdrop-filter: blur(0px);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 58%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 58%, transparent 100%);
+  transition:
+    opacity 0.35s ease,
+    -webkit-backdrop-filter 0.35s ease,
+    backdrop-filter 0.35s ease;
+  will-change: opacity, backdrop-filter;
+}
+body:not(.header-scroll-hide) .rc-nav[data-stuck="1"]:not([data-open="1"]) .rc-nav__bar-wrap::before {
+  opacity: 1;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+/* =========================================================================
+   Spotlight collection (+ timeline) — replicate the legacy header treatment.
+   HeaderComponent sets body.has-always-visible-fixed-header on these templates
+   and keeps header-scroll-hide false; the rules below mirror what the theme does
+   to .header__desktop__bar__* / .theme__header__scroll-blur for the RC nav.
+   ========================================================================= */
+/* Always visible — never let the regions slide out even if header-scroll-hide is
+   ever set (matches theme.css: body.has-always-visible-fixed-header.header-scroll-hide …). */
+body.has-always-visible-fixed-header.header-scroll-hide .rc-d-left,
+body.has-always-visible-fixed-header.header-scroll-hide .rc-d-logo,
+body.has-always-visible-fixed-header.header-scroll-hide .rc-d-right,
+body.has-always-visible-fixed-header.header-scroll-hide .rc-mobile-bar {
+  transform: none !important;
+}
+/* No scroll-reveal blur on spotlight collections (theme hides .theme__header__scroll-blur). */
+body.template-collection:has(.collection--spotlight) .rc-nav__bar-wrap::before {
+  display: none;
+}
+/* Whole nav goes DARK on spotlight collections (spotlight backgrounds are light).
+   The one region over the spotlight image is overridden with the metafield color below. */
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-d-link,
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-d-icon,
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-d-bag,
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-d-bag__count,
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .icon,
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-mobile-bar a,
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-mobile-bar button {
+  color: #000;
+}
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-d-icon svg [stroke]:not([stroke="none"]),
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-d-bag svg [stroke]:not([stroke="none"]),
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-mobile-bar svg [stroke]:not([stroke="none"]) {
+  stroke: #000;
+}
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-d-logo img,
+body.template-collection:has(.collection--spotlight) .rc-nav:not([data-open="1"]) .rc-mobile-bar__logo {
+  filter: brightness(0);
+}
+/* Except: the region over the spotlight image uses the collection's metafield color
+   (--spotlight-collection-menu-link), mirroring custom-collection.css bar__c / bar__r.
+   Higher specificity than the dark rules above, so it wins for that region only. */
+body.template-collection:has(.collection--spotlight.collection--spotlight-position-left) .rc-nav:not([data-open="1"]) .rc-d-left .rc-d-link,
+body.template-collection:has(.collection--spotlight.collection--spotlight-position-left) .rc-nav:not([data-open="1"]) .rc-d-left .rc-d-icon,
+body.template-collection:has(.collection--spotlight.collection--spotlight-position-left) .rc-nav:not([data-open="1"]) .rc-d-left .icon,
+body.template-collection:has(.collection--spotlight.collection--spotlight-position-right) .rc-nav:not([data-open="1"]) .rc-d-right .rc-d-link,
+body.template-collection:has(.collection--spotlight.collection--spotlight-position-right) .rc-nav:not([data-open="1"]) .rc-d-right .rc-d-bag,
+body.template-collection:has(.collection--spotlight.collection--spotlight-position-right) .rc-nav:not([data-open="1"]) .rc-d-right .rc-d-bag__count,
+body.template-collection:has(.collection--spotlight.collection--spotlight-position-right) .rc-nav:not([data-open="1"]) .rc-d-right .icon {
+  color: var(--spotlight-collection-menu-link, #fff);
+}
+body.template-collection:has(.collection--spotlight.collection--spotlight-position-left)
+  .rc-nav:not([data-open="1"])
+  .rc-d-left
+  .rc-d-icon
+  svg
+  [stroke]:not([stroke="none"]),
+body.template-collection:has(.collection--spotlight.collection--spotlight-position-right)
+  .rc-nav:not([data-open="1"])
+  .rc-d-right
+  .rc-d-bag
+  svg
+  [stroke]:not([stroke="none"]) {
+  stroke: var(--spotlight-collection-menu-link, #fff);
+}
+
+/* =========================================================================
+   Naked / super-naked collections — content clears the fixed header on desktop
+   and the nav renders in dark mode over the light product layout.
+   (<main> carries .main-content--collection-naked / --collection-super-naked
+   from layout/theme.liquid.)
+   ========================================================================= */
+/* mobile: same pages get a smaller top offset to clear the fixed header */
+@media (max-width: 1023px) {
+  .main-content--collection-naked,
+  .main-content--collection-super-naked,
+  .main-content--blog,
+  .main-content--page {
+    padding-top: 75px;
+  }
+}
+@media (min-width: 1024px) {
+  .main-content--collection-naked,
+  .main-content--collection-super-naked {
+    padding-top: 150px;
+  }
+}
+body:has(:is(.main-content--collection-naked, .main-content--collection-super-naked))
+  .rc-nav:not([data-open="1"])
+  :is(.rc-d-link, .rc-d-icon, .rc-d-bag, .rc-d-bag__count, .icon, .rc-mobile-bar a, .rc-mobile-bar button) {
+  color: #000;
+}
+body:has(:is(.main-content--collection-naked, .main-content--collection-super-naked))
+  .rc-nav:not([data-open="1"])
+  :is(.rc-d-icon, .rc-d-bag, .rc-mobile-bar)
+  svg
+  [stroke]:not([stroke="none"]) {
+  stroke: #000;
+}
+body:has(:is(.main-content--collection-naked, .main-content--collection-super-naked)) .rc-nav:not([data-open="1"]) :is(.rc-d-logo img, .rc-mobile-bar__logo) {
+  filter: brightness(0);
+}
+
+/* =========================================================================
+   Blog pages + generic site pages — nav in dark mode. Generic pages also get a
+   150px desktop padding-top so content clears the fixed header (they have no
+   full-bleed hero behind the transparent bar).
+   ========================================================================= */
+@media (min-width: 1024px) {
+  .main-content--blog,
+  .main-content--page {
+    padding-top: 150px;
+  }
+}
+body:is(.template-blog, .template-page)
+  .rc-nav:not([data-open="1"])
+  :is(.rc-d-link, .rc-d-icon, .rc-d-bag, .rc-d-bag__count, .icon, .rc-mobile-bar a, .rc-mobile-bar button) {
+  color: #000;
+}
+body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-icon, .rc-d-bag, .rc-mobile-bar) svg [stroke]:not([stroke="none"]) {
+  stroke: #000;
+}
+body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-logo img, .rc-mobile-bar__logo) {
+  filter: brightness(0);
+}
+
+/* Search popdown — relocated out of .theme__header into .rc-nav. Two fixes:
+   1) Pin it to the viewport top, full width (the theme's .theme__header is-open
+      width/position rules no longer apply, so it was mispositioned/half off-screen).
+   2) Force an opaque surface + dark text. The theme drives these from
+      var(--COLOR-SUBMENU-*), but if those settings are blank on the live theme the
+      vars are defined-but-empty, so a var() fallback never triggers → transparent
+      panel + white (invisible) text under .rc-nav. Hard values guarantee the look. */
+.rc-nav .rc-search-popdown .search-popdown {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100vw;
+  --bg: #fcfbf9;
+  --text: #222222;
+  --link: #222222;
+  --link-hover: #000000;
+  --text-light: #6f6f6f;
+  background: #fcfbf9;
+  color: #222222;
+  display: BLOCK;
+  width: 100%;
+  z-index: 6006;
+  height: 50px;
+  padding: 80px;
+}
+@media (max-width: 1024px) {
+  .rc-nav .rc-search-popdown .search-popdown {
+    padding: 30px 0;
+  }
+}
+.rc-nav .rc-search-popdown .search-popdown__main {
+  background: #fcfbf9;
+}
+/* popdown glyphs (search / submit / close) dark on the light surface — overrides
+   the nav's white .icon rule and the data-scheme icon rule */
+.rc-nav .rc-search-popdown .search-popdown .icon,
+.rc-nav[data-scheme="dark"] .rc-search-popdown .search-popdown .icon {
+  color: #222222;
+}
+
+/* shared type helpers */
+.rc-display {
+  font-family: var(--rc-display);
+  font-weight: 500;
+}
+.rc-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.rc-label {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@keyframes rcZoom {
+  from {
+    transform: scale(1.1);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes rcCover {
+  from {
+    transform: scale(1.12);
+  }
+  to {
+    transform: scale(1.06);
+  }
+}
+@keyframes rcMenuIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* header entrance — same offsets + timing as the theme's header-init-animation
+   (plp-header-*): logo drops from the top first, then the side bars slide in. */
+@keyframes rcHeaderFromTop {
+  from {
+    transform: translateY(-200px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes rcHeaderFromLeft {
+  from {
+    transform: translateX(-200px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes rcHeaderFromRight {
+  from {
+    transform: translateX(200px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* =========================================================================
+   DESKTOP — transparent header + hover mega-menu
+   ========================================================================= */
+.rc-desktop {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .rc-desktop {
+    display: block;
+  }
+
+  /* transparent header overlaid on the hero (no colour band) */
+  .rc-d-bar {
+    position: relative;
+    z-index: 30;
+    pointer-events: auto;
+  }
+  .rc-d-bar__grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 24px;
+    height: 160px;
+    padding: 0 40px;
+  }
+  /* header entrance + scroll hide/reveal: regions slide fully off-screen when
+     body.header-scroll-hide is present (left→left, logo→top, right→right) and
+     slide back when it's removed. nav-menu.js toggles the class by scroll
+     direction; calc(±(100% + 80px)) guarantees off-screen at any width. */
+  body.header-scroll-hide .rc-d-left {
+    transform: translateX(calc(-100% - 80px));
+  }
+  body.header-scroll-hide .rc-d-logo {
+    transform: translateY(calc(-100% - 80px));
+  }
+  body.header-scroll-hide .rc-d-right {
+    transform: translateX(calc(100% + 80px));
+  }
+  /* while hidden the empty fixed bar must not intercept clicks on content below it */
+  body.header-scroll-hide .rc-d-bar {
+    pointer-events: none;
+  }
+  .rc-d-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    transition: transform 0.8s var(--rc-ease);
+    will-change: transform;
+    animation: rcHeaderFromLeft 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  }
+  .rc-d-right {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    justify-content: flex-end;
+    transition: transform 0.8s var(--rc-ease);
+    will-change: transform;
+    animation: rcHeaderFromRight 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  }
+  .rc-d-icon {
+    display: flex;
+    align-items: center;
+    height: 26px;
+    color: var(--rc-white);
+  }
+  .rc-d-icon svg {
+    display: block;
+  }
+
+  .rc-d-stack {
+    display: flex;
+    flex-direction: column;
+  }
+  .rc-d-right .rc-d-stack {
+    align-items: flex-end;
+  }
+
+  .rc-d-stack--primary {
+    align-items: flex-start;
+  }
+  .rc-d-link {
+    font-family: var(--rc-body);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 26px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: #fff;
+    white-space: nowrap;
+    text-align: left;
+    margin: 0;
+    transition: opacity 0.25s ease;
+  }
+  .rc-d-right .rc-d-link {
+    text-align: right;
+  }
+  /* non-active primary items dim while a menu is open */
+  .rc-nav[data-open="1"] .rc-d-stack--primary .rc-d-link:not([data-active="1"]) {
+    opacity: 0.45;
+  }
+
+  .rc-d-logo {
+    display: inline-flex;
+    align-items: center;
+    transition: transform 0.8s var(--rc-ease);
+    will-change: transform;
+    animation: rcHeaderFromTop 550ms 200ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  }
+  .rc-d-logo img {
+    height: 50px;
+    width: auto;
+    display: block;
+  }
+
+  .rc-d-bag {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 26px;
+    color: var(--rc-white);
+  }
+  .rc-d-bag__count {
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    font-size: 11px;
+    line-height: 1;
+    color: var(--rc-white);
+  }
+
+  /* mega-menu veil — fades as one element, fixed height leaves a bottom exit strip */
+  .rc-d-panels {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 760px;
+    z-index: 20;
+    background: var(--rc-veil);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .rc-nav[data-open="1"] .rc-d-panels {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .rc-d-panel {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+  }
+  .rc-d-panel[data-shown="1"] {
+    opacity: 1;
+    visibility: visible;
+  }
+  .rc-nav[data-open="1"] .rc-d-panel:not([data-shown="1"]) {
+    opacity: 0;
+  }
+
+  .rc-d-panel__inner {
+    position: relative;
+    margin: 0 auto;
+    padding: 176px 84px 0;
+    height: 100%;
+  }
+
+  /* anchored imagery zone (right-aligned) */
+  .rc-d-imgzone {
+    position: absolute;
+    top: 176px;
+    right: 84px;
+    width: 500px;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+  .rc-d-imgzone--wide {
+    width: 1002px;
+    height: 500px;
+    aspect-ratio: auto;
+  }
+  .rc-d-imgzone__inner {
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+  }
+  .rc-d-imgzone__layer {
+    position: absolute;
+    inset: -40px;
+    background-size: cover;
+    background-position: center;
+    transition: opacity 0.3s ease;
+  }
+  .rc-d-imgzone__scrim {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 48%;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.55) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+  .rc-d-imgzone__caption {
+    position: absolute;
+    left: 24px;
+    bottom: 24px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .rc-d-imgzone__caption .rc-display {
+    font-size: 40px;
+    line-height: 46px;
+  }
+
+  /* dual tiles (Occasions) */
+  .rc-d-dual {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    gap: 24px;
+  }
+  .rc-d-tile {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    display: block;
+  }
+  /* single tile (Maison) — direct child of the wide zone has no flex parent to size it,
+     so stretch it to fill (occasions tiles are nested in .rc-d-dual, unaffected) */
+  .rc-d-imgzone--wide > .rc-d-tile {
+    position: absolute;
+    inset: 0;
+  }
+  .rc-d-tile__bg {
+    position: absolute;
+    inset: -40px;
+    background-size: cover;
+    background-position: center;
+    will-change: transform;
+  }
+  .rc-d-tile__scrim {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 48%;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.55) 100%);
+    pointer-events: none;
+  }
+  .rc-d-tile__caption {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    z-index: 2;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .rc-d-tile__caption .rc-display {
+    font-size: 40px;
+    line-height: 46px;
+  }
+
+  /* left nav area — capped so it never runs under the image.
+     jewelry cap reserves the 500px image + gap while letting the columns
+     spread on wide monitors. */
+  .rc-d-left-area {
+    position: relative;
+    max-width: 860px;
+  }
+  .rc-d-left-area--jewelry {
+    max-width: min(1080px, calc(100% - 540px));
+  }
+  .rc-d-left-area--stack {
+    max-width: 240px;
+  }
+  .rc-d-left-area[data-layout="occasions"] {
+    max-width: 382px;
+  }
+  .rc-d-left-area[data-layout="maison"] {
+    max-width: 192px;
+  }
+
+  .rc-d-cells {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+  }
+  .rc-d-vdiv {
+    width: 1px;
+    height: 500px;
+    background: var(--rc-hair-light);
+    flex: none;
+    margin: 0 30px;
+  }
+  .rc-d-cell {
+    min-width: 0;
+  }
+  .rc-d-cell--grow {
+    flex: 1.6 1 0;
+  }
+  .rc-d-cell--fixed {
+    width: 188px;
+    flex: none;
+  }
+  .rc-d-cell--feat {
+    width: 224px;
+    flex: none;
+  }
+  /* occasions: single stacked column (GIFT IDEAS over BY OCCASION) */
+  .rc-d-cell--stack {
+    width: 200px;
+  }
+  .rc-d-cell--stack .rc-d-sec + .rc-d-sec {
+    margin-right: 0;
+    padding-right: 0;
+  }
+
+  .rc-d-sec + .rc-d-sec {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rc-hair-light);
+    margin-right: -32px;
+    padding-right: 32px;
+  }
+  /* stacked sections inside a fixed column (OUR SELECTION over SHOP BY CATEGORY):
+     separated by whitespace only — no rule, no gap-filling border */
+  .rc-d-cell--fixed .rc-d-sec + .rc-d-sec {
+    margin-top: 40px;
+    padding-top: 0;
+    border-top: 0;
+    margin-right: 0;
+    padding-right: 0;
+  }
+
+  .rc-d-sec__head {
+    display: block;
+    color: var(--rc-overline);
+    margin-bottom: 6px;
+  }
+  .rc-d-links {
+    display: flex;
+    flex-direction: column;
+  }
+  .rc-d-links--two {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(7, auto);
+    column-gap: 32px;
+    row-gap: 0;
+  }
+
+  .rc-d-voice {
+    color: var(--rc-white);
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    white-space: nowrap;
+    /* force Title Case regardless of the menu item's stored casing
+       (paired with `| downcase` in the template) */
+    text-transform: capitalize;
+    transition: opacity 0.2s ease;
+  }
+  .rc-d-voice:hover {
+    opacity: 0.62;
+  }
+  .rc-d-voice--body {
+    font-family: var(--rc-body);
+    font-size: 14px;
+  }
+  .rc-d-voice--serif {
+    font-family: var(--rc-display);
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 27px;
+  }
+
+  /* trailing arrow — hidden at rest, fades/slides in on hover of its own row */
+  .rc-arrow {
+    opacity: 0;
+    transform: translate(-4px, 4px);
+    flex: none;
+    transition:
+      opacity var(--rc-dur-fast) var(--rc-ease),
+      transform var(--rc-dur-fast) var(--rc-ease);
+  }
+  .rc-d-voice:hover .rc-arrow {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  .rc-arrow--sm {
+    width: 18px;
+    height: 18px;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .rc-arrow--lg {
+    width: 22px;
+    height: 22px;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  /* homepage hero blur/darken while menu open (applied by JS to the page's hero, optional hook) */
+  .rc-nav[data-open="1"] ~ .rc-home-veil {
+    filter: blur(30px) brightness(0.6);
+  }
+}
+
+/* =========================================================================
+   MID-DESKTOP (1024–1599) — keep panels on-screen above the tablet drawer.
+   The imagery is position:absolute at a fixed size, so on narrower desktops
+   the link columns would slide under it. Shrink the imagery fluidly, tighten
+   the columns, and reserve the image footprint so nothing overlaps.
+   ========================================================================= */
+@media (min-width: 1024px) and (max-width: 1599px) {
+  .rc-d-panel__inner {
+    padding: 140px 85px 0;
+  }
+
+  /* fluid imagery, pulled into the reduced gutter */
+  .rc-d-imgzone {
+    top: 140px;
+    right: 85px;
+    width: min(440px, 30vw);
+  }
+  .rc-d-imgzone--wide {
+    top: 140px;
+    right: 85px;
+    width: min(760px, 56vw);
+  }
+  .rc-d-imgzone__caption .rc-display,
+  .rc-d-tile__caption .rc-display {
+    font-size: 30px;
+    line-height: 36px;
+  }
+
+  /* reserve the image's footprint so the jewelry columns can't run under it */
+  .rc-d-left-area--jewelry {
+    max-width: calc(100% - min(440px, 30vw) - 48px);
+  }
+
+  /* tighten the jewelry columns */
+  .rc-d-vdiv {
+    height: 440px;
+    margin: 0 18px;
+  }
+  .rc-d-cell--fixed {
+    width: 160px;
+  }
+  .rc-d-cell--feat {
+    width: 180px;
+  }
+}
+
+/* Tightest desktop band (1024–1239): even two-up ALL COLLECTIONS won't fit,
+   so drop it to a single column and shrink the image further. */
+@media (min-width: 1024px) and (max-width: 1239px) {
+  .rc-d-imgzone {
+    width: min(340px, 28vw);
+  }
+  /* occasions / maison use the narrow stacked column — widen their tile */
+  .rc-d-imgzone--wide {
+    width: min(800px, 58vw);
+  }
+  .rc-d-left-area--jewelry {
+    max-width: calc(100% - min(340px, 28vw) - 40px);
+  }
+  .rc-d-vdiv {
+    margin: 0 14px;
+  }
+  .rc-d-cell--fixed {
+    width: 150px;
+  }
+  .rc-d-cell--feat {
+    width: 168px;
+  }
+  .rc-d-cell--grow .rc-d-links--two {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+/* =========================================================================
+   MOBILE + TABLET — full-screen drill-down drawer
+   ========================================================================= */
+.rc-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 6006;
+  background: var(--rc-green);
+  color: var(--rc-white);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity 0.3s ease,
+    visibility 0s linear 0.3s;
+}
+.rc-drawer[data-open="1"] {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+@media (min-width: 1024px) {
+  .rc-drawer {
+    display: none;
+  }
+}
+
+.rc-drawer__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 64%, rgba(0, 0, 0, 0.28) 100%);
+  pointer-events: none;
+}
+
+.rc-drawer__header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  height: 72px;
+  padding: 20px 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.22) 60%, rgba(0, 0, 0, 0) 100%);
+  transition: background 0.3s ease;
+}
+.rc-drawer[data-scrolled="1"] .rc-drawer__header {
+  background: var(--rc-green);
+}
+.rc-drawer__header--solid {
+  background: var(--rc-green);
+}
+.rc-drawer__hslot {
+  width: 40px;
+  display: flex;
+  align-items: center;
+}
+.rc-drawer__hslot--end {
+  justify-content: flex-end;
+}
+.rc-drawer__logo {
+  width: auto;
+  height: auto;
+  max-width: min(230px, 62vw); /* match the site mobile bar logo exactly */
+}
+
+.rc-drawer__scroll {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+  z-index: 2;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.rc-drawer__scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* the sliding panel */
+.rc-panel {
+  will-change: transform;
+}
+.rc-panel[data-anim="fwd-start"] {
+  transform: translateX(100%);
+}
+.rc-panel[data-anim="back-start"] {
+  transform: translateX(-100%);
+}
+.rc-panel[data-anim="in"] {
+  transform: translateX(0);
+  transition: transform 0.44s var(--rc-ease);
+}
+
+/* spotlight / hero blocks */
+.rc-m-spot {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+.rc-m-hero {
+  position: relative;
+  height: 216px;
+  overflow: hidden;
+}
+.rc-m-cover {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+.rc-m-cover--zoom {
+  animation: rcZoom 9s ease-out both;
+  transform-origin: center;
+}
+.rc-m-spot__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 24%, rgba(39, 87, 77, 0) 46%, rgba(39, 87, 77, 0.74) 100%);
+}
+.rc-m-hero__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(39, 87, 77, 0.05) 0%, rgba(39, 87, 77, 0) 34%, rgba(39, 87, 77, 0.78) 100%);
+}
+.rc-m-cap {
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 18px;
+}
+.rc-m-cap__eyebrow {
+  opacity: 0.85;
+}
+.rc-m-cap__title {
+  font-family: var(--rc-display);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 32px;
+  margin-top: 6px;
+}
+.rc-m-hero .rc-m-cap__title {
+  font-size: 30px;
+  line-height: 36px;
+}
+
+.rc-m-titleblock {
+  padding: 8px 22px 2px;
+}
+.rc-m-titleblock__eyebrow {
+  color: rgba(255, 255, 255, 0.66);
+}
+.rc-m-titleblock__title {
+  font-family: var(--rc-display);
+  font-weight: 500;
+  font-size: 32px;
+  line-height: 38px;
+  margin-top: 6px;
+}
+
+/* sticky back row under spotlight */
+.rc-nav .rc-m-back {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 16px 22px;
+  text-align: left;
+  background: var(--rc-green);
+  border-bottom: 1px solid var(--rc-hair-strong);
+}
+.rc-m-back--sticky {
+  position: sticky;
+  top: 72px;
+  z-index: 4;
+}
+.rc-nav .rc-m-back--top {
+  padding: 6px 22px 14px;
+  background: none;
+  border: 0;
+}
+.rc-m-back span {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* root body */
+.rc-m-body {
+  padding: 4px 22px 44px;
+}
+.rc-m-cat-body {
+  padding: 24px 22px 48px;
+}
+
+/* scoped under .rc-nav so the `.rc-nav button { padding:0; border:0 }` reset
+   (higher specificity) doesn't strip the padding/separator from the <button> rows */
+.rc-nav .rc-m-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--rc-hair-strong);
+  width: 100%;
+  text-align: left;
+}
+.rc-m-search span {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.rc-m-nav {
+  display: flex;
+  flex-direction: column;
+}
+.rc-nav .rc-m-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--rc-hair-strong);
+  text-align: left;
+}
+.rc-m-row__label {
+  font-family: var(--rc-display);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 22px;
+  color: var(--rc-white);
+  text-transform: capitalize; /* normalize menu casing to Title Case (paired with | downcase) */
+}
+
+.rc-m-util {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 16px;
+  margin-top: 34px;
+}
+.rc-m-util__item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-align: left;
+}
+.rc-m-util__item span {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.88);
+}
+.rc-m-util__item svg {
+  flex: none;
+}
+
+/* category groups */
+.rc-m-group {
+  margin-bottom: 28px;
+}
+.rc-m-group__head {
+  color: var(--rc-overline);
+  margin-bottom: 10px;
+}
+.rc-m-grow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--rc-hair-light);
+  text-align: left;
+}
+.rc-m-grow__label {
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  color: var(--rc-white);
+}
+
+.rc-m-cards {
+  margin-bottom: 30px;
+}
+.rc-m-cards__head {
+  color: var(--rc-overline);
+  margin-bottom: 14px;
+}
+.rc-m-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--rc-hair-med);
+  text-align: left;
+}
+.rc-m-card__label {
+  font-family: var(--rc-display);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 27px;
+  color: var(--rc-white);
+}
+
+.rc-m-cols {
+  margin-top: 2px;
+}
+.rc-m-cols__head {
+  color: var(--rc-overline);
+  margin-bottom: 14px;
+}
+.rc-m-col {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--rc-hair-light);
+}
+.rc-m-col__label {
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* ---- tablet portrait re-layout (834px) ---- */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .rc-drawer__header {
+    height: 76px;
+    padding: 24px 40px 0;
+  }
+  .rc-drawer__logo {
+    max-width: 340px;
+  }
+  .rc-m-body {
+    padding: 8px 40px 56px;
+  }
+  .rc-m-cat-body {
+    padding: 36px 40px 56px;
+  }
+  .rc-m-cap {
+    left: 40px;
+    right: 40px;
+    bottom: 30px;
+  }
+  .rc-m-back--sticky {
+    top: 76px;
+    padding: 20px 40px;
+  }
+  .rc-m-row__label {
+    font-size: 32px;
+    line-height: 38px;
+  }
+  .rc-m-util {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-top: 44px;
+  }
+  .rc-m-groups {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 56px;
+  }
+  .rc-m-featcols {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 56px;
+    align-items: start;
+  }
+  .rc-m-card__label {
+    font-size: 24px;
+    line-height: 30px;
+  }
+}
+
+/* =========================================================================
+   HEADER MOUNT — transparent overlay (hero templates) vs solid (inner pages)
+   ========================================================================= */
+.rc-nav__bar-wrap {
+  position: fixed; /* pinned overlay: stays reachable so it can hide/reveal on scroll */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 6005;
+}
+.rc-nav[data-transparent="0"] .rc-nav__bar-wrap {
+  position: sticky; /* solid: occupy space + stick on scroll */
+  background: var(--rc-green);
+}
+.rc-desktop {
+  position: relative;
+}
+
+/* closed mobile/tablet top bar (hamburger · wordmark · bag) */
+.rc-mobile-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+  padding: 20px 20px 0;
+  color: var(--rc-white);
+  transition: transform 0.4s var(--rc-ease);
+}
+/* mobile: slide the bar up out of the top on scroll-down (theme's header-scroll-hide),
+   mirroring the desktop logo's upward exit */
+body.header-scroll-hide .rc-mobile-bar {
+  transform: translateY(-100%);
+}
+@media (min-width: 1024px) {
+  .rc-mobile-bar {
+    display: none;
+  }
+}
+/* equal-width side slots (hamburger + cart) so the natural-width centre logo
+   sits dead-centre; the logo slot keeps its auto width */
+.rc-mobile-bar__slot {
+  display: flex;
+  align-items: center;
+}
+.rc-mobile-bar__slot:first-child,
+.rc-mobile-bar__slot:last-child {
+  flex: 0 0 36px;
+}
+.rc-mobile-bar__slot:last-child {
+  justify-content: flex-end;
+}
+.rc-mobile-bar__slot:nth-child(2) {
+  flex: 0 1 auto;
+  min-width: 0;
+  justify-content: center;
+}
+/* cap the (very wide) wordmark so it never overruns the equal side slots;
+   height:auto keeps the aspect ratio (no squish) */
+.rc-mobile-bar__logo {
+  width: auto;
+  height: auto;
+  max-width: min(230px, 62vw);
+}
+.rc-mobile-bar a,
+.rc-mobile-bar button {
+  color: var(--rc-white);
+  display: flex;
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .rc-mobile-bar {
+    height: 76px;
+    padding: 24px 40px 0;
+  }
+  .rc-mobile-bar__logo {
+    max-width: 340px;
+  }
+}
+
+/* lock background scroll while the drawer is open */
+html.rc-drawer-open,
+html.rc-drawer-open body {
+  overflow: hidden;
+}
+
+/* Hide the closed mobile bar while the drawer is open — the fixed bar-wrap sits
+   above the drawer (z-index 6005 vs 100), so otherwise its logo/hamburger/cart
+   would stack on top of the drawer's own header. */
+html.rc-drawer-open .rc-mobile-bar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rc-nav *,
+  .rc-drawer *,
+  .rc-panel {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

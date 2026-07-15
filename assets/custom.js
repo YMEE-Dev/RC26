@@ -42,6 +42,7 @@
   loadScriptOnce(dataset.rcTimelineSrc || "", "data-rc-timeline-script");
   loadScriptOnce(dataset.rcInviewFadeSrc || "", "data-rc-inview-fade-script");
   loadScriptOnce(dataset.rcTimelineInviewSrc || "", "data-rc-timeline-inview-script");
+  loadScriptOnce(dataset.navMenuSrc || "", "data-nav-menu-script");
 
   const normalizePathname = (pathname) => {
     const normalizedPath = `${pathname || ""}`.trim().toLowerCase().replace(/\/+$/, "");
@@ -163,16 +164,18 @@
 
   document.addEventListener("click", handleNewsletterLinkClick, true);
 
-  const breakpointRefreshQuery = window.matchMedia("(min-width: 960px)");
-  const handleBreakpointRefresh = () => {
-    window.location.reload();
-  };
+  // Reloads the page when crossing the desktop/mobile breakpoint (960px).
+  // Commented out to stop the full-page refresh on viewport change — keep for reference.
+  // const breakpointRefreshQuery = window.matchMedia("(min-width: 960px)");
+  // const handleBreakpointRefresh = () => {
+  //   window.location.reload();
+  // };
 
-  if (typeof breakpointRefreshQuery.addEventListener === "function") {
-    breakpointRefreshQuery.addEventListener("change", handleBreakpointRefresh);
-  } else if (typeof breakpointRefreshQuery.addListener === "function") {
-    breakpointRefreshQuery.addListener(handleBreakpointRefresh);
-  }
+  // if (typeof breakpointRefreshQuery.addEventListener === "function") {
+  //   breakpointRefreshQuery.addEventListener("change", handleBreakpointRefresh);
+  // } else if (typeof breakpointRefreshQuery.addListener === "function") {
+  //   breakpointRefreshQuery.addListener(handleBreakpointRefresh);
+  // }
 
   // ^^ Keep your scripts inside this IIFE function call to
   // avoid leaking your variables into the global scope.
