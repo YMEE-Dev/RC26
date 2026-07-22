@@ -76,6 +76,7 @@
       data-newsletter-float
       aria-hidden="true"
       data-newsletter-float-delay="{{ section.settings.float_delay_seconds | default: 3 }}"
+      data-newsletter-float-delay-mobile="{{ section.settings.float_delay_seconds_mobile | default: 15 }}"
     >
       <button
         type="button"
@@ -86,16 +87,16 @@
         {%- render 'icon-close' -%}
       </button>
       <p class="footer-newsletter-float__title h4">
-        {{ section.settings.float_title | default: 'Sign up to our Newsletter' | escape }}
+        {{ section.settings.float_title | default: 'Get inspired by the world of Roberto Coin' | escape }}
       </p>
       <button
         type="button"
-        class="btn btn--primary btn--solid btn--full footer-newsletter-float__cta"
+        class="btn btn--secondary btn--outline btn--full footer-newsletter-float__cta"
         data-newsletter-drawer-open
         data-newsletter-float-signup
         aria-controls="FooterNewsletterDrawer--{{ section.id }}"
       >
-        {{ section.settings.float_button_text | default: 'SIGN UP' | escape }}
+        {{ section.settings.float_button_text | default: 'Sign up to our newsletter' | escape }}
       </button>
     </aside>
     <div class="underlay footer-newsletter-float__underlay" data-newsletter-float-underlay></div>
@@ -349,13 +350,17 @@
   .footer-newsletter-float {
     position: fixed;
     right: 40px;
-    bottom: 32px;
+    bottom: 40px;
     z-index: 102;
-    width: min(420px, calc(100vw - 80px));
-    padding: 26px 24px 22px;
-    background: #fff;
+    display: flex;
+    flex-direction: column;
+    width: min(397px, calc(100vw - 80px));
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
     color: #111;
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
     transform: translate3d(0, 120%, 0);
     opacity: 0;
     visibility: hidden;
@@ -369,13 +374,16 @@
     transition: transform 0.45s ease, opacity 0.3s ease;
   }
 
+  /* In-flow, right-aligned above the heading (matches Figma), not an
+     overlapping corner icon. */
+  /* Negative margins let the larger tap target sit flush in the corner
+     (~20px inset, matching Figma) without pushing the heading down. */
   .footer-newsletter-float__close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 28px;
-    height: 28px;
+    position: static;
+    align-self: flex-end;
+    margin: -8px -8px 2px 0;
     border: 0;
+    padding: 8px;
     background: transparent;
     color: currentColor;
     display: inline-flex;
@@ -384,18 +392,31 @@
     cursor: pointer;
   }
 
-  .footer-newsletter-float__close .icon {
-    width: 12px;
-    height: 12px;
+  .footer-newsletter-float__close svg {
+    display: block;
+    width: 24px;
+    height: 24px;
   }
 
   .footer-newsletter-float__title {
     margin: 0 0 20px;
-    padding-right: 18px;
+    text-align: center;
   }
 
   .footer-newsletter-float__cta {
     min-height: 44px;
+  }
+
+  /* Force a dark outline on the light translucent panel, independent of the
+     section color scheme (whose secondary border can resolve to white).
+     Selector matches the theme's `.btn--outline.btn--secondary` specificity plus one. */
+  .footer-newsletter-float__cta.btn--outline.btn--secondary {
+    --btn-border: #111;
+    --btn-text: #111;
+    --btn-border-hover: #111;
+    --btn-text-hover: #111;
+    --btn-bg: transparent;
+    --btn-bg-hover: transparent;
   }
 
   @media only screen and (max-width: 767px) {
@@ -413,25 +434,20 @@
     }
 
     .footer-newsletter-float {
-      top: 50%;
-      left: 50%;
-      right: auto;
-      bottom: auto;
-      width: calc(100% - 32px);
-      max-width: 420px;
-      padding: 22px 18px 16px;
+      top: auto;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      width: auto;
+      max-width: none;
+      padding: 20px;
       border-top: 0;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-      transform: translate3d(-50%, calc(-50% + 40px), 0);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+      transform: translate3d(0, calc(100% + 16px), 0);
     }
 
     .footer-newsletter-float.is-visible {
-      transform: translate3d(-50%, -50%, 0);
-    }
-
-    .footer-newsletter-float__title {
-      margin-bottom: 16px;
-      padding-right: 22px;
+      transform: translate3d(0, 0, 0);
     }
 
     .footer-newsletter-float__underlay {
@@ -468,8 +484,8 @@
       this.mobileQuery = window.matchMedia('(max-width: 767px)');
       this.hasShownFloat = false;
       this.floatDelayMs = Number(this.floatPopup?.dataset.newsletterFloatDelay || 3) * 1000;
+      this.mobileFloatDelayMs = Number(this.floatPopup?.dataset.newsletterFloatDelayMobile || 15) * 1000;
       this.floatDismissDelayMs = 260;
-      this.boundOnScroll = () => this.onScroll();
 
       this.openTriggers.forEach((trigger) => {
         trigger.addEventListener('click', (event) => {
@@ -562,27 +578,16 @@
         return;
       }
 
-      if (this.mobileQuery.matches) {
-        window.addEventListener('scroll', this.boundOnScroll, {passive: true});
-        this.onScroll();
-        return;
-      }
+      // Desktop uses the configured delay; mobile uses its own (15s by default),
+      // both purely time-based after the page loads.
+      const delayMs = this.mobileQuery.matches ? this.mobileFloatDelayMs : this.floatDelayMs;
 
       window.setTimeout(() => {
         if (this.readCookie(this.dismissCookie) === '1' || this.hasShownFloat) {
           return;
         }
         this.showFloat();
-      }, this.floatDelayMs);
-    }
-
-    onScroll() {
-      if (!this.floatPopup || this.hasShownFloat || this.readCookie(this.dismissCookie) === '1') {
-        return;
-      }
-      if (window.scrollY > 80) {
-        this.showFloat();
-      }
+      }, delayMs);
     }
 
     showFloat() {
@@ -591,25 +596,15 @@
       }
       this.floatPopup.classList.add('is-visible');
       this.floatPopup.setAttribute('aria-hidden', 'false');
-      if (this.mobileQuery.matches) {
-        this.floatUnderlay?.classList.add('is-visible');
-        window.dispatchEvent(new CustomEvent('theme:scroll:lock'));
-      }
       this.hasShownFloat = true;
-      window.removeEventListener('scroll', this.boundOnScroll);
     }
 
-    hideFloat(skipScrollUnlock = false) {
+    hideFloat() {
       if (!this.floatPopup) {
         return;
       }
       this.floatPopup.classList.remove('is-visible');
       this.floatPopup.setAttribute('aria-hidden', 'true');
-      this.floatUnderlay?.classList.remove('is-visible');
-      if (!skipScrollUnlock) {
-        window.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
-      }
-      window.removeEventListener('scroll', this.boundOnScroll);
     }
 
     dismissFloat(withDelay = false) {
@@ -617,7 +612,7 @@
 
       if (withDelay) {
         window.setTimeout(() => {
-          this.hideFloat(true);
+          this.hideFloat();
         }, this.floatDismissDelayMs);
         return;
       }
@@ -671,13 +666,13 @@
       "type": "text",
       "id": "float_title",
       "label": "Popup title",
-      "default": "Sign up to our Newsletter"
+      "default": "Get inspired by the world of Roberto Coin"
     },
     {
       "type": "text",
       "id": "float_button_text",
       "label": "Popup button text",
-      "default": "SIGN UP"
+      "default": "Sign up to our newsletter"
     },
     {
       "type": "range",
@@ -688,6 +683,16 @@
       "unit": "s",
       "label": "Desktop popup delay",
       "default": 3
+    },
+    {
+      "type": "range",
+      "id": "float_delay_seconds_mobile",
+      "min": 1,
+      "max": 30,
+      "step": 1,
+      "unit": "s",
+      "label": "Mobile popup delay",
+      "default": 15
     },
     {
       "type": "header",
