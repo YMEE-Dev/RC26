@@ -428,7 +428,7 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
     align-items: flex-start;
     gap: 24px;
     height: 160px;
-    padding: 30px 40px;
+    padding: calc(var(--announcement-height) + 20px) 40px;
   }
   /* header entrance + scroll hide/reveal: regions slide fully off-screen when
      body.header-scroll-hide is present (left→left, logo→top, right→right) and
@@ -992,6 +992,7 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
 .rc-m-spot {
   position: relative;
   width: 100%;
+  height: 400px;
   aspect-ratio: 1 / 1;
   overflow: hidden;
 }
@@ -1174,6 +1175,18 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
   font-size: 15px;
   letter-spacing: 0.01em;
   color: var(--rc-white);
+  text-transform: capitalize; /* title-case menu labels (paired with | downcase) */
+}
+/* trailing diagonal arrow on drill rows.
+   .rc-arrow sizing lives inside the >=1024px block, so size it explicitly here.
+   Shown on every row at phone width; tablet keeps it on featured/collection groups only. */
+.rc-m-grow .rc-arrow {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  opacity: 1;
+  transform: none;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .rc-m-cards {
@@ -1294,14 +1307,14 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
   align-items: center;
   justify-content: space-between;
   height: 72px;
-  padding: 20px 20px 0;
+  padding: calc(var(--announcement-height) + 20px) 20px 0;
   color: var(--rc-white);
   transition: transform 0.4s var(--rc-ease);
 }
 /* mobile: slide the bar up out of the top on scroll-down (theme's header-scroll-hide),
    mirroring the desktop logo's upward exit */
 body.header-scroll-hide .rc-mobile-bar {
-  transform: translateY(-100%);
+  transform: translateY(-150%);
 }
 @media (min-width: 1024px) {
   .rc-mobile-bar {
