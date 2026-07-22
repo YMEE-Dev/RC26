@@ -38,6 +38,15 @@
   box-sizing: border-box;
 }
 
+/* Announcement dismissed: collapse the space the header reserves for it so it
+   returns to the top. --ANNOUNCEMENT-HEIGHT-* are static on :root and
+   announcement.js only toggles .announcement__wrapper--closing (also present
+   pre-JS until the not-dismissed state is confirmed), so key --announcement-height
+   off that class — header and announcement then appear/disappear together. */
+:root:has(.announcement__wrapper--closing) {
+  --announcement-height: 0px;
+}
+
 .rc-nav button {
   font: inherit;
   color: inherit;
@@ -308,10 +317,11 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
   display: block;
   width: 100%;
   z-index: 6006;
-  height: 54px;
+  height: 60px;
 }
 @media (max-width: 1024px) {
   .rc-nav .rc-search-popdown .search-popdown {
+    height: 54px;
     padding: 0;
   }
 }
