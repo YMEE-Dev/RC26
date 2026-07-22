@@ -115,6 +115,9 @@
     panelsWrap.addEventListener('mouseleave', function () { hoverIntent(null); });
     panelsWrap.addEventListener('mouseenter', function () { clearTimeout(hiTimer); clearTimeout(closeTimer); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+    // scrolling while a panel is open closes it — the header slides away on scroll,
+    // so the trigger link disappears and an open panel would be left detached
+    window.addEventListener('scroll', function () { if (openKey) close(); }, { passive: true });
 
     /* ---- image crossfade reveal (Jewelry featured voices) ---- */
     var jewelPanel = panels['jewelry'];

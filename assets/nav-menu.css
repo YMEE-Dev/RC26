@@ -171,10 +171,7 @@ body:not(.header-scroll-hide) .rc-nav[data-stuck="1"]:not([data-open="1"]) .rc-n
    ========================================================================= */
 /* Always visible — never let the regions slide out even if header-scroll-hide is
    ever set (matches theme.css: body.has-always-visible-fixed-header.header-scroll-hide …). */
-body.has-always-visible-fixed-header.header-scroll-hide .rc-d-left,
-body.has-always-visible-fixed-header.header-scroll-hide .rc-d-logo,
-body.has-always-visible-fixed-header.header-scroll-hide .rc-d-right,
-body.has-always-visible-fixed-header.header-scroll-hide .rc-mobile-bar {
+body.has-always-visible-fixed-header.header-scroll-hide .rc-slide {
   transform: none !important;
 }
 /* No scroll-reveal blur on spotlight collections (theme hides .theme__header__scroll-blur). */
@@ -375,7 +372,10 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
    (plp-header-*): logo drops from the top first, then the side bars slide in. */
 @keyframes rcHeaderFromTop {
   from {
-    transform: translateY(-200px);
+    /* drop distance is overridable per context — the short mobile bar uses a
+       smaller value so the logo isn't hidden above the bar / behind the
+       announcement (which reads as a pop instead of a drop). */
+    transform: translateY(var(--rc-drop, -200px));
     opacity: 0;
   }
   to {
@@ -405,6 +405,44 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
 }
 
 /* =========================================================================
+   HEADER ENTRANCE + SCROLL HIDE/REVEAL — single source of truth.
+   Applied via direction classes on both the desktop regions
+   (.rc-d-left/.rc-d-logo/.rc-d-right) and the mobile bar slots, so the logo
+   drops from the top while the sides slide in from left/right.
+   - Entrance is gated on the theme's header-init-animation trigger
+     (body.plp-header-ready, added only after fonts/images decode) so the full
+     slide is painted; ungated it runs before first paint and the horizontal
+     travel is missed, reading as "all from the top".
+   - Scroll hide/reveal keys off body.header-scroll-hide (toggled by the theme's
+     HeaderComponent). calc(±(100% + 80px)) guarantees off-screen at any width.
+   ========================================================================= */
+.rc-slide {
+  transition: transform 0.8s var(--rc-ease);
+  will-change: transform;
+}
+body.plp-header-loading .rc-slide {
+  opacity: 0;
+}
+body.plp-header-ready:not(.plp-header-anim-done) .rc-slide--l {
+  animation: rcHeaderFromLeft 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+}
+body.plp-header-ready:not(.plp-header-anim-done) .rc-slide--t {
+  animation: rcHeaderFromTop 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+}
+body.plp-header-ready:not(.plp-header-anim-done) .rc-slide--r {
+  animation: rcHeaderFromRight 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+}
+body.header-scroll-hide .rc-slide--l {
+  transform: translateX(calc(-100% - 80px));
+}
+body.header-scroll-hide .rc-slide--t {
+  transform: translateY(calc(-100% - 80px));
+}
+body.header-scroll-hide .rc-slide--r {
+  transform: translateX(calc(100% + 80px));
+}
+
+/* =========================================================================
    DESKTOP — transparent header + hover mega-menu
    ========================================================================= */
 .rc-desktop {
@@ -430,19 +468,8 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
     height: 160px;
     padding: calc(var(--announcement-height) + 20px) 40px;
   }
-  /* header entrance + scroll hide/reveal: regions slide fully off-screen when
-     body.header-scroll-hide is present (left→left, logo→top, right→right) and
-     slide back when it's removed. nav-menu.js toggles the class by scroll
-     direction; calc(±(100% + 80px)) guarantees off-screen at any width. */
-  body.header-scroll-hide .rc-d-left {
-    transform: translateX(calc(-100% - 80px));
-  }
-  body.header-scroll-hide .rc-d-logo {
-    transform: translateY(calc(-100% - 80px));
-  }
-  body.header-scroll-hide .rc-d-right {
-    transform: translateX(calc(100% + 80px));
-  }
+  /* entrance + scroll hide/reveal come from the shared .rc-slide--l/t/r classes
+     (see top of file); the regions carry those classes in nav-mega-desktop.liquid. */
   /* while hidden the empty fixed bar must not intercept clicks on content below it */
   body.header-scroll-hide .rc-d-bar {
     pointer-events: none;
@@ -451,18 +478,12 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
     display: flex;
     align-items: flex-start;
     gap: 24px;
-    transition: transform 0.8s var(--rc-ease);
-    will-change: transform;
-    animation: rcHeaderFromLeft 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
   }
   .rc-d-right {
     display: flex;
     align-items: flex-start;
     gap: 24px;
     justify-content: flex-end;
-    transition: transform 0.8s var(--rc-ease);
-    will-change: transform;
-    animation: rcHeaderFromRight 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
   }
   .rc-d-icon {
     display: flex;
@@ -509,9 +530,6 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
   .rc-d-logo {
     display: inline-flex;
     align-items: center;
-    transition: transform 0.8s var(--rc-ease);
-    will-change: transform;
-    animation: rcHeaderFromTop 550ms 200ms cubic-bezier(0.05, 0, 0, 1) backwards;
   }
   .rc-d-logo img {
     height: 50px;
@@ -895,7 +913,12 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
    ========================================================================= */
 .rc-drawer {
   position: fixed;
-  inset: 0;
+  /* start below the fixed announcement bar so it stays visible while the menu is
+     open (falls back to full-screen when there's no announcement: height 0). */
+  top: var(--announcement-height, 0px);
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 6006;
   background: var(--rc-green);
   color: var(--rc-white);
@@ -1297,6 +1320,14 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
   position: sticky; /* solid: occupy space + stick on scroll */
   background: var(--rc-green);
 }
+/* Cart drawer open: the theme's cart-drawer sits well below the fixed header
+   (bar-wrap z-index 6005), so the header's top edge would intercept clicks meant
+   for the drawer. Drop the header beneath it while the cart is open — the theme
+   already hides its own header on theme:cart-drawer:open, so this matches. */
+body:has(cart-drawer.is-open) .rc-nav__bar-wrap {
+  z-index: 1;
+  pointer-events: none;
+}
 .rc-desktop {
   position: relative;
 }
@@ -1309,12 +1340,9 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
   height: 72px;
   padding: calc(var(--announcement-height) + 20px) 20px 0;
   color: var(--rc-white);
-  transition: transform 0.4s var(--rc-ease);
-}
-/* mobile: slide the bar up out of the top on scroll-down (theme's header-scroll-hide),
-   mirroring the desktop logo's upward exit */
-body.header-scroll-hide .rc-mobile-bar {
-  transform: translateY(-150%);
+  /* short bar: shrink the logo drop so it stays within the visible bar instead of
+     starting far above it (behind the announcement), which read as a pop. */
+  --rc-drop: -48px;
 }
 @media (min-width: 1024px) {
   .rc-mobile-bar {
@@ -1322,7 +1350,9 @@ body.header-scroll-hide .rc-mobile-bar {
   }
 }
 /* equal-width side slots (hamburger + cart) so the natural-width centre logo
-   sits dead-centre; the logo slot keeps its auto width */
+   sits dead-centre; the logo slot keeps its auto width. Entrance + scroll
+   hide/reveal come from the shared .rc-slide--l/t/r classes (see top of file);
+   the slots carry those classes in nav-header.liquid. */
 .rc-mobile-bar__slot {
   display: flex;
   align-items: center;
@@ -1338,6 +1368,12 @@ body.header-scroll-hide .rc-mobile-bar {
   flex: 0 1 auto;
   min-width: 0;
   justify-content: center;
+}
+/* clip the side slots while they sit off-screen (entrance travel + scroll-hide) —
+   position:fixed children ignore html's overflow clip on iOS Safari. overflow-x
+   clip leaves the vertical axis visible so the logo can still drop from the top. */
+.rc-mobile-bar {
+  overflow-x: clip;
 }
 /* cap the (very wide) wordmark so it never overruns the equal side slots;
    height:auto keeps the aspect ratio (no squish) */
