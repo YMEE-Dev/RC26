@@ -425,10 +425,10 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
   .rc-d-bar__grid {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
-    align-items: center;
+    align-items: flex-start;
     gap: 24px;
     height: 160px;
-    padding: 0 40px;
+    padding: 30px 40px;
   }
   /* header entrance + scroll hide/reveal: regions slide fully off-screen when
      body.header-scroll-hide is present (left→left, logo→top, right→right) and
@@ -489,7 +489,7 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
     font-family: var(--rc-body);
     font-size: 12px;
     font-weight: 400;
-    line-height: 26px;
+    line-height: 22px;
     letter-spacing: 0.13em;
     text-transform: uppercase;
     color: #fff;
@@ -763,19 +763,17 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
 
   .rc-d-voice {
     color: var(--rc-white);
-    padding: 8px 0;
+    padding: 6px 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
     white-space: nowrap;
-    /* force Title Case regardless of the menu item's stored casing
-       (paired with `| downcase` in the template) */
     text-transform: capitalize;
     transition: opacity 0.2s ease;
   }
   .rc-d-voice:hover {
-    opacity: 0.62;
+    opacity: 0.6;
   }
   .rc-d-voice--body {
     font-family: var(--rc-body);
