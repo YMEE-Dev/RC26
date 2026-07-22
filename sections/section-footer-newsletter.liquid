@@ -352,6 +352,8 @@
     right: 40px;
     bottom: 40px;
     z-index: 102;
+    display: flex;
+    flex-direction: column;
     width: min(397px, calc(100vw - 80px));
     padding: 20px;
     background: rgba(255, 255, 255, 0.8);
@@ -372,13 +374,16 @@
     transition: transform 0.45s ease, opacity 0.3s ease;
   }
 
+  /* In-flow, right-aligned above the heading (matches Figma), not an
+     overlapping corner icon. */
+  /* Negative margins let the larger tap target sit flush in the corner
+     (~20px inset, matching Figma) without pushing the heading down. */
   .footer-newsletter-float__close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 28px;
-    height: 28px;
+    position: static;
+    align-self: flex-end;
+    margin: -8px -8px 2px 0;
     border: 0;
+    padding: 8px;
     background: transparent;
     color: currentColor;
     display: inline-flex;
@@ -387,19 +392,31 @@
     cursor: pointer;
   }
 
-  .footer-newsletter-float__close .icon {
-    width: 12px;
-    height: 12px;
+  .footer-newsletter-float__close svg {
+    display: block;
+    width: 24px;
+    height: 24px;
   }
 
   .footer-newsletter-float__title {
     margin: 0 0 20px;
-    padding: 0 18px;
     text-align: center;
   }
 
   .footer-newsletter-float__cta {
     min-height: 44px;
+  }
+
+  /* Force a dark outline on the light translucent panel, independent of the
+     section color scheme (whose secondary border can resolve to white).
+     Selector matches the theme's `.btn--outline.btn--secondary` specificity plus one. */
+  .footer-newsletter-float__cta.btn--outline.btn--secondary {
+    --btn-border: #111;
+    --btn-text: #111;
+    --btn-border-hover: #111;
+    --btn-text-hover: #111;
+    --btn-bg: transparent;
+    --btn-bg-hover: transparent;
   }
 
   @media only screen and (max-width: 767px) {
@@ -431,11 +448,6 @@
 
     .footer-newsletter-float.is-visible {
       transform: translate3d(0, 0, 0);
-    }
-
-    .footer-newsletter-float__title {
-      margin-bottom: 16px;
-      padding-right: 22px;
     }
 
     .footer-newsletter-float__underlay {
