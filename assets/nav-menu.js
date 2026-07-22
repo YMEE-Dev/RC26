@@ -253,6 +253,12 @@
     drawer.querySelectorAll('[data-rc-drawer-close]').forEach(function (b) {
       b.addEventListener('click', closeDrawer);
     });
+    // cart toggle inside the drawer: close the drawer so the cart drawer (lower
+    // z-index than this full-screen overlay) isn't left hidden behind it. The
+    // theme's own [data-cart-toggle] handler still opens the cart on the same click.
+    drawer.querySelectorAll('[data-cart-toggle]').forEach(function (b) {
+      b.addEventListener('click', closeDrawer);
+    });
     if (scroller) scroller.addEventListener('scroll', updateScrollTint, { passive: true });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDrawer(); });
 
