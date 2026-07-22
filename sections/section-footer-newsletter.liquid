@@ -481,6 +481,8 @@
       this.floatUnderlay = this.querySelector('[data-newsletter-float-underlay]');
       this.lastFocusedElement = null;
       this.dismissCookie = 'footer_newsletter_float_dismissed';
+      this.seenCookie = 'footer_newsletter_float_seen';
+      this.seenCookieHours = 24;
       this.mobileQuery = window.matchMedia('(max-width: 767px)');
       this.hasShownFloat = false;
       this.floatDelayMs = Number(this.floatPopup?.dataset.newsletterFloatDelay || 3) * 1000;
@@ -573,8 +575,14 @@
       this.focusWithoutScroll(focusTarget);
     }
 
+    // The popup is suppressed once a visitor has either seen it or dismissed it,
+    // so it does not reappear on every page during the same visit.
+    isFloatSuppressed() {
+      return this.readCookie(this.dismissCookie) === '1' || this.readCookie(this.seenCookie) === '1';
+    }
+
     setupFloatPopup() {
-      if (!this.floatPopup || this.readCookie(this.dismissCookie) === '1') {
+      if (!this.floatPopup || this.isFloatSuppressed()) {
         return;
       }
 
@@ -583,7 +591,7 @@
       const delayMs = this.mobileQuery.matches ? this.mobileFloatDelayMs : this.floatDelayMs;
 
       window.setTimeout(() => {
-        if (this.readCookie(this.dismissCookie) === '1' || this.hasShownFloat) {
+        if (this.isFloatSuppressed() || this.hasShownFloat) {
           return;
         }
         this.showFloat();
@@ -597,6 +605,8 @@
       this.floatPopup.classList.add('is-visible');
       this.floatPopup.setAttribute('aria-hidden', 'false');
       this.hasShownFloat = true;
+      // Remember it was shown so it does not reappear on subsequent page views.
+      this.writeCookie(this.seenCookie, '1', this.seenCookieHours);
     }
 
     hideFloat() {
