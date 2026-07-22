@@ -115,6 +115,9 @@
     panelsWrap.addEventListener('mouseleave', function () { hoverIntent(null); });
     panelsWrap.addEventListener('mouseenter', function () { clearTimeout(hiTimer); clearTimeout(closeTimer); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+    // scrolling while a panel is open closes it — the header slides away on scroll,
+    // so the trigger link disappears and an open panel would be left detached
+    window.addEventListener('scroll', function () { if (openKey) close(); }, { passive: true });
 
     /* ---- image crossfade reveal (Jewelry featured voices) ---- */
     var jewelPanel = panels['jewelry'];
@@ -248,6 +251,12 @@
       b.addEventListener('click', back);
     });
     drawer.querySelectorAll('[data-rc-drawer-close]').forEach(function (b) {
+      b.addEventListener('click', closeDrawer);
+    });
+    // cart toggle inside the drawer: close the drawer so the cart drawer (lower
+    // z-index than this full-screen overlay) isn't left hidden behind it. The
+    // theme's own [data-cart-toggle] handler still opens the cart on the same click.
+    drawer.querySelectorAll('[data-cart-toggle]').forEach(function (b) {
       b.addEventListener('click', closeDrawer);
     });
     if (scroller) scroller.addEventListener('scroll', updateScrollTint, { passive: true });

@@ -24,7 +24,7 @@
   <div class="rc-d-bar">
     <div class="rc-d-bar__grid">
       {%- comment -%} left: search + primary stack (menu-driven) {%- endcomment -%}
-      <div class="rc-d-left">
+      <div class="rc-d-left rc-slide rc-slide--l">
         <button
           type="button"
           class="rc-d-icon"
@@ -57,19 +57,21 @@
       </div>
 
       {%- comment -%} center: wordmark {%- endcomment -%}
-      <a class="rc-d-logo" href="{{ routes.root_url }}" data-rc-close aria-label="{{ shop.name }} — home">
+      <a class="rc-d-logo rc-slide rc-slide--t" href="{{ routes.root_url }}" data-rc-close aria-label="{{ shop.name }} — home">
         <img src="{{ logo }}" alt="{{ shop.name }}" width="180" height="50">
       </a>
 
       {%- comment -%} right: utility stack + bag (hardcoded — some items trigger JS) {%- endcomment -%}
-      <div class="rc-d-right">
+      <div class="rc-d-right rc-slide rc-slide--r">
         <nav class="rc-d-stack rc-d-stack--utility" aria-label="Utility">
           <a class="rc-d-link" href="{% render 'nav-url', key: 'find-a-boutique' %}" data-rc-close>Find a Boutique</a>
           <a class="rc-d-link" href="{% render 'nav-url', key: 'concierge' %}" data-rc-close>Concierge</a>
           <a class="rc-d-link" href="{% render 'nav-url', key: 'login' %}" data-rc-close>Log In</a>
-          <a class="rc-d-link" href="{% render 'nav-url', key: 'keep-in-touch' %}" data-rc-newsletter data-rc-close
-            >Keep in Touch</a
-          >
+          {% comment %}
+            <a class="rc-d-link" href="{% render 'nav-url', key: 'keep-in-touch' %}" data-rc-newsletter data-rc-close
+              >Keep in Touch
+            </a>
+          {% endcomment %}
         </nav>
         <a
           class="rc-d-bag"

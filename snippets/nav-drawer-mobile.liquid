@@ -103,12 +103,14 @@
             </svg>
             <span>Log In</span></a
           >
-          <a class="rc-m-util__item" href="{% render 'nav-url', key: 'keep-in-touch' %}" data-rc-newsletter>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M3 6h18v12H3z M3.5 7l8.5 6 8.5-6" stroke="rgba(255,255,255,0.88)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
-            </svg>
-            <span>Keep in Touch</span></a
-          >
+          {% comment %}
+            <a class="rc-m-util__item" href="{% render 'nav-url', key: 'keep-in-touch' %}" data-rc-newsletter>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M3 6h18v12H3z M3.5 7l8.5 6 8.5-6" stroke="rgba(255,255,255,0.88)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <span>Keep in Touch</span></a
+            >
+          {% endcomment %}
         </nav>
       </div>
     </div>
@@ -153,25 +155,63 @@
         <div class="rc-m-cat-body">
           <div class="rc-m-groups">
             {%- for group in linklists[panel_menu].links -%}
-              <div class="rc-m-group">
+              {%- liquid
+                assign group_head = group.title | downcase
+                assign is_featured_group = false
+                if group_head contains 'featured' or group_head contains 'collection'
+                  assign is_featured_group = true
+                endif
+              -%}
+              <div class="rc-m-group{% if is_featured_group %} rc-m-group--feat{% endif %}">
                 {%- if group.title != blank -%}
                   <div class="rc-label rc-m-group__head">{{ group.title | strip_html | escape }}</div>
                 {%- endif -%}
                 {%- for l in group.links -%}
                   <a class="rc-m-grow" href="{{ l.url }}"
-                    ><span class="rc-m-grow__label">
-                      {{- l.title | strip_html | downcase | capitalize | escape -}}
-                    </span></a
-                  >
+                    ><span class="rc-m-grow__label">{{ l.title | strip_html | downcase | escape }}</span>
+                    {%- render 'icon-nav-arrow', size: 'sm' -%}
+                  </a>
                 {%- else -%}
                   <a class="rc-m-grow" href="{{ group.url }}"
-                    ><span class="rc-m-grow__label">
-                      {{- group.title | strip_html | downcase | capitalize | escape -}}
-                    </span></a
-                  >
+                    ><span class="rc-m-grow__label">{{ group.title | strip_html | downcase | escape }}</span>
+                    {%- render 'icon-nav-arrow', size: 'sm' -%}
+                  </a>
                 {%- endfor -%}
               </div>
             {%- endfor -%}
+
+            {%- comment -%}
+              Featured tiles mirrored from the desktop mega panel (nav-mega-desktop):
+              those are hardcoded imagery, not part of panel_menu, so surface them here
+              as text links with a trailing arrow. Keep keys/titles in sync with desktop.
+            {%- endcomment -%}
+            {%- case block.settings.panel_style -%}
+              {%- when 'occasions' -%}
+                <div class="rc-m-group rc-m-group--feat">
+                  <div class="rc-label rc-m-group__head">Featured</div>
+                  <a class="rc-m-grow" href="{% render 'nav-url', key: 'gift-ideas' %}"
+                    ><span class="rc-m-grow__label">Gift Ideas</span>
+                    {%- render 'icon-nav-arrow', size: 'sm' -%}
+                  </a>
+                  <a class="rc-m-grow" href="{% render 'nav-url', key: 'beyond-jewels' %}"
+                    ><span class="rc-m-grow__label">Beyond Jewels</span>
+                    {%- render 'icon-nav-arrow', size: 'sm' -%}
+                  </a>
+                </div>
+              {%- when 'maison' -%}
+                {%- liquid
+                  assign maison_article = blogs.brand.articles.first
+                  assign maison_href = maison_article.url | default: blogs.brand.url | default: routes.root_url
+                  assign maison_title = maison_article.title | default: 'A Dream Campaign'
+                -%}
+                <div class="rc-m-group rc-m-group--feat">
+                  <div class="rc-label rc-m-group__head">Featured</div>
+                  <a class="rc-m-grow" href="{{ maison_href }}"
+                    ><span class="rc-m-grow__label">{{ maison_title | escape }}</span>
+                    {%- render 'icon-nav-arrow', size: 'sm' -%}
+                  </a>
+                </div>
+            {%- endcase -%}
           </div>
         </div>
       </div>

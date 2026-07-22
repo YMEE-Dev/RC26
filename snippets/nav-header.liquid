@@ -13,19 +13,25 @@
 -%}
 
 <div class="rc-nav" data-transparent="{{ rc_transparent }}" data-open="0" data-search-url="{{ routes.search_url }}">
-  <div class="rc-nav__bar-wrap">
+  {%- comment -%}
+    data-header-height: the theme's setVars() (theme.js) measures the first
+    [data-header-height] to publish --header-height / --content-full / --content-min.
+    The legacy header carries it too but is display:none, so it measured 0. This bar
+    is first in the DOM, so the theme reads the real header height from here instead.
+  {%- endcomment -%}
+  <div class="rc-nav__bar-wrap" data-header-height>
 
     {%- comment -%} closed mobile / tablet bar {%- endcomment -%}
     <div class="rc-mobile-bar">
-      <div class="rc-mobile-bar__slot">
+      <div class="rc-mobile-bar__slot rc-slide rc-slide--l">
         <button type="button" data-rc-drawer-open aria-label="Open menu">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M3 9h18M3 15h18" stroke="currentColor" stroke-width="1.3"></path></svg>
         </button>
       </div>
-      <a class="rc-mobile-bar__slot" href="{{ routes.root_url }}" aria-label="{{ shop.name }} — home">
+      <a class="rc-mobile-bar__slot rc-slide rc-slide--t" href="{{ routes.root_url }}" aria-label="{{ shop.name }} — home">
         <img class="rc-mobile-bar__logo" src="{{ 'nav-rc-logo-light.svg' | asset_url }}" alt="{{ shop.name }}" width="120" height="27">
       </a>
-      <div class="rc-mobile-bar__slot">
+      <div class="rc-mobile-bar__slot rc-slide rc-slide--r">
         <a href="{{ routes.cart_url }}" data-cart-toggle aria-label="{{ 'cart.general.title' | t | default: 'Cart' }}">
           {%- render 'icon-cart' -%}
         </a>
