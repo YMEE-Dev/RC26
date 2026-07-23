@@ -2,6 +2,10 @@
   nav-header — mount point for the hardcoded Roberto Coin navigation (replaces Qikify).
   Renders the closed mobile bar, the desktop transparent header + mega-menu, and the drill-down drawer.
   Transparent overlay on every template (the bar sits over the page hero — no green band).
+
+  @param {string} [default_mode] - Initial header colour scheme ('light' | 'dark'),
+    from the header section's per-template header_default_mode. Drives data-scheme
+    on first paint; nav-menu.js's initScheme overrides it where observer sections exist.
 {%- endcomment -%}
 
 {{ 'nav-menu.css' | asset_url | stylesheet_tag }}
@@ -10,9 +14,16 @@
   assign rc_transparent = 1
   assign rc_menu = section.settings.rc_menu_linklist | default: 'main-menu'
   assign rc_blocks = section.blocks
+
+  # Initial colour scheme rendered server-side (correct on first paint, no flash).
+  # Reuse the header's existing per-template header_default_mode (passed in as
+  # default_mode). Where a page has [data-header-observer-mode] sections,
+  # nav-menu.js's initScheme takes over per scroll; where there are none it
+  # early-returns and this value stays.
+  assign rc_scheme = default_mode | default: 'dark'
 -%}
 
-<div class="rc-nav" data-transparent="{{ rc_transparent }}" data-open="0" data-search-url="{{ routes.search_url }}">
+<div class="rc-nav" data-transparent="{{ rc_transparent }}" data-scheme="{{ rc_scheme }}" data-open="0" data-search-url="{{ routes.search_url }}">
   {%- comment -%}
     data-header-height: the theme's setVars() (theme.js) measures the first
     [data-header-height] to publish --header-height / --content-full / --content-min.
@@ -22,16 +33,22 @@
   <div class="rc-nav__bar-wrap" data-header-height>
 
     {%- comment -%} closed mobile / tablet bar {%- endcomment -%}
+    {%- comment -%}
+      Mobile bar slots are plain (no rc-slide classes): the mobile directional
+      slide animates the CONTENT inside each slot, and the left/right slots are
+      their own overflow-clip containers — see .rc-mobile-bar__slot in nav-menu.css.
+      (Desktop still uses .rc-slide--l/t/r on the .rc-d-* regions.)
+    {%- endcomment -%}
     <div class="rc-mobile-bar">
-      <div class="rc-mobile-bar__slot rc-slide rc-slide--l">
+      <div class="rc-mobile-bar__slot">
         <button type="button" data-rc-drawer-open aria-label="Open menu">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M3 9h18M3 15h18" stroke="currentColor" stroke-width="1.3"></path></svg>
         </button>
       </div>
-      <a class="rc-mobile-bar__slot rc-slide rc-slide--t" href="{{ routes.root_url }}" aria-label="{{ shop.name }} — home">
+      <a class="rc-mobile-bar__slot" href="{{ routes.root_url }}" aria-label="{{ shop.name }} — home">
         <img class="rc-mobile-bar__logo" src="{{ 'nav-rc-logo-light.svg' | asset_url }}" alt="{{ shop.name }}" width="120" height="27">
       </a>
-      <div class="rc-mobile-bar__slot rc-slide rc-slide--r">
+      <div class="rc-mobile-bar__slot">
         <a href="{{ routes.cart_url }}" data-cart-toggle aria-label="{{ 'cart.general.title' | t | default: 'Cart' }}">
           {%- render 'icon-cart' -%}
         </a>
