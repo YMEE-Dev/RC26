@@ -27,6 +27,9 @@
   assign block_count_desktop = 0
   assign block_count_mobile = 0
   assign announcement_height = 'max(calc(var(--font-' | append: text_font_size | append: ') * var(--line-height-normal)), 36px)'
+  if section.settings.bar_height > 0
+    assign announcement_height = section.settings.bar_height | append: 'px'
+  endif
   assign announcement_cookie_name = 'announcement_bar_closed'
   assign announcement_modifier = ''
   assign style_root = ''

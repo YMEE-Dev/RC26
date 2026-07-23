@@ -33,16 +33,22 @@
   <div class="rc-nav__bar-wrap" data-header-height>
 
     {%- comment -%} closed mobile / tablet bar {%- endcomment -%}
+    {%- comment -%}
+      Mobile bar slots are plain (no rc-slide classes): the mobile directional
+      slide animates the CONTENT inside each slot, and the left/right slots are
+      their own overflow-clip containers — see .rc-mobile-bar__slot in nav-menu.css.
+      (Desktop still uses .rc-slide--l/t/r on the .rc-d-* regions.)
+    {%- endcomment -%}
     <div class="rc-mobile-bar">
-      <div class="rc-mobile-bar__slot rc-slide rc-slide--l">
+      <div class="rc-mobile-bar__slot">
         <button type="button" data-rc-drawer-open aria-label="Open menu">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M3 9h18M3 15h18" stroke="currentColor" stroke-width="1.3"></path></svg>
         </button>
       </div>
-      <a class="rc-mobile-bar__slot rc-slide rc-slide--t" href="{{ routes.root_url }}" aria-label="{{ shop.name }} — home">
+      <a class="rc-mobile-bar__slot" href="{{ routes.root_url }}" aria-label="{{ shop.name }} — home">
         <img class="rc-mobile-bar__logo" src="{{ 'nav-rc-logo-light.svg' | asset_url }}" alt="{{ shop.name }}" width="120" height="27">
       </a>
-      <div class="rc-mobile-bar__slot rc-slide rc-slide--r">
+      <div class="rc-mobile-bar__slot">
         <a href="{{ routes.cart_url }}" data-cart-toggle aria-label="{{ 'cart.general.title' | t | default: 'Cart' }}">
           {%- render 'icon-cart' -%}
         </a>

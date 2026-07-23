@@ -47,6 +47,37 @@
   --announcement-height: 0px;
 }
 
+/* Announcement bar rides with the fixed header: the theme renders it
+   position:absolute (so it scrolls away on its own). Pin it to the viewport top
+   and hide/reveal it in step with the header via body.header-scroll-hide — the
+   same signal that drives the header slide. Kept visible on always-visible-header
+   templates (spotlight / timeline), matching the header. */
+.announcement__wrapper--top {
+  position: fixed;
+  /* literal easing — the announcement is outside .rc-nav so var(--rc-ease) is
+     undefined here, which invalidated the whole transition (bar snapped, no slide). */
+  transition:
+    transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1),
+    top 0.3s ease;
+  will-change: transform;
+  --rc-drop: -100%; /* entrance drops in by its own height (see rcHeaderFromTop) */
+}
+body.header-scroll-hide .announcement__wrapper--top {
+  transform: translateY(-100%);
+}
+body.has-always-visible-fixed-header.header-scroll-hide .announcement__wrapper--top {
+  transform: none;
+}
+/* Load entrance — drop in from the top, reusing the header keyframe + the same
+   plp-header-ready gate so it animates in step with the header (not before first
+   paint). Hidden during loading to avoid a visible→hidden→drop flash. */
+body.plp-header-loading .announcement__wrapper--top {
+  opacity: 0;
+}
+body.plp-header-ready:not(.plp-header-anim-done) .announcement__wrapper--top {
+  animation: rcHeaderFromTop 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+}
+
 .rc-nav button {
   font: inherit;
   color: inherit;
@@ -160,14 +191,18 @@
   backdrop-filter: blur(0px);
   -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 58%, transparent 100%);
   mask-image: linear-gradient(180deg, #000 0%, #000 58%, transparent 100%);
+  /* enters from up top: starts lifted above its slot, drops to 0 when stuck */
+  transform: translateY(-100%);
   transition:
     opacity 0.35s ease,
+    transform 0.45s var(--rc-ease),
     -webkit-backdrop-filter 0.35s ease,
     backdrop-filter 0.35s ease;
-  will-change: opacity, backdrop-filter;
+  will-change: opacity, transform, backdrop-filter;
 }
 body:not(.header-scroll-hide) .rc-nav[data-stuck="1"]:not([data-open="1"]) .rc-nav__bar-wrap::before {
   opacity: 1;
+  transform: translateY(0);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
 }
@@ -964,7 +999,7 @@ body.header-scroll-hide .rc-slide--r {
   left: 0;
   right: 0;
   z-index: 5;
-  height: 72px;
+  height: 50px;
   padding: 20px 20px 0;
   display: flex;
   align-items: center;
@@ -1337,6 +1372,13 @@ body:has(cart-drawer.is-open) .rc-nav__bar-wrap {
   z-index: 1;
   pointer-events: none;
 }
+/* Search popdown open: drop the header beneath the popdown's overlay so it reads
+   as dimmed underneath it. The popdown panel itself is fixed at z6006 and still
+   covers the top strip; only the bar-wrap needs to fall below the underlay. */
+.rc-nav:has(.rc-search-popdown details[open]) .rc-nav__bar-wrap {
+  z-index: 1;
+  pointer-events: none;
+}
 .rc-desktop {
   position: relative;
 }
@@ -1346,43 +1388,76 @@ body:has(cart-drawer.is-open) .rc-nav__bar-wrap {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 72px;
-  padding: calc(var(--announcement-height) + 20px) 20px 0;
+  height: 50px;
+  /* Sit below the fixed announcement via a relative shift (not top padding), matching
+     the drawer header (offset the same way via .rc-drawer top:var(--announcement-height)).
+     Using position (not padding) keeps offsetHeight unchanged so --header-height is too. */
+  position: relative;
+  top: var(--announcement-height, 0px);
+  padding: 20px 20px 0;
   color: var(--rc-white);
-  /* short bar: shrink the logo drop so it stays within the visible bar instead of
-     starting far above it (behind the announcement), which read as a pop. */
-  --rc-drop: -48px;
+  --rc-drop: -48px; /* short bar: small logo entrance drop */
 }
 @media (min-width: 1024px) {
   .rc-mobile-bar {
     display: none;
   }
 }
-/* equal-width side slots (hamburger + cart) so the natural-width centre logo
-   sits dead-centre; the logo slot keeps its auto width. Entrance + scroll
-   hide/reveal come from the shared .rc-slide--l/t/r classes (see top of file);
-   the slots carry those classes in nav-header.liquid. */
+
 .rc-mobile-bar__slot {
   display: flex;
   align-items: center;
 }
 .rc-mobile-bar__slot:first-child,
 .rc-mobile-bar__slot:last-child {
-  flex: 0 0 36px;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: visible;
+}
+.rc-mobile-bar__slot:first-child {
+  justify-content: flex-start;
 }
 .rc-mobile-bar__slot:last-child {
   justify-content: flex-end;
 }
 .rc-mobile-bar__slot:nth-child(2) {
-  flex: 0 1 auto;
-  min-width: 0;
+  flex: 0 0 auto;
   justify-content: center;
+  overflow: visible; /* logo slides UP unclipped */
 }
-/* clip the side slots while they sit off-screen (entrance travel + scroll-hide) —
-   position:fixed children ignore html's overflow clip on iOS Safari. overflow-x
-   clip leaves the vertical axis visible so the logo can still drop from the top. */
-.rc-mobile-bar {
-  overflow-x: clip;
+
+.rc-nav .rc-mobile-bar .rc-mobile-bar__slot > * {
+  transition:
+    transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1),
+    color 0.3s ease,
+    filter 0.3s ease;
+  will-change: transform;
+}
+/* load entrance — gated on the theme's header-init trigger (hidden until then) */
+body.plp-header-loading .rc-mobile-bar__slot > * {
+  opacity: 0;
+}
+body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-bar__slot:first-child > * {
+  animation: rcHeaderFromLeft 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+}
+body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-bar__slot:nth-child(2) > * {
+  animation: rcHeaderFromTop 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+}
+body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-bar__slot:last-child > * {
+  animation: rcHeaderFromRight 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+}
+/* scroll-down: hamburger exits left, logo up, cart right (reverse in on scroll-up) */
+body.header-scroll-hide .rc-mobile-bar__slot:first-child > * {
+  transform: translateX(-250%);
+}
+body.header-scroll-hide .rc-mobile-bar__slot:nth-child(2) > * {
+  transform: translateY(calc(-100% - var(--announcement-height, 0px) - 60px));
+}
+body.header-scroll-hide .rc-mobile-bar__slot:last-child > * {
+  transform: translateX(250%);
+}
+body.has-always-visible-fixed-header.header-scroll-hide .rc-mobile-bar__slot > * {
+  transform: none;
 }
 /* cap the (very wide) wordmark so it never overruns the equal side slots;
    height:auto keeps the aspect ratio (no squish) */

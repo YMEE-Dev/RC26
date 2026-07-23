@@ -282,6 +282,12 @@
     var sections = [].slice.call(document.querySelectorAll('[data-header-observer-mode]'));
     if (!sections.length) return;
 
+    // Server-rendered default from the header's header_default_mode (captured
+    // before update() mutates data-scheme). Used when no observer section sits
+    // under the bar — e.g. an article whose only marked section is at the bottom,
+    // where hardcoding 'light' would wrongly flip a dark-default page to light.
+    var defaultMode = root.getAttribute('data-scheme') === 'dark' ? 'dark' : 'light';
+
     function headerHeight() {
       var bar = root.querySelector('.rc-d-bar__grid');
       if (bar && bar.offsetParent !== null) return bar.offsetHeight;
@@ -296,7 +302,7 @@
           return sections[i].getAttribute('data-header-observer-mode') === 'dark' ? 'dark' : 'light';
         }
       }
-      return 'light';
+      return defaultMode;
     }
     var raf = null;
     function update() {
