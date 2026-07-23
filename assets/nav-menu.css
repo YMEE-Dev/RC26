@@ -352,13 +352,20 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
   display: block;
   width: 100%;
   z-index: 6006;
-  height: 60px;
+  /* Match the live theme's search panel proportions: a roomy panel with the input
+     box vertically centred (live inherits the tall header height ≈160px). The nav
+     context strips that, so set it explicitly and let wrapper/main fill it. */
+  height: 160px;
 }
 @media (max-width: 1024px) {
   .rc-nav .rc-search-popdown .search-popdown {
-    height: 54px;
+    height: 90px;
     padding: 0;
   }
+}
+.rc-nav .rc-search-popdown .search-popdown > .wrapper,
+.rc-nav .rc-search-popdown .search-popdown__main {
+  height: 100%;
 }
 .rc-nav .rc-search-popdown .search-popdown__main {
   background: #fcfbf9;
