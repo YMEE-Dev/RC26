@@ -13,7 +13,7 @@
 
 {%- liquid
   assign logo = 'nav-rc-logo-light.svg' | asset_url
-  assign jewelry_spotlight = 'nav-jewelry-hero.png' | asset_url
+  assign jewelry_spotlight = 'https://cdn.shopify.com/s/files/1/1007/1697/0327/files/roberto-coin-homepage-july.jpg?v=1784714833'
 
   assign rc_menu = rc_menu | default: section.settings.rc_menu_linklist | default: 'main-menu'
   assign nav_blocks = blocks | default: section.blocks
@@ -173,15 +173,15 @@
                     class="rc-d-imgzone__layer"
                     data-rc-img-front
                     data-default="{{ jewelry_spotlight }}"
-                    style="background-image:url('{{ jewelry_spotlight }}'); background-position:center 12%;"
+                    style="background-image:url('{{ jewelry_spotlight }}'); background-position:center;"
                   ></div>
                 </div>
                 <div class="rc-d-imgzone__scrim"></div>
                 <div class="rc-d-imgzone__caption">
                   <span class="rc-eyebrow" style="display:block;color:rgba(255,255,255,0.85);margin-bottom:6px;"
-                    >Discover Our</span
+                    >Discover the Collection</span
                   >
-                  <div class="rc-display">{{ block.settings.panel_heading | default: 'Jewelry' | escape }}</div>
+                  <div class="rc-display">{{ block.settings.panel_heading | default: 'Love in Verona' | escape }}</div>
                 </div>
               </div>
           {%- endcase -%}
