@@ -12,7 +12,7 @@
 {%- liquid
   assign logo = 'nav-rc-logo-light.svg' | asset_url
   assign img_root = 'nav-maison-cover.jpg' | asset_url
-  assign img_jewelry = 'nav-jewelry-hero.png' | asset_url
+  assign img_jewelry = 'https://cdn.shopify.com/s/files/1/1007/1697/0327/files/roberto-coin-homepage-july.jpg?v=1784714833'
   assign img_occasions = 'nav-occasions-1.png' | asset_url
   assign img_maison = 'nav-concierge.jpg' | asset_url
 
@@ -125,12 +125,15 @@
           when 'occasions'
             assign node_img = img_occasions
             assign node_eyebrow = 'Discover Our'
+            assign node_url = ''
           when 'maison'
             assign node_img = img_maison
             assign node_eyebrow = 'Discover The'
+            assign node_url = ''
           else
             assign node_img = img_jewelry
-            assign node_eyebrow = 'Discover Our'
+            assign node_eyebrow = 'Discover the Collection'
+            assign node_url = collections['love-in-verona'].url | default: '/collections/love-in-verona'
         endcase
         assign node_title = block.settings.panel_heading
         if node_title == blank
@@ -145,6 +148,9 @@
             <div class="rc-eyebrow rc-m-cap__eyebrow">{{ node_eyebrow }}</div>
             <div class="rc-m-cap__title">{{ node_title | escape }}</div>
           </div>
+          {%- if node_url != blank -%}
+            <a class="rc-m-spot__link" href="{{ node_url }}" aria-label="Discover the {{ node_title | escape }} collection"></a>
+          {%- endif -%}
         </div>
         <button type="button" class="rc-m-back rc-m-back--sticky" data-rc-back>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">

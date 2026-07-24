@@ -115,6 +115,12 @@ body.plp-header-ready:not(.plp-header-anim-done) .announcement__wrapper--top {
   height: 20px;
   color: #fff;
 }
+/* Desktop search + cart glyphs at 24px to match the live/main header (≈20% larger). */
+.rc-nav .rc-d-icon .icon,
+.rc-nav .rc-d-bag .icon {
+  width: 24px;
+  height: 24px;
+}
 .rc-nav .icon [stroke]:not([stroke="none"]) {
   stroke: currentColor;
 }
@@ -517,7 +523,9 @@ body.header-scroll-hide .rc-slide--r {
     align-items: flex-start;
     gap: 24px;
     height: 160px;
-    padding: calc(var(--announcement-height) + 20px) 40px;
+    /* Top gap matches the live/main header (40px above the menu row). The
+       announcement height stacks on top so the menu clears the bar when shown. */
+    padding: calc(var(--announcement-height) + 40px) 40px;
   }
   /* entrance + scroll hide/reveal come from the shared .rc-slide--l/t/r classes
      (see top of file); the regions carry those classes in nav-mega-desktop.liquid. */
@@ -1083,6 +1091,12 @@ body.header-scroll-hide .rc-slide--r {
   background-size: cover;
   background-position: center;
 }
+/* full-cover click target over the spotlight (links to the collection) */
+.rc-m-spot__link {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+}
 .rc-m-cover--zoom {
   animation: rcZoom 9s ease-out both;
   transform-origin: center;
@@ -1145,7 +1159,10 @@ body.header-scroll-hide .rc-slide--r {
 }
 .rc-m-back--sticky {
   position: sticky;
-  top: 72px;
+  /* Stick flush against the 50px drawer header so the solid header + solid BACK
+     button form a continuous cover — no transparent gap for scrolling menu items
+     to show through. (Tablet overrides both to 76px below.) */
+  top: 50px;
   z-index: 4;
 }
 .rc-nav .rc-m-back--top {
