@@ -1153,7 +1153,10 @@ body.header-scroll-hide .rc-slide--r {
 }
 .rc-m-back--sticky {
   position: sticky;
-  top: 72px;
+  /* Stick flush against the 50px drawer header so the solid header + solid BACK
+     button form a continuous cover — no transparent gap for scrolling menu items
+     to show through. (Tablet overrides both to 76px below.) */
+  top: 50px;
   z-index: 4;
 }
 .rc-nav .rc-m-back--top {
