@@ -87,7 +87,7 @@
         {%- render 'icon-close' -%}
       </button>
       <p class="footer-newsletter-float__title h4">
-        {{ section.settings.float_title | default: 'Get inspired by the world|of Roberto Coin' | escape | replace: '|', '<br>' }}
+        {{ section.settings.float_title | default: 'Get inspired by the world|of Roberto Coin' | escape | replace: '|', ' <br class="footer-newsletter-float__break"> ' }}
       </p>
       <button
         type="button"
@@ -452,6 +452,12 @@
       transform: translate3d(0, 0, 0);
     }
 
+    /* Drop the forced title line break on mobile so the heading wraps
+       naturally (the surrounding spaces keep the words apart). */
+    .footer-newsletter-float__break {
+      display: none;
+    }
+
     .footer-newsletter-float__underlay {
       position: fixed;
       inset: 0;
@@ -678,7 +684,7 @@
       "type": "text",
       "id": "float_title",
       "label": "Popup title",
-      "info": "Use | to force a line break, e.g. Get inspired by the world|of Roberto Coin",
+      "info": "Use | to force a line break on desktop (wraps naturally on mobile), e.g. Get inspired by the world|of Roberto Coin",
       "default": "Get inspired by the world|of Roberto Coin"
     },
     {
