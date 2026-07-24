@@ -49,8 +49,9 @@
         <img class="rc-mobile-bar__logo" src="{{ 'nav-rc-logo-light.svg' | asset_url }}" alt="{{ shop.name }}" width="120" height="27">
       </a>
       <div class="rc-mobile-bar__slot">
-        <a href="{{ routes.cart_url }}" data-cart-toggle aria-label="{{ 'cart.general.title' | t | default: 'Cart' }}">
+        <a class="rc-m-bag" href="{{ routes.cart_url }}" data-cart-toggle aria-label="{{ 'cart.general.title' | t | default: 'Cart' }}">
           {%- render 'icon-cart' -%}
+          <cart-count class="rc-m-bag__count" data-cart-count="{{ cart.item_count }}">{{ cart.item_count }}</cart-count>
         </a>
       </div>
     </div>
