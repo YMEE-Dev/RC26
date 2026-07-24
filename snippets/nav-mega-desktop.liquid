@@ -162,8 +162,13 @@
               </div>
 
             {%- else -%}
-              {%- comment -%} jewelry (default): anchored 1:1 image with parallax {%- endcomment -%}
-              <div class="rc-d-imgzone">
+              {%- comment -%} jewelry (default): anchored 1:1 image with parallax. Whole zone links to the collection (matches the Occasions gift tiles). {%- endcomment -%}
+              {%- assign jewelry_spotlight_url = collections['love-in-verona'].url | default: '/collections/love-in-verona' -%}
+              <a
+                class="rc-d-imgzone"
+                href="{{ jewelry_spotlight_url }}"
+                aria-label="Discover the Love in Verona collection"
+              >
                 <div class="rc-d-imgzone__inner" data-rc-parallax>
                   <div class="rc-d-imgzone__layer" data-rc-img-back></div>
                   <div
@@ -180,7 +185,7 @@
                   >
                   <div class="rc-display">{{ block.settings.panel_heading | default: 'Love in Verona' | escape }}</div>
                 </div>
-              </div>
+              </a>
           {%- endcase -%}
 
           {%- comment -%} ---------- menu-driven link columns ---------- {%- endcomment -%}
