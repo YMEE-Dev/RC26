@@ -87,7 +87,7 @@
         {%- render 'icon-close' -%}
       </button>
       <p class="footer-newsletter-float__title h4">
-        {{ section.settings.float_title | default: 'Get inspired by the world of Roberto Coin' | escape }}
+        {{ section.settings.float_title | default: 'Get inspired by the world|of Roberto Coin' | escape | replace: '|', '<br>' }}
       </p>
       <button
         type="button"
@@ -413,10 +413,12 @@
   .footer-newsletter-float__cta.btn--outline.btn--secondary {
     --btn-border: #111;
     --btn-text: #111;
-    --btn-border-hover: #111;
-    --btn-text-hover: #111;
     --btn-bg: transparent;
-    --btn-bg-hover: transparent;
+    /* Hover/focus: dark fill slides up and text flips to white — mirrors the
+       hero "Discover more" outline button's invert-on-hover behaviour. */
+    --btn-border-hover: #111;
+    --btn-bg-hover: #111;
+    --btn-text-hover: #fff;
   }
 
   @media only screen and (max-width: 767px) {
@@ -676,7 +678,8 @@
       "type": "text",
       "id": "float_title",
       "label": "Popup title",
-      "default": "Get inspired by the world of Roberto Coin"
+      "info": "Use | to force a line break, e.g. Get inspired by the world|of Roberto Coin",
+      "default": "Get inspired by the world|of Roberto Coin"
     },
     {
       "type": "text",
