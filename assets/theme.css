@@ -4212,7 +4212,11 @@ body:has([data-header-sticky]) .main-content > .shopify-section:first-of-type {
 }
 
 body:has([data-header-transparent]) .main-content > .shopify-section.section-overlay-header:first-of-type {
-  --full-screen: calc(var(--full-height) - var(--announcement-height));
+  /* Transparent/overlay header: the announcement bar is position:fixed and overlays
+     the hero (it takes no flow space), so the hero must fill the whole viewport.
+     Subtracting --announcement-height here left a blank strip at the bottom of the
+     first section when the bar was shown. */
+  --full-screen: var(--full-height);
 }
 
 .has-header-sticky {
