@@ -34,8 +34,9 @@
     </div>
     <img class="rc-drawer__logo" src="{{ logo }}" alt="{{ shop.name }}" width="120" height="27">
     <div class="rc-drawer__hslot rc-drawer__hslot--end">
-      <a href="{{ routes.cart_url }}" data-cart-toggle aria-label="{{ 'cart.general.title' | t | default: 'Cart' }}">
+      <a class="rc-m-bag" href="{{ routes.cart_url }}" data-cart-toggle aria-label="{{ 'cart.general.title' | t | default: 'Cart' }}">
         {%- render 'icon-cart' -%}
+        <cart-count class="rc-m-bag__count" data-cart-count="{{ cart.item_count }}">{{ cart.item_count }}</cart-count>
       </a>
     </div>
   </div>

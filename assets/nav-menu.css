@@ -139,6 +139,26 @@ body.plp-header-ready:not(.plp-header-anim-done) .announcement__wrapper--top {
   width: 17px;
   height: 17px;
 }
+/* mobile/tablet cart counter (closed bar + drawer header) — mirrors the desktop badge */
+.rc-nav .rc-m-bag {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.rc-nav .rc-m-bag__count {
+  position: absolute;
+  top: -4px;
+  right: -7px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  line-height: 11px;
+  color: var(--rc-white);
+}
 
 /* Light/dark switcher — nav-menu.js sets data-scheme on .rc-nav from the section
    under the bar (sections opt in with [data-header-observer-mode="dark"]).
@@ -536,7 +556,9 @@ body.header-scroll-hide .rc-slide--r {
   .rc-d-left {
     display: flex;
     align-items: flex-start;
-    gap: 24px;
+    /* 21px keeps the primary menu's left edge aligned with the mega-panel columns
+       (.rc-d-panel__inner padding-left) now that the search icon is 24px wide. */
+    gap: 21px;
   }
   .rc-d-right {
     display: flex;
@@ -618,10 +640,13 @@ body.header-scroll-hide .rc-slide--r {
     color: var(--rc-white);
   }
 
-  /* mega-menu veil — fades as one element, fixed height leaves a bottom exit strip */
+  /* mega-menu veil — fades as one element, fixed height leaves a bottom exit strip.
+     Shift down by the announcement height so the veil + panel content stay in sync
+     with the header bar (which is pushed down by var(--announcement-height)); otherwise
+     the content keeps its no-bar offset and the header-to-columns spacing collapses. */
   .rc-d-panels {
     position: absolute;
-    top: 0;
+    top: var(--announcement-height, 0px);
     left: 0;
     right: 0;
     height: 760px;
