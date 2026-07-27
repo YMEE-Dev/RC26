@@ -1695,6 +1695,35 @@
     },
     {
       "type": "header",
+      "content": "Mobile drawer spotlight"
+    },
+    {
+      "type": "paragraph",
+      "content": "Imagery at the top of the mobile drawer. Leave the image empty to start the menu rows at the top."
+    },
+    {
+      "type": "image_picker",
+      "id": "m_spot_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "m_spot_eyebrow",
+      "label": "Eyebrow"
+    },
+    {
+      "type": "text",
+      "id": "m_spot_title",
+      "label": "Title"
+    },
+    {
+      "type": "url",
+      "id": "m_spot_link",
+      "label": "Link",
+      "info": "Optional. Makes the spotlight clickable."
+    },
+    {
+      "type": "header",
       "content": "Mobile"
     },
     {
@@ -1845,30 +1874,106 @@
         },
         {
           "type": "select",
-          "id": "panel_style",
-          "label": "Imagery style",
-          "info": "Chooses the hardcoded panel imagery/layout.",
-          "default": "jewelry",
+          "id": "panel_images",
+          "label": "Images",
+          "info": "Square is 1:1, landscape and the two tiles fill the full 2:1 zone.",
+          "default": "one",
           "options": [
             {
-              "value": "jewelry",
-              "label": "Jewelry (single spotlight image)"
+              "value": "one",
+              "label": "One image (square spotlight)"
             },
             {
-              "value": "occasions",
-              "label": "Occasions (two image tiles)"
+              "value": "one_wide",
+              "label": "One image (wide landscape)"
             },
             {
-              "value": "maison",
-              "label": "Maison (blog cover tile)"
+              "value": "two",
+              "label": "Two images (wide tiles)"
             }
           ]
         },
         {
+          "type": "select",
+          "id": "panel_columns",
+          "label": "Link columns",
+          "info": "Three columns places menu headings by keyword: selection/category, featured, collection.",
+          "default": "stack",
+          "options": [
+            {
+              "value": "stack",
+              "label": "Stacked"
+            },
+            {
+              "value": "columns",
+              "label": "Three columns"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Image 1"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_1",
+          "label": "Image",
+          "info": "Leave empty to show links only, with no imagery."
+        },
+        {
           "type": "text",
-          "id": "panel_heading",
-          "label": "Panel heading",
-          "info": "Overlaid on the imagery. Defaults to the imagery style name."
+          "id": "eyebrow_1",
+          "label": "Eyebrow"
+        },
+        {
+          "type": "text",
+          "id": "heading_1",
+          "label": "Heading"
+        },
+        {
+          "type": "url",
+          "id": "link_1",
+          "label": "Link"
+        },
+        {
+          "visible_if": "{{ block.settings.panel_images == 'two' }}",
+          "type": "header",
+          "content": "Image 2"
+        },
+        {
+          "visible_if": "{{ block.settings.panel_images == 'two' }}",
+          "type": "image_picker",
+          "id": "image_2",
+          "label": "Image",
+          "info": "Both images must be set to show the two-tile layout. With only one, it falls back to the square spotlight."
+        },
+        {
+          "visible_if": "{{ block.settings.panel_images == 'two' }}",
+          "type": "text",
+          "id": "eyebrow_2",
+          "label": "Eyebrow"
+        },
+        {
+          "visible_if": "{{ block.settings.panel_images == 'two' }}",
+          "type": "text",
+          "id": "heading_2",
+          "label": "Heading"
+        },
+        {
+          "visible_if": "{{ block.settings.panel_images == 'two' }}",
+          "type": "url",
+          "id": "link_2",
+          "label": "Link"
+        },
+        {
+          "type": "header",
+          "content": "Mobile"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "Mobile spotlight image",
+          "info": "Shown at the top of this submenu in the mobile drawer. Defaults to Image 1."
         }
       ]
     },

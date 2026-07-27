@@ -59,15 +59,13 @@
 
     var openKey = null;     // active (drives fade-in)
     var shownKey = null;    // rendered (persists through fade-out)
-    var hiTimer = null, closeTimer = null, revealTimer = null;
+    var hiTimer = null, closeTimer = null;
 
     function showPanel(key) {
       shownKey = key;
       Object.keys(panels).forEach(function (k) {
         panels[k].setAttribute('data-shown', k === key ? '1' : '0');
       });
-      // reset reveal image to this panel's default
-      resetReveal();
     }
     function markActiveTrigger(key) {
       triggers.forEach(function (t) {
@@ -75,7 +73,7 @@
       });
     }
     function openNow(key) {
-      clearTimeout(hiTimer); clearTimeout(closeTimer); clearTimeout(revealTimer);
+      clearTimeout(hiTimer); clearTimeout(closeTimer);
       if (!panels[key]) return;
       openKey = key;
       root.setAttribute('data-open', '1');
@@ -88,7 +86,7 @@
     }
     function cancelIntent() { clearTimeout(hiTimer); }
     function close() {
-      clearTimeout(hiTimer); clearTimeout(revealTimer);
+      clearTimeout(hiTimer);
       if (!openKey) return;
       openKey = null;
       root.setAttribute('data-open', '0');
@@ -118,47 +116,6 @@
     // scrolling while a panel is open closes it — the header slides away on scroll,
     // so the trigger link disappears and an open panel would be left detached
     window.addEventListener('scroll', function () { if (openKey) close(); }, { passive: true });
-
-    /* ---- image crossfade reveal (Jewelry featured voices) ---- */
-    var jewelPanel = panels['jewelry'];
-    var frontLayer = jewelPanel && jewelPanel.querySelector('[data-rc-img-front]');
-    var backLayer = jewelPanel && jewelPanel.querySelector('[data-rc-img-back]');
-    var frontVisible = true;
-    var curImg = frontLayer ? frontLayer.getAttribute('data-default') : '';
-
-    function setImage(src) {
-      if (!frontLayer || !backLayer || !src || src === curImg) return;
-      curImg = src;
-      if (frontVisible) {
-        backLayer.style.backgroundImage = "url('" + src + "')";
-        backLayer.style.backgroundPosition = 'center';
-        requestAnimationFrame(function () { frontLayer.style.opacity = '0'; backLayer.style.opacity = '1'; });
-        frontVisible = false;
-      } else {
-        frontLayer.style.backgroundImage = "url('" + src + "')";
-        frontLayer.style.backgroundPosition = 'center';
-        requestAnimationFrame(function () { frontLayer.style.opacity = '1'; backLayer.style.opacity = '0'; });
-        frontVisible = true;
-      }
-    }
-    function resetReveal() {
-      if (!frontLayer) return;
-      var def = frontLayer.getAttribute('data-default');
-      setImage(def);
-    }
-    if (jewelPanel) {
-      jewelPanel.querySelectorAll('[data-rc-reveal]').forEach(function (a) {
-        a.addEventListener('mouseenter', function () {
-          clearTimeout(revealTimer);
-          var img = a.getAttribute('data-rc-reveal');
-          revealTimer = setTimeout(function () { setImage(img); }, DWELL);
-        });
-        a.addEventListener('mouseleave', function () {
-          clearTimeout(revealTimer);
-          revealTimer = setTimeout(resetReveal, DWELL);
-        });
-      });
-    }
 
     /* ---- cursor parallax across the open menu ---- */
     if (motionOK) {
