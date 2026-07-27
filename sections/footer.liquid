@@ -149,7 +149,39 @@
                       >
                         {%- assign has_iubenda_links = false -%}
                         {%- assign iubenda_policy_id = block.settings.iubenda_policy_id -%}
+                        {%- comment -%}
+                          Per-language link URLs. Each rule is "LANG => label => url", multiple rules
+                          separated by "|":
+                            LANG  = storefront language iso code (e.g. IT) — must equal the active language
+                            label = the menu item's label AS IT RENDERS in that language (Shopify
+                                    translates labels; link.title is the current-language title and
+                                    Liquid can't read the original, so use the label shown for LANG)
+                            url   = the URL to use for that link in that language
+                          Match is case-insensitive on the rendered label. Links keep their menu order.
+                          Works for any link type (PDF, page, external).
+                        {%- endcomment -%}
+                        {%- assign loc_overrides = block.settings.localized_url_overrides -%}
+                        {%- assign cur_lang = localization.language.iso_code | downcase -%}
+                        {%- if loc_overrides != blank -%}
+                          {%- assign loc_rules = loc_overrides | split: '|' -%}
+                        {%- endif -%}
                         {%- for link in linklist.links -%}
+                          {%- assign link_href = link.url -%}
+                          {%- if loc_overrides != blank -%}
+                            {%- assign link_label_key = link.title | strip_html | strip | downcase -%}
+                            {%- for rule in loc_rules -%}
+                              {%- assign rf = rule | split: '=>' -%}
+                              {%- if rf.size >= 3 -%}
+                                {%- assign r_lang = rf[0] | strip | downcase -%}
+                                {%- assign r_label = rf[1] | strip | downcase -%}
+                                {%- assign r_url = rf[2] | strip -%}
+                                {%- if r_lang == cur_lang and r_label == link_label_key and r_url != blank -%}
+                                  {%- assign link_href = r_url -%}
+                                  {%- break -%}
+                                {%- endif -%}
+                              {%- endif -%}
+                            {%- endfor -%}
+                          {%- endif -%}
                           {%- assign link_title_lower = link.title | downcase -%}
                           {%- assign is_iubenda_cookie = false -%}
                           {%- assign is_iubenda_privacy = false -%}
@@ -168,13 +200,27 @@
                           {%- endif -%}
                           <li class="navlink">
                             {%- if is_iubenda_cookie -%}
-                              <a href="{{ pages['cookie-policy'].url | default: '/pages/cookie-policy' }}" title="{{ link.title | escape }}">{{ link.title }}</a>
+                              <a
+                                href="{{ pages['cookie-policy'].url | default: '/pages/cookie-policy' }}"
+                                title="{{ link.title | escape }}"
+                              >
+                                {{- link.title -}}
+                              </a>
                             {%- elsif is_iubenda_choices -%}
-                              <a href="#" class="iubenda-cs-preferences-link" title="{{ link.title | escape }}">{{ link.title }}</a>
+                              <a href="#" class="iubenda-cs-preferences-link" title="{{ link.title | escape }}">
+                                {{- link.title -}}
+                              </a>
                             {%- elsif is_iubenda_privacy -%}
-                              <a href="{{ pages['privacy-policy'].url | default: '/pages/privacy-policy' }}" title="{{ link.title | escape }}">{{ link.title }}</a>
+                              <a
+                                href="{{ pages['privacy-policy'].url | default: '/pages/privacy-policy' }}"
+                                title="{{ link.title | escape }}"
+                              >
+                                {{- link.title -}}
+                              </a>
                             {%- else -%}
-                              <a href="{{ link.url }}">{{ link.title }}</a>
+                              <a href="{{ link_href }}" data-original-title="{{ link.title | escape }}">
+                                {{- link.title -}}
+                              </a>
                             {%- endif -%}
                           </li>
                         {%- endfor -%}
@@ -505,6 +551,16 @@
           "label": "Iubenda policy ID",
           "info": "Required for Cookie Policy and Privacy links. e.g. 32804813",
           "default": "32804813"
+        },
+        {
+          "type": "header",
+          "content": "Per-language link URLs"
+        },
+        {
+          "type": "textarea",
+          "id": "localized_url_overrides",
+          "label": "Language URL overrides",
+          "info": "Rules of the form LANG => label => url, separated by | . LANG = language code (e.g. IT); label = the menu item's label as it appears in that language; url = the URL to use. Works for any link type and any language. Example: IT => Code of Ethics => https://cdn.shopify.com/…/Codice_etico_ITA.pdf | FR => Code of Ethics => https://…/Code_of_ethics_FR.pdf"
         }
       ]
     },
