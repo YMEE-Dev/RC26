@@ -1,0 +1,51 @@
+{%- doc -%}
+  Renders one image tile of a desktop mega-menu panel: full-bleed parallax image
+  with an optional eyebrow/heading caption. Becomes a link when `url` is set.
+  Nothing renders when no image is set — panels without imagery show links only.
+
+  Styles live in assets/nav-menu.css (.rc-d-tile*).
+
+  @param {image} image - The tile image
+  @param {string} [eyebrow] - Small label above the heading
+  @param {string} [heading] - Display heading
+  @param {string} [url] - Optional destination for the whole tile
+  @param {number} [width] - Source width to request (default 1200; the wide zone is
+    1002 CSS px, so pass ~2200 there for retina)
+
+  @example
+  {% render 'nav-panel-tile',
+    image: block.settings.image_1,
+    eyebrow: block.settings.eyebrow_1,
+    heading: block.settings.heading_1,
+    url: block.settings.link_1
+  %}
+{%- enddoc -%}
+
+{%- if image != blank -%}
+  {%- liquid
+    assign width = width | default: 1200
+    if url == blank
+      assign tag = 'div'
+    else
+      assign tag = 'a'
+    endif
+  -%}
+  <{{ tag }} class="rc-d-tile"{% if url != blank %} href="{{ url }}"{% endif %}>
+    <div
+      class="rc-d-tile__bg"
+      data-rc-parallax
+      style="background-image:url('{{ image | image_url: width: width }}');"
+    ></div>
+    <div class="rc-d-tile__scrim"></div>
+    {%- if eyebrow != blank or heading != blank -%}
+      <div class="rc-d-tile__caption">
+        {%- if eyebrow != blank -%}
+          <span class="rc-eyebrow rc-d-tile__eyebrow">{{ eyebrow | escape }}</span>
+        {%- endif -%}
+        {%- if heading != blank -%}
+          <div class="rc-display">{{ heading | escape }}</div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </{{ tag }}>
+{%- endif -%}

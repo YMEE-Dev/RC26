@@ -3,7 +3,11 @@
   Root rows come from the `rc_menu` link list (top level). Any top item that has a
   matching `rc_panel` section block becomes a drill row into a menu-driven node.
   Node link groups come from the block's `panel_menu` (level-1 = heading, level-2 = links).
-  Spotlight imagery + utility rows stay hardcoded. Interaction lives in the javascript tag of snippets/nav-header.liquid.
+  Spotlight imagery comes from the theme editor: the root spotlight from the header
+  section settings (m_spot_*), each node's from its block (mobile_image, falling back
+  to the desktop image_1, plus eyebrow_1/heading_1/link_1). No image set means no
+  spotlight — the rows start at the top of the drawer. Utility rows stay hardcoded.
+  Interaction lives in the javascript tag of snippets/nav-header.liquid.
 
   @param {string} [rc_menu] - Handle of the main (left) link list
   @param {block[]} [blocks] - The section blocks (defaults to section.blocks)
@@ -11,10 +15,11 @@
 
 {%- liquid
   assign logo = 'nav-rc-logo-light.svg' | asset_url
-  assign img_root = 'nav-maison-cover.jpg' | asset_url
-  assign img_jewelry = 'https://cdn.shopify.com/s/files/1/1007/1697/0327/files/roberto-coin-homepage-july.jpg?v=1784714833'
-  assign img_occasions = 'nav-occasions-1.png' | asset_url
-  assign img_maison = 'nav-concierge.jpg' | asset_url
+
+  assign root_image = section.settings.m_spot_image
+  assign root_eyebrow = section.settings.m_spot_eyebrow
+  assign root_title = section.settings.m_spot_title
+  assign root_link = section.settings.m_spot_link
 
   assign rc_menu = rc_menu | default: section.settings.rc_menu_linklist | default: 'main-menu'
   assign nav_blocks = blocks | default: section.blocks
@@ -44,17 +49,12 @@
   <div class="rc-drawer__scroll" data-rc-scroll>
     {%- comment -%} ===== ROOT (menu-driven primary + hardcoded utility) ===== {%- endcomment -%}
     <div class="rc-panel" data-node="root" data-active="1">
-      <div class="rc-m-spot">
-        <div
-          class="rc-m-cover rc-m-cover--zoom"
-          style="background-image:url('{{ img_root }}');background-position:74% center;"
-        ></div>
-        <div class="rc-m-spot__scrim"></div>
-        <div class="rc-m-cap">
-          <div class="rc-eyebrow rc-m-cap__eyebrow">Collection Spotlight</div>
-          <div class="rc-m-cap__title">Princess Flower</div>
-        </div>
-      </div>
+      {%- render 'nav-drawer-spot',
+        image: root_image,
+        eyebrow: root_eyebrow,
+        title: root_title,
+        url: root_link
+      -%}
       <div class="rc-m-body">
         <button type="button" class="rc-m-search" data-rc-search>
           {%- render 'icon-search' -%}
@@ -122,37 +122,18 @@
       {%- liquid
         assign panel_key = 'rcp-' | append: block.settings.position
         assign panel_menu = block.settings.panel_menu
-        case block.settings.panel_style
-          when 'occasions'
-            assign node_img = img_occasions
-            assign node_eyebrow = 'Discover Our'
-            assign node_url = ''
-          when 'maison'
-            assign node_img = img_maison
-            assign node_eyebrow = 'Discover The'
-            assign node_url = ''
-          else
-            assign node_img = img_jewelry
-            assign node_eyebrow = 'Discover the Collection'
-            assign node_url = collections['love-in-verona'].url | default: '/collections/love-in-verona'
-        endcase
-        assign node_title = block.settings.panel_heading
-        if node_title == blank
-          assign node_title = block.settings.panel_style | capitalize
+        assign node_img = block.settings.mobile_image
+        if node_img == blank
+          assign node_img = block.settings.image_1
         endif
       -%}
       <div class="rc-panel" data-node="{{ panel_key }}" {{ block.shopify_attributes }} hidden>
-        <div class="rc-m-spot">
-          <div class="rc-m-cover rc-m-cover--zoom" style="background-image:url('{{ node_img }}');"></div>
-          <div class="rc-m-spot__scrim"></div>
-          <div class="rc-m-cap">
-            <div class="rc-eyebrow rc-m-cap__eyebrow">{{ node_eyebrow }}</div>
-            <div class="rc-m-cap__title">{{ node_title | escape }}</div>
-          </div>
-          {%- if node_url != blank -%}
-            <a class="rc-m-spot__link" href="{{ node_url }}" aria-label="Discover the {{ node_title | escape }} collection"></a>
-          {%- endif -%}
-        </div>
+        {%- render 'nav-drawer-spot',
+          image: node_img,
+          eyebrow: block.settings.eyebrow_1,
+          title: block.settings.heading_1,
+          url: block.settings.link_1
+        -%}
         <button type="button" class="rc-m-back rc-m-back--sticky" data-rc-back>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
             <path d="M15 5l-7 7 7 7" stroke="rgba(255,255,255,0.9)" stroke-width="1.2"></path>
@@ -188,37 +169,41 @@
             {%- endfor -%}
 
             {%- comment -%}
-              Featured tiles mirrored from the desktop mega panel (nav-mega-desktop):
-              those are hardcoded imagery, not part of panel_menu, so surface them here
-              as text links with a trailing arrow. Keep keys/titles in sync with desktop.
+              The desktop panel's image tiles aren't part of panel_menu, so surface their
+              links here as text rows. Tile 1 is skipped when the spotlight above already
+              carries it (the spotlight uses tile 1's image and link).
             {%- endcomment -%}
-            {%- case block.settings.panel_style -%}
-              {%- when 'occasions' -%}
-                <div class="rc-m-group rc-m-group--feat">
-                  <div class="rc-label rc-m-group__head">Featured</div>
-                  <a class="rc-m-grow" href="{% render 'nav-url', key: 'gift-ideas' %}"
-                    ><span class="rc-m-grow__label">Gift Ideas</span>
+            {%- liquid
+              assign feat1_label = block.settings.heading_1 | default: block.settings.eyebrow_1
+              assign feat2_label = block.settings.heading_2 | default: block.settings.eyebrow_2
+
+              assign show_feat1 = false
+              if node_img == blank and block.settings.link_1 != blank and feat1_label != blank
+                assign show_feat1 = true
+              endif
+
+              assign show_feat2 = false
+              if block.settings.panel_images == 'two' and block.settings.link_2 != blank and feat2_label != blank
+                assign show_feat2 = true
+              endif
+            -%}
+            {%- if show_feat1 or show_feat2 -%}
+              <div class="rc-m-group rc-m-group--feat">
+                <div class="rc-label rc-m-group__head">Featured</div>
+                {%- if show_feat1 -%}
+                  <a class="rc-m-grow" href="{{ block.settings.link_1 }}"
+                    ><span class="rc-m-grow__label">{{ feat1_label | escape }}</span>
                     {%- render 'icon-nav-arrow', size: 'sm' -%}
                   </a>
-                  <a class="rc-m-grow" href="{% render 'nav-url', key: 'beyond-jewels' %}"
-                    ><span class="rc-m-grow__label">Beyond Jewels</span>
+                {%- endif -%}
+                {%- if show_feat2 -%}
+                  <a class="rc-m-grow" href="{{ block.settings.link_2 }}"
+                    ><span class="rc-m-grow__label">{{ feat2_label | escape }}</span>
                     {%- render 'icon-nav-arrow', size: 'sm' -%}
                   </a>
-                </div>
-              {%- when 'maison' -%}
-                {%- liquid
-                  assign maison_article = blogs.brand.articles.first
-                  assign maison_href = maison_article.url | default: blogs.brand.url | default: routes.root_url
-                  assign maison_title = maison_article.title | default: 'A Dream Campaign'
-                -%}
-                <div class="rc-m-group rc-m-group--feat">
-                  <div class="rc-label rc-m-group__head">Featured</div>
-                  <a class="rc-m-grow" href="{{ maison_href }}"
-                    ><span class="rc-m-grow__label">{{ maison_title | escape }}</span>
-                    {%- render 'icon-nav-arrow', size: 'sm' -%}
-                  </a>
-                </div>
-            {%- endcase -%}
+                {%- endif -%}
+              </div>
+            {%- endif -%}
           </div>
         </div>
       </div>
