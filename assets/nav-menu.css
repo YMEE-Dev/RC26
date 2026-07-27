@@ -1044,6 +1044,8 @@ body.header-scroll-hide .rc-slide--r {
 .rc-drawer__scroll {
   flex: 1;
   overflow-y: auto;
+  /* the panels translate ±100% while crossing over — never let that pan sideways */
+  overflow-x: hidden;
   position: relative;
   z-index: 2;
   -webkit-overflow-scrolling: touch;
@@ -1054,7 +1056,9 @@ body.header-scroll-hide .rc-slide--r {
   height: 0;
 }
 
-/* the sliding panel */
+/* the sliding panel — during a drill the incoming panel holds the flow while the
+   outgoing one is lifted out of it (absolute) and slid away underneath, so the two
+   cross over each other instead of the drawer flashing empty mid-transition. */
 .rc-panel {
   will-change: transform;
 }
@@ -1066,6 +1070,36 @@ body.header-scroll-hide .rc-slide--r {
 }
 .rc-panel[data-anim="in"] {
   transform: translateX(0);
+}
+/* incoming panel keeps the flow and travels over the outgoing one */
+.rc-panel[data-anim="fwd-start"],
+.rc-panel[data-anim="back-start"],
+.rc-panel[data-anim="in"] {
+  position: relative;
+  z-index: 2;
+}
+/* outgoing panel is lifted out of the flow (JS pins its `top` to the scroll offset
+   it was showing) and slid away underneath, so no tap can land on it on the way out */
+.rc-panel[data-anim^="out-"] {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.rc-panel[data-anim="out-fwd-start"],
+.rc-panel[data-anim="out-back-start"] {
+  transform: translateX(0);
+}
+.rc-panel[data-anim="out-fwd"] {
+  transform: translateX(-100%);
+}
+.rc-panel[data-anim="out-back"] {
+  transform: translateX(100%);
+}
+.rc-panel[data-anim="in"],
+.rc-panel[data-anim="out-fwd"],
+.rc-panel[data-anim="out-back"] {
   transition: transform 0.44s var(--rc-ease);
 }
 
