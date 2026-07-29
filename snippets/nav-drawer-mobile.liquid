@@ -142,11 +142,23 @@
         </button>
         <div class="rc-m-cat-body">
           <div class="rc-m-groups">
-            {%- for group in linklists[panel_menu].links -%}
+            {%- comment -%}
+              Which groups read as "featured" is decided by position, matching the
+              desktop panel's columns (nav-mega-desktop): the first groups are the plain
+              selection/category lists, later ones are the featured/collection blocks.
+              Heading text can't decide it — menu titles are translated per locale.
+            {%- endcomment -%}
+            {%- liquid
+              assign panel_groups = linklists[panel_menu].links
+              assign feat_from = 2
+              if panel_groups.size < 4
+                assign feat_from = 1
+              endif
+            -%}
+            {%- for group in panel_groups -%}
               {%- liquid
-                assign group_head = group.title | downcase
                 assign is_featured_group = false
-                if group_head contains 'featured' or group_head contains 'collection'
+                if forloop.index > feat_from
                   assign is_featured_group = true
                 endif
               -%}
