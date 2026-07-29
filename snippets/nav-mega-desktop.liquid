@@ -4,9 +4,9 @@
   Each mega panel is driven by an `rc_panel` section block: a link list whose
   level-1 items are the column headings and level-2 items are the links.
   Each panel picks its imagery layout (`panel_images`: one square spotlight, one wide
-  landscape, or two wide tiles) and its link layout (`panel_columns`: stacked or three
-  keyword-matched columns) in the theme editor. Images, captions and links are per-block
-  settings — a panel with no image set renders links only, at full width.
+  landscape, or two wide tiles) and its link layout (`panel_columns`: stacked, or three
+  columns filled by menu position) in the theme editor. Images, captions and links are
+  per-block settings — a panel with no image set renders links only, at full width.
   Utility stack (right side) is intentionally hardcoded — some items trigger JS.
   Interaction + styles live in the javascript / stylesheet tags of snippets/nav-header.liquid.
 
@@ -185,18 +185,32 @@
           {%- comment -%} ---------- menu-driven link columns ---------- {%- endcomment -%}
           {%- if block.settings.panel_columns == 'columns' -%}
             {%- comment -%}
-              Three columns split by vertical dividers:
-                col 1 — OUR SELECTION stacked over SHOP BY CATEGORY (body voices)
-                col 2 — FEATURED (serif voices)
-                col 3 — ALL COLLECTIONS (two-up grid, body voices)
-              Columns are matched by heading keyword so menu order doesn't matter.
+              Three columns split by vertical dividers, filled by menu POSITION:
+                col 1 — first two groups, stacked (e.g. OUR SELECTION over SHOP BY CATEGORY)
+                col 2 — third group (e.g. FEATURED)
+                col 3 — any remaining groups (e.g. ALL COLLECTIONS, two-up grid)
+              Position, not heading text: menu titles are translated per locale, so the
+              keyword match this used to do ('selection' / 'featured' / 'collection')
+              found nothing on the Italian storefront and silently dropped every link.
+              Shorter menus collapse — three groups give one column each, and a menu with
+              one or two groups fills the columns it needs and skips the dividers.
             {%- endcomment -%}
+            {%- liquid
+              assign panel_groups = linklists[panel_menu].links
+              assign group_count = panel_groups.size
+              if group_count >= 4
+                assign col1_end = 2
+                assign col2_end = 3
+              else
+                assign col1_end = 1
+                assign col2_end = 2
+              endif
+            -%}
             <div class="rc-d-left-area {{ left_area_class }}">
               <div class="rc-d-cells">
                 <div class="rc-d-cell rc-d-cell--fixed">
-                  {%- for group in linklists[panel_menu].links -%}
-                    {%- assign gh = group.title | downcase -%}
-                    {%- if gh contains 'selection' or gh contains 'category' -%}
+                  {%- for group in panel_groups -%}
+                    {%- if forloop.index <= col1_end -%}
                       <div class="rc-d-sec">
                         {%- if group.title != blank -%}
                           <span class="rc-label rc-d-sec__head">{{ group.title | strip_html | escape }}</span>
@@ -219,40 +233,41 @@
                   {%- endfor -%}
                 </div>
 
-                <div class="rc-d-vdiv" aria-hidden="true"></div>
-
-                <div class="rc-d-cell rc-d-cell--feat">
-                  {%- for group in linklists[panel_menu].links -%}
-                    {%- assign gh = group.title | downcase -%}
-                    {%- if gh contains 'featured' -%}
-                      <div class="rc-d-sec">
-                        {%- if group.title != blank -%}
-                          <span class="rc-label rc-d-sec__head">{{ group.title | strip_html | escape }}</span>
-                        {%- endif -%}
-                        <div class="rc-d-links">
-                          {%- for l in group.links -%}
-                            <a class="rc-d-voice rc-d-voice--body" href="{{ l.url }}"
-                              ><span>{{ l.title | strip_html | downcase | escape }}</span>
-                              {%- render 'icon-nav-arrow', size: 'sm' -%}
-                            </a>
-                          {%- else -%}
-                            <a class="rc-d-voice rc-d-voice--body" href="{{ group.url }}"
-                              ><span>{{ group.title | strip_html | downcase | escape }}</span>
-                              {%- render 'icon-nav-arrow', size: 'sm' -%}
-                            </a>
-                          {%- endfor -%}
+                {%- if group_count > col1_end -%}
+                  <div class="rc-d-vdiv" aria-hidden="true"></div>
+                  <div class="rc-d-cell rc-d-cell--feat">
+                  {%- for group in panel_groups -%}
+                    {%- if forloop.index > col1_end -%}
+                      {%- if forloop.index <= col2_end -%}
+                        <div class="rc-d-sec">
+                          {%- if group.title != blank -%}
+                            <span class="rc-label rc-d-sec__head">{{ group.title | strip_html | escape }}</span>
+                          {%- endif -%}
+                          <div class="rc-d-links">
+                            {%- for l in group.links -%}
+                              <a class="rc-d-voice rc-d-voice--body" href="{{ l.url }}"
+                                ><span>{{ l.title | strip_html | downcase | escape }}</span>
+                                {%- render 'icon-nav-arrow', size: 'sm' -%}
+                              </a>
+                            {%- else -%}
+                              <a class="rc-d-voice rc-d-voice--body" href="{{ group.url }}"
+                                ><span>{{ group.title | strip_html | downcase | escape }}</span>
+                                {%- render 'icon-nav-arrow', size: 'sm' -%}
+                              </a>
+                            {%- endfor -%}
+                          </div>
                         </div>
-                      </div>
+                      {%- endif -%}
                     {%- endif -%}
                   {%- endfor -%}
-                </div>
+                  </div>
+                {%- endif -%}
 
-                <div class="rc-d-vdiv" aria-hidden="true"></div>
-
-                <div class="rc-d-cell rc-d-cell--grow">
-                  {%- for group in linklists[panel_menu].links -%}
-                    {%- assign gh = group.title | downcase -%}
-                    {%- if gh contains 'collection' -%}
+                {%- if group_count > col2_end -%}
+                  <div class="rc-d-vdiv" aria-hidden="true"></div>
+                  <div class="rc-d-cell rc-d-cell--grow">
+                  {%- for group in panel_groups -%}
+                    {%- if forloop.index > col2_end -%}
                       <div class="rc-d-sec">
                         {%- if group.title != blank -%}
                           <span class="rc-label rc-d-sec__head">{{ group.title | strip_html | escape }}</span>
@@ -273,7 +288,8 @@
                       </div>
                     {%- endif -%}
                   {%- endfor -%}
-                </div>
+                  </div>
+                {%- endif -%}
               </div>
             </div>
           {%- else -%}
