@@ -66,9 +66,15 @@
       {%- comment -%} right: utility stack + bag (hardcoded — some items trigger JS) {%- endcomment -%}
       <div class="rc-d-right rc-slide rc-slide--r">
         <nav class="rc-d-stack rc-d-stack--utility" aria-label="Utility">
-          <a class="rc-d-link" href="{% render 'nav-url', key: 'find-a-boutique' %}" data-rc-close>Find a Boutique</a>
-          <a class="rc-d-link" href="{% render 'nav-url', key: 'concierge' %}" data-rc-close>Concierge</a>
-          <a class="rc-d-link" href="{% render 'nav-url', key: 'login' %}" data-rc-close>Log In</a>
+          <a class="rc-d-link" href="{% render 'nav-url', key: 'find-a-boutique' %}" data-rc-close>
+            {{- 'layout.header.find_a_boutique' | t -}}
+          </a>
+          <a class="rc-d-link" href="{% render 'nav-url', key: 'concierge' %}" data-rc-close>
+            {{- 'layout.header.concierge' | t -}}
+          </a>
+          <a class="rc-d-link" href="{% render 'nav-url', key: 'login' %}" data-rc-close>
+            {{- 'layout.customer.log_in' | t -}}
+          </a>
           {% comment %}
             <a class="rc-d-link" href="{% render 'nav-url', key: 'keep-in-touch' %}" data-rc-newsletter data-rc-close
               >Keep in Touch
