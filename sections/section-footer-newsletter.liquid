@@ -468,6 +468,7 @@
       this.mobileQuery = window.matchMedia('(max-width: 767px)');
       this.hasShownFloat = false;
       this.floatDelayMs = Number(this.floatPopup?.dataset.newsletterFloatDelay || 3) * 1000;
+      this.mobileFloatDelayMs = 10000;
       this.floatDismissDelayMs = 260;
       this.boundOnScroll = () => this.onScroll();
 
@@ -563,8 +564,13 @@
       }
 
       if (this.mobileQuery.matches) {
-        window.addEventListener('scroll', this.boundOnScroll, {passive: true});
-        this.onScroll();
+        // Mobile: show 10 seconds after the page loads (instead of on scroll).
+        window.setTimeout(() => {
+          if (this.readCookie(this.dismissCookie) === '1' || this.hasShownFloat) {
+            return;
+          }
+          this.showFloat();
+        }, this.mobileFloatDelayMs);
         return;
       }
 
