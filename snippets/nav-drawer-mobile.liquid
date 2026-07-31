@@ -143,79 +143,66 @@
         <div class="rc-m-cat-body">
           <div class="rc-m-groups">
             {%- comment -%}
-              Which groups read as "featured" is decided by position, matching the
-              desktop panel's columns (nav-mega-desktop): the first groups are the plain
-              selection/category lists, later ones are the featured/collection blocks.
-              Heading text can't decide it — menu titles are translated per locale.
+              Group order and roles come from menu POSITION, never heading text (titles
+              are translated per locale). For the three-column panels the drawer differs
+              from the desktop layout in two ways:
+                - the featured group (menu position 3) is pulled up to second, so it sits
+                  right under the first list instead of below a long category list
+                - the last group (ALL COLLECTIONS) collapses into a dropdown, since it
+                  carries every collection and would otherwise dominate the drawer
+              Other panels keep plain menu order with every group expanded.
             {%- endcomment -%}
             {%- liquid
               assign panel_groups = linklists[panel_menu].links
-              assign feat_from = 2
-              if panel_groups.size < 4
-                assign feat_from = 1
+              assign group_count = panel_groups.size
+              assign is_columns_panel = false
+              if block.settings.panel_columns == 'columns'
+                assign is_columns_panel = true
               endif
-            -%}
-            {%- for group in panel_groups -%}
-              {%- liquid
-                assign is_featured_group = false
-                if forloop.index > feat_from
-                  assign is_featured_group = true
+
+              assign mobile_order = ''
+              if is_columns_panel and group_count >= 3
+                assign mobile_order = '1,3,2'
+                if group_count >= 4
+                  for i in (4..group_count)
+                    assign mobile_order = mobile_order | append: ',' | append: i
+                  endfor
                 endif
-              -%}
-              <div class="rc-m-group{% if is_featured_group %} rc-m-group--feat{% endif %}">
-                {%- if group.title != blank -%}
-                  <div class="rc-label rc-m-group__head">{{ group.title | strip_html | escape }}</div>
-                {%- endif -%}
-                {%- for l in group.links -%}
-                  <a class="rc-m-grow" href="{{ l.url }}"
-                    ><span class="rc-m-grow__label">{{ l.title | strip_html | downcase | escape }}</span>
-                    {%- render 'icon-nav-arrow', size: 'sm' -%}
-                  </a>
-                {%- else -%}
-                  <a class="rc-m-grow" href="{{ group.url }}"
-                    ><span class="rc-m-grow__label">{{ group.title | strip_html | downcase | escape }}</span>
-                    {%- render 'icon-nav-arrow', size: 'sm' -%}
-                  </a>
-                {%- endfor -%}
-              </div>
-            {%- endfor -%}
-
-            {%- comment -%}
-              The desktop panel's image tiles aren't part of panel_menu, so surface their
-              links here as text rows. Tile 1 is skipped when the spotlight above already
-              carries it (the spotlight uses tile 1's image and link).
-            {%- endcomment -%}
-            {%- liquid
-              assign feat1_label = block.settings.heading_1 | default: block.settings.eyebrow_1
-              assign feat2_label = block.settings.heading_2 | default: block.settings.eyebrow_2
-
-              assign show_feat1 = false
-              if node_img == blank and block.settings.link_1 != blank and feat1_label != blank
-                assign show_feat1 = true
+              else
+                for i in (1..group_count)
+                  if forloop.first
+                    assign mobile_order = i | append: ''
+                  else
+                    assign mobile_order = mobile_order | append: ',' | append: i
+                  endif
+                endfor
               endif
-
-              assign show_feat2 = false
-              if block.settings.panel_images == 'two' and block.settings.link_2 != blank and feat2_label != blank
-                assign show_feat2 = true
-              endif
+              assign mobile_order_list = mobile_order | split: ','
             -%}
-            {%- if show_feat1 or show_feat2 -%}
-              <div class="rc-m-group rc-m-group--feat">
-                <div class="rc-label rc-m-group__head">Featured</div>
-                {%- if show_feat1 -%}
-                  <a class="rc-m-grow" href="{{ block.settings.link_1 }}"
-                    ><span class="rc-m-grow__label">{{ feat1_label | escape }}</span>
-                    {%- render 'icon-nav-arrow', size: 'sm' -%}
-                  </a>
+            {%- for pos in mobile_order_list -%}
+              {%- assign target = pos | plus: 0 -%}
+              {%- for group in panel_groups -%}
+                {%- if forloop.index == target -%}
+                  {%- liquid
+                    assign is_featured = false
+                    assign is_collapsible = false
+                    if is_columns_panel
+                      if target == 3
+                        assign is_featured = true
+                      endif
+                      if target == group_count and group_count >= 3
+                        assign is_collapsible = true
+                      endif
+                    endif
+                  -%}
+                  {%- render 'nav-drawer-group',
+                    group: group,
+                    featured: is_featured,
+                    collapsible: is_collapsible
+                  -%}
                 {%- endif -%}
-                {%- if show_feat2 -%}
-                  <a class="rc-m-grow" href="{{ block.settings.link_2 }}"
-                    ><span class="rc-m-grow__label">{{ feat2_label | escape }}</span>
-                    {%- render 'icon-nav-arrow', size: 'sm' -%}
-                  </a>
-                {%- endif -%}
-              </div>
-            {%- endif -%}
+              {%- endfor -%}
+            {%- endfor -%}
           </div>
         </div>
       </div>

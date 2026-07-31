@@ -825,6 +825,11 @@ body.header-scroll-hide .rc-slide--r {
     color: var(--rc-overline);
     margin-bottom: 6px;
   }
+  /* the featured column's heading (FEATURED COLLECTIONS) is set in the display face.
+     Keyed to the column, not the heading text, which is translated per locale. */
+  .rc-d-cell--feat .rc-d-sec__head {
+    font-family: var(--rc-display);
+  }
   .rc-d-links {
     display: flex;
     flex-direction: column;
@@ -1284,6 +1289,43 @@ body.header-scroll-hide .rc-slide--r {
 .rc-m-group__head {
   color: var(--rc-overline);
   margin-bottom: 10px;
+}
+/* mirrors .rc-d-cell--feat .rc-d-sec__head on desktop */
+.rc-m-group__head--display {
+  font-family: var(--rc-display);
+}
+
+/* ALL COLLECTIONS collapses in the drawer — native <details>, no JS */
+.rc-m-group--drop > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 0;
+  cursor: pointer;
+  list-style: none;
+}
+.rc-m-group--drop > summary::-webkit-details-marker {
+  display: none;
+}
+.rc-m-group--drop[open] > summary {
+  margin-bottom: 10px;
+}
+/* the shared icon ships a black stroke for light surfaces — recolour for the veil */
+.rc-m-group--drop > summary .icon-nav-arrow-down {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  transition: transform 0.25s ease;
+}
+.rc-m-group--drop > summary .icon-nav-arrow-down path {
+  stroke: rgba(255, 255, 255, 0.85);
+  stroke-width: 1.2;
+}
+/* `is-closing` is set while the collapse animation runs (nav-menu.dev.js keeps the
+   element open until it finishes), so the chevron turns back with the panel, not after */
+.rc-m-group--drop[open]:not(.is-closing) > summary .icon-nav-arrow-down {
+  transform: rotate(180deg);
 }
 .rc-m-grow {
   display: flex;
