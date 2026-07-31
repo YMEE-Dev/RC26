@@ -69,6 +69,18 @@ body.template-collection .js__show__mobile .theme__header label {
   pointer-events: auto;
 }
 
+/* PLP desktop counterpart of the pointer-events fix above. The header is locked
+   to height:var(--header-height) (160px), but .section-padding adds 40px below
+   152px of content — so its box renders 192px and the last 32px hang over the
+   collection nav (which starts at 160px) and swallow clicks on it. The padding
+   is dead space here, since the fixed header height means nothing below it
+   moves. */
+@media only screen and (min-width: 960px) {
+  body.template-collection .theme__header > .section-padding {
+    padding-bottom: 0;
+  }
+}
+
 .collection__nav.collection__nav--media-only .subcollection_links-wrapper {
   display: flex;
 }

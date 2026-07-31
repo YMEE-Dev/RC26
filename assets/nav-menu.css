@@ -1435,6 +1435,15 @@ body:has(cart-drawer.is-open) .rc-nav__bar-wrap {
   z-index: 1;
   pointer-events: none;
 }
+/* Scrolled down (header hidden): supersedes `body.header-scroll-hide .rc-d-bar`
+   in the desktop block, which only reached two levels inside the mount — the
+   fixed bar-wrap and .rc-desktop kept hit-testing at z6005 and covered the whole
+   stuck PLP filter bar. Below 1024px .rc-desktop is display:none, so both
+   selectors are needed. Nothing inside is reachable in this state. */
+body.header-scroll-hide .rc-nav__bar-wrap,
+body.header-scroll-hide .rc-desktop {
+  pointer-events: none;
+}
 .rc-desktop {
   position: relative;
 }
