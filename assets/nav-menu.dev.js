@@ -242,6 +242,72 @@
       document.documentElement.classList.remove('rc-drawer-open');
     }
 
+    /* ---- collapsible link groups (ALL COLLECTIONS) ----
+       A <details> can't transition its own height — the content isn't rendered while
+       closed — so the toggle is taken over here and the panel is animated instead.
+       On close the element stays open until the animation ends; `is-closing` lets the
+       chevron start rotating back immediately (see .rc-m-group--drop in nav-menu.css). */
+    var DROP_MS = 320;
+    var DROP_EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
+    drawer.querySelectorAll('.rc-m-group--drop').forEach(function (drop) {
+      var summary = drop.querySelector('summary');
+      var panel = drop.querySelector('.rc-m-group__panel');
+      if (!summary || !panel) return;
+      var running = null;
+
+      function run(from, to, done) {
+        if (running) running.cancel();
+        panel.style.overflow = 'hidden';
+        var anim = panel.animate(
+          [
+            { height: from + 'px', opacity: from === 0 ? 0 : 1 },
+            { height: to + 'px', opacity: to === 0 ? 0 : 1 }
+          ],
+          { duration: DROP_MS, easing: DROP_EASE }
+        );
+        running = anim;
+        anim.finished.then(
+          function () {
+            if (running !== anim) return;   // a newer toggle took over
+            running = null;
+            panel.style.overflow = '';
+            if (done) done();
+          },
+          function () {}                    // cancelled by a newer toggle
+        );
+      }
+
+      summary.addEventListener('click', function (e) {
+        // no WAAPI or reduced motion: leave the native instant toggle alone
+        if (prefersReduced || typeof panel.animate !== 'function') return;
+        e.preventDefault();
+        if (drop.classList.contains('is-closing')) {
+          // re-opened while collapsing: carry on from the height it reached
+          var mid = parseFloat(window.getComputedStyle(panel).height);
+          if (isNaN(mid)) mid = 0;
+          drop.classList.remove('is-closing');
+          run(mid, panel.scrollHeight);
+        } else if (drop.open) {
+          // mid-expand, start from where it got to; otherwise from the full content
+          var from = panel.scrollHeight;
+          if (running) {
+            // 0 is a real height here, so test for NaN rather than falsiness
+            var live = parseFloat(window.getComputedStyle(panel).height);
+            if (!isNaN(live)) from = live;
+          }
+          drop.classList.add('is-closing');
+          run(from, 0, function () {
+            drop.classList.remove('is-closing');
+            drop.open = false;
+          });
+        } else {
+          // a closed <details> reports stale layout metrics, so always expand from 0
+          drop.open = true;
+          run(0, panel.scrollHeight);
+        }
+      });
+    });
+
     drawer.querySelectorAll('[data-rc-drill]').forEach(function (b) {
       b.addEventListener('click', function () { drill(b.getAttribute('data-rc-drill')); });
     });
