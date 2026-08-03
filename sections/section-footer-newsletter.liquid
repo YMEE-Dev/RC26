@@ -468,6 +468,7 @@
       this.mobileQuery = window.matchMedia('(max-width: 767px)');
       this.hasShownFloat = false;
       this.floatDelayMs = Number(this.floatPopup?.dataset.newsletterFloatDelay || 3) * 1000;
+      this.mobileFloatDelayMs = 10000;
       this.floatDismissDelayMs = 260;
       this.boundOnScroll = () => this.onScroll();
 
@@ -562,18 +563,30 @@
         return;
       }
 
-      if (this.mobileQuery.matches) {
-        window.addEventListener('scroll', this.boundOnScroll, {passive: true});
-        this.onScroll();
+      // Mobile shows 10s after load; desktop uses the configured delay.
+      const delayMs = this.mobileQuery.matches ? this.mobileFloatDelayMs : this.floatDelayMs;
+
+      window.setTimeout(() => this.tryShowFloat(), delayMs);
+    }
+
+    tryShowFloat() {
+      if (this.readCookie(this.dismissCookie) === '1' || this.hasShownFloat) {
         return;
       }
 
-      window.setTimeout(() => {
-        if (this.readCookie(this.dismissCookie) === '1' || this.hasShownFloat) {
-          return;
-        }
-        this.showFloat();
-      }, this.floatDelayMs);
+      // Don't interrupt an open menu/drawer/modal: showing the popup here would
+      // re-lock page scroll and block scrolling inside the open menu. Wait until
+      // it's closed, then show.
+      const modalOpen =
+        (window.theme && typeof window.theme.hasOpenModals === 'function' && window.theme.hasOpenModals()) ||
+        document.documentElement.hasAttribute('data-scroll-locked');
+
+      if (modalOpen) {
+        window.setTimeout(() => this.tryShowFloat(), 1000);
+        return;
+      }
+
+      this.showFloat();
     }
 
     onScroll() {
