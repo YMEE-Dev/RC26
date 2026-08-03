@@ -1,0 +1,61 @@
+.announcement__wrapper--top {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.announcement__bar-holder--slider .flickity-viewport,
+.announcement__bar-holder--slider .flickity-slider {
+  min-height: var(--announcement-height);
+}
+
+.announcement__bar-holder--slider .flickity-enabled .flickity-slider .announcement__slide + .announcement__slide {
+  opacity: 1;
+}
+
+.announcement__bar-holder--arrows .announcement__slider:not(.single-slide) {
+  --arrow-space: 24px;
+  --arrow-space-offset: calc(var(--arrow-space) * -1);
+  margin-left: calc(var(--outer) + var(--arrow-space));
+  margin-right: calc(var(--outer) + var(--arrow-space));
+}
+
+.announcement__bar-holder--arrows .announcement__slider:not(.single-slide) .flickity-prev-next-button {
+  --icon-size: var(--arrow-space);
+  --btn-size: var(--arrow-space);
+  width: var(--arrow-space);
+  height: var(--arrow-space);
+}
+
+.announcement__bar-holder--arrows .announcement__slider:not(.single-slide) .flickity-viewport::before,
+.announcement__bar-holder--arrows .announcement__slider:not(.single-slide) .flickity-viewport::after {
+  content: none;
+  background: none;
+}
+
+.announcement__close-mirror {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  gap: 0.5rem;
+  padding: 1px 6px;
+  border: 0;
+  font: inherit;
+  line-height: 1;
+  white-space: nowrap;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.announcement__close-mirror .icon {
+  width: var(--icon-size);
+  height: var(--icon-size);
+}
+
+.announcement__close-label {
+  display: none;
+}
+
+.announcement__close-icon {
+  display: inline-flex;
+}

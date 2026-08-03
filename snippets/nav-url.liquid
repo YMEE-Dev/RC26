@@ -1,0 +1,76 @@
+{%- comment -%}
+  nav-url — single source of truth for the hardcoded navigation link targets.
+  Maps a stable `key` to a real, locale-aware store URL. See _claude-nav-package/NAV_LINK_MAP.md.
+  Usage: <a href="{% render 'nav-url', key: 'rings' %}">
+
+  kinds: collection (default) | page | blog | route | newsletter
+{%- endcomment -%}
+{%- liquid
+  assign key = key | default: ''
+  assign kind = 'collection'
+  assign handle = key
+  assign suffix = ''
+
+  case key
+    when 'bestsellers', 'jewelry-bestsellers'
+      assign handle = 'bestsellers'
+    when 'pendants'
+      assign handle = 'necklaces-pendants'
+    when 'beyond-jewels'
+      assign handle = 'gadget'
+    when 'gift-ideas-under-1500'
+      assign handle = 'gift-ideas'
+      assign suffix = '?filter.v.price.lte=1500'
+    when 'the-brand', 'our-commitment', 'prestige-service'
+      assign kind = 'page'
+    when 'find-a-boutique'
+      assign kind = 'page'
+      assign handle = 'store-locator'
+    when 'concierge'
+      assign kind = 'page'
+    when 'stories-brand'
+      assign kind = 'blog'
+      assign handle = 'brand'
+    when 'stories-celebrity'
+      assign kind = 'blog'
+      assign handle = 'celebrity'
+    when 'stories-occasion'
+      assign kind = 'blog'
+      assign handle = 'occasions'
+    when 'stories-style'
+      assign kind = 'blog'
+      assign handle = 'style'
+    when 'stories-all'
+      assign kind = 'blog'
+      assign handle = 'all'
+    when 'login'
+      assign kind = 'route'
+    when 'keep-in-touch'
+      assign kind = 'newsletter'
+  endcase
+
+  case kind
+    when 'collection'
+      assign u = collections[handle].url
+      if u == blank
+        assign u = routes.root_url | append: '/collections/' | append: handle
+      endif
+      echo u | append: suffix
+    when 'page'
+      assign u = pages[handle].url
+      if u == blank
+        assign u = routes.root_url | append: '/pages/' | append: handle
+      endif
+      echo u
+    when 'blog'
+      assign u = blogs[handle].url
+      if u == blank
+        assign u = routes.root_url | append: '/blogs/' | append: handle
+      endif
+      echo u
+    when 'route'
+      echo routes.account_login_url
+    when 'newsletter'
+      echo '#nav-newsletter'
+  endcase
+-%}

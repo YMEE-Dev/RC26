@@ -1,0 +1,43 @@
+{%- doc -%}
+  Renders the spotlight image at the top of a mobile drawer node, with an optional
+  eyebrow/title caption and an optional full-tile link.
+  Nothing renders when no image is set, so the drawer rows start at the top instead.
+
+  Styles live in assets/nav-menu.css (.rc-m-spot*, .rc-m-cover, .rc-m-cap*).
+
+  @param {image} image - The spotlight image
+  @param {string} [eyebrow] - Small label above the title
+  @param {string} [title] - Spotlight title
+  @param {string} [url] - Optional destination for the whole spotlight
+
+  @example
+  {% render 'nav-drawer-spot',
+    image: block.settings.mobile_image,
+    eyebrow: block.settings.eyebrow_1,
+    title: block.settings.heading_1,
+    url: block.settings.link_1
+  %}
+{%- enddoc -%}
+
+{%- if image != blank -%}
+  <div class="rc-m-spot">
+    <div
+      class="rc-m-cover rc-m-cover--zoom"
+      style="background-image:url('{{ image | image_url: width: 900 }}');"
+    ></div>
+    <div class="rc-m-spot__scrim"></div>
+    {%- if eyebrow != blank or title != blank -%}
+      <div class="rc-m-cap">
+        {%- if eyebrow != blank -%}
+          <div class="rc-eyebrow rc-m-cap__eyebrow">{{ eyebrow | escape }}</div>
+        {%- endif -%}
+        {%- if title != blank -%}
+          <div class="rc-m-cap__title">{{ title | escape }}</div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+    {%- if url != blank -%}
+      <a class="rc-m-spot__link" href="{{ url }}" aria-label="{{ title | default: eyebrow | escape }}"></a>
+    {%- endif -%}
+  </div>
+{%- endif -%}

@@ -1,0 +1,334 @@
+{%- comment -%}
+  nav-mega-desktop — Roberto Coin desktop header + hover mega-menu.
+  Primary bar links come from the `rc_menu` link list (top level).
+  Each mega panel is driven by an `rc_panel` section block: a link list whose
+  level-1 items are the column headings and level-2 items are the links.
+  Each panel picks its imagery layout (`panel_images`: one square spotlight, one wide
+  landscape, or two wide tiles) and its link layout (`panel_columns`: stacked, or three
+  columns filled by menu position) in the theme editor. Images, captions and links are
+  per-block settings — a panel with no image set renders links only, at full width.
+  Utility stack (right side) is intentionally hardcoded — some items trigger JS.
+  Interaction + styles live in the javascript / stylesheet tags of snippets/nav-header.liquid.
+
+  @param {string} [rc_menu] - Handle of the main (left) link list
+  @param {block[]} [blocks] - The section blocks (defaults to section.blocks)
+{%- endcomment -%}
+
+{%- liquid
+  assign logo = 'nav-rc-logo-light.svg' | asset_url
+
+  assign rc_menu = rc_menu | default: section.settings.rc_menu_linklist | default: 'main-menu'
+  assign nav_blocks = blocks | default: section.blocks
+-%}
+
+<div class="rc-desktop">
+  {%- comment -%} ---------- transparent header ---------- {%- endcomment -%}
+  <div class="rc-d-bar">
+    <div class="rc-d-bar__grid">
+      {%- comment -%} left: search + primary stack (menu-driven) {%- endcomment -%}
+      <div class="rc-d-left rc-slide rc-slide--l">
+        <button
+          type="button"
+          class="rc-d-icon"
+          data-rc-search
+          aria-label="{{ 'general.search.title' | t | default: 'Search' }}"
+        >
+          {%- render 'icon-search' -%}
+        </button>
+        <nav class="rc-d-stack rc-d-stack--primary" aria-label="Primary">
+          {%- for link in linklists[rc_menu].links -%}
+            {%- liquid
+              assign pos = forloop.index | append: ''
+              assign panel_key = ''
+              for block in nav_blocks
+                if block.type == 'rc_panel' and block.settings.position == pos
+                  assign panel_key = 'rcp-' | append: pos
+                  break
+                endif
+              endfor
+            -%}
+            {%- if panel_key != '' -%}
+              <a class="rc-d-link" href="{{ link.url }}" data-rc-trigger="{{ panel_key }}" aria-haspopup="true">
+                {{- link.title | strip_html | escape -}}
+              </a>
+            {%- else -%}
+              <a class="rc-d-link" href="{{ link.url }}">{{ link.title | strip_html | escape }}</a>
+            {%- endif -%}
+          {%- endfor -%}
+        </nav>
+      </div>
+
+      {%- comment -%} center: wordmark {%- endcomment -%}
+      <a class="rc-d-logo rc-slide rc-slide--t" href="{{ routes.root_url }}" data-rc-close aria-label="{{ shop.name }} — home">
+        <img src="{{ logo }}" alt="{{ shop.name }}" width="180" height="50">
+      </a>
+
+      {%- comment -%} right: utility stack + bag (hardcoded — some items trigger JS) {%- endcomment -%}
+      <div class="rc-d-right rc-slide rc-slide--r">
+        <nav class="rc-d-stack rc-d-stack--utility" aria-label="Utility">
+          <a class="rc-d-link" href="{% render 'nav-url', key: 'find-a-boutique' %}" data-rc-close>
+            {{- 'layout.header.find_a_boutique' | t -}}
+          </a>
+          <a class="rc-d-link" href="{% render 'nav-url', key: 'concierge' %}" data-rc-close>
+            {{- 'layout.header.concierge' | t -}}
+          </a>
+          <a class="rc-d-link" href="{% render 'nav-url', key: 'login' %}" data-rc-close>
+            {{- 'layout.customer.log_in' | t -}}
+          </a>
+          {% comment %}
+            <a class="rc-d-link" href="{% render 'nav-url', key: 'keep-in-touch' %}" data-rc-newsletter data-rc-close
+              >Keep in Touch
+            </a>
+          {% endcomment %}
+        </nav>
+        <a
+          class="rc-d-bag"
+          href="{{ routes.cart_url }}"
+          data-cart-toggle
+          data-rc-close
+          aria-label="{{ 'cart.general.title' | t | default: 'Cart' }}"
+        >
+          {%- render 'icon-cart' -%}
+          <cart-count
+            class="rc-d-bag__count"
+            data-cart-count="{{ cart.item_count }}"
+          >
+            {{- cart.item_count -}}
+          </cart-count>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} ---------- mega-menu panels (green veil) ---------- {%- endcomment -%}
+  <div class="rc-d-panels" data-rc-panels>
+    {%- for block in nav_blocks -%}
+      {%- if block.type != 'rc_panel' -%}{%- continue -%}{%- endif -%}
+      {%- liquid
+        assign panel_key = 'rcp-' | append: block.settings.position
+        assign panel_menu = block.settings.panel_menu
+
+        # Imagery is one of: a 1:1 square spotlight, a single wide landscape tile, or
+        # two tiles filling that same wide zone. Two tiles need both images — with only
+        # one set the panel keeps the wide zone and renders it as a single landscape.
+        assign image_1 = block.settings.image_1
+        assign image_2 = ''
+        if block.settings.panel_images == 'two'
+          assign image_2 = block.settings.image_2
+        endif
+
+        assign media = 'none'
+        if image_1 != blank and image_2 != blank
+          assign media = 'dual'
+        elsif image_1 != blank or image_2 != blank
+          if block.settings.panel_images == 'one'
+            assign media = 'square'
+          else
+            assign media = 'wide'
+          endif
+        endif
+
+        # the imagery is absolutely positioned, so the link area reserves its footprint
+        assign left_area_class = ''
+        if media == 'square'
+          assign left_area_class = 'rc-d-left-area--img-square'
+        elsif media != 'none'
+          assign left_area_class = 'rc-d-left-area--img-wide'
+        endif
+
+        # a single tile takes its caption/link from whichever image is set; the wide
+        # zone is twice as many CSS pixels across as the square one
+        assign solo_width = 2200
+        if media == 'square'
+          assign solo_width = 1200
+        endif
+        assign solo_image = image_1
+        assign solo_eyebrow = block.settings.eyebrow_1
+        assign solo_heading = block.settings.heading_1
+        assign solo_url = block.settings.link_1
+        if image_1 == blank
+          assign solo_image = image_2
+          assign solo_eyebrow = block.settings.eyebrow_2
+          assign solo_heading = block.settings.heading_2
+          assign solo_url = block.settings.link_2
+        endif
+      -%}
+
+      <div class="rc-d-panel" data-panel="{{ panel_key }}" {{ block.shopify_attributes }}>
+        <div class="rc-d-panel__inner">
+          {%- comment -%} ---------- imagery zone: square spotlight, wide landscape, or two wide tiles ---------- {%- endcomment -%}
+          {%- if media != 'none' -%}
+            <div class="rc-d-imgzone{% unless media == 'square' %} rc-d-imgzone--wide{% endunless %}">
+              {%- if media == 'dual' -%}
+                <div class="rc-d-dual">
+                  {%- render 'nav-panel-tile',
+                    image: image_1,
+                    eyebrow: block.settings.eyebrow_1,
+                    heading: block.settings.heading_1,
+                    url: block.settings.link_1,
+                    width: 1200
+                  -%}
+                  {%- render 'nav-panel-tile',
+                    image: image_2,
+                    eyebrow: block.settings.eyebrow_2,
+                    heading: block.settings.heading_2,
+                    url: block.settings.link_2,
+                    width: 1200
+                  -%}
+                </div>
+              {%- else -%}
+                {%- render 'nav-panel-tile',
+                  image: solo_image,
+                  eyebrow: solo_eyebrow,
+                  heading: solo_heading,
+                  url: solo_url,
+                  width: solo_width
+                -%}
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+
+          {%- comment -%} ---------- menu-driven link columns ---------- {%- endcomment -%}
+          {%- if block.settings.panel_columns == 'columns' -%}
+            {%- comment -%}
+              Three columns split by vertical dividers, filled by menu POSITION:
+                col 1 — first two groups, stacked (e.g. OUR SELECTION over SHOP BY CATEGORY)
+                col 2 — third group (e.g. FEATURED)
+                col 3 — any remaining groups (e.g. ALL COLLECTIONS, two-up grid)
+              Position, not heading text: menu titles are translated per locale, so the
+              keyword match this used to do ('selection' / 'featured' / 'collection')
+              found nothing on the Italian storefront and silently dropped every link.
+              Shorter menus collapse — three groups give one column each, and a menu with
+              one or two groups fills the columns it needs and skips the dividers.
+            {%- endcomment -%}
+            {%- liquid
+              assign panel_groups = linklists[panel_menu].links
+              assign group_count = panel_groups.size
+              if group_count >= 4
+                assign col1_end = 2
+                assign col2_end = 3
+              else
+                assign col1_end = 1
+                assign col2_end = 2
+              endif
+            -%}
+            <div class="rc-d-left-area {{ left_area_class }}">
+              <div class="rc-d-cells">
+                <div class="rc-d-cell rc-d-cell--fixed">
+                  {%- for group in panel_groups -%}
+                    {%- if forloop.index <= col1_end -%}
+                      <div class="rc-d-sec">
+                        {%- if group.title != blank -%}
+                          <span class="rc-label rc-d-sec__head">{{ group.title | strip_html | escape }}</span>
+                        {%- endif -%}
+                        <div class="rc-d-links">
+                          {%- for l in group.links -%}
+                            <a class="rc-d-voice rc-d-voice--body" href="{{ l.url }}"
+                              ><span>{{ l.title | strip_html | downcase | escape }}</span>
+                              {%- render 'icon-nav-arrow', size: 'sm' -%}
+                            </a>
+                          {%- else -%}
+                            <a class="rc-d-voice rc-d-voice--body" href="{{ group.url }}"
+                              ><span>{{ group.title | strip_html | downcase | escape }}</span>
+                              {%- render 'icon-nav-arrow', size: 'sm' -%}
+                            </a>
+                          {%- endfor -%}
+                        </div>
+                      </div>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </div>
+
+                {%- if group_count > col1_end -%}
+                  <div class="rc-d-vdiv" aria-hidden="true"></div>
+                  <div class="rc-d-cell rc-d-cell--feat">
+                  {%- for group in panel_groups -%}
+                    {%- if forloop.index > col1_end -%}
+                      {%- if forloop.index <= col2_end -%}
+                        <div class="rc-d-sec">
+                          {%- if group.title != blank -%}
+                            <span class="rc-label rc-d-sec__head">{{ group.title | strip_html | escape }}</span>
+                          {%- endif -%}
+                          <div class="rc-d-links">
+                            {%- for l in group.links -%}
+                              <a class="rc-d-voice rc-d-voice--body" href="{{ l.url }}"
+                                ><span>{{ l.title | strip_html | downcase | escape }}</span>
+                                {%- render 'icon-nav-arrow', size: 'sm' -%}
+                              </a>
+                            {%- else -%}
+                              <a class="rc-d-voice rc-d-voice--body" href="{{ group.url }}"
+                                ><span>{{ group.title | strip_html | downcase | escape }}</span>
+                                {%- render 'icon-nav-arrow', size: 'sm' -%}
+                              </a>
+                            {%- endfor -%}
+                          </div>
+                        </div>
+                      {%- endif -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                  </div>
+                {%- endif -%}
+
+                {%- if group_count > col2_end -%}
+                  <div class="rc-d-vdiv" aria-hidden="true"></div>
+                  <div class="rc-d-cell rc-d-cell--grow">
+                  {%- for group in panel_groups -%}
+                    {%- if forloop.index > col2_end -%}
+                      <div class="rc-d-sec">
+                        {%- if group.title != blank -%}
+                          <span class="rc-label rc-d-sec__head">{{ group.title | strip_html | escape }}</span>
+                        {%- endif -%}
+                        <div class="rc-d-links rc-d-links--two">
+                          {%- for l in group.links -%}
+                            <a class="rc-d-voice rc-d-voice--body" href="{{ l.url }}"
+                              ><span>{{ l.title | strip_html | downcase | escape }}</span>
+                              {%- render 'icon-nav-arrow', size: 'sm' -%}
+                            </a>
+                          {%- else -%}
+                            <a class="rc-d-voice rc-d-voice--body" href="{{ group.url }}"
+                              ><span>{{ group.title | strip_html | downcase | escape }}</span>
+                              {%- render 'icon-nav-arrow', size: 'sm' -%}
+                            </a>
+                          {%- endfor -%}
+                        </div>
+                      </div>
+                    {%- endif -%}
+                  {%- endfor -%}
+                  </div>
+                {%- endif -%}
+              </div>
+            </div>
+          {%- else -%}
+            {%- comment -%} stacked: every heading in one column, one under the other (e.g. GIFT IDEAS over BY OCCASION) {%- endcomment -%}
+            <div class="rc-d-left-area {{ left_area_class }}">
+              <div class="rc-d-cells">
+                <div class="rc-d-cell rc-d-cell--stack">
+                  {%- for group in linklists[panel_menu].links -%}
+                    <div class="rc-d-sec">
+                      {%- if group.title != blank -%}
+                        <span class="rc-label rc-d-sec__head">{{ group.title | strip_html | escape }}</span>
+                      {%- endif -%}
+                      <div class="rc-d-links">
+                        {%- for l in group.links -%}
+                          <a class="rc-d-voice rc-d-voice--body" href="{{ l.url }}"
+                            ><span>{{ l.title | strip_html | downcase | escape }}</span>
+                            {%- render 'icon-nav-arrow', size: 'sm' -%}
+                          </a>
+                        {%- else -%}
+                          <a class="rc-d-voice rc-d-voice--body" href="{{ group.url }}"
+                            ><span>{{ group.title | strip_html | downcase | escape }}</span>
+                            {%- render 'icon-nav-arrow', size: 'sm' -%}
+                          </a>
+                        {%- endfor -%}
+                      </div>
+                    </div>
+                  {%- endfor -%}
+                </div>
+              </div>
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endfor -%}
+  </div>
+</div>

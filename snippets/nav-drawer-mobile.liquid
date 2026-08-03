@@ -1,0 +1,211 @@
+{%- comment -%}
+  nav-drawer-mobile — Roberto Coin mobile + tablet drill-down drawer.
+  Root rows come from the `rc_menu` link list (top level). Any top item that has a
+  matching `rc_panel` section block becomes a drill row into a menu-driven node.
+  Node link groups come from the block's `panel_menu` (level-1 = heading, level-2 = links).
+  Spotlight imagery comes from the theme editor: the root spotlight from the header
+  section settings (m_spot_*), each node's from its block (mobile_image, falling back
+  to the desktop image_1, plus eyebrow_1/heading_1/link_1). No image set means no
+  spotlight — the rows start at the top of the drawer. Utility rows stay hardcoded.
+  Interaction lives in the javascript tag of snippets/nav-header.liquid.
+
+  @param {string} [rc_menu] - Handle of the main (left) link list
+  @param {block[]} [blocks] - The section blocks (defaults to section.blocks)
+{%- endcomment -%}
+
+{%- liquid
+  assign logo = 'nav-rc-logo-light.svg' | asset_url
+
+  assign root_image = section.settings.m_spot_image
+  assign root_eyebrow = section.settings.m_spot_eyebrow
+  assign root_title = section.settings.m_spot_title
+  assign root_link = section.settings.m_spot_link
+
+  assign rc_menu = rc_menu | default: section.settings.rc_menu_linklist | default: 'main-menu'
+  assign nav_blocks = blocks | default: section.blocks
+-%}
+
+<div class="rc-drawer" data-rc-drawer aria-hidden="true">
+  <div class="rc-drawer__scrim"></div>
+
+  {%- comment -%} shared header {%- endcomment -%}
+  <div class="rc-drawer__header" data-rc-drawer-header>
+    <div class="rc-drawer__hslot">
+      <button type="button" data-rc-drawer-close aria-label="Close menu">
+        <svg width="23" height="23" viewBox="0 0 24 24" fill="none">
+          <path d="M6 6l12 12M18 6L6 18" stroke="#fff" stroke-width="1.2"></path>
+        </svg>
+      </button>
+    </div>
+    <img class="rc-drawer__logo" src="{{ logo }}" alt="{{ shop.name }}" width="120" height="27">
+    <div class="rc-drawer__hslot rc-drawer__hslot--end">
+      <a class="rc-m-bag" href="{{ routes.cart_url }}" data-cart-toggle aria-label="{{ 'cart.general.title' | t | default: 'Cart' }}">
+        {%- render 'icon-cart' -%}
+        <cart-count class="rc-m-bag__count" data-cart-count="{{ cart.item_count }}">{{ cart.item_count }}</cart-count>
+      </a>
+    </div>
+  </div>
+
+  <div class="rc-drawer__scroll" data-rc-scroll>
+    {%- comment -%} ===== ROOT (menu-driven primary + hardcoded utility) ===== {%- endcomment -%}
+    <div class="rc-panel" data-node="root" data-active="1">
+      {%- render 'nav-drawer-spot',
+        image: root_image,
+        eyebrow: root_eyebrow,
+        title: root_title,
+        url: root_link
+      -%}
+      <div class="rc-m-body">
+        <button type="button" class="rc-m-search" data-rc-search>
+          {%- render 'icon-search' -%}
+          <span>Search</span>
+        </button>
+        <nav class="rc-m-nav" aria-label="Primary">
+          {%- for link in linklists[rc_menu].links -%}
+            {%- liquid
+              assign pos = forloop.index | append: ''
+              assign panel_key = ''
+              for block in nav_blocks
+                if block.type == 'rc_panel' and block.settings.position == pos
+                  assign panel_key = 'rcp-' | append: pos
+                  break
+                endif
+              endfor
+            -%}
+            {%- if panel_key != '' -%}
+              <button type="button" class="rc-m-row" data-rc-drill="{{ panel_key }}">
+                <span class="rc-m-row__label">{{ link.title | strip_html | downcase | escape }}</span>
+                {%- render 'icon-nav-chevron' %}
+              </button>
+            {%- else -%}
+              <a class="rc-m-row" href="{{ link.url }}"
+                ><span class="rc-m-row__label">{{ link.title | strip_html | downcase | escape }}</span>
+                {%- render 'icon-nav-chevron' -%}
+              </a>
+            {%- endif -%}
+          {%- endfor -%}
+        </nav>
+        <nav class="rc-m-util" aria-label="Utility">
+          <a class="rc-m-util__item" href="{% render 'nav-url', key: 'find-a-boutique' %}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" stroke="rgba(255,255,255,0.88)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            <span>{{ 'layout.header.find_a_boutique' | t }}</span></a
+          >
+          <a class="rc-m-util__item" href="{% render 'nav-url', key: 'concierge' %}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M4 5.5h16v10H8.5L4.5 19.5V5.5z M8 9.5h8 M8 12.5h5" stroke="rgba(255,255,255,0.88)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            <span>{{ 'layout.header.concierge' | t }}</span></a
+          >
+          <a class="rc-m-util__item" href="{% render 'nav-url', key: 'login' %}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M12 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z M5 20c0-3.3 3.1-5.5 7-5.5s7 2.2 7 5.5" stroke="rgba(255,255,255,0.88)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            <span>{{ 'layout.customer.log_in' | t }}</span></a
+          >
+          {% comment %}
+            <a class="rc-m-util__item" href="{% render 'nav-url', key: 'keep-in-touch' %}" data-rc-newsletter>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M3 6h18v12H3z M3.5 7l8.5 6 8.5-6" stroke="rgba(255,255,255,0.88)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <span>Keep in Touch</span></a
+            >
+          {% endcomment %}
+        </nav>
+      </div>
+    </div>
+
+    {%- comment -%} ===== PANEL NODES (one per rc_panel block) ===== {%- endcomment -%}
+    {%- for block in nav_blocks -%}
+      {%- if block.type != 'rc_panel' -%}{%- continue -%}{%- endif -%}
+      {%- liquid
+        assign panel_key = 'rcp-' | append: block.settings.position
+        assign panel_menu = block.settings.panel_menu
+        assign node_img = block.settings.mobile_image
+        if node_img == blank
+          assign node_img = block.settings.image_1
+        endif
+      -%}
+      <div class="rc-panel" data-node="{{ panel_key }}" {{ block.shopify_attributes }} hidden>
+        {%- render 'nav-drawer-spot',
+          image: node_img,
+          eyebrow: block.settings.eyebrow_1,
+          title: block.settings.heading_1,
+          url: block.settings.link_1
+        -%}
+        <button type="button" class="rc-m-back rc-m-back--sticky" data-rc-back>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M15 5l-7 7 7 7" stroke="rgba(255,255,255,0.9)" stroke-width="1.2"></path>
+          </svg>
+          <span>Back</span>
+        </button>
+        <div class="rc-m-cat-body">
+          <div class="rc-m-groups">
+            {%- comment -%}
+              Group order and roles come from menu POSITION, never heading text (titles
+              are translated per locale). For the three-column panels the drawer differs
+              from the desktop layout in two ways:
+                - the featured group (menu position 3) is pulled up to second, so it sits
+                  right under the first list instead of below a long category list
+                - the last group (ALL COLLECTIONS) collapses into a dropdown, since it
+                  carries every collection and would otherwise dominate the drawer
+              Other panels keep plain menu order with every group expanded.
+            {%- endcomment -%}
+            {%- liquid
+              assign panel_groups = linklists[panel_menu].links
+              assign group_count = panel_groups.size
+              assign is_columns_panel = false
+              if block.settings.panel_columns == 'columns'
+                assign is_columns_panel = true
+              endif
+
+              assign mobile_order = ''
+              if is_columns_panel and group_count >= 3
+                assign mobile_order = '1,3,2'
+                if group_count >= 4
+                  for i in (4..group_count)
+                    assign mobile_order = mobile_order | append: ',' | append: i
+                  endfor
+                endif
+              else
+                for i in (1..group_count)
+                  if forloop.first
+                    assign mobile_order = i | append: ''
+                  else
+                    assign mobile_order = mobile_order | append: ',' | append: i
+                  endif
+                endfor
+              endif
+              assign mobile_order_list = mobile_order | split: ','
+            -%}
+            {%- for pos in mobile_order_list -%}
+              {%- assign target = pos | plus: 0 -%}
+              {%- for group in panel_groups -%}
+                {%- if forloop.index == target -%}
+                  {%- liquid
+                    assign is_featured = false
+                    assign is_collapsible = false
+                    if is_columns_panel
+                      if target == 3
+                        assign is_featured = true
+                      endif
+                      if target == group_count and group_count >= 3
+                        assign is_collapsible = true
+                      endif
+                    endif
+                  -%}
+                  {%- render 'nav-drawer-group',
+                    group: group,
+                    featured: is_featured,
+                    collapsible: is_collapsible
+                  -%}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endfor -%}
+          </div>
+        </div>
+      </div>
+    {%- endfor -%}
+  </div>
+</div>

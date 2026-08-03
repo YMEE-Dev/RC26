@@ -118,17 +118,26 @@
 
   comment
     The poster is the page's LCP candidate when this section is first in the
-    template: fetch it at high priority. The widths ladder is capped at 3000
-    (image-hero's default reaches 5760) so high-DPR devices don't pull
-    oversized poster files.
+    template: fetch it at high priority.
+
+    When a background video will replace the poster, cap the widths ladder at
+    3000 so high-DPR devices don't pull an oversized poster file that only
+    shows for a moment. With no video the poster IS the permanent hero, so
+    leave widths unset and let image-hero use its full ladder (up to 5760) to
+    stay sharp on large / high-DPR screens.
   endcomment
   assign poster_fetchpriority = nil
   if section.location == 'template' and section.index == 1
     assign poster_fetchpriority = 'high'
   endif
 
+  assign poster_widths = nil
+  if has_background_video
+    assign poster_widths = '180, 360, 540, 720, 900, 1080, 1296, 1512, 1728, 1950, 2100, 2260, 2450, 2700, 3000'
+  endif
+
   capture video_poster
-    render 'image-hero', image_desktop: image_desktop, image_mobile: image_mobile, desktop_height: desktop_height, mobile_height: mobile_height, aspect_ratio: aspect_ratio, aspect_ratio_mobile: aspect_ratio, fetchpriority: poster_fetchpriority, widths: '180, 360, 540, 720, 900, 1080, 1296, 1512, 1728, 1950, 2100, 2260, 2450, 2700, 3000'
+    render 'image-hero', image_desktop: image_desktop, image_mobile: image_mobile, desktop_height: desktop_height, mobile_height: mobile_height, aspect_ratio: aspect_ratio, aspect_ratio_mobile: aspect_ratio, fetchpriority: poster_fetchpriority, widths: poster_widths
   endcapture
 -%}
 

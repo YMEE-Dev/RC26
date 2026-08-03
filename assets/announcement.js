@@ -100,10 +100,23 @@
 
       applyClosedState() {
         this.wrapper?.classList.add("announcement__wrapper--closing");
+        // Collapse the space the header reserves for the bar (--PT in the header
+        // consumes --announcement-height). The bar is position:absolute, so this
+        // is the whole fix — otherwise a blank strip is left where the bar was.
+        if (this.isTopBar()) {
+          document.documentElement.style.setProperty("--announcement-height", "0px");
+        }
       }
 
       removeClosedState() {
         this.wrapper?.classList.remove("announcement__wrapper--closing");
+        if (this.isTopBar()) {
+          document.documentElement.style.removeProperty("--announcement-height");
+        }
+      }
+
+      isTopBar() {
+        return this.wrapper?.classList.contains("announcement__wrapper--top");
       }
 
       removeSlide(slide) {

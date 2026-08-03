@@ -721,6 +721,10 @@
   <script src="{{ 'ticker.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 
+{%- comment -%} === Hardcoded Roberto Coin navigation — replaces the Qikify Smart Menu. Legacy header kept in DOM but hidden. === {%- endcomment -%}
+{% render 'nav-header', default_mode: header_default_mode %}
+<style>.header__wrapper { display: none !important; }</style>
+
 <header-component
   class="header__wrapper"
   data-header-wrapper
@@ -1676,142 +1680,47 @@
       "default": false
     },
     {
-      "type": "checkbox",
-      "id": "enable_search",
-      "default": true,
-      "label": "Show search"
-    },
-    {
       "type": "header",
-      "content": "Style"
+      "content": "Roberto Coin navigation"
     },
     {
-      "type": "select",
-      "id": "header_style",
-      "label": "Header",
-      "default": "logo_beside",
-      "options": [
-        {"value": "logo_above", "label": "Logo above menu"},
-        {"value": "logo_beside", "label": "Logo beside menu"},
-        {"value": "drawer", "label": "Mobile drawer menu"},
-        {"value": "logo_center_menu_left", "label": "Logo center menu left"}
-      ]
-    },
-    {
-      "type": "checkbox",
-      "id": "show_separator_line",
-      "label": "Show border",
-      "default": false
-    },
-    {
-      "type": "color",
-      "id": "header_border_color",
-      "label": "Border color",
-      "info": "Not applied to Transparent headers",
-      "alpha": true
-    },
-    {
-      "type": "range",
-      "id": "separator_opacity",
-      "label": "Border opacity",
-      "unit": "%",
-      "min": 0,
-      "max": 100,
-      "step": 5,
-      "default": 50
-    },
-    {
-      "type": "header",
-      "content": "Icons"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_icons",
-      "label": "Show icons",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "icon_as_circle",
-      "label": "Show cart icon as circle",
-      "default": false
-    },
-    {
-      "type": "select",
-      "id": "cart_icon_family",
-      "label": "Cart icon",
-      "default": "bag",
-      "options": [
-        {"value": "bag", "label": "Bag"},
-        {"value": "cart", "label": "Cart"}
-      ]
-    },
-    {
-      "type": "header",
-      "content": "Logo"
-    },
-    {
-      "type": "select",
-      "id": "logo_variant",
-      "label": "Asset logo",
-      "info": "Select the light or dark logo that ships with the theme.",
-      "default": "dark",
-      "options": [
-        {"value": "light", "label": "Light"},
-        {"value": "dark", "label": "Dark"}
-      ]
-    },
-    {
-      "type": "header",
-      "content": "Desktop"
+      "type": "paragraph",
+      "content": "Drives the left/primary bar of the RC mega-menu. Top-level items become the bar; add a \"Mega menu panel\" block to give an item a dropdown."
     },
     {
       "type": "link_list",
-      "label": "Main menu",
-      "id": "main_menu_linklist"
+      "label": "RC main menu (left)",
+      "id": "rc_menu_linklist",
+      "default": "main-menu"
     },
     {
-      "type": "link_list",
-      "label": "Right menu (desktop)",
-      "id": "right_menu_linklist",
-      "info": "Optional menu displayed on the right side of the desktop header."
+      "type": "header",
+      "content": "Mobile drawer spotlight"
     },
     {
-      "type": "checkbox",
-      "id": "enable_call_to_action",
-      "label": "Show call to action",
-      "default": false
+      "type": "paragraph",
+      "content": "Imagery at the top of the mobile drawer. Leave the image empty to start the menu rows at the top."
+    },
+    {
+      "type": "image_picker",
+      "id": "m_spot_image",
+      "label": "Image"
     },
     {
       "type": "text",
-      "id": "button_text",
-      "visible_if": "{{ section.settings.enable_call_to_action }}",
-      "label": "Text"
+      "id": "m_spot_eyebrow",
+      "label": "Eyebrow"
+    },
+    {
+      "type": "text",
+      "id": "m_spot_title",
+      "label": "Title"
     },
     {
       "type": "url",
-      "id": "button_link",
-      "visible_if": "{{ section.settings.enable_call_to_action }}",
-      "label": "Link"
-    },
-    {
-      "type": "select",
-      "id": "button_type",
-      "visible_if": "{{ section.settings.enable_call_to_action }}",
-      "label": "Color",
-      "default": "btn--primary",
-      "options": [
-        {"value": "btn--black", "label": "Black"},
-        {"value": "btn--white", "label": "White"},
-        {"value": "btn--primary", "label": "Primary"},
-        {"value": "btn--secondary", "label": "Secondary"}
-      ]
-    },
-    {
-      "type": "checkbox",
-      "id": "show_social_icons",
-      "default": true,
-      "label": "Show social icons"
+      "id": "m_spot_link",
+      "label": "Link",
+      "info": "Optional. Makes the spotlight clickable."
     },
     {
       "type": "header",
@@ -1820,69 +1729,6 @@
     {
       "type": "paragraph",
       "content": "Configure the hamburger menu in the Mobile menu section"
-    },
-    {
-      "type": "header",
-      "content": "Language selector",
-      "info": "To add a language, go to your [language settings.](/admin/settings/languages)"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_locale_selector",
-      "label": "Show language selector",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "show_locale_code",
-      "label": "Show language code only",
-      "default": false
-    },
-    {
-      "type": "checkbox",
-      "id": "show_globe_icon",
-      "label": "Show globe icon",
-      "default": true
-    },
-    {
-      "type": "header",
-      "content": "Country/Region selector",
-      "info": "To add a country/region, go to your [markets settings](/admin/settings/markets)."
-    },
-    {
-      "type": "checkbox",
-      "id": "show_country_selector",
-      "label": "Show country/region selector",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "show_country_name",
-      "label": "Show country name",
-      "default": false
-    },
-    {
-      "type": "checkbox",
-      "id": "show_country_flag",
-      "label": "Show country flag",
-      "default": true
-    },
-    {
-      "type": "header",
-      "content": "Highlight link"
-    },
-    {
-      "type": "text",
-      "id": "highlight_item",
-      "label": "Menu item",
-      "default": "Sale"
-    },
-    {
-      "type": "color",
-      "id": "highlight_item_color",
-      "label": "Color",
-      "default": "#D02E2E",
-      "alpha": true
     },
     {
       "type": "header",
@@ -1964,6 +1810,174 @@
   ],
   "blocks": [
     {
+      "name": "Mega menu panel",
+      "type": "rc_panel",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Adds a dropdown to one item of the RC main menu. Panel links come from the menu below: its top-level items are column headings, their sub-items are the links."
+        },
+        {
+          "type": "select",
+          "id": "position",
+          "label": "Attach to main menu item",
+          "info": "Which top-level RC main menu item opens this panel.",
+          "default": "2",
+          "options": [
+            {
+              "value": "1",
+              "label": "Item 1"
+            },
+            {
+              "value": "2",
+              "label": "Item 2"
+            },
+            {
+              "value": "3",
+              "label": "Item 3"
+            },
+            {
+              "value": "4",
+              "label": "Item 4"
+            },
+            {
+              "value": "5",
+              "label": "Item 5"
+            },
+            {
+              "value": "6",
+              "label": "Item 6"
+            },
+            {
+              "value": "7",
+              "label": "Item 7"
+            },
+            {
+              "value": "8",
+              "label": "Item 8"
+            },
+            {
+              "value": "9",
+              "label": "Item 9"
+            },
+            {
+              "value": "10",
+              "label": "Item 10"
+            }
+          ]
+        },
+        {
+          "type": "link_list",
+          "id": "panel_menu",
+          "label": "Panel menu",
+          "info": "Top-level items = column headings. Their nested items = links."
+        },
+        {
+          "type": "select",
+          "id": "panel_images",
+          "label": "Images",
+          "info": "Square is 1:1, landscape and the two tiles fill the full 2:1 zone.",
+          "default": "one",
+          "options": [
+            {
+              "value": "one",
+              "label": "One image (square spotlight)"
+            },
+            {
+              "value": "one_wide",
+              "label": "One image (wide landscape)"
+            },
+            {
+              "value": "two",
+              "label": "Two images (wide tiles)"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "panel_columns",
+          "label": "Link columns",
+          "info": "Three columns places menu headings by keyword: selection/category, featured, collection.",
+          "default": "stack",
+          "options": [
+            {
+              "value": "stack",
+              "label": "Stacked"
+            },
+            {
+              "value": "columns",
+              "label": "Three columns"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Image 1"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_1",
+          "label": "Image",
+          "info": "Leave empty to show links only, with no imagery."
+        },
+        {
+          "type": "text",
+          "id": "eyebrow_1",
+          "label": "Eyebrow"
+        },
+        {
+          "type": "text",
+          "id": "heading_1",
+          "label": "Heading"
+        },
+        {
+          "type": "url",
+          "id": "link_1",
+          "label": "Link"
+        },
+        {
+          "visible_if": "{{ block.settings.panel_images == 'two' }}",
+          "type": "header",
+          "content": "Image 2"
+        },
+        {
+          "visible_if": "{{ block.settings.panel_images == 'two' }}",
+          "type": "image_picker",
+          "id": "image_2",
+          "label": "Image",
+          "info": "Both images must be set to show the two-tile layout. With only one, it falls back to the square spotlight."
+        },
+        {
+          "visible_if": "{{ block.settings.panel_images == 'two' }}",
+          "type": "text",
+          "id": "eyebrow_2",
+          "label": "Eyebrow"
+        },
+        {
+          "visible_if": "{{ block.settings.panel_images == 'two' }}",
+          "type": "text",
+          "id": "heading_2",
+          "label": "Heading"
+        },
+        {
+          "visible_if": "{{ block.settings.panel_images == 'two' }}",
+          "type": "url",
+          "id": "link_2",
+          "label": "Link"
+        },
+        {
+          "type": "header",
+          "content": "Mobile"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "Mobile spotlight image",
+          "info": "Shown at the top of this submenu in the mobile drawer. Defaults to Image 1."
+        }
+      ]
+    },
+    {
       "name": "Image",
       "type": "image",
       "settings": [
@@ -1973,16 +1987,46 @@
           "label": "Link position in main menu",
           "default": "1",
           "options": [
-            {"value": "1", "label": "Item 1"},
-            {"value": "2", "label": "Item 2"},
-            {"value": "3", "label": "Item 3"},
-            {"value": "4", "label": "Item 4"},
-            {"value": "5", "label": "Item 5"},
-            {"value": "6", "label": "Item 6"},
-            {"value": "7", "label": "Item 7"},
-            {"value": "8", "label": "Item 8"},
-            {"value": "9", "label": "Item 9"},
-            {"value": "10", "label": "Item 10"}
+            {
+              "value": "1",
+              "label": "Item 1"
+            },
+            {
+              "value": "2",
+              "label": "Item 2"
+            },
+            {
+              "value": "3",
+              "label": "Item 3"
+            },
+            {
+              "value": "4",
+              "label": "Item 4"
+            },
+            {
+              "value": "5",
+              "label": "Item 5"
+            },
+            {
+              "value": "6",
+              "label": "Item 6"
+            },
+            {
+              "value": "7",
+              "label": "Item 7"
+            },
+            {
+              "value": "8",
+              "label": "Item 8"
+            },
+            {
+              "value": "9",
+              "label": "Item 9"
+            },
+            {
+              "value": "10",
+              "label": "Item 10"
+            }
           ]
         },
         {
@@ -2018,9 +2062,18 @@
           "label": "Overlay type",
           "default": "text",
           "options": [
-            {"value": "disabled", "label": "Disabled"},
-            {"value": "opacity", "label": "Opacity overlay"},
-            {"value": "text", "label": "Text underlay"}
+            {
+              "value": "disabled",
+              "label": "Disabled"
+            },
+            {
+              "value": "opacity",
+              "label": "Opacity overlay"
+            },
+            {
+              "value": "text",
+              "label": "Text underlay"
+            }
           ]
         },
         {
@@ -2038,12 +2091,30 @@
           "label": "Heading size",
           "default": "heading-medium",
           "options": [
-            {"value": "heading-mini", "label": "Mini"},
-            {"value": "heading-x-small", "label": "Extra small"},
-            {"value": "heading-small", "label": "Small"},
-            {"value": "heading-medium", "label": "Medium"},
-            {"value": "heading-large", "label": "Large"},
-            {"value": "heading-x-large", "label": "Extra large"}
+            {
+              "value": "heading-mini",
+              "label": "Mini"
+            },
+            {
+              "value": "heading-x-small",
+              "label": "Extra small"
+            },
+            {
+              "value": "heading-small",
+              "label": "Small"
+            },
+            {
+              "value": "heading-medium",
+              "label": "Medium"
+            },
+            {
+              "value": "heading-large",
+              "label": "Large"
+            },
+            {
+              "value": "heading-x-large",
+              "label": "Extra large"
+            }
           ]
         },
         {
@@ -2058,11 +2129,26 @@
           "info": "Automatically generated by the base size.",
           "default": "body-medium",
           "options": [
-            {"value": "body-x-small", "label": "Extra small"},
-            {"value": "body-small", "label": "Small"},
-            {"value": "body-medium", "label": "Medium"},
-            {"value": "body-large", "label": "Large"},
-            {"value": "body-x-large", "label": "Extra large"}
+            {
+              "value": "body-x-small",
+              "label": "Extra small"
+            },
+            {
+              "value": "body-small",
+              "label": "Small"
+            },
+            {
+              "value": "body-medium",
+              "label": "Medium"
+            },
+            {
+              "value": "body-large",
+              "label": "Large"
+            },
+            {
+              "value": "body-x-large",
+              "label": "Extra large"
+            }
           ]
         },
         {
@@ -2070,7 +2156,6 @@
           "id": "link",
           "label": "Link"
         },
-
         {
           "type": "header",
           "content": "Color"
@@ -2232,7 +2317,9 @@
     }
   ],
   "enabled_on": {
-    "groups": ["header"]
+    "groups": [
+      "header"
+    ]
   }
 }
 {% endschema %}

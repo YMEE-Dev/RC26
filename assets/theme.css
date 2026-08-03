@@ -4212,7 +4212,11 @@ body:has([data-header-sticky]) .main-content > .shopify-section:first-of-type {
 }
 
 body:has([data-header-transparent]) .main-content > .shopify-section.section-overlay-header:first-of-type {
-  --full-screen: calc(var(--full-height) - var(--announcement-height));
+  /* Transparent/overlay header: the announcement bar is position:fixed and overlays
+     the hero (it takes no flow space), so the hero must fill the whole viewport.
+     Subtracting --announcement-height here left a blank strip at the bottom of the
+     first section when the bar was shown. */
+  --full-screen: var(--full-height);
 }
 
 .has-header-sticky {
@@ -7595,7 +7599,7 @@ hover-disclosure {
 .header-sections .page-announcement {
   order: -1;
   position: relative;
-  z-index: 6003;
+  z-index: 6006;
 }
 
 .header__wrapper {
@@ -10250,8 +10254,8 @@ header-search-popdown.is-open .search-popdown {
 @media only screen and (max-width: 960px) {
   header-search-popdown.is-open .search-popdown {
     --text: #fff;
-    margin-top: 55px;
-    padding-top: 20px;
+    margin-top: 0;
+    padding-top: 30px;
     position: absolute;
     z-index: 6002;
   }
@@ -10265,7 +10269,6 @@ header-search-popdown.is-open .search-popdown {
 
 .search-popdown__main {
   width: 100%;
-  height: var(--header-height);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -22879,7 +22882,7 @@ main:not(.main-content--collection-spotlight) .collection__products .grid-outer 
  * Subcollection
  */
 .subcollections {
-  padding-top: calc(var(--header-height) + var(--PT));
+  padding-top: var(--PT);
   padding-bottom: calc(var(--PB));
   --link: var(--text);
   position: relative;
@@ -22888,7 +22891,7 @@ main:not(.main-content--collection-spotlight) .collection__products .grid-outer 
 
 @media only screen and (max-width: 960px) {
   .subcollections {
-    padding-top: var(--header-height);
+    padding-top: calc(var(--header-height) + 70px);
     padding-bottom: var(--PB);
   }
 }
@@ -26263,6 +26266,12 @@ predictive-search[loading] .predictive-search__loader {
   scrollbar-width: none;
   -ms-overflow-style: none;
   /* for Internet Explorer, Edge */
+}
+
+@media only screen and (max-width: 1024px) {
+  .predictive-search {
+    width: 100%;
+  }
 }
 
 .predictive-search::-webkit-scrollbar {
