@@ -26,10 +26,22 @@
 
 {%- style -%}
   .search-page {
-    --PT: {{ section.settings.padding_top }}px;
+    /* The announcement bar is fixed at the top of the viewport and full-width, so the
+       page's own top padding has to reserve its height — otherwise the bar sits on top
+       of the search field. --announcement-height resolves to 0px when the bar is
+       disabled or dismissed, so this collapses back to the setting on its own. */
+    --PT: calc({{ section.settings.padding_top }}px + var(--announcement-height, 0px));
     --PB: {{ section.settings.padding_bottom }}px;
     --COLUMNS-MOBILE: {{ columns_mobile }};
     --COLUMNS: {{ columns_desktop }};
+  }
+
+  /* theme.css makes the search field `position: sticky; top: 0` from 960px up, which
+     parks it underneath the bar once you scroll. Offset it by the same height. */
+  @media only screen and (min-width: 960px) {
+    .template-search main-search {
+      top: var(--announcement-height, 0px);
+    }
   }
 {%- endstyle -%}
 
