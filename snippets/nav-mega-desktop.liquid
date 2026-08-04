@@ -52,7 +52,14 @@
                 {{- link.title | strip_html | escape -}}
               </a>
             {%- else -%}
-              <a class="rc-d-link" href="{{ link.url }}">{{ link.title | strip_html | escape }}</a>
+              {%- comment -%}
+                data-rc-close: a primary item with no panel dismisses whatever panel is
+                open as soon as it's hovered or focused, so sweeping along the bar can't
+                leave a stale panel behind (same handler the logo and utility links use).
+              {%- endcomment -%}
+              <a class="rc-d-link" href="{{ link.url }}" data-rc-close>
+                {{- link.title | strip_html | escape -}}
+              </a>
             {%- endif -%}
           {%- endfor -%}
         </nav>

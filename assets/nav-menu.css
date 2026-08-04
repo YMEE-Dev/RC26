@@ -173,7 +173,8 @@ body.plp-header-ready:not(.plp-header-anim-done) .announcement__wrapper--top {
 .rc-nav .rc-mobile-bar__logo {
   transition:
     color 0.3s ease,
-    filter 0.3s ease;
+    filter 0.3s ease,
+    opacity 0.3s ease;
 }
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-link,
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-icon,
@@ -597,13 +598,15 @@ body.header-scroll-hide .rc-slide--r {
     white-space: nowrap;
     text-align: left;
     margin: 0;
-    transition: opacity 0.25s ease;
   }
   .rc-d-right .rc-d-link {
     text-align: right;
   }
-  /* non-active primary items dim while a menu is open */
-  .rc-nav[data-open="1"] .rc-d-stack--primary .rc-d-link:not([data-active="1"]) {
+  /* While a panel is open every header link recedes except the one that opened it —
+     the left primary stack and the right utility stack alike, so the whole bar reads
+     as background to the panel. */
+  .rc-nav[data-open="1"] .rc-d-stack--primary .rc-d-link:not([data-active="1"]),
+  .rc-nav[data-open="1"] .rc-d-stack--utility .rc-d-link {
     opacity: 0.45;
   }
 
@@ -637,6 +640,34 @@ body.header-scroll-hide .rc-slide--r {
     font-weight: 400;
     line-height: 12px;
     color: var(--rc-white);
+  }
+
+  /* Full-viewport backdrop behind the mega panels. The veil below is only 760px tall
+     and 90% opaque, so the page under it stayed sharp — every other overlay in the theme
+     (cart drawer, search popdown, side drawer) dims and blurs the whole page through
+     .underlay, and this matches those values: --underlay-bg + blur(30px). It sits under
+     .rc-nav__bar-wrap (z-index 6005) so the header itself stays crisp, and it never takes
+     pointer events, so the hover-out/close behaviour is untouched.
+     Desktop-only by scope: .rc-drawer is display:none from 1024px up, so [data-open="1"]
+     here can only mean an open mega panel. */
+  .rc-nav::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 6004;
+    background: var(--underlay-bg, rgba(0, 0, 0, 0.4));
+    -webkit-backdrop-filter: blur(30px);
+    backdrop-filter: blur(30px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 0.3s ease,
+      visibility 0.3s ease;
+  }
+  .rc-nav[data-open="1"]::after {
+    opacity: 1;
+    visibility: visible;
   }
 
   /* mega-menu veil — fades as one element, fixed height leaves a bottom exit strip.
