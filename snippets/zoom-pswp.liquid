@@ -32,7 +32,10 @@
   }
 
   body:has(.pswp--open) .js__header__stuck,
-  body:has(.pswp--open) .theme__header {
+  body:has(.pswp--open) .theme__header,
+  /* the RC nav replaced .theme__header as the visible header: its fixed bar sits at
+     z-index 6005, so without this it stayed above the gallery and ate the clicks */
+  body:has(.pswp--open) .rc-nav__bar-wrap {
     z-index: 0;
   }
 
