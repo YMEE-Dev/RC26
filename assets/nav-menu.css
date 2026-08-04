@@ -173,7 +173,8 @@ body.plp-header-ready:not(.plp-header-anim-done) .announcement__wrapper--top {
 .rc-nav .rc-mobile-bar__logo {
   transition:
     color 0.3s ease,
-    filter 0.3s ease;
+    filter 0.3s ease,
+    opacity 0.3s ease;
 }
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-link,
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-icon,
@@ -181,7 +182,8 @@ body.plp-header-ready:not(.plp-header-anim-done) .announcement__wrapper--top {
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-bag__count,
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .icon,
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-mobile-bar a,
-.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-mobile-bar button {
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-mobile-bar button,
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-crumbs {
   color: #000;
 }
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-icon svg [stroke]:not([stroke="none"]),
@@ -193,6 +195,80 @@ body.plp-header-ready:not(.plp-header-anim-done) .announcement__wrapper--top {
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-logo img,
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-mobile-bar__logo {
   filter: brightness(0);
+}
+
+/* Parallax switched off in the theme editor: drop any transform nav-menu.dev.js may
+   have applied before the setting changed, so the images sit still without a reload. */
+.rc-nav[data-parallax="0"] [data-rc-parallax] {
+  transform: none !important;
+}
+
+/* Header breadcrumb (nav-header-meta) — restores the legacy header's
+   .header__logo__meta, shown on product / collection / page / search. Values are 1:1 with what it inherited there: the
+   theme's h6 (body face, --FONT-TITLE/--LINE-HEIGHT-TITLE = 16/22 by default,
+   font-weight 400, 1.6px tracking, uppercase) with the current crumb underlined.
+   Links carry no underline (legacy .header__logo__meta a + --no-underline on product
+   children); only the collection page's current crumb is underlined, via __current.
+   Shared by both breakpoints; placement/spacing is per-breakpoint below. */
+.rc-crumbs {
+  font-family: var(--rc-body);
+  font-size: var(--FONT-TITLE, 16px);
+  line-height: var(--LINE-HEIGHT-TITLE, 22px);
+  font-weight: 400;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  text-align: center;
+}
+.rc-crumbs {
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease;
+}
+.rc-crumbs a {
+  text-decoration: none;
+  transition: opacity 0.25s ease;
+}
+.rc-crumbs a:hover {
+  opacity: 0.6;
+}
+.rc-crumbs__current {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Mobile: its own row under the bar. The legacy header stacked logo + meta in
+   .header__logo with gap 16px on collections (40px from 769px up), and the row rides
+   the announcement offset + entrance/scroll-hide exactly like the bar's slots do. */
+.rc-mobile-crumbs {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  top: var(--announcement-height, 0px);
+  padding: 16px 20px 0;
+}
+.rc-nav .rc-mobile-crumbs > * {
+  transition:
+    transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1),
+    color 0.3s ease,
+    filter 0.3s ease;
+  will-change: transform;
+}
+body.plp-header-loading .rc-mobile-crumbs > * {
+  opacity: 0;
+}
+body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-crumbs > * {
+  animation: rcHeaderFromTop 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+}
+body.header-scroll-hide .rc-mobile-crumbs > * {
+  transform: translateY(calc(-100% - var(--announcement-height, 0px) - 60px));
+}
+body.has-always-visible-fixed-header.header-scroll-hide .rc-mobile-crumbs > * {
+  transform: none;
+}
+@media (min-width: 1024px) {
+  .rc-mobile-crumbs {
+    display: none;
+  }
 }
 
 /* Scroll-reveal blur — 1:1 copy of the theme's `.theme__header__scroll-blur`
@@ -597,20 +673,40 @@ body.header-scroll-hide .rc-slide--r {
     white-space: nowrap;
     text-align: left;
     margin: 0;
-    transition: opacity 0.25s ease;
   }
   .rc-d-right .rc-d-link {
     text-align: right;
   }
-  /* non-active primary items dim while a menu is open */
-  .rc-nav[data-open="1"] .rc-d-stack--primary .rc-d-link:not([data-active="1"]) {
+  /* While a panel is open every header link recedes except the one that opened it —
+     the left primary stack and the right utility stack alike, so the whole bar reads
+     as background to the panel. */
+  .rc-nav[data-open="1"] .rc-d-stack--primary .rc-d-link:not([data-active="1"]),
+  .rc-nav[data-open="1"] .rc-d-stack--utility .rc-d-link {
     opacity: 0.45;
+  }
+
+  /* The breadcrumb clears out while a panel is open — the legacy header did the same
+     (custom-menu.css: [data-header-desktop]:has(.tmenu_item_active) .header__logo__meta),
+     since the panel's own headings take over that space. */
+  .rc-nav[data-open="1"] .rc-crumbs {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .rc-d-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* logo-to-breadcrumb spacing (legacy .header__logo used 40px here; tuned down) */
+    gap: 40px;
   }
 
   .rc-d-logo {
     display: inline-flex;
     align-items: center;
   }
+
   .rc-d-logo img {
     height: 50px;
     width: auto;
@@ -637,6 +733,34 @@ body.header-scroll-hide .rc-slide--r {
     font-weight: 400;
     line-height: 12px;
     color: var(--rc-white);
+  }
+
+  /* Full-viewport backdrop behind the mega panels. The veil below is only 760px tall
+     and 90% opaque, so the page under it stayed sharp — every other overlay in the theme
+     (cart drawer, search popdown, side drawer) dims and blurs the whole page through
+     .underlay, and this matches those values: --underlay-bg + blur(30px). It sits under
+     .rc-nav__bar-wrap (z-index 6005) so the header itself stays crisp, and it never takes
+     pointer events, so the hover-out/close behaviour is untouched.
+     Desktop-only by scope: .rc-drawer is display:none from 1024px up, so [data-open="1"]
+     here can only mean an open mega panel. */
+  .rc-nav::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 6004;
+    background: var(--underlay-bg, rgba(0, 0, 0, 0.4));
+    -webkit-backdrop-filter: blur(30px);
+    backdrop-filter: blur(30px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 0.3s ease,
+      visibility 0.3s ease;
+  }
+  .rc-nav[data-open="1"]::after {
+    opacity: 1;
+    visibility: visible;
   }
 
   /* mega-menu veil — fades as one element, fixed height leaves a bottom exit strip.
@@ -824,11 +948,6 @@ body.header-scroll-hide .rc-slide--r {
     display: block;
     color: var(--rc-overline);
     margin-bottom: 6px;
-  }
-  /* the featured column's heading (FEATURED COLLECTIONS) is set in the display face.
-     Keyed to the column, not the heading text, which is translated per locale. */
-  .rc-d-cell--feat .rc-d-sec__head {
-    font-family: var(--rc-display);
   }
   .rc-d-links {
     display: flex;
@@ -1290,11 +1409,6 @@ body.header-scroll-hide .rc-slide--r {
   color: var(--rc-overline);
   margin-bottom: 10px;
 }
-/* mirrors .rc-d-cell--feat .rc-d-sec__head on desktop */
-.rc-m-group__head--display {
-  font-family: var(--rc-display);
-}
-
 /* ALL COLLECTIONS collapses in the drawer — native <details>, no JS */
 .rc-m-group--drop > summary {
   display: flex;
@@ -1597,7 +1711,8 @@ html.rc-drawer-open body {
 /* Hide the closed mobile bar while the drawer is open — the fixed bar-wrap sits
    above the drawer (z-index 6005 vs 100), so otherwise its logo/hamburger/cart
    would stack on top of the drawer's own header. */
-html.rc-drawer-open .rc-mobile-bar {
+html.rc-drawer-open .rc-mobile-bar,
+html.rc-drawer-open .rc-mobile-crumbs {
   display: none;
 }
 

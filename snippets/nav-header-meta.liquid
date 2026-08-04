@@ -1,0 +1,130 @@
+{%- doc -%}
+  Renders the breadcrumb line that sits under the header wordmark. Restores what the
+  legacy header showed in .header__logo__meta (sections/header.liquid, now hidden behind
+  the RC nav by `.header__wrapper { display: none }`), which covered four templates:
+
+  - product    the product's collection. Source is `collection` (the collection the
+               visitor arrived through), falling back to the `custom.collection`
+               metafield — which may be a plain string, hence the title/url guards.
+               A "Parent - Child" title splits into two links; the child is NOT
+               underlined here (legacy used --subcollection--no-underline).
+  - collection the collection itself. "Parent - Child" splits into a link to the parent
+               plus the child as the current, underlined crumb.
+  - page       the page title, unlinked.
+  - search     the search label, only once a term has been submitted.
+
+  For split titles the parent URL resolves from the first segment of the collection
+  handle, then from the handle in the URL, then (product only) from the parent title
+  handleized, falling back to the collection's own URL.
+
+  Renders nothing on other templates, or when the source is missing — callers capture the
+  output and skip their wrapper when it comes back blank, so an empty line never adds
+  height to the fixed header. Styles live in assets/nav-menu.css (.rc-crumbs*).
+
+  @example
+  {% render 'nav-header-meta' %}
+{%- enddoc -%}
+
+{%- liquid
+  assign meta_source = ''
+  if template.name == 'product'
+    assign meta_source = 'product'
+  elsif template contains 'collection' and collection
+    assign meta_source = 'collection'
+  elsif template contains 'page' and page.title != blank
+    assign meta_source = 'page'
+  elsif template.name == 'search' and search.terms != blank
+    assign meta_source = 'search'
+  endif
+-%}
+
+{%- case meta_source -%}
+  {%- when 'product' -%}
+    {%- liquid
+      assign crumb_collection = collection | default: product.metafields.custom.collection
+      assign crumb_title = crumb_collection.title | default: crumb_collection
+    -%}
+    {%- if crumb_collection != blank and crumb_title != blank -%}
+      <div class="rc-crumbs">
+        {%- if crumb_title contains ' - ' -%}
+          {%- liquid
+            assign parent_title = crumb_title | split: ' - ' | first | strip
+            assign child_title = crumb_title | remove_first: parent_title | remove_first: ' - ' | strip
+          -%}
+          {%- if parent_title != blank and child_title != blank -%}
+            {%- liquid
+              assign parent_handle = crumb_collection.handle | default: ''
+              if parent_handle == blank and crumb_collection.url != blank
+                assign parent_handle = crumb_collection.url | split: '/collections/' | last | split: '?' | first | split: '/' | first
+              endif
+              if parent_handle != blank
+                assign parent_handle = parent_handle | split: '-' | first
+              else
+                assign parent_handle = parent_title | handleize
+              endif
+              assign parent_collection = collections[parent_handle]
+              assign parent_url = crumb_collection.url
+              if parent_collection != blank
+                assign parent_url = parent_collection.url
+              endif
+            -%}
+            <a href="{{ parent_url }}">{{ parent_title | escape }}</a>
+            <span class="rc-crumbs__sep" aria-hidden="true">&nbsp;/&nbsp;</span>
+            {%- comment -%} product keeps the child linked and un-underlined {%- endcomment -%}
+            <a href="{{ crumb_collection.url }}">{{ child_title | escape }}</a>
+          {%- else -%}
+            <a href="{{ crumb_collection.url }}">{{ crumb_title | escape }}</a>
+          {%- endif -%}
+        {%- elsif crumb_collection.url != blank -%}
+          <a href="{{ crumb_collection.url }}">{{ crumb_title | escape }}</a>
+        {%- else -%}
+          {%- comment -%} metafield string: no object to link, so build the collection URL {%- endcomment -%}
+          {%- assign metafield_url = crumb_title | handleize | prepend: '/collections/' -%}
+          <a href="{{ metafield_url }}">{{ crumb_title | escape }}</a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+  {%- when 'collection' -%}
+    {%- liquid
+      assign parent_title = ''
+      assign child_title = ''
+      if collection.title contains ' - '
+        assign parent_title = collection.title | split: ' - ' | first | strip
+        assign child_title = collection.title | remove_first: parent_title | remove_first: ' - ' | strip
+      endif
+    -%}
+    <div class="rc-crumbs">
+      {%- if parent_title != blank and child_title != blank -%}
+        {%- liquid
+          assign parent_handle = collection.handle | default: ''
+          if parent_handle == blank and collection.url != blank
+            assign parent_handle = collection.url | split: '/collections/' | last | split: '?' | first | split: '/' | first
+          endif
+          if parent_handle != blank
+            assign parent_handle = parent_handle | split: '-' | first
+          endif
+          assign parent_collection = collections[parent_handle]
+          assign parent_url = collection.url
+          if parent_collection != blank
+            assign parent_url = parent_collection.url
+          endif
+        -%}
+        <a href="{{ parent_url }}">{{ parent_title | escape }}</a>
+        <span class="rc-crumbs__sep" aria-hidden="true">&nbsp;/&nbsp;</span>
+        <span class="rc-crumbs__current">{{ child_title | escape }}</span>
+      {%- else -%}
+        <span>{{ collection.title | escape }}</span>
+      {%- endif -%}
+    </div>
+
+  {%- when 'page' -%}
+    <div class="rc-crumbs">
+      <span>{{ page.title | escape }}</span>
+    </div>
+
+  {%- when 'search' -%}
+    <div class="rc-crumbs">
+      <span>{{ 'general.search.title' | t }}</span>
+    </div>
+{%- endcase -%}

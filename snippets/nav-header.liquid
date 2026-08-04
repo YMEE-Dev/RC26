@@ -16,6 +16,14 @@
   assign rc_menu = section.settings.rc_menu_linklist | default: 'main-menu'
   assign rc_blocks = section.blocks
 
+  # Mega-panel image parallax, off via the section's `rc_panel_parallax` switch.
+  # nav-menu.dev.js reads data-parallax once at init; the CSS also neutralises the
+  # transform so toggling in the theme editor shows immediately, before any reload.
+  assign rc_parallax = '1'
+  unless section.settings.rc_panel_parallax
+    assign rc_parallax = '0'
+  endunless
+
   # Initial colour scheme rendered server-side (correct on first paint, no flash).
   # Reuse the header's existing per-template header_default_mode (passed in as
   # default_mode). Where a page has [data-header-observer-mode] sections,
@@ -24,7 +32,7 @@
   assign rc_scheme = default_mode | default: 'dark'
 -%}
 
-<div class="rc-nav" data-transparent="{{ rc_transparent }}" data-scheme="{{ rc_scheme }}" data-open="0" data-search-url="{{ routes.search_url }}">
+<div class="rc-nav" data-transparent="{{ rc_transparent }}" data-scheme="{{ rc_scheme }}" data-parallax="{{ rc_parallax }}" data-open="0" data-search-url="{{ routes.search_url }}">
   {%- comment -%}
     data-header-height: the theme's setVars() (theme.js) measures the first
     [data-header-height] to publish --header-height / --content-full / --content-min.
@@ -56,6 +64,20 @@
         </a>
       </div>
     </div>
+
+    {%- comment -%}
+      Header breadcrumb, mobile copy — product / collection / page / search, same as the
+      legacy .header__logo__meta. It sits outside .rc-mobile-bar (a fixed-height flex row)
+      as its own row, mirroring how the legacy header stacked logo and meta. The desktop
+      copy lives in nav-mega-desktop, inside .rc-desktop, which is display:none below
+      1024px — hence one render per breakpoint. The wrapper is skipped when the snippet
+      returns nothing, so templates without a crumb keep their header height.
+    {%- endcomment -%}
+    {%- capture header_meta -%}{%- render 'nav-header-meta' -%}{%- endcapture -%}
+    {%- assign header_meta = header_meta | strip -%}
+    {%- if header_meta != blank -%}
+      <div class="rc-mobile-crumbs">{{ header_meta }}</div>
+    {%- endif -%}
 
     {%- render 'nav-mega-desktop', rc_menu: rc_menu, blocks: rc_blocks -%}
   </div>

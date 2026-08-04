@@ -122,8 +122,11 @@
     // so the trigger link disappears and an open panel would be left detached
     window.addEventListener('scroll', function () { if (openKey) close(); }, { passive: true });
 
-    /* ---- cursor parallax across the open menu ---- */
-    if (motionOK) {
+    /* ---- cursor parallax across the open menu ----
+       Gated by the header section's "Parallax on submenu images" switch (data-parallax
+       on .rc-nav) on top of motionOK, so the rAF loop never starts when it's off. */
+    var parallaxOK = motionOK && root.getAttribute('data-parallax') !== '0';
+    if (parallaxOK) {
       var px = 0, py = 0, tx = 0, ty = 0, MAX = 32;
       panelsWrap.addEventListener('mousemove', function (e) {
         var r = panelsWrap.getBoundingClientRect();

@@ -6,20 +6,12 @@
   Styles live in assets/nav-menu.css (.rc-m-group*).
 
   @param {object} group - A link list item; its child links become the rows
-  @param {boolean} [featured] - Sets the heading in the display face (Portrait LS)
   @param {boolean} [collapsible] - Renders the group as a collapsed dropdown
 
   @example
-  {% render 'nav-drawer-group', group: group, featured: true %}
+  {% render 'nav-drawer-group', group: group %}
   {% render 'nav-drawer-group', group: group, collapsible: true %}
 {%- enddoc -%}
-
-{%- liquid
-  assign head_class = 'rc-label rc-m-group__head'
-  if featured
-    assign head_class = head_class | append: ' rc-m-group__head--display'
-  endif
--%}
 
 {%- capture rows -%}
   {%- for l in group.links -%}
@@ -43,7 +35,7 @@
     so an unwrapped list stays visible when collapsed.
   {%- endcomment -%}
   <details class="rc-m-group rc-m-group--drop">
-    <summary class="{{ head_class }}">
+    <summary class="rc-label rc-m-group__head">
       <span>{{ group.title | strip_html | escape }}</span>
       {%- render 'icon-nav-arrow-down' -%}
     </summary>
@@ -52,7 +44,7 @@
 {%- else -%}
   <div class="rc-m-group">
     {%- if group.title != blank -%}
-      <div class="{{ head_class }}">{{ group.title | strip_html | escape }}</div>
+      <div class="rc-label rc-m-group__head">{{ group.title | strip_html | escape }}</div>
     {%- endif -%}
     {{ rows }}
   </div>

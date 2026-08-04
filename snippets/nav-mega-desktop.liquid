@@ -52,16 +52,33 @@
                 {{- link.title | strip_html | escape -}}
               </a>
             {%- else -%}
-              <a class="rc-d-link" href="{{ link.url }}">{{ link.title | strip_html | escape }}</a>
+              {%- comment -%}
+                data-rc-close: a primary item with no panel dismisses whatever panel is
+                open as soon as it's hovered or focused, so sweeping along the bar can't
+                leave a stale panel behind (same handler the logo and utility links use).
+              {%- endcomment -%}
+              <a class="rc-d-link" href="{{ link.url }}" data-rc-close>
+                {{- link.title | strip_html | escape -}}
+              </a>
             {%- endif -%}
           {%- endfor -%}
         </nav>
       </div>
 
-      {%- comment -%} center: wordmark {%- endcomment -%}
-      <a class="rc-d-logo rc-slide rc-slide--t" href="{{ routes.root_url }}" data-rc-close aria-label="{{ shop.name }} — home">
-        <img src="{{ logo }}" alt="{{ shop.name }}" width="180" height="50">
-      </a>
+      {%- comment -%}
+        center: wordmark, with the header breadcrumb stacked beneath it (product /
+        collection / page / search — see nav-header-meta). The slide classes sit on the
+        wrapper so logo and breadcrumb enter and leave as one unit.
+      {%- endcomment -%}
+      {%- capture header_meta -%}{%- render 'nav-header-meta' -%}{%- endcapture -%}
+      {%- assign header_meta = header_meta | strip -%}
+      <div class="rc-d-center rc-slide rc-slide--t">
+        <a class="rc-d-logo" href="{{ routes.root_url }}" data-rc-close aria-label="{{ shop.name }} — home">
+          <img src="{{ logo }}" alt="{{ shop.name }}" width="180" height="50">
+        </a>
+        {%- comment -%} empty on templates without a crumb, so the column keeps no gap {%- endcomment -%}
+        {{ header_meta }}
+      </div>
 
       {%- comment -%} right: utility stack + bag (hardcoded — some items trigger JS) {%- endcomment -%}
       <div class="rc-d-right rc-slide rc-slide--r">

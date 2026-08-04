@@ -26,10 +26,22 @@
 
 {%- style -%}
   .search-page {
-    --PT: {{ section.settings.padding_top }}px;
+    /* The announcement bar is fixed at the top of the viewport and full-width, so the
+       page's own top padding has to reserve its height — otherwise the bar sits on top
+       of the search field. --announcement-height resolves to 0px when the bar is
+       disabled or dismissed, so this collapses back to the setting on its own. */
+    --PT: calc({{ section.settings.padding_top }}px + var(--announcement-height, 0px));
     --PB: {{ section.settings.padding_bottom }}px;
     --COLUMNS-MOBILE: {{ columns_mobile }};
     --COLUMNS: {{ columns_desktop }};
+  }
+
+  /* theme.css makes the search field `position: sticky; top: 0` from 960px up, which
+     parks it underneath the bar once you scroll. Offset it by the same height. */
+  @media only screen and (min-width: 960px) {
+    .template-search main-search {
+      top: var(--announcement-height, 0px);
+    }
   }
 {%- endstyle -%}
 
@@ -75,11 +87,11 @@
                     assign product_title_prefix_hyphen = normalized_title | slice: 0, 4
                     assign product_title_prefix_space = normalized_title | slice: 0, 3
                     assign exclude_product = false
-                    
+
                     if product_title_prefix_hyphen == 'st -' or product_title_prefix_space == 'st ' or normalized_title contains 'storytelling'
                       assign exclude_product = true
                     endif
-                    
+
                     if exclude_product == false
                       for tag in item.tags
                         assign normalized_tag = tag | downcase
@@ -89,7 +101,7 @@
                         endif
                       endfor
                     endif
-                    
+
                     if exclude_product
                       continue
                     endif
