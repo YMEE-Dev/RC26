@@ -391,6 +391,22 @@ body.template-collection:has(.collection--spotlight.collection--spotlight-positi
     padding-top: 150px;
   }
 }
+
+/* text-naked collections: nothing pushes content down here — the banner, highlights and
+   subcollection rows are all disabled in collection.text-naked.json, so the rich-text PLP
+   description is the first section and sits directly under the header.
+
+   The space the header reserves above it is a fixed 160px, but the header's *contents*
+   are shifted down by the announcement bar (.rc-nav__bar-wrap top, .rc-mobile-bar top,
+   .rc-d-bar__grid padding all carry var(--announcement-height)). So when the bar is shown
+   the breadcrumb hangs that much below the reserved band and lands on the description —
+   measured at 10px of overlap on desktop. Growing the reserved band does not help; it is
+   not what positions <main>. Offsetting the content by exactly the announcement height
+   restores the same 30px breadcrumb-to-description gap the bar-off state already has, and
+   collapses to 0 when the bar is hidden or dismissed. */
+.main-content--collection-text-naked {
+  padding-top: var(--announcement-height, 0px);
+}
 body:has(:is(.main-content--collection-naked, .main-content--collection-super-naked))
   .rc-nav:not([data-open="1"])
   :is(.rc-d-link, .rc-d-icon, .rc-d-bag, .rc-d-bag__count, .icon, .rc-mobile-bar a, .rc-mobile-bar button) {
