@@ -183,7 +183,7 @@ body.plp-header-ready:not(.plp-header-anim-done) .announcement__wrapper--top {
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .icon,
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-mobile-bar a,
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-mobile-bar button,
-.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-crumbs {
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .header__logo__meta {
   color: #000;
 }
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-icon svg [stroke]:not([stroke="none"]),
@@ -203,37 +203,21 @@ body.plp-header-ready:not(.plp-header-anim-done) .announcement__wrapper--top {
   transform: none !important;
 }
 
-/* Header breadcrumb (nav-header-meta) — restores the legacy header's
-   .header__logo__meta, shown on product / collection / page / search. Values are 1:1 with what it inherited there: the
-   theme's h6 (body face, --FONT-TITLE/--LINE-HEIGHT-TITLE = 16/22 by default,
-   font-weight 400, 1.6px tracking, uppercase) with the current crumb underlined.
-   Links carry no underline (legacy .header__logo__meta a + --no-underline on product
-   children); only the collection page's current crumb is underlined, via __current.
-   Shared by both breakpoints; placement/spacing is per-breakpoint below. */
-.rc-crumbs {
-  font-family: var(--rc-body);
-  font-size: var(--FONT-TITLE, 16px);
-  line-height: var(--LINE-HEIGHT-TITLE, 22px);
-  font-weight: 400;
-  letter-spacing: 1.6px;
-  text-transform: uppercase;
-  text-align: center;
-}
-.rc-crumbs {
+/* Header breadcrumb — markup and typography come from snippets/header-logo-meta.liquid
+   and the theme's own rules (theme.css .header__logo__meta* + h6 scale, and
+   custom-collection.css for collection spacing). Only the bits the RC nav needs are here:
+   inherit the nav's colour instead of the theme's --link, and hide while a panel is open
+   (the legacy hide was keyed to Qikify's .tmenu_item_active, which no longer exists). */
+.rc-nav .header__logo__meta {
+  color: inherit;
   transition:
     opacity 0.2s ease,
     visibility 0.2s ease;
 }
-.rc-crumbs a {
-  text-decoration: none;
-  transition: opacity 0.25s ease;
-}
-.rc-crumbs a:hover {
-  opacity: 0.6;
-}
-.rc-crumbs__current {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+.rc-nav[data-open="1"] .header__logo__meta {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* Mobile: its own row under the bar, riding the announcement offset and the
@@ -271,7 +255,7 @@ body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-crumbs > * {
   animation: rcHeaderFromTop 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.header-scroll-hide .rc-mobile-crumbs > * {
-  transform: translateY(calc(-200% - var(--announcement-height, 0px) - 60px));
+  transform: translateY(calc(-260% - var(--announcement-height, 0px) - 60px));
 }
 body.has-always-visible-fixed-header.header-scroll-hide .rc-mobile-crumbs > * {
   transform: none;
@@ -696,20 +680,11 @@ body.header-scroll-hide .rc-slide--r {
     opacity: 0.45;
   }
 
-  /* The breadcrumb clears out while a panel is open — the legacy header did the same
-     (custom-menu.css: [data-header-desktop]:has(.tmenu_item_active) .header__logo__meta),
-     since the panel's own headings take over that space. */
-  .rc-nav[data-open="1"] .rc-crumbs {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
-
   .rc-d-center {
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* logo-to-breadcrumb spacing (legacy .header__logo used 40px here; tuned down) */
+    /* logo-to-breadcrumb spacing — matches the legacy .header__logo gap on desktop */
     gap: 40px;
   }
 
