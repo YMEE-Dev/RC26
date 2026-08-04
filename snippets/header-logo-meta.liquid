@@ -1,0 +1,161 @@
+{%- doc -%}
+  The header breadcrumb line — the theme's original `.header__logo__meta`, moved out of
+  sections/header.liquid so the legacy header and the RC nav render the SAME markup rather
+  than two parallel implementations. Product / collection / page / search behave exactly
+  as before; the only change is how the parent link resolves (see the inline comment).
+
+  Self-contained: everything it reads is a global (template, collection, product, page,
+  search, collections), so it renders correctly from either header.
+
+  Styling is the theme's existing CSS — theme.css `.header__logo__meta*` and the h6 type
+  scale, custom-collection.css for collection spacing. assets/nav-menu.css only adds
+  placement and open/scheme state for the RC nav.
+
+  @example
+  {% render 'header-logo-meta' %}
+{%- enddoc -%}
+
+{%- if template.name == 'product' or template contains 'collection' or template contains 'page' or template.name == 'search' -%}
+  <div class="header__logo__meta">
+    {%- if template.name == 'product' -%}
+      {%- assign current_collection = collection | default: product.metafields.custom.collection -%}
+      {%- assign has_collection = false -%}
+      {%- if current_collection != blank -%}
+        {%- assign has_collection = true -%}
+      {%- endif -%}
+      <h6 class="header__logo__meta__line">
+        {%- if has_collection -%}
+          <span class="header__logo__meta__collection">
+            {%- assign current_collection_title = current_collection.title | default: current_collection -%}
+            {%- if current_collection_title contains ' - ' -%}
+              {%- liquid
+                assign parent_collection_title = current_collection_title | split: ' - ' | first | strip
+                assign child_collection_title = current_collection_title | remove_first: parent_collection_title | remove_first: ' - ' | strip
+              -%}
+              {%- if parent_collection_title != blank -%}
+                {%- if child_collection_title != blank -%}
+                  {%- liquid
+                    # Parent URL comes from the HANDLE, which Shopify never translates — the displayed
+                    # title is. Take the LONGEST handle prefix that is a real collection
+                    # ("love-in-verona-necklaces" -> "love-in-verona"). Splitting the handle and keeping
+                    # only its first segment yielded "love", which is no collection, so the link fell back
+                    # to the page the visitor was already on. Handleized parent title stays the fallback.
+                    assign parent_collection_handle = ''
+                    assign crumb_handle = current_collection.handle | default: ''
+                    if crumb_handle == blank and current_collection.url != blank
+                      assign crumb_handle = current_collection.url | split: '/collections/' | last | split: '?' | first | split: '/' | first
+                    endif
+                    assign crumb_parts = crumb_handle | split: '-'
+                    assign crumb_prefix = ''
+                    for crumb_part in crumb_parts
+                      if forloop.last
+                        break
+                      endif
+                      if crumb_prefix == blank
+                        assign crumb_prefix = crumb_part
+                      else
+                        assign crumb_prefix = crumb_prefix | append: '-' | append: crumb_part
+                      endif
+                      if collections[crumb_prefix] != blank
+                        assign parent_collection_handle = crumb_prefix
+                      endif
+                    endfor
+                    if parent_collection_handle == blank
+                      assign parent_collection_handle = parent_collection_title | handleize
+                    endif
+                    assign parent_collection_obj = collections[parent_collection_handle]
+                    assign parent_collection_url = routes.root_url | append: '/collections/' | append: parent_collection_handle
+                    if parent_collection_obj != blank
+                      assign parent_collection_url = parent_collection_obj.url
+                    endif
+                  -%}
+                  <a href="{{ parent_collection_url }}">{{ parent_collection_title }}</a>
+                  <span class="header__logo__meta__separator">&nbsp;/&nbsp;</span>
+                  <a class="header__logo__meta__subcollection header__logo__meta__subcollection--no-underline" href="{{ current_collection.url }}">{{ child_collection_title }}</a>
+                {%- else -%}
+                  <a href="{{ current_collection.url }}">{{ current_collection.title }}</a>
+                {%- endif -%}
+              {%- else -%}
+                <a href="{{ current_collection.url }}">{{ current_collection.title }}</a>
+              {%- endif -%}
+            {%- elsif current_collection.url != blank -%}
+              <a href="{{ current_collection.url }}">{{ current_collection.title }}</a>
+            {%- else -%}
+              {%- assign collection_handle = product.metafields.custom.collection | handleize -%}
+              {%-  assign parent_collection_url = '/collections/' | append: collection_handle -%}
+              <a href="{{ parent_collection_url }}">{{ product.metafields.custom.collection }}</a>
+            {%- endif -%}
+          </span>
+        {%- endif -%}
+      </h6>
+    {%- elsif template contains 'collection' and collection -%}
+          <h6 class="header__logo__meta__collection">
+        {%- assign collection_title = collection.title -%}
+        {%- if collection_title contains ' - ' -%}
+          {%- liquid
+            assign parent_collection_title = collection_title | split: ' - ' | first | strip
+            assign child_collection_title = collection_title | remove_first: parent_collection_title | remove_first: ' - ' | strip
+          -%}
+          {%- if parent_collection_title != blank -%}
+            {%- if child_collection_title != blank -%}
+              {%- liquid
+                # Parent URL comes from the HANDLE, which Shopify never translates — the displayed
+                # title is. Take the LONGEST handle prefix that is a real collection
+                # ("love-in-verona-necklaces" -> "love-in-verona"). Splitting the handle and keeping
+                # only its first segment yielded "love", which is no collection, so the link fell back
+                # to the page the visitor was already on. Handleized parent title stays the fallback.
+                assign parent_collection_handle = ''
+                assign crumb_handle = collection.handle | default: ''
+                if crumb_handle == blank and collection.url != blank
+                  assign crumb_handle = collection.url | split: '/collections/' | last | split: '?' | first | split: '/' | first
+                endif
+                assign crumb_parts = crumb_handle | split: '-'
+                assign crumb_prefix = ''
+                for crumb_part in crumb_parts
+                  if forloop.last
+                    break
+                  endif
+                  if crumb_prefix == blank
+                    assign crumb_prefix = crumb_part
+                  else
+                    assign crumb_prefix = crumb_prefix | append: '-' | append: crumb_part
+                  endif
+                  if collections[crumb_prefix] != blank
+                    assign parent_collection_handle = crumb_prefix
+                  endif
+                endfor
+                if parent_collection_handle == blank
+                  assign parent_collection_handle = parent_collection_title | handleize
+                endif
+                assign parent_collection_obj = collections[parent_collection_handle]
+                assign parent_collection_url = routes.root_url | append: '/collections/' | append: parent_collection_handle
+                if parent_collection_obj != blank
+                  assign parent_collection_url = parent_collection_obj.url
+                endif
+              -%}
+              <a href="{{ parent_collection_url }}">{{ parent_collection_title }}</a>
+              <span class="header__logo__meta__separator">&nbsp;/&nbsp;</span>
+              <span class="header__logo__meta__subcollection">{{ child_collection_title }}</span>
+            {%- else -%}
+              <a href="{{ collection.url }}">{{ collection.title }}</a>
+            {%- endif -%}
+          {%- else -%}
+            <span>{{ collection.title }}</span>
+          {%- endif -%}
+        {%- else -%}
+          <span>{{ collection.title }}</span>
+        {%- endif -%}
+      </h6>
+    {%  elsif template contains 'page' %}
+      <h6 class="header__logo__meta__page">
+        <span>{{ page.title }}</span>
+      </h6>
+    {%- elsif template.name == 'search' -%}
+      <h6 class="header__logo__meta__page">
+        {%- if search.terms != blank -%}
+          <span>{{ 'general.search.title' | t }}</span>
+        {%- endif -%}
+      </h6>
+    {%- endif -%}
+  </div>
+{%- endif -%}

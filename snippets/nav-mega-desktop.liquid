@@ -67,10 +67,10 @@
 
       {%- comment -%}
         center: wordmark, with the header breadcrumb stacked beneath it (product /
-        collection / page / search — see nav-header-meta). The slide classes sit on the
-        wrapper so logo and breadcrumb enter and leave as one unit.
+        collection / page / search — see header-logo-meta, shared with the legacy header).
+        The slide classes sit on the wrapper so both enter and leave as one unit.
       {%- endcomment -%}
-      {%- capture header_meta -%}{%- render 'nav-header-meta' -%}{%- endcapture -%}
+      {%- capture header_meta -%}{%- render 'header-logo-meta' -%}{%- endcapture -%}
       {%- assign header_meta = header_meta | strip -%}
       <div class="rc-d-center rc-slide rc-slide--t">
         <a class="rc-d-logo" href="{{ routes.root_url }}" data-rc-close aria-label="{{ shop.name }} — home">

@@ -66,14 +66,14 @@
     </div>
 
     {%- comment -%}
-      Header breadcrumb, mobile copy — product / collection / page / search, same as the
-      legacy .header__logo__meta. It sits outside .rc-mobile-bar (a fixed-height flex row)
+      Header breadcrumb, mobile copy — renders the shared header-logo-meta snippet (the
+      theme's own .header__logo__meta). It sits outside .rc-mobile-bar (a fixed-height row)
       as its own row, mirroring how the legacy header stacked logo and meta. The desktop
       copy lives in nav-mega-desktop, inside .rc-desktop, which is display:none below
       1024px — hence one render per breakpoint. The wrapper is skipped when the snippet
       returns nothing, so templates without a crumb keep their header height.
     {%- endcomment -%}
-    {%- capture header_meta -%}{%- render 'nav-header-meta' -%}{%- endcapture -%}
+    {%- capture header_meta -%}{%- render 'header-logo-meta' -%}{%- endcapture -%}
     {%- assign header_meta = header_meta | strip -%}
     {%- if header_meta != blank -%}
       <div class="rc-mobile-crumbs">{{ header_meta }}</div>

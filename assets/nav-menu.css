@@ -57,7 +57,7 @@
   /* literal easing — the announcement is outside .rc-nav so var(--rc-ease) is
      undefined here, which invalidated the whole transition (bar snapped, no slide). */
   transition:
-    transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1),
     top 0.3s ease;
   will-change: transform;
   --rc-drop: -100%; /* entrance drops in by its own height (see rcHeaderFromTop) */
@@ -75,7 +75,7 @@ body.plp-header-loading .announcement__wrapper--top {
   opacity: 0;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .announcement__wrapper--top {
-  animation: rcHeaderFromTop 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromTop 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 
 .rc-nav button {
@@ -183,7 +183,7 @@ body.plp-header-ready:not(.plp-header-anim-done) .announcement__wrapper--top {
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .icon,
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-mobile-bar a,
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-mobile-bar button,
-.rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-crumbs {
+.rc-nav[data-scheme="dark"]:not([data-open="1"]) .header__logo__meta {
   color: #000;
 }
 .rc-nav[data-scheme="dark"]:not([data-open="1"]) .rc-d-icon svg [stroke]:not([stroke="none"]),
@@ -203,52 +203,52 @@ body.plp-header-ready:not(.plp-header-anim-done) .announcement__wrapper--top {
   transform: none !important;
 }
 
-/* Header breadcrumb (nav-header-meta) — restores the legacy header's
-   .header__logo__meta, shown on product / collection / page / search. Values are 1:1 with what it inherited there: the
-   theme's h6 (body face, --FONT-TITLE/--LINE-HEIGHT-TITLE = 16/22 by default,
-   font-weight 400, 1.6px tracking, uppercase) with the current crumb underlined.
-   Links carry no underline (legacy .header__logo__meta a + --no-underline on product
-   children); only the collection page's current crumb is underlined, via __current.
-   Shared by both breakpoints; placement/spacing is per-breakpoint below. */
-.rc-crumbs {
-  font-family: var(--rc-body);
-  font-size: var(--FONT-TITLE, 16px);
-  line-height: var(--LINE-HEIGHT-TITLE, 22px);
-  font-weight: 400;
-  letter-spacing: 1.6px;
-  text-transform: uppercase;
-  text-align: center;
-}
-.rc-crumbs {
+/* Header breadcrumb — markup and typography come from snippets/header-logo-meta.liquid
+   and the theme's own rules (theme.css .header__logo__meta* + h6 scale, and
+   custom-collection.css for collection spacing). Only the bits the RC nav needs are here:
+   inherit the nav's colour instead of the theme's --link, and hide while a panel is open
+   (the legacy hide was keyed to Qikify's .tmenu_item_active, which no longer exists). */
+.rc-nav .header__logo__meta {
+  color: inherit;
   transition:
     opacity 0.2s ease,
     visibility 0.2s ease;
 }
-.rc-crumbs a {
-  text-decoration: none;
-  transition: opacity 0.25s ease;
+/* theme.css pins the "/" separator to var(--link); inside the nav it has to follow the
+   crumb text instead, which is white or black depending on data-scheme. */
+.rc-nav .header__logo__meta__separator {
+  color: inherit;
 }
-.rc-crumbs a:hover {
-  opacity: 0.6;
-}
-.rc-crumbs__current {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+.rc-nav[data-open="1"] .header__logo__meta {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
-/* Mobile: its own row under the bar. The legacy header stacked logo + meta in
-   .header__logo with gap 16px on collections (40px from 769px up), and the row rides
-   the announcement offset + entrance/scroll-hide exactly like the bar's slots do. */
+/* Mobile: its own row under the bar, riding the announcement offset and the
+   entrance/scroll-hide exactly like the bar's slots do.
+
+   Spacing follows the legacy header, where logo and meta were flex children of
+   .header__logo and the distance was that element's `gap`:
+     24px  base, every template          (theme.css .header__logo)
+     16px  collection, below 769px       (custom-collection.css)
+     40px  collection, 769px and up      (custom-collection.css)
+   The 769px step existed because one element served both breakpoints there. Here the
+   desktop copy takes over at 1024px with its own .rc-d-center gap, so this row only
+   needs the two mobile figures. */
 .rc-mobile-crumbs {
   display: flex;
   justify-content: center;
   position: relative;
-  top: var(--announcement-height, 0px);
-  padding: 16px 20px 0;
+  top: calc(var(--announcement-height) + 25px);
+  padding: 24px 20px 0;
+}
+body.template-collection .rc-mobile-crumbs {
+  padding-top: 16px;
 }
 .rc-nav .rc-mobile-crumbs > * {
   transition:
-    transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1),
     color 0.3s ease,
     filter 0.3s ease;
   will-change: transform;
@@ -257,10 +257,10 @@ body.plp-header-loading .rc-mobile-crumbs > * {
   opacity: 0;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-crumbs > * {
-  animation: rcHeaderFromTop 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromTop 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.header-scroll-hide .rc-mobile-crumbs > * {
-  transform: translateY(calc(-100% - var(--announcement-height, 0px) - 60px));
+  transform: translateY(calc(-260% - var(--announcement-height, 0px) - 60px));
 }
 body.has-always-visible-fixed-header.header-scroll-hide .rc-mobile-crumbs > * {
   transform: none;
@@ -389,6 +389,27 @@ body.template-collection:has(.collection--spotlight.collection--spotlight-positi
   .main-content--collection-naked,
   .main-content--collection-super-naked {
     padding-top: 150px;
+  }
+}
+
+/* text-naked collections: nothing pushes content down here — the banner, highlights and
+   subcollection rows are all disabled in collection.text-naked.json, so the first section
+   is the rich-text PLP description and the fixed header's breadcrumb landed on top of it.
+
+   The offsets carry var(--announcement-height) because the header mount does too
+   (.rc-nav__bar-wrap top, .rc-mobile-bar top, .rc-d-bar__grid padding): when the
+   announcement bar is shown the whole header — breadcrumb included — shifts down by its
+   height while page content stays put, so a fixed figure clears only while the bar is off.
+
+   Figures follow the breadcrumb's own baseline plus the section's 20px padding-top:
+     desktop  grid padding-top 40 + logo 50 + .rc-d-center gap 40 + line-height 22 = 152
+     mobile   bar 50 + crumbs top 25 + collection padding-top 16 + line-height 22 = 113 */
+.main-content--collection-text-naked {
+  padding-top: calc(var(--announcement-height, 0px) + 100px);
+}
+@media (min-width: 1024px) {
+  .main-content--collection-text-naked {
+    padding-top: calc(var(--announcement-height, 0px) + 150px);
   }
 }
 body:has(:is(.main-content--collection-naked, .main-content--collection-super-naked))
@@ -569,20 +590,20 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
      HeaderComponent). calc(±(100% + 80px)) guarantees off-screen at any width.
    ========================================================================= */
 .rc-slide {
-  transition: transform 0.8s var(--rc-ease);
+  transition: transform 0.5s var(--rc-ease);
   will-change: transform;
 }
 body.plp-header-loading .rc-slide {
   opacity: 0;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-slide--l {
-  animation: rcHeaderFromLeft 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromLeft 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-slide--t {
-  animation: rcHeaderFromTop 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromTop 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-slide--r {
-  animation: rcHeaderFromRight 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromRight 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.header-scroll-hide .rc-slide--l {
   transform: translateX(calc(-100% - 80px));
@@ -685,20 +706,11 @@ body.header-scroll-hide .rc-slide--r {
     opacity: 0.45;
   }
 
-  /* The breadcrumb clears out while a panel is open — the legacy header did the same
-     (custom-menu.css: [data-header-desktop]:has(.tmenu_item_active) .header__logo__meta),
-     since the panel's own headings take over that space. */
-  .rc-nav[data-open="1"] .rc-crumbs {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
-
   .rc-d-center {
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* logo-to-breadcrumb spacing (legacy .header__logo used 40px here; tuned down) */
+    /* logo-to-breadcrumb spacing — matches the legacy .header__logo gap on desktop */
     gap: 40px;
   }
 
@@ -1649,7 +1661,7 @@ body.header-scroll-hide .rc-desktop {
 
 .rc-nav .rc-mobile-bar .rc-mobile-bar__slot > * {
   transition:
-    transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1),
     color 0.3s ease,
     filter 0.3s ease;
   will-change: transform;
@@ -1659,20 +1671,20 @@ body.plp-header-loading .rc-mobile-bar__slot > * {
   opacity: 0;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-bar__slot:first-child > * {
-  animation: rcHeaderFromLeft 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromLeft 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-bar__slot:nth-child(2) > * {
-  animation: rcHeaderFromTop 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromTop 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-bar__slot:last-child > * {
-  animation: rcHeaderFromRight 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromRight 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 /* scroll-down: hamburger exits left, logo up, cart right (reverse in on scroll-up) */
 body.header-scroll-hide .rc-mobile-bar__slot:first-child > * {
   transform: translateX(-250%);
 }
 body.header-scroll-hide .rc-mobile-bar__slot:nth-child(2) > * {
-  transform: translateY(calc(-100% - var(--announcement-height, 0px) - 60px));
+  transform: translateY(calc(-200% - var(--announcement-height, 0px) - 60px));
 }
 body.header-scroll-hide .rc-mobile-bar__slot:last-child > * {
   transform: translateX(250%);
