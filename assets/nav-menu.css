@@ -197,6 +197,12 @@ body.plp-header-ready:not(.plp-header-anim-done) .announcement__wrapper--top {
   filter: brightness(0);
 }
 
+/* Parallax switched off in the theme editor: drop any transform nav-menu.dev.js may
+   have applied before the setting changed, so the images sit still without a reload. */
+.rc-nav[data-parallax="0"] [data-rc-parallax] {
+  transform: none !important;
+}
+
 /* Header breadcrumb (nav-header-meta) — restores the legacy header's
    .header__logo__meta, shown on product / collection / page / search. Values are 1:1 with what it inherited there: the
    theme's h6 (body face, --FONT-TITLE/--LINE-HEIGHT-TITLE = 16/22 by default,
