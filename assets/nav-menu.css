@@ -393,24 +393,19 @@ body.template-collection:has(.collection--spotlight.collection--spotlight-positi
 }
 
 /* text-naked collections: nothing pushes content down here — the banner, highlights and
-   subcollection rows are all disabled in collection.text-naked.json, so the first section
-   is the rich-text PLP description and the fixed header's breadcrumb landed on top of it.
+   subcollection rows are all disabled in collection.text-naked.json, so the rich-text PLP
+   description is the first section and sits directly under the header.
 
-   The offsets carry var(--announcement-height) because the header mount does too
-   (.rc-nav__bar-wrap top, .rc-mobile-bar top, .rc-d-bar__grid padding): when the
-   announcement bar is shown the whole header — breadcrumb included — shifts down by its
-   height while page content stays put, so a fixed figure clears only while the bar is off.
-
-   Figures follow the breadcrumb's own baseline plus the section's 20px padding-top:
-     desktop  grid padding-top 40 + logo 50 + .rc-d-center gap 40 + line-height 22 = 152
-     mobile   bar 50 + crumbs top 25 + collection padding-top 16 + line-height 22 = 113 */
+   The space the header reserves above it is a fixed 160px, but the header's *contents*
+   are shifted down by the announcement bar (.rc-nav__bar-wrap top, .rc-mobile-bar top,
+   .rc-d-bar__grid padding all carry var(--announcement-height)). So when the bar is shown
+   the breadcrumb hangs that much below the reserved band and lands on the description —
+   measured at 10px of overlap on desktop. Growing the reserved band does not help; it is
+   not what positions <main>. Offsetting the content by exactly the announcement height
+   restores the same 30px breadcrumb-to-description gap the bar-off state already has, and
+   collapses to 0 when the bar is hidden or dismissed. */
 .main-content--collection-text-naked {
-  padding-top: calc(var(--announcement-height, 0px) + 100px);
-}
-@media (min-width: 1024px) {
-  .main-content--collection-text-naked {
-    padding-top: calc(var(--announcement-height, 0px) + 150px);
-  }
+  padding-top: var(--announcement-height, 0px);
 }
 body:has(:is(.main-content--collection-naked, .main-content--collection-super-naked))
   .rc-nav:not([data-open="1"])
