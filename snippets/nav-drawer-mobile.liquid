@@ -184,12 +184,8 @@
               {%- for group in panel_groups -%}
                 {%- if forloop.index == target -%}
                   {%- liquid
-                    assign is_featured = false
                     assign is_collapsible = false
                     if is_columns_panel
-                      if target == 3
-                        assign is_featured = true
-                      endif
                       if target == group_count and group_count >= 3
                         assign is_collapsible = true
                       endif
@@ -197,7 +193,6 @@
                   -%}
                   {%- render 'nav-drawer-group',
                     group: group,
-                    featured: is_featured,
                     collapsible: is_collapsible
                   -%}
                 {%- endif -%}
