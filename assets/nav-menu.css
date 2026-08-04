@@ -640,10 +640,6 @@ body.header-scroll-hide .rc-slide--r {
   }
   /* entrance + scroll hide/reveal come from the shared .rc-slide--l/t/r classes
      (see top of file); the regions carry those classes in nav-mega-desktop.liquid. */
-  /* while hidden the empty fixed bar must not intercept clicks on content below it */
-  body.header-scroll-hide .rc-d-bar {
-    pointer-events: none;
-  }
   .rc-d-left {
     display: flex;
     align-items: flex-start;
@@ -1578,6 +1574,18 @@ body.header-scroll-hide .rc-slide--r {
   left: 0;
   right: 0;
   z-index: 6005;
+}
+/* Scrolled away: the bar's contents translate out but this box stays fixed at its full
+   height (160px on desktop) and, at z-index 6005, kept swallowing clicks meant for the
+   page underneath — the collection filter/sort row sat right below it. Guarding the inner
+   .rc-d-bar wasn't enough; the wrapper itself is the element under the cursor.
+   Two exceptions: templates that keep the header visible (spotlight / timeline set
+   .has-always-visible-fixed-header, where scroll-hide is inert), and an open mega panel,
+   which lives inside this wrapper and must stay hoverable. */
+body.header-scroll-hide:not(.has-always-visible-fixed-header)
+  .rc-nav:not([data-open="1"])
+  :is(.rc-nav__bar-wrap, .rc-d-bar) {
+  pointer-events: none;
 }
 .rc-nav[data-transparent="0"] .rc-nav__bar-wrap {
   position: sticky; /* solid: occupy space + stick on scroll */
