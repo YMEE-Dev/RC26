@@ -57,7 +57,7 @@
   /* literal easing — the announcement is outside .rc-nav so var(--rc-ease) is
      undefined here, which invalidated the whole transition (bar snapped, no slide). */
   transition:
-    transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1),
     top 0.3s ease;
   will-change: transform;
   --rc-drop: -100%; /* entrance drops in by its own height (see rcHeaderFromTop) */
@@ -75,7 +75,7 @@ body.plp-header-loading .announcement__wrapper--top {
   opacity: 0;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .announcement__wrapper--top {
-  animation: rcHeaderFromTop 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromTop 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 
 .rc-nav button {
@@ -236,19 +236,30 @@ body.plp-header-ready:not(.plp-header-anim-done) .announcement__wrapper--top {
   text-underline-offset: 3px;
 }
 
-/* Mobile: its own row under the bar. The legacy header stacked logo + meta in
-   .header__logo with gap 16px on collections (40px from 769px up), and the row rides
-   the announcement offset + entrance/scroll-hide exactly like the bar's slots do. */
+/* Mobile: its own row under the bar, riding the announcement offset and the
+   entrance/scroll-hide exactly like the bar's slots do.
+
+   Spacing follows the legacy header, where logo and meta were flex children of
+   .header__logo and the distance was that element's `gap`:
+     24px  base, every template          (theme.css .header__logo)
+     16px  collection, below 769px       (custom-collection.css)
+     40px  collection, 769px and up      (custom-collection.css)
+   The 769px step existed because one element served both breakpoints there. Here the
+   desktop copy takes over at 1024px with its own .rc-d-center gap, so this row only
+   needs the two mobile figures. */
 .rc-mobile-crumbs {
   display: flex;
   justify-content: center;
   position: relative;
-  top: var(--announcement-height, 0px);
-  padding: 16px 20px 0;
+  top: calc(var(--announcement-height) + 10px);
+  padding: 24px 20px 0;
+}
+body.template-collection .rc-mobile-crumbs {
+  padding-top: 16px;
 }
 .rc-nav .rc-mobile-crumbs > * {
   transition:
-    transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1),
     color 0.3s ease,
     filter 0.3s ease;
   will-change: transform;
@@ -257,10 +268,10 @@ body.plp-header-loading .rc-mobile-crumbs > * {
   opacity: 0;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-crumbs > * {
-  animation: rcHeaderFromTop 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromTop 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.header-scroll-hide .rc-mobile-crumbs > * {
-  transform: translateY(calc(-100% - var(--announcement-height, 0px) - 60px));
+  transform: translateY(calc(-200% - var(--announcement-height, 0px) - 60px));
 }
 body.has-always-visible-fixed-header.header-scroll-hide .rc-mobile-crumbs > * {
   transform: none;
@@ -569,20 +580,20 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
      HeaderComponent). calc(±(100% + 80px)) guarantees off-screen at any width.
    ========================================================================= */
 .rc-slide {
-  transition: transform 0.8s var(--rc-ease);
+  transition: transform 0.5s var(--rc-ease);
   will-change: transform;
 }
 body.plp-header-loading .rc-slide {
   opacity: 0;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-slide--l {
-  animation: rcHeaderFromLeft 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromLeft 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-slide--t {
-  animation: rcHeaderFromTop 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromTop 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-slide--r {
-  animation: rcHeaderFromRight 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromRight 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.header-scroll-hide .rc-slide--l {
   transform: translateX(calc(-100% - 80px));
@@ -1640,7 +1651,7 @@ body:has(cart-drawer.is-open) .rc-nav__bar-wrap {
 
 .rc-nav .rc-mobile-bar .rc-mobile-bar__slot > * {
   transition:
-    transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1),
     color 0.3s ease,
     filter 0.3s ease;
   will-change: transform;
@@ -1650,20 +1661,20 @@ body.plp-header-loading .rc-mobile-bar__slot > * {
   opacity: 0;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-bar__slot:first-child > * {
-  animation: rcHeaderFromLeft 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromLeft 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-bar__slot:nth-child(2) > * {
-  animation: rcHeaderFromTop 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromTop 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-bar__slot:last-child > * {
-  animation: rcHeaderFromRight 700ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromRight 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 /* scroll-down: hamburger exits left, logo up, cart right (reverse in on scroll-up) */
 body.header-scroll-hide .rc-mobile-bar__slot:first-child > * {
   transform: translateX(-250%);
 }
 body.header-scroll-hide .rc-mobile-bar__slot:nth-child(2) > * {
-  transform: translateY(calc(-100% - var(--announcement-height, 0px) - 60px));
+  transform: translateY(calc(-200% - var(--announcement-height, 0px) - 60px));
 }
 body.header-scroll-hide .rc-mobile-bar__slot:last-child > * {
   transform: translateX(250%);
