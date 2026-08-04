@@ -391,6 +391,27 @@ body.template-collection:has(.collection--spotlight.collection--spotlight-positi
     padding-top: 150px;
   }
 }
+
+/* text-naked collections: nothing pushes content down here — the banner, highlights and
+   subcollection rows are all disabled in collection.text-naked.json, so the first section
+   is the rich-text PLP description and the fixed header's breadcrumb landed on top of it.
+
+   The offsets carry var(--announcement-height) because the header mount does too
+   (.rc-nav__bar-wrap top, .rc-mobile-bar top, .rc-d-bar__grid padding): when the
+   announcement bar is shown the whole header — breadcrumb included — shifts down by its
+   height while page content stays put, so a fixed figure clears only while the bar is off.
+
+   Figures follow the breadcrumb's own baseline plus the section's 20px padding-top:
+     desktop  grid padding-top 40 + logo 50 + .rc-d-center gap 40 + line-height 22 = 152
+     mobile   bar 50 + crumbs top 25 + collection padding-top 16 + line-height 22 = 113 */
+.main-content--collection-text-naked {
+  padding-top: calc(var(--announcement-height, 0px) + 100px);
+}
+@media (min-width: 1024px) {
+  .main-content--collection-text-naked {
+    padding-top: calc(var(--announcement-height, 0px) + 150px);
+  }
+}
 body:has(:is(.main-content--collection-naked, .main-content--collection-super-naked))
   .rc-nav:not([data-open="1"])
   :is(.rc-d-link, .rc-d-icon, .rc-d-bag, .rc-d-bag__count, .icon, .rc-mobile-bar a, .rc-mobile-bar button) {
