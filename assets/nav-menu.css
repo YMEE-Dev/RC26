@@ -214,6 +214,11 @@ body.plp-header-ready:not(.plp-header-anim-done) .announcement__wrapper--top {
     opacity 0.2s ease,
     visibility 0.2s ease;
 }
+/* theme.css pins the "/" separator to var(--link); inside the nav it has to follow the
+   crumb text instead, which is white or black depending on data-scheme. */
+.rc-nav .header__logo__meta__separator {
+  color: inherit;
+}
 .rc-nav[data-open="1"] .header__logo__meta {
   opacity: 0;
   visibility: hidden;
