@@ -18,7 +18,7 @@
 {%- if linklists[collection.handle].links.size > 0 -%}
   {%- style -%}
     #Subcollections--{{ section.id }} {
-      --PT: {{ section.settings.padding_top }}px;
+      --PT: calc({{ section.settings.padding_top }}px + var(--announcement-height, 0px));
       --PB: {{ section.settings.padding_bottom }}px;
       --globaltext: {% if header_observer_mode == 'light' %}#fff{% else %}#000{% endif %};
       --link: {% if header_observer_mode == 'light' %}#fff{% else %}#000{% endif %};
