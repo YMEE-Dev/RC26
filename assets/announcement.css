@@ -59,3 +59,37 @@
 .announcement__close-icon {
   display: inline-flex;
 }
+
+@media only screen and (max-width: 749px) {
+  .announcement__bar-holder--desktop-slider {
+    display: block;
+  }
+
+  .announcement__bar-holder--mobile-marquee {
+    display: none;
+  }
+
+  .announcement__wrapper:has(.announcement__bar-holder--desktop-slider) .announcement__close-mirror {
+    display: none;
+  }
+
+  .announcement__wrapper:has(.announcement__bar-holder--desktop-slider) .announcement__close {
+    position: absolute;
+    top: 0;
+    right: 4px;
+    bottom: 0;
+    z-index: 3;
+  }
+
+  .announcement__bar-holder--desktop-slider .announcement__slide.announcement__bar {
+    padding: 0 34px 0 8px;
+  }
+
+  .announcement__bar-holder--desktop-slider [data-clone] {
+    display: none;
+  }
+
+  .announcement__bar-holder--desktop-slider .ticker--animated {
+    animation: none;
+  }
+}
