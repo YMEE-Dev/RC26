@@ -350,24 +350,27 @@
     position: fixed;
     right: 40px;
     bottom: 32px;
-    z-index: 102;
+    z-index: 6006;
     width: min(420px, calc(100vw - 80px));
     padding: 26px 24px 22px;
     background: #fff;
     color: #111;
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
-    transform: translate3d(0, 120%, 0);
+    /* Slide in from the right edge, reusing the theme's side-drawer motion
+       (translateX + var(--duration) ease). No backdrop blur — a slight shadow
+       lifts it off the page. */
+    --duration: 0.6s;
+    box-shadow: 0 2px 18px rgba(0, 0, 0, 0.12);
+    transform: translateX(calc(100% + 40px));
     opacity: 0;
     visibility: hidden;
-    transition: transform 0.45s ease, opacity 0.3s ease, visibility 0s linear 0.45s;
-    z-index: 6006;
+    transition: transform var(--duration) ease, opacity var(--duration) ease, visibility 0s linear var(--duration);
   }
 
   .footer-newsletter-float.is-visible {
-    transform: translate3d(0, 0, 0);
+    transform: translateX(0);
     opacity: 1;
     visibility: visible;
-    transition: transform 0.45s ease, opacity 0.3s ease;
+    transition: transform var(--duration) ease, opacity var(--duration) ease;
   }
 
   .footer-newsletter-float__close {
@@ -414,20 +417,20 @@
     }
 
     .footer-newsletter-float {
-      top: 50%;
-      left: 50%;
-      right: auto;
-      bottom: auto;
-      width: calc(100% - 32px);
-      max-width: 420px;
+      top: auto;
+      left: auto;
+      right: 16px;
+      bottom: 16px;
+      width: min(360px, calc(100vw - 32px));
+      max-width: none;
       padding: 22px 18px 16px;
       border-top: 0;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-      transform: translate3d(-50%, calc(-50% + 40px), 0);
+      box-shadow: 0 2px 18px rgba(0, 0, 0, 0.14);
+      transform: translateX(calc(100% + 16px));
     }
 
     .footer-newsletter-float.is-visible {
-      transform: translate3d(-50%, -50%, 0);
+      transform: translateX(0);
     }
 
     .footer-newsletter-float__title {
@@ -605,10 +608,8 @@
       }
       this.floatPopup.classList.add('is-visible');
       this.floatPopup.setAttribute('aria-hidden', 'false');
-      if (this.mobileQuery.matches) {
-        this.floatUnderlay?.classList.add('is-visible');
-        window.dispatchEvent(new CustomEvent('theme:scroll:lock'));
-      }
+      // Non-blocking: no dimming/blurring underlay and no scroll lock, so the
+      // page stays visible and scrollable behind the slide-in panel.
       this.hasShownFloat = true;
       window.removeEventListener('scroll', this.boundOnScroll);
     }
