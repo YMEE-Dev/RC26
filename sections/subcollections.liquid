@@ -18,7 +18,7 @@
 {%- if linklists[collection.handle].links.size > 0 -%}
   {%- style -%}
     #Subcollections--{{ section.id }} {
-      --PT: {{ section.settings.padding_top }}px;
+      --PT: calc({{ section.settings.padding_top }}px + var(--announcement-height, 0px));
       --PB: {{ section.settings.padding_bottom }}px;
       --globaltext: {% if header_observer_mode == 'light' %}#fff{% else %}#000{% endif %};
       --link: {% if header_observer_mode == 'light' %}#fff{% else %}#000{% endif %};
@@ -158,7 +158,7 @@
       {%- if sub_collection_html != '' and template.suffix != 'media-only' -%}
         <script src="{{ 'subcollections-slider.js' | asset_url }}" defer></script>
         {%- if plp_short_description != blank -%}
-          <p class="subcollections__description">{{ plp_short_description | newline_to_br }}</p>
+          <p class="subcollections__description plp-el-up">{{ plp_short_description | newline_to_br }}</p>
         {%- endif -%}
         <div class="subcollections__swiper swiper" data-subcollections-swiper>
           <div class="swiper-wrapper">
@@ -171,13 +171,29 @@
       (function () {
         const section = document.getElementById('Subcollections--{{ section.id }}');
         if (!section) return;
+        /* The short description shares the tiles' entrance (.plp-el-up), so it must be
+           revealed even on the paths that bail out below — otherwise the CSS that hides
+           .plp-el-up would leave it invisible. */
+        const description = section.querySelector('.subcollections__description');
+        const revealDescription = function () {
+          if (description) description.classList.add('plp-el-up--visible');
+        };
         const swiper = section.querySelector('[data-subcollections-swiper]');
-        if (!swiper) return;
+        if (!swiper) {
+          revealDescription();
+          return;
+        }
         const items = Array.from(swiper.querySelectorAll('.subcollection__item'));
-        if (!items.length) return;
+        if (!items.length) {
+          revealDescription();
+          return;
+        }
+        /* animations off: the hiding rule is gated on the same attribute, so nothing to do */
         if (document.body.dataset.rcAnimations === 'false') return;
 
         const animateItems = function () {
+          /* description first — it sits above the tiles, keeping the top-to-bottom order */
+          revealDescription();
           items.forEach(function (item, i) {
             setTimeout(function () {
               item.classList.add('plp-el-up--visible');

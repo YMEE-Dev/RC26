@@ -3621,8 +3621,13 @@
   window.theme.hasOpenModals = function () {
     const openModals = Boolean(document.querySelectorAll("dialog[open][data-scroll-lock-required]").length);
     const openDrawers = Boolean(document.querySelectorAll(".drawer.is-open").length);
+    /* The RC nav drawer isn't a .drawer — nav-menu.js marks it .rc-drawer[data-open="1"]
+       and locks scroll with html.rc-drawer-open. Without it here, anything that defers to
+       this helper (newsletter popup, zoom, storytelling tiles) treats an open mobile menu
+       as "nothing open" and opens straight over it. */
+    const openRcDrawer = Boolean(document.querySelectorAll('.rc-drawer[data-open="1"]').length);
 
-    return openModals || openDrawers;
+    return openModals || openDrawers || openRcDrawer;
   };
 
   if (!customElements.get("header-component")) {

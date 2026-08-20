@@ -393,24 +393,19 @@ body.template-collection:has(.collection--spotlight.collection--spotlight-positi
 }
 
 /* text-naked collections: nothing pushes content down here — the banner, highlights and
-   subcollection rows are all disabled in collection.text-naked.json, so the first section
-   is the rich-text PLP description and the fixed header's breadcrumb landed on top of it.
+   subcollection rows are all disabled in collection.text-naked.json, so the rich-text PLP
+   description is the first section and sits directly under the header.
 
-   The offsets carry var(--announcement-height) because the header mount does too
-   (.rc-nav__bar-wrap top, .rc-mobile-bar top, .rc-d-bar__grid padding): when the
-   announcement bar is shown the whole header — breadcrumb included — shifts down by its
-   height while page content stays put, so a fixed figure clears only while the bar is off.
-
-   Figures follow the breadcrumb's own baseline plus the section's 20px padding-top:
-     desktop  grid padding-top 40 + logo 50 + .rc-d-center gap 40 + line-height 22 = 152
-     mobile   bar 50 + crumbs top 25 + collection padding-top 16 + line-height 22 = 113 */
+   The space the header reserves above it is a fixed 160px, but the header's *contents*
+   are shifted down by the announcement bar (.rc-nav__bar-wrap top, .rc-mobile-bar top,
+   .rc-d-bar__grid padding all carry var(--announcement-height)). So when the bar is shown
+   the breadcrumb hangs that much below the reserved band and lands on the description —
+   measured at 10px of overlap on desktop. Growing the reserved band does not help; it is
+   not what positions <main>. Offsetting the content by exactly the announcement height
+   restores the same 30px breadcrumb-to-description gap the bar-off state already has, and
+   collapses to 0 when the bar is hidden or dismissed. */
 .main-content--collection-text-naked {
-  padding-top: calc(var(--announcement-height, 0px) + 100px);
-}
-@media (min-width: 1024px) {
-  .main-content--collection-text-naked {
-    padding-top: calc(var(--announcement-height, 0px) + 150px);
-  }
+  padding-top: var(--announcement-height, 0px);
 }
 body:has(:is(.main-content--collection-naked, .main-content--collection-super-naked))
   .rc-nav:not([data-open="1"])
@@ -645,10 +640,6 @@ body.header-scroll-hide .rc-slide--r {
   }
   /* entrance + scroll hide/reveal come from the shared .rc-slide--l/t/r classes
      (see top of file); the regions carry those classes in nav-mega-desktop.liquid. */
-  /* while hidden the empty fixed bar must not intercept clicks on content below it */
-  body.header-scroll-hide .rc-d-bar {
-    pointer-events: none;
-  }
   .rc-d-left {
     display: flex;
     align-items: flex-start;
@@ -1584,6 +1575,18 @@ body.header-scroll-hide .rc-slide--r {
   right: 0;
   z-index: 6005;
 }
+/* Scrolled away: the bar's contents translate out but this box stays fixed at its full
+   height (160px on desktop) and, at z-index 6005, kept swallowing clicks meant for the
+   page underneath — the collection filter/sort row sat right below it. Guarding the inner
+   .rc-d-bar wasn't enough; the wrapper itself is the element under the cursor.
+   Two exceptions: templates that keep the header visible (spotlight / timeline set
+   .has-always-visible-fixed-header, where scroll-hide is inert), and an open mega panel,
+   which lives inside this wrapper and must stay hoverable. */
+body.header-scroll-hide:not(.has-always-visible-fixed-header)
+  .rc-nav:not([data-open="1"])
+  :is(.rc-nav__bar-wrap, .rc-d-bar) {
+  pointer-events: none;
+}
 .rc-nav[data-transparent="0"] .rc-nav__bar-wrap {
   position: sticky; /* solid: occupy space + stick on scroll */
   background: var(--rc-green);
@@ -1684,7 +1687,7 @@ body.header-scroll-hide .rc-mobile-bar__slot:first-child > * {
   transform: translateX(-250%);
 }
 body.header-scroll-hide .rc-mobile-bar__slot:nth-child(2) > * {
-  transform: translateY(calc(-200% - var(--announcement-height, 0px) - 60px));
+  transform: translateY(calc(-260% - var(--announcement-height, 0px) - 60px));
 }
 body.header-scroll-hide .rc-mobile-bar__slot:last-child > * {
   transform: translateX(250%);
