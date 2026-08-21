@@ -1,0 +1,68 @@
+{%- doc -%}
+  Renders the collection grid entry for one product: one card per variant option value
+  when the section's "Split variants into separate cards" setting is on, otherwise the
+  single card the theme has always rendered.
+
+  Which option splits: the first one that is not a size axis. Size stays collapsed inside
+  a card (a ring lists once per metal, not once per metal per size), and 'Title' is
+  Shopify's placeholder option on single-variant products, so it is skipped too.
+  Everything else — Metal color, Silk color — becomes its own card.
+
+  The representative variant per value comes from `option_value.variant`, the same source
+  product-grid-item already uses for its swatch images (line ~244). That avoids looping
+  product.variants, which Liquid caps at 50 iterations per loop.
+
+  No product in the catalogue has more than one non-size option, so a single split axis
+  covers all of them; if that ever changes, only the first non-size option splits.
+
+  @param {product} product - The product to render
+  @param {boolean} [split_variants] - Section setting; false renders one card per product
+  @param {number} [index] - Position in the grid loop
+  @param {string} [sizes] - Image sizes attribute
+  @param {string} [attributes] - Extra html attributes for the card
+  @param {number} [animation_delay] - Stagger for the entrance animation
+  @param {string} [card_animation] - Animation flavour ('plp' on collection pages)
+
+  @example
+  {% render 'collection-grid-cards', product: product, split_variants: section.settings.collection_split_variants, index: forloop.index, sizes: image_sizes, card_animation: 'plp' %}
+{%- enddoc -%}
+
+{%- liquid
+  assign split_option = blank
+
+  if split_variants
+    # size axes stay inside the card; 'title' is Shopify's placeholder option
+    assign size_option_names = 'size,title' | split: ','
+
+    for option in product.options_with_values
+      assign option_key = option.name | downcase | strip
+      unless size_option_names contains option_key
+        assign split_option = option
+        break
+      endunless
+    endfor
+  endif
+-%}
+
+{%- if split_option == blank -%}
+  {%- render 'product-grid-item',
+    product: product,
+    index: index,
+    sizes: sizes,
+    attributes: attributes,
+    animation_delay: animation_delay,
+    card_animation: card_animation
+  -%}
+{%- else -%}
+  {%- for option_value in split_option.values -%}
+    {%- render 'product-grid-item',
+      product: product,
+      variant: option_value.variant,
+      index: index,
+      sizes: sizes,
+      attributes: attributes,
+      animation_delay: animation_delay,
+      card_animation: card_animation
+    -%}
+  {%- endfor -%}
+{%- endif -%}
