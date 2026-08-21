@@ -1000,20 +1000,6 @@
 
   <script>
     (function () {
-      /* Page exit fade */
-      document.addEventListener('click', function (e) {
-        const link = e.target.closest('a[href]');
-        if (!link) return;
-        const href = link.getAttribute('href');
-        if (!href || href.startsWith('#') || href.startsWith('javascript') || link.target === '_blank') return;
-        if (link.origin && link.origin !== location.origin) return;
-        e.preventDefault();
-        document.body.classList.add('page-exit');
-        setTimeout(function () {
-          window.location.href = href;
-        }, 600);
-      });
-
       if (document.body.dataset.rcAnimations === 'false') return;
       const cards = Array.from(document.querySelectorAll('.plp-card-up'));
       if (!cards.length) return;
