@@ -556,7 +556,7 @@
                     capture spotlight_product_attributes
                       echo 'style="--spotlight-stack-index: ' | append: counter_grid | append: ';"'
                     endcapture
-                    render 'product-grid-item', product: product, index: forloop.index, sizes: image_sizes, attributes: spotlight_product_attributes, card_animation: 'plp'
+                    render 'collection-grid-cards', product: product, split_variants: section.settings.collection_split_variants, index: forloop.index, sizes: image_sizes, attributes: spotlight_product_attributes, card_animation: 'plp'
                   endif
 
                   assign counter_grid = counter_grid | plus: 1
@@ -605,7 +605,7 @@
                   if product_storytelling
                     render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false
                   else
-                    render 'product-grid-item', product: product, index: forloop.index, sizes: image_sizes, card_animation: 'plp'
+                    render 'collection-grid-cards', product: product, split_variants: section.settings.collection_split_variants, index: forloop.index, sizes: image_sizes, card_animation: 'plp'
                   endif
                 endfor
               -%}
@@ -628,7 +628,7 @@
                   if product_storytelling
                     render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false
                   else
-                    render 'product-grid-item', product: product, animation_delay: animation_delay, index: forloop.index, sizes: image_sizes, card_animation: 'plp'
+                    render 'collection-grid-cards', product: product, split_variants: section.settings.collection_split_variants, animation_delay: animation_delay, index: forloop.index, sizes: image_sizes, card_animation: 'plp'
                   endif
                 endfor
               -%}
@@ -1174,6 +1174,13 @@
     {
       "type": "header",
       "content": "Product grid"
+    },
+    {
+      "type": "checkbox",
+      "id": "collection_split_variants",
+      "label": "Split variants into separate cards",
+      "info": "Lists each variant option (metal colour, silk colour) as its own product card. Size options stay collapsed inside a card. Turn off to show one card per product.",
+      "default": true
     },
     {
       "type": "range",
