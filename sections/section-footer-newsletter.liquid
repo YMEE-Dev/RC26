@@ -77,17 +77,35 @@
       aria-hidden="true"
       data-newsletter-float-delay="{{ section.settings.float_delay_seconds | default: 3 }}"
     >
+      <img
+        class="footer-newsletter-float__watermark"
+        src="{{ 'rc-flower-watermark.svg' | asset_url }}"
+        alt=""
+        role="presentation"
+        aria-hidden="true"
+        loading="lazy"
+        width="260"
+        height="268"
+      >
       <button
         type="button"
         class="footer-newsletter-float__close"
         data-newsletter-float-close
         aria-label="{{ 'general.accessibility.close' | t }}"
       >
-        {%- render 'icon-close' -%}
+        <svg viewBox="0 0 11 11" width="11" height="11" fill="none" aria-hidden="true" focusable="false">
+          <path d="M0.916667 0.916667L10.0833 10.0833M10.0833 0.916667L0.916667 10.0833" stroke="currentColor" stroke-width="1.1"/>
+        </svg>
       </button>
-      <p class="footer-newsletter-float__title h4">
-        {{ section.settings.float_title | default: 'Sign up to our Newsletter' | escape }}
-      </p>
+      <div class="footer-newsletter-float__copy">
+        {%- assign float_eyebrow = section.settings.float_eyebrow | default: 'Keep in touch' -%}
+        {%- unless float_eyebrow == blank -%}
+          <p class="footer-newsletter-float__eyebrow">{{ float_eyebrow | escape }}</p>
+        {%- endunless -%}
+        <p class="footer-newsletter-float__title h4">
+          {{ section.settings.float_title | default: 'Discover the Latest from Roberto Coin' | escape }}
+        </p>
+      </div>
       <button
         type="button"
         class="btn btn--primary btn--solid btn--full footer-newsletter-float__cta"
@@ -95,7 +113,7 @@
         data-newsletter-float-signup
         aria-controls="FooterNewsletterDrawer--{{ section.id }}"
       >
-        {{ section.settings.float_button_text | default: 'SIGN UP' | escape }}
+        {{ section.settings.float_button_text | default: 'Newsletter sign up' | escape }}
       </button>
     </aside>
     <div class="underlay footer-newsletter-float__underlay" data-newsletter-float-underlay></div>
@@ -351,20 +369,26 @@
     right: 40px;
     bottom: 32px;
     z-index: 6006;
-    width: min(420px, calc(100vw - 80px));
-    padding: 26px 24px 22px;
-    background: #fff;
-    color: #111;
-    /* Slide in from the right edge, reusing the theme's side-drawer motion
-       (translateX + var(--duration) ease). No backdrop blur — a slight shadow
-       lifts it off the page. */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    width: min(389px, calc(100vw - 80px));
+    padding: 28px 32px 30px 29px;
+    background: #f4f2ed;
+    color: #212121;
+    border: 1px solid rgba(33, 33, 33, 0.16);
+    /* Teal brand accent stripe down the left edge (per design). */
+    border-left: 3px solid #27574d;
+    overflow: hidden;
+    /* Entrance: slide in from the right edge, and a slight shadow (both kept
+       from the previous version per the brief). */
     --duration: 0.6s;
     box-shadow: 0 2px 24px rgba(0, 0, 0, 0.16);
     transform: translateX(calc(100% + 40px));
     opacity: 0;
     visibility: hidden;
     transition: transform var(--duration) ease, opacity var(--duration) ease, visibility 0s linear var(--duration);
-    z-index: 6006;
   }
 
   .footer-newsletter-float.is-visible {
@@ -374,33 +398,81 @@
     transition: transform var(--duration) ease, opacity var(--duration) ease;
   }
 
+  /* Decorative RC flower, top-right, clipped by the panel's overflow. */
+  .footer-newsletter-float__watermark {
+    position: absolute;
+    top: -48px;
+    right: -101px;
+    width: 260px;
+    height: 268px;
+    pointer-events: none;
+    user-select: none;
+  }
+
   .footer-newsletter-float__close {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 28px;
-    height: 28px;
+    top: 14px;
+    right: 15px;
+    z-index: 2;
+    padding: 6px;
     border: 0;
     background: transparent;
-    color: currentColor;
+    color: #212121;
+    opacity: 0.5;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    transition: opacity 0.2s ease;
   }
 
-  .footer-newsletter-float__close .icon {
-    width: 12px;
-    height: 12px;
+  @media (hover: hover) {
+    .footer-newsletter-float__close:hover {
+      opacity: 1;
+    }
   }
 
-  .footer-newsletter-float__title {
-    margin: 0 0 20px;
-    padding-right: 18px;
+  .footer-newsletter-float__close svg {
+    display: block;
+    width: 11px;
+    height: 11px;
   }
 
+  .footer-newsletter-float__copy {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    width: 270px;
+    max-width: 100%;
+  }
+
+  .footer-newsletter-float__eyebrow {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    line-height: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(33, 33, 33, 0.62);
+  }
+
+  .footer-newsletter-float .footer-newsletter-float__title {
+    margin: 0;
+    font-size: 24px;
+    line-height: 32px;
+    color: #212121;
+  }
+
+  /* Matches the current site's newsletter popup button: primary solid (black,
+     white text) that fades to the brand green on hover. The theme's own button
+     styling handles the colours + fade, so no overrides here — just layer it
+     above the watermark. */
   .footer-newsletter-float__cta {
-    min-height: 44px;
+    position: relative;
+    z-index: 1;
   }
 
   @media only screen and (max-width: 767px) {
@@ -422,10 +494,9 @@
       left: auto;
       right: 16px;
       bottom: 16px;
-      width: min(360px, calc(100vw - 32px));
-      max-width: none;
-      padding: 22px 18px 16px;
-      border-top: 0;
+      width: min(363px, calc(100vw - 32px));
+      gap: 16px;
+      padding: 20px 22px 22px 19px;
       box-shadow: 0 2px 24px rgba(0, 0, 0, 0.18);
       transform: translateX(calc(100% + 16px));
     }
@@ -434,26 +505,15 @@
       transform: translateX(0);
     }
 
-    .footer-newsletter-float__title {
-      margin-bottom: 16px;
-      padding-right: 22px;
+    .footer-newsletter-float__copy {
+      width: 240px;
     }
 
-    .footer-newsletter-float__underlay {
-      position: fixed;
-      inset: 0;
-      z-index: 6005;
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transition: opacity 0.3s ease, visibility 0s linear 0.3s;
-    }
-
-    .footer-newsletter-float__underlay.is-visible {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-      transition: opacity 0.3s ease;
+    .footer-newsletter-float__watermark {
+      top: -31px;
+      right: -72px;
+      width: 200px;
+      height: 206px;
     }
   }
 {% endstylesheet %}
@@ -685,15 +745,21 @@
     },
     {
       "type": "text",
+      "id": "float_eyebrow",
+      "label": "Popup eyebrow",
+      "default": "Keep in touch"
+    },
+    {
+      "type": "text",
       "id": "float_title",
       "label": "Popup title",
-      "default": "Sign up to our Newsletter"
+      "default": "Discover the Latest from Roberto Coin"
     },
     {
       "type": "text",
       "id": "float_button_text",
       "label": "Popup button text",
-      "default": "SIGN UP"
+      "default": "Newsletter sign up"
     },
     {
       "type": "range",
