@@ -76,17 +76,8 @@
       data-newsletter-float
       aria-hidden="true"
       data-newsletter-float-delay="{{ section.settings.float_delay_seconds | default: 3 }}"
+      style="--float-watermark: url('{{ 'rc-flower-watermark.svg' | asset_url }}');"
     >
-      <img
-        class="footer-newsletter-float__watermark"
-        src="{{ 'rc-flower-watermark.svg' | asset_url }}"
-        alt=""
-        role="presentation"
-        aria-hidden="true"
-        loading="lazy"
-        width="260"
-        height="268"
-      >
       <button
         type="button"
         class="footer-newsletter-float__close"
@@ -375,7 +366,13 @@
     gap: 20px;
     width: min(389px, calc(100vw - 80px));
     padding: 28px 32px 30px 29px;
-    background: #f4f2ed;
+    background-color: #f4f2ed;
+    /* Decorative RC flower, top-right, as a background image (clipped by the
+       panel's overflow). Same placement/size as the previous <img>. */
+    background-image: var(--float-watermark);
+    background-repeat: no-repeat;
+    background-position: right -101px top -48px;
+    background-size: 260px 268px;
     color: #212121;
     border: 1px solid rgba(33, 33, 33, 0.16);
     /* Teal brand accent stripe down the left edge (per design). */
@@ -396,17 +393,6 @@
     opacity: 1;
     visibility: visible;
     transition: transform var(--duration) ease, opacity var(--duration) ease;
-  }
-
-  /* Decorative RC flower, top-right, clipped by the panel's overflow. */
-  .footer-newsletter-float__watermark {
-    position: absolute;
-    top: -48px;
-    right: -101px;
-    width: 260px;
-    height: 268px;
-    pointer-events: none;
-    user-select: none;
   }
 
   .footer-newsletter-float__close {
@@ -445,7 +431,10 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
-    width: 270px;
+    /* Narrow column so the title wraps like the design ("Discover the Latest" /
+       "from Roberto Coin") and stays clear of the flower watermark. Matches the
+       CTA width below. */
+    width: 216px;
     max-width: 100%;
   }
 
@@ -515,6 +504,9 @@
       padding: 20px 22px 22px 19px;
       box-shadow: 0 2px 24px rgba(0, 0, 0, 0.18);
       transform: translateX(calc(100% + 16px));
+      /* Smaller flower on mobile. */
+      background-position: right -72px top -31px;
+      background-size: 200px 206px;
     }
 
     .footer-newsletter-float.is-visible {
@@ -522,14 +514,7 @@
     }
 
     .footer-newsletter-float__copy {
-      width: 240px;
-    }
-
-    .footer-newsletter-float__watermark {
-      top: -31px;
-      right: -72px;
-      width: 200px;
-      height: 206px;
+      width: 216px;
     }
   }
 {% endstylesheet %}
