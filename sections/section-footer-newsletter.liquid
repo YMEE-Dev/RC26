@@ -108,7 +108,7 @@
       </div>
       <button
         type="button"
-        class="btn btn--primary btn--solid footer-newsletter-float__cta"
+        class="btn btn--secondary btn--outline footer-newsletter-float__cta"
         data-newsletter-drawer-open
         data-newsletter-float-signup
         aria-controls="FooterNewsletterDrawer--{{ section.id }}"
@@ -471,13 +471,24 @@
      white text) that fades to the brand green on hover. The theme's own button
      styling handles the colours + fade, so no overrides here — just layer it
      above the watermark. */
-  /* Fixed-width, left-aligned (per design) so it doesn't span the panel and
-     cover the flower watermark on the right. */
+  /* Outlined (transparent) button per the Figma — fixed width, left-aligned —
+     so the flower watermark shows through it and is never covered. */
   .footer-newsletter-float__cta {
     position: relative;
     z-index: 1;
     width: 216px;
     max-width: 100%;
+  }
+
+  .footer-newsletter-float__cta.btn--outline.btn--secondary {
+    --btn-border: #212121;
+    --btn-text: #212121;
+    --btn-bg: transparent;
+    /* Hover stays transparent (no fill) so the flower remains visible; border
+       and text tint to the brand green. */
+    --btn-border-hover: #397e70;
+    --btn-bg-hover: transparent;
+    --btn-text-hover: #397e70;
   }
 
   @media only screen and (max-width: 767px) {
