@@ -10,7 +10,11 @@ side-drawer {
   bottom: 0;
   left: 0;
   width: 100%;
-  z-index: 6003;
+  /* Must stay above the RC header (.rc-nav__bar-wrap, z-index 6005) or the header
+     paints over the top 160px of every desktop drawer. 6100 matches the filters
+     drawer, which already sits above the header. Mobile was unaffected because
+     nav-menu.css hides the mobile bar via html.rc-drawer-open. */
+  z-index: 6100;
   pointer-events: none;
 }
 
