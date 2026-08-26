@@ -1076,8 +1076,9 @@
           scheduleRelease();
         } else {
           document.addEventListener('theme:plp:header-ready', scheduleRelease, {once: true});
-          /* never leave the grid invisible if the header entrance never runs */
-          setTimeout(releaseAboveFold, 2500);
+          /* never leave the grid invisible if the header entrance never runs. Scaled,
+             or in slow-motion review this fires first and products lead the cascade. */
+          setTimeout(releaseAboveFold, 2500 * (window.__plpSlow || 1));
         }
       };
 

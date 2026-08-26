@@ -17,36 +17,25 @@
        Keep --plp-cascade-products >= the tile stagger tail, or products overtake
        the subcategories on collections with many tiles. */
     :root {
+      /* Shared by EVERY participant. Equal durations are what make the order
+         predictable: same fade length means whichever starts first becomes visible
+         first. Mixed durations decouple start order from visible order. */
+      --plp-cascade-duration: 600ms;
       --plp-cascade-title: 150ms;
       --plp-cascade-desc: 300ms;
-      --plp-cascade-subcat: 450ms;
-      --plp-cascade-subcat-step: 80ms;
-      --plp-cascade-products: 900ms;
+      --plp-cascade-subcat: 600ms;
+      /* 160ms matches the per-tile rhythm already shipping on the live theme (measured
+         144-182ms). Keep --plp-cascade-products above the last tile's START — 600 + 5 x
+         step at the 6-tile maximum = 1400ms — so products never overtake the tiles. */
+      --plp-cascade-subcat-step: 160ms;
+      --plp-cascade-products: 1550ms;
       /* Templates without a subcollections section have no tile stagger to clear,
          so they use a shorter offset rather than waiting out 900ms for nothing. */
       --plp-cascade-products-solo: 400ms;
     }
 
-    /* Slow-motion review mode (?plp-slow=N) — inert unless the JS below adds
-       .plp-slow-motion. !important overrides id-scoped shipped rules; debug-only. */
-    body.plp-slow-motion .rc-slide--l,
-    body.plp-slow-motion .rc-slide--t,
-    body.plp-slow-motion .rc-slide--r {
-      animation-duration: calc(500ms * var(--plp-slow, 1)) !important;
-      animation-delay: calc(600ms * var(--plp-slow, 1)) !important;
-    }
-    body.plp-slow-motion .rc-nav .header__logo__meta {
-      animation-duration: calc(400ms * var(--plp-slow, 1)) !important;
-      /* --plp-cascade-title is ALREADY multiplied by --plp-slow in the JS above, so only
-         the 600ms base gets scaled here. Scaling the whole sum would apply slow twice and
-         push the name far out of sequence. */
-      animation-delay: calc(600ms * var(--plp-slow, 1) + var(--plp-cascade-title, 150ms)) !important;
-    }
-    body.plp-slow-motion .plp-el-up,
-    body.plp-slow-motion .plp-card-up {
-      transition-duration: calc(600ms * var(--plp-slow, 1)) !important;
-      transition-delay: 0ms !important;
-    }
+    /* Slow-motion review mode (?plp-slow=N) needs no overrides here: every delay and
+       duration now reads from the cascade tokens, and the JS scales those directly. */
 
     @keyframes plp-header-from-top { from { transform: translateY(-200px); opacity: 0; } to { transform: none; opacity: 1; } }
     @keyframes plp-header-fade-near { from { transform: translateY(-20px); opacity: 0; } to { transform: none; opacity: 1; } }
@@ -136,6 +125,7 @@
           '--plp-cascade-subcat-step',
           '--plp-cascade-products',
           '--plp-cascade-products-solo',
+          '--plp-cascade-duration',
         ].forEach(function (name) {
           var base = Number.parseFloat(getComputedStyle(rootEl).getPropertyValue(name));
           if (Number.isFinite(base)) rootEl.style.setProperty(name, base * slow + 'ms');
@@ -143,6 +133,10 @@
         rootEl.style.setProperty('--plp-slow', String(slow));
         document.body.classList.add('plp-slow-motion');
       }
+      /* Sections read this to scale their own safety timeouts. Unscaled, a 2500ms
+         fallback fires long before the real schedule at high factors and releases
+         products first — which is exactly how the order looked scrambled at 25x. */
+      window.__plpSlow = slow;
 
       var doneTimer;
 

@@ -75,7 +75,7 @@ body.plp-header-loading .announcement__wrapper--top {
   opacity: 0;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .announcement__wrapper--top {
-  animation: rcHeaderFromTop 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromTop var(--plp-cascade-duration, 600ms) 0ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 
 .rc-nav button {
@@ -256,8 +256,11 @@ body.template-collection .rc-mobile-crumbs {
 body.plp-header-loading .rc-mobile-crumbs > * {
   opacity: 0;
 }
+/* Mobile collection name — beat 2. Uses rcHeaderFromTop (which animates opacity) because
+   nothing above it fades on mobile, unlike the desktop copy inside .rc-d-center. */
+body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-crumbs .header__logo__meta,
 body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-crumbs > * {
-  animation: rcHeaderFromTop 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromTop var(--plp-cascade-duration, 600ms) var(--plp-cascade-title, 150ms) cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.header-scroll-hide .rc-mobile-crumbs > * {
   transform: translateY(calc(-260% - var(--announcement-height, 0px) - 60px));
@@ -620,32 +623,47 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
 body.plp-header-loading .rc-slide {
   opacity: 0;
 }
+/* The header is beat ZERO of the cascade, so it starts the instant plp-header-ready
+   lands — no delay. It previously waited 600ms, which put it behind the description
+   (t0+300) and the first three subcategory tiles in actual visible order.
+
+   Duration is --plp-cascade-duration, shared with every other participant. Equal
+   durations are what make the order predictable: when two elements fade for the same
+   length of time, whichever STARTS first also becomes visible first. With mixed
+   durations (this was 500ms while tiles were 600ms) start order stops predicting
+   visible order, which is what read as "random". */
 body.plp-header-ready:not(.plp-header-anim-done) .rc-slide--l {
-  animation: rcHeaderFromLeft 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromLeft var(--plp-cascade-duration, 600ms) 0ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-slide--t {
-  animation: rcHeaderFromTop 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromTop var(--plp-cascade-duration, 600ms) 0ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-slide--r {
-  animation: rcHeaderFromRight 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromRight var(--plp-cascade-duration, 600ms) 0ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 
 /* Collection name — second beat of the PLP cascade, offset by --plp-cascade-title so it
    lands just after the logo. Deliberately a small fade, not a second translate: it sits
    inside .rc-d-center, whose slide is still running, and child transforms compose with
    the parent. Ends at 1150ms, inside the 1200ms plp-header-anim-done window. */
+/* Transform ONLY — deliberately no opacity. This element is nested inside
+   .rc-d-center, which is already fading in; animating opacity here too multiplies the
+   two curves, so the name only crossed the visible threshold long after the tiles.
+   The parent supplies the fade, this supplies the beat. */
 @keyframes rcMetaIn {
   from {
     transform: translateY(-12px);
-    opacity: 0;
   }
   to {
     transform: none;
-    opacity: 1;
   }
 }
-body.plp-header-ready:not(.plp-header-anim-done) .rc-nav .header__logo__meta {
-  animation: rcMetaIn 400ms calc(600ms + var(--plp-cascade-title, 150ms)) cubic-bezier(0.05, 0, 0, 1) backwards;
+/* Scoped to .rc-d-center, NOT .rc-nav: the mobile copy of .header__logo__meta lives in
+   .rc-mobile-crumbs, which has no fading parent, so the transform-only rcMetaIn would
+   leave it fully opaque from the start and it would beat the header. Mobile uses
+   rcHeaderFromTop (opacity + transform) instead — see .rc-mobile-crumbs below. */
+body.plp-header-ready:not(.plp-header-anim-done) .rc-d-center .header__logo__meta {
+  animation: rcMetaIn var(--plp-cascade-duration, 600ms) var(--plp-cascade-title, 150ms) cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.header-scroll-hide .rc-slide--l {
   transform: translateX(calc(-100% - 80px));
@@ -1721,13 +1739,13 @@ body.plp-header-loading .rc-mobile-bar__slot > * {
   opacity: 0;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-bar__slot:first-child > * {
-  animation: rcHeaderFromLeft 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromLeft var(--plp-cascade-duration, 600ms) 0ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-bar__slot:nth-child(2) > * {
-  animation: rcHeaderFromTop 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromTop var(--plp-cascade-duration, 600ms) 0ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-bar__slot:last-child > * {
-  animation: rcHeaderFromRight 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromRight var(--plp-cascade-duration, 600ms) 0ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 /* scroll-down: hamburger exits left, logo up, cart right (reverse in on scroll-up) */
 body.header-scroll-hide .rc-mobile-bar__slot:first-child > * {

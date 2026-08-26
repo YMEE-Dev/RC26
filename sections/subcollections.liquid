@@ -70,8 +70,8 @@
       opacity: 0;
       transform: translateY(30px);
       transition:
-        opacity 600ms cubic-bezier(0.70, 0, 0.3, 1),
-        transform 600ms 150ms cubic-bezier(0.05, 0, 0, 1);
+        opacity var(--plp-cascade-duration, 600ms) cubic-bezier(0.70, 0, 0.3, 1),
+        transform var(--plp-cascade-duration, 600ms) 150ms cubic-bezier(0.05, 0, 0, 1);
     }
     body[data-rc-animations="true"] #Subcollections--{{ section.id }} .plp-el-up.plp-el-up--visible {
       opacity: 1;
@@ -236,8 +236,9 @@
           animateItems();
         } else {
           document.addEventListener('theme:plp:header-ready', animateItems, {once: true});
-          /* covers templates that render this section without header-init-animation */
-          setTimeout(animateItems, 2500);
+          /* covers templates that render this section without header-init-animation.
+             Scaled, or in slow-motion review it fires before the real schedule. */
+          setTimeout(animateItems, 2500 * (window.__plpSlow || 1));
         }
       })();
     </script>
