@@ -5,6 +5,10 @@
   assign hidden_products_count = 0
   assign show_recently_viewed_indicator = settings.show_recently_viewed_indicator
   assign color_scheme = 'color-' | append: section.settings.color_scheme
+  # Resolved hex of this section's scheme, reused below for <body>. Falls back to the
+  # theme default scheme so a blank setting can't emit `background: ;`.
+  assign selected_color_scheme = section.settings.color_scheme | strip
+  assign scheme_bg = settings.color_schemes[selected_color_scheme].settings.section_bg | default: settings.color_schemes[settings.color_scheme].settings.section_bg
 
   assign columns_desktop = 4
   assign columns_medium = 3
@@ -34,6 +38,15 @@
     --PB: {{ section.settings.padding_bottom }}px;
     --COLUMNS-MOBILE: {{ columns_mobile }};
     --COLUMNS: {{ columns_desktop }};
+  }
+
+  /* No section on this template is a .section-overlay-header, so the theme reserves the
+     fixed header's height with .header__backfill instead of letting the first section
+     run under it. That spacer is visibility:hidden, so <body> — which uses the theme
+     default scheme (white), not this section's — showed as a white band above the grey
+     results. Painting the backfill does nothing; paint <body> to match instead. */
+  body.template-search {
+    background: {{ scheme_bg }};
   }
 
   /* theme.css makes the search field `position: sticky; top: 0` from 960px up, which
