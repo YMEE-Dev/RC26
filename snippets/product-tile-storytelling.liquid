@@ -4,6 +4,11 @@
   @param {product} product - Product object rendered in the tile
   @param {number} [index] - Position index used for unique DOM IDs
   @param {boolean} [pdp_mode] - When true, shows the second product image in the trigger instead of the first
+  @param {boolean} [is_highlight] - Reserved for grid placement variants
+  @param {boolean} [is_spotlight] - Reserved for grid placement variants
+  @param {string} [card_animation] - Pass 'plp' to join the PLP entrance cascade. Without it
+    the tile is never hidden, so it paints at first paint — ahead of the header and every
+    other grid item. Mirrors the same param on product-grid-item.
 {% enddoc %}
 
 {%- liquid
@@ -116,7 +121,7 @@
 {% endfor %}
 
 <grid-item
-  class="product-storytelling grid-item product-item  product-item--left product-item--overlay-text {{ grid_item_type }}"
+  class="product-storytelling grid-item product-item  product-item--left product-item--overlay-text {{ grid_item_type }}{% if card_animation == 'plp' %} plp-card-up{% endif %}"
   data-product-available="{{ product.available }}"
   data-product-storytelling
   style="{{ grid_item_styles }} grid-row: span 1;"

@@ -600,6 +600,29 @@ body.plp-header-ready:not(.plp-header-anim-done) .rc-slide--t {
 body.plp-header-ready:not(.plp-header-anim-done) .rc-slide--r {
   animation: rcHeaderFromRight 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
+
+/* Collection name — the second beat of the PLP cascade (header → name → description →
+   subcategories → products), which is the order the client asked for.
+
+   It lives INSIDE .rc-d-center (desktop) / .rc-mobile-crumbs (mobile), so it already
+   rides the parent's slide. This layers a short fade on top, offset by the shared
+   --plp-cascade-title token, so the name lands just after the logo rather than with it.
+   Deliberately a small fade and not a second translate: the parent is still animating,
+   and child transforms compose with it — a full -200px drop here would read as double
+   travel. Ends at 750 + 400 = 1150ms, inside the 1200ms plp-header-anim-done window. */
+@keyframes rcMetaIn {
+  from {
+    transform: translateY(-12px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+body.plp-header-ready:not(.plp-header-anim-done) .rc-nav .header__logo__meta {
+  animation: rcMetaIn 400ms calc(600ms + var(--plp-cascade-title, 150ms)) cubic-bezier(0.05, 0, 0, 1) backwards;
+}
 body.header-scroll-hide .rc-slide--l {
   transform: translateX(calc(-100% - 80px));
 }
@@ -789,12 +812,26 @@ body.header-scroll-hide .rc-slide--r {
     pointer-events: auto;
   }
 
+  /* Closed panels are display:none, NOT just visibility:hidden.
+     `visibility: hidden` still keeps the element in the layout tree, so the
+     inline background-image on every .rc-d-tile__bg inside it was fetched on
+     EVERY page load, menu opened or not. Measured on a /collections/venetian-princess
+     load where the menu was never touched: four panel images (1200px, 1200px,
+     1200px and one at 2200px) downloaded ahead of the first product image.
+     display:none takes them out of the fetch path entirely; nav-menu.dev.js warms
+     them at idle after load, so the first hover is still instant. */
   .rc-d-panel {
     position: absolute;
     inset: 0;
+    display: none;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease;
+  }
+  /* Once the menu opens, ALL panels are laid out so cross-panel fades still work. */
+  .rc-nav[data-open="1"] .rc-d-panel,
+  .rc-d-panel[data-shown="1"] {
+    display: block;
   }
   .rc-d-panel[data-shown="1"] {
     opacity: 1;

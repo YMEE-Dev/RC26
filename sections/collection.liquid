@@ -551,7 +551,7 @@
                   endunless
 
                   if product_storytelling
-                    render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false
+                    render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false, card_animation: 'plp'
                   else
                     capture spotlight_product_attributes
                       echo 'style="--spotlight-stack-index: ' | append: counter_grid | append: ';"'
@@ -603,7 +603,7 @@
                   endunless
 
                   if product_storytelling
-                    render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false
+                    render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false, card_animation: 'plp'
                   else
                     render 'product-grid-item', product: product, index: forloop.index, sizes: image_sizes, card_animation: 'plp'
                   endif
@@ -626,7 +626,7 @@
                   endunless
 
                   if product_storytelling
-                    render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false
+                    render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false, card_animation: 'plp'
                   else
                     render 'product-grid-item', product: product, animation_delay: animation_delay, index: forloop.index, sizes: image_sizes, card_animation: 'plp'
                   endif
@@ -1000,25 +1000,18 @@
 
   <script>
     (function () {
-      /* Page exit fade */
-      document.addEventListener('click', function (e) {
-        const link = e.target.closest('a[href]');
-        if (!link) return;
-        const href = link.getAttribute('href');
-        if (!href || href.startsWith('#') || href.startsWith('javascript') || link.target === '_blank') return;
-        if (link.origin && link.origin !== location.origin) return;
-        e.preventDefault();
-        document.body.classList.add('page-exit');
-        setTimeout(function () {
-          window.location.href = href;
-        }, 600);
-      });
+      /* The page exit fade that used to live here was a DUPLICATE. snippets/page-transition.liquid
+         already registers a document-wide click handler with TRANSITION_TARGETS = '*', so on a
+         PLP both handlers fired on every internal link: two preventDefault()s, two 600ms timers,
+         two competing navigations — and this one additionally set `body.page-exit`, whose
+         `opacity: 0 !important` on <body> promotes it to a compositing root and breaks the mobile
+         menu's backdrop-filter (the exact problem page-transition.liquid documents avoiding by
+         fading .main-content instead). Removed; the global handler keeps the fade. */
 
       if (document.body.dataset.rcAnimations === 'false') return;
       const cards = Array.from(document.querySelectorAll('.plp-card-up'));
       if (!cards.length) return;
 
-      let subcollectionsDone = false;
       const aboveFold = [];
       const belowFold = [];
 
@@ -1044,10 +1037,46 @@
         {threshold: 0, rootMargin: '0px'}
       );
 
+      let released = false;
       const releaseAboveFold = function () {
+        if (released) return;
+        released = true;
         aboveFold.forEach(function (card) {
           card.classList.add('plp-card-up--visible');
         });
+      };
+
+      const token = function (name, fallback) {
+        const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        const parsed = Number.parseFloat(raw);
+        return Number.isFinite(parsed) ? parsed : fallback;
+      };
+
+      /* Products reveal at a fixed offset from the cascade anchor — NOT chained off the
+         subcollections section.
+
+         The old chain waited on `theme:subcollections:animated`, then on the last tile's
+         `transitionend` (900ms fallback), then gave up at 3000ms. Two measured consequences:
+
+         1. On templates WITH subcollections the waits stacked. On
+            /collections/venetian-princess the header was ready at 649ms and the first
+            product did not appear until 3992ms.
+         2. On the six templates where subcollections is disabled (cento, naked,
+            super-naked, text-naked, media-only, naked-white-background) the chain was
+            skipped entirely and products released at DOMContentLoaded — BEFORE the header.
+            Measured on /collections/cento: products 1155ms, header 1203ms. Inverted.
+
+         One clock fixes both: products always follow the header, on every template. */
+      const scheduleRelease = function () {
+        /* Only wait out the subcategory stagger when there are actually tiles staggering. */
+        const hasSubcollectionTiles = !!document.querySelector(
+          '[data-section-type="subcollections"] .subcollection__item'
+        );
+        const offset = hasSubcollectionTiles
+          ? token('--plp-cascade-products', 900)
+          : token('--plp-cascade-products-solo', 400);
+        const anchor = typeof window.__plpCascadeT0 === 'number' ? window.__plpCascadeT0 : performance.now();
+        setTimeout(releaseAboveFold, Math.max(0, anchor + offset - performance.now()));
       };
 
       const init = function () {
@@ -1055,46 +1084,15 @@
         belowFold.forEach(function (card) {
           scrollObserver.observe(card);
         });
-        if (subcollectionsDone) releaseAboveFold();
+
+        if (document.body.classList.contains('plp-header-ready')) {
+          scheduleRelease();
+        } else {
+          document.addEventListener('theme:plp:header-ready', scheduleRelease, {once: true});
+          /* never leave the grid invisible if the header entrance never runs */
+          setTimeout(releaseAboveFold, 2500);
+        }
       };
-
-      const hasSubcollections = !!document.querySelector('[data-section-type="subcollections"]');
-
-      document.addEventListener(
-        'theme:subcollections:animated',
-        function () {
-          subcollectionsDone = true;
-          if (!aboveFold.length) return;
-
-          const lastItem =
-            document.querySelector('.subcollection__item.plp-el-up--visible:last-child') ||
-            document.querySelector('.subcollection__item.plp-el-up--visible');
-          if (!lastItem) {
-            releaseAboveFold();
-            return;
-          }
-
-          var fallback = setTimeout(releaseAboveFold, 900);
-          lastItem.addEventListener('transitionend', function handler(e) {
-            if (e.propertyName !== 'transform') return;
-            clearTimeout(fallback);
-            lastItem.removeEventListener('transitionend', handler);
-            releaseAboveFold();
-          });
-        },
-        {once: true}
-      );
-
-      if (hasSubcollections) {
-        setTimeout(function () {
-          if (!subcollectionsDone) {
-            subcollectionsDone = true;
-            if (aboveFold.length) releaseAboveFold();
-          }
-        }, 3000);
-      } else {
-        subcollectionsDone = true;
-      }
 
       const scheduleInit = function () {
         requestAnimationFrame(init);

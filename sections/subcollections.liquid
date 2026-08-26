@@ -29,7 +29,14 @@
       {%- endunless -%}
 
       {%  if section.settings.subcollection_bg %}
-        background: url({{ section.settings.subcollection_bg | image_url }});
+        {%- comment -%}
+          `image_url` with no width returns the ORIGINAL master image. On
+          /collections/venetian-princess that was BG_VENETIAN_PRINCESS_1.jpg at 427KB —
+          the heaviest asset on the page by 2.4x, and it is the PLP hero, so it is also
+          the LCP candidate. 2400 covers a 1200px-wide viewport at 2x DPR, which is past
+          the point this full-bleed background shows any difference.
+        {%- endcomment -%}
+        background: url({{ section.settings.subcollection_bg | image_url: width: 2400 }});
         background-repeat: initial;
         background-position: bottom;
         background-size: cover;
@@ -131,9 +138,15 @@
                     {%- assign image = sub_collection.products.first.featured_media.preview_image -%}
                   {%- endif -%}
 
-                  {%- capture sizes -%}
-                    (min-width: 750px) (calc(100vw - 16px) / 3), calc(100vw - 32px)
-                  {%- endcapture -%}
+                  {%- comment -%}
+                    The parenthesised form this used to carry — `(calc(100vw - 16px) / 3)` —
+                    is not a valid <source-size-value>: the division has to live INSIDE the
+                    calc(). Browsers dropped the whole descriptor and fell back to 100vw, so
+                    a tile that paints ~528px wide was being served at width=1728 — roughly
+                    3x the pixels, five times over, eagerly, directly ahead of the product
+                    grid. Verified in the network log on /collections/venetian-princess.
+                  {%- endcomment -%}
+                  {%- capture sizes -%}(min-width: 750px) calc((100vw - 16px) / 3), calc(100vw - 32px){%- endcapture -%}
 
                   {%- render 'image' image: image, sizes: sizes, cover: true, show_backfill: false, loading: 'eager' -%}
                 </div>
@@ -191,65 +204,56 @@
         /* animations off: the hiding rule is gated on the same attribute, so nothing to do */
         if (document.body.dataset.rcAnimations === 'false') return;
 
+        /* Offsets come from the shared cascade tokens in header-init-animation, so the
+           whole PLP order lives in one place. Values are read once, at reveal time. */
+        const token = function (name, fallback) {
+          const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+          const parsed = Number.parseFloat(raw);
+          return Number.isFinite(parsed) ? parsed : fallback;
+        };
+
+        let started = false;
         const animateItems = function () {
+          if (started) return;
+          started = true;
+
+          const descAt = token('--plp-cascade-desc', 300);
+          const subAt = token('--plp-cascade-subcat', 450);
+          const step = token('--plp-cascade-subcat-step', 80);
+
           /* description first — it sits above the tiles, keeping the top-to-bottom order */
-          revealDescription();
+          setTimeout(revealDescription, descAt);
           items.forEach(function (item, i) {
             setTimeout(function () {
               item.classList.add('plp-el-up--visible');
-              if (i === items.length - 1) {
-                document.dispatchEvent(new CustomEvent('theme:subcollections:animated'));
-              }
-            }, i * 160);
+            }, subAt + i * step);
           });
+
+          /* Kept for any listener that still wants it. The product grid no longer
+             depends on this event — it runs off the same clock instead. */
+          setTimeout(function () {
+            document.dispatchEvent(new CustomEvent('theme:subcollections:animated'));
+          }, subAt + Math.max(0, items.length - 1) * step);
         };
 
-        const imgs = Array.from(swiper.querySelectorAll('img'));
+        /* Anchor: the single `plp-header-ready` moment. Everything after it is a fixed
+           offset, so no image decode or font can reorder the cascade.
 
-        /* Wait for header animation to start first (top-to-bottom order on PLP) */
-        const waitForHeader = new Promise(function (resolve) {
-          if (document.body.classList.contains('plp-header-ready')) {
-            resolve();
-          } else {
-            document.addEventListener('theme:plp:header-ready', resolve, {once: true});
-            setTimeout(resolve, 3500); /* safety fallback aligned with collection.liquid */
-          }
-        });
-
-        Promise.all([
-          waitForHeader,
-          ...imgs.map(function (img) {
-            return img.decode().catch(function () {});
-          }),
-        ]).then(function () {
-          /* Wait for the last header element's CSS animation to actually finish before categories enter.
-           Desktop: last bar (.header__desktop__bar__r) finishes last.
-           Mobile: breadcrumb (.header__mobile .header__logo__meta) finishes last.
-           Fallback timeout covers reduced-motion / no-animation cases. */
-          var lastHeaderEl =
-            window.innerWidth >= 960
-              ? document.querySelector('.header__desktop__bar__r')
-              : document.querySelector('.header__mobile .header__logo__meta');
-
-          if (!lastHeaderEl) {
-            animateItems();
-            return;
-          }
-
-          var handler = function (event) {
-            if (event.target !== lastHeaderEl) return;
-            clearTimeout(fallback);
-            lastHeaderEl.removeEventListener('animationend', handler);
-            animateItems();
-          };
-
-          var fallback = setTimeout(function () {
-            lastHeaderEl.removeEventListener('animationend', handler);
-            animateItems();
-          }, 1800);
-
-          lastHeaderEl.addEventListener('animationend', handler);
-        });
+           This replaced two waits that could never do what they claimed. The tiles used
+           to await `img.decode()` on every subcategory image — one slow tile stalled the
+           subcategories AND the products behind them. Then they awaited `animationend`
+           on `.header__desktop__bar__r`, an element inside the legacy header that
+           sections/header.liquid hides with display:none. CSS animations don't run on
+           display:none elements, so that event never fired and every single load burned
+           the 1800ms fallback instead. Measured on /collections/venetian-princess:
+           header ready at 649ms, description not revealed until 2355ms. */
+        if (document.body.classList.contains('plp-header-ready')) {
+          animateItems();
+        } else {
+          document.addEventListener('theme:plp:header-ready', animateItems, {once: true});
+          /* covers templates that render this section without header-init-animation */
+          setTimeout(animateItems, 2500);
+        }
       })();
     </script>
   </section>
