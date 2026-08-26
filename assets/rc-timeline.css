@@ -16,7 +16,13 @@
 
 @font-face {
   font-family: "Portrait";
-  src: url("Portrait-Medium-Cy.otf") format("opentype");
+  /* woff2 first, otf fallback — kept in step with the 'Portrait LS' face in
+     snippets/head.liquid. Left pointing at the .otf, this second declaration would
+     pull the heavier file down again on any page that loads rc-timeline.css.
+     Relative URLs resolve against this stylesheet, and both files sit in assets/. */
+  src:
+    url("Portrait-Medium-Cy.woff2") format("woff2"),
+    url("Portrait-Medium-Cy.otf") format("opentype");
   font-style: normal;
   font-weight: 500;
   font-display: swap;

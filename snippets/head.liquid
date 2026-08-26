@@ -139,7 +139,15 @@
 {% style %}
   @font-face {
     font-family: 'Portrait LS';
-    src: url('{{ 'Portrait-Medium-Cy.otf' | asset_url }}') format('opentype');
+    /* WOFF2 first, OTF kept as a fallback for anything that can't read it.
+       The browser downloads only the FIRST format it supports, so modern clients
+       fetch the woff2 alone and never touch the .otf.
+       Wire size: the OTF arrives gzipped at ~107KB; the woff2 is 90KB and carries
+       identical glyph data (woff2 is a lossless container — same outlines, better
+       compression — so rendering is unchanged). */
+    src:
+      url('{{ 'Portrait-Medium-Cy.woff2' | asset_url }}') format('woff2'),
+      url('{{ 'Portrait-Medium-Cy.otf' | asset_url }}') format('opentype');
     font-display: swap;
     font-style: normal;
     font-weight: 500;
@@ -625,7 +633,12 @@
 {%- unless settings.type_body_font.system? -%}
   <link rel="preload" as="font" href="{{ settings.type_body_font | font_url }}" type="font/woff2" crossorigin>
 {%- endunless -%}
-<link rel="preload" as="font" href="{{ 'Portrait-Medium-Cy.otf' | asset_url }}" type="font/otf" crossorigin>
+{%- comment -%}
+  Must preload the SAME file @font-face will actually pick, i.e. the woff2. Preloading
+  the .otf here while the font-face resolves to .woff2 would download both — the preload
+  wasted, and the warning "preloaded but not used within a few seconds" in the console.
+{%- endcomment -%}
+<link rel="preload" as="font" href="{{ 'Portrait-Medium-Cy.woff2' | asset_url }}" type="font/woff2" crossorigin>
 {%- unless settings.type_btn_font.system? -%}
   <link rel="preload" as="font" href="{{ settings.type_btn_font | font_url }}" type="font/woff2" crossorigin>
 {%- endunless -%}
