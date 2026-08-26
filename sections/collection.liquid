@@ -1,6 +1,9 @@
 {{ 'custom-collection.css' | asset_url | stylesheet_tag }}
 {{ 'collection-floating-bar.css' | asset_url | stylesheet_tag }}
-{{ 'cento-comparison.css' | asset_url | stylesheet_tag }}
+{%- comment -%}
+  cento-comparison.css now loads from its two consumers (the cento_comparison block
+  snippet and section-cento-diamond-comparison) instead of from every collection page.
+{%- endcomment -%}
 
 {%- liquid
   assign enable_infinity_scroll = settings.enable_infinity_scroll
