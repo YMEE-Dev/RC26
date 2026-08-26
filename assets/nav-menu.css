@@ -380,7 +380,6 @@ body.template-collection:has(.collection--spotlight.collection--spotlight-positi
 @media (max-width: 1023px) {
   .main-content--collection-naked,
   .main-content--collection-super-naked,
-  .main-content--blog,
   .main-content--page {
     padding-top: 75px;
   }
@@ -429,9 +428,39 @@ body:has(:is(.main-content--collection-naked, .main-content--collection-super-na
    full-bleed hero behind the transparent bar).
    ========================================================================= */
 @media (min-width: 1024px) {
-  .main-content--blog,
   .main-content--page {
     padding-top: 150px;
+  }
+}
+
+/* Blog listing: the visible gap under the header is this padding PLUS the blog
+   banner's own .section-padding, which theme.css scales per breakpoint (40/40/28/20px).
+   The old gap pushed the highlight's title and button below the fold; the client asked
+   for 60% less, so each value is (old gap * 0.4) - that breakpoint's section padding:
+     >= 1024px   190 * 0.4 - 40 = 36
+     990-1023px  115 * 0.4 - 40 = 6
+     750-989px   103 * 0.4 - 28 = 13
+     <= 749px     95 * 0.4 - 20 = 18
+   Ranges mirror .section-padding's breakpoints in theme.css — keep them in sync.
+   These are not "60% of the old padding": the section's share stays put and counts. */
+@media (min-width: 1024px) {
+  .main-content--blog {
+    padding-top: 36px;
+  }
+}
+@media (min-width: 990px) and (max-width: 1023px) {
+  .main-content--blog {
+    padding-top: 6px;
+  }
+}
+@media (min-width: 750px) and (max-width: 989px) {
+  .main-content--blog {
+    padding-top: 13px;
+  }
+}
+@media (max-width: 749px) {
+  .main-content--blog {
+    padding-top: 18px;
   }
 }
 body:is(.template-blog, .template-page)
