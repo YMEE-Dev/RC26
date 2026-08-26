@@ -71,7 +71,17 @@
 
           {%- if tab.image != blank -%}
             <div class="care-tabs__panel-image">
-              {{ tab.image | image_url: width: 600 | image_tag: loading: 'lazy' }}
+              {%- comment -%}
+                data-src — side-drawer.js restores it on first open. `loading="lazy"` was
+                already set here and was still not enough: this drawer is rendered on EVERY
+                page from layout/theme.liquid, and the active tab's panel is laid out inside
+                it, so the browser fetched that one image site-wide for a drawer nobody had
+                opened. Deferring the src covers every tab, not just the active one.
+              {%- endcomment -%}
+              {%- capture drawer_img -%}
+                {{ tab.image | image_url: width: 600 | image_tag: loading: 'lazy' }}
+              {%- endcapture -%}
+              {{ drawer_img | replace: ' src="', ' data-src="' | replace: ' srcset="', ' data-srcset="' }}
             </div>
           {%- endif -%}
         </div>

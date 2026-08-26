@@ -36,7 +36,17 @@
       
       {%- if free_shipping_content.image != blank -%}
         <div class="free-shipping__image drawer-content__image">
-          {{ free_shipping_content.image | image_url: width: 600 | image_tag }}
+          {%- comment -%}
+            data-src, not src — side-drawer.js swaps it in on the drawer's first open.
+            This drawer is closed on load (translated off-screen), and `loading="lazy"`
+            was NOT enough on its own: Chrome's lazy-load margin is generous enough that
+            artwork just past the viewport edge is fetched anyway (verified — the image
+            still downloaded with lazy set). Deferring the src is what actually stops it.
+          {%- endcomment -%}
+          {%- capture drawer_img -%}
+            {{ free_shipping_content.image | image_url: width: 600 | image_tag: loading: 'lazy' }}
+          {%- endcapture -%}
+          {{ drawer_img | replace: ' src="', ' data-src="' | replace: ' srcset="', ' data-srcset="' }}
         </div>
       {%- endif -%}
     </div>
