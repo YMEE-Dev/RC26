@@ -248,16 +248,10 @@
       document.addEventListener('theme:cart-drawer:open', this.hideDrawer);
     }
 
-    /* Load drawer imagery on FIRST open instead of on page load.
-
-       `loading="lazy"` alone does not do this: a closed drawer is only translated
-       off-screen, and Chrome's lazy-load margin is generous enough that artwork
-       sitting just past the viewport edge is fetched anyway. Measured on a PLP,
-       four drawer images (~130KB) downloaded on every page view for drawers nobody
-       had opened. Deferring the src is the same technique drawer-ask-concierge
-       already uses for its own header image; this generalises it to every drawer,
-       so each render site (product.liquid, section-collections-and-icons,
-       section-protection-cards) benefits without repeating the script. */
+    /* Load drawer imagery on first open instead of on page load. `loading="lazy"`
+       does not achieve this — a closed drawer sits inside Chrome's lazy-load margin.
+       Generalises the data-src technique drawer-ask-concierge already used, so every
+       render site benefits without repeating the script. */
     hydrateImages() {
       this.querySelectorAll('img[data-srcset]').forEach((img) => {
         img.setAttribute('srcset', img.getAttribute('data-srcset'));

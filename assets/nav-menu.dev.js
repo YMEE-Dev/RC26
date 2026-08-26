@@ -58,13 +58,11 @@
   var panelsWrap = root.querySelector('[data-rc-panels]');
 
   /* ---------------------------------------------------------------------
-     Panel imagery — warm at idle, never during load.
+     Panel imagery — warmed at idle, never during load.
 
-     nav-menu.css keeps closed panels display:none so their background images
-     stay out of the critical path (they used to download on every page load,
-     ahead of the product grid). That alone would leave the first hover to
-     fetch cold, so once the page is quiet we pull them into cache ourselves.
-     Idle + post-load means this never competes with content.
+     nav-menu.css keeps closed panels display:none so their backgrounds stay off the
+     critical path; this pulls them into cache once the page is quiet, so the first
+     hover is not a cold fetch.
      --------------------------------------------------------------------- */
   function warmPanelImages() {
     var tiles = root.querySelectorAll('.rc-d-tile__bg');

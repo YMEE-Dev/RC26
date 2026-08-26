@@ -11,15 +11,10 @@
 {% endcomment %}
 
 <style>
-    /* ── PLP entrance cascade — single source of truth ─────────────────────────
-       Every PLP element reveals at a FIXED offset from one anchor: the moment
-       `plp-header-ready` lands on <body>. Sections read these tokens instead of
-       chaining on each other's events, so the order is guaranteed top-to-bottom
-       and cannot be reshuffled by whichever image or font happens to resolve first.
-
-       Consumers: nav-menu.css (collection name), sections/subcollections.liquid
-       (description + subcategory tiles), sections/collection.liquid (product grid).
-       Keep --plp-cascade-products >= the tile stagger tail or products overtake
+    /* PLP entrance cascade. Every element reveals at a fixed offset from one anchor
+       (`plp-header-ready` on <body>) rather than chaining on the previous section's
+       events. Read by nav-menu.css, subcollections.liquid and collection.liquid.
+       Keep --plp-cascade-products >= the tile stagger tail, or products overtake
        the subcategories on collections with many tiles. */
     :root {
       --plp-cascade-title: 150ms;
@@ -27,21 +22,13 @@
       --plp-cascade-subcat: 450ms;
       --plp-cascade-subcat-step: 80ms;
       --plp-cascade-products: 900ms;
-      /* Six of the eight collection templates (cento, naked, super-naked, text-naked,
-         media-only, naked-white-background) disable the subcollections section. The
-         900ms above exists to clear the subcategory tile stagger — with no tiles there
-         is nothing to clear, and spending it anyway would make those pages SLOWER than
-         they are today (Cento currently paints products at 1155ms). Shorter offset keeps
-         the header-then-products order while staying faster than the current behaviour. */
+      /* Templates without a subcollections section have no tile stagger to clear,
+         so they use a shorter offset rather than waiting out 900ms for nothing. */
       --plp-cascade-products-solo: 400ms;
     }
 
-    /* ── Slow-motion review mode (?plp-slow=N) ────────────────────────────────
-       Only active when the JS below adds .plp-slow-motion, i.e. only when the URL
-       parameter is present. Scales the header entrance and the element transitions
-       by --plp-slow so each beat is separately visible. !important is deliberate:
-       the shipped rules it overrides are id-scoped (#Subcollections--<id> .plp-el-up),
-       and this block is debug-only so it cannot affect production rendering. */
+    /* Slow-motion review mode (?plp-slow=N) — inert unless the JS below adds
+       .plp-slow-motion. !important overrides id-scoped shipped rules; debug-only. */
     body.plp-slow-motion .rc-slide--l,
     body.plp-slow-motion .rc-slide--t,
     body.plp-slow-motion .rc-slide--r {
@@ -126,14 +113,9 @@
 
       if (document.body.dataset.rcAnimations === 'false') return;
 
-      /* ── Slow-motion review mode — opt-in, for eyeballing the sequence ──────────
-         Append ?plp-slow=6 to any PLP URL to stretch the whole cascade 6x (bare
-         ?plp-slow defaults to 5x, clamped to 20x). Every offset is a CSS token, so
-         slowing down is just scaling those tokens plus the animation/transition
-         durations — the ORDER is untouched, which is the point: it lets you verify
-         header -> name -> description -> subcategories (left to right) -> products
-         at a speed the eye can follow, without changing what ships.
-         Does nothing at all without the parameter. Safe to leave in. */
+      /* Slow-motion review mode: ?plp-slow=6 stretches the cascade 6x so the order
+         can be eyeballed (bare ?plp-slow = 5x, capped at 20x). Scales the offsets
+         only — the order is untouched. Inert without the parameter. */
       var slow = 1;
       try {
         var params = new URLSearchParams(window.location.search);
@@ -179,26 +161,16 @@
           requestAnimationFrame(function () {
             document.body.classList.add('plp-header-ready');
             document.body.classList.remove('plp-header-loading');
-            /* The cascade anchor, in absolute page time. Downstream sections schedule
-               against THIS rather than against the moment their own script happens to
-               run — collection.liquid, for one, initialises at DOMContentLoaded, which
-               on a measured PLP was 625ms after the header was already up. Relative
-               scheduling there would silently add that gap to every offset. */
+            /* The cascade anchor in absolute page time. Downstream sections schedule
+               against this, not against whenever their own script runs — collection.liquid
+               initialises at DOMContentLoaded, well after the header is up. */
             window.__plpCascadeT0 = performance.now();
             document.dispatchEvent(new CustomEvent('theme:plp:header-ready'));
             clearTimeout(doneTimer);
-            /* 1200ms > the 1100ms header entrance (nav-menu.css: 500ms duration,
-               600ms delay). The old 1050ms landed BEFORE the entrance finished, and
-               because the `:not(.plp-header-anim-done)` selector stops matching the
-               moment the class lands, the animation was cut 50ms short and snapped
-               to its base state. The previous `animationend` listener targeted
-               `.header__mobile .header__mobile__right` — inside the legacy header,
-               which sections/header.liquid hides with display:none. Animations never
-               run on display:none elements, so that listener could never fire and
-               only the timer was ever doing the work. Timer only now, and correct. */
-            /* Scaled in slow-motion mode too — the `:not(.plp-header-anim-done)` selector
-               stops matching once this lands, so leaving it at 1200ms would cut the
-               stretched header entrance off partway and defeat the whole exercise. */
+            /* Must exceed the 1100ms header entrance (nav-menu.css: 500ms + 600ms delay):
+               `:not(.plp-header-anim-done)` stops matching the moment this lands, so a
+               shorter value cuts the animation short and snaps it to its base state.
+               Scaled by `slow` for the same reason. */
             doneTimer = setTimeout(markDone, 1200 * slow);
           });
         });
@@ -214,20 +186,15 @@
         document.body.classList.add('plp-header-loading');
         trigger();
       });
-      /* The images that gate the entrance must be the ones the visitor actually sees.
-         This used to query `.header__desktop img, .header__mobile img` — the legacy
-         header, which sections/header.liquid hides with `display:none !important`
-         since the mega-menu refactor. So the whole page cascade was gated on artwork
-         nobody looks at, and never on the real logo. */
+      /* Must be the visible header. The legacy `.header__desktop`/`.header__mobile`
+         markup is display:none since the mega-menu refactor (sections/header.liquid),
+         so gating on its images gated the cascade on artwork nobody sees. */
       var headerImgs = Array.prototype.slice.call(
         document.querySelectorAll('.rc-d-logo img, .rc-mobile-bar__logo')
       );
 
-      /* Fonts are RACED, not awaited. `document.fonts.ready` is page-wide: it resolves
-         only once every face on the page has settled, so one slow font would hold the
-         header — and everything staggered behind it — hostage. Past the cap we start
-         the entrance regardless; a late font swaps in under an already-visible header,
-         which is far cheaper than a blank one. */
+      /* Fonts are raced, not awaited: `document.fonts.ready` is page-wide, so one slow
+         face would hold the header and everything staggered behind it. */
       var FONT_CAP_MS = 500;
       var fontsReady = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
       var fontsRaced = Promise.race([

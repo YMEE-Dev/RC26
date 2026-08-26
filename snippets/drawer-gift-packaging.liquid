@@ -39,8 +39,7 @@
       {%- if gift_content.image != blank -%}
         <div class="gift-packaging__image drawer-content__image">
           {%- comment -%}
-            data-src — closed drawer; see drawer-free-shipping for why lazy alone is not
-            enough. side-drawer.js restores it on first open.
+            data-src — see drawer-free-shipping; lazy alone does not defer a closed drawer.
           {%- endcomment -%}
           {%- capture drawer_img -%}
             {{ gift_content.image | image_url: width: 600 | image_tag: loading: 'lazy' }}

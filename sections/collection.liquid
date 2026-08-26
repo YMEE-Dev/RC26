@@ -1000,13 +1000,8 @@
 
   <script>
     (function () {
-      /* The page exit fade that used to live here was a DUPLICATE. snippets/page-transition.liquid
-         already registers a document-wide click handler with TRANSITION_TARGETS = '*', so on a
-         PLP both handlers fired on every internal link: two preventDefault()s, two 600ms timers,
-         two competing navigations — and this one additionally set `body.page-exit`, whose
-         `opacity: 0 !important` on <body> promotes it to a compositing root and breaks the mobile
-         menu's backdrop-filter (the exact problem page-transition.liquid documents avoiding by
-         fading .main-content instead). Removed; the global handler keeps the fade. */
+      /* No exit-fade handler here: page-transition.liquid already registers one globally
+         (TRANSITION_TARGETS = '*'). A second one double-fired on every internal link. */
 
       if (document.body.dataset.rcAnimations === 'false') return;
       const cards = Array.from(document.querySelectorAll('.plp-card-up'));
@@ -1052,21 +1047,10 @@
         return Number.isFinite(parsed) ? parsed : fallback;
       };
 
-      /* Products reveal at a fixed offset from the cascade anchor — NOT chained off the
-         subcollections section.
-
-         The old chain waited on `theme:subcollections:animated`, then on the last tile's
-         `transitionend` (900ms fallback), then gave up at 3000ms. Two measured consequences:
-
-         1. On templates WITH subcollections the waits stacked. On
-            /collections/venetian-princess the header was ready at 649ms and the first
-            product did not appear until 3992ms.
-         2. On the six templates where subcollections is disabled (cento, naked,
-            super-naked, text-naked, media-only, naked-white-background) the chain was
-            skipped entirely and products released at DOMContentLoaded — BEFORE the header.
-            Measured on /collections/cento: products 1155ms, header 1203ms. Inverted.
-
-         One clock fixes both: products always follow the header, on every template. */
+      /* Fixed offset from the cascade anchor, deliberately NOT chained off the
+         subcollections section. Chaining stacked the waits where that section exists, and
+         skipped the wait entirely on the templates where it is disabled — releasing
+         products before the header. One clock keeps the order right on every template. */
       const scheduleRelease = function () {
         /* Only wait out the subcategory stagger when there are actually tiles staggering. */
         const hasSubcollectionTiles = !!document.querySelector(
