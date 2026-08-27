@@ -20,18 +20,20 @@
       /* Shared by EVERY participant. Equal durations are what make the order
          predictable: same fade length means whichever starts first becomes visible
          first. Mixed durations decouple start order from visible order. */
+      /* Duration stays 600ms: the per-tile fade itself matches the live theme, which the
+         client signed off. Tightening is done by shortening the GAPS between beats, not
+         the animation, so each element still appears exactly as it does today. */
       --plp-cascade-duration: 600ms;
-      --plp-cascade-title: 150ms;
-      --plp-cascade-desc: 300ms;
-      --plp-cascade-subcat: 600ms;
-      /* 160ms matches the per-tile rhythm already shipping on the live theme (measured
-         144-182ms). Keep --plp-cascade-products above the last tile's START — 600 + 5 x
-         step at the 6-tile maximum = 1400ms — so products never overtake the tiles. */
-      --plp-cascade-subcat-step: 160ms;
-      --plp-cascade-products: 1550ms;
+      --plp-cascade-title: 120ms;
+      --plp-cascade-desc: 240ms;
+      --plp-cascade-subcat: 500ms;
+      /* Keep --plp-cascade-products above the last tile's START, which at the 6-tile
+         maximum is 500 + 5 x step = 1100ms — otherwise products overtake the tiles. */
+      --plp-cascade-subcat-step: 120ms;
+      --plp-cascade-products: 1150ms;
       /* Templates without a subcollections section have no tile stagger to clear,
-         so they use a shorter offset rather than waiting out 900ms for nothing. */
-      --plp-cascade-products-solo: 400ms;
+         so they use a shorter offset rather than waiting for nothing. */
+      --plp-cascade-products-solo: 300ms;
     }
 
     /* Slow-motion review mode (?plp-slow=N) needs no overrides here: every delay and
