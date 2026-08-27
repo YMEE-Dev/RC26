@@ -8,7 +8,14 @@
 -%}
 
 <meta name="theme-color" content="{{ scheme_accent }}">
-<link rel="canonical" href="{{ canonical_url }}">
+{%- comment -%} Emptied Shopify policies keep serving a blank 200 page; forward it to the real one. {%- endcomment -%}
+{%- if request.path contains '/policies/privacy-policy' -%}
+  {%- assign privacy_url = pages['privacy-policy'].url | default: '/pages/privacy-policy' -%}
+  <link rel="canonical" href="{{ request.origin }}{{ privacy_url }}">
+  <meta http-equiv="refresh" content="0; url={{ privacy_url }}">
+{%- else -%}
+  <link rel="canonical" href="{{ canonical_url }}">
+{%- endif -%}
 
 <!-- ======================= Broadcast Theme V8.0.0 ========================= -->
 
