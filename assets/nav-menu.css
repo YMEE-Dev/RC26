@@ -75,7 +75,7 @@ body.plp-header-loading .announcement__wrapper--top {
   opacity: 0;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .announcement__wrapper--top {
-  animation: rcHeaderFromTop 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromTop var(--plp-cascade-duration, 600ms) 0ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 
 .rc-nav button {
@@ -256,8 +256,11 @@ body.template-collection .rc-mobile-crumbs {
 body.plp-header-loading .rc-mobile-crumbs > * {
   opacity: 0;
 }
+/* Mobile collection name — beat 2. Uses rcHeaderFromTop (which animates opacity) because
+   nothing above it fades on mobile, unlike the desktop copy inside .rc-d-center. */
+body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-crumbs .header__logo__meta,
 body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-crumbs > * {
-  animation: rcHeaderFromTop 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromTop var(--plp-cascade-duration, 600ms) var(--plp-cascade-title, 150ms) cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.header-scroll-hide .rc-mobile-crumbs > * {
   transform: translateY(calc(-260% - var(--announcement-height, 0px) - 60px));
@@ -380,7 +383,6 @@ body.template-collection:has(.collection--spotlight.collection--spotlight-positi
 @media (max-width: 1023px) {
   .main-content--collection-naked,
   .main-content--collection-super-naked,
-  .main-content--blog,
   .main-content--page {
     padding-top: 75px;
   }
@@ -429,9 +431,39 @@ body:has(:is(.main-content--collection-naked, .main-content--collection-super-na
    full-bleed hero behind the transparent bar).
    ========================================================================= */
 @media (min-width: 1024px) {
-  .main-content--blog,
   .main-content--page {
     padding-top: 150px;
+  }
+}
+
+/* Blog listing: the visible gap under the header is this padding PLUS the blog
+   banner's own .section-padding, which theme.css scales per breakpoint (40/40/28/20px).
+   The old gap pushed the highlight's title and button below the fold; the client asked
+   for 60% less, so each value is (old gap * 0.4) - that breakpoint's section padding:
+     >= 1024px   190 * 0.4 - 40 = 36
+     990-1023px  115 * 0.4 - 40 = 6
+     750-989px   103 * 0.4 - 28 = 13
+     <= 749px     95 * 0.4 - 20 = 18
+   Ranges mirror .section-padding's breakpoints in theme.css — keep them in sync.
+   These are not "60% of the old padding": the section's share stays put and counts. */
+@media (min-width: 1024px) {
+  .main-content--blog {
+    padding-top: 36px;
+  }
+}
+@media (min-width: 990px) and (max-width: 1023px) {
+  .main-content--blog {
+    padding-top: 6px;
+  }
+}
+@media (min-width: 750px) and (max-width: 989px) {
+  .main-content--blog {
+    padding-top: 13px;
+  }
+}
+@media (max-width: 749px) {
+  .main-content--blog {
+    padding-top: 18px;
   }
 }
 body:is(.template-blog, .template-page)
@@ -591,14 +623,47 @@ body:is(.template-blog, .template-page) .rc-nav:not([data-open="1"]) :is(.rc-d-l
 body.plp-header-loading .rc-slide {
   opacity: 0;
 }
+/* The header is beat ZERO of the cascade, so it starts the instant plp-header-ready
+   lands — no delay. It previously waited 600ms, which put it behind the description
+   (t0+300) and the first three subcategory tiles in actual visible order.
+
+   Duration is --plp-cascade-duration, shared with every other participant. Equal
+   durations are what make the order predictable: when two elements fade for the same
+   length of time, whichever STARTS first also becomes visible first. With mixed
+   durations (this was 500ms while tiles were 600ms) start order stops predicting
+   visible order, which is what read as "random". */
 body.plp-header-ready:not(.plp-header-anim-done) .rc-slide--l {
-  animation: rcHeaderFromLeft 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromLeft var(--plp-cascade-duration, 600ms) 0ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-slide--t {
-  animation: rcHeaderFromTop 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromTop var(--plp-cascade-duration, 600ms) 0ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-slide--r {
-  animation: rcHeaderFromRight 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromRight var(--plp-cascade-duration, 600ms) 0ms cubic-bezier(0.05, 0, 0, 1) backwards;
+}
+
+/* Collection name — second beat of the PLP cascade, offset by --plp-cascade-title so it
+   lands just after the logo. Deliberately a small fade, not a second translate: it sits
+   inside .rc-d-center, whose slide is still running, and child transforms compose with
+   the parent. Ends at 1150ms, inside the 1200ms plp-header-anim-done window. */
+/* Transform ONLY — deliberately no opacity. This element is nested inside
+   .rc-d-center, which is already fading in; animating opacity here too multiplies the
+   two curves, so the name only crossed the visible threshold long after the tiles.
+   The parent supplies the fade, this supplies the beat. */
+@keyframes rcMetaIn {
+  from {
+    transform: translateY(-12px);
+  }
+  to {
+    transform: none;
+  }
+}
+/* Scoped to .rc-d-center, NOT .rc-nav: the mobile copy of .header__logo__meta lives in
+   .rc-mobile-crumbs, which has no fading parent, so the transform-only rcMetaIn would
+   leave it fully opaque from the start and it would beat the header. Mobile uses
+   rcHeaderFromTop (opacity + transform) instead — see .rc-mobile-crumbs below. */
+body.plp-header-ready:not(.plp-header-anim-done) .rc-d-center .header__logo__meta {
+  animation: rcMetaIn var(--plp-cascade-duration, 600ms) var(--plp-cascade-title, 150ms) cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.header-scroll-hide .rc-slide--l {
   transform: translateX(calc(-100% - 80px));
@@ -789,12 +854,21 @@ body.header-scroll-hide .rc-slide--r {
     pointer-events: auto;
   }
 
+  /* display:none, not visibility:hidden — a hidden-but-laid-out panel still fetches the
+     background-image on every .rc-d-tile__bg, on every page load, menu opened or not.
+     nav-menu.dev.js warms them at idle so the first hover stays instant. */
   .rc-d-panel {
     position: absolute;
     inset: 0;
+    display: none;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease;
+  }
+  /* Once the menu opens, ALL panels are laid out so cross-panel fades still work. */
+  .rc-nav[data-open="1"] .rc-d-panel,
+  .rc-d-panel[data-shown="1"] {
+    display: block;
   }
   .rc-d-panel[data-shown="1"] {
     opacity: 1;
@@ -1674,13 +1748,13 @@ body.plp-header-loading .rc-mobile-bar__slot > * {
   opacity: 0;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-bar__slot:first-child > * {
-  animation: rcHeaderFromLeft 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromLeft var(--plp-cascade-duration, 600ms) 0ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-bar__slot:nth-child(2) > * {
-  animation: rcHeaderFromTop 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromTop var(--plp-cascade-duration, 600ms) 0ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 body.plp-header-ready:not(.plp-header-anim-done) .rc-mobile-bar__slot:last-child > * {
-  animation: rcHeaderFromRight 500ms 600ms cubic-bezier(0.05, 0, 0, 1) backwards;
+  animation: rcHeaderFromRight var(--plp-cascade-duration, 600ms) 0ms cubic-bezier(0.05, 0, 0, 1) backwards;
 }
 /* scroll-down: hamburger exits left, logo up, cart right (reverse in on scroll-up) */
 body.header-scroll-hide .rc-mobile-bar__slot:first-child > * {
