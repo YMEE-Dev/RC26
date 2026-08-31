@@ -11,6 +11,34 @@
 {% endcomment %}
 
 <style>
+    /* PLP entrance cascade. Every element reveals at a fixed offset from one anchor
+       (`plp-header-ready` on <body>) rather than chaining on the previous section's
+       events. Read by nav-menu.css, subcollections.liquid and collection.liquid.
+       Keep --plp-cascade-products >= the tile stagger tail, or products overtake
+       the subcategories on collections with many tiles. */
+    :root {
+      /* Shared by EVERY participant. Equal durations are what make the order
+         predictable: same fade length means whichever starts first becomes visible
+         first. Mixed durations decouple start order from visible order. */
+      /* Duration stays 600ms: the per-tile fade itself matches the live theme, which the
+         client signed off. Tightening is done by shortening the GAPS between beats, not
+         the animation, so each element still appears exactly as it does today. */
+      --plp-cascade-duration: 600ms;
+      --plp-cascade-title: 120ms;
+      --plp-cascade-desc: 240ms;
+      --plp-cascade-subcat: 500ms;
+      /* Keep --plp-cascade-products above the last tile's START, which at the 6-tile
+         maximum is 500 + 5 x step = 1100ms — otherwise products overtake the tiles. */
+      --plp-cascade-subcat-step: 120ms;
+      --plp-cascade-products: 1150ms;
+      /* Templates without a subcollections section have no tile stagger to clear,
+         so they use a shorter offset rather than waiting for nothing. */
+      --plp-cascade-products-solo: 300ms;
+    }
+
+    /* Slow-motion review mode (?plp-slow=N) needs no overrides here: every delay and
+       duration now reads from the cascade tokens, and the JS scales those directly. */
+
     @keyframes plp-header-from-top { from { transform: translateY(-200px); opacity: 0; } to { transform: none; opacity: 1; } }
     @keyframes plp-header-fade-near { from { transform: translateY(-20px); opacity: 0; } to { transform: none; opacity: 1; } }
     @keyframes plp-header-from-left { from { transform: translateX(-200px); opacity: 0; } to { transform: none; opacity: 1; } }
@@ -76,6 +104,42 @@
 
       if (document.body.dataset.rcAnimations === 'false') return;
 
+      /* Slow-motion review mode: ?plp-slow=6 stretches the cascade 6x so the order
+         can be eyeballed (bare ?plp-slow = 5x, capped at 20x). Scales the offsets
+         only — the order is untouched. Inert without the parameter. */
+      var slow = 1;
+      try {
+        var params = new URLSearchParams(window.location.search);
+        if (params.has('plp-slow')) {
+          var requested = Number.parseFloat(params.get('plp-slow'));
+          slow = Number.isFinite(requested) && requested > 0 ? Math.min(requested, 20) : 5;
+        }
+      } catch (e) {
+        /* URLSearchParams unavailable — stay at 1x */
+      }
+
+      if (slow > 1) {
+        var rootEl = document.documentElement;
+        [
+          '--plp-cascade-title',
+          '--plp-cascade-desc',
+          '--plp-cascade-subcat',
+          '--plp-cascade-subcat-step',
+          '--plp-cascade-products',
+          '--plp-cascade-products-solo',
+          '--plp-cascade-duration',
+        ].forEach(function (name) {
+          var base = Number.parseFloat(getComputedStyle(rootEl).getPropertyValue(name));
+          if (Number.isFinite(base)) rootEl.style.setProperty(name, base * slow + 'ms');
+        });
+        rootEl.style.setProperty('--plp-slow', String(slow));
+        document.body.classList.add('plp-slow-motion');
+      }
+      /* Sections read this to scale their own safety timeouts. Unscaled, a 2500ms
+         fallback fires long before the real schedule at high factors and releases
+         products first — which is exactly how the order looked scrambled at 25x. */
+      window.__plpSlow = slow;
+
       var doneTimer;
 
       var markDone = function () {
@@ -93,11 +157,17 @@
           requestAnimationFrame(function () {
             document.body.classList.add('plp-header-ready');
             document.body.classList.remove('plp-header-loading');
+            /* The cascade anchor in absolute page time. Downstream sections schedule
+               against this, not against whenever their own script runs — collection.liquid
+               initialises at DOMContentLoaded, well after the header is up. */
+            window.__plpCascadeT0 = performance.now();
             document.dispatchEvent(new CustomEvent('theme:plp:header-ready'));
             clearTimeout(doneTimer);
-            var rightBar = document.querySelector('.header__mobile .header__mobile__right');
-            if (rightBar) rightBar.addEventListener('animationend', markDone, { once: true });
-            doneTimer = setTimeout(markDone, 1050);
+            /* Must exceed the 1100ms header entrance (nav-menu.css: 500ms + 600ms delay):
+               `:not(.plp-header-anim-done)` stops matching the moment this lands, so a
+               shorter value cuts the animation short and snaps it to its base state.
+               Scaled by `slow` for the same reason. */
+            doneTimer = setTimeout(markDone, 1200 * slow);
           });
         });
       };
@@ -112,11 +182,25 @@
         document.body.classList.add('plp-header-loading');
         trigger();
       });
-      var headerImgs = Array.prototype.slice.call(document.querySelectorAll('.header__desktop img, .header__mobile img'));
+      /* Must be the visible header. The legacy `.header__desktop`/`.header__mobile`
+         markup is display:none since the mega-menu refactor (sections/header.liquid),
+         so gating on its images gated the cascade on artwork nobody sees. */
+      var headerImgs = Array.prototype.slice.call(
+        document.querySelectorAll('.rc-d-logo img, .rc-mobile-bar__logo')
+      );
+
+      /* Fonts are raced, not awaited: `document.fonts.ready` is page-wide, so one slow
+         face would hold the header and everything staggered behind it. */
+      var FONT_CAP_MS = 500;
       var fontsReady = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
-      Promise.all([fontsReady].concat(headerImgs.map(function (img) {
-        return img.decode().catch(function () {});
+      var fontsRaced = Promise.race([
+        fontsReady,
+        new Promise(function (resolve) { setTimeout(resolve, FONT_CAP_MS); }),
+      ]);
+
+      Promise.all([fontsRaced].concat(headerImgs.map(function (img) {
+        return img.decode ? img.decode().catch(function () {}) : Promise.resolve();
       }))).then(trigger);
-      setTimeout(trigger, 3000);
+      setTimeout(trigger, 2000);
     })();
   </script>

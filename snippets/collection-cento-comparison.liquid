@@ -8,6 +8,9 @@
 
 {%- assign bg_url = 'cento-diamond-comparison-bg.jpg' | asset_url -%}
 
+{%- comment -%} Loaded here, not in collection.liquid, so non-cento PLPs don't pay for it. {%- endcomment -%}
+{{ 'cento-comparison.css' | asset_url | stylesheet_tag }}
+
 <div class="collection-cento-comparison-banner" {{ block.shopify_attributes }}>
   <div class="cento-comparison">
     <div class="cento-comparison__bg" style="background: url('{{ bg_url }}') lightgray 0px -132.752px / 160.866% 134.653% no-repeat;"></div>
