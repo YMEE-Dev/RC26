@@ -76,7 +76,6 @@
       data-newsletter-float
       aria-hidden="true"
       data-newsletter-float-delay="{{ section.settings.float_delay_seconds | default: 3 }}"
-      style="--float-watermark: url('{{ 'rc-flower-watermark.svg' | asset_url }}');"
     >
       <button
         type="button"
@@ -88,15 +87,18 @@
           <path d="M0.916667 0.916667L10.0833 10.0833M10.0833 0.916667L0.916667 10.0833" stroke="currentColor" stroke-width="1.1"/>
         </svg>
       </button>
-      <div class="footer-newsletter-float__copy">
-        {%- assign float_eyebrow = section.settings.float_eyebrow | default: 'Keep in touch' -%}
-        {%- unless float_eyebrow == blank -%}
-          <p class="footer-newsletter-float__eyebrow">{{ float_eyebrow | escape }}</p>
-        {%- endunless -%}
-        <p class="footer-newsletter-float__title h4">
-          {{ section.settings.float_title | default: 'Discover the Latest from Roberto Coin' | escape }}
-        </p>
-      </div>
+      <img
+        class="footer-newsletter-float__monogram"
+        src="{{ 'rc-monogram.svg' | asset_url }}"
+        alt=""
+        role="presentation"
+        aria-hidden="true"
+        width="92"
+        height="40"
+      >
+      <p class="footer-newsletter-float__title">
+        {{ section.settings.float_title | default: 'Discover the Latest from Roberto Coin' | escape }}
+      </p>
       <button
         type="button"
         class="btn btn--secondary btn--outline footer-newsletter-float__cta"
@@ -358,31 +360,24 @@
   .footer-newsletter-float {
     position: fixed;
     right: 40px;
-    bottom: 32px;
+    bottom: 40px;
     z-index: 6006;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 20px;
-    width: min(389px, calc(100vw - 80px));
-    padding: 28px 32px 30px 29px;
-    /* Match the site's neutral white page background. */
-    background-color: var(--COLOR-BG, #ffffff);
-    /* Decorative RC flower, top-right, as a background image (clipped by the
-       panel's overflow). Same placement/size as the previous <img>. */
-    background-image: var(--float-watermark);
-    background-repeat: no-repeat;
-    background-position: right -101px top -48px;
-    background-size: 260px 268px;
-    color: #212121;
-    border: 1px solid rgba(33, 33, 33, 0.16);
-    /* Teal brand accent stripe down the left edge (per design). */
-    border-left: 3px solid #27574d;
+    width: min(360px, calc(100vw - 80px));
+    padding: 32px 22px 34px;
+    /* Brand teal panel (per approved v3 design). */
+    background-color: #27574d;
+    color: #f4f2ed;
+    border: 1px solid rgba(244, 242, 237, 0.28);
     overflow: hidden;
-    /* Entrance: slide in from the right edge, and a slight shadow (both kept
-       from the previous version per the brief). */
+    /* Entrance: slide in from the right edge. Shadow is the design's two-layer
+       dark halo — a tight drop plus a large soft spread — deliberately prominent
+       (matches the client's "more prominent shadow" request). */
     --duration: 0.6s;
-    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.24);
+    box-shadow: 0 14px 30px rgba(20, 26, 24, 0.18), 0 0 72px 32px rgba(20, 26, 24, 0.55);
     transform: translateX(calc(100% + 40px));
     opacity: 0;
     visibility: hidden;
@@ -398,14 +393,14 @@
 
   .footer-newsletter-float__close {
     position: absolute;
-    top: 14px;
+    top: 13px;
     right: 15px;
     z-index: 2;
     padding: 6px;
     border: 0;
     background: transparent;
-    color: #212121;
-    opacity: 0.5;
+    color: #f4f2ed;
+    opacity: 0.6;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -425,60 +420,40 @@
     height: 11px;
   }
 
-  .footer-newsletter-float__copy {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    /* Narrow column so the title wraps like the design ("Discover the Latest" /
-       "from Roberto Coin") and stays clear of the flower watermark. Matches the
-       CTA width below. */
-    width: 216px;
-    max-width: 100%;
-  }
-
-  .footer-newsletter-float__eyebrow {
-    margin: 0;
-    font-family: var(--FONT-STACK-BODY);
-    font-size: 10px;
-    font-weight: 400;
-    line-height: 14px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: rgba(33, 33, 33, 0.62);
+  /* RC monogram (exported from Figma), centred at the top. Cream at 0.55 opacity
+     is baked into the SVG. */
+  .footer-newsletter-float__monogram {
+    display: block;
+    width: 92px;
+    height: 40px;
+    flex-shrink: 0;
   }
 
   .footer-newsletter-float .footer-newsletter-float__title {
     margin: 0;
-    font-size: 24px;
-    line-height: 32px;
-    color: #212121;
+    width: 100%;
+    font-family: var(--FONT-STACK-HEADING);
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 1.2;
+    text-align: center;
+    color: #f4f2ed;
   }
 
-  /* Matches the current site's newsletter popup button: primary solid (black,
-     white text) that fades to the brand green on hover. The theme's own button
-     styling handles the colours + fade, so no overrides here — just layer it
-     above the watermark. */
-  /* Outlined (transparent) button per the Figma — fixed width, left-aligned —
-     so the flower watermark shows through it and is never covered. */
+  /* Outlined CTA per the design: cream border + text, transparent fill, full
+     width. Hover fills cream with teal text (inverse) — NOTE: no hover state is
+     defined in the Figma; this is a sensible default, easy to change. */
   .footer-newsletter-float__cta {
-    position: relative;
-    z-index: 1;
-    width: 216px;
-    max-width: 100%;
+    width: 100%;
   }
 
   .footer-newsletter-float__cta.btn--outline.btn--secondary {
-    --btn-border: #212121;
-    --btn-text: #212121;
+    --btn-border: #f4f2ed;
+    --btn-text: #f4f2ed;
     --btn-bg: transparent;
-    /* Hover stays transparent (no fill) so the flower remains visible; border
-       and text tint to the brand green. */
-    --btn-border-hover: #397e70;
-    --btn-bg-hover: transparent;
-    --btn-text-hover: #397e70;
+    --btn-border-hover: #f4f2ed;
+    --btn-bg-hover: #f4f2ed;
+    --btn-text-hover: #27574d;
   }
 
   @media only screen and (max-width: 767px) {
@@ -497,25 +472,23 @@
 
     .footer-newsletter-float {
       top: auto;
-      left: auto;
-      right: 16px;
-      bottom: 16px;
-      width: min(363px, calc(100vw - 32px));
-      gap: 16px;
-      padding: 20px 22px 22px 19px;
-      box-shadow: 0 6px 30px rgba(0, 0, 0, 0.26);
-      transform: translateX(calc(100% + 16px));
-      /* Smaller flower on mobile. */
-      background-position: right -72px top -31px;
-      background-size: 200px 206px;
+      left: 20px;
+      right: 20px;
+      bottom: 20px;
+      width: auto;
+      gap: 18px;
+      padding: 24px 22px 26px;
+      box-shadow: 0 10px 24px rgba(20, 26, 24, 0.2), 0 0 60px 40px rgba(20, 26, 24, 0.7);
+      transform: translateX(calc(100% + 20px));
     }
 
     .footer-newsletter-float.is-visible {
       transform: translateX(0);
     }
 
-    .footer-newsletter-float__copy {
-      width: 216px;
+    .footer-newsletter-float__monogram {
+      width: 80px;
+      height: 35px;
     }
   }
 {% endstylesheet %}
@@ -744,12 +717,6 @@
     {
       "type": "header",
       "content": "Floating popup"
-    },
-    {
-      "type": "text",
-      "id": "float_eyebrow",
-      "label": "Popup eyebrow",
-      "default": "Keep in touch"
     },
     {
       "type": "text",
