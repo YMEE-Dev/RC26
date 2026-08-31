@@ -86,7 +86,31 @@ body.template-collection .js__show__mobile .theme__header label {
 body[data-rc-animations="true"].template-collection .collection__nav {
   transition:
     opacity 600ms 400ms cubic-bezier(0.7, 0, 0.3, 1),
-    transform 600ms 550ms cubic-bezier(0.05, 0, 0, 1);
+    transform 600ms 550ms cubic-bezier(0.05, 0, 0, 1),
+    /* `top` must be listed HERE, not in a separate rule: this shorthand outranks
+       `.collection__nav.is-stuck` and would reset it. The desktop block above flips
+       `top` between 0 and --header-height (160px) whenever the header hides or reveals,
+       and without a transition that lands in one frame — the stuck bar visibly jumps on
+       every change of scroll direction. 500ms matches the header's own slide. */
+    top 500ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Delay the DOWNWARD move only (0 -> --header-height), by carrying the delay on the rule
+   that applies in the offset state; the return upward keeps the base rule's zero delay.
+
+   Why: at the moment the bar sticks, the header is usually still revealed, so the offset
+   applies and the bar drops 160px — then the header finishes hiding a fraction of a
+   second later and it comes straight back. Transitioning both legs turned that transient
+   into a visible bounce. With a 400ms delay the value returns before the animation
+   starts, so nothing moves; a header that stays revealed still slides normally.
+   Measured: a 400ms header flicker goes from a 158px bounce to 0px. */
+@media only screen and (min-width: 960px) {
+  body[data-rc-animations="true"].template-collection.has-header-sticky:not(.header-scroll-hide-layered) .collection__nav {
+    transition:
+      opacity 600ms 400ms cubic-bezier(0.7, 0, 0.3, 1),
+      transform 600ms 550ms cubic-bezier(0.05, 0, 0, 1),
+      top 400ms 400ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
 }
 
 body[data-rc-animations="true"].template-collection:not(.plp-header-ready) .collection__nav,
