@@ -146,9 +146,9 @@
   }
 
   /*
-     * --duration is only defined inside .collection__products so we set it
-     * here to match the collection filter slide-out timing exactly.
-     */
+   * --duration is only defined inside .collection__products so we set it
+   * here to match the collection filter slide-out timing exactly.
+   */
   .footer-newsletter__drawer {
     --duration: 0.6s;
   }
@@ -374,16 +374,15 @@
     border: 1px solid rgba(244, 242, 237, 0.28);
     overflow: hidden;
     /* Entrance: slide in from the right edge. Shadow is the design's two-layer
-         dark halo — a tight drop plus a large soft spread — deliberately prominent
-         from the design, at 40% less opacity per the client's request after
-         seeing it live (blur/offset/spread unchanged). */
+       dark halo — a tight drop plus a large soft spread — deliberately prominent
+       from the design, at 40% less opacity per the client's request after
+       seeing it live (blur/offset/spread unchanged). */
     --duration: 0.6s;
     box-shadow: 0 14px 30px rgba(20, 26, 24, 0.11), 0 0 72px 32px rgba(20, 26, 24, 0.33);
     transform: translateX(calc(100% + 40px));
     opacity: 0;
     visibility: hidden;
     transition: transform var(--duration) ease, opacity var(--duration) ease, visibility 0s linear var(--duration);
-    z-index: 6006;
   }
 
   .footer-newsletter-float.is-visible {
@@ -423,7 +422,7 @@
   }
 
   /* RC monogram (exported from Figma), centred at the top. Cream at 0.55 opacity
-       is baked into the SVG. */
+     is baked into the SVG. */
   .footer-newsletter-float__monogram {
     display: block;
     width: 92px;
@@ -443,8 +442,8 @@
   }
 
   /* Outlined CTA per the design: cream border + text, transparent fill, full
-       width. Hover fills cream with teal text (inverse) — NOTE: no hover state is
-       defined in the Figma; this is a sensible default, easy to change. */
+     width. Hover fills cream with teal text (inverse) — NOTE: no hover state is
+     defined in the Figma; this is a sensible default, easy to change. */
   .footer-newsletter-float__cta {
     width: 100%;
   }
@@ -474,14 +473,15 @@
 
     .footer-newsletter-float {
       top: auto;
-      left: auto;
+      /* 16px gutters (slightly tighter than the 406px Figma artboard's 20px) so
+         the title stays on one line on 390px+ phones. */
+      left: 16px;
       right: 16px;
-      bottom: 16px;
-      width: min(360px, calc(100vw - 32px));
-      max-width: none;
-      padding: 22px 18px 16px;
-      border-top: 0;
-      box-shadow: 0 2px 24px rgba(0, 0, 0, 0.18);
+      bottom: 20px;
+      width: auto;
+      gap: 18px;
+      padding: 24px 22px 26px;
+      box-shadow: 0 10px 24px rgba(20, 26, 24, 0.12), 0 0 60px 40px rgba(20, 26, 24, 0.42);
       transform: translateX(calc(100% + 16px));
     }
 
