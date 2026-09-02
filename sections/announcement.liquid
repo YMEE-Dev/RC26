@@ -63,7 +63,27 @@
       "id": "show_arrows",
       "visible_if": "{{ section.settings.layout == 'slider' }}",
       "label": "Show arrows",
+      "info": "Arrows are shown on desktop only. On mobile, messages autoplay and can be swiped.",
       "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "text_wrap",
+      "visible_if": "{{ section.settings.layout == 'slider' }}",
+      "label": "Wrap text on two lines",
+      "info": "Text announcements that don't fit wrap onto a second line instead of scrolling. Never more than two lines.",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "text_max_chars",
+      "visible_if": "{{ section.settings.layout == 'slider' and section.settings.text_wrap }}",
+      "label": "Character limit",
+      "info": "Text announcements longer than this are cut with an ellipsis. Formatting (bold, links) is dropped from a cut message. Text is always capped at two lines regardless of this limit.",
+      "min": 40,
+      "max": 300,
+      "step": 10,
+      "default": 140
     },
     {
       "type": "range",
@@ -173,6 +193,7 @@
           "type": "richtext",
           "id": "text",
           "label": "Text",
+          "info": "With the slider layout and \"Wrap text on two lines\" on, the message is cut at the section's character limit.",
           "default": "<p>New customers save 10% with code <strong>GET10</strong></p>"
         },
         {
