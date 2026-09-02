@@ -70,7 +70,12 @@
 
   <div class="underlay" data-newsletter-drawer-close></div>
 
-  {%- unless customer -%}
+  {%- comment -%}
+    Floating popup: hidden from logged-in customers, and switchable per theme so
+    the auto-appearing prompt can be handed over to the Klaviyo flyout.
+    `!= false` so an instance saved before this setting existed still shows it.
+  {%- endcomment -%}
+  {%- if section.settings.float_enabled != false and customer == nil -%}
     <aside
       class="footer-newsletter-float"
       data-newsletter-float
@@ -110,7 +115,7 @@
       </button>
     </aside>
     <div class="underlay footer-newsletter-float__underlay" data-newsletter-float-underlay></div>
-  {%- endunless -%}
+  {%- endif -%}
 </footer-newsletter-drawer>
 
 {% stylesheet %}
@@ -720,6 +725,13 @@
     {
       "type": "header",
       "content": "Floating popup"
+    },
+    {
+      "type": "checkbox",
+      "id": "float_enabled",
+      "label": "Show floating popup",
+      "info": "Turn off to hand the auto-appearing prompt over to the Klaviyo flyout.",
+      "default": true
     },
     {
       "type": "text",
