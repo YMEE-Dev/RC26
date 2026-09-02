@@ -109,7 +109,6 @@
         {{ section.settings.float_button_text | default: 'Newsletter sign up' | escape }}
       </button>
     </aside>
-    <div class="underlay footer-newsletter-float__underlay" data-newsletter-float-underlay></div>
   {%- endunless -%}
 </footer-newsletter-drawer>
 
@@ -505,7 +504,6 @@
       this.floatPopup = this.querySelector('[data-newsletter-float]');
       this.floatClose = this.querySelector('[data-newsletter-float-close]');
       this.floatSignup = this.querySelector('[data-newsletter-float-signup]');
-      this.floatUnderlay = this.querySelector('[data-newsletter-float-underlay]');
       this.lastFocusedElement = null;
       this.dismissCookie = 'footer_newsletter_float_dismissed';
       this.mobileQuery = window.matchMedia('(max-width: 767px)');
@@ -526,9 +524,6 @@
       });
 
       this.floatClose?.addEventListener('click', () => {
-        this.dismissFloat();
-      });
-      this.floatUnderlay?.addEventListener('click', () => {
         this.dismissFloat();
       });
 
@@ -653,16 +648,12 @@
       window.removeEventListener('scroll', this.boundOnScroll);
     }
 
-    hideFloat(skipScrollUnlock = false) {
+    hideFloat() {
       if (!this.floatPopup) {
         return;
       }
       this.floatPopup.classList.remove('is-visible');
       this.floatPopup.setAttribute('aria-hidden', 'true');
-      this.floatUnderlay?.classList.remove('is-visible');
-      if (!skipScrollUnlock) {
-        window.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
-      }
       window.removeEventListener('scroll', this.boundOnScroll);
     }
 
@@ -670,9 +661,7 @@
       this.writeCookie(this.dismissCookie, '1', 24);
 
       if (withDelay) {
-        window.setTimeout(() => {
-          this.hideFloat(true);
-        }, this.floatDismissDelayMs);
+        window.setTimeout(() => this.hideFloat(), this.floatDismissDelayMs);
         return;
       }
 
