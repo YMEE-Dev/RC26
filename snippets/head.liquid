@@ -8,7 +8,14 @@
 -%}
 
 <meta name="theme-color" content="{{ scheme_accent }}">
-<link rel="canonical" href="{{ canonical_url }}">
+{%- comment -%} Emptied Shopify policies keep serving a blank 200 page; forward it to the real one. {%- endcomment -%}
+{%- if request.path contains '/policies/privacy-policy' -%}
+  {%- assign privacy_url = pages['privacy-policy'].url | default: '/pages/privacy-policy' -%}
+  <link rel="canonical" href="{{ request.origin }}{{ privacy_url }}">
+  <meta http-equiv="refresh" content="0; url={{ privacy_url }}">
+{%- else -%}
+  <link rel="canonical" href="{{ canonical_url }}">
+{%- endif -%}
 
 <!-- ======================= Broadcast Theme V8.0.0 ========================= -->
 
@@ -139,7 +146,11 @@
 {% style %}
   @font-face {
     font-family: 'Portrait LS';
-    src: url('{{ 'Portrait-Medium-Cy.otf' | asset_url }}') format('opentype');
+    /* WOFF2 first, OTF fallback. The browser fetches only the first format it
+       supports, so modern clients never touch the .otf. Same glyph data either way. */
+    src:
+      url('{{ 'Portrait-Medium-Cy.woff2' | asset_url }}') format('woff2'),
+      url('{{ 'Portrait-Medium-Cy.otf' | asset_url }}') format('opentype');
     font-display: swap;
     font-style: normal;
     font-weight: 500;
@@ -625,13 +636,20 @@
 {%- unless settings.type_body_font.system? -%}
   <link rel="preload" as="font" href="{{ settings.type_body_font | font_url }}" type="font/woff2" crossorigin>
 {%- endunless -%}
-<link rel="preload" as="font" href="{{ 'Portrait-Medium-Cy.otf' | asset_url }}" type="font/otf" crossorigin>
+{%- comment -%}
+  Must preload the same file @font-face resolves to (the woff2), or both get downloaded.
+{%- endcomment -%}
+<link rel="preload" as="font" href="{{ 'Portrait-Medium-Cy.woff2' | asset_url }}" type="font/woff2" crossorigin>
 {%- unless settings.type_btn_font.system? -%}
   <link rel="preload" as="font" href="{{ settings.type_btn_font | font_url }}" type="font/woff2" crossorigin>
 {%- endunless -%}
 
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+{%- comment -%}
+  Self-hosted (Swiper 11.2.10). Was loaded from jsdelivr, which put a third-party DNS +
+  TLS handshake on the critical path before first paint. Stays render-blocking on
+  purpose: the subcollections slider is above the fold on every PLP.
+{%- endcomment -%}
+{{ 'swiper-bundle.min.css' | asset_url | stylesheet_tag }}
 
 {%- comment -%} theme.min.css is generated — edit theme.css, then run `npm run minify` {%- endcomment -%}
 {{ 'theme.min.css' | asset_url | stylesheet_tag }}
@@ -791,7 +809,17 @@
   {%- endif -%}
 {%- endif -%}
 {%- if template.name == 'product' or template.name == 'collection' or template.name == 'index' or template.suffix == 'concierge' -%}
-  <link rel="stylesheet" href="{{ 'side-drawer.css' | asset_url }}">
+  {%- comment -%}
+    Non-blocking: every drawer is closed at first paint, so none of this is needed for
+    the initial render. The media swap applies it as soon as it arrives.
+  {%- endcomment -%}
+  <link
+    rel="stylesheet"
+    href="{{ 'side-drawer.css' | asset_url }}"
+    media="print"
+    onload="this.media='all';this.onload=null"
+  >
+  <noscript><link rel="stylesheet" href="{{ 'side-drawer.css' | asset_url }}"></noscript>
   <script src="{{ 'side-drawer.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 {%- if request.design_mode -%}

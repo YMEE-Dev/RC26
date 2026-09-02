@@ -83,19 +83,30 @@
         data-newsletter-float-close
         aria-label="{{ 'general.accessibility.close' | t }}"
       >
-        {%- render 'icon-close' -%}
+        <svg viewBox="0 0 11 11" width="11" height="11" fill="none" aria-hidden="true" focusable="false">
+          <path d="M0.916667 0.916667L10.0833 10.0833M10.0833 0.916667L0.916667 10.0833" stroke="currentColor" stroke-width="1.1"/>
+        </svg>
       </button>
-      <p class="footer-newsletter-float__title h4">
-        {{ section.settings.float_title | default: 'Sign up to our Newsletter' | escape }}
+      <img
+        class="footer-newsletter-float__monogram"
+        src="{{ 'rc-monogram.svg' | asset_url }}"
+        alt=""
+        role="presentation"
+        aria-hidden="true"
+        width="92"
+        height="40"
+      >
+      <p class="footer-newsletter-float__title">
+        {{ section.settings.float_title | default: 'Discover the Latest from Roberto Coin' | escape }}
       </p>
       <button
         type="button"
-        class="btn btn--primary btn--solid btn--full footer-newsletter-float__cta"
+        class="btn btn--secondary btn--outline footer-newsletter-float__cta"
         data-newsletter-drawer-open
         data-newsletter-float-signup
         aria-controls="FooterNewsletterDrawer--{{ section.id }}"
       >
-        {{ section.settings.float_button_text | default: 'SIGN UP' | escape }}
+        {{ section.settings.float_button_text | default: 'Newsletter sign up' | escape }}
       </button>
     </aside>
     <div class="underlay footer-newsletter-float__underlay" data-newsletter-float-underlay></div>
@@ -135,9 +146,9 @@
   }
 
   /*
-   * --duration is only defined inside .collection__products so we set it
-   * here to match the collection filter slide-out timing exactly.
-   */
+     * --duration is only defined inside .collection__products so we set it
+     * here to match the collection filter slide-out timing exactly.
+     */
   .footer-newsletter__drawer {
     --duration: 0.6s;
   }
@@ -349,17 +360,25 @@
   .footer-newsletter-float {
     position: fixed;
     right: 40px;
-    bottom: 32px;
+    bottom: 40px;
     z-index: 6006;
-    width: min(420px, calc(100vw - 80px));
-    padding: 26px 24px 22px;
-    background: #fff;
-    color: #111;
-    /* Slide in from the right edge, reusing the theme's side-drawer motion
-       (translateX + var(--duration) ease). No backdrop blur — a slight shadow
-       lifts it off the page. */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: min(360px, calc(100vw - 80px));
+    padding: 32px 22px 34px;
+    /* Brand teal panel (per approved v3 design). */
+    background-color: #27574d;
+    color: #f4f2ed;
+    border: 1px solid rgba(244, 242, 237, 0.28);
+    overflow: hidden;
+    /* Entrance: slide in from the right edge. Shadow is the design's two-layer
+         dark halo — a tight drop plus a large soft spread — deliberately prominent
+         from the design, at 40% less opacity per the client's request after
+         seeing it live (blur/offset/spread unchanged). */
     --duration: 0.6s;
-    box-shadow: 0 2px 24px rgba(0, 0, 0, 0.16);
+    box-shadow: 0 14px 30px rgba(20, 26, 24, 0.11), 0 0 72px 32px rgba(20, 26, 24, 0.33);
     transform: translateX(calc(100% + 40px));
     opacity: 0;
     visibility: hidden;
@@ -376,31 +395,67 @@
 
   .footer-newsletter-float__close {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 28px;
-    height: 28px;
+    top: 13px;
+    right: 15px;
+    z-index: 2;
+    padding: 6px;
     border: 0;
     background: transparent;
-    color: currentColor;
+    color: #f4f2ed;
+    opacity: 0.6;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    transition: opacity 0.2s ease;
   }
 
-  .footer-newsletter-float__close .icon {
-    width: 12px;
-    height: 12px;
+  @media (hover: hover) {
+    .footer-newsletter-float__close:hover {
+      opacity: 1;
+    }
   }
 
-  .footer-newsletter-float__title {
-    margin: 0 0 20px;
-    padding-right: 18px;
+  .footer-newsletter-float__close svg {
+    display: block;
+    width: 11px;
+    height: 11px;
   }
 
+  /* RC monogram (exported from Figma), centred at the top. Cream at 0.55 opacity
+       is baked into the SVG. */
+  .footer-newsletter-float__monogram {
+    display: block;
+    width: 92px;
+    height: 40px;
+    flex-shrink: 0;
+  }
+
+  .footer-newsletter-float .footer-newsletter-float__title {
+    margin: 0;
+    width: 100%;
+    font-family: var(--FONT-STACK-HEADING);
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 1.2;
+    text-align: center;
+    color: #f4f2ed;
+  }
+
+  /* Outlined CTA per the design: cream border + text, transparent fill, full
+       width. Hover fills cream with teal text (inverse) — NOTE: no hover state is
+       defined in the Figma; this is a sensible default, easy to change. */
   .footer-newsletter-float__cta {
-    min-height: 44px;
+    width: 100%;
+  }
+
+  .footer-newsletter-float__cta.btn--outline.btn--secondary {
+    --btn-border: #f4f2ed;
+    --btn-text: #f4f2ed;
+    --btn-bg: transparent;
+    --btn-border-hover: #f4f2ed;
+    --btn-bg-hover: #f4f2ed;
+    --btn-text-hover: #27574d;
   }
 
   @media only screen and (max-width: 767px) {
@@ -434,26 +489,9 @@
       transform: translateX(0);
     }
 
-    .footer-newsletter-float__title {
-      margin-bottom: 16px;
-      padding-right: 22px;
-    }
-
-    .footer-newsletter-float__underlay {
-      position: fixed;
-      inset: 0;
-      z-index: 6005;
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transition: opacity 0.3s ease, visibility 0s linear 0.3s;
-    }
-
-    .footer-newsletter-float__underlay.is-visible {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-      transition: opacity 0.3s ease;
+    .footer-newsletter-float__monogram {
+      width: 80px;
+      height: 35px;
     }
   }
 {% endstylesheet %}
@@ -687,13 +725,13 @@
       "type": "text",
       "id": "float_title",
       "label": "Popup title",
-      "default": "Sign up to our Newsletter"
+      "default": "Discover the Latest from Roberto Coin"
     },
     {
       "type": "text",
       "id": "float_button_text",
       "label": "Popup button text",
-      "default": "SIGN UP"
+      "default": "Newsletter sign up"
     },
     {
       "type": "range",

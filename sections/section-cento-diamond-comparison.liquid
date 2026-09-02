@@ -1,4 +1,11 @@
 <!-- /sections/section-cento-diamond-comparison.liquid -->
+{%- comment -%}
+  This section styles itself from cento-comparison.css but only ever defined
+  .cento-comparison__bg locally — it was relying on collection.liquid loading the
+  stylesheet for every collection page. Loaded here now so it stands on its own.
+{%- endcomment -%}
+{{ 'cento-comparison.css' | asset_url | stylesheet_tag }}
+
 {%- liquid
   assign item_blocks = section.blocks | where: 'type', 'item'
 -%}

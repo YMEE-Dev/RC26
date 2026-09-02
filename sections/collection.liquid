@@ -1,6 +1,9 @@
 {{ 'custom-collection.css' | asset_url | stylesheet_tag }}
 {{ 'collection-floating-bar.css' | asset_url | stylesheet_tag }}
-{{ 'cento-comparison.css' | asset_url | stylesheet_tag }}
+{%- comment -%}
+  cento-comparison.css now loads from its two consumers (the cento_comparison block
+  snippet and section-cento-diamond-comparison) instead of from every collection page.
+{%- endcomment -%}
 
 {%- liquid
   assign enable_infinity_scroll = settings.enable_infinity_scroll
@@ -554,7 +557,7 @@
                   endunless
 
                   if product_storytelling
-                    render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false
+                    render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false, card_animation: 'plp'
                   else
                     capture spotlight_product_attributes
                       echo 'style="--spotlight-stack-index: ' | append: counter_grid | append: ';"'
@@ -606,7 +609,7 @@
                   endunless
 
                   if product_storytelling
-                    render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false
+                    render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false, card_animation: 'plp'
                   else
                     render 'collection-grid-cards', product: product, split_variants: section.settings.collection_split_variants, index: forloop.index, sizes: image_sizes, card_animation: 'plp'
                   endif
@@ -629,7 +632,7 @@
                   endunless
 
                   if product_storytelling
-                    render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false
+                    render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false, card_animation: 'plp'
                   else
                     render 'collection-grid-cards', product: product, split_variants: section.settings.collection_split_variants, animation_delay: animation_delay, index: forloop.index, sizes: image_sizes, card_animation: 'plp'
                   endif
@@ -1007,25 +1010,13 @@
 
   <script>
     (function () {
-      /* Page exit fade */
-      document.addEventListener('click', function (e) {
-        const link = e.target.closest('a[href]');
-        if (!link) return;
-        const href = link.getAttribute('href');
-        if (!href || href.startsWith('#') || href.startsWith('javascript') || link.target === '_blank') return;
-        if (link.origin && link.origin !== location.origin) return;
-        e.preventDefault();
-        document.body.classList.add('page-exit');
-        setTimeout(function () {
-          window.location.href = href;
-        }, 600);
-      });
+      /* No exit-fade handler here: page-transition.liquid already registers one globally
+         (TRANSITION_TARGETS = '*'). A second one double-fired on every internal link. */
 
       if (document.body.dataset.rcAnimations === 'false') return;
       const cards = Array.from(document.querySelectorAll('.plp-card-up'));
       if (!cards.length) return;
 
-      let subcollectionsDone = false;
       const aboveFold = [];
       const belowFold = [];
 
@@ -1051,10 +1042,35 @@
         {threshold: 0, rootMargin: '0px'}
       );
 
+      let released = false;
       const releaseAboveFold = function () {
+        if (released) return;
+        released = true;
         aboveFold.forEach(function (card) {
           card.classList.add('plp-card-up--visible');
         });
+      };
+
+      const token = function (name, fallback) {
+        const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        const parsed = Number.parseFloat(raw);
+        return Number.isFinite(parsed) ? parsed : fallback;
+      };
+
+      /* Fixed offset from the cascade anchor, deliberately NOT chained off the
+         subcollections section. Chaining stacked the waits where that section exists, and
+         skipped the wait entirely on the templates where it is disabled — releasing
+         products before the header. One clock keeps the order right on every template. */
+      const scheduleRelease = function () {
+        /* Only wait out the subcategory stagger when there are actually tiles staggering. */
+        const hasSubcollectionTiles = !!document.querySelector(
+          '[data-section-type="subcollections"] .subcollection__item'
+        );
+        const offset = hasSubcollectionTiles
+          ? token('--plp-cascade-products', 900)
+          : token('--plp-cascade-products-solo', 400);
+        const anchor = typeof window.__plpCascadeT0 === 'number' ? window.__plpCascadeT0 : performance.now();
+        setTimeout(releaseAboveFold, Math.max(0, anchor + offset - performance.now()));
       };
 
       const init = function () {
@@ -1062,46 +1078,16 @@
         belowFold.forEach(function (card) {
           scrollObserver.observe(card);
         });
-        if (subcollectionsDone) releaseAboveFold();
+
+        if (document.body.classList.contains('plp-header-ready')) {
+          scheduleRelease();
+        } else {
+          document.addEventListener('theme:plp:header-ready', scheduleRelease, {once: true});
+          /* never leave the grid invisible if the header entrance never runs. Scaled,
+             or in slow-motion review this fires first and products lead the cascade. */
+          setTimeout(releaseAboveFold, 2500 * (window.__plpSlow || 1));
+        }
       };
-
-      const hasSubcollections = !!document.querySelector('[data-section-type="subcollections"]');
-
-      document.addEventListener(
-        'theme:subcollections:animated',
-        function () {
-          subcollectionsDone = true;
-          if (!aboveFold.length) return;
-
-          const lastItem =
-            document.querySelector('.subcollection__item.plp-el-up--visible:last-child') ||
-            document.querySelector('.subcollection__item.plp-el-up--visible');
-          if (!lastItem) {
-            releaseAboveFold();
-            return;
-          }
-
-          var fallback = setTimeout(releaseAboveFold, 900);
-          lastItem.addEventListener('transitionend', function handler(e) {
-            if (e.propertyName !== 'transform') return;
-            clearTimeout(fallback);
-            lastItem.removeEventListener('transitionend', handler);
-            releaseAboveFold();
-          });
-        },
-        {once: true}
-      );
-
-      if (hasSubcollections) {
-        setTimeout(function () {
-          if (!subcollectionsDone) {
-            subcollectionsDone = true;
-            if (aboveFold.length) releaseAboveFold();
-          }
-        }, 3000);
-      } else {
-        subcollectionsDone = true;
-      }
 
       const scheduleInit = function () {
         requestAnimationFrame(init);

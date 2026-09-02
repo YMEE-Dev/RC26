@@ -16,7 +16,11 @@
 
 @font-face {
   font-family: "Portrait";
-  src: url("Portrait-Medium-Cy.otf") format("opentype");
+  /* woff2 first, otf fallback — must stay in step with the 'Portrait LS' face in
+     snippets/head.liquid, or this second declaration re-downloads the heavier file. */
+  src:
+    url("Portrait-Medium-Cy.woff2") format("woff2"),
+    url("Portrait-Medium-Cy.otf") format("opentype");
   font-style: normal;
   font-weight: 500;
   font-display: swap;

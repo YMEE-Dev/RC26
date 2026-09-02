@@ -57,6 +57,39 @@
   var desktop = root.querySelector('.rc-desktop');
   var panelsWrap = root.querySelector('[data-rc-panels]');
 
+  /* ---------------------------------------------------------------------
+     Panel imagery — warmed at idle, never during load.
+
+     nav-menu.css keeps closed panels display:none so their backgrounds stay off the
+     critical path; this pulls them into cache once the page is quiet, so the first
+     hover is not a cold fetch.
+     --------------------------------------------------------------------- */
+  function warmPanelImages() {
+    var tiles = root.querySelectorAll('.rc-d-tile__bg');
+    if (!tiles.length) return;
+    tiles.forEach(function (tile) {
+      var bg = tile.style.backgroundImage || '';
+      var match = bg.match(/url\(["']?(.*?)["']?\)/);
+      if (!match || !match[1]) return;
+      var img = new Image();
+      img.decoding = 'async';
+      img.src = match[1];
+    });
+  }
+
+  function scheduleWarm() {
+    var run = function () {
+      if (window.requestIdleCallback) {
+        window.requestIdleCallback(warmPanelImages, {timeout: 4000});
+      } else {
+        setTimeout(warmPanelImages, 1500);
+      }
+    };
+    if (document.readyState === 'complete') run();
+    else window.addEventListener('load', run, {once: true});
+  }
+  scheduleWarm();
+
   if (desktop && panelsWrap) {
     var triggers = root.querySelectorAll('[data-rc-trigger]');
     var panels = {};
