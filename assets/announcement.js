@@ -36,6 +36,7 @@
         this.resizeEvent = this.resize.bind(this);
         this.closeEvent = this.close.bind(this);
         this.syncHeightEvent = this.syncHeight.bind(this);
+        this.autoplayHooked = new WeakSet();
       }
 
       connectedCallback() {
@@ -45,10 +46,11 @@
           this.removeClosedState();
         }
 
-        this.addEventListener("theme:slider:loaded", () => {
+        this.addEventListener("theme:slider:loaded", (event) => {
           this.querySelectorAll(selectors.ticker)?.forEach((ticker) => {
             ticker.dispatchEvent(new CustomEvent("theme:ticker:refresh"));
           });
+          this.resumeAutoplayAfterInteraction(event.detail?.slider);
           this.syncHeight();
         });
 
@@ -94,6 +96,29 @@
         this.slider?.dispatchEvent(new CustomEvent("theme:slider:reposition", { bubbles: false }));
         // Flickity has just re-sized its viewport; measure after this frame's layout.
         requestAnimationFrame(this.syncHeightEvent);
+      }
+
+      // Flickity's player stops for good on uiChange/pointerDown; restart it once the user lets go.
+      resumeAutoplayAfterInteraction(sliderComponent) {
+        const flkty = sliderComponent?.flkty;
+        if (!flkty || !flkty.options.autoPlay || this.autoplayHooked.has(flkty)) return;
+        this.autoplayHooked.add(flkty);
+
+        // iOS fires mouseenter on tap but never mouseleave, so hover-pause would freeze the bar.
+        if (window.theme?.touch) flkty.options.pauseAutoPlayOnHover = false;
+
+        const resume = () => {
+          if (flkty.player.state !== "stopped") return;
+
+          flkty.playPlayer();
+
+          if (flkty.options.pauseAutoPlayOnHover && flkty.element.matches(":hover")) {
+            flkty.pausePlayer();
+          }
+        };
+
+        flkty.on("uiChange", resume);
+        flkty.on("pointerUp", resume);
       }
 
       // Slider layout with "Wrap text on two lines": --ANNOUNCEMENT-HEIGHT-* on :root is a
