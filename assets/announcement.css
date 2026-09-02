@@ -3,6 +3,58 @@
   backdrop-filter: blur(12px);
 }
 
+/* Dismissed state. theme.css slides the wrapper to top:-50px, which only hides bars up to
+   50px tall; a two-line message (or a "Bar height" above 50) left a strip showing. Add the
+   remainder as a transform so the bar always travels its full height. */
+.announcement__wrapper {
+  transition:
+    top 0.5s ease,
+    transform 0.5s ease;
+}
+
+.announcement__wrapper--closing {
+  transform: translateY(calc(-100% + 50px));
+}
+
+/* Auto height (slider layout with "Wrap text on two lines"). announcement.js measures the
+   rendered bar and writes --announcement-height on <html> so the header offset follows a
+   bar that grew to two lines. The min-heights inside the bar also read that variable, so
+   pin them to the static Liquid value here — otherwise a measured height feeds the
+   min-height, which grows the bar, which is measured again. */
+.announcement__wrapper--top[data-announcement-auto-height] {
+  --announcement-height: var(--ANNOUNCEMENT-HEIGHT-DESKTOP, 0px);
+}
+
+@media only screen and (max-width: 749px) {
+  .announcement__wrapper--top[data-announcement-auto-height] {
+    --announcement-height: var(--ANNOUNCEMENT-HEIGHT-MOBILE, 0px);
+  }
+}
+
+/* Wrapped text slide. The slide is a plain div (no <ticker-bar>), so nothing clones or
+   scrolls it; theme.css nowrap/max-content ticker rules are undone here and the text is
+   clamped at two lines. max-height backs up -webkit-line-clamp where the clamp does not
+   count lines inside the nested <p>. */
+.announcement__slide--wrap .announcement__scale {
+  display: block;
+  width: 100%;
+}
+
+.announcement__slide--wrap .announcement__text {
+  display: block;
+  white-space: normal;
+  min-height: 0;
+}
+
+.announcement__slide--wrap .announcement__text > div {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  max-height: calc(2em * var(--line-height-normal));
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
 .announcement__bar-holder--slider .flickity-viewport,
 .announcement__bar-holder--slider .flickity-slider {
   min-height: var(--announcement-height);
@@ -38,7 +90,7 @@
   justify-content: center;
   flex: 0 0 auto;
   gap: 0.5rem;
-  padding: 1px 6px;
+  padding: 1px 0;
   border: 0;
   font: inherit;
   line-height: 1;
@@ -75,14 +127,15 @@
 
   .announcement__wrapper:has(.announcement__bar-holder--desktop-slider) .announcement__close {
     position: absolute;
+    padding: 0 4px 0 0;
     top: 0;
-    right: 4px;
+    right: 0px;
     bottom: 0;
     z-index: 3;
   }
 
   .announcement__bar-holder--desktop-slider .announcement__slide.announcement__bar {
-    padding: 0 34px 0 8px;
+    padding: 0 30px 0;
   }
 
   .announcement__bar-holder--desktop-slider [data-clone] {

@@ -33,6 +33,18 @@
   assign announcement_cookie_name = 'announcement_bar_closed'
   assign announcement_modifier = ''
   assign style_root = ''
+
+  comment
+    Slider layout only: text blocks wrap onto a second line instead of being turned into
+    an in-slide ticker, and are cut at a character limit. `text_wrap` exists only on the
+    header "Announcement bar" schema, so this stays off for the in-page "Scrolling text"
+    section that shares this snippet.
+  endcomment
+  assign wrap_text = false
+  if section.settings.layout == 'slider' and section.settings.text_wrap
+    assign wrap_text = true
+  endif
+  assign text_max_chars = section.settings.text_max_chars | default: 140
 -%}
 
 {%- for block in section.blocks -%}
@@ -68,6 +80,12 @@
 
     if section.settings.layout == 'slider'
       assign classes = classes | append: ' announcement__bar'
+    endif
+
+    assign is_wrap_slide = false
+    if wrap_text and block.type == 'text'
+      assign is_wrap_slide = true
+      assign classes = classes | append: ' announcement__slide--wrap'
     endif
 
     assign show_bar = true
@@ -145,7 +163,23 @@
             {%- when 'text' -%}
 
               {%- if block.settings.text != blank -%}
-                {{ block.settings.text | replace: '|', '<span class="announcement__divider"></span>' }}
+                {%- liquid
+                  assign text_html = block.settings.text
+
+                  comment
+                    Character limit for wrapped slides. Liquid cannot cut HTML safely, so an
+                    over-limit message is reduced to its plain text (bold/links dropped),
+                    truncated, and re-wrapped in a paragraph. Within the limit the rich text
+                    is output untouched.
+                  endcomment
+                  if is_wrap_slide
+                    assign text_plain = text_html | strip_html | strip
+                    if text_plain.size > text_max_chars
+                      assign text_html = text_plain | truncate: text_max_chars | prepend: '<p>' | append: '</p>'
+                    endif
+                  endif
+                -%}
+                {{ text_html | replace: '|', '<span class="announcement__divider"></span>' }}
               {%- endif -%}
 
             {%- when 'message' -%}
@@ -229,19 +263,36 @@
     {%- endcapture -%}
 
     {%- capture bar_html_slider -%}
-      <ticker-bar style="{{ block_style }}" {{ block_attributes }}>
-        <div data-ticker-frame class="announcement__message">
-          <div data-ticker-scale class="announcement__scale ticker--unloaded">
-            {%- if block.type == 'image' -%}
-              {{ block_content }}
-            {%- else -%}
-              <div data-ticker-text class="announcement__text">
+      {%- if is_wrap_slide -%}
+        {%- comment -%}
+          Wrapped text is a plain slide, not a <ticker-bar>: ticker.js turns any text wider
+          than the slide into a scrolling clone loop, which is exactly what wrapping replaces.
+          Same class hooks as the ticker markup so the slider/close styles still apply.
+        {%- endcomment -%}
+        <div style="{{ block_style }}" {{ block_attributes }}>
+          <div class="announcement__message">
+            <div class="announcement__scale">
+              <div class="announcement__text">
                 {{ block_content }}
               </div>
-            {%- endif -%}
+            </div>
           </div>
         </div>
-      </ticker-bar>
+      {%- else -%}
+        <ticker-bar style="{{ block_style }}" {{ block_attributes }}>
+          <div data-ticker-frame class="announcement__message">
+            <div data-ticker-scale class="announcement__scale ticker--unloaded">
+              {%- if block.type == 'image' -%}
+                {{ block_content }}
+              {%- else -%}
+                <div data-ticker-text class="announcement__text">
+                  {{ block_content }}
+                </div>
+              {%- endif -%}
+            </div>
+          </div>
+        </ticker-bar>
+      {%- endif -%}
     {%- endcapture -%}
 
     {%- if section.settings.layout == 'slider' -%}
@@ -330,6 +381,7 @@
   class="announcement__wrapper announcement__wrapper--closing{% if is_top %} announcement__wrapper--top{% endif %}{% if show_border %} announcement__wrapper--borders{% endif %}"
   data-announcement-wrapper
   data-announcement-cookie-name="{{ announcement_cookie_name }}"
+  {% if wrap_text %}data-announcement-auto-height{% endif %}
   data-section-id="{{ section.id }}"
   data-section-type="announcement"
   style="{{ style }}"
