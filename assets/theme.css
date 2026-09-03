@@ -15409,11 +15409,6 @@ main-search .input-holder {
   opacity: 1;
 }
 
-hover-images {
-  --slides-count: 10;
-  --slider-index: 0;
-}
-
 hover-images .product-item__bg__progress-bar {
   position: absolute;
   left: 0;
@@ -15444,30 +15439,36 @@ hover-images .related-slider-progress.hidden {
 
 hover-images .related-slider-progress__line {
   display: block;
-  width: var(--related-slider-progress, 0%);
+  width: 100%;
   height: 100%;
   background: #111111;
-  transition: width 0.2s ease;
+  transform: scaleX(var(--related-slider-progress-ratio, 0));
+  transform-origin: left center;
+  transition: transform 0.2s ease;
 }
 
 .supports-touch hover-images .product-item__bg__slider {
-  display: flex;
-  flex-flow: row nowrap;
   width: 100%;
   height: 100%;
-  overflow-y: hidden;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  /* for Internet Explorer, Edge */
   -webkit-user-select: none;
   user-select: none;
   -webkit-user-drag: none;
   background-color: #fff;
 }
 
-.supports-touch hover-images .product-item__bg__slider::-webkit-scrollbar {
+.supports-touch hover-images .product-item__bg__slider:not(.flickity-enabled) {
+  display: flex;
+  flex-flow: row nowrap;
+  overflow-y: hidden;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  /* for Internet Explorer, Edge */
+}
+
+.supports-touch hover-images .product-item__bg__slider:not(.flickity-enabled)::-webkit-scrollbar {
   display: none;
   /* for Chrome, Safari, and Opera */
 }
@@ -15478,11 +15479,14 @@ hover-images .related-slider-progress__line {
 }
 
 .supports-touch hover-images .product-item__bg__slide {
+  flex: 0 0 100%;
+  width: 100%;
   min-width: 100%;
   scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
 
-.supports-touch hover-images .product-item__bg__slide.deferred-media {
+.supports-touch hover-images .product-item__bg__slider:not(.flickity-enabled) .product-item__bg__slide.deferred-media {
   position: relative;
 }
 

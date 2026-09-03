@@ -70,7 +70,12 @@
 
   <div class="underlay" data-newsletter-drawer-close></div>
 
-  {%- unless customer -%}
+  {%- comment -%}
+    Floating popup: hidden from logged-in customers, and switchable per theme so
+    the auto-appearing prompt can be handed over to the Klaviyo flyout.
+    `!= false` so an instance saved before this setting existed still shows it.
+  {%- endcomment -%}
+  {%- if section.settings.float_enabled != false and customer == nil -%}
     <aside
       class="footer-newsletter-float"
       data-newsletter-float
@@ -109,9 +114,9 @@
         {{ section.settings.float_button_text | default: 'Newsletter sign up' | escape }}
       </button>
     </aside>
-    <div class="underlay footer-newsletter-float__underlay" data-newsletter-float-underlay></div>
-  {%- endunless -%}
-</footer-newsletter-drawer>
+
+{%- endunless -%}
+ </footer-newsletter-drawer>
 
 {% stylesheet %}
   .footer-newsletter__inner {
@@ -505,7 +510,6 @@
       this.floatPopup = this.querySelector('[data-newsletter-float]');
       this.floatClose = this.querySelector('[data-newsletter-float-close]');
       this.floatSignup = this.querySelector('[data-newsletter-float-signup]');
-      this.floatUnderlay = this.querySelector('[data-newsletter-float-underlay]');
       this.lastFocusedElement = null;
       this.dismissCookie = 'footer_newsletter_float_dismissed';
       this.mobileQuery = window.matchMedia('(max-width: 767px)');
@@ -526,9 +530,6 @@
       });
 
       this.floatClose?.addEventListener('click', () => {
-        this.dismissFloat();
-      });
-      this.floatUnderlay?.addEventListener('click', () => {
         this.dismissFloat();
       });
 
@@ -653,16 +654,12 @@
       window.removeEventListener('scroll', this.boundOnScroll);
     }
 
-    hideFloat(skipScrollUnlock = false) {
+    hideFloat() {
       if (!this.floatPopup) {
         return;
       }
       this.floatPopup.classList.remove('is-visible');
       this.floatPopup.setAttribute('aria-hidden', 'true');
-      this.floatUnderlay?.classList.remove('is-visible');
-      if (!skipScrollUnlock) {
-        window.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
-      }
       window.removeEventListener('scroll', this.boundOnScroll);
     }
 
@@ -670,9 +667,7 @@
       this.writeCookie(this.dismissCookie, '1', 24);
 
       if (withDelay) {
-        window.setTimeout(() => {
-          this.hideFloat(true);
-        }, this.floatDismissDelayMs);
+        window.setTimeout(() => this.hideFloat(), this.floatDismissDelayMs);
         return;
       }
 
@@ -720,6 +715,13 @@
     {
       "type": "header",
       "content": "Floating popup"
+    },
+    {
+      "type": "checkbox",
+      "id": "float_enabled",
+      "label": "Show floating popup",
+      "info": "Turn off to hand the auto-appearing prompt over to the Klaviyo flyout.",
+      "default": true
     },
     {
       "type": "text",

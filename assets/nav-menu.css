@@ -1513,8 +1513,7 @@ body.header-scroll-hide .rc-slide--r {
   stroke: rgba(255, 255, 255, 0.85);
   stroke-width: 1.2;
 }
-/* `is-closing` is set while the collapse animation runs (nav-menu.dev.js keeps the
-   element open until it finishes), so the chevron turns back with the panel, not after */
+
 .rc-m-group--drop[open]:not(.is-closing) > summary .icon-nav-arrow-down {
   transform: rotate(180deg);
 }
@@ -1533,9 +1532,7 @@ body.header-scroll-hide .rc-slide--r {
   color: var(--rc-white);
   text-transform: capitalize; /* title-case menu labels (paired with | downcase) */
 }
-/* trailing diagonal arrow on drill rows.
-   .rc-arrow sizing lives inside the >=1024px block, so size it explicitly here.
-   Shown on every row at phone width; tablet keeps it on featured/collection groups only. */
+
 .rc-m-grow .rc-arrow {
   width: 16px;
   height: 16px;
@@ -1649,13 +1646,6 @@ body.header-scroll-hide .rc-slide--r {
   right: 0;
   z-index: 6005;
 }
-/* Scrolled away: the bar's contents translate out but this box stays fixed at its full
-   height (160px on desktop) and, at z-index 6005, kept swallowing clicks meant for the
-   page underneath — the collection filter/sort row sat right below it. Guarding the inner
-   .rc-d-bar wasn't enough; the wrapper itself is the element under the cursor.
-   Two exceptions: templates that keep the header visible (spotlight / timeline set
-   .has-always-visible-fixed-header, where scroll-hide is inert), and an open mega panel,
-   which lives inside this wrapper and must stay hoverable. */
 body.header-scroll-hide:not(.has-always-visible-fixed-header) .rc-nav:not([data-open="1"]) :is(.rc-nav__bar-wrap, .rc-d-bar) {
   pointer-events: none;
 }
@@ -1663,17 +1653,11 @@ body.header-scroll-hide:not(.has-always-visible-fixed-header) .rc-nav:not([data-
   position: sticky; /* solid: occupy space + stick on scroll */
   background: var(--rc-green);
 }
-/* Cart drawer open: the theme's cart-drawer sits well below the fixed header
-   (bar-wrap z-index 6005), so the header's top edge would intercept clicks meant
-   for the drawer. Drop the header beneath it while the cart is open — the theme
-   already hides its own header on theme:cart-drawer:open, so this matches. */
 body:has(cart-drawer.is-open) .rc-nav__bar-wrap {
   z-index: 1;
   pointer-events: none;
 }
-/* Search popdown open: drop the header beneath the popdown's overlay so it reads
-   as dimmed underneath it. The popdown panel itself is fixed at z6006 and still
-   covers the top strip; only the bar-wrap needs to fall below the underlay. */
+
 .rc-nav:has(.rc-search-popdown details[open]) .rc-nav__bar-wrap {
   z-index: 1;
   pointer-events: none;
@@ -1688,9 +1672,6 @@ body:has(cart-drawer.is-open) .rc-nav__bar-wrap {
   align-items: center;
   justify-content: space-between;
   height: 50px;
-  /* Sit below the fixed announcement via a relative shift (not top padding), matching
-     the drawer header (offset the same way via .rc-drawer top:var(--announcement-height)).
-     Using position (not padding) keeps offsetHeight unchanged so --header-height is too. */
   position: relative;
   top: var(--announcement-height, 0px);
   padding: 20px 20px 0;
@@ -1758,8 +1739,7 @@ body.header-scroll-hide .rc-mobile-bar__slot:last-child > * {
 body.has-always-visible-fixed-header.header-scroll-hide .rc-mobile-bar__slot > * {
   transform: none;
 }
-/* cap the (very wide) wordmark so it never overruns the equal side slots;
-   height:auto keeps the aspect ratio (no squish) */
+
 .rc-mobile-bar__logo {
   width: auto;
   height: auto;
@@ -1786,9 +1766,6 @@ html.rc-drawer-open body {
   overflow: hidden;
 }
 
-/* Hide the closed mobile bar while the drawer is open — the fixed bar-wrap sits
-   above the drawer (z-index 6005 vs 100), so otherwise its logo/hamburger/cart
-   would stack on top of the drawer's own header. */
 html.rc-drawer-open .rc-mobile-bar,
 html.rc-drawer-open .rc-mobile-crumbs {
   display: none;
