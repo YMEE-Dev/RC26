@@ -18,10 +18,7 @@
 {%- endstyle -%}
 
 {%- comment -%}
-  With a Klaviyo form id set, the popup's CTA opens that Klaviyo form (drawer as
-  fallback) and the popup hides itself from existing Klaviyo profiles. Blank id
-  keeps the drawer as the only sign-up surface. The footer trigger always opens
-  the drawer, untargeted.
+  Blank klaviyo_form_id keeps the drawer as the only sign-up surface.
 {%- endcomment -%}
 <footer-newsletter-drawer
   class="footer-newsletter-popup"
@@ -80,9 +77,7 @@
   <div class="underlay" data-newsletter-drawer-close></div>
 
   {%- comment -%}
-    Floating popup: hidden from logged-in customers, and switchable per theme so
-    the auto-appearing prompt can be handed over to the Klaviyo flyout.
-    `!= false` so an instance saved before this setting existed still shows it.
+    `!= false` so an instance saved before float_enabled existed still shows it.
   {%- endcomment -%}
   {%- if section.settings.float_enabled != false and customer == nil -%}
     <aside
@@ -531,6 +526,8 @@
       this.klaviyoOpenTimeoutMs = 700;
       /* Identity lookup is fast; cap it so a slow Klaviyo never delays the popup. */
       this.klaviyoIdentityTimeoutMs = 2000;
+      /* Allow for async klaviyo.js load — still well inside the popup delay. */
+      this.klaviyoReadyTimeoutMs = 6000;
       this.boundOnScroll = () => this.onScroll();
 
       // Resolve identity up front so the answer is ready before the popup delay.
@@ -661,10 +658,7 @@
       }
     }
 
-    /*
-     * The popup carries the "don't show to existing Klaviyo profiles" rule, since
-     * a Klaviyo custom-trigger form cannot do its own targeting.
-     */
+    /* The popup owns the targeting: a custom-trigger Klaviyo form can't do its own. */
     async maybeShowFloat() {
       if (await this.isExistingKlaviyoProfile()) {
         return;
@@ -673,14 +667,13 @@
     }
 
     /*
-     * Cached so both show-paths share one lookup. Fails open — if Klaviyo is
-     * missing, errors or is slow, we show the popup rather than hide it from
-     * everyone, which is how Klaviyo's own targeting degrades too.
+     * Cached so both show-paths share one lookup. Fails open, so a broken or slow
+     * Klaviyo shows the popup rather than hiding it from everyone.
      */
     isExistingKlaviyoProfile() {
       if (!this.klaviyoIdentityPromise) {
         this.klaviyoIdentityPromise = (async () => {
-          if (!this.klaviyoFormId || typeof window.klaviyo?.isIdentified !== 'function') {
+          if (!this.klaviyoFormId || !(await this.waitForKlaviyo())) {
             return false;
           }
           try {
@@ -697,9 +690,30 @@
     }
 
     /*
-     * Popup CTA opens the Klaviyo form; the footer trigger keeps the drawer.
+     * klaviyo.js loads async, so poll rather than answering straight away — a
+     * premature "not a known profile" would be cached and the popup never hide.
+     */
+    waitForKlaviyo() {
+      return new Promise((resolve) => {
+        const deadline = Date.now() + this.klaviyoReadyTimeoutMs;
+        const poll = () => {
+          if (typeof window.klaviyo?.isIdentified === 'function') {
+            resolve(true);
+            return;
+          }
+          if (Date.now() >= deadline) {
+            resolve(false);
+            return;
+          }
+          window.setTimeout(poll, 150);
+        };
+        poll();
+      });
+    }
+
+    /*
      * Klaviyo is silent when it declines to open, so poll for a rendered form and
-     * fall back to the drawer — the button must never appear to do nothing.
+     * fall back to the drawer — the CTA must never appear to do nothing.
      */
     openKlaviyoFormOrDrawer() {
       if (!this.klaviyoFormId) {
