@@ -531,6 +531,8 @@
       this.klaviyoOpenTimeoutMs = 700;
       /* Identity lookup is fast; cap it so a slow Klaviyo never delays the popup. */
       this.klaviyoIdentityTimeoutMs = 2000;
+      /* Allow for async klaviyo.js load — still well inside the popup delay. */
+      this.klaviyoReadyTimeoutMs = 6000;
       this.boundOnScroll = () => this.onScroll();
 
       // Resolve identity up front so the answer is ready before the popup delay.
@@ -680,7 +682,7 @@
     isExistingKlaviyoProfile() {
       if (!this.klaviyoIdentityPromise) {
         this.klaviyoIdentityPromise = (async () => {
-          if (!this.klaviyoFormId || typeof window.klaviyo?.isIdentified !== 'function') {
+          if (!this.klaviyoFormId || !(await this.waitForKlaviyo())) {
             return false;
           }
           try {
@@ -694,6 +696,30 @@
         })();
       }
       return this.klaviyoIdentityPromise;
+    }
+
+    /*
+     * klaviyo.js loads async, so at connect time the API usually isn't there yet.
+     * Poll for it rather than answering "not a known profile" straight away —
+     * otherwise that premature answer gets cached and the popup never hides.
+     * The wait fits well inside the popup's delay.
+     */
+    waitForKlaviyo() {
+      return new Promise((resolve) => {
+        const deadline = Date.now() + this.klaviyoReadyTimeoutMs;
+        const poll = () => {
+          if (typeof window.klaviyo?.isIdentified === 'function') {
+            resolve(true);
+            return;
+          }
+          if (Date.now() >= deadline) {
+            resolve(false);
+            return;
+          }
+          window.setTimeout(poll, 150);
+        };
+        poll();
+      });
     }
 
     /*
