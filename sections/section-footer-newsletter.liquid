@@ -17,14 +17,7 @@
   }
 {%- endstyle -%}
 
-{%- comment -%}
-  Blank klaviyo_form_id keeps the on-site drawer as the sign-up surface; setting
-  it routes the trigger to that Klaviyo form, with the drawer as fallback.
-{%- endcomment -%}
-<footer-newsletter-drawer
-  class="footer-newsletter-popup"
-  data-klaviyo-form-id="{{ section.settings.klaviyo_form_id | strip }}"
->
+<footer-newsletter-drawer class="footer-newsletter-popup">
   <section
     id="FooterNewsletter--{{ section.id }}"
     class="footer-newsletter section-padding {{ color_scheme }}"
@@ -525,9 +518,6 @@
       this.floatDelayMs = Number(this.floatPopup?.dataset.newsletterFloatDelay || 3) * 1000;
       this.mobileFloatDelayMs = 10000;
       this.floatDismissDelayMs = 260;
-      this.klaviyoFormId = (this.dataset.klaviyoFormId || '').trim();
-      /* How long to wait for a Klaviyo form to render before using the drawer. */
-      this.klaviyoOpenTimeoutMs = 700;
       this.boundOnScroll = () => this.onScroll();
 
       this.openTriggers.forEach((trigger) => {
@@ -536,7 +526,7 @@
           if (fromFloat) {
             this.dismissFloat(true);
           }
-          this.openSignup();
+          this.open();
         });
       });
 
@@ -574,43 +564,6 @@
         element.focus();
         window.scrollTo(scrollX, scrollY);
       }
-    }
-
-    /*
-     * Prefer the Klaviyo form when one is configured, otherwise open the drawer.
-     * openForm() resolves silently when Klaviyo declines to show the form (its
-     * audience targeting excludes existing profiles, for example), so poll for a
-     * rendered form and fall back to the drawer — the trigger must never appear
-     * to do nothing.
-     */
-    openSignup() {
-      if (!this.klaviyoFormId || typeof window.klaviyo?.openForm !== 'function') {
-        this.open();
-        return;
-      }
-
-      try {
-        window.klaviyo.openForm(this.klaviyoFormId);
-      } catch (error) {
-        this.open();
-        return;
-      }
-
-      const deadline = Date.now() + this.klaviyoOpenTimeoutMs;
-      const poll = () => {
-        if (this.hasVisibleKlaviyoForm()) return;
-        if (Date.now() >= deadline) {
-          this.open();
-          return;
-        }
-        window.setTimeout(poll, 100);
-      };
-      window.setTimeout(poll, 100);
-    }
-
-    hasVisibleKlaviyoForm() {
-      const candidates = document.querySelectorAll('[class*="klaviyo-form"], [class*="kl-private"]');
-      return Array.from(candidates).some((el) => el.getBoundingClientRect().height > 0);
     }
 
     open() {
@@ -855,12 +808,6 @@
       "id": "klaviyo_company_id",
       "label": "Company ID (public API key)",
       "info": "Optional override. Leave blank to use Theme settings > Klaviyo public API key."
-    },
-    {
-      "type": "text",
-      "id": "klaviyo_form_id",
-      "label": "Klaviyo form ID",
-      "info": "Set to open that Klaviyo form from the sign-up trigger (drawer is the fallback). Leave blank to use the on-site drawer."
     },
     {
       "type": "text",
