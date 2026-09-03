@@ -214,22 +214,6 @@
       }, FADE_MS);
     });
 
-    /* Clean overlay state BEFORE the page is stored to BFCache.
-       Setting display:none removes the element from the paint tree entirely,
-       so the BFCache snapshot has no visible overlay regardless of what opacity
-       the CSS transition left it at. Clearing only opacity/transition is not enough
-       because some browsers repaint the restored page before inline styles settle. */
-    window.addEventListener('pagehide', function () {
-      var overlay = document.querySelector('.page-transition-overlay');
-      if (overlay) {
-        overlay.style.transition = 'none';
-        overlay.style.opacity = '0';
-        overlay.style.display = 'none';
-      }
-      /* Remove ALL exit-state classes so BFCache snapshot has no opacity:0 on body */
-      document.body.classList.remove('page-transition-leaving', 'page-exit');
-    });
-
     /* Defensive pageshow cleanup: restore overlay to CSS-default state so future
        outgoing transitions can use it again.
        Two-step: first set opacity:0 + no-transition while restoring display (one frame),
