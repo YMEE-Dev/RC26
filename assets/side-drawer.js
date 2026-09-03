@@ -244,7 +244,26 @@
 
       this.addEventListener('theme:drawer:close', this.hideDrawer);
       this.addEventListener('theme:drawer:open', this.showDrawer);
+      this.addEventListener('theme:drawer:open', this.hydrateImages, {once: true});
       document.addEventListener('theme:cart-drawer:open', this.hideDrawer);
+    }
+
+    /* Load drawer imagery on first open instead of on page load. `loading="lazy"`
+       does not achieve this — a closed drawer sits inside Chrome's lazy-load margin.
+       Generalises the data-src technique drawer-ask-concierge already used, so every
+       render site benefits without repeating the script. */
+    hydrateImages() {
+      this.querySelectorAll('img[data-srcset]').forEach((img) => {
+        img.setAttribute('srcset', img.getAttribute('data-srcset'));
+        img.removeAttribute('data-srcset');
+      });
+      /* srcset first: setting src on an img that already has a srcset would make the
+         browser pick a candidate from the OLD (absent) srcset. Restoring srcset before
+         src means one fetch of the right candidate rather than two. */
+      this.querySelectorAll('img[data-src]').forEach((img) => {
+        img.setAttribute('src', img.getAttribute('data-src'));
+        img.removeAttribute('data-src');
+      });
     }
 
     closers() {

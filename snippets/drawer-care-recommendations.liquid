@@ -71,7 +71,15 @@
 
           {%- if tab.image != blank -%}
             <div class="care-tabs__panel-image">
-              {{ tab.image | image_url: width: 600 | image_tag: loading: 'lazy' }}
+              {%- comment -%}
+                data-src — see drawer-free-shipping. Matters most here: this drawer renders
+                on every page from layout/theme.liquid, so the active tab's image was being
+                fetched site-wide.
+              {%- endcomment -%}
+              {%- capture drawer_img -%}
+                {{ tab.image | image_url: width: 600 | image_tag: loading: 'lazy' }}
+              {%- endcapture -%}
+              {{ drawer_img | replace: ' src="', ' data-src="' | replace: ' srcset="', ' data-srcset="' }}
             </div>
           {%- endif -%}
         </div>

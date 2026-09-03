@@ -38,7 +38,13 @@
       
       {%- if gift_content.image != blank -%}
         <div class="gift-packaging__image drawer-content__image">
-          {{ gift_content.image | image_url: width: 600 | image_tag }}
+          {%- comment -%}
+            data-src — see drawer-free-shipping; lazy alone does not defer a closed drawer.
+          {%- endcomment -%}
+          {%- capture drawer_img -%}
+            {{ gift_content.image | image_url: width: 600 | image_tag: loading: 'lazy' }}
+          {%- endcapture -%}
+          {{ drawer_img | replace: ' src="', ' data-src="' | replace: ' srcset="', ' data-srcset="' }}
         </div>
       {%- endif -%}
     </div>
