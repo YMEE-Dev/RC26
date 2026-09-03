@@ -104,17 +104,8 @@
         if (!flkty || !flkty.options.autoPlay || this.autoplayHooked.has(flkty)) return;
         this.autoplayHooked.add(flkty);
 
-        // iOS fires mouseenter on tap but never mouseleave, so hover-pause would freeze the bar.
-        if (window.theme?.touch) flkty.options.pauseAutoPlayOnHover = false;
-
         const resume = () => {
-          if (flkty.player.state !== "stopped") return;
-
-          flkty.playPlayer();
-
-          if (flkty.options.pauseAutoPlayOnHover && flkty.element.matches(":hover")) {
-            flkty.pausePlayer();
-          }
+          if (flkty.player.state === "stopped") flkty.playPlayer();
         };
 
         flkty.on("uiChange", resume);
