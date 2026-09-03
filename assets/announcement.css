@@ -3,6 +3,12 @@
   backdrop-filter: blur(12px);
 }
 
+/* Bar padding applies as-is on every screen; skip .section-padding's small-screen rescale. */
+.announcement__bar-outer.section-padding {
+  --padding-top: var(--PT);
+  --padding-bottom: var(--PB);
+}
+
 /* Dismissed state. theme.css slides the wrapper to top:-50px, which only hides bars up to
    50px tall; a two-line message (or a "Bar height" above 50) left a strip showing. Add the
    remainder as a transform so the bar always travels its full height. */
