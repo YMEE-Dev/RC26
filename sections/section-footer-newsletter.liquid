@@ -17,7 +17,16 @@
   }
 {%- endstyle -%}
 
-<footer-newsletter-drawer class="footer-newsletter-popup">
+{%- comment -%}
+  With a Klaviyo form id set, the popup's CTA opens that Klaviyo form (drawer as
+  fallback) and the popup hides itself from existing Klaviyo profiles. Blank id
+  keeps the drawer as the only sign-up surface. The footer trigger always opens
+  the drawer, untargeted.
+{%- endcomment -%}
+<footer-newsletter-drawer
+  class="footer-newsletter-popup"
+  data-klaviyo-form-id="{{ section.settings.klaviyo_form_id | strip }}"
+>
   <section
     id="FooterNewsletter--{{ section.id }}"
     class="footer-newsletter section-padding {{ color_scheme }}"
@@ -517,13 +526,23 @@
       this.floatDelayMs = Number(this.floatPopup?.dataset.newsletterFloatDelay || 3) * 1000;
       this.mobileFloatDelayMs = 10000;
       this.floatDismissDelayMs = 260;
+      this.klaviyoFormId = (this.dataset.klaviyoFormId || '').trim();
+      /* How long to wait for a Klaviyo form to render before using the drawer. */
+      this.klaviyoOpenTimeoutMs = 700;
+      /* Identity lookup is fast; cap it so a slow Klaviyo never delays the popup. */
+      this.klaviyoIdentityTimeoutMs = 2000;
       this.boundOnScroll = () => this.onScroll();
+
+      // Resolve identity up front so the answer is ready before the popup delay.
+      this.isExistingKlaviyoProfile();
 
       this.openTriggers.forEach((trigger) => {
         trigger.addEventListener('click', (event) => {
           const fromFloat = event.currentTarget?.hasAttribute('data-newsletter-float-signup');
           if (fromFloat) {
             this.dismissFloat(true);
+            this.openKlaviyoFormOrDrawer();
+            return;
           }
           this.open();
         });
@@ -630,7 +649,7 @@
         return;
       }
 
-      this.showFloat();
+      this.maybeShowFloat();
     }
 
     onScroll() {
@@ -638,8 +657,79 @@
         return;
       }
       if (window.scrollY > 80) {
-        this.showFloat();
+        this.maybeShowFloat();
       }
+    }
+
+    /*
+     * The popup carries the "don't show to existing Klaviyo profiles" rule, since
+     * a Klaviyo custom-trigger form cannot do its own targeting.
+     */
+    async maybeShowFloat() {
+      if (await this.isExistingKlaviyoProfile()) {
+        return;
+      }
+      this.showFloat();
+    }
+
+    /*
+     * Cached so both show-paths share one lookup. Fails open — if Klaviyo is
+     * missing, errors or is slow, we show the popup rather than hide it from
+     * everyone, which is how Klaviyo's own targeting degrades too.
+     */
+    isExistingKlaviyoProfile() {
+      if (!this.klaviyoIdentityPromise) {
+        this.klaviyoIdentityPromise = (async () => {
+          if (!this.klaviyoFormId || typeof window.klaviyo?.isIdentified !== 'function') {
+            return false;
+          }
+          try {
+            return await Promise.race([
+              window.klaviyo.isIdentified(),
+              new Promise((resolve) => window.setTimeout(() => resolve(false), this.klaviyoIdentityTimeoutMs)),
+            ]);
+          } catch (error) {
+            return false;
+          }
+        })();
+      }
+      return this.klaviyoIdentityPromise;
+    }
+
+    /*
+     * Popup CTA opens the Klaviyo form; the footer trigger keeps the drawer.
+     * Klaviyo is silent when it declines to open, so poll for a rendered form and
+     * fall back to the drawer — the button must never appear to do nothing.
+     */
+    openKlaviyoFormOrDrawer() {
+      if (!this.klaviyoFormId) {
+        this.open();
+        return;
+      }
+
+      try {
+        window._klOnsite = window._klOnsite || [];
+        window._klOnsite.push(['openForm', this.klaviyoFormId]);
+      } catch (error) {
+        this.open();
+        return;
+      }
+
+      const deadline = Date.now() + this.klaviyoOpenTimeoutMs;
+      const poll = () => {
+        if (this.hasVisibleKlaviyoForm()) return;
+        if (Date.now() >= deadline) {
+          this.open();
+          return;
+        }
+        window.setTimeout(poll, 100);
+      };
+      window.setTimeout(poll, 100);
+    }
+
+    hasVisibleKlaviyoForm() {
+      const candidates = document.querySelectorAll('[class*="klaviyo-form"], [class*="kl-private"]');
+      return Array.from(candidates).some((el) => el.getBoundingClientRect().height > 0);
     }
 
     showFloat() {
@@ -798,6 +888,12 @@
       "id": "klaviyo_company_id",
       "label": "Company ID (public API key)",
       "info": "Optional override. Leave blank to use Theme settings > Klaviyo public API key."
+    },
+    {
+      "type": "text",
+      "id": "klaviyo_form_id",
+      "label": "Klaviyo form ID",
+      "info": "Popup CTA opens this Klaviyo form, and the popup hides from existing Klaviyo profiles. Leave blank to use the on-site drawer only."
     },
     {
       "type": "text",
