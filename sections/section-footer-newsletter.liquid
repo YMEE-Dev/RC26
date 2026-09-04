@@ -466,7 +466,36 @@
     --btn-text-hover: #27574d;
   }
 
+  /*
+   * The Klaviyo form is authored at 360px so Klaviyo never shrinks it to fit a
+   * phone (it downscales anything wider, which made the text unreadable). Its
+   * internals are hard-coded to that width, so reflow them fluid and widen the
+   * container on desktop — one form serving both.
+   */
+  .footer-newsletter__klaviyo-form {
+    width: 600px !important;
+    max-width: 100vw !important;
+  }
+
+  .footer-newsletter__klaviyo-form div,
+  .footer-newsletter__klaviyo-form form,
+  .footer-newsletter__klaviyo-form input,
+  .footer-newsletter__klaviyo-form button,
+  .footer-newsletter__klaviyo-form p {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
   @media only screen and (max-width: 767px) {
+    /* Full width, and drop Klaviyo's fit-to-screen scale since we now fit. */
+    .footer-newsletter__klaviyo-form {
+      width: 100vw !important;
+      left: 0 !important;
+      right: 0 !important;
+      transform: none !important;
+    }
+
     .footer-newsletter__drawer {
       max-width: 100%;
     }
@@ -754,6 +783,7 @@
       if (!container) return;
       container.style.maxHeight = '100vh';
       container.style.overflowY = 'auto';
+      container.classList.add('footer-newsletter__klaviyo-form');
     }
 
     hasVisibleKlaviyoForm() {
