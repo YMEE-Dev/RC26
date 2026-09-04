@@ -487,6 +487,12 @@
     box-sizing: border-box !important;
   }
 
+  /* Left as Klaviyo positioned them (see the JS that marks these). */
+  .footer-newsletter__klaviyo-form .footer-newsletter__klaviyo-abs {
+    width: auto !important;
+    max-width: none !important;
+  }
+
   @media only screen and (max-width: 767px) {
     /* Full width, and drop Klaviyo's fit-to-screen scale since we now fit. */
     .footer-newsletter__klaviyo-form {
@@ -784,6 +790,31 @@
       container.style.maxHeight = '100vh';
       container.style.overflowY = 'auto';
       container.classList.add('footer-newsletter__klaviyo-form');
+
+      /*
+       * Absolutely positioned children resolve width:100% against the padding
+       * box, so the reflow rule below would push them past the padding and drag
+       * the close button off-screen. CSS can't select by position; mark them.
+       */
+      container.querySelectorAll('*').forEach((el) => {
+        if (window.getComputedStyle(el).position === 'absolute') {
+          el.classList.add('footer-newsletter__klaviyo-abs');
+        }
+      });
+
+      /*
+       * The close button anchors to a wrapper that now overhangs the container,
+       * pushing the button past the screen edge. Measure the overhang and inset
+       * by it, rather than assuming a fixed value.
+       */
+      const close = container.querySelector('.klaviyo-close-form');
+      const anchor = close && close.offsetParent;
+      if (anchor) {
+        const overhang = anchor.getBoundingClientRect().right - container.getBoundingClientRect().right;
+        if (overhang > 0) {
+          close.style.setProperty('right', overhang + 'px', 'important');
+        }
+      }
     }
 
     hasVisibleKlaviyoForm() {
