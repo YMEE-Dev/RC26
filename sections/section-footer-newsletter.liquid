@@ -538,10 +538,8 @@
           const fromFloat = event.currentTarget?.hasAttribute('data-newsletter-float-signup');
           if (fromFloat) {
             this.dismissFloat(true);
-            this.openKlaviyoFormOrDrawer();
-            return;
           }
-          this.open();
+          this.openKlaviyoFormOrDrawer();
         });
       });
 
@@ -731,7 +729,10 @@
 
       const deadline = Date.now() + this.klaviyoOpenTimeoutMs;
       const poll = () => {
-        if (this.hasVisibleKlaviyoForm()) return;
+        if (this.hasVisibleKlaviyoForm()) {
+          this.fitKlaviyoForm();
+          return;
+        }
         if (Date.now() >= deadline) {
           this.open();
           return;
@@ -739,6 +740,20 @@
         window.setTimeout(poll, 100);
       };
       window.setTimeout(poll, 100);
+    }
+
+    /*
+     * Klaviyo can render the form taller than the viewport with overflow visible,
+     * leaving the submit button unreachable in a short window. Give the container
+     * its own scroll — found by computed position, as the classes are hashed.
+     */
+    fitKlaviyoForm() {
+      const container = Array.from(document.querySelectorAll('[class*="kl-private"]')).find(
+        (el) => window.getComputedStyle(el).position === 'fixed'
+      );
+      if (!container) return;
+      container.style.maxHeight = '100vh';
+      container.style.overflowY = 'auto';
     }
 
     hasVisibleKlaviyoForm() {
