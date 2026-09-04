@@ -58,6 +58,8 @@
         this.scrollableEl = this.querySelector("[data-scroll-lock-scrollable]");
         this.closeButtons = Array.from(this.querySelectorAll("[data-store-info-popup-close]"));
         this.closeButton = this.closeButtons.find((button) => !button.hasAttribute("hidden")) || this.closeButtons[0];
+        this.copy = this.querySelector("[data-store-info-popup-copy]");
+        this.copyTemplate = this.copy ? this.copy.innerHTML : "";
         this.config = this.getConfig();
 
         if (!this.dialog || !this.config?.enabled) return;
@@ -70,9 +72,15 @@
           return;
         }
 
-        window.setTimeout(() => {
-          this.maybeOpen();
-        }, 0);
+        this.resolveAudience().then((countryCode) => {
+          if (countryCode === false) return;
+
+          this.updateDynamicContent(countryCode);
+
+          window.setTimeout(() => {
+            this.maybeOpen();
+          }, 0);
+        });
       };
 
       if (document.readyState === "loading") {
@@ -120,6 +128,32 @@
       } catch (error) {
         return null;
       }
+    }
+
+    // Resolves to the visitor's country code when the popup should show, or false to skip it.
+    async resolveAudience() {
+      const audience = this.config.audience || "all";
+      const needsCountry = audience !== "all" || /\[country\]/i.test(this.copyTemplate);
+      const countryCode = needsCountry ? (await window.theme?.geo?.detectCountry?.()) || "" : "";
+
+      if (audience === "all" || window.Shopify?.designMode) return countryCode;
+      if (!countryCode) return false;
+
+      const listed = String(this.config.countryCodes || "")
+        .split(",")
+        .map((code) => code.trim().toUpperCase())
+        .includes(countryCode);
+
+      return listed === (audience === "inside") ? countryCode : false;
+    }
+
+    updateDynamicContent(countryCode) {
+      if (!this.copy || !this.copyTemplate) return;
+
+      const label = document.createElement("span");
+      label.textContent = window.theme?.geo?.countryName?.(countryCode) || "your country";
+
+      this.copy.innerHTML = this.copyTemplate.replace(/\[country\]/gi, label.innerHTML);
     }
 
     hasCountryRedirectPriority() {

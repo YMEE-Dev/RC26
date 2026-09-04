@@ -35,13 +35,15 @@
 >
   <script type="application/json" data-store-info-popup-config>
     {
-      "enabled": {{ section.settings.enabled | json }}
+      "enabled": {{ section.settings.enabled | json }},
+      "audience": {{ section.settings.audience | default: 'all' | json }},
+      "countryCodes": {{ section.settings.country_codes | default: '' | json }}
     }
   </script>
 
   <dialog
     class="store-info-popup__dialog"
-    data-cookie-name="store-info-popup"
+    data-cookie-name="{{ section.settings.cookie_name | default: 'store-info-popup' | handleize }}"
     data-scroll-lock-required
     aria-modal="true"
     {% if modal_heading != blank %}
@@ -69,11 +71,13 @@
         </h2>
       {%- endif -%}
 
-      <h2 class="store-info-popup__brand">{{ shop.name | escape }}</h2>
+      {%- if section.settings.show_brand -%}
+        <h2 class="store-info-popup__brand">{{ shop.name | escape }}</h2>
+      {%- endif -%}
 
       <div class="store-info-popup__content">
         {%- if section.settings.modal_body != blank -%}
-          <div class="store-info-popup__copy rte body-medium">
+          <div class="store-info-popup__copy rte body-medium" data-store-info-popup-copy>
             {{ section.settings.modal_body }}
           </div>
         {%- endif -%}
@@ -105,7 +109,7 @@
 {
   "name": "Store info popup",
   "class": "shopify-section-popups",
-  "limit": 1,
+  "limit": 2,
   "enabled_on": {
     "groups": ["aside"]
   },
@@ -141,9 +145,16 @@
       "default": "Welcome to"
     },
     {
+      "type": "checkbox",
+      "id": "show_brand",
+      "label": "Show store name under the eyebrow",
+      "default": true
+    },
+    {
       "type": "richtext",
       "id": "modal_body",
       "label": "Popup body",
+      "info": "Use [country] where the visitor's country name should appear.",
       "default": "<p>Use this popup to share a welcome message, collection highlight, or important store information.</p>"
     },
     {
@@ -162,11 +173,52 @@
       "id": "button_closes_popup",
       "label": "Button closes popup",
       "default": false
+    },
+    {
+      "type": "header",
+      "content": "Audience"
+    },
+    {
+      "type": "select",
+      "id": "audience",
+      "label": "Show to",
+      "default": "all",
+      "options": [
+        {"value": "all", "label": "Everyone"},
+        {"value": "outside", "label": "Visitors outside the countries below"},
+        {"value": "inside", "label": "Visitors in the countries below"}
+      ]
+    },
+    {
+      "type": "textarea",
+      "id": "country_codes",
+      "label": "Country codes",
+      "info": "Comma-separated ISO alpha-2 codes. Defaults to the 27 EU member states. The visitor's country comes from Shopify's location detection; when it is unavailable, targeted popups stay hidden. In the theme editor the audience filter is ignored so the popup can be previewed.",
+      "default": "AT, BE, BG, HR, CY, CZ, DK, EE, FI, FR, DE, GR, HU, IE, IT, LV, LT, LU, MT, NL, PL, PT, RO, SK, SI, ES, SE"
+    },
+    {
+      "type": "text",
+      "id": "cookie_name",
+      "label": "Cookie name",
+      "default": "store-info-popup",
+      "info": "Each popup is shown once per 90 days per cookie name. Give every popup its own name so dismissing one does not hide the others."
     }
   ],
   "presets": [
     {
       "name": "Store info popup"
+    },
+    {
+      "name": "Euro pricing notice",
+      "settings": {
+        "modal_heading": "Roberto Coin, delivered to you",
+        "show_brand": false,
+        "modal_body": "<p>We are pleased to offer delivery to [country]. Please note that all prices are displayed in euros.</p><p>Discover our creations and enjoy your Roberto Coin experience.</p>",
+        "button_label": "Discover our creations",
+        "button_closes_popup": true,
+        "audience": "outside",
+        "cookie_name": "euro-pricing-notice"
+      }
     }
   ]
 }

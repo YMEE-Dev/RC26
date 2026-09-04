@@ -93,19 +93,9 @@
     }
 
     async getDetectedCountry() {
-      try {
-        const response = await fetch("/browsing_context_suggestions.json", {
-          credentials: "same-origin",
-        });
-        const data = await response.json();
-        const detectedCountry = this.normalizeCountry(data?.detected_values?.country?.handle);
+      const detectedCountry = await window.theme?.geo?.detectCountry?.();
 
-        if (detectedCountry) {
-          return detectedCountry;
-        }
-      } catch (error) {}
-
-      return this.normalizeCountry(this.config?.fallbackCountryCode || window.Shopify?.country);
+      return this.normalizeCountry(detectedCountry || this.config?.fallbackCountryCode || window.Shopify?.country);
     }
 
     isPreviewMode() {
@@ -211,19 +201,7 @@
         return "your region";
       }
 
-      if (typeof Intl === "undefined" || typeof Intl.DisplayNames !== "function") {
-        return countryCode;
-      }
-
-      try {
-        const displayNames = new Intl.DisplayNames([document.documentElement.lang || "en"], {
-          type: "region",
-        });
-
-        return displayNames.of(countryCode) || countryCode;
-      } catch (error) {
-        return countryCode;
-      }
+      return window.theme?.geo?.countryName?.(countryCode) || countryCode;
     }
 
     bindEvents() {
