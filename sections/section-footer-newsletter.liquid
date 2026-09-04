@@ -467,14 +467,21 @@
   }
 
   /*
-   * The Klaviyo form is authored at 360px so Klaviyo never shrinks it to fit a
-   * phone (it downscales anything wider, which made the text unreadable). Its
-   * internals are hard-coded to that width, so reflow them fluid and widen the
-   * container on desktop — one form serving both.
+   * Authored at 360px so Klaviyo never downscales it on phones. Its internals are
+   * hard-coded to that width, so reflow them fluid and widen only on desktop.
    */
   .footer-newsletter__klaviyo-form {
     width: 600px !important;
     max-width: 100vw !important;
+  }
+
+  /*
+   * Reflowing overhangs the wrapper the close anchors to. Set here, not inline —
+   * Klaviyo rewrites inline styles after render.
+   */
+  .footer-newsletter__klaviyo-form .klaviyo-close-form {
+    right: 20px !important;
+    left: auto !important;
   }
 
   /* Not the close button — stretching it renders its icon at the far left. */
@@ -695,8 +702,8 @@
     }
 
     /*
-     * Cached so both show-paths share one lookup. Fails open, so a broken or slow
-     * Klaviyo shows the popup rather than hiding it from everyone.
+     * Cached; fails open so a broken Klaviyo shows the popup rather than hiding
+     * it from everyone.
      */
     isExistingKlaviyoProfile() {
       if (!this.klaviyoIdentityPromise) {
@@ -717,10 +724,7 @@
       return this.klaviyoIdentityPromise;
     }
 
-    /*
-     * klaviyo.js loads async, so poll rather than answering straight away — a
-     * premature "not a known profile" would be cached and the popup never hide.
-     */
+    /* klaviyo.js loads async; answering early caches a wrong "not a profile". */
     waitForKlaviyo() {
       return new Promise((resolve) => {
         const deadline = Date.now() + this.klaviyoReadyTimeoutMs;
@@ -739,10 +743,7 @@
       });
     }
 
-    /*
-     * Klaviyo is silent when it declines to open, so poll for a rendered form and
-     * fall back to the drawer — the CTA must never appear to do nothing.
-     */
+    /* Klaviyo is silent when it declines, so poll and fall back to the drawer. */
     openKlaviyoFormOrDrawer() {
       if (!this.klaviyoFormId) {
         this.open();
@@ -772,11 +773,8 @@
       window.setTimeout(poll, 100);
     }
 
-    /*
-     * Klaviyo can render the form taller than the viewport with overflow visible,
-     * leaving the submit button unreachable in a short window. Give the container
-     * its own scroll — found by computed position, as the classes are hashed.
-     */
+    /* Klaviyo renders taller than the viewport without scrolling. Located by
+       position, since its class names are hashed. */
     fitKlaviyoForm() {
       const container = Array.from(document.querySelectorAll('[class*="kl-private"]')).find(
         (el) => window.getComputedStyle(el).position === 'fixed'
@@ -785,22 +783,6 @@
       container.style.maxHeight = '100vh';
       container.style.overflowY = 'auto';
       container.classList.add('footer-newsletter__klaviyo-form');
-
-      /*
-       * Reflowing widens the wrapper the close button anchors to, so the button
-       * ends up past the screen edge. Measure how far it sticks out once layout
-       * settles and inset by that plus a small gap — self-correcting, and a
-       * no-op when it already sits inside.
-       */
-      const close = container.querySelector('.klaviyo-close-form');
-      if (close) {
-        window.requestAnimationFrame(() => {
-          const overhang = close.getBoundingClientRect().right - container.getBoundingClientRect().right;
-          if (overhang > 0 && overhang < 100) {
-            close.style.setProperty('right', overhang + 8 + 'px', 'important');
-          }
-        });
-      }
     }
 
     hasVisibleKlaviyoForm() {
