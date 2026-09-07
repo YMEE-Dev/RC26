@@ -88,12 +88,13 @@
   {%- comment -%}
     `!= false` so an instance saved before float_enabled existed still shows it.
   {%- endcomment -%}
-  {%- if section.settings.float_enabled != false and customer == nil -%}
+  {%- if section.settings.float_enabled != false and customer == null -%}
     <aside
       class="footer-newsletter-float"
       data-newsletter-float
       aria-hidden="true"
       data-newsletter-float-delay="{{ section.settings.float_delay_seconds | default: 3 }}"
+      style="--footer-newsletter-float-bg: {{ section.settings.float_background_color | default: '#27574d' }};"
     >
       <button
         type="button"
@@ -127,9 +128,8 @@
         {{ section.settings.float_button_text | default: 'Newsletter sign up' | escape }}
       </button>
     </aside>
-
-{%- endif -%}
- </footer-newsletter-drawer>
+  {%- endif -%}
+</footer-newsletter-drawer>
 
 {% stylesheet %}
   .footer-newsletter__inner {
@@ -386,8 +386,7 @@
     gap: 20px;
     width: min(360px, calc(100vw - 80px));
     padding: 32px 22px 34px;
-    /* Brand teal panel (per approved v3 design). */
-    background-color: #27574d;
+    background-color: var(--footer-newsletter-float-bg, #27574d);
     color: #f4f2ed;
     border: 1px solid rgba(244, 242, 237, 0.28);
     overflow: hidden;
@@ -472,7 +471,7 @@
     --btn-bg: transparent;
     --btn-border-hover: #f4f2ed;
     --btn-bg-hover: #f4f2ed;
-    --btn-text-hover: #27574d;
+    --btn-text-hover: var(--footer-newsletter-float-bg, #27574d);
   }
 
   /*
@@ -989,10 +988,9 @@
     },
     {
       "type": "color",
-      "id": "drawer_background_color",
-      "label": "Drawer background",
-      "info": "Leave empty to use the store's default color scheme background.",
-      "alpha": true
+      "id": "float_background_color",
+      "label": "Popup background",
+      "default": "#37796C"
     },
     {
       "type": "color_scheme",
