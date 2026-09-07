@@ -1,6 +1,5 @@
 (function () {
   const sectionSelector = '[data-section-type="subcollections"]';
-  const MOBILE_BREAKPOINT = 960;
   const RETRY_DELAY = 120;
   const MAX_RETRIES = 40;
   const HINT_CLASS = "subcollections__swiper--swipe-hint";
@@ -11,10 +10,6 @@
   window.__subcollectionsSwiperRetries = pendingRetries;
   const interactedSections = window.__subcollectionsSwiperInteracted || {};
   window.__subcollectionsSwiperInteracted = interactedSections;
-
-  function isMobile() {
-    return window.innerWidth < MOBILE_BREAKPOINT;
-  }
 
   function enableSwipeHint(sectionId, swiperElement) {
     const swiper = swiperInstances[sectionId];
@@ -57,14 +52,19 @@
 
     swiperInstances[sectionId] = new Swiper(swiperElement, {
       slidesPerView: 2.2,
+      spaceBetween: 20,
+      freeMode: true,
+      loop: false,
       breakpoints: {
         768: {
           slidesPerView: 3,
         },
+        960: {
+          slidesPerView: "auto",
+          spaceBetween: 50,
+          centerInsufficientSlides: true,
+        },
       },
-      spaceBetween: 20,
-      freeMode: true,
-      loop: false,
     });
 
     /* Enable swipe hint after entrance animation completes + pause before bouncing */
@@ -78,14 +78,6 @@
     setTimeout(function () {
       enableSwipeHint(sectionId, swiperElement);
     }, 7000);
-  }
-
-  function destroySwiper(sectionId) {
-    if (!swiperInstances[sectionId]) return;
-
-    swiperInstances[sectionId].el.classList.remove(HINT_CLASS);
-    swiperInstances[sectionId].destroy(true, true);
-    delete swiperInstances[sectionId];
   }
 
   function clearPendingRetry(sectionId) {
@@ -112,18 +104,13 @@
 
     if (!sectionId || !swiperElement) return;
 
-    if (isMobile()) {
-      if (typeof Swiper === "undefined") {
-        scheduleRetry(section, sectionId, attempt || 0);
-        return;
-      }
-
-      clearPendingRetry(sectionId);
-      initSwiper(section, sectionId, swiperElement);
-    } else {
-      clearPendingRetry(sectionId);
-      destroySwiper(sectionId);
+    if (typeof Swiper === "undefined") {
+      scheduleRetry(section, sectionId, attempt || 0);
+      return;
     }
+
+    clearPendingRetry(sectionId);
+    initSwiper(section, sectionId, swiperElement);
   }
 
   function syncAll(root) {
@@ -134,6 +121,16 @@
 
     const scope = root || document;
     scope.querySelectorAll(sectionSelector).forEach(syncSection);
+  }
+
+  function refreshHints() {
+    Object.keys(swiperInstances).forEach(function (sectionId) {
+      const swiper = swiperInstances[sectionId];
+
+      if (swiper && !swiper.destroyed) {
+        enableSwipeHint(sectionId, swiper.el);
+      }
+    });
   }
 
   if (!window.__subcollectionsSliderInitialized) {
@@ -149,6 +146,7 @@
 
     window.addEventListener("resize", function () {
       syncAll();
+      refreshHints();
     });
 
     document.addEventListener("shopify:section:load", function (event) {
