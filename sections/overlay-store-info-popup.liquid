@@ -67,15 +67,17 @@
         {% render 'icon-close' %}
       </button>
 
-      {%- if section.settings.show_brand -%}
-        <h2 class="store-info-popup__brand">{{ shop.name | escape }}</h2>
-      {%- endif -%}
+      <div>
+        {%- if section.settings.show_brand -%}
+          <h2 class="store-info-popup__brand">{{ shop.name | escape }}</h2>
+        {%- endif -%}
 
-      {%- if modal_heading != blank -%}
-        <h2 id="StoreInfoPopupTitle--{{ section.id }}" class="store-info-popup__title title">
-          {{ modal_heading | escape }}
-        </h2>
-      {%- endif -%}
+        {%- if modal_heading != blank -%}
+          <h2 id="StoreInfoPopupTitle--{{ section.id }}" class="store-info-popup__title title">
+            {{ modal_heading | escape }}
+          </h2>
+        {%- endif -%}
+      </div>
 
       <div class="store-info-popup__content">
         {%- if section.settings.modal_body != blank -%}
