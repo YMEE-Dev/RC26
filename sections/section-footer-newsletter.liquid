@@ -15,6 +15,15 @@
     padding-top: var(--PT);
     padding-bottom: var(--PB);
   }
+
+  {%- assign drawer_bg = section.settings.drawer_background_color -%}
+  {%- unless drawer_bg == blank or drawer_bg == 'rgba(0,0,0,0)' -%}
+    #FooterNewsletterDrawer--{{ section.id }} {
+      --bg: {{ drawer_bg }};
+      --COLOR-BG: {{ drawer_bg }};
+      --COLOR-BG-RGB: {{ drawer_bg | color_extract: 'red' }}, {{ drawer_bg | color_extract: 'green' }}, {{ drawer_bg | color_extract: 'blue' }};
+    }
+  {%- endunless -%}
 {%- endstyle -%}
 
 {%- comment -%}
@@ -975,8 +984,15 @@
     {
       "type": "color",
       "id": "background_color",
-      "label": "Background",
+      "label": "Trigger bar background",
       "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "drawer_background_color",
+      "label": "Drawer background",
+      "info": "Leave empty to use the store's default color scheme background.",
+      "alpha": true
     },
     {
       "type": "color_scheme",
