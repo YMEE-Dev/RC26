@@ -6,7 +6,7 @@
 {%- endcomment -%}
 
 {%- liquid
-  assign enable_infinity_scroll = settings.enable_infinity_scroll
+  assign pagination_type = section.settings.pagination_type | default: 'paginated'
   assign enable_sort = section.settings.enable_sort
   assign enable_filters = section.settings.enable_filters
   assign filter_layout = section.settings.filter_layout
@@ -99,7 +99,7 @@
   assign animation_duration = 800
 
   assign items_container_tag = 'div'
-  if enable_infinity_scroll
+  if pagination_type == 'infinite'
     assign items_container_tag = 'ajaxinate-items'
   endif
 -%}
@@ -493,7 +493,7 @@
         ></div>
         <{{ items_container_tag }}
           class="grid"
-          {% if enable_infinity_scroll %}
+          {% if pagination_type == 'infinite' %}
             id="AjaxinateLoop" data-ajaxinate-id="{{ section.id }}"
           {% endif %}
         >
@@ -655,7 +655,24 @@
           {%- endif -%}
         </{{ items_container_tag }}>
 
-        {%- if enable_infinity_scroll -%}
+        {%- if pagination_type == 'load_more' -%}
+          {%- assign shown_to = paginate.current_page | times: paginate.page_size | at_most: collection_products_count -%}
+          <div class="pagination pagination--load-more" data-load-more>
+            <p class="pagination__count">
+              {{ 'general.pagination.showing' | t: from: 1, to: shown_to, total: collection_products_count }}
+            </p>
+            {%- if paginate.next -%}
+              <a
+                href="{{ paginate.next.url }}"
+                class="btn btn--primary btn--solid pagination__load-more"
+                data-load-more-button
+                data-loading-text="{{ 'general.pagination.loading' | t }}"
+              >
+                <span>{{ 'general.pagination.load_more' | t }}</span>
+              </a>
+            {%- endif -%}
+          </div>
+        {%- elsif pagination_type == 'infinite' -%}
           <div
             class="pagination pagination--infinite"
             id="AjaxinatePagination"
@@ -908,6 +925,7 @@
 
         observer.observe(productsGrid, {childList: true, subtree: true});
 
+        const columns = {{ section.settings.grid | default: 3 }};
         const animObserver = new MutationObserver(function () {
           var newCards = Array.from(productsGrid.querySelectorAll('.plp-card-up:not(.plp-card-up--visible)'));
           if (!newCards.length) return;
@@ -922,7 +940,9 @@
             },
             {threshold: 0}
           );
-          newCards.forEach(function (card) {
+          newCards.forEach(function (card, index) {
+            /* column ripple only; the inline delay carries the load cascade's header wait */
+            card.style.setProperty('--plp-delay', (index % columns) * 100 + 'ms');
             if (card.getBoundingClientRect().top < vh) {
               card.classList.add('plp-card-up--visible');
             } else {
@@ -931,7 +951,8 @@
           });
         });
 
-        animObserver.observe(productsGrid, {childList: true, subtree: false});
+        /* subtree: infinite scroll appends inside the .grid child, not under this node */
+        animObserver.observe(productsGrid, {childList: true, subtree: true});
       };
 
       const initAll = (root) => {
@@ -1103,8 +1124,10 @@
     <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
   {%- endif -%}
 
-  {%- if enable_infinity_scroll -%}
+  {%- if pagination_type == 'infinite' -%}
     <script src="{{ 'ajaxinate.js' | asset_url }}" defer="defer"></script>
+  {%- elsif pagination_type == 'load_more' -%}
+    <script src="{{ 'collection-load-more.js' | asset_url }}" defer="defer"></script>
   {%- endif -%}
 
   {%- if show_recently_viewed_indicator -%}
@@ -1194,6 +1217,18 @@
       "step": 1,
       "label": "Products per page",
       "default": 24
+    },
+    {
+      "type": "select",
+      "id": "pagination_type",
+      "label": "Pagination",
+      "default": "paginated",
+      "options": [
+        {"value": "paginated", "label": "Paginated"},
+        {"value": "infinite", "label": "Infinite scroll"},
+        {"value": "load_more", "label": "Load more button"}
+      ],
+      "info": "Infinite scroll appends the next page as the visitor scrolls. Load more shows a count and a button that appends the next page."
     },
     {
       "type": "header",
