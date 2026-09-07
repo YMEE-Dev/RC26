@@ -246,6 +246,17 @@ body.plp-header-ready:not(.plp-header-anim-done) .announcement__wrapper--top {
 body.template-collection .rc-mobile-crumbs {
   padding-top: 16px;
 }
+/* The 25px `top` above is a relative shift, invisible to the offsetHeight behind
+   --header-height, so the crumb landed on the gallery. Fold it into padding, less the 10px
+   the crumb was tightened by: 24 + 25 - 10 = 39. */
+body.template-product .rc-mobile-crumbs {
+  top: var(--announcement-height, 0px);
+  padding-top: 39px;
+}
+/* No collection: the row still renders, with an empty h6 and nothing to clear. */
+body.template-product .rc-mobile-crumbs:has(h6:empty) {
+  padding-top: 24px;
+}
 .rc-nav .rc-mobile-crumbs > * {
   transition:
     transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1),
