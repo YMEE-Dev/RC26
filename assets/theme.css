@@ -22900,15 +22900,8 @@ main:not(.main-content--collection-spotlight) .collection__products .grid-outer 
 }
 
 @media only screen and (min-width: 960px) {
-  .subcollections .subcollections__swiper .swiper-wrapper {
-    display: flex;
-    flex-wrap: nowrap;
-    justify-content: center;
-    gap: 50px;
-  }
-
-  .subcollections .subcollections__swiper .subcollection__item {
-    display: flex;
+  .subcollections .subcollections__swiper {
+    padding: 0 var(--outer);
   }
 }
 
@@ -23135,6 +23128,18 @@ main:not(.main-content--collection-spotlight) .collection__products .grid-outer 
 /* ================ Infinity Scroll ================ */
 .pagination--infinite {
   text-align: center;
+}
+
+.pagination--load-more {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  padding-top: 40px;
+  text-align: center;
+}
+
+.pagination__count {
+  margin: 0;
 }
 
 .pagination__loading {
