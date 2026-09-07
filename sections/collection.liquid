@@ -12,25 +12,37 @@
   assign filter_layout = section.settings.filter_layout
   assign show_recently_viewed_indicator = settings.show_recently_viewed_indicator
   assign color_scheme = 'color-' | append: section.settings.color_scheme
-  assign sub_collections = linklists[collection.handle].links
   assign sub_collection_links_limit = 6
   assign has_active_subcollection_link = false
   assign parent_collection_url = collection.url
+  assign parent_collection_handle = collection.handle
 
   assign collection_handle = collection.handle | default: ''
   if collection_handle == blank and collection.url != blank
     assign collection_handle = collection.url | split: '/collections/' | last | split: '?' | first | split: '/' | first
   endif
 
-  if collection_handle != blank
-    assign parent_collection_handle = collection_handle | split: '-' | first
-    assign parent_collection_obj = collections[parent_collection_handle]
+  comment
+    A subcollection handle extends its parent's: venetian-princess-bracelets → venetian-princess.
+    Longest prefix whose menu links to this collection wins.
+  endcomment
+  assign handle_parts = collection_handle | split: '-'
+  if handle_parts.size > 1
+    assign longest_prefix_size = handle_parts.size | minus: 1
+    for prefix_size in (1..longest_prefix_size) reversed
+      assign candidate_handle = handle_parts | slice: 0, prefix_size | join: '-'
+      assign candidate_child_handles = linklists[candidate_handle].links | where: 'type', 'collection_link' | map: 'object' | map: 'handle'
 
-    if parent_collection_obj != blank and parent_collection_obj.handle != collection.handle
-      assign parent_collection_url = parent_collection_obj.url
-      assign has_active_subcollection_link = true
-    endif
+      if candidate_child_handles contains collection_handle
+        assign parent_collection_handle = candidate_handle
+        assign parent_collection_url = collections[candidate_handle].url
+        assign has_active_subcollection_link = true
+        break
+      endif
+    endfor
   endif
+
+  assign sub_collections = linklists[parent_collection_handle].links
 
   if filter_layout == 'inline-open'
     assign filters_expanded = true
@@ -344,13 +356,19 @@
         data-has-active-subcollection-link="{{ has_active_subcollection_link }}"
       >
         <div class="availability_filter-wrapper" data-availability-filter>
+          {%- liquid
+            assign view_all_active = true
+            if availability_filter_active or has_active_subcollection_link
+              assign view_all_active = false
+            endif
+          -%}
           <a
             href="{{ parent_collection_url }}"
             type="button"
-            class="availability-filter__button navlink{% unless availability_filter_active %} is-active{% endunless %}"
+            class="availability-filter__button navlink{% if view_all_active %} is-active{% endif %}"
             data-availability-view-all
-            data-availability-view-all-default-active="{% unless availability_filter_active %}true{% else %}false{% endunless %}"
-            aria-pressed="{% unless availability_filter_active %}true{% else %}false{% endunless %}"
+            data-availability-view-all-default-active="{{ view_all_active }}"
+            aria-pressed="{{ view_all_active }}"
           >
             <span
               class="availability-filter__label availability-filter__label--count"
@@ -821,8 +839,12 @@
         }
 
         if (viewAllButton) {
-          viewAllButton.classList.toggle('is-active', !isActive);
-          viewAllButton.setAttribute('aria-pressed', !isActive ? 'true' : 'false');
+          const nav = component.querySelector('[data-collection-nav]');
+          const inSubcollection = nav?.dataset.hasActiveSubcollectionLink === 'true';
+          const viewAllActive = !isActive && !inSubcollection;
+
+          viewAllButton.classList.toggle('is-active', viewAllActive);
+          viewAllButton.setAttribute('aria-pressed', viewAllActive ? 'true' : 'false');
         }
 
         if (
