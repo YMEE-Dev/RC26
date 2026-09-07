@@ -15,9 +15,24 @@
     padding-top: var(--PT);
     padding-bottom: var(--PB);
   }
+
+  {%- assign drawer_bg = section.settings.drawer_background_color -%}
+  {%- unless drawer_bg == blank or drawer_bg == 'rgba(0,0,0,0)' -%}
+    #FooterNewsletterDrawer--{{ section.id }} {
+      --bg: {{ drawer_bg }};
+      --COLOR-BG: {{ drawer_bg }};
+      --COLOR-BG-RGB: {{ drawer_bg | color_extract: 'red' }}, {{ drawer_bg | color_extract: 'green' }}, {{ drawer_bg | color_extract: 'blue' }};
+    }
+  {%- endunless -%}
 {%- endstyle -%}
 
-<footer-newsletter-drawer class="footer-newsletter-popup">
+{%- comment -%}
+  Blank klaviyo_form_id keeps the drawer as the only sign-up surface.
+{%- endcomment -%}
+<footer-newsletter-drawer
+  class="footer-newsletter-popup"
+  data-klaviyo-form-id="{{ section.settings.klaviyo_form_id | strip }}"
+>
   <section
     id="FooterNewsletter--{{ section.id }}"
     class="footer-newsletter section-padding {{ color_scheme }}"
@@ -71,9 +86,7 @@
   <div class="underlay" data-newsletter-drawer-close></div>
 
   {%- comment -%}
-    Floating popup: hidden from logged-in customers, and switchable per theme so
-    the auto-appearing prompt can be handed over to the Klaviyo flyout.
-    `!= false` so an instance saved before this setting existed still shows it.
+    `!= false` so an instance saved before float_enabled existed still shows it.
   {%- endcomment -%}
   {%- if section.settings.float_enabled != false and customer == nil -%}
     <aside
@@ -115,7 +128,7 @@
       </button>
     </aside>
 
-{%- endunless -%}
+{%- endif -%}
  </footer-newsletter-drawer>
 
 {% stylesheet %}
@@ -462,7 +475,45 @@
     --btn-text-hover: #27574d;
   }
 
+  /*
+   * Authored at 360px so Klaviyo never downscales it on phones. Its internals are
+   * hard-coded to that width, so reflow them fluid and widen only on desktop.
+   */
+  .footer-newsletter__klaviyo-form {
+    width: 600px !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
+  /*
+   * Reflowing overhangs the wrapper the close anchors to. Set here, not inline —
+   * Klaviyo rewrites inline styles after render.
+   */
+  .footer-newsletter__klaviyo-form .klaviyo-close-form {
+    right: 20px !important;
+    left: auto !important;
+  }
+
+  /* Not the close button — stretching it renders its icon at the far left. */
+  .footer-newsletter__klaviyo-form div,
+  .footer-newsletter__klaviyo-form form,
+  .footer-newsletter__klaviyo-form input,
+  .footer-newsletter__klaviyo-form button:not(.klaviyo-close-form),
+  .footer-newsletter__klaviyo-form p {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
   @media only screen and (max-width: 767px) {
+    /* Full width, and drop Klaviyo's fit-to-screen scale since we now fit. */
+    .footer-newsletter__klaviyo-form {
+      width: 100vw !important;
+      left: 0 !important;
+      right: 0 !important;
+      transform: none !important;
+    }
+
     .footer-newsletter__drawer {
       max-width: 100%;
     }
@@ -517,7 +568,17 @@
       this.floatDelayMs = Number(this.floatPopup?.dataset.newsletterFloatDelay || 3) * 1000;
       this.mobileFloatDelayMs = 10000;
       this.floatDismissDelayMs = 260;
+      this.klaviyoFormId = (this.dataset.klaviyoFormId || '').trim();
+      /* How long to wait for a Klaviyo form to render before using the drawer. */
+      this.klaviyoOpenTimeoutMs = 700;
+      /* Identity lookup is fast; cap it so a slow Klaviyo never delays the popup. */
+      this.klaviyoIdentityTimeoutMs = 2000;
+      /* Allow for async klaviyo.js load — still well inside the popup delay. */
+      this.klaviyoReadyTimeoutMs = 6000;
       this.boundOnScroll = () => this.onScroll();
+
+      // Resolve identity up front so the answer is ready before the popup delay.
+      this.isExistingKlaviyoProfile();
 
       this.openTriggers.forEach((trigger) => {
         trigger.addEventListener('click', (event) => {
@@ -525,7 +586,7 @@
           if (fromFloat) {
             this.dismissFloat(true);
           }
-          this.open();
+          this.openKlaviyoFormOrDrawer();
         });
       });
 
@@ -630,7 +691,7 @@
         return;
       }
 
-      this.showFloat();
+      this.maybeShowFloat();
     }
 
     onScroll() {
@@ -638,8 +699,105 @@
         return;
       }
       if (window.scrollY > 80) {
-        this.showFloat();
+        this.maybeShowFloat();
       }
+    }
+
+    /* The popup owns the targeting: a custom-trigger Klaviyo form can't do its own. */
+    async maybeShowFloat() {
+      if (await this.isExistingKlaviyoProfile()) {
+        return;
+      }
+      this.showFloat();
+    }
+
+    /*
+     * Cached; fails open so a broken Klaviyo shows the popup rather than hiding
+     * it from everyone.
+     */
+    isExistingKlaviyoProfile() {
+      if (!this.klaviyoIdentityPromise) {
+        this.klaviyoIdentityPromise = (async () => {
+          if (!this.klaviyoFormId || !(await this.waitForKlaviyo())) {
+            return false;
+          }
+          try {
+            return await Promise.race([
+              window.klaviyo.isIdentified(),
+              new Promise((resolve) => window.setTimeout(() => resolve(false), this.klaviyoIdentityTimeoutMs)),
+            ]);
+          } catch (error) {
+            return false;
+          }
+        })();
+      }
+      return this.klaviyoIdentityPromise;
+    }
+
+    /* klaviyo.js loads async; answering early caches a wrong "not a profile". */
+    waitForKlaviyo() {
+      return new Promise((resolve) => {
+        const deadline = Date.now() + this.klaviyoReadyTimeoutMs;
+        const poll = () => {
+          if (typeof window.klaviyo?.isIdentified === 'function') {
+            resolve(true);
+            return;
+          }
+          if (Date.now() >= deadline) {
+            resolve(false);
+            return;
+          }
+          window.setTimeout(poll, 150);
+        };
+        poll();
+      });
+    }
+
+    /* Klaviyo is silent when it declines, so poll and fall back to the drawer. */
+    openKlaviyoFormOrDrawer() {
+      if (!this.klaviyoFormId) {
+        this.open();
+        return;
+      }
+
+      try {
+        window._klOnsite = window._klOnsite || [];
+        window._klOnsite.push(['openForm', this.klaviyoFormId]);
+      } catch (error) {
+        this.open();
+        return;
+      }
+
+      const deadline = Date.now() + this.klaviyoOpenTimeoutMs;
+      const poll = () => {
+        if (this.hasVisibleKlaviyoForm()) {
+          this.fitKlaviyoForm();
+          return;
+        }
+        if (Date.now() >= deadline) {
+          this.open();
+          return;
+        }
+        window.setTimeout(poll, 100);
+      };
+      window.setTimeout(poll, 100);
+    }
+
+    /* Klaviyo renders taller than the viewport without scrolling. Located by
+       position, since its class names are hashed. */
+    fitKlaviyoForm() {
+      const container = Array.from(document.querySelectorAll('[class*="kl-private"]')).find(
+        (el) => window.getComputedStyle(el).position === 'fixed'
+      );
+      if (!container) return;
+      container.style.maxHeight = '100vh';
+      container.style.overflowY = 'auto';
+      container.classList.add('footer-newsletter__klaviyo-form');
+    }
+
+    hasVisibleKlaviyoForm() {
+      const candidates = document.querySelectorAll('[class*="klaviyo-form"], [class*="kl-private"]');
+      return Array.from(candidates).some((el) => el.getBoundingClientRect().height > 0);
     }
 
     showFloat() {
@@ -801,6 +959,12 @@
     },
     {
       "type": "text",
+      "id": "klaviyo_form_id",
+      "label": "Klaviyo form ID",
+      "info": "Popup CTA opens this Klaviyo form, and the popup hides from existing Klaviyo profiles. Leave blank to use the on-site drawer only."
+    },
+    {
+      "type": "text",
       "id": "klaviyo_list_id",
       "label": "List ID",
       "default": "UAE2Jy",
@@ -820,8 +984,15 @@
     {
       "type": "color",
       "id": "background_color",
-      "label": "Background",
+      "label": "Trigger bar background",
       "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "drawer_background_color",
+      "label": "Drawer background",
+      "info": "Leave empty to use the store's default color scheme background.",
+      "alpha": true
     },
     {
       "type": "color_scheme",
