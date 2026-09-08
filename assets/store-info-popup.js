@@ -50,6 +50,25 @@
     }
   }
 
+  // showModal() puts the notice in the top layer, above any z-index. The only thing that can
+  // paint over it is a later top-layer entry, so the cookie banner is re-shown as a popover
+  // once the notice is open. Elements above the topmost modal are not inert, so it stays clickable.
+  const COOKIE_BANNER_ID = "iubenda-cs-banner";
+
+  const raiseCookieBanner = () => {
+    const banner = document.getElementById(COOKIE_BANNER_ID);
+    if (!banner || typeof banner.showPopover !== "function") return false;
+
+    try {
+      if (banner.matches(":popover-open")) banner.hidePopover();
+      banner.setAttribute("popover", "manual");
+      banner.showPopover();
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
+
   class StoreInfoPopup extends HTMLElement {
     connectedCallback() {
       if (this.initialized) return;
@@ -93,6 +112,8 @@
     }
 
     disconnectedCallback() {
+      this.stopCookieBannerWatch();
+
       if (this.handleEscape) {
         document.removeEventListener("keydown", this.handleEscape, true);
       }
@@ -235,6 +256,7 @@
       if (typeof this.dialog.showModal === "function") {
         try {
           this.dialog.showModal();
+          this.keepCookieBannerOnTop();
         } catch (error) {
           this.dataset.fallbackOpen = "true";
           this.dialog.setAttribute("open", "");
@@ -288,7 +310,23 @@
       window.setTimeout(finishClose, 600);
     }
 
+    // The banner loads async; if it is not there yet, catch it when iubenda appends it.
+    keepCookieBannerOnTop() {
+      if (raiseCookieBanner()) return;
+
+      this.cookieBannerObserver = new MutationObserver(() => {
+        if (raiseCookieBanner()) this.stopCookieBannerWatch();
+      });
+      this.cookieBannerObserver.observe(document.body, { childList: true });
+    }
+
+    stopCookieBannerWatch() {
+      this.cookieBannerObserver?.disconnect();
+      this.cookieBannerObserver = null;
+    }
+
     finishClose({ skipScrollUnlock = false } = {}) {
+      this.stopCookieBannerWatch();
       if (typeof this.dialog.close === "function" && this.dialog.open) {
         this.dialog.close();
       } else {

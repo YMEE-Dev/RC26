@@ -61,6 +61,16 @@ _iub.csLangConfiguration = {"en-GB":{"cookiePolicyId":32804813},"it":{"cookiePol
       }
 </script>
 <style>
+  /* store-info-popup.js re-shows the banner as a popover to paint above the notice dialog;
+     undo the UA popover box (centered fit-content box with border/padding). iubenda's own
+     bottom/left/width rules keep applying. */
+  #iubenda-cs-banner[popover] {
+    top: auto;
+    margin: 0;
+    border: 0;
+    padding: 0;
+    overflow: visible;
+  }
   #iubenda-cs-banner #iubenda-cs-title {
     font-family: inherit !important;
   }
