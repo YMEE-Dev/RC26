@@ -5,6 +5,8 @@
   const STORE_INFO_POPUP_COOKIE_HOURS = 90 * 24;
   const STORE_INFO_POPUP_COOKIE_NAME = "store-info-popup";
   const STORE_INFO_POPUP_LEGACY_COOKIE_PREFIX = "store-info-popup-";
+  // Popup hierarchy: cookie banner at once, geolocation popups at 5s, newsletter float at 15s.
+  const STORE_INFO_POPUP_OPEN_DELAY_MS = 5000;
 
   class StoreInfoPopupCookie {
     constructor(name, hoursToExpire = STORE_INFO_POPUP_COOKIE_HOURS) {
@@ -79,7 +81,7 @@
 
           window.setTimeout(() => {
             this.maybeOpen();
-          }, 0);
+          }, STORE_INFO_POPUP_OPEN_DELAY_MS);
         });
       };
 
@@ -150,10 +152,10 @@
     updateDynamicContent(countryCode) {
       if (!this.copy || !this.copyTemplate) return;
 
-      const label = document.createElement("span");
+      const label = document.createElement("strong");
       label.textContent = window.theme?.geo?.countryName?.(countryCode) || "your country";
 
-      this.copy.innerHTML = this.copyTemplate.replace(/\[country\]/gi, label.innerHTML);
+      this.copy.innerHTML = this.copyTemplate.replace(/\[country\]/gi, label.outerHTML);
     }
 
     hasCountryRedirectPriority() {
@@ -255,7 +257,9 @@
     }
 
     close({ skipScrollUnlock = false } = {}) {
-      if (!this.dialog || !this.isDialogOpen()) return;
+      if (!this.dialog || !this.isDialogOpen() || this.isClosing) return;
+
+      this.isClosing = true;
 
       if (window.theme?.a11y?.removeTrapFocus) {
         window.theme.a11y.removeTrapFocus();
@@ -264,6 +268,27 @@
       this.dialog.setAttribute("aria-hidden", "true");
       this.dialog.setAttribute("inert", "");
 
+      // theme.css animates dialog[closing] with fadeOut; close for real once it has played.
+      this.dialog.setAttribute("closing", "");
+
+      let finished = false;
+      const finishClose = () => {
+        if (finished) return;
+        finished = true;
+
+        this.dialog.removeEventListener("animationend", onAnimationEnd);
+        this.dialog.removeAttribute("closing");
+        this.finishClose({ skipScrollUnlock });
+      };
+      const onAnimationEnd = (event) => {
+        if (event.target === this.dialog) finishClose();
+      };
+
+      this.dialog.addEventListener("animationend", onAnimationEnd);
+      window.setTimeout(finishClose, 600);
+    }
+
+    finishClose({ skipScrollUnlock = false } = {}) {
       if (typeof this.dialog.close === "function" && this.dialog.open) {
         this.dialog.close();
       } else {
@@ -271,6 +296,7 @@
       }
 
       delete this.dataset.fallbackOpen;
+      this.isClosing = false;
 
       if (!skipScrollUnlock && (!window.theme?.hasOpenModals || !window.theme.hasOpenModals())) {
         document.dispatchEvent(

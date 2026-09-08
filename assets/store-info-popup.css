@@ -35,6 +35,14 @@ store-info-popup[data-fallback-open="true"]::before {
   backdrop-filter: blur(15px);
 }
 
+.store-info-popup__dialog[open]::backdrop {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.store-info-popup__dialog[closing]::backdrop {
+  animation: fadeOut 0.5s ease forwards;
+}
+
 .store-info-popup__body {
   position: relative;
   z-index: 1;
@@ -120,18 +128,17 @@ store-info-popup[data-fallback-open="true"]::before {
 
   .store-info-popup__body {
     gap: 18px;
-    width: 100vw;
-    min-height: 100vh;
-    max-height: 100vh;
-    height: 100vh;
+    width: 90vw;
+    margin: 0 auto;
+    height: auto;
     padding: 32px 20px 40px;
     align-content: center;
     justify-items: center;
   }
 
   .store-info-popup__close {
-    top: 16px;
-    right: 16px;
+    top: 0;
+    right: 0;
   }
 
   .store-info-popup__title {
