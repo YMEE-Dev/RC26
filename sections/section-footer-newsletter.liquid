@@ -17,13 +17,7 @@
   }
 {%- endstyle -%}
 
-{%- comment -%}
-  Blank klaviyo_form_id keeps the drawer as the only sign-up surface.
-{%- endcomment -%}
-<footer-newsletter-drawer
-  class="footer-newsletter-popup"
-  data-klaviyo-form-id="{{ section.settings.klaviyo_form_id | strip }}"
->
+<footer-newsletter-drawer class="footer-newsletter-popup">
   <section
     id="FooterNewsletter--{{ section.id }}"
     class="footer-newsletter section-padding {{ color_scheme }}"
@@ -465,45 +459,7 @@
     --btn-text-hover: var(--footer-newsletter-float-bg, #27574d);
   }
 
-  /*
-   * Authored at 360px so Klaviyo never downscales it on phones. Its internals are
-   * hard-coded to that width, so reflow them fluid and widen only on desktop.
-   */
-  .footer-newsletter__klaviyo-form {
-    width: 600px !important;
-    max-width: 100vw !important;
-    overflow-x: hidden !important;
-  }
-
-  /*
-   * Reflowing overhangs the wrapper the close anchors to. Set here, not inline —
-   * Klaviyo rewrites inline styles after render.
-   */
-  .footer-newsletter__klaviyo-form .klaviyo-close-form {
-    right: 20px !important;
-    left: auto !important;
-  }
-
-  /* Not the close button — stretching it renders its icon at the far left. */
-  .footer-newsletter__klaviyo-form div,
-  .footer-newsletter__klaviyo-form form,
-  .footer-newsletter__klaviyo-form input,
-  .footer-newsletter__klaviyo-form button:not(.klaviyo-close-form),
-  .footer-newsletter__klaviyo-form p {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
   @media only screen and (max-width: 767px) {
-    /* Full width, and drop Klaviyo's fit-to-screen scale since we now fit. */
-    .footer-newsletter__klaviyo-form {
-      width: 100vw !important;
-      left: 0 !important;
-      right: 0 !important;
-      transform: none !important;
-    }
-
     .footer-newsletter__drawer {
       max-width: 100%;
     }
@@ -558,9 +514,6 @@
       this.floatDelayMs = Number(this.floatPopup?.dataset.newsletterFloatDelay || 3) * 1000;
       this.mobileFloatDelayMs = 10000;
       this.floatDismissDelayMs = 260;
-      this.klaviyoFormId = (this.dataset.klaviyoFormId || '').trim();
-      /* How long to wait for a Klaviyo form to render before using the drawer. */
-      this.klaviyoOpenTimeoutMs = 700;
       /* Identity lookup is fast; cap it so a slow Klaviyo never delays the popup. */
       this.klaviyoIdentityTimeoutMs = 2000;
       /* Allow for async klaviyo.js load — still well inside the popup delay. */
@@ -576,7 +529,7 @@
           if (fromFloat) {
             this.dismissFloat(true);
           }
-          this.openKlaviyoFormOrDrawer();
+          this.open();
         });
       });
 
@@ -708,7 +661,7 @@
     isExistingKlaviyoProfile() {
       if (!this.klaviyoIdentityPromise) {
         this.klaviyoIdentityPromise = (async () => {
-          if (!this.klaviyoFormId || !(await this.waitForKlaviyo())) {
+          if (!(await this.waitForKlaviyo())) {
             return false;
           }
           try {
@@ -741,53 +694,6 @@
         };
         poll();
       });
-    }
-
-    /* Klaviyo is silent when it declines, so poll and fall back to the drawer. */
-    openKlaviyoFormOrDrawer() {
-      if (!this.klaviyoFormId) {
-        this.open();
-        return;
-      }
-
-      try {
-        window._klOnsite = window._klOnsite || [];
-        window._klOnsite.push(['openForm', this.klaviyoFormId]);
-      } catch (error) {
-        this.open();
-        return;
-      }
-
-      const deadline = Date.now() + this.klaviyoOpenTimeoutMs;
-      const poll = () => {
-        if (this.hasVisibleKlaviyoForm()) {
-          this.fitKlaviyoForm();
-          return;
-        }
-        if (Date.now() >= deadline) {
-          this.open();
-          return;
-        }
-        window.setTimeout(poll, 100);
-      };
-      window.setTimeout(poll, 100);
-    }
-
-    /* Klaviyo renders taller than the viewport without scrolling. Located by
-       position, since its class names are hashed. */
-    fitKlaviyoForm() {
-      const container = Array.from(document.querySelectorAll('[class*="kl-private"]')).find(
-        (el) => window.getComputedStyle(el).position === 'fixed'
-      );
-      if (!container) return;
-      container.style.maxHeight = '100vh';
-      container.style.overflowY = 'auto';
-      container.classList.add('footer-newsletter__klaviyo-form');
-    }
-
-    hasVisibleKlaviyoForm() {
-      const candidates = document.querySelectorAll('[class*="klaviyo-form"], [class*="kl-private"]');
-      return Array.from(candidates).some((el) => el.getBoundingClientRect().height > 0);
     }
 
     showFloat() {
@@ -949,12 +855,6 @@
     },
     {
       "type": "text",
-      "id": "klaviyo_form_id",
-      "label": "Klaviyo form ID",
-      "info": "Popup CTA opens this Klaviyo form, and the popup hides from existing Klaviyo profiles. Leave blank to use the on-site drawer only."
-    },
-    {
-      "type": "text",
       "id": "klaviyo_list_id",
       "label": "List ID",
       "default": "UAE2Jy",
@@ -981,7 +881,7 @@
       "type": "color",
       "id": "float_background_color",
       "label": "Popup background",
-      "default": "#37796C"
+      "default": "#27574d"
     },
     {
       "type": "color_scheme",
