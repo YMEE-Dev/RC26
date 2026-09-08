@@ -3,6 +3,8 @@
   const COUNTRY_REDIRECT_SHOWN_ATTRIBUTE = "data-country-redirect-shown";
   const COUNTRY_REDIRECT_OPEN_EVENT = "theme:country-redirect:opened";
   const COUNTRY_REDIRECT_CLOSE_EVENT = "theme:country-redirect:closed";
+  // Popup hierarchy: cookie banner at once, geolocation popups at 5s, newsletter float at 15s.
+  const COUNTRY_REDIRECT_OPEN_DELAY_MS = 5000;
 
   class HeadCountryRedirect extends HTMLElement {
     connectedCallback() {
@@ -48,7 +50,10 @@
         this.bindEvents();
         this.updateDynamicContent();
         this.updateFlagIcon();
-        this.open();
+
+        window.setTimeout(() => {
+          if (this.isConnected) this.open();
+        }, COUNTRY_REDIRECT_OPEN_DELAY_MS);
       };
 
       if (document.readyState === "loading") {

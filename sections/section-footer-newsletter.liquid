@@ -93,7 +93,7 @@
       class="footer-newsletter-float"
       data-newsletter-float
       aria-hidden="true"
-      data-newsletter-float-delay="{{ section.settings.float_delay_seconds | default: 3 }}"
+      data-newsletter-float-delay="{{ section.settings.float_delay_seconds | default: 15 }}"
     >
       <button
         type="button"
@@ -565,8 +565,7 @@
       this.dismissCookie = 'footer_newsletter_float_dismissed';
       this.mobileQuery = window.matchMedia('(max-width: 767px)');
       this.hasShownFloat = false;
-      this.floatDelayMs = Number(this.floatPopup?.dataset.newsletterFloatDelay || 3) * 1000;
-      this.mobileFloatDelayMs = 10000;
+      this.floatDelayMs = Number(this.floatPopup?.dataset.newsletterFloatDelay || 15) * 1000;
       this.floatDismissDelayMs = 260;
       this.klaviyoFormId = (this.dataset.klaviyoFormId || '').trim();
       /* How long to wait for a Klaviyo form to render before using the drawer. */
@@ -668,10 +667,7 @@
         return;
       }
 
-      // Mobile shows 10s after load; desktop uses the configured delay.
-      const delayMs = this.mobileQuery.matches ? this.mobileFloatDelayMs : this.floatDelayMs;
-
-      window.setTimeout(() => this.tryShowFloat(), delayMs);
+      window.setTimeout(() => this.tryShowFloat(), this.floatDelayMs);
     }
 
     tryShowFloat() {
@@ -897,11 +893,12 @@
       "type": "range",
       "id": "float_delay_seconds",
       "min": 1,
-      "max": 12,
+      "max": 30,
       "step": 1,
       "unit": "s",
-      "label": "Desktop popup delay",
-      "default": 3
+      "label": "Popup delay",
+      "info": "Applies on desktop and mobile. Keep it above the geolocation popups (5s) so they take turns.",
+      "default": 15
     },
     {
       "type": "header",
