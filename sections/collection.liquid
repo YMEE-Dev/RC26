@@ -285,6 +285,10 @@
           {%- if filter.true_value.count > 0 -%}
             {%- assign has_available_products = true -%}
           {%- endif -%}
+
+          {%- comment -%} Storytelling tiles are excluded from every count, as in collection-products-count. {%- endcomment -%}
+          {%- assign storytelling_products_count = collection.products_count | minus: collection_products_count | at_least: 0 -%}
+          {%- assign collection_available_count = filter.true_value.count | minus: storytelling_products_count | at_least: 0 -%}
         {%- endif -%}
 
         {%- break -%}
@@ -505,6 +509,9 @@
           hidden
           data-collection-counts
           data-collection-products-count="{{ collection_products_count }}"
+          {% if availability_filter_param_name != blank %}
+            data-collection-available-count="{{ collection_available_count }}"
+          {% endif %}
           data-availability-filter-active="{% if availability_filter_active %}true{% else %}false{% endif %}"
           data-availability-filter-param-name="{{ availability_filter_param_name }}"
           data-availability-filter-value="{{ availability_filter_true_value }}"
@@ -679,7 +686,11 @@
         {%- if pagination_type == 'load_more' -%}
           {%- assign shown_to = paginate.current_page | times: paginate.page_size | at_most: collection_products_count -%}
           <div class="pagination pagination--load-more" data-load-more>
-            <p class="pagination__count">
+            <p
+              class="pagination__count"
+              data-load-more-count
+              data-load-more-count-template="{{ 'general.pagination.showing' | t: from: '[from]', to: '[to]', total: '[total]' }}"
+            >
               {{ 'general.pagination.showing' | t: from: 1, to: shown_to, total: collection_products_count }}
             </p>
             {%- if paginate.next -%}
@@ -774,6 +785,55 @@
         availabilityCount.textContent = `${countValue} ${countLabel}`.trim();
       };
 
+      const updateLoadMoreCount = (component, shownCount, totalCount) => {
+        const count = component.querySelector('[data-load-more-count]');
+        const template = count ? count.getAttribute('data-load-more-count-template') : '';
+        if (!template || Number.isNaN(totalCount)) return;
+
+        const nextText = template
+          .replace('[from]', shownCount > 0 ? 1 : 0)
+          .replace('[to]', Math.min(shownCount, totalCount))
+          .replace('[total]', totalCount);
+
+        /* the grid observer re-runs the filter on every mutation here; an unchanged write would loop */
+        if (count.textContent.trim() === nextText) return;
+        count.textContent = nextText;
+      };
+
+      const availableCountRequests = new WeakMap();
+
+      /* Collection-wide in-stock total when Shopify's availability filter is not enabled for the
+         store (no server count on the page). Same public endpoint storytelling-lookup.js pages. */
+      const fetchCollectionAvailableCount = (component) => {
+        if (availableCountRequests.has(component)) return availableCountRequests.get(component);
+
+        const base = (component.dataset.collection || '/collections/all').split('?')[0].replace(/\/$/, '');
+
+        const request = (async () => {
+          let count = 0;
+
+          for (let page = 1; page <= 20; page++) {
+            const response = await fetch(`${base}/products.json?limit=250&page=${page}`);
+            if (!response.ok) throw new Error(response.statusText);
+
+            const products = (await response.json()).products || [];
+
+            products.forEach((product) => {
+              const isStorytelling = (product.product_type || '').toLowerCase().includes('storytelling');
+              const isAvailable = (product.variants || []).some((variant) => variant.available);
+              if (!isStorytelling && isAvailable) count += 1;
+            });
+
+            if (products.length < 250) break;
+          }
+
+          return count;
+        })();
+
+        availableCountRequests.set(component, request);
+        return request;
+      };
+
       const applyLocalAvailabilityFilter = (component, enabled) => {
         if (!component) return;
 
@@ -782,12 +842,20 @@
         const defaultCount = countsData
           ? Number.parseInt(countsData.getAttribute('data-collection-products-count'), 10)
           : Number.NaN;
+        const collectionAvailableCount = countsData
+          ? Number.parseInt(countsData.getAttribute('data-collection-available-count'), 10)
+          : Number.NaN;
         let availableCount = 0;
+        let productCount = 0;
 
         items.forEach((item) => {
           const isStorytelling = item.hasAttribute('data-product-storytelling');
           const isAvailable = item.getAttribute('data-product-available') === 'true';
           let showItem = true;
+
+          if (isStorytelling == false) {
+            productCount += 1;
+          }
 
           if (isStorytelling == false && isAvailable) {
             availableCount += 1;
@@ -806,7 +874,28 @@
         });
 
         component.dataset.localAvailabilityFilterActive = enabled ? 'true' : 'false';
-        updateAvailabilityCount(component, enabled ? availableCount : defaultCount);
+
+        /* No server count yet: keep the current numbers until the collection-wide total arrives. */
+        if (enabled && Number.isNaN(collectionAvailableCount) && component.dataset.availableCountFailed !== 'true') {
+          fetchCollectionAvailableCount(component)
+            .then((count) => {
+              getCollectionCounts(component)?.setAttribute('data-collection-available-count', count);
+            })
+            .catch(() => {
+              component.dataset.availableCountFailed = 'true';
+            })
+            .finally(() => {
+              if (component.dataset.localAvailabilityFilterActive === 'true') {
+                applyLocalAvailabilityFilter(component, true);
+              }
+            });
+          return;
+        }
+
+        const inStockTotal = Number.isNaN(collectionAvailableCount) ? availableCount : collectionAvailableCount;
+
+        updateAvailabilityCount(component, enabled ? inStockTotal : defaultCount);
+        updateLoadMoreCount(component, enabled ? availableCount : productCount, enabled ? inStockTotal : defaultCount);
       };
 
       const syncAvailabilityUi = (component) => {
