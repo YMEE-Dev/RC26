@@ -43,7 +43,7 @@
 
   <dialog
     class="store-info-popup__dialog"
-    data-cookie-name="{{ section.settings.cookie_name | default: 'store-info-popup' | handleize }}"
+    data-cookie-name="{{ section.settings.cookie_name | handleize }}"
     data-scroll-lock-required
     aria-modal="true"
     {% if modal_heading != blank %}
@@ -205,7 +205,7 @@
       "id": "cookie_name",
       "label": "Cookie name",
       "default": "store-info-popup",
-      "info": "Each popup is shown once per 90 days per cookie name. Give every popup its own name so dismissing one does not hide the others."
+      "info": "Each popup is shown once per 90 days per cookie name. Give every popup its own name so dismissing one does not hide the others. Leave empty to show it once per browsing session instead."
     }
   ],
   "presets": [

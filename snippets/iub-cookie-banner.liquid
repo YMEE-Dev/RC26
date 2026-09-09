@@ -4,7 +4,17 @@ _iub.csConfiguration = {"askConsentAtCookiePolicyUpdate":true,"perPurposeConsent
 _iub.csLangConfiguration = {"en-GB":{"cookiePolicyId":32804813},"it":{"cookiePolicyId":71195821}};
 
 <!-- code for Shopify (1 of 2) -->
+      // Theme popups (euro pricing notice, newsletter float) wait while the banner is up and
+      // open once consent is settled: banner closed, already given, or not needed.
+      var markCookieConsentSettled = function () {
+          document.documentElement.removeAttribute('data-cookie-banner-open');
+          document.documentElement.setAttribute('data-cookie-consent-settled', '');
+          document.dispatchEvent(new CustomEvent('theme:cookie-consent:settled'));
+      };
+
       var onPreferenceExpressedOrNotNeededCallback = function(preference) {
+          markCookieConsentSettled();
+
           // --- 1. Sync consenso su Shopify Customer Privacy API ---
           var isPrefEmpty = !preference || Object.keys(preference).length === 0;
           var consent = isPrefEmpty ? _iub.cs.api.getPreferences() : preference;
@@ -60,14 +70,10 @@ _iub.csLangConfiguration = {"en-GB":{"cookiePolicyId":32804813},"it":{"cookiePol
           };
       }
 
-      // Theme popups (euro pricing notice, newsletter float) wait while the banner is up.
       _iub.csConfiguration.callback.onBannerShown = function () {
           document.documentElement.setAttribute('data-cookie-banner-open', '');
       };
-      _iub.csConfiguration.callback.onBannerClosed = function () {
-          document.documentElement.removeAttribute('data-cookie-banner-open');
-          document.dispatchEvent(new CustomEvent('theme:cookie-banner:closed'));
-      };
+      _iub.csConfiguration.callback.onBannerClosed = markCookieConsentSettled;
 </script>
 <style>
   #iubenda-cs-banner #iubenda-cs-title {
