@@ -632,7 +632,8 @@
       // it's closed, then show.
       const modalOpen =
         (window.theme && typeof window.theme.hasOpenModals === 'function' && window.theme.hasOpenModals()) ||
-        document.documentElement.hasAttribute('data-scroll-locked');
+        document.documentElement.hasAttribute('data-scroll-locked') ||
+        document.documentElement.hasAttribute('data-cookie-banner-open');
 
       if (modalOpen) {
         window.setTimeout(() => this.tryShowFloat(), 1000);

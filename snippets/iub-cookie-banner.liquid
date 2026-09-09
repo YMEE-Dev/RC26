@@ -59,18 +59,17 @@ _iub.csLangConfiguration = {"en-GB":{"cookiePolicyId":32804813},"it":{"cookiePol
               onPreferenceExpressedOrNotNeeded: onPreferenceExpressedOrNotNeededCallback
           };
       }
+
+      // Theme popups (euro pricing notice, newsletter float) wait while the banner is up.
+      _iub.csConfiguration.callback.onBannerShown = function () {
+          document.documentElement.setAttribute('data-cookie-banner-open', '');
+      };
+      _iub.csConfiguration.callback.onBannerClosed = function () {
+          document.documentElement.removeAttribute('data-cookie-banner-open');
+          document.dispatchEvent(new CustomEvent('theme:cookie-banner:closed'));
+      };
 </script>
 <style>
-  /* store-info-popup.js re-shows the banner as a popover to paint above the notice dialog;
-     undo the UA popover box (centered fit-content box with border/padding). iubenda's own
-     bottom/left/width rules keep applying. */
-  #iubenda-cs-banner[popover] {
-    top: auto;
-    margin: 0;
-    border: 0;
-    padding: 0;
-    overflow: visible;
-  }
   #iubenda-cs-banner #iubenda-cs-title {
     font-family: inherit !important;
   }
