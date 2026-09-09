@@ -3,7 +3,6 @@
   const COUNTRY_REDIRECT_SHOWN_ATTRIBUTE = "data-country-redirect-shown";
   const COUNTRY_REDIRECT_OPEN_EVENT = "theme:country-redirect:opened";
   const STORE_INFO_POPUP_COOKIE_HOURS = 90 * 24;
-  const STORE_INFO_POPUP_LEGACY_COOKIE_PREFIX = "store-info-popup-";
   // Popup hierarchy: cookie banner at once, geolocation popups at 5s, newsletter float at 15s.
   const STORE_INFO_POPUP_OPEN_DELAY_MS = 5000;
 
@@ -24,18 +23,6 @@
       return cookieValue.slice(cookiePrefix.length);
     }
 
-    readLegacy() {
-      const hasLegacySeenCookie = document.cookie.split("; ").some((row) => {
-        if (!row.startsWith(STORE_INFO_POPUP_LEGACY_COOKIE_PREFIX)) return false;
-
-        const value = row.slice(row.indexOf("=") + 1);
-
-        return value === "seen";
-      });
-
-      return hasLegacySeenCookie ? "seen" : false;
-    }
-
     write(value = "seen") {
       if (!this.name || !this.maxAge) return;
 
@@ -49,12 +36,7 @@
     }
   }
 
-  // Set by the iubenda callbacks in snippets/iub-cookie-banner.liquid.
-  const COOKIE_BANNER_OPEN_ATTRIBUTE = "data-cookie-banner-open";
-  const COOKIE_CONSENT_SETTLED_ATTRIBUTE = "data-cookie-consent-settled";
-  const COOKIE_CONSENT_SETTLED_EVENT = "theme:cookie-consent:settled";
-  // iubenda blocked or offline: stop waiting for it after this, unless a banner is up.
-  const COOKIE_CONSENT_GRACE_MS = 5000;
+  const log = (message) => console.log(`[store-info-popup] ${message}`);
 
   // Empty cookie name: remember the dismissal for the browsing session only.
   class StoreInfoPopupSessionFlag {
@@ -68,10 +50,6 @@
       } catch (error) {
         return false;
       }
-    }
-
-    readLegacy() {
-      return false;
     }
 
     write(value = "seen") {
@@ -104,8 +82,9 @@
 
         this.bindEvents();
 
-        const dismissed = this.cookie.read() !== false || this.cookie.readLegacy() !== false;
+        const dismissed = this.cookie.read() !== false;
         if (dismissed && !window.Shopify?.designMode) {
+          log(`skip: already dismissed (${cookieName ? `cookie ${cookieName}` : "this session"})`);
           return;
         }
 
@@ -114,9 +93,11 @@
 
           this.updateDynamicContent(countryCode);
 
-          window.setTimeout(() => {
-            this.maybeOpen();
-          }, STORE_INFO_POPUP_OPEN_DELAY_MS);
+          // Timed from the load event, not DOM-ready: the homepage hero is still white until
+          // its video and poster arrive, and the popup should not sit over an unpainted page.
+          const start = () => window.setTimeout(() => this.maybeOpen(), STORE_INFO_POPUP_OPEN_DELAY_MS);
+          if (document.readyState === "complete") start();
+          else window.addEventListener("load", start, { once: true });
         });
       };
 
@@ -139,7 +120,7 @@
       }
 
       if (this.handleBackdropClose) {
-        this.dialog?.removeEventListener("click", this.handleBackdropClose);
+        this.removeEventListener("click", this.handleBackdropClose);
       }
 
       if (this.handleCancel) {
@@ -174,14 +155,16 @@
       const countryCode = needsCountry ? (await window.theme?.geo?.detectCountry?.()) || "" : "";
 
       if (audience === "all" || window.Shopify?.designMode) return countryCode;
-      if (!countryCode) return false;
 
       const listed = String(this.config.countryCodes || "")
         .split(",")
         .map((code) => code.trim().toUpperCase())
         .includes(countryCode);
+      const show = Boolean(countryCode) && listed === (audience === "inside");
 
-      return listed === (audience === "inside") ? countryCode : false;
+      log(`country: ${countryCode || "(none)"}, audience: ${audience}, listed: ${listed} → ${show ? "eligible" : "skip"}`);
+
+      return show ? countryCode : false;
     }
 
     updateDynamicContent(countryCode) {
@@ -230,7 +213,7 @@
       };
 
       this.handleBackdropClose = (event) => {
-        if (event.target !== this.dialog) return;
+        if (event.target !== this && event.target !== this.dialog) return;
         this.close();
       };
 
@@ -240,34 +223,15 @@
       this.closeButtons.forEach((button) => {
         button.addEventListener("click", this.handleCloseClick);
       });
-      this.dialog.addEventListener("click", this.handleBackdropClose);
+      this.addEventListener("click", this.handleBackdropClose);
     }
 
-    maybeOpen(skipConsentWait = false) {
+    maybeOpen() {
       if (this.hasAttemptedOpen) return;
-
-      // Cookie banner first; a modal dialog would sit above it and block it. Wait until iubenda
-      // has closed its banner or reported consent as settled, not just for a banner already up:
-      // it loads async and can show up after the 5s mark.
-      if (!skipConsentWait && !document.documentElement.hasAttribute(COOKIE_CONSENT_SETTLED_ATTRIBUTE)) {
-        const proceed = (force) => {
-          window.clearTimeout(grace);
-          document.removeEventListener(COOKIE_CONSENT_SETTLED_EVENT, onSettled);
-          this.maybeOpen(force === true);
-        };
-        const onSettled = () => proceed(false);
-        // iubenda silent (blocked, offline) and no banner up: stop waiting for it.
-        const grace = window.setTimeout(() => {
-          if (!document.documentElement.hasAttribute(COOKIE_BANNER_OPEN_ATTRIBUTE)) proceed(true);
-        }, COOKIE_CONSENT_GRACE_MS);
-
-        document.addEventListener(COOKIE_CONSENT_SETTLED_EVENT, onSettled);
-        return;
-      }
-
       this.hasAttemptedOpen = true;
 
       if (this.blockedByCountryRedirect || this.hasCountryRedirectPriority()) {
+        log("skip: country redirect has priority");
         return;
       }
 
@@ -287,17 +251,12 @@
       this.dialog.removeAttribute("inert");
       this.dialog.setAttribute("aria-hidden", "false");
 
-      if (typeof this.dialog.showModal === "function") {
-        try {
-          this.dialog.showModal();
-        } catch (error) {
-          this.dataset.fallbackOpen = "true";
-          this.dialog.setAttribute("open", "");
-        }
-      } else {
-        this.dataset.fallbackOpen = "true";
-        this.dialog.setAttribute("open", "");
-      }
+      // Not showModal(): a modal lives in the browser's top layer, above every z-index, so the
+      // cookie banner could never sit over it. Opened in-page instead; theme a11y trap and the
+      // keydown handler cover focus and Escape.
+      this.dataset.fallbackOpen = "true";
+      this.dialog.setAttribute("open", "");
+      log("open");
 
       this.cookie.write();
 

@@ -51,9 +51,13 @@
         this.updateDynamicContent();
         this.updateFlagIcon();
 
-        window.setTimeout(() => {
-          if (this.isConnected) this.open();
-        }, COUNTRY_REDIRECT_OPEN_DELAY_MS);
+        // Timed from the load event so the dialog never opens over a still-blank hero.
+        const start = () =>
+          window.setTimeout(() => {
+            if (this.isConnected) this.open();
+          }, COUNTRY_REDIRECT_OPEN_DELAY_MS);
+        if (document.readyState === "complete") start();
+        else window.addEventListener("load", start, { once: true });
       };
 
       if (document.readyState === "loading") {

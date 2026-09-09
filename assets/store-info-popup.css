@@ -9,17 +9,28 @@ store-info-popup[data-fallback-open="true"] {
   display: grid;
   place-items: center;
   padding: 24px;
+  background: none;
 }
 
 store-info-popup[data-fallback-open="true"]::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(17, 17, 17, 0.64);
+  background: transparent;
+  backdrop-filter: blur(15px);
+  animation: fadeIn 0.5s ease forwards;
+}
+
+store-info-popup:has(.store-info-popup__dialog[closing])::before {
+  animation: fadeOut 0.5s ease forwards;
 }
 
 .store-info-popup__dialog {
+  position: fixed;
+  inset: 0;
   width: min(560px, calc(100vw - 48px));
+  height: fit-content;
+  max-height: 100%;
   margin: auto;
   border: none;
   padding: 0;
@@ -28,19 +39,6 @@ store-info-popup[data-fallback-open="true"]::before {
   display: flex;
   flex-direction: column;
   justify-content: center;
-}
-
-.store-info-popup__dialog::backdrop {
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(15px);
-}
-
-.store-info-popup__dialog[open]::backdrop {
-  animation: fadeIn 0.5s ease forwards;
-}
-
-.store-info-popup__dialog[closing]::backdrop {
-  animation: fadeOut 0.5s ease forwards;
 }
 
 .store-info-popup__body {
@@ -119,7 +117,6 @@ store-info-popup[data-fallback-open="true"]::before {
 @media only screen and (max-width: 749px) {
   .store-info-popup__dialog {
     width: 100%;
-    margin: 0;
   }
 
   store-info-popup[data-fallback-open="true"] {
