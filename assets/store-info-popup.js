@@ -3,7 +3,6 @@
   const COUNTRY_REDIRECT_SHOWN_ATTRIBUTE = "data-country-redirect-shown";
   const COUNTRY_REDIRECT_OPEN_EVENT = "theme:country-redirect:opened";
   const STORE_INFO_POPUP_COOKIE_HOURS = 90 * 24;
-  const STORE_INFO_POPUP_COOKIE_NAME = "store-info-popup";
   const STORE_INFO_POPUP_LEGACY_COOKIE_PREFIX = "store-info-popup-";
   // Popup hierarchy: cookie banner at once, geolocation popups at 5s, newsletter float at 15s.
   const STORE_INFO_POPUP_OPEN_DELAY_MS = 5000;
@@ -50,9 +49,37 @@
     }
   }
 
-  // Set/cleared by the iubenda callbacks in snippets/iub-cookie-banner.liquid.
+  // Set by the iubenda callbacks in snippets/iub-cookie-banner.liquid.
   const COOKIE_BANNER_OPEN_ATTRIBUTE = "data-cookie-banner-open";
-  const COOKIE_BANNER_CLOSED_EVENT = "theme:cookie-banner:closed";
+  const COOKIE_CONSENT_SETTLED_ATTRIBUTE = "data-cookie-consent-settled";
+  const COOKIE_CONSENT_SETTLED_EVENT = "theme:cookie-consent:settled";
+  // iubenda blocked or offline: stop waiting for it after this, unless a banner is up.
+  const COOKIE_CONSENT_GRACE_MS = 5000;
+
+  // Empty cookie name: remember the dismissal for the browsing session only.
+  class StoreInfoPopupSessionFlag {
+    constructor(sectionId) {
+      this.key = `store-info-popup-session:${sectionId || "default"}`;
+    }
+
+    read() {
+      try {
+        return window.sessionStorage.getItem(this.key) || false;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    readLegacy() {
+      return false;
+    }
+
+    write(value = "seen") {
+      try {
+        window.sessionStorage.setItem(this.key, value);
+      } catch (error) {}
+    }
+  }
 
   class StoreInfoPopup extends HTMLElement {
     connectedCallback() {
@@ -70,11 +97,15 @@
 
         if (!this.dialog || !this.config?.enabled) return;
 
-        this.cookie = new StoreInfoPopupCookie(this.dialog.dataset.cookieName || STORE_INFO_POPUP_COOKIE_NAME);
+        const cookieName = (this.dialog.dataset.cookieName || "").trim();
+        this.cookie = cookieName
+          ? new StoreInfoPopupCookie(cookieName)
+          : new StoreInfoPopupSessionFlag(this.dataset.sectionId);
 
         this.bindEvents();
 
-        if (this.cookie.read() !== false || this.cookie.readLegacy() !== false) {
+        const dismissed = this.cookie.read() !== false || this.cookie.readLegacy() !== false;
+        if (dismissed && !window.Shopify?.designMode) {
           return;
         }
 
@@ -212,12 +243,25 @@
       this.dialog.addEventListener("click", this.handleBackdropClose);
     }
 
-    maybeOpen() {
+    maybeOpen(skipConsentWait = false) {
       if (this.hasAttemptedOpen) return;
 
-      // Cookie banner first; a modal dialog would sit above it and block it.
-      if (document.documentElement.hasAttribute(COOKIE_BANNER_OPEN_ATTRIBUTE)) {
-        document.addEventListener(COOKIE_BANNER_CLOSED_EVENT, () => this.maybeOpen(), { once: true });
+      // Cookie banner first; a modal dialog would sit above it and block it. Wait until iubenda
+      // has closed its banner or reported consent as settled, not just for a banner already up:
+      // it loads async and can show up after the 5s mark.
+      if (!skipConsentWait && !document.documentElement.hasAttribute(COOKIE_CONSENT_SETTLED_ATTRIBUTE)) {
+        const proceed = (force) => {
+          window.clearTimeout(grace);
+          document.removeEventListener(COOKIE_CONSENT_SETTLED_EVENT, onSettled);
+          this.maybeOpen(force === true);
+        };
+        const onSettled = () => proceed(false);
+        // iubenda silent (blocked, offline) and no banner up: stop waiting for it.
+        const grace = window.setTimeout(() => {
+          if (!document.documentElement.hasAttribute(COOKIE_BANNER_OPEN_ATTRIBUTE)) proceed(true);
+        }, COOKIE_CONSENT_GRACE_MS);
+
+        document.addEventListener(COOKIE_CONSENT_SETTLED_EVENT, onSettled);
         return;
       }
 
