@@ -75,7 +75,7 @@
     the auto-appearing prompt can be handed over to the Klaviyo flyout.
     `!= false` so an instance saved before this setting existed still shows it.
   {%- endcomment -%}
-  {%- if section.settings.float_enabled != false and customer == nil -%}
+  {%- if section.settings.float_enabled != false and customer == null -%}
     <aside
       class="footer-newsletter-float"
       data-newsletter-float
@@ -114,9 +114,8 @@
         {{ section.settings.float_button_text | default: 'Newsletter sign up' | escape }}
       </button>
     </aside>
-
-{%- endunless -%}
- </footer-newsletter-drawer>
+  {%- endif -%}
+</footer-newsletter-drawer>
 
 {% stylesheet %}
   .footer-newsletter__inner {
