@@ -2438,16 +2438,16 @@
                 <div {{ product_slides_attributes }}>
               {%- endif -%}
 
-                {%- for media in ordered_media -%}
-                  {%- render 'media',
-                    media: media,
-                    featured_media: featured_media,
-                    enable_video_looping: enable_video_looping,
-                    sectionkey: section.id,
-                    image_width: image_width,
-                    cover: true
-                  -%}
-                {%- endfor -%}
+              {%- for media in ordered_media -%}
+                {%- render 'media',
+                  media: media,
+                  featured_media: featured_media,
+                  enable_video_looping: enable_video_looping,
+                  sectionkey: section.id,
+                  image_width: image_width,
+                  cover: true
+                -%}
+              {%- endfor -%}
 
               {%- if section.settings.enable_zoom -%}
                 </zoom-images>
@@ -3783,7 +3783,11 @@
   data-drawer-direction="right-to-left"
 >
   <div class="drawer__inner" data-drawer-inner>
-    <button class="drawer__close" data-drawer-close="ruby-signature" aria-label="{{ 'general.accessibility.close' | t }}">
+    <button
+      class="drawer__close"
+      data-drawer-close="ruby-signature"
+      aria-label="{{ 'general.accessibility.close' | t }}"
+    >
       {% render 'icon-close' %}
     </button>
 
@@ -3802,15 +3806,23 @@
     if (rubyDrawer) {
       var closeBtn = rubyDrawer.querySelector('.drawer__close');
       if (closeBtn) {
-        closeBtn.addEventListener('touchstart', function (e) {
-          e.preventDefault();
-        }, { passive: false });
-        closeBtn.addEventListener('touchend', function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          rubyDrawer.isAnimating = false;
-          rubyDrawer.hideDrawer();
-        }, { passive: false });
+        closeBtn.addEventListener(
+          'touchstart',
+          function (e) {
+            e.preventDefault();
+          },
+          {passive: false}
+        );
+        closeBtn.addEventListener(
+          'touchend',
+          function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            rubyDrawer.isAnimating = false;
+            rubyDrawer.hideDrawer();
+          },
+          {passive: false}
+        );
       }
     }
   })();
