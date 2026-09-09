@@ -56,7 +56,11 @@
 
   window.theme.geo = {
     // Visitor's ISO alpha-2 country from Shopify's IP suggestion, "" when unknown. One request per page.
+    // QA: `?geo_country=GB` on any URL stands in for the detected country.
     detectCountry() {
+      const forcedCountry = normalizeCountryCode(new URLSearchParams(window.location.search).get("geo_country"));
+      if (forcedCountry) return Promise.resolve(forcedCountry);
+
       if (!detectedCountryPromise) {
         detectedCountryPromise = fetch("/browsing_context_suggestions.json", { credentials: "same-origin" })
           .then((response) => response.json())
