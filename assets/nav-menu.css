@@ -225,41 +225,21 @@ body.plp-header-ready:not(.plp-header-anim-done) .announcement__wrapper--top {
   pointer-events: none;
 }
 
-/* Mobile: its own row under the bar, riding the announcement offset and the
-   entrance/scroll-hide exactly like the bar's slots do.
-
-   Spacing follows the legacy header, where logo and meta were flex children of
-   .header__logo and the distance was that element's `gap`:
-     24px  base, every template          (theme.css .header__logo)
-     16px  collection, below 769px       (custom-collection.css)
-     40px  collection, 769px and up      (custom-collection.css)
-   The 769px step existed because one element served both breakpoints there. Here the
-   desktop copy takes over at 1024px with its own .rc-d-center gap, so this row only
-   needs the two mobile figures. */
 .rc-mobile-crumbs {
   display: flex;
   justify-content: center;
   position: relative;
-  top: calc(var(--announcement-height) + 0px);
-  padding: 24px 20px 0;
-}
-body.template-collection .rc-mobile-crumbs {
-  padding-top: 16px;
-}
-/* The 25px `top` above is a relative shift, invisible to the offsetHeight behind
-   --header-height, so the crumb landed on the gallery. Fold it into padding, less the 10px
-   the crumb was tightened by: 24 + 25 - 10 = 39. */
-body.template-product .rc-mobile-crumbs {
   top: var(--announcement-height, 0px);
   padding-top: 10px;
 }
 
-body.template-product .rc-mobile-crumbs a {
+.rc-mobile-crumbs h6,
+.rc-mobile-crumbs a {
   font-size: 12px;
   line-height: 16px;
 }
-/* No collection: the row still renders, with an empty h6 and nothing to clear. */
-body.template-product .rc-mobile-crumbs:has(h6:empty) {
+
+.rc-mobile-crumbs:has(h6:empty) {
   padding-top: 24px;
 }
 .rc-nav .rc-mobile-crumbs > * {
