@@ -129,6 +129,7 @@
       .then(function (response) {
         clearTimeout(timeoutId);
         if (response.ok || response.status === 202) {
+          identifyInKlaviyo(profile.email);
           showSuccess(form);
           return null;
         }
@@ -161,6 +162,22 @@
       }
     }
     return "";
+  }
+
+  /* Server-side subscribe doesn't tie the browser to the profile, so identify
+   * explicitly; _klOnsite queues it if klaviyo.js hasn't initialised yet. */
+  function identifyInKlaviyo(email) {
+    if (!email) return;
+    try {
+      if (window.klaviyo && typeof window.klaviyo.identify === "function") {
+        Promise.resolve(window.klaviyo.identify({ email: email })).catch(function () {});
+        return;
+      }
+      window._klOnsite = window._klOnsite || [];
+      window._klOnsite.push(["identify", { email: email }]);
+    } catch (error) {
+      // identification must never break an already-successful subscribe
+    }
   }
 
   function extractError(body) {
