@@ -6245,6 +6245,9 @@
       this.productLink = this.closest(selectors$8.productLink);
       this.handleScroll = this.handleScroll.bind(this);
       this.updateProgressBar = this.updateProgressBar.bind(this);
+      this.scrollFrame = null;
+      this.lastProgress = null;
+      this.touchObserver = null;
       this.recentlyViewed = this.closest(selectors$8.recentlyViewed);
       this.hovered = false;
       this.productLinkArrowClickHandler = (event) => {
@@ -6307,6 +6310,16 @@
       if (this.slider) {
         this.slider.removeEventListener("scroll", this.handleScroll);
       }
+
+      if (this.scrollFrame) {
+        cancelAnimationFrame(this.scrollFrame);
+        this.scrollFrame = null;
+      }
+
+      if (this.touchObserver) {
+        this.touchObserver.disconnect();
+        this.touchObserver = null;
+      }
     }
 
     initBasedOnDevice() {
@@ -6324,76 +6337,185 @@
     }
 
     initTouch() {
-      this.style.setProperty("--slides-count", this.querySelectorAll(selectors$8.slideTouch).length);
-      this.slider.addEventListener("scroll", this.handleScroll);
+      // Touch devices used to rely on the native scroll-snap scroller (theme.css,
+      // `.supports-touch hover-images .product-item__bg__slider:not(.flickity-enabled)`).
+      // On iOS WebKit — Safari and Chrome iOS alike — the swipe stopped between slides
+      // instead of settling on one, and stripping every layout write out of the scroll
+      // handler did not cure it. So touch now runs the same Flickity instance as desktop,
+      // with dragging on: Flickity owns the drag physics and always settles on a cell.
+      // The native scroller remains the pre-init state and the fallback for single-media
+      // items or a missing Flickity.
+      if (this.flkty || this.touchObserver) return;
+
+      this.slider.addEventListener("scroll", this.handleScroll, { passive: true });
       this.updateProgressBar();
+
+      if (!window.theme.Flickity || this.querySelectorAll(selectors$8.slideTouch).length < 2) return;
+
+      // Lazy per card: a PLP has 30+ of these, and initialising them all during the load
+      // cascade would add a burst of layout reads/writes. Cards within one viewport of the
+      // fold init right away, the rest as they approach.
+      if (!("IntersectionObserver" in window)) {
+        this.initFlickity(true);
+        return;
+      }
+
+      this.touchObserver = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          this.touchObserver.disconnect();
+          this.touchObserver = null;
+          this.initFlickity(true);
+        },
+        { rootMargin: "100% 0px" }
+      );
+      this.touchObserver.observe(this);
+    }
+
+    // Desktop: hover-driven, arrows, wraps around, and `watchCSS` lets the
+    // `.no-touch hover-images .product-item__bg__slider::after { content: "flickity" }` rule
+    // switch it off. Touch: drag-driven and bounded like the native scroller it replaces,
+    // with every media slide as a cell.
+    flickityOptions(isTouch) {
+      const shared = {
+        cellAlign: "left",
+        contain: true,
+        autoPlay: false,
+        pageDots: false,
+      };
+
+      if (isTouch) {
+        return {
+          ...shared,
+          cellSelector: selectors$8.slideTouch,
+          wrapAround: false,
+          percentPosition: true,
+          // Viewport height comes from CSS (100% of the card), not from measuring cells —
+          // the cells are themselves 100% tall, so measuring would freeze the height at
+          // the first layout and break orientation changes.
+          setGallerySize: false,
+          watchCSS: false,
+          draggable: true,
+          dragThreshold: 8,
+          prevNextButtons: false,
+          accessibility: false,
+        };
+      }
+
+      return {
+        ...shared,
+        cellSelector: selectors$8.slide,
+        wrapAround: true,
+        percentPosition: false,
+        watchCSS: true,
+        draggable: false,
+        prevNextButtons: true,
+      };
     }
 
     handleScroll() {
-      const slideIndex = this.slider.scrollLeft / this.slider.clientWidth;
-      this.style.setProperty("--slider-index", slideIndex);
-      this.updateProgressBar();
+      if (this.scrollFrame) return;
+
+      this.scrollFrame = requestAnimationFrame(() => {
+        this.scrollFrame = null;
+        this.updateProgressBar();
+      });
     }
 
     updateProgressBar() {
       if (!this.progressBar) return;
 
-      const slideCount = window.theme.touch
-        ? this.querySelectorAll(selectors$8.slideTouch).length
-        : this.flkty?.cells?.length || this.querySelectorAll(selectors$8.slide).length;
+      let slideCount = 0;
+      let progress = 0;
+
+      if (this.flkty) {
+        slideCount = this.flkty.cells?.length || 0;
+
+        if (slideCount > 1) {
+          const maxIndex = Math.max(slideCount - 1, 1);
+          progress = Math.max(0, Math.min(100, ((this.flkty.selectedIndex || 0) / maxIndex) * 100));
+          this.progressBar.classList.remove("hidden");
+        }
+      } else if (window.theme.touch) {
+        // Native scroller (pre-init or fallback). Reads are grouped, writes only on change.
+        slideCount = this.querySelectorAll(selectors$8.slideTouch).length;
+
+        if (slideCount > 1) {
+          const { scrollLeft, clientWidth, scrollWidth } = this.slider;
+          const isScrollable = scrollWidth > clientWidth + 1;
+
+          if (this.progressBar.classList.contains("hidden") === isScrollable) {
+            this.progressBar.classList.toggle("hidden", !isScrollable);
+          }
+
+          if (!isScrollable) {
+            this.setProgress(0);
+            return;
+          }
+
+          const progressPercent = ((scrollLeft + clientWidth) / scrollWidth) * 100;
+          progress = Math.max(0, Math.min(100, progressPercent));
+        }
+      } else {
+        slideCount = this.querySelectorAll(selectors$8.slide).length;
+      }
 
       if (slideCount <= 1) {
-        this.progressBar.hidden = true;
+        if (!this.progressBar.hidden) this.progressBar.hidden = true;
         return;
       }
 
-      let progress = 0;
-
-      if (window.theme.touch) {
-        const isScrollable = this.slider.scrollWidth > this.slider.clientWidth + 1;
-        this.progressBar.classList.toggle("hidden", !isScrollable);
-
-        if (!isScrollable) {
-          this.progressBar.style.setProperty("--related-slider-progress", "0%");
-          return;
-        }
-
-        const progressPercent = ((this.slider.scrollLeft + this.slider.clientWidth) / this.slider.scrollWidth) * 100;
-        progress = Math.max(0, Math.min(100, progressPercent));
-      } else if (this.flkty) {
-        const maxIndex = Math.max(slideCount - 1, 1);
-        progress = Math.max(0, Math.min(100, ((this.flkty.selectedIndex || 0) / maxIndex) * 100));
-        this.progressBar.classList.remove("hidden");
-      }
-
-      this.progressBar.hidden = false;
-      this.progressBar.style.setProperty("--related-slider-progress", `${progress}%`);
-      if (this.progressLine) {
-        this.progressLine.style.width = `${progress}%`;
-      }
+      if (this.progressBar.hidden) this.progressBar.hidden = false;
+      this.setProgress(progress);
     }
 
-    initFlickity() {
+    // The bar's line is drawn with transform: scaleX(var(--related-slider-progress-ratio))
+    // (see `hover-images .related-slider-progress__line` in theme.css) — a composited
+    // property, so updating it does not lay out the card. Quantised to 0.1% so a scroll
+    // that lands on the same value writes nothing.
+    setProgress(progress) {
+      const rounded = Math.round(progress * 10) / 10;
+      if (rounded === this.lastProgress) return;
+
+      this.lastProgress = rounded;
+      this.progressBar.style.setProperty("--related-slider-progress", `${rounded}%`);
+      this.progressBar.style.setProperty("--related-slider-progress-ratio", `${rounded / 100}`);
+    }
+
+    initFlickity(isTouch = false) {
+      const cellSelector = isTouch ? selectors$8.slideTouch : selectors$8.slide;
+
       if (
         this.flkty ||
         !this.slider ||
+        !this.isConnected ||
         this.slider.classList.contains("flickity-enabled") ||
-        this.querySelectorAll(selectors$8.slide).length < 2
+        this.querySelectorAll(cellSelector).length < 2
       )
         return;
 
-      this.flkty = new window.theme.Flickity(this.slider, {
-        cellSelector: selectors$8.slide,
-        cellAlign: "left",
-        contain: true,
-        wrapAround: true,
-        percentPosition: false,
-        watchCSS: true,
-        autoPlay: false,
-        draggable: false,
-        pageDots: false,
-        prevNextButtons: true,
-      });
+      if (isTouch) {
+        this.slider.removeEventListener("scroll", this.handleScroll);
+
+        if (this.scrollFrame) {
+          cancelAnimationFrame(this.scrollFrame);
+          this.scrollFrame = null;
+        }
+
+        // A swipe may already have moved the native scroller before this ran. Flickity
+        // positions cells with transforms and expects the container itself at 0.
+        this.slider.scrollLeft = 0;
+      }
+
+      this.flkty = new window.theme.Flickity(this.slider, this.flickityOptions(isTouch));
+      this.flkty.on("change", this.updateProgressBar);
+      this.updateProgressBar();
+
+      if (isTouch) {
+        // Live progress while the finger moves; `change` re-syncs to the settled index.
+        this.flkty.on("scroll", (progress) => this.setProgress(progress * 100));
+        return;
+      }
 
       const refreshFlickityLayout = () => {
         if (!this.flkty) return;
@@ -6403,8 +6525,6 @@
 
       requestAnimationFrame(refreshFlickityLayout);
       this.flkty.pausePlayer();
-      this.updateProgressBar();
-      this.flkty.on("change", this.updateProgressBar);
 
       this.addEventListener("mouseenter", () => {
         refreshFlickityLayout();
