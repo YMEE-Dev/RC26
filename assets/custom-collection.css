@@ -4,18 +4,19 @@
 
 .collection__nav .availability_filter-wrapper [data-availability-view-all] .availability-filter__label--view-all {
   display: none;
+  margin-bottom: 1px;
+}
+
+.collection__nav.is-stuck .availability_filter-wrapper [data-availability-view-all] .availability-filter__label--count {
+  display: none;
+}
+
+.collection__nav.is-stuck .availability_filter-wrapper [data-availability-view-all] .availability-filter__label--view-all {
+  display: inline;
 }
 
 .collection__nav .availability_filter-wrapper [data-availability-view-all] {
   text-decoration: none;
-}
-
-/* Client request: hide the "view all" availability control entirely once the
-   collection nav becomes sticky (replaces the earlier stuck-state label swap).
-   `display: none` on the element also hides its label children, so it wins over
-   the mobile label !important rules in collection-floating-bar.css. */
-.collection__nav.is-stuck .availability_filter-wrapper [data-availability-view-all] {
-  display: none;
 }
 
 /* PLP scroll-up overlap fix (desktop): when the header re-reveals on upward
