@@ -180,7 +180,7 @@
 
               if related_product.id != product.id and hidden_product == false and excluded_product == false and related_count < related_category_limit
                 assign related_count = related_count | plus: 1
-                render 'product-grid-item', product: related_product, animation_delay: forloop.index0 | times: 1, animation_anchor: '#RelatedProductsCollection--' | append: section.id, index: forloop.index
+                render 'product-grid-item', product: related_product, animation_delay: forloop.index0, times: 1, animation_anchor: '#RelatedProductsCollection--', append: section.id, index: forloop.index
               endif
             endfor
           endcapture
@@ -220,7 +220,7 @@
 
               if category_product.id != product.id and hidden_product == false and excluded_product == false and category_count < related_category_limit
                 assign category_count = category_count | plus: 1
-                render 'product-grid-item', product: category_product, animation_delay: forloop.index0 | times: 1, animation_anchor: '#RelatedProductsCategory--' | append: section.id, index: forloop.index
+                render 'product-grid-item', product: category_product, animation_delay: forloop.index0, times: 1, animation_anchor: '#RelatedProductsCategory--', append: section.id, index: forloop.index
               endif
             endfor
           endcapture
@@ -730,3 +730,24 @@
   ]
 }
 {% endschema %}
+{% comment %}
+
+This file has been rewritten to preserve the original behavior.
+
+---
+Changes:
+- from: "                render 'product-grid-item', product: related_product, animation_delay:
+    forloop.index0 | times: 1, animation_anchor: '#RelatedProductsCollection--' |
+    append: section.id, index: forloop.index"
+  to: "                render 'product-grid-item', product: related_product, animation_delay:
+    forloop.index0, times: 1, animation_anchor: '#RelatedProductsCollection--', append:
+    section.id, index: forloop.index"
+  position: 6535..6738
+- from: "                render 'product-grid-item', product: category_product, animation_delay:
+    forloop.index0 | times: 1, animation_anchor: '#RelatedProductsCategory--' | append:
+    section.id, index: forloop.index"
+  to: "                render 'product-grid-item', product: category_product, animation_delay:
+    forloop.index0, times: 1, animation_anchor: '#RelatedProductsCategory--', append:
+    section.id, index: forloop.index"
+  position: 8704..8906
+{% endcomment %}
