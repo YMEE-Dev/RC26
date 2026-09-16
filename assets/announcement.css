@@ -23,10 +23,11 @@
 }
 
 /* Auto height (slider layout with "Wrap text on two lines"). announcement.js measures the
-   rendered bar and writes --announcement-height on <html> so the header offset follows a
-   bar that grew to two lines. The min-heights inside the bar also read that variable, so
-   pin them to the static Liquid value here — otherwise a measured height feeds the
-   min-height, which grows the bar, which is measured again. */
+   rendered bar and writes --ANNOUNCEMENT-MEASURED-DESKTOP/-MOBILE on <html> so the header
+   offset follows a bar that grew to two lines. The min-heights inside the bar resolve
+   --announcement-height, which theme.css feeds from those measurements, so pin them to the
+   static Liquid value here — otherwise a measured height feeds the min-height, which grows
+   the bar, which is measured again. */
 .announcement__wrapper--top[data-announcement-auto-height] {
   --announcement-height: var(--ANNOUNCEMENT-HEIGHT-DESKTOP, 0px);
 }

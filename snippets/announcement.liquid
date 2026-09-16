@@ -30,6 +30,10 @@
   if section.settings.bar_height > 0
     assign announcement_height = section.settings.bar_height | append: 'px'
   endif
+  assign announcement_height_mobile = announcement_height
+  if section.settings.bar_height_mobile > 0
+    assign announcement_height_mobile = section.settings.bar_height_mobile | append: 'px'
+  endif
   assign announcement_cookie_name = 'announcement_bar_closed'
   assign announcement_modifier = ''
   assign style_root = ''
@@ -352,13 +356,13 @@
   {%- capture style_root -%}
     {{ style_root }}
     --ANNOUNCEMENT-HEIGHT-DESKTOP: 0px;
-    --ANNOUNCEMENT-HEIGHT-MOBILE: {{ announcement_height }};
+    --ANNOUNCEMENT-HEIGHT-MOBILE: {{ announcement_height_mobile }};
   {%- endcapture -%}
 {%- else -%}
   {%- capture style_root -%}
     {{ style_root }}
     --ANNOUNCEMENT-HEIGHT-DESKTOP: {{ announcement_height }};
-    --ANNOUNCEMENT-HEIGHT-MOBILE: {{ announcement_height }};
+    --ANNOUNCEMENT-HEIGHT-MOBILE: {{ announcement_height_mobile }};
   {%- endcapture -%}
 {%- endif -%}
 

@@ -16,6 +16,13 @@
     autoHeight: "data-announcement-auto-height"
   };
 
+  const measuredProperties = {
+    desktop: "--ANNOUNCEMENT-MEASURED-DESKTOP",
+    mobile: "--ANNOUNCEMENT-MEASURED-MOBILE"
+  };
+
+  const mobileQuery = "(max-width: 749px)";
+
   if (customElements.get("announcement-bar")) return;
 
   customElements.define(
@@ -88,6 +95,13 @@
         this.addEventListener("theme:countdown:expire", refreshTickers);
         this.closeButton?.addEventListener("click", this.closeEvent);
         document.addEventListener("theme:resize:width", this.resizeEvent);
+        // A single rAF after a width change measures mid-relayout and publishes a height the
+        // bar never settles at. Observe the box instead: it reports the settled height, and
+        // nothing inside the bar reads the published value, so this cannot loop.
+        if (this.autoHeight && this.wrapper && "ResizeObserver" in window) {
+          this.heightObserver = new ResizeObserver(this.syncHeightEvent);
+          this.heightObserver.observe(this.wrapper);
+        }
         document.dispatchEvent(new CustomEvent("theme:announcement:init", { bubbles: true }));
       }
 
@@ -115,9 +129,10 @@
       // Slider layout with "Wrap text on two lines": --ANNOUNCEMENT-HEIGHT-* on :root is a
       // Liquid guess of a single text line, but a wrapped slide makes the bar taller, and
       // the header offsets itself by var(--announcement-height). Publish the rendered height
-      // on <html> (inline style wins over the :root media rules and the :has() rule in
-      // nav-menu.css). announcement.css pins the bar's own inner min-heights to the static
-      // value so this measurement cannot feed back into itself.
+      // per breakpoint, not as a resolved --announcement-height: theme.css switches that at
+      // 750px, and a single shared value let a desktop viewport keep a height measured on
+      // mobile. announcement.css pins the bar's own inner min-heights to the static value so
+      // this measurement cannot feed back into itself.
       syncHeight() {
         if (!this.autoHeight || !this.wrapper || !this.isTopBar()) return;
         // fonts.ready can resolve after the editor re-rendered the section; a detached
@@ -130,8 +145,16 @@
         const holder = this.querySelector(selectors.barHolder);
         const contentHeight = holder ? holder.offsetHeight : 0;
         const height = contentHeight > 0 ? this.wrapper.offsetHeight : 0;
+        const property = window.matchMedia(mobileQuery).matches
+          ? measuredProperties.mobile
+          : measuredProperties.desktop;
 
-        document.documentElement.style.setProperty("--announcement-height", `${height}px`);
+        document.documentElement.style.setProperty(property, `${height}px`);
+      }
+
+      clearMeasuredHeights() {
+        document.documentElement.style.removeProperty(measuredProperties.desktop);
+        document.documentElement.style.removeProperty(measuredProperties.mobile);
       }
 
       close() {
@@ -192,11 +215,12 @@
       disconnectedCallback() {
         document.removeEventListener("theme:resize:width", this.resizeEvent);
         this.closeButton?.removeEventListener("click", this.closeEvent);
+        this.heightObserver?.disconnect();
         // Drop the measured height when the bar leaves the page (editor removes the section
         // or all its blocks) so the header falls back to the :root value instead of a
         // stale inline one. A re-rendered bar connects afterwards and measures again.
         if (this.autoHeight && this.isTopBar()) {
-          document.documentElement.style.removeProperty("--announcement-height");
+          this.clearMeasuredHeights();
         }
       }
     }
