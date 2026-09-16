@@ -139,17 +139,23 @@
         // bar measures 0 and would collapse the header offset.
         if (!this.isConnected || this.isClosing || this.hasDismissedCookie()) return;
 
-        // Device-targeted slides are display:none on the other breakpoint. With no visible
-        // slide the holder is 0px tall and the bar reserves nothing, exactly as the Liquid
-        // value does — don't let the stray close button become the reserved height.
-        const holder = this.querySelector(selectors.barHolder);
-        const contentHeight = holder ? holder.offsetHeight : 0;
-        const height = contentHeight > 0 ? this.wrapper.offsetHeight : 0;
         const property = window.matchMedia(mobileQuery).matches
           ? measuredProperties.mobile
           : measuredProperties.desktop;
 
-        document.documentElement.style.setProperty(property, `${height}px`);
+        // Device-targeted slides are display:none on the other breakpoint, and the bar is
+        // briefly 0px tall while Flickity lays out. Publishing that 0 would latch it: 0px is
+        // a valid value, so the var() fallback to the Liquid height never runs. Drop the
+        // measurement instead — Liquid already emits 0px for a breakpoint with no slides.
+        const holder = this.querySelector(selectors.barHolder);
+        const contentHeight = holder ? holder.offsetHeight : 0;
+        const height = contentHeight > 0 ? this.wrapper.offsetHeight : 0;
+
+        if (height > 0) {
+          document.documentElement.style.setProperty(property, `${height}px`);
+        } else {
+          document.documentElement.style.removeProperty(property);
+        }
       }
 
       clearMeasuredHeights() {
