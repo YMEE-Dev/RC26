@@ -3,6 +3,7 @@
   window.__collectionLoadMoreInitialized = true;
 
   const selectors = {
+    backToTop: "[data-pagination-back-to-top]",
     button: "[data-load-more-button]",
     grid: "[data-products-grid] .grid",
     pagination: "[data-load-more]",
@@ -46,6 +47,11 @@
 
   // Delegated so it survives filter re-renders and the pagination swap after each load.
   document.addEventListener("click", (event) => {
+    if (event.target.closest(selectors.backToTop)) {
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+      return;
+    }
+
     const button = event.target.closest(selectors.button);
     if (!button) return;
 
