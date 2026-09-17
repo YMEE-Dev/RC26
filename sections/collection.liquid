@@ -696,12 +696,22 @@
             {%- if paginate.next -%}
               <a
                 href="{{ paginate.next.url }}"
-                class="btn btn--primary btn--solid pagination__load-more"
+                class="btn btn--secondary btn--outline pagination__load-more"
                 data-load-more-button
                 data-loading-text="{{ 'general.pagination.loading' | t }}"
               >
                 <span>{{ 'general.pagination.load_more' | t }}</span>
               </a>
+            {%- endif -%}
+            {%- if paginate.next or paginate.current_page > 1 -%}
+              <button
+                type="button"
+                class="btn btn--secondary btn--text pagination__back-to-top"
+                data-pagination-back-to-top
+              >
+                {%- render 'icon-nav-arrow-up' -%}
+                <span class="navlink">{{ 'general.pagination.back_to_top' | t }}</span>
+              </button>
             {%- endif -%}
           </div>
         {%- elsif pagination_type == 'infinite' -%}

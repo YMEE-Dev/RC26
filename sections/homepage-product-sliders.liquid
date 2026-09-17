@@ -85,11 +85,14 @@
             {%- continue -%}
           {%- endif -%}
 
-          {%- assign tab_products_count = tab_products_count | plus: 1 -%}
+          {%- liquid
+            assign tab_products_count = tab_products_count | plus: 1
+            assign animation_anchor = '#HomepageProductSlidersTab--' | append: section.id | append: '-' | append: rendered_tab_count
+          -%}
           {%- render 'product-grid-item',
             product: selected_product,
-            animation_delay: forloop.index0 | times: 1,
-            animation_anchor: '#HomepageProductSlidersTab--' | append: section.id | append: '-' | append: rendered_tab_count,
+            animation_delay: forloop.index0,
+            animation_anchor: animation_anchor,
             index: forloop.index,
             disable_image_hover: disable_image_hover,
             modifier_class: 'product-item--homepage-slider-scale',
@@ -125,11 +128,14 @@
             {%- continue -%}
           {%- endif -%}
 
-          {%- assign tab_products_count = tab_products_count | plus: 1 -%}
+          {%- liquid
+            assign tab_products_count = tab_products_count | plus: 1
+            assign animation_anchor = '#HomepageProductSlidersTab--' | append: section.id | append: '-' | append: rendered_tab_count
+          -%}
           {%- render 'product-grid-item',
             product: selected_product,
-            animation_delay: forloop.index0 | times: 1,
-            animation_anchor: '#HomepageProductSlidersTab--' | append: section.id | append: '-' | append: rendered_tab_count,
+            animation_delay: forloop.index0,
+            animation_anchor: animation_anchor,
             index: forloop.index,
             disable_image_hover: disable_image_hover,
             modifier_class: 'product-item--homepage-slider-scale'

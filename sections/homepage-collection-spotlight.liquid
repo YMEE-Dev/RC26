@@ -111,11 +111,15 @@
                   -%}
 
                   {%- if hidden_product == false -%}
-                    {%- assign rendered_products_count = rendered_products_count | plus: 1 -%}
+                    {%- liquid
+                      assign rendered_products_count = rendered_products_count | plus: 1
+                      assign animation_delay = rendered_products_count | minus: 1
+                      assign animation_anchor = '#HomepageCollectionSpotlightSlider--' | append: section.id
+                    -%}
                     {%- render 'product-grid-item',
                       product: product,
-                      animation_delay: rendered_products_count | minus: 1,
-                      animation_anchor: '#HomepageCollectionSpotlightSlider--' | append: section.id,
+                      animation_delay: animation_delay,
+                      animation_anchor: animation_anchor,
                       index: rendered_products_count,
                       sizes: sizes,
                       disable_image_hover: true,
@@ -128,6 +132,7 @@
                   {%- for i in (1..2) -%}
                     {%- liquid
                       assign placeholder = 'product-' | append: forloop.index
+                      assign animation_anchor = '#HomepageCollectionSpotlightSlider--' | append: section.id
                       capture placeholder_title
                         cycle 'Spotlight Product', 'Collection Piece'
                       endcapture
@@ -137,7 +142,7 @@
                       placeholder: placeholder,
                       index: forloop.index,
                       animation_delay: forloop.index0,
-                      animation_anchor: '#HomepageCollectionSpotlightSlider--' | append: section.id
+                      animation_anchor: animation_anchor
                     -%}
                   {%- endfor -%}
                 {%- endif -%}
@@ -280,8 +285,8 @@
       "label": "Button style",
       "default": "primary",
       "options": [
-        { "value": "primary", "label": "Primary" },
-        { "value": "secondary", "label": "Secondary" }
+        {"value": "primary", "label": "Primary"},
+        {"value": "secondary", "label": "Secondary"}
       ]
     },
     {
