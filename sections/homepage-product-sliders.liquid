@@ -86,7 +86,15 @@
           {%- endif -%}
 
           {%- assign tab_products_count = tab_products_count | plus: 1 -%}
-          {%- render 'product-grid-item', product: selected_product, animation_delay: forloop.index0, times: 1, animation_anchor: '#HomepageProductSlidersTab--', append: rendered_tab_count, index: forloop.index, disable_image_hover: disable_image_hover, modifier_class: 'product-item--homepage-slider-scale', show_hover_slider_mobile: false -%}
+          {%- render 'product-grid-item',
+            product: selected_product,
+            animation_delay: forloop.index0 | times: 1,
+            animation_anchor: '#HomepageProductSlidersTab--' | append: section.id | append: '-' | append: rendered_tab_count,
+            index: forloop.index,
+            disable_image_hover: disable_image_hover,
+            modifier_class: 'product-item--homepage-slider-scale',
+            show_hover_slider_mobile: false
+          -%}
         {%- endfor -%}
       {%- endif -%}
 
@@ -118,7 +126,14 @@
           {%- endif -%}
 
           {%- assign tab_products_count = tab_products_count | plus: 1 -%}
-          {%- render 'product-grid-item', product: selected_product, animation_delay: forloop.index0, times: 1, animation_anchor: '#HomepageProductSlidersTab--', append: rendered_tab_count, index: forloop.index, disable_image_hover: disable_image_hover, modifier_class: 'product-item--homepage-slider-scale' -%}
+          {%- render 'product-grid-item',
+            product: selected_product,
+            animation_delay: forloop.index0 | times: 1,
+            animation_anchor: '#HomepageProductSlidersTab--' | append: section.id | append: '-' | append: rendered_tab_count,
+            index: forloop.index,
+            disable_image_hover: disable_image_hover,
+            modifier_class: 'product-item--homepage-slider-scale'
+          -%}
         {%- endfor -%}
       {%- endif -%}
     {%- endcapture -%}
@@ -381,40 +396,3 @@
   ]
 }
 {% endschema %}
-{% comment %}
-
-This file has been rewritten to preserve the original behavior.
-
----
-Changes:
-- from: |-
-    {%- render 'product-grid-item',
-                product: selected_product,
-                animation_delay: forloop.index0 | times: 1,
-                animation_anchor: '#HomepageProductSlidersTab--' | append: section.id | append: '-' | append: rendered_tab_count,
-                index: forloop.index,
-                disable_image_hover: disable_image_hover,
-                modifier_class: 'product-item--homepage-slider-scale',
-                show_hover_slider_mobile: false
-              -%}
-  to: "{%- render 'product-grid-item', product: selected_product, animation_delay:
-    forloop.index0, times: 1, animation_anchor: '#HomepageProductSlidersTab--', append:
-    rendered_tab_count, index: forloop.index, disable_image_hover: disable_image_hover,
-    modifier_class: 'product-item--homepage-slider-scale', show_hover_slider_mobile:
-    false -%}"
-  position: 2972..3306
-- from: |-
-    {%- render 'product-grid-item',
-                product: selected_product,
-                animation_delay: forloop.index0 | times: 1,
-                animation_anchor: '#HomepageProductSlidersTab--' | append: section.id | append: '-' | append: rendered_tab_count,
-                index: forloop.index,
-                disable_image_hover: disable_image_hover,
-                modifier_class: 'product-item--homepage-slider-scale'
-              -%}
-  to: "{%- render 'product-grid-item', product: selected_product, animation_delay:
-    forloop.index0, times: 1, animation_anchor: '#HomepageProductSlidersTab--', append:
-    rendered_tab_count, index: forloop.index, disable_image_hover: disable_image_hover,
-    modifier_class: 'product-item--homepage-slider-scale' -%}"
-  position: 4305..4606
-{% endcomment %}

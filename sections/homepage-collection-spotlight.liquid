@@ -112,7 +112,15 @@
 
                   {%- if hidden_product == false -%}
                     {%- assign rendered_products_count = rendered_products_count | plus: 1 -%}
-                    {%- render 'product-grid-item', product: product, animation_delay: rendered_products_count, minus: 1, animation_anchor: '#HomepageCollectionSpotlightSlider--', append: section.id, index: rendered_products_count, sizes: sizes, disable_image_hover: true, modifier_class: 'homepage-collection-spotlight__product-card' -%}
+                    {%- render 'product-grid-item',
+                      product: product,
+                      animation_delay: rendered_products_count | minus: 1,
+                      animation_anchor: '#HomepageCollectionSpotlightSlider--' | append: section.id,
+                      index: rendered_products_count,
+                      sizes: sizes,
+                      disable_image_hover: true,
+                      modifier_class: 'homepage-collection-spotlight__product-card'
+                    -%}
                   {%- endif -%}
                 {%- endfor -%}
 
@@ -124,7 +132,13 @@
                         cycle 'Spotlight Product', 'Collection Piece'
                       endcapture
                     -%}
-                    {%- render 'onboarding-product-grid-item', title: placeholder_title, placeholder: placeholder, index: forloop.index, animation_delay: forloop.index0, animation_anchor: '#HomepageCollectionSpotlightSlider--', append: section.id -%}
+                    {%- render 'onboarding-product-grid-item',
+                      title: placeholder_title,
+                      placeholder: placeholder,
+                      index: forloop.index,
+                      animation_delay: forloop.index0,
+                      animation_anchor: '#HomepageCollectionSpotlightSlider--' | append: section.id
+                    -%}
                   {%- endfor -%}
                 {%- endif -%}
               </div>
@@ -389,37 +403,3 @@
   ]
 }
 {% endschema %}
-{% comment %}
-
-This file has been rewritten to preserve the original behavior.
-
----
-Changes:
-- from: |-
-    {%- render 'product-grid-item',
-                          product: product,
-                          animation_delay: rendered_products_count | minus: 1,
-                          animation_anchor: '#HomepageCollectionSpotlightSlider--' | append: section.id,
-                          index: rendered_products_count,
-                          sizes: sizes,
-                          disable_image_hover: true,
-                          modifier_class: 'homepage-collection-spotlight__product-card'
-                        -%}
-  to: "{%- render 'product-grid-item', product: product, animation_delay: rendered_products_count,
-    minus: 1, animation_anchor: '#HomepageCollectionSpotlightSlider--', append: section.id,
-    index: rendered_products_count, sizes: sizes, disable_image_hover: true, modifier_class:
-    'homepage-collection-spotlight__product-card' -%}"
-  position: 5023..5341
-- from: |-
-    {%- render 'onboarding-product-grid-item',
-                          title: placeholder_title,
-                          placeholder: placeholder,
-                          index: forloop.index,
-                          animation_delay: forloop.index0,
-                          animation_anchor: '#HomepageCollectionSpotlightSlider--' | append: section.id
-                        -%}
-  to: "{%- render 'onboarding-product-grid-item', title: placeholder_title, placeholder:
-    placeholder, index: forloop.index, animation_delay: forloop.index0, animation_anchor:
-    '#HomepageCollectionSpotlightSlider--', append: section.id -%}"
-  position: 5808..6038
-{% endcomment %}
