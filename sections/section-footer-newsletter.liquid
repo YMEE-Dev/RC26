@@ -71,9 +71,7 @@
   <div class="underlay" data-newsletter-drawer-close></div>
 
   {%- comment -%}
-    Floating popup: hidden from logged-in customers, and switchable per theme so
-    the auto-appearing prompt can be handed over to the Klaviyo flyout.
-    `!= false` so an instance saved before this setting existed still shows it.
+    `!= false` so an instance saved before float_enabled existed still shows it.
   {%- endcomment -%}
   {%- if section.settings.float_enabled != false and customer == null -%}
     <aside
@@ -81,6 +79,7 @@
       data-newsletter-float
       aria-hidden="true"
       data-newsletter-float-delay="{{ section.settings.float_delay_seconds | default: 3 }}"
+      style="--footer-newsletter-float-bg: {{ section.settings.float_background_color | default: '#37796C' }};"
     >
       <button
         type="button"
@@ -372,8 +371,7 @@
     gap: 20px;
     width: min(360px, calc(100vw - 80px));
     padding: 32px 22px 34px;
-    /* Brand teal panel (per approved v3 design). */
-    background-color: #27574d;
+    background-color: var(--footer-newsletter-float-bg, #37796C);
     color: #f4f2ed;
     border: 1px solid rgba(244, 242, 237, 0.28);
     overflow: hidden;
@@ -458,7 +456,7 @@
     --btn-bg: transparent;
     --btn-border-hover: #f4f2ed;
     --btn-bg-hover: #f4f2ed;
-    --btn-text-hover: #27574d;
+    --btn-text-hover: var(--footer-newsletter-float-bg, #37796C);
   }
 
   @media only screen and (max-width: 767px) {
@@ -516,7 +514,14 @@
       this.floatDelayMs = Number(this.floatPopup?.dataset.newsletterFloatDelay || 3) * 1000;
       this.mobileFloatDelayMs = 10000;
       this.floatDismissDelayMs = 260;
+      /* Identity lookup is fast; cap it so a slow Klaviyo never delays the popup. */
+      this.klaviyoIdentityTimeoutMs = 2000;
+      /* Allow for async klaviyo.js load — still well inside the popup delay. */
+      this.klaviyoReadyTimeoutMs = 6000;
       this.boundOnScroll = () => this.onScroll();
+
+      // Resolve identity up front so the answer is ready before the popup delay.
+      this.isExistingKlaviyoProfile();
 
       this.openTriggers.forEach((trigger) => {
         trigger.addEventListener('click', (event) => {
@@ -629,7 +634,7 @@
         return;
       }
 
-      this.showFloat();
+      this.maybeShowFloat();
     }
 
     onScroll() {
@@ -637,8 +642,58 @@
         return;
       }
       if (window.scrollY > 80) {
-        this.showFloat();
+        this.maybeShowFloat();
       }
+    }
+
+    /* The popup owns the targeting: a custom-trigger Klaviyo form can't do its own. */
+    async maybeShowFloat() {
+      if (await this.isExistingKlaviyoProfile()) {
+        return;
+      }
+      this.showFloat();
+    }
+
+    /*
+     * Cached; fails open so a broken Klaviyo shows the popup rather than hiding
+     * it from everyone.
+     */
+    isExistingKlaviyoProfile() {
+      if (!this.klaviyoIdentityPromise) {
+        this.klaviyoIdentityPromise = (async () => {
+          if (!(await this.waitForKlaviyo())) {
+            return false;
+          }
+          try {
+            return await Promise.race([
+              window.klaviyo.isIdentified(),
+              new Promise((resolve) => window.setTimeout(() => resolve(false), this.klaviyoIdentityTimeoutMs)),
+            ]);
+          } catch (error) {
+            return false;
+          }
+        })();
+      }
+      return this.klaviyoIdentityPromise;
+    }
+
+    /* klaviyo.js loads async; answering early caches a wrong "not a profile". */
+    waitForKlaviyo() {
+      return new Promise((resolve) => {
+        const deadline = Date.now() + this.klaviyoReadyTimeoutMs;
+        const poll = () => {
+          if (typeof window.klaviyo?.isIdentified === 'function') {
+            resolve(true);
+            return;
+          }
+          if (Date.now() >= deadline) {
+            resolve(false);
+            return;
+          }
+          window.setTimeout(poll, 150);
+        };
+        poll();
+      });
     }
 
     showFloat() {
@@ -819,8 +874,14 @@
     {
       "type": "color",
       "id": "background_color",
-      "label": "Background",
+      "label": "Trigger bar background",
       "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "float_background_color",
+      "label": "Popup background",
+      "default": "#37796C"
     },
     {
       "type": "color_scheme",
