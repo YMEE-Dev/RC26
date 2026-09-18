@@ -1,0 +1,52 @@
+{%- layout none -%}
+{%- comment -%}
+  Card totals for the current collection, honouring the active storefront filters.
+  collection-grid-cards splits a product into one card per non-size option value, and the
+  page markup only carries product counts, so the load more counter reads this template.
+{%- endcomment -%}
+{%- paginate collection.products by 50 -%}
+  {%- liquid
+    assign cards = 0
+    assign available_cards = 0
+    assign products = 0
+    assign available_products = 0
+    assign size_option_names = 'size,title' | split: ','
+
+    for product in collection.products
+      assign product_type = product.type | downcase | strip
+      if product_type contains 'storytelling'
+        continue
+      endif
+
+      assign products = products | plus: 1
+      if product.available
+        assign available_products = available_products | plus: 1
+      endif
+
+      assign split_option = blank
+
+      for option in product.options_with_values
+        assign option_key = option.name | downcase | strip
+        unless size_option_names contains option_key
+          assign split_option = option
+          break
+        endunless
+      endfor
+
+      if split_option == blank
+        assign cards = cards | plus: 1
+        if product.available
+          assign available_cards = available_cards | plus: 1
+        endif
+      else
+        assign cards = cards | plus: split_option.values.size
+        for option_value in split_option.values
+          if option_value.variant.available
+            assign available_cards = available_cards | plus: 1
+          endif
+        endfor
+      endif
+    endfor
+  -%}
+  {"page":{{ paginate.current_page }},"pages":{{ paginate.pages }},"products":{{ products }},"available_products":{{ available_products }},"cards":{{ cards }},"available_cards":{{ available_cards }}}
+{%- endpaginate -%}

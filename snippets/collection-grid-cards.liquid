@@ -17,6 +17,9 @@
 
   @param {product} product - The product to render
   @param {boolean} [split_variants] - Section setting; false renders one card per product
+  @param {number} [card_limit] - Cards a page may show; the rest render with data-card-overflow
+                                 so a split page still holds products_per_page tiles
+  @param {number} [card_offset] - Cards already rendered on this page, from collection-card-count
   @param {number} [index] - Position in the grid loop
   @param {string} [sizes] - Image sizes attribute
   @param {string} [attributes] - Extra html attributes for the card
@@ -45,22 +48,35 @@
 -%}
 
 {%- if split_option == blank -%}
+  {%- liquid
+    assign card_attributes = attributes
+    if card_limit > 0 and card_offset >= card_limit
+      assign card_attributes = card_attributes | append: ' data-card-overflow'
+    endif
+  -%}
   {%- render 'product-grid-item',
     product: product,
     index: index,
     sizes: sizes,
-    attributes: attributes,
+    attributes: card_attributes,
     animation_delay: animation_delay,
     card_animation: card_animation
   -%}
 {%- else -%}
   {%- for option_value in split_option.values -%}
+    {%- liquid
+      assign card_position = card_offset | plus: forloop.index0
+      assign card_attributes = attributes
+      if card_limit > 0 and card_position >= card_limit
+        assign card_attributes = card_attributes | append: ' data-card-overflow'
+      endif
+    -%}
     {%- render 'product-grid-item',
       product: product,
       variant: option_value.variant,
       index: index,
       sizes: sizes,
-      attributes: attributes,
+      attributes: card_attributes,
       animation_delay: animation_delay,
       card_animation: card_animation
     -%}

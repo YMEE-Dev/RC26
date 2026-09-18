@@ -6,7 +6,7 @@
 {%- endcomment -%}
 
 {%- liquid
-  assign enable_infinity_scroll = settings.enable_infinity_scroll
+  assign pagination_type = section.settings.pagination_type | default: 'paginated'
   assign enable_sort = section.settings.enable_sort
   assign enable_filters = section.settings.enable_filters
   assign filter_layout = section.settings.filter_layout
@@ -52,6 +52,11 @@
   endcomment
 
   assign product_limit = section.settings.products_per_page
+  assign card_limit = 0
+  assign rendered_cards = 0
+  if section.settings.collection_split_variants and pagination_type == 'load_more'
+    assign card_limit = product_limit
+  endif
   assign blocks_featured_image = section.blocks | where: 'type', 'featured_image'
   assign collection_template_suffix = collection.template_suffix | default: template.suffix | downcase | strip
   assign is_spotlight_collection_template = false
@@ -111,7 +116,7 @@
   assign animation_duration = 800
 
   assign items_container_tag = 'div'
-  if enable_infinity_scroll
+  if pagination_type == 'infinite'
     assign items_container_tag = 'ajaxinate-items'
   endif
 -%}
@@ -285,6 +290,16 @@
           {%- if filter.true_value.count > 0 -%}
             {%- assign has_available_products = true -%}
           {%- endif -%}
+
+          {%- comment -%} Storytelling tiles are excluded from every count, as in collection-products-count. {%- endcomment -%}
+          {%- assign storytelling_products_count = collection.products_count
+            | minus: collection_products_count
+            | at_least: 0
+          -%}
+          {%- assign collection_available_count = filter.true_value.count
+            | minus: storytelling_products_count
+            | at_least: 0
+          -%}
         {%- endif -%}
 
         {%- break -%}
@@ -505,13 +520,17 @@
           hidden
           data-collection-counts
           data-collection-products-count="{{ collection_products_count }}"
+          data-collection-split-variants="{% if section.settings.collection_split_variants %}true{% else %}false{% endif %}"
+          {% if availability_filter_param_name != blank %}
+            data-collection-available-count="{{ collection_available_count }}"
+          {% endif %}
           data-availability-filter-active="{% if availability_filter_active %}true{% else %}false{% endif %}"
           data-availability-filter-param-name="{{ availability_filter_param_name }}"
           data-availability-filter-value="{{ availability_filter_true_value }}"
         ></div>
         <{{ items_container_tag }}
           class="grid"
-          {% if enable_infinity_scroll %}
+          {% if pagination_type == 'infinite' %}
             id="AjaxinateLoop" data-ajaxinate-id="{{ section.id }}"
           {% endif %}
         >
@@ -541,6 +560,9 @@
                 }
                 grid-item.product-item .product-item__bg__slide figure img {
                   mix-blend-mode: multiply;
+                }
+                hover-images .product-item__bg__slide .image-wrapper--cover img {
+                  object-fit: cover;
                 }
               </style>
             {% endif %}
@@ -577,7 +599,11 @@
                     capture spotlight_product_attributes
                       echo 'style="--spotlight-stack-index: ' | append: counter_grid | append: ';"'
                     endcapture
-                    render 'collection-grid-cards', product: product, split_variants: section.settings.collection_split_variants, index: forloop.index, sizes: image_sizes, attributes: spotlight_product_attributes, card_animation: 'plp'
+                    capture product_cards
+                      render 'collection-card-count', product: product, split_variants: section.settings.collection_split_variants
+                    endcapture
+                    render 'collection-grid-cards', product: product, split_variants: section.settings.collection_split_variants, card_limit: card_limit, card_offset: rendered_cards, index: forloop.index, sizes: image_sizes, attributes: spotlight_product_attributes, card_animation: 'plp'
+                    assign rendered_cards = rendered_cards | plus: product_cards
                   endif
 
                   assign counter_grid = counter_grid | plus: 1
@@ -626,7 +652,11 @@
                   if product_storytelling
                     render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false, card_animation: 'plp'
                   else
-                    render 'collection-grid-cards', product: product, split_variants: section.settings.collection_split_variants, index: forloop.index, sizes: image_sizes, card_animation: 'plp'
+                    capture product_cards
+                      render 'collection-card-count', product: product, split_variants: section.settings.collection_split_variants
+                    endcapture
+                    render 'collection-grid-cards', product: product, split_variants: section.settings.collection_split_variants, card_limit: card_limit, card_offset: rendered_cards, index: forloop.index, sizes: image_sizes, card_animation: 'plp'
+                    assign rendered_cards = rendered_cards | plus: product_cards
                   endif
                 endfor
               -%}
@@ -649,7 +679,11 @@
                   if product_storytelling
                     render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false, card_animation: 'plp'
                   else
-                    render 'collection-grid-cards', product: product, split_variants: section.settings.collection_split_variants, animation_delay: animation_delay, index: forloop.index, sizes: image_sizes, card_animation: 'plp'
+                    capture product_cards
+                      render 'collection-card-count', product: product, split_variants: section.settings.collection_split_variants
+                    endcapture
+                    render 'collection-grid-cards', product: product, split_variants: section.settings.collection_split_variants, card_limit: card_limit, card_offset: rendered_cards, animation_delay: animation_delay, index: forloop.index, sizes: image_sizes, card_animation: 'plp'
+                    assign rendered_cards = rendered_cards | plus: product_cards
                   endif
                 endfor
               -%}
@@ -673,7 +707,60 @@
           {%- endif -%}
         </{{ items_container_tag }}>
 
-        {%- if enable_infinity_scroll -%}
+        {%- if pagination_type == 'load_more' -%}
+          {%- liquid
+            assign shown_to = paginate.current_page | times: paginate.page_size | at_most: collection_products_count
+            assign load_more_step = paginate.page_size
+            assign held_back_cards = false
+            if card_limit > 0
+              assign load_more_step = card_limit
+              assign shown_to = paginate.current_page | times: card_limit
+              if rendered_cards > card_limit
+                assign held_back_cards = true
+              endif
+            endif
+          -%}
+          <div
+            class="pagination pagination--load-more"
+            data-load-more
+            data-load-more-step="{{ load_more_step }}"
+          >
+            <p
+              class="pagination__count"
+              data-load-more-count
+              data-load-more-count-template="{{ 'general.pagination.showing' | t: from: '[from]', to: '[to]', total: '[total]' }}"
+            >
+              {{ 'general.pagination.showing' | t: from: 1, to: shown_to, total: collection_products_count }}
+            </p>
+            {%- if paginate.next -%}
+              <a
+                href="{{ paginate.next.url }}"
+                class="btn btn--secondary btn--outline pagination__load-more"
+                data-load-more-button
+                data-loading-text="{{ 'general.pagination.loading' | t }}"
+              >
+                <span>{{ 'general.pagination.load_more' | t }}</span>
+              </a>
+            {%- elsif held_back_cards -%}
+              <button
+                type="button"
+                class="btn btn--secondary btn--outline pagination__load-more"
+                data-load-more-button
+              >
+                <span>{{ 'general.pagination.load_more' | t }}</span>
+              </button>
+            {%- endif -%}
+            {%- if paginate.next or paginate.current_page > 1 -%}
+              <button
+                type="button"
+                class="btn btn--secondary btn--text pagination__back-to-top btn--text-no-underline"
+                data-pagination-back-to-top
+              >
+                <span class="navlink ">{{ 'general.pagination.back_to_top' | t }}</span>
+              </button>
+            {%- endif -%}
+          </div>
+        {%- elsif pagination_type == 'infinite' -%}
           <div
             class="pagination pagination--infinite"
             id="AjaxinatePagination"
@@ -754,6 +841,170 @@
         availabilityCount.textContent = `${countValue} ${countLabel}`.trim();
       };
 
+      const updateLoadMoreCount = (component, shownCount, totalCount) => {
+        const count = component.querySelector('[data-load-more-count]');
+        const template = count ? count.getAttribute('data-load-more-count-template') : '';
+        if (!template || Number.isNaN(totalCount)) return;
+
+        const nextText = template
+          .replace('[from]', shownCount > 0 ? 1 : 0)
+          .replace('[to]', Math.min(shownCount, totalCount))
+          .replace('[total]', totalCount);
+
+        /* the grid observer re-runs the filter on every mutation here; an unchanged write would loop */
+        if (count.textContent.trim() === nextText) return;
+        count.textContent = nextText;
+      };
+
+      const collectionCounts = new WeakMap();
+
+      /* filters live in the query string, so they are part of the cache key */
+      const countsKey = () => {
+        const params = new URLSearchParams(window.location.search);
+        params.delete('page');
+        params.delete('view');
+        params.sort();
+
+        return `${window.location.pathname}?${params.toString()}`;
+      };
+
+      const fetchCountsPage = async (page) => {
+        const params = new URLSearchParams(window.location.search);
+        params.set('view', 'card-count');
+        params.set('page', page);
+
+        const response = await fetch(`${window.location.pathname}?${params.toString()}`);
+        if (!response.ok) throw new Error(response.statusText);
+
+        return JSON.parse((await response.text()).trim());
+      };
+
+      /* Totals for the filters currently applied. templates/collection.card-count.liquid splits
+         products the same way collection-grid-cards does, so its cards are the tiles on screen. */
+      const fetchCollectionCounts = (component) => {
+        const key = countsKey();
+        const cached = collectionCounts.get(component);
+        if (cached && cached.key === key) return cached.request;
+
+        const request = (async () => {
+          const totals = {products: 0, availableProducts: 0, cards: 0, availableCards: 0};
+          const add = (data) => {
+            totals.products += data.products;
+            totals.availableProducts += data.available_products;
+            totals.cards += data.cards;
+            totals.availableCards += data.available_cards;
+          };
+
+          const first = await fetchCountsPage(1);
+          add(first);
+
+          const rest = [];
+          for (let page = 2; page <= Math.min(first.pages, 40); page++) {
+            rest.push(fetchCountsPage(page));
+          }
+
+          (await Promise.all(rest)).forEach(add);
+
+          return totals;
+        })();
+
+        collectionCounts.set(component, {key, request});
+        return request;
+      };
+
+      const splitsVariants = (component) => {
+        const countsData = getCollectionCounts(component);
+
+        return countsData ? countsData.getAttribute('data-collection-split-variants') === 'true' : false;
+      };
+
+      /* Cards are only the unit where a load more button paces them: without the split every card
+         is a product, and paginated and infinite pages count products per page. */
+      const usesCardCounts = (component) =>
+        splitsVariants(component) && Boolean(component.querySelector('[data-load-more-count]'));
+
+      const getCardTotals = (component) => {
+        const countsData = getCollectionCounts(component);
+        if (!countsData || !usesCardCounts(component)) return null;
+        if (countsData.getAttribute('data-collection-counts-key') !== countsKey()) return null;
+
+        const total = Number.parseInt(countsData.getAttribute('data-collection-card-count'), 10);
+        const available = Number.parseInt(countsData.getAttribute('data-collection-available-card-count'), 10);
+
+        return Number.isNaN(total) || Number.isNaN(available) ? null : {total, available};
+      };
+
+      const countGridCards = (component) => {
+        /* overflow cards are rendered but held back until the next load more */
+        const revealed = Array.from(component.querySelectorAll('[data-products-grid] [data-product-available]')).filter(
+          (card) => !card.hasAttribute('data-product-storytelling') && !card.hasAttribute('data-card-overflow')
+        );
+
+        return {cards: revealed.length, visible: revealed.filter((card) => !card.hidden).length};
+      };
+
+      /* The counter is in cards, matching the tiles on screen; false means the totals are not in
+         yet and the caller keeps its product-count fallback. */
+      const refreshLoadMoreCount = (component, enabled) => {
+        const cardTotals = getCardTotals(component);
+        if (!cardTotals) return false;
+
+        const active = typeof enabled === 'boolean' ? enabled : getAvailabilityActiveState(component);
+        const counted = countGridCards(component);
+
+        updateLoadMoreCount(
+          component,
+          active ? counted.visible : counted.cards,
+          active ? cardTotals.available : cardTotals.total
+        );
+
+        return true;
+      };
+
+      const refreshAvailabilityCount = (component, enabled) => {
+        const cardTotals = getCardTotals(component);
+        if (!cardTotals) return false;
+
+        const active = typeof enabled === 'boolean' ? enabled : getAvailabilityActiveState(component);
+
+        updateAvailabilityCount(component, active ? cardTotals.available : cardTotals.total);
+
+        return true;
+      };
+
+      const storeCollectionCounts = (component, totals, key) => {
+        const countsData = getCollectionCounts(component);
+        if (!countsData) return;
+
+        countsData.setAttribute('data-collection-counts-key', key);
+        countsData.setAttribute('data-collection-card-count', totals.cards);
+        countsData.setAttribute('data-collection-available-card-count', totals.availableCards);
+
+        if (Number.isNaN(Number.parseInt(countsData.getAttribute('data-collection-available-count'), 10))) {
+          countsData.setAttribute('data-collection-available-count', totals.availableProducts);
+        }
+      };
+
+      const requestCollectionCounts = (component) => {
+        if (!usesCardCounts(component)) return;
+
+        const key = countsKey();
+        if (component.dataset.collectionCountsKey === key) return;
+
+        component.dataset.collectionCountsKey = key;
+
+        fetchCollectionCounts(component)
+          .then((totals) => {
+            storeCollectionCounts(component, totals, key);
+          })
+          .catch(() => {
+            if (component.dataset.collectionCountsKey === key) delete component.dataset.collectionCountsKey;
+          })
+          .finally(() => {
+            refreshAvailabilityCount(component);
+            refreshLoadMoreCount(component);
+          });
+      };
       const applyLocalAvailabilityFilter = (component, enabled) => {
         if (!component) return;
 
@@ -800,7 +1051,35 @@
         const productCount = products.size;
 
         component.dataset.localAvailabilityFilterActive = enabled ? 'true' : 'false';
-        updateAvailabilityCount(component, enabled ? availableCount : defaultCount);
+
+        /* No server count yet: keep the current numbers until the collection-wide total arrives. */
+        if (enabled && Number.isNaN(collectionAvailableCount) && component.dataset.availableCountFailed !== 'true') {
+          const countsRequestKey = countsKey();
+
+          fetchCollectionCounts(component)
+            .then((totals) => {
+              storeCollectionCounts(component, totals, countsRequestKey);
+            })
+            .catch(() => {
+              component.dataset.availableCountFailed = 'true';
+            })
+            .finally(() => {
+              if (component.dataset.localAvailabilityFilterActive === 'true') {
+                applyLocalAvailabilityFilter(component, true);
+              }
+            });
+          return;
+        }
+
+        const inStockTotal = Number.isNaN(collectionAvailableCount) ? availableCount : collectionAvailableCount;
+
+        if (!refreshAvailabilityCount(component, enabled)) {
+          updateAvailabilityCount(component, enabled ? inStockTotal : defaultCount);
+        }
+
+        if (!refreshLoadMoreCount(component, enabled)) {
+          updateLoadMoreCount(component, enabled ? availableCount : productCount, enabled ? inStockTotal : defaultCount);
+        }
       };
 
       const syncAvailabilityUi = (component) => {
@@ -844,13 +1123,14 @@
           viewAllButton.setAttribute('aria-pressed', viewAllActive ? 'true' : 'false');
         }
 
-        if (
-          availabilityCount &&
-          !Number.isNaN(productsCount) &&
-          (hasServerAvailabilityFilter(component) || !isActive)
-        ) {
-          availabilityCount.textContent = `${productsCount} ${countLabel}`.trim();
+        if (availabilityCount && (hasServerAvailabilityFilter(component) || !isActive)) {
+          if (!refreshAvailabilityCount(component, isActive) && !Number.isNaN(productsCount)) {
+            availabilityCount.textContent = `${productsCount} ${countLabel}`.trim();
+          }
         }
+
+        requestCollectionCounts(component);
+        refreshLoadMoreCount(component);
       };
 
       const setAvailabilityFilterInputState = (component, enabled) => {
@@ -933,6 +1213,7 @@
 
         component.dataset.availabilityFilterReady = 'true';
         syncAvailabilityUi(component);
+        requestCollectionCounts(component);
         updateCollectionNavStickyState(component);
 
         const productsGrid = component.querySelector('[data-products-grid]');
@@ -942,8 +1223,14 @@
           syncAvailabilityUi(component);
         });
 
-        observer.observe(productsGrid, {childList: true, subtree: true});
+        observer.observe(productsGrid, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['data-card-overflow']
+        });
 
+        const columns = {{ section.settings.grid | default: 3 }};
         const animObserver = new MutationObserver(function () {
           var newCards = Array.from(productsGrid.querySelectorAll('.plp-card-up:not(.plp-card-up--visible)'));
           if (!newCards.length) return;
@@ -958,7 +1245,9 @@
             },
             {threshold: 0}
           );
-          newCards.forEach(function (card) {
+          newCards.forEach(function (card, index) {
+            /* column ripple only; the inline delay carries the load cascade's header wait */
+            card.style.setProperty('--plp-delay', (index % columns) * 100 + 'ms');
             if (card.getBoundingClientRect().top < vh) {
               card.classList.add('plp-card-up--visible');
             } else {
@@ -967,7 +1256,8 @@
           });
         });
 
-        animObserver.observe(productsGrid, {childList: true, subtree: false});
+        /* subtree: infinite scroll appends inside the .grid child, not under this node */
+        animObserver.observe(productsGrid, {childList: true, subtree: true});
       };
 
       const initAll = (root) => {
@@ -1017,6 +1307,10 @@
       } else {
         initAll(document);
       }
+
+      window.addEventListener('load', () => {
+        requestAnimationFrame(() => updateCollectionNavStickyState(document));
+      });
 
       document.addEventListener('theme:scroll', () => {
         updateCollectionNavStickyState(document);
@@ -1136,8 +1430,10 @@
     <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
   {%- endif -%}
 
-  {%- if enable_infinity_scroll -%}
+  {%- if pagination_type == 'infinite' -%}
     <script src="{{ 'ajaxinate.js' | asset_url }}" defer="defer"></script>
+  {%- elsif pagination_type == 'load_more' -%}
+    <script src="{{ 'collection-load-more.js' | asset_url }}" defer="defer"></script>
   {%- endif -%}
 
   {%- if show_recently_viewed_indicator -%}
@@ -1232,8 +1528,21 @@
       "min": 1,
       "max": 24,
       "step": 1,
-      "label": "Products per page",
+      "label": "Cards per page",
+      "info": "With Load more and variant splitting on, each step shows this many cards. Otherwise it is products per page.",
       "default": 24
+    },
+    {
+      "type": "select",
+      "id": "pagination_type",
+      "label": "Pagination",
+      "default": "paginated",
+      "options": [
+        {"value": "paginated", "label": "Paginated"},
+        {"value": "infinite", "label": "Infinite scroll"},
+        {"value": "load_more", "label": "Load more button"}
+      ],
+      "info": "Infinite scroll appends the next page as the visitor scrolls. Load more shows a count and a button that appends the next page."
     },
     {
       "type": "header",
