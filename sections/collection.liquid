@@ -52,6 +52,11 @@
   endcomment
 
   assign product_limit = section.settings.products_per_page
+  assign card_limit = 0
+  assign rendered_cards = 0
+  if section.settings.collection_split_variants and pagination_type == 'load_more'
+    assign card_limit = product_limit
+  endif
   assign blocks_featured_image = section.blocks | where: 'type', 'featured_image'
   assign collection_template_suffix = collection.template_suffix | default: template.suffix | downcase | strip
   assign is_spotlight_collection_template = false
@@ -515,6 +520,7 @@
           hidden
           data-collection-counts
           data-collection-products-count="{{ collection_products_count }}"
+          data-collection-split-variants="{% if section.settings.collection_split_variants %}true{% else %}false{% endif %}"
           {% if availability_filter_param_name != blank %}
             data-collection-available-count="{{ collection_available_count }}"
           {% endif %}
@@ -593,7 +599,11 @@
                     capture spotlight_product_attributes
                       echo 'style="--spotlight-stack-index: ' | append: counter_grid | append: ';"'
                     endcapture
-                    render 'collection-grid-cards', product: product, split_variants: section.settings.collection_split_variants, index: forloop.index, sizes: image_sizes, attributes: spotlight_product_attributes, card_animation: 'plp'
+                    capture product_cards
+                      render 'collection-card-count', product: product, split_variants: section.settings.collection_split_variants
+                    endcapture
+                    render 'collection-grid-cards', product: product, split_variants: section.settings.collection_split_variants, card_limit: card_limit, card_offset: rendered_cards, index: forloop.index, sizes: image_sizes, attributes: spotlight_product_attributes, card_animation: 'plp'
+                    assign rendered_cards = rendered_cards | plus: product_cards
                   endif
 
                   assign counter_grid = counter_grid | plus: 1
@@ -642,7 +652,11 @@
                   if product_storytelling
                     render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false, card_animation: 'plp'
                   else
-                    render 'collection-grid-cards', product: product, split_variants: section.settings.collection_split_variants, index: forloop.index, sizes: image_sizes, card_animation: 'plp'
+                    capture product_cards
+                      render 'collection-card-count', product: product, split_variants: section.settings.collection_split_variants
+                    endcapture
+                    render 'collection-grid-cards', product: product, split_variants: section.settings.collection_split_variants, card_limit: card_limit, card_offset: rendered_cards, index: forloop.index, sizes: image_sizes, card_animation: 'plp'
+                    assign rendered_cards = rendered_cards | plus: product_cards
                   endif
                 endfor
               -%}
@@ -665,7 +679,11 @@
                   if product_storytelling
                     render 'product-tile-storytelling', product: product, index: forloop.index, is_highlight: false, is_spotlight: false, card_animation: 'plp'
                   else
-                    render 'collection-grid-cards', product: product, split_variants: section.settings.collection_split_variants, animation_delay: animation_delay, index: forloop.index, sizes: image_sizes, card_animation: 'plp'
+                    capture product_cards
+                      render 'collection-card-count', product: product, split_variants: section.settings.collection_split_variants
+                    endcapture
+                    render 'collection-grid-cards', product: product, split_variants: section.settings.collection_split_variants, card_limit: card_limit, card_offset: rendered_cards, animation_delay: animation_delay, index: forloop.index, sizes: image_sizes, card_animation: 'plp'
+                    assign rendered_cards = rendered_cards | plus: product_cards
                   endif
                 endfor
               -%}
@@ -690,11 +708,23 @@
         </{{ items_container_tag }}>
 
         {%- if pagination_type == 'load_more' -%}
-          {%- assign shown_to = paginate.current_page
-            | times: paginate.page_size
-            | at_most: collection_products_count
+          {%- liquid
+            assign shown_to = paginate.current_page | times: paginate.page_size | at_most: collection_products_count
+            assign load_more_step = paginate.page_size
+            assign held_back_cards = false
+            if card_limit > 0
+              assign load_more_step = card_limit
+              assign shown_to = paginate.current_page | times: card_limit
+              if rendered_cards > card_limit
+                assign held_back_cards = true
+              endif
+            endif
           -%}
-          <div class="pagination pagination--load-more" data-load-more>
+          <div
+            class="pagination pagination--load-more"
+            data-load-more
+            data-load-more-step="{{ load_more_step }}"
+          >
             <p
               class="pagination__count"
               data-load-more-count
@@ -711,6 +741,14 @@
               >
                 <span>{{ 'general.pagination.load_more' | t }}</span>
               </a>
+            {%- elsif held_back_cards -%}
+              <button
+                type="button"
+                class="btn btn--secondary btn--outline pagination__load-more"
+                data-load-more-button
+              >
+                <span>{{ 'general.pagination.load_more' | t }}</span>
+              </button>
             {%- endif -%}
             {%- if paginate.next or paginate.current_page > 1 -%}
               <button
@@ -818,40 +856,155 @@
         count.textContent = nextText;
       };
 
-      const availableCountRequests = new WeakMap();
+      const collectionCounts = new WeakMap();
 
-      /* Collection-wide in-stock total when Shopify's availability filter is not enabled for the
-         store (no server count on the page). Same public endpoint storytelling-lookup.js pages. */
-      const fetchCollectionAvailableCount = (component) => {
-        if (availableCountRequests.has(component)) return availableCountRequests.get(component);
+      /* filters live in the query string, so they are part of the cache key */
+      const countsKey = () => {
+        const params = new URLSearchParams(window.location.search);
+        params.delete('page');
+        params.delete('view');
+        params.sort();
 
-        const base = (component.dataset.collection || '/collections/all').split('?')[0].replace(/\/$/, '');
+        return `${window.location.pathname}?${params.toString()}`;
+      };
+
+      const fetchCountsPage = async (page) => {
+        const params = new URLSearchParams(window.location.search);
+        params.set('view', 'card-count');
+        params.set('page', page);
+
+        const response = await fetch(`${window.location.pathname}?${params.toString()}`);
+        if (!response.ok) throw new Error(response.statusText);
+
+        return JSON.parse((await response.text()).trim());
+      };
+
+      /* Totals for the filters currently applied. templates/collection.card-count.liquid splits
+         products the same way collection-grid-cards does, so its cards are the tiles on screen. */
+      const fetchCollectionCounts = (component) => {
+        const key = countsKey();
+        const cached = collectionCounts.get(component);
+        if (cached && cached.key === key) return cached.request;
 
         const request = (async () => {
-          let count = 0;
+          const totals = {products: 0, availableProducts: 0, cards: 0, availableCards: 0};
+          const add = (data) => {
+            totals.products += data.products;
+            totals.availableProducts += data.available_products;
+            totals.cards += data.cards;
+            totals.availableCards += data.available_cards;
+          };
 
-          for (let page = 1; page <= 20; page++) {
-            const response = await fetch(`${base}/products.json?limit=250&page=${page}`);
-            if (!response.ok) throw new Error(response.statusText);
+          const first = await fetchCountsPage(1);
+          add(first);
 
-            const products = (await response.json()).products || [];
-
-            products.forEach((product) => {
-              const isStorytelling = (product.product_type || '').toLowerCase().includes('storytelling');
-              const isAvailable = (product.variants || []).some((variant) => variant.available);
-              if (!isStorytelling && isAvailable) count += 1;
-            });
-
-            if (products.length < 250) break;
+          const rest = [];
+          for (let page = 2; page <= Math.min(first.pages, 40); page++) {
+            rest.push(fetchCountsPage(page));
           }
 
-          return count;
+          (await Promise.all(rest)).forEach(add);
+
+          return totals;
         })();
 
-        availableCountRequests.set(component, request);
+        collectionCounts.set(component, {key, request});
         return request;
       };
 
+      const splitsVariants = (component) => {
+        const countsData = getCollectionCounts(component);
+
+        return countsData ? countsData.getAttribute('data-collection-split-variants') === 'true' : false;
+      };
+
+      /* Cards are only the unit where a load more button paces them: without the split every card
+         is a product, and paginated and infinite pages count products per page. */
+      const usesCardCounts = (component) =>
+        splitsVariants(component) && Boolean(component.querySelector('[data-load-more-count]'));
+
+      const getCardTotals = (component) => {
+        const countsData = getCollectionCounts(component);
+        if (!countsData || !usesCardCounts(component)) return null;
+        if (countsData.getAttribute('data-collection-counts-key') !== countsKey()) return null;
+
+        const total = Number.parseInt(countsData.getAttribute('data-collection-card-count'), 10);
+        const available = Number.parseInt(countsData.getAttribute('data-collection-available-card-count'), 10);
+
+        return Number.isNaN(total) || Number.isNaN(available) ? null : {total, available};
+      };
+
+      const countGridCards = (component) => {
+        /* overflow cards are rendered but held back until the next load more */
+        const revealed = Array.from(component.querySelectorAll('[data-products-grid] [data-product-available]')).filter(
+          (card) => !card.hasAttribute('data-product-storytelling') && !card.hasAttribute('data-card-overflow')
+        );
+
+        return {cards: revealed.length, visible: revealed.filter((card) => !card.hidden).length};
+      };
+
+      /* The counter is in cards, matching the tiles on screen; false means the totals are not in
+         yet and the caller keeps its product-count fallback. */
+      const refreshLoadMoreCount = (component, enabled) => {
+        const cardTotals = getCardTotals(component);
+        if (!cardTotals) return false;
+
+        const active = typeof enabled === 'boolean' ? enabled : getAvailabilityActiveState(component);
+        const counted = countGridCards(component);
+
+        updateLoadMoreCount(
+          component,
+          active ? counted.visible : counted.cards,
+          active ? cardTotals.available : cardTotals.total
+        );
+
+        return true;
+      };
+
+      const refreshAvailabilityCount = (component, enabled) => {
+        const cardTotals = getCardTotals(component);
+        if (!cardTotals) return false;
+
+        const active = typeof enabled === 'boolean' ? enabled : getAvailabilityActiveState(component);
+
+        updateAvailabilityCount(component, active ? cardTotals.available : cardTotals.total);
+
+        return true;
+      };
+
+      const storeCollectionCounts = (component, totals, key) => {
+        const countsData = getCollectionCounts(component);
+        if (!countsData) return;
+
+        countsData.setAttribute('data-collection-counts-key', key);
+        countsData.setAttribute('data-collection-card-count', totals.cards);
+        countsData.setAttribute('data-collection-available-card-count', totals.availableCards);
+
+        if (Number.isNaN(Number.parseInt(countsData.getAttribute('data-collection-available-count'), 10))) {
+          countsData.setAttribute('data-collection-available-count', totals.availableProducts);
+        }
+      };
+
+      const requestCollectionCounts = (component) => {
+        if (!usesCardCounts(component)) return;
+
+        const key = countsKey();
+        if (component.dataset.collectionCountsKey === key) return;
+
+        component.dataset.collectionCountsKey = key;
+
+        fetchCollectionCounts(component)
+          .then((totals) => {
+            storeCollectionCounts(component, totals, key);
+          })
+          .catch(() => {
+            if (component.dataset.collectionCountsKey === key) delete component.dataset.collectionCountsKey;
+          })
+          .finally(() => {
+            refreshAvailabilityCount(component);
+            refreshLoadMoreCount(component);
+          });
+      };
       const applyLocalAvailabilityFilter = (component, enabled) => {
         if (!component) return;
 
@@ -901,9 +1054,11 @@
 
         /* No server count yet: keep the current numbers until the collection-wide total arrives. */
         if (enabled && Number.isNaN(collectionAvailableCount) && component.dataset.availableCountFailed !== 'true') {
-          fetchCollectionAvailableCount(component)
-            .then((count) => {
-              getCollectionCounts(component)?.setAttribute('data-collection-available-count', count);
+          const countsRequestKey = countsKey();
+
+          fetchCollectionCounts(component)
+            .then((totals) => {
+              storeCollectionCounts(component, totals, countsRequestKey);
             })
             .catch(() => {
               component.dataset.availableCountFailed = 'true';
@@ -918,8 +1073,13 @@
 
         const inStockTotal = Number.isNaN(collectionAvailableCount) ? availableCount : collectionAvailableCount;
 
-        updateAvailabilityCount(component, enabled ? inStockTotal : defaultCount);
-        updateLoadMoreCount(component, enabled ? availableCount : productCount, enabled ? inStockTotal : defaultCount);
+        if (!refreshAvailabilityCount(component, enabled)) {
+          updateAvailabilityCount(component, enabled ? inStockTotal : defaultCount);
+        }
+
+        if (!refreshLoadMoreCount(component, enabled)) {
+          updateLoadMoreCount(component, enabled ? availableCount : productCount, enabled ? inStockTotal : defaultCount);
+        }
       };
 
       const syncAvailabilityUi = (component) => {
@@ -963,13 +1123,14 @@
           viewAllButton.setAttribute('aria-pressed', viewAllActive ? 'true' : 'false');
         }
 
-        if (
-          availabilityCount &&
-          !Number.isNaN(productsCount) &&
-          (hasServerAvailabilityFilter(component) || !isActive)
-        ) {
-          availabilityCount.textContent = `${productsCount} ${countLabel}`.trim();
+        if (availabilityCount && (hasServerAvailabilityFilter(component) || !isActive)) {
+          if (!refreshAvailabilityCount(component, isActive) && !Number.isNaN(productsCount)) {
+            availabilityCount.textContent = `${productsCount} ${countLabel}`.trim();
+          }
         }
+
+        requestCollectionCounts(component);
+        refreshLoadMoreCount(component);
       };
 
       const setAvailabilityFilterInputState = (component, enabled) => {
@@ -1052,6 +1213,7 @@
 
         component.dataset.availabilityFilterReady = 'true';
         syncAvailabilityUi(component);
+        requestCollectionCounts(component);
         updateCollectionNavStickyState(component);
 
         const productsGrid = component.querySelector('[data-products-grid]');
@@ -1061,7 +1223,12 @@
           syncAvailabilityUi(component);
         });
 
-        observer.observe(productsGrid, {childList: true, subtree: true});
+        observer.observe(productsGrid, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['data-card-overflow']
+        });
 
         const columns = {{ section.settings.grid | default: 3 }};
         const animObserver = new MutationObserver(function () {
@@ -1361,7 +1528,8 @@
       "min": 1,
       "max": 24,
       "step": 1,
-      "label": "Products per page",
+      "label": "Cards per page",
+      "info": "With Load more and variant splitting on, each step shows this many cards. Otherwise it is products per page.",
       "default": 24
     },
     {
