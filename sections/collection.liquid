@@ -863,20 +863,23 @@
         const collectionAvailableCount = countsData
           ? Number.parseInt(countsData.getAttribute('data-collection-available-count'), 10)
           : Number.NaN;
-        let availableCount = 0;
-        let productCount = 0;
+        /* collection-grid-cards splits one product into a card per variant, so the counts
+           are per product url: the totals they are compared against count products. */
+        const products = new Set();
+        const availableProducts = new Set();
 
         items.forEach((item) => {
           const isStorytelling = item.hasAttribute('data-product-storytelling');
           const isAvailable = item.getAttribute('data-product-available') === 'true';
+          const productKey = item.getAttribute('data-url') || item.id;
           let showItem = true;
 
           if (isStorytelling == false) {
-            productCount += 1;
+            products.add(productKey);
           }
 
           if (isStorytelling == false && isAvailable) {
-            availableCount += 1;
+            availableProducts.add(productKey);
           }
 
           if (enabled) {
@@ -890,6 +893,9 @@
           item.hidden = !showItem;
           item.setAttribute('aria-hidden', showItem ? 'false' : 'true');
         });
+
+        const availableCount = availableProducts.size;
+        const productCount = products.size;
 
         component.dataset.localAvailabilityFilterActive = enabled ? 'true' : 'false';
 
