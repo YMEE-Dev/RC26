@@ -4,6 +4,8 @@
   assign current_collection_handle = collection.handle | default: '' | downcase | strip
   assign current_collection_url = collection.url | default: '' | downcase | strip
   assign current_collection_title = collection.title | default: '' | downcase | strip
+  # Client request: hide these values from the "Type" filter
+  assign type_filter_hidden_values = 'pendants,shop the look' | split: ','
 
   capture swatch_button_style
     case settings.swatch_style
@@ -169,6 +171,11 @@
                           if filter_value_value == current_collection_handle or filter_value_value == current_collection_url or filter_value_label == current_collection_title
                             continue
                           endif
+                        endif
+
+                        assign filter_label_normalized = filter.label | downcase | strip
+                        if filter_label_normalized == 'type' and filter_value.active == false and type_filter_hidden_values contains filter_value_label
+                          continue
                         endif
                       -%}
                       <li
