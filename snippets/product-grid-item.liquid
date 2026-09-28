@@ -747,9 +747,38 @@
           {%- if double_img -%}
             {%- if hover_slider_enabled -%}
               {%- liquid
+                assign slide_media = product.media
+
+                # variant card: its own photo leads and other metals' photos (alt "variant:<color>") are left out
+                if variant.featured_media != blank
+                  assign card_color = ''
+                  assign card_alt = card_media.alt | downcase
+                  if card_alt contains 'variant:'
+                    assign card_color = card_alt | split: 'variant:' | last | split: ',' | first | strip | split: ' ' | join: '_'
+                  endif
+
+                  assign slide_media = product.media | where: 'id', card_media.id
+                  for media in product.media
+                    if media.id == card_media.id
+                      continue
+                    endif
+
+                    assign media_alt = media.alt | downcase
+                    if card_color != blank and media_alt contains 'variant:'
+                      assign media_color = media_alt | split: 'variant:' | last | split: ',' | first | strip | split: ' ' | join: '_'
+                      if media_color != card_color
+                        continue
+                      endif
+                    endif
+
+                    assign kept_media = product.media | where: 'id', media.id
+                    assign slide_media = slide_media | concat: kept_media
+                  endfor
+                endif
+
                 assign has_common_model_hover_slide = false
 
-                for media in product.media limit: settings.image_hover_limit
+                for media in slide_media limit: settings.image_hover_limit
                   assign media_alt = media.alt | default: '' | downcase | strip
 
                   if media_alt contains 'common:model'
@@ -761,7 +790,7 @@
 
               <hover-images class="product-item__bg__under{% unless hover_slider_mobile_enabled %} product-item__bg__under--desktop-only{% endunless %}">
                 <div class="product-item__bg__slider" data-hover-slider>
-                  {%- for media in product.media limit: settings.image_hover_limit -%}
+                  {%- for media in slide_media limit: settings.image_hover_limit -%}
                     {%- liquid
                       assign hover_slide_attr = ''
                       assign scale_class = ''
