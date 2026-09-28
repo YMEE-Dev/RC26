@@ -62,6 +62,15 @@
   overflow-wrap: anywhere;
 }
 
+/* Inline, not the theme's inline-block: Safari 18–26 adds a false clamp ellipsis after an
+   inline-block, and its 2px padding pushed the underline outside the two-line clip.
+   nowrap keeps the link on one line, as inline-block did, so the ::after underline stays whole. */
+.announcement__slide--wrap .announcement__text a {
+  display: inline;
+  padding-bottom: 0;
+  white-space: nowrap;
+}
+
 .announcement__bar-holder--slider .flickity-viewport,
 .announcement__bar-holder--slider .flickity-slider {
   min-height: var(--announcement-height);
