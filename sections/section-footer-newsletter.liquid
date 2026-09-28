@@ -16,14 +16,14 @@
     padding-bottom: var(--PB);
   }
 
-  {%- assign drawer_bg = section.settings.drawer_background_color -%}
+  /* {%- assign drawer_bg = section.settings.drawer_background_color -%}
   {%- unless drawer_bg == blank or drawer_bg == 'rgba(0,0,0,0)' -%}
     #FooterNewsletterDrawer--{{ section.id }} {
       --bg: {{ drawer_bg }};
       --COLOR-BG: {{ drawer_bg }};
       --COLOR-BG-RGB: {{ drawer_bg | color_extract: 'red' }}, {{ drawer_bg | color_extract: 'green' }}, {{ drawer_bg | color_extract: 'blue' }};
     }
-  {%- endunless -%}
+  {%- endunless -%} */
 {%- endstyle -%}
 
 {%- comment -%}
@@ -94,6 +94,7 @@
       data-newsletter-float
       aria-hidden="true"
       data-newsletter-float-delay="{{ section.settings.float_delay_seconds | default: 15 }}"
+      style="--footer-newsletter-float-bg: {{ section.settings.float_background_color | default: '#37796C' }};"
     >
       <button
         type="button"
@@ -385,8 +386,7 @@
     gap: 20px;
     width: min(360px, calc(100vw - 80px));
     padding: 32px 22px 34px;
-    /* Brand teal panel (per approved v3 design). */
-    background-color: #27574d;
+    background-color: var(--footer-newsletter-float-bg, #37796c);
     color: #f4f2ed;
     border: 1px solid rgba(244, 242, 237, 0.28);
     overflow: hidden;
@@ -471,7 +471,7 @@
     --btn-bg: transparent;
     --btn-border-hover: #f4f2ed;
     --btn-bg-hover: #f4f2ed;
-    --btn-text-hover: #27574d;
+    --btn-text-hover: var(--footer-newsletter-float-bg, #37796c);
   }
 
   /*
@@ -987,10 +987,9 @@
     },
     {
       "type": "color",
-      "id": "drawer_background_color",
-      "label": "Drawer background",
-      "info": "Leave empty to use the store's default color scheme background.",
-      "alpha": true
+      "id": "float_background_color",
+      "label": "Popup background",
+      "default": "#37796C"
     },
     {
       "type": "color_scheme",
