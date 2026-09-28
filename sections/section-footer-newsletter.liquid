@@ -78,7 +78,7 @@
       class="footer-newsletter-float"
       data-newsletter-float
       aria-hidden="true"
-      data-newsletter-float-delay="{{ section.settings.float_delay_seconds | default: 3 }}"
+      data-newsletter-float-delay="{{ section.settings.float_delay_seconds | default: 10 }}"
       style="--footer-newsletter-float-bg: {{ section.settings.float_background_color | default: '#37796C' }};"
     >
       <button
@@ -509,10 +509,8 @@
       this.floatSignup = this.querySelector('[data-newsletter-float-signup]');
       this.lastFocusedElement = null;
       this.dismissCookie = 'footer_newsletter_float_dismissed';
-      this.mobileQuery = window.matchMedia('(max-width: 767px)');
       this.hasShownFloat = false;
-      this.floatDelayMs = Number(this.floatPopup?.dataset.newsletterFloatDelay || 3) * 1000;
-      this.mobileFloatDelayMs = 10000;
+      this.floatDelayMs = Number(this.floatPopup?.dataset.newsletterFloatDelay || 10) * 1000;
       this.floatDismissDelayMs = 260;
       /* Identity lookup is fast; cap it so a slow Klaviyo never delays the popup. */
       this.klaviyoIdentityTimeoutMs = 2000;
@@ -611,10 +609,9 @@
         return;
       }
 
-      // Mobile shows 10s after load; desktop uses the configured delay.
-      const delayMs = this.mobileQuery.matches ? this.mobileFloatDelayMs : this.floatDelayMs;
-
-      window.setTimeout(() => this.tryShowFloat(), delayMs);
+      const start = () => window.setTimeout(() => this.tryShowFloat(), this.floatDelayMs);
+      if (document.readyState === 'complete') start();
+      else window.addEventListener('load', start, {once: true});
     }
 
     tryShowFloat() {
@@ -793,11 +790,12 @@
       "type": "range",
       "id": "float_delay_seconds",
       "min": 1,
-      "max": 12,
+      "max": 30,
       "step": 1,
       "unit": "s",
-      "label": "Desktop popup delay",
-      "default": 3
+      "label": "Popup delay",
+      "info": "Applies on desktop and mobile. Keep it above the geolocation popups (5s) so they take turns.",
+      "default": 10
     },
     {
       "type": "header",

@@ -44,6 +44,45 @@
   loadScriptOnce(dataset.rcTimelineInviewSrc || "", "data-rc-timeline-inview-script");
   loadScriptOnce(dataset.navMenuSrc || "", "data-nav-menu-script");
 
+  window.theme = window.theme || {};
+
+  const normalizeCountryCode = (value) =>
+    String(value || "")
+      .toUpperCase()
+      .replace(/[^A-Z]/g, "")
+      .slice(0, 2);
+
+  let detectedCountryPromise = null;
+
+  window.theme.geo = {
+    // Visitor's ISO alpha-2 country from Shopify's IP suggestion, "" when unknown. One request per page.
+    // QA: `?geo_country=GB` on any URL stands in for the detected country.
+    detectCountry() {
+      const forcedCountry = normalizeCountryCode(new URLSearchParams(window.location.search).get("geo_country"));
+      if (forcedCountry) return Promise.resolve(forcedCountry);
+
+      if (!detectedCountryPromise) {
+        detectedCountryPromise = fetch("/browsing_context_suggestions.json", { credentials: "same-origin" })
+          .then((response) => response.json())
+          .then((data) => normalizeCountryCode(data?.detected_values?.country?.handle))
+          .catch(() => "");
+      }
+
+      return detectedCountryPromise;
+    },
+
+    countryName(countryCode) {
+      const code = normalizeCountryCode(countryCode);
+      if (!code) return "";
+
+      try {
+        return new Intl.DisplayNames([document.documentElement.lang || "en"], { type: "region" }).of(code) || code;
+      } catch (error) {
+        return code;
+      }
+    },
+  };
+
   const normalizePathname = (pathname) => {
     const normalizedPath = `${pathname || ""}`.trim().toLowerCase().replace(/\/+$/, "");
     return normalizedPath || "/";

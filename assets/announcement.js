@@ -2,6 +2,7 @@
   "use strict";
 
   const selectors = {
+    barHolder: ".announcement__bar-holder",
     closeButton: "[data-announcement-close]",
     marquee: ".announcement__bar-holder--marquee",
     slide: "[data-slide]",
@@ -10,6 +11,17 @@
     tickerSlide: ".announcement__slide",
     wrapper: "[data-announcement-wrapper]"
   };
+
+  const attributes = {
+    autoHeight: "data-announcement-auto-height"
+  };
+
+  const measuredProperties = {
+    desktop: "--ANNOUNCEMENT-MEASURED-DESKTOP",
+    mobile: "--ANNOUNCEMENT-MEASURED-MOBILE"
+  };
+
+  const mobileQuery = "(max-width: 749px)";
 
   if (customElements.get("announcement-bar")) return;
 
@@ -26,9 +38,12 @@
         this.wrapper = this.closest(selectors.wrapper);
         this.closeButton = this.wrapper?.querySelector(selectors.closeButton);
         this.cookieName = this.wrapper?.dataset.announcementCookieName || "announcement_bar_closed";
+        this.autoHeight = this.wrapper?.hasAttribute(attributes.autoHeight) || false;
         this.isClosing = false;
         this.resizeEvent = this.resize.bind(this);
         this.closeEvent = this.close.bind(this);
+        this.syncHeightEvent = this.syncHeight.bind(this);
+        this.autoplayHooked = new WeakSet();
       }
 
       connectedCallback() {
@@ -38,11 +53,17 @@
           this.removeClosedState();
         }
 
-        this.addEventListener("theme:slider:loaded", () => {
+        this.addEventListener("theme:slider:loaded", (event) => {
           this.querySelectorAll(selectors.ticker)?.forEach((ticker) => {
             ticker.dispatchEvent(new CustomEvent("theme:ticker:refresh"));
           });
+          this.resumeAutoplayAfterInteraction(event.detail?.slider);
+          this.syncHeight();
         });
+
+        // Web fonts change line metrics; a two-line bar measured with the fallback font
+        // can be a few px off once the real face paints.
+        document.fonts?.ready.then(this.syncHeightEvent);
 
         this.addEventListener("theme:countdown:hide", (event) => {
           if (window.Shopify.designMode) return;
@@ -50,7 +71,9 @@
           const marquee = event.target.closest(selectors.marquee);
 
           if (this.slidesCount < 2) {
-            this.querySelector(selectors.ticker).style.display = "none";
+            // Wrapped text slides are plain divs, so a bar can have no <ticker-bar> at all.
+            const ticker = this.querySelector(selectors.ticker);
+            if (ticker) ticker.style.display = "none";
           }
 
           if (marquee) {
@@ -72,12 +95,72 @@
         this.addEventListener("theme:countdown:expire", refreshTickers);
         this.closeButton?.addEventListener("click", this.closeEvent);
         document.addEventListener("theme:resize:width", this.resizeEvent);
+        // A single rAF after a width change measures mid-relayout and publishes a height the
+        // bar never settles at. Observe the box instead: it reports the settled height, and
+        // nothing inside the bar reads the published value, so this cannot loop.
+        if (this.autoHeight && this.wrapper && "ResizeObserver" in window) {
+          this.heightObserver = new ResizeObserver(this.syncHeightEvent);
+          this.heightObserver.observe(this.wrapper);
+        }
         document.dispatchEvent(new CustomEvent("theme:announcement:init", { bubbles: true }));
       }
 
       resize() {
         this.slider?.dispatchEvent(new CustomEvent("theme:slider:init", { bubbles: false }));
         this.slider?.dispatchEvent(new CustomEvent("theme:slider:reposition", { bubbles: false }));
+        // Flickity has just re-sized its viewport; measure after this frame's layout.
+        requestAnimationFrame(this.syncHeightEvent);
+      }
+
+      // Flickity's player stops for good on uiChange/pointerDown; restart it once the user lets go.
+      resumeAutoplayAfterInteraction(sliderComponent) {
+        const flkty = sliderComponent?.flkty;
+        if (!flkty || !flkty.options.autoPlay || this.autoplayHooked.has(flkty)) return;
+        this.autoplayHooked.add(flkty);
+
+        const resume = () => {
+          if (flkty.player.state === "stopped") flkty.playPlayer();
+        };
+
+        flkty.on("uiChange", resume);
+        flkty.on("pointerUp", resume);
+      }
+
+      // Slider layout with "Wrap text on two lines": --ANNOUNCEMENT-HEIGHT-* on :root is a
+      // Liquid guess of a single text line, but a wrapped slide makes the bar taller, and
+      // the header offsets itself by var(--announcement-height). Publish the rendered height
+      // per breakpoint, not as a resolved --announcement-height: theme.css switches that at
+      // 750px, and a single shared value let a desktop viewport keep a height measured on
+      // mobile. announcement.css pins the bar's own inner min-heights to the static value so
+      // this measurement cannot feed back into itself.
+      syncHeight() {
+        if (!this.autoHeight || !this.wrapper || !this.isTopBar()) return;
+        // fonts.ready can resolve after the editor re-rendered the section; a detached
+        // bar measures 0 and would collapse the header offset.
+        if (!this.isConnected || this.isClosing || this.hasDismissedCookie()) return;
+
+        const property = window.matchMedia(mobileQuery).matches
+          ? measuredProperties.mobile
+          : measuredProperties.desktop;
+
+        // Device-targeted slides are display:none on the other breakpoint, and the bar is
+        // briefly 0px tall while Flickity lays out. Publishing that 0 would latch it: 0px is
+        // a valid value, so the var() fallback to the Liquid height never runs. Drop the
+        // measurement instead — Liquid already emits 0px for a breakpoint with no slides.
+        const holder = this.querySelector(selectors.barHolder);
+        const contentHeight = holder ? holder.offsetHeight : 0;
+        const height = contentHeight > 0 ? this.wrapper.offsetHeight : 0;
+
+        if (height > 0) {
+          document.documentElement.style.setProperty(property, `${height}px`);
+        } else {
+          document.documentElement.style.removeProperty(property);
+        }
+      }
+
+      clearMeasuredHeights() {
+        document.documentElement.style.removeProperty(measuredProperties.desktop);
+        document.documentElement.style.removeProperty(measuredProperties.mobile);
       }
 
       close() {
@@ -113,6 +196,7 @@
         if (this.isTopBar()) {
           document.documentElement.style.removeProperty("--announcement-height");
         }
+        this.syncHeight();
       }
 
       isTopBar() {
@@ -137,6 +221,13 @@
       disconnectedCallback() {
         document.removeEventListener("theme:resize:width", this.resizeEvent);
         this.closeButton?.removeEventListener("click", this.closeEvent);
+        this.heightObserver?.disconnect();
+        // Drop the measured height when the bar leaves the page (editor removes the section
+        // or all its blocks) so the header falls back to the :root value instead of a
+        // stale inline one. A re-rendered bar connects afterwards and measures again.
+        if (this.autoHeight && this.isTopBar()) {
+          this.clearMeasuredHeights();
+        }
       }
     }
   );

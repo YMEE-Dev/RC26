@@ -3,8 +3,8 @@
   const COUNTRY_REDIRECT_SHOWN_ATTRIBUTE = "data-country-redirect-shown";
   const COUNTRY_REDIRECT_OPEN_EVENT = "theme:country-redirect:opened";
   const STORE_INFO_POPUP_COOKIE_HOURS = 90 * 24;
-  const STORE_INFO_POPUP_COOKIE_NAME = "store-info-popup";
-  const STORE_INFO_POPUP_LEGACY_COOKIE_PREFIX = "store-info-popup-";
+  // Popup hierarchy: cookie banner at once, geolocation popups at 5s, newsletter float at 10s.
+  const STORE_INFO_POPUP_OPEN_DELAY_MS = 5000;
 
   class StoreInfoPopupCookie {
     constructor(name, hoursToExpire = STORE_INFO_POPUP_COOKIE_HOURS) {
@@ -23,18 +23,6 @@
       return cookieValue.slice(cookiePrefix.length);
     }
 
-    readLegacy() {
-      const hasLegacySeenCookie = document.cookie.split("; ").some((row) => {
-        if (!row.startsWith(STORE_INFO_POPUP_LEGACY_COOKIE_PREFIX)) return false;
-
-        const value = row.slice(row.indexOf("=") + 1);
-
-        return value === "seen";
-      });
-
-      return hasLegacySeenCookie ? "seen" : false;
-    }
-
     write(value = "seen") {
       if (!this.name || !this.maxAge) return;
 
@@ -48,6 +36,29 @@
     }
   }
 
+  const log = (message) => console.log(`[store-info-popup] ${message}`);
+
+  // Empty cookie name: remember the dismissal for the browsing session only.
+  class StoreInfoPopupSessionFlag {
+    constructor(sectionId) {
+      this.key = `store-info-popup-session:${sectionId || "default"}`;
+    }
+
+    read() {
+      try {
+        return window.sessionStorage.getItem(this.key) || false;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    write(value = "seen") {
+      try {
+        window.sessionStorage.setItem(this.key, value);
+      } catch (error) {}
+    }
+  }
+
   class StoreInfoPopup extends HTMLElement {
     connectedCallback() {
       if (this.initialized) return;
@@ -58,21 +69,36 @@
         this.scrollableEl = this.querySelector("[data-scroll-lock-scrollable]");
         this.closeButtons = Array.from(this.querySelectorAll("[data-store-info-popup-close]"));
         this.closeButton = this.closeButtons.find((button) => !button.hasAttribute("hidden")) || this.closeButtons[0];
+        this.copy = this.querySelector("[data-store-info-popup-copy]");
+        this.copyTemplate = this.copy ? this.copy.innerHTML : "";
         this.config = this.getConfig();
 
         if (!this.dialog || !this.config?.enabled) return;
 
-        this.cookie = new StoreInfoPopupCookie(this.dialog.dataset.cookieName || STORE_INFO_POPUP_COOKIE_NAME);
+        const cookieName = (this.dialog.dataset.cookieName || "").trim();
+        this.cookie = cookieName
+          ? new StoreInfoPopupCookie(cookieName)
+          : new StoreInfoPopupSessionFlag(this.dataset.sectionId);
 
         this.bindEvents();
 
-        if (this.cookie.read() !== false || this.cookie.readLegacy() !== false) {
+        const dismissed = this.cookie.read() !== false;
+        if (dismissed && !window.Shopify?.designMode) {
+          log(`skip: already dismissed (${cookieName ? `cookie ${cookieName}` : "this session"})`);
           return;
         }
 
-        window.setTimeout(() => {
-          this.maybeOpen();
-        }, 0);
+        this.resolveAudience().then((countryCode) => {
+          if (countryCode === false) return;
+
+          this.updateDynamicContent(countryCode);
+
+          // Timed from the load event, not DOM-ready: the homepage hero is still white until
+          // its video and poster arrive, and the popup should not sit over an unpainted page.
+          const start = () => window.setTimeout(() => this.maybeOpen(), STORE_INFO_POPUP_OPEN_DELAY_MS);
+          if (document.readyState === "complete") start();
+          else window.addEventListener("load", start, { once: true });
+        });
       };
 
       if (document.readyState === "loading") {
@@ -94,7 +120,7 @@
       }
 
       if (this.handleBackdropClose) {
-        this.dialog?.removeEventListener("click", this.handleBackdropClose);
+        this.removeEventListener("click", this.handleBackdropClose);
       }
 
       if (this.handleCancel) {
@@ -120,6 +146,34 @@
       } catch (error) {
         return null;
       }
+    }
+
+    // Resolves to the visitor's country code when the popup should show, or false to skip it.
+    async resolveAudience() {
+      const audience = this.config.audience || "all";
+      const needsCountry = audience !== "all" || /\[country\]/i.test(this.copyTemplate);
+      const countryCode = needsCountry ? (await window.theme?.geo?.detectCountry?.()) || "" : "";
+
+      if (audience === "all" || window.Shopify?.designMode) return countryCode;
+
+      const listed = String(this.config.countryCodes || "")
+        .split(",")
+        .map((code) => code.trim().toUpperCase())
+        .includes(countryCode);
+      const show = Boolean(countryCode) && listed === (audience === "inside");
+
+      log(`country: ${countryCode || "(none)"}, audience: ${audience}, listed: ${listed} → ${show ? "eligible" : "skip"}`);
+
+      return show ? countryCode : false;
+    }
+
+    updateDynamicContent(countryCode) {
+      if (!this.copy || !this.copyTemplate) return;
+
+      const label = document.createElement("strong");
+      label.textContent = window.theme?.geo?.countryName?.(countryCode) || "your country";
+
+      this.copy.innerHTML = this.copyTemplate.replace(/\[country\]/gi, label.outerHTML);
     }
 
     hasCountryRedirectPriority() {
@@ -159,7 +213,7 @@
       };
 
       this.handleBackdropClose = (event) => {
-        if (event.target !== this.dialog) return;
+        if (event.target !== this && event.target !== this.dialog) return;
         this.close();
       };
 
@@ -169,7 +223,7 @@
       this.closeButtons.forEach((button) => {
         button.addEventListener("click", this.handleCloseClick);
       });
-      this.dialog.addEventListener("click", this.handleBackdropClose);
+      this.addEventListener("click", this.handleBackdropClose);
     }
 
     maybeOpen() {
@@ -177,6 +231,7 @@
       this.hasAttemptedOpen = true;
 
       if (this.blockedByCountryRedirect || this.hasCountryRedirectPriority()) {
+        log("skip: country redirect has priority");
         return;
       }
 
@@ -196,17 +251,12 @@
       this.dialog.removeAttribute("inert");
       this.dialog.setAttribute("aria-hidden", "false");
 
-      if (typeof this.dialog.showModal === "function") {
-        try {
-          this.dialog.showModal();
-        } catch (error) {
-          this.dataset.fallbackOpen = "true";
-          this.dialog.setAttribute("open", "");
-        }
-      } else {
-        this.dataset.fallbackOpen = "true";
-        this.dialog.setAttribute("open", "");
-      }
+      // Not showModal(): a modal lives in the browser's top layer, above every z-index, so the
+      // cookie banner could never sit over it. Opened in-page instead; theme a11y trap and the
+      // keydown handler cover focus and Escape.
+      this.dataset.fallbackOpen = "true";
+      this.dialog.setAttribute("open", "");
+      log("open");
 
       this.cookie.write();
 
@@ -221,7 +271,9 @@
     }
 
     close({ skipScrollUnlock = false } = {}) {
-      if (!this.dialog || !this.isDialogOpen()) return;
+      if (!this.dialog || !this.isDialogOpen() || this.isClosing) return;
+
+      this.isClosing = true;
 
       if (window.theme?.a11y?.removeTrapFocus) {
         window.theme.a11y.removeTrapFocus();
@@ -230,6 +282,27 @@
       this.dialog.setAttribute("aria-hidden", "true");
       this.dialog.setAttribute("inert", "");
 
+      // theme.css animates dialog[closing] with fadeOut; close for real once it has played.
+      this.dialog.setAttribute("closing", "");
+
+      let finished = false;
+      const finishClose = () => {
+        if (finished) return;
+        finished = true;
+
+        this.dialog.removeEventListener("animationend", onAnimationEnd);
+        this.dialog.removeAttribute("closing");
+        this.finishClose({ skipScrollUnlock });
+      };
+      const onAnimationEnd = (event) => {
+        if (event.target === this.dialog) finishClose();
+      };
+
+      this.dialog.addEventListener("animationend", onAnimationEnd);
+      window.setTimeout(finishClose, 600);
+    }
+
+    finishClose({ skipScrollUnlock = false } = {}) {
       if (typeof this.dialog.close === "function" && this.dialog.open) {
         this.dialog.close();
       } else {
@@ -237,6 +310,7 @@
       }
 
       delete this.dataset.fallbackOpen;
+      this.isClosing = false;
 
       if (!skipScrollUnlock && (!window.theme?.hasOpenModals || !window.theme.hasOpenModals())) {
         document.dispatchEvent(
