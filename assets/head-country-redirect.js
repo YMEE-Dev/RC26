@@ -3,6 +3,8 @@
   const COUNTRY_REDIRECT_SHOWN_ATTRIBUTE = "data-country-redirect-shown";
   const COUNTRY_REDIRECT_OPEN_EVENT = "theme:country-redirect:opened";
   const COUNTRY_REDIRECT_CLOSE_EVENT = "theme:country-redirect:closed";
+  // Popup hierarchy: cookie banner at once, geolocation popups at 5s, newsletter float at 15s.
+  const COUNTRY_REDIRECT_OPEN_DELAY_MS = 5000;
 
   class HeadCountryRedirect extends HTMLElement {
     connectedCallback() {
@@ -48,7 +50,14 @@
         this.bindEvents();
         this.updateDynamicContent();
         this.updateFlagIcon();
-        this.open();
+
+        // Timed from the load event so the dialog never opens over a still-blank hero.
+        const start = () =>
+          window.setTimeout(() => {
+            if (this.isConnected) this.open();
+          }, COUNTRY_REDIRECT_OPEN_DELAY_MS);
+        if (document.readyState === "complete") start();
+        else window.addEventListener("load", start, { once: true });
       };
 
       if (document.readyState === "loading") {
@@ -93,19 +102,9 @@
     }
 
     async getDetectedCountry() {
-      try {
-        const response = await fetch("/browsing_context_suggestions.json", {
-          credentials: "same-origin",
-        });
-        const data = await response.json();
-        const detectedCountry = this.normalizeCountry(data?.detected_values?.country?.handle);
+      const detectedCountry = await window.theme?.geo?.detectCountry?.();
 
-        if (detectedCountry) {
-          return detectedCountry;
-        }
-      } catch (error) {}
-
-      return this.normalizeCountry(this.config?.fallbackCountryCode || window.Shopify?.country);
+      return this.normalizeCountry(detectedCountry || this.config?.fallbackCountryCode || window.Shopify?.country);
     }
 
     isPreviewMode() {
@@ -211,19 +210,7 @@
         return "your region";
       }
 
-      if (typeof Intl === "undefined" || typeof Intl.DisplayNames !== "function") {
-        return countryCode;
-      }
-
-      try {
-        const displayNames = new Intl.DisplayNames([document.documentElement.lang || "en"], {
-          type: "region",
-        });
-
-        return displayNames.of(countryCode) || countryCode;
-      } catch (error) {
-        return countryCode;
-      }
+      return window.theme?.geo?.countryName?.(countryCode) || countryCode;
     }
 
     bindEvents() {
