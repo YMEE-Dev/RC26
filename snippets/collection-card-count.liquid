@@ -1,0 +1,30 @@
+{%- doc -%}
+  Returns how many grid cards a product occupies.
+
+  Keep the split rule in sync with collection-grid-cards: the first option that is not a size
+  axis becomes one card per value, everything else is a single card.
+
+  @param {product} product - The product to measure
+  @param {boolean} [split_variants] - Section setting; false always returns 1
+
+  @example
+  {% capture product_cards %}{% render 'collection-card-count', product: product, split_variants: true %}{% endcapture %}
+{%- enddoc -%}
+
+{%- liquid
+  assign cards = 1
+
+  if split_variants
+    assign size_option_names = 'size,title' | split: ','
+
+    for option in product.options_with_values
+      assign option_key = option.name | downcase | strip
+      unless size_option_names contains option_key
+        assign cards = option.values.size
+        break
+      endunless
+    endfor
+  endif
+
+  echo cards
+-%}

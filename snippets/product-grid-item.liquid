@@ -3,6 +3,9 @@
 
   Accepts:
   - product: {Object} product (required)
+  - variant: {Object} render the card for this specific variant (image, price, url).
+             Used by collection-grid-cards to give each non-size option value its own
+             card. Omit it and the card behaves exactly as before.
   - animation_delay: {Int} animation timing for load
   - last_element: {Boolean} True when custom image is taking up the first slot for the collection
                             and the loop is on the last element for the page.
@@ -36,8 +39,11 @@
     assign cr_show_inquire = false
   endif
 
-  assign current_variant = product.first_available_variant
+  assign current_variant = variant | default: product.first_available_variant
   assign product_url = product.url | within: collection | split: '?_pos' | first
+  if variant != blank
+    assign product_url = product_url | append: '?variant=' | append: variant.id
+  endif
   assign attributes = attributes | default: ''
   assign animation_delay = animation_delay | default: 0
   assign aos_delay_default = animation_delay | times: 100
@@ -298,6 +304,9 @@
 
   capture item_unique
     echo 'product-item--' | append: section.id | append: '-' | append: product.id
+    if variant != blank
+      echo '-' | append: variant.id
+    endif
   endcapture
 
   assign aos_anchor_default = item_unique | prepend: '#'
@@ -642,7 +651,7 @@
     class="grid-item product-item {{ swatches_class }} {{ alignment_class }} {{ overlay_text_class }} {{ quickview_class }} {{ product_card_class }}{% if modifier_class != blank %} {{ modifier_class }}{% endif %}{% if card_animation == 'plp' %} plp-card-up{% endif %}"
     id="{{ item_unique }}"
     data-grid-item
-    data-product-available="{{ product.available }}"
+    data-product-available="{% if variant != blank %}{{ variant.available }}{% else %}{{ product.available }}{% endif %}"
     data-url="{{ product.url }}"
     data-swap-id="true"
     {{ attributes }}
@@ -675,8 +684,13 @@
                 endif
               endif
 
+              assign card_media = product.featured_media
+              if variant.featured_media != blank
+                assign card_media = variant.featured_media
+              endif
+
               capture featured_image
-                render 'image', image: product.featured_media.preview_image, aspect_ratio: aspect_ratio, sizes: sizes, widths: widths, loading: loading, fetchpriority: fetchpriority, preload: preload, attributes: image_animations, cover: true
+                render 'image', image: card_media.preview_image, aspect_ratio: aspect_ratio, sizes: sizes, widths: widths, loading: loading, fetchpriority: fetchpriority, preload: preload, attributes: image_animations, cover: true
               endcapture
             -%}
 
