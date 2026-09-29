@@ -34,8 +34,9 @@
   assign split_option = blank
 
   if split_variants
-    # size axes stay inside the card; 'title' is Shopify's placeholder option
-    assign size_option_names = 'size,title' | split: ','
+    # size axes stay inside the card; 'title' is Shopify's placeholder option;
+    # Size is 'dimensioni' on /it and 'المقاس' on RC UAE's /ar
+    assign size_option_names = 'size,title,dimensioni,المقاس' | split: ','
 
     for option in product.options_with_values
       assign option_key = option.name | downcase | strip
