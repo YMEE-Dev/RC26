@@ -10,7 +10,8 @@
     assign available_cards = 0
     assign products = 0
     assign available_products = 0
-    assign size_option_names = 'size,title' | split: ','
+    # same list as collection-grid-cards: Size is 'dimensioni' on /it and 'المقاس' on RC UAE's /ar
+    assign size_option_names = 'size,title,dimensioni,المقاس' | split: ','
 
     for product in collection.products
       assign product_type = product.type | downcase | strip
