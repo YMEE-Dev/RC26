@@ -40,8 +40,11 @@
         endif
       else
         assign cards = cards | plus: split_option.values.size
+        assign split_option_key = 'option' | append: split_option.position
         for option_value in split_option.values
-          if option_value.variant.available
+          # same rule as collection-grid-cards: a value's card is in stock when any of its sizes is
+          assign available_value_variants = product.variants | where: split_option_key, option_value.name | where: 'available'
+          if available_value_variants.size > 0
             assign available_cards = available_cards | plus: 1
           endif
         endfor

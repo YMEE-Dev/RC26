@@ -8,9 +8,9 @@
   Shopify's placeholder option on single-variant products, so it is skipped too.
   Everything else — Metal color, Silk color — becomes its own card.
 
-  The representative variant per value comes from `option_value.variant`, the same source
-  product-grid-item already uses for its swatch images (line ~244). That avoids looping
-  product.variants, which Liquid caps at 50 iterations per loop.
+  The representative variant per value is `option_value.variant` (this value in the default
+  size). When that size is missing or sold out in this value, the first in-stock variant of the
+  value is used instead, then its first variant.
 
   No product in the catalogue has more than one non-size option, so a single split axis
   covers all of them; if that ever changes, only the first non-size option splits.
@@ -63,6 +63,7 @@
     card_animation: card_animation
   -%}
 {%- else -%}
+  {%- assign split_option_key = 'option' | append: split_option.position -%}
   {%- for option_value in split_option.values -%}
     {%- liquid
       assign card_position = card_offset | plus: forloop.index0
@@ -70,10 +71,16 @@
       if card_limit > 0 and card_position >= card_limit
         assign card_attributes = card_attributes | append: ' data-card-overflow'
       endif
+
+      assign card_variant = option_value.variant
+      unless card_variant.available
+        assign value_variants = product.variants | where: split_option_key, option_value.name
+        assign card_variant = value_variants | where: 'available' | first | default: card_variant | default: value_variants.first
+      endunless
     -%}
     {%- render 'product-grid-item',
       product: product,
-      variant: option_value.variant,
+      variant: card_variant,
       index: index,
       sizes: sizes,
       attributes: card_attributes,
