@@ -341,3 +341,264 @@
     display: block;
   }
 }
+
+/* Split style (F&F page), per the Figma 390 and 1440 frames */
+@media only screen and (max-width: 959px) {
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__eyebrow {
+    margin-block-end: 12px;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0.1em;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__title {
+    margin-block-end: 12px;
+    font-size: var(--FONT-DISPLAY-S);
+    line-height: var(--LINE-HEIGHT-DISPLAY-S);
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products {
+    margin-block-start: 32px;
+    padding-block-end: 37px;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products .related-slider-progress {
+    inline-size: 235px;
+    background: #e5e5e5;
+    overflow: visible;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products .related-slider-progress__line {
+    block-size: 2px;
+    margin-block-start: -0.5px;
+    background: #212121;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products .product-item__info {
+    padding: 18px 0 0;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products .product-item__title {
+    padding: 0 0 20px;
+    font-size: 11px;
+    line-height: 16.5px;
+    letter-spacing: 0.08em;
+  }
+
+  /* Figma's "normal" leading, set explicitly so Safari and Chrome agree */
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products :is(.product-item__price, .product-item__price .price) {
+    font-size: 12px;
+    line-height: 15px;
+    letter-spacing: 0.08em;
+    color: #212121;
+  }
+}
+
+/* Theme's price-row min-height breaks Figma's title-to-price gap */
+.homepage-collection-spotlight--split .homepage-collection-spotlight__products .product-item__swatches-wrapper {
+  min-block-size: 0;
+}
+
+/* Mobile: two 169px cards at 390 */
+@media only screen and (max-width: 768px) {
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__layout {
+    row-gap: 72px;
+  }
+
+  /* Theme bleeds the slider (-outer margin, outer left pad), hence - var(--outer) below; unclip so the third card peeks in */
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products,
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products grid-slider {
+    overflow: visible;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products .grid--slider {
+    gap: 12px;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products .product-item {
+    flex: 0 0 calc((100% - var(--outer) - 12px) / 2);
+    inline-size: calc((100% - var(--outer) - 12px) / 2);
+  }
+
+  /* Capped so large phones and small tablets don't get a ~960px-tall image */
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__media {
+    inline-size: 100%;
+    max-block-size: 640px;
+    aspect-ratio: 390 / 488;
+  }
+}
+
+@media only screen and (min-width: 600px) and (max-width: 768px) {
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__description {
+    max-inline-size: 382px;
+  }
+}
+
+/* Tablet: stacked, with desktop copy and image widths */
+@media only screen and (min-width: 769px) and (max-width: 959px) {
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__layout {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 72px;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__content,
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__media {
+    grid-column: 1;
+    justify-self: center;
+    inline-size: 100%;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__content {
+    order: 2;
+    max-inline-size: 460px;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__media {
+    order: 1;
+    max-inline-size: 500px;
+    block-size: auto;
+    aspect-ratio: 500 / 640;
+  }
+
+  .homepage-collection-spotlight--split.homepage-collection-spotlight--mobile_reversed .homepage-collection-spotlight__content {
+    order: 1;
+  }
+
+  .homepage-collection-spotlight--split.homepage-collection-spotlight--mobile_reversed .homepage-collection-spotlight__media {
+    order: 2;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__description {
+    max-inline-size: 382px;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products .grid--slider {
+    gap: 12px;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products .product-item {
+    flex: 0 0 calc((100% - 12px) / 2);
+    inline-size: calc((100% - 12px) / 2);
+  }
+}
+
+@media only screen and (min-width: 960px) {
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__layout {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: clamp(40px, 5.556vw, 80px);
+    padding-inline: clamp(40px, 8.333vw, 120px);
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__media {
+    grid-column: 1;
+    justify-self: end;
+    inline-size: 100%;
+    max-inline-size: 500px;
+    block-size: auto;
+    aspect-ratio: 500 / 640;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__content {
+    grid-column: 2;
+    justify-self: start;
+    max-inline-size: 460px;
+  }
+
+  .homepage-collection-spotlight--split.homepage-collection-spotlight--reversed .homepage-collection-spotlight__content {
+    grid-column: 1;
+    justify-self: end;
+  }
+
+  .homepage-collection-spotlight--split.homepage-collection-spotlight--reversed .homepage-collection-spotlight__media {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__eyebrow {
+    margin-block-end: 10px;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.12em;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__title {
+    margin-block-end: 24px;
+    font-size: var(--FONT-DISPLAY-M);
+    line-height: var(--LINE-HEIGHT-DISPLAY-M);
+  }
+
+  /* Figma box is 380px but the widest line renders at 380.9px; 382px keeps Figma's breaks */
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__description {
+    max-inline-size: 382px;
+  }
+
+  /* 432 = 320px carousel + 2 × (44px arrow + 12px gap) */
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products {
+    max-inline-size: 432px;
+    margin: 48px auto 0;
+    padding: 0 56px;
+  }
+
+  /* Theme's 40px scroller padding shows the next card in the arrow gutters */
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products .grid--slider {
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products .slider__arrows {
+    inset: 0;
+    width: auto;
+    transform: none;
+    overflow: visible;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products .slider__button {
+    --btn-size: 44px;
+    --icon-size: 20px;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products .slider__button::after {
+    content: none;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products .slider__button:disabled {
+    visibility: visible;
+    opacity: 0.3;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products .related-slider-progress {
+    display: none;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products .product-item__image {
+    max-inline-size: 300px;
+    padding-block-start: min(100%, 300px);
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products .product-item__info {
+    padding: 32px 0 0;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products .product-item__title {
+    max-inline-size: 260px;
+    margin-inline: auto;
+    padding: 0 0 14px;
+    font-size: 11px;
+    line-height: 18px;
+    letter-spacing: 0.12em;
+  }
+
+  .homepage-collection-spotlight--split .homepage-collection-spotlight__products :is(.product-item__price, .product-item__price .price) {
+    font-size: 11px;
+    line-height: 16px;
+    letter-spacing: 0.12em;
+    color: #212121;
+  }
+}
