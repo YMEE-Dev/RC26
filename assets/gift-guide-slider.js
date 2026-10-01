@@ -100,9 +100,12 @@
       delete swiperInstances[sectionId];
     }
 
+    // Compact: fixed slide widths come from the CSS so the next card peeks in
+    const isCompact = swiperElement.dataset.cardSize === "compact";
+
     swiperInstances[sectionId] = new Swiper(swiperElement, {
-      slidesPerView: 1.15,
-      spaceBetween: 20,
+      slidesPerView: isCompact ? "auto" : 1.15,
+      spaceBetween: isCompact ? 18 : 20,
       loop: false,
       watchOverflow: true,
       observer: true,
@@ -145,11 +148,16 @@
           requestAnimationFrame(() => updateProgress(sectionId));
         },
       },
-      breakpoints: {
-        750: { slidesPerView: 1.8, spaceBetween: 20 },
-        960: { slidesPerView: 2.7, spaceBetween: 20 },
-        1200: { slidesPerView: 2.7, spaceBetween: 80 },
-      },
+      breakpoints: isCompact
+        ? {
+            750: { spaceBetween: 32 },
+            1200: { spaceBetween: 64 },
+          }
+        : {
+            750: { slidesPerView: 1.8, spaceBetween: 20 },
+            960: { slidesPerView: 2.7, spaceBetween: 20 },
+            1200: { slidesPerView: 2.7, spaceBetween: 80 },
+          },
     });
 
     bindImageRefresh(section, sectionId);

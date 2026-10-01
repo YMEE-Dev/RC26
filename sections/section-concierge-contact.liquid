@@ -1,0 +1,255 @@
+<!-- /sections/section-concierge-contact.liquid -->
+{{ 'section-concierge-contact.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign image = section.settings.image
+  assign eyebrow = section.settings.eyebrow | strip
+  assign title = section.settings.title | strip
+  assign text = section.settings.text
+  assign button_label = section.settings.button_label | strip
+  assign button_link = section.settings.button_link
+  assign animation_anchor = '#ConciergeContact--' | append: section.id
+  assign animation_order = 0
+-%}
+
+<section
+  id="ConciergeContact--{{ section.id }}"
+  class="concierge-contact header-observer--{{ section.settings.header_observer_mode }}{% if section.settings.layout == 'reversed' %} concierge-contact--reversed{% endif %}"
+  style="--concierge-contact-bg: {{ section.settings.background_color }};"
+  data-section-id="{{ section.id }}"
+  data-section-type="concierge-contact"
+  data-header-observer-mode="{{ section.settings.header_observer_mode }}"
+>
+  <div class="concierge-contact__media">
+    {%- if image != blank -%}
+      {{
+        image
+        | image_url: width: 2000
+        | image_tag:
+          class: 'concierge-contact__image',
+          loading: 'lazy',
+          sizes: '(min-width: 990px) 44vw, 100vw',
+          widths: '375, 550, 750, 990, 1200, 1600, 2000'
+      }}
+    {%- else -%}
+      {{ 'image' | placeholder_svg_tag: 'concierge-contact__placeholder placeholder-svg' }}
+    {%- endif -%}
+  </div>
+
+  <div class="concierge-contact__panel">
+    <div class="concierge-contact__content">
+      {%- if eyebrow != blank -%}
+        {%- assign animation_order = animation_order | plus: 1 -%}
+        <p
+          class="concierge-contact__eyebrow"
+          data-aos="hero"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-order="{{ animation_order }}"
+        >
+          {{ eyebrow | escape }}
+        </p>
+      {%- endif -%}
+
+      {%- if title != blank -%}
+        {%- assign animation_order = animation_order | plus: 1 -%}
+        <h2
+          class="concierge-contact__title"
+          data-aos="hero"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-order="{{ animation_order }}"
+        >
+          {{ title | escape }}
+        </h2>
+      {%- endif -%}
+
+      {%- if text != blank -%}
+        {%- assign animation_order = animation_order | plus: 1 -%}
+        <div
+          class="concierge-contact__text"
+          data-aos="hero"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-order="{{ animation_order }}"
+        >
+          {{ text }}
+        </div>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+        {%- assign animation_order = animation_order | plus: 1 -%}
+        <div
+          class="concierge-contact__rows"
+          data-aos="hero"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-order="{{ animation_order }}"
+        >
+          {%- for block in section.blocks -%}
+            {%- case block.type -%}
+              {%- when 'phone' -%}
+                {%- assign number = block.settings.number | strip -%}
+                {%- if number != blank -%}
+                  <a class="concierge-contact__row" href="tel:{{ number | remove: ' ' }}" {{ block.shopify_attributes }}>
+                    <span class="concierge-contact__icon" aria-hidden="true">{%- render 'icon-phone' -%}</span>
+                    <span class="concierge-contact__value">{{ number | escape }}</span>
+                  </a>
+                {%- endif -%}
+              {%- when 'email' -%}
+                {%- assign address = block.settings.address | strip -%}
+                {%- if address contains '@' -%}
+                  <a class="concierge-contact__row" href="mailto:{{ address }}" {{ block.shopify_attributes }}>
+                    <span class="concierge-contact__icon" aria-hidden="true">{%- render 'icon-email' -%}</span>
+                    <span class="concierge-contact__value">{{ address | escape }}</span>
+                  </a>
+                {%- elsif address != blank -%}
+                  <span class="concierge-contact__row" {{ block.shopify_attributes }}>
+                    <span class="concierge-contact__icon" aria-hidden="true">{%- render 'icon-email' -%}</span>
+                    <span class="concierge-contact__value">{{ address | escape }}</span>
+                  </span>
+                {%- endif -%}
+            {%- endcase -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- if button_label != blank and button_link != blank -%}
+        {%- assign animation_order = animation_order | plus: 1 -%}
+        <a
+          href="{{ button_link }}"
+          class="btn btn--primary btn--solid concierge-contact__button"
+          data-aos="hero"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-order="{{ animation_order }}"
+        >
+          <span>{{ button_label | escape }}</span>
+          {%- render 'icon-arrow-long-right' -%}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Concierge contact",
+  "tag": "section",
+  "class": "section-concierge-contact",
+  "disabled_on": {
+    "groups": ["header", "aside", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Desktop layout",
+      "default": "",
+      "options": [
+        {"value": "", "label": "Image left, content right"},
+        {"value": "reversed", "label": "Content left, image right"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Concierge"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Ask Our Concierge"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Our concierge is always keen on answering any questions you may have.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Label",
+      "default": "Contact Us"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Panel background",
+      "default": "#F9F9F9"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "phone",
+      "name": "Phone",
+      "settings": [
+        {
+          "type": "text",
+          "id": "number",
+          "label": "Phone number",
+          "default": "+39 0444 202 202"
+        }
+      ]
+    },
+    {
+      "type": "email",
+      "name": "Email",
+      "settings": [
+        {
+          "type": "text",
+          "id": "address",
+          "label": "Email address",
+          "default": "customercare@robertocoin.com"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Concierge contact",
+      "blocks": [
+        {"type": "phone"},
+        {"type": "email"}
+      ]
+    }
+  ]
+}
+{% endschema %}

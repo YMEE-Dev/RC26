@@ -217,3 +217,119 @@
     padding-bottom: 20px;
   }
 }
+
+/* Compact cards (F&F page): Figma centres a 1080px column and lets the tiles bleed right */
+.gift-guide-slider.gift-guide-slider--compact {
+  padding-block: 64px 72px;
+}
+
+.gift-guide-slider--compact .gift-guide-slider__header {
+  margin-block-end: 24px;
+}
+
+.gift-guide-slider--compact .gift-guide-slider__subheading {
+  margin-block-end: 12px;
+  font-size: 13px;
+  line-height: 18px;
+  letter-spacing: 0.12em;
+  color: #212121;
+}
+
+.gift-guide-slider--compact .gift-guide-slider__heading {
+  font-size: var(--FONT-DISPLAY-S);
+  line-height: var(--LINE-HEIGHT-DISPLAY-S);
+  color: #212121;
+}
+
+.gift-guide-slider--compact .gift-guide-slider__swiper .swiper-slide {
+  width: 276px;
+}
+
+.gift-guide-slider--compact .gift-guide-slider__swiper:not(.swiper-initialized) .swiper-wrapper {
+  gap: 18px;
+}
+
+.gift-guide-slider--compact .gift-guide-slider__card-image {
+  aspect-ratio: 4 / 5;
+}
+
+.gift-guide-slider--compact .gift-guide-slider__card-content {
+  padding: 22px 0 0;
+}
+
+.gift-guide-slider--compact .gift-guide-slider__card-subheading {
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+  line-height: 18px;
+  letter-spacing: 0.12em;
+  color: #212121;
+}
+
+/* 41px = 40px Figma gap + 1px track */
+.gift-guide-slider--compact .gift-guide-slider__carousel-container {
+  padding-block-end: 41px;
+}
+
+.gift-guide-slider--compact .gift-guide-slider__carousel-container .related-slider-progress {
+  inline-size: 235px;
+  background: #e5e5e5;
+  overflow: visible;
+}
+
+.gift-guide-slider--compact .gift-guide-slider__carousel-container .related-slider-progress__line {
+  block-size: 2px;
+  margin-block-start: -0.5px;
+  background: #212121;
+}
+
+@media (min-width: 750px) {
+  .gift-guide-slider.gift-guide-slider--compact {
+    padding-block: var(--PT) var(--PB);
+  }
+
+  .gift-guide-slider--compact .gift-guide-slider__wrapper {
+    max-inline-size: none;
+    padding-inline: max(var(--outer), calc((100% - 1080px) / 2));
+  }
+
+  .gift-guide-slider--compact .gift-guide-slider__header {
+    margin-block-end: 40px;
+  }
+
+  .gift-guide-slider--compact .gift-guide-slider__subheading {
+    margin-block-end: 10px;
+    font-size: 11px;
+    line-height: 16px;
+    color: #a0a0a0;
+  }
+
+  .gift-guide-slider--compact .gift-guide-slider__swiper .swiper-slide {
+    width: 320px;
+  }
+
+  .gift-guide-slider--compact .gift-guide-slider__swiper:not(.swiper-initialized) .swiper-wrapper {
+    gap: 32px;
+  }
+
+  .gift-guide-slider--compact .gift-guide-slider__card-subheading {
+    font-size: 11px;
+    line-height: 16px;
+  }
+}
+
+@media (min-width: 990px) {
+  .gift-guide-slider--compact .gift-guide-slider__carousel-container {
+    padding-block-end: 0;
+  }
+
+  .gift-guide-slider--compact .gift-guide-slider__carousel-container .related-slider-progress {
+    display: none;
+  }
+}
+
+@media (min-width: 1200px) {
+  .gift-guide-slider--compact .gift-guide-slider__swiper:not(.swiper-initialized) .swiper-wrapper {
+    gap: 64px;
+  }
+}

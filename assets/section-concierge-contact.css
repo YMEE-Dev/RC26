@@ -1,0 +1,200 @@
+/* Per the Figma "Concierge" 390 and 1440 frames */
+.concierge-contact {
+  --concierge-contact-text-primary: #212121;
+  --concierge-contact-text-secondary: #646464;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--concierge-contact-bg);
+}
+
+/* Explicit width, or aspect-ratio + max-height shrink it in a flex column */
+.concierge-contact__media {
+  position: relative;
+  inline-size: 100%;
+  aspect-ratio: 390 / 280;
+  max-block-size: 480px;
+  overflow: hidden;
+}
+
+.concierge-contact__image,
+.concierge-contact__placeholder {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.concierge-contact__image {
+  object-fit: cover;
+}
+
+.concierge-contact__placeholder {
+  background-color: rgb(0 0 0 / 0.05);
+}
+
+.concierge-contact__panel {
+  display: flex;
+  align-items: center;
+  padding-block: 48px 56px;
+  padding-inline: var(--outer);
+}
+
+.concierge-contact__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.concierge-contact__eyebrow {
+  margin: 0;
+  font-family: var(--FONT-STACK-BODY);
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--concierge-contact-text-secondary);
+}
+
+.concierge-contact__title {
+  margin: 0;
+  font-family: var(--FONT-STACK-HEADING);
+  font-size: var(--FONT-DISPLAY-S);
+  font-style: var(--FONT-STYLE-HEADING);
+  font-weight: var(--FONT-WEIGHT-HEADING);
+  line-height: var(--LINE-HEIGHT-DISPLAY-S);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--concierge-contact-text-primary);
+}
+
+.concierge-contact__text {
+  font-family: var(--FONT-STACK-BODY);
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--concierge-contact-text-secondary);
+}
+
+.concierge-contact__text p {
+  margin: 0;
+}
+
+.concierge-contact__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-block: 8px;
+}
+
+.concierge-contact__row {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  min-block-size: 44px;
+  font-family: var(--FONT-STACK-BODY);
+  font-size: 12px;
+  line-height: 20px;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  text-transform: uppercase;
+  color: var(--concierge-contact-text-primary);
+  transition: opacity 0.3s ease;
+}
+
+@media (hover: hover) {
+  a.concierge-contact__row:hover {
+    opacity: 0.6;
+  }
+}
+
+.concierge-contact__icon {
+  display: flex;
+  flex-shrink: 0;
+  inline-size: 25px;
+  block-size: 25px;
+}
+
+/* Shared icon snippets hardcode fill="black" */
+.concierge-contact__icon path {
+  fill: currentColor;
+}
+
+.concierge-contact__button {
+  gap: 10px;
+  inline-size: 100%;
+  padding: 10px 30px;
+}
+
+/* Keep the label white on hover; theme's solid primary turns it black (0,2,0) */
+.concierge-contact .concierge-contact__button.btn {
+  --btn-text-hover: var(--BTN-PRIMARY-TEXT);
+}
+
+.concierge-contact__button .icon-arrow-long-right {
+  flex-shrink: 0;
+}
+
+/* Tablet: stacked, with desktop copy and button widths */
+@media only screen and (min-width: 750px) {
+  .concierge-contact__panel {
+    padding-block: 64px 72px;
+  }
+
+  .concierge-contact__text {
+    max-inline-size: 420px;
+  }
+
+  .concierge-contact__button {
+    inline-size: auto;
+  }
+}
+
+@media only screen and (min-width: 990px) {
+  .concierge-contact {
+    flex-direction: row;
+    min-block-size: 620px;
+  }
+
+  .concierge-contact--reversed {
+    flex-direction: row-reverse;
+  }
+
+  /* 624 / 1440 */
+  .concierge-contact__media {
+    flex: 0 0 43.333%;
+    inline-size: auto;
+    aspect-ratio: auto;
+    max-block-size: none;
+  }
+
+  .concierge-contact__image,
+  .concierge-contact__placeholder {
+    position: absolute;
+    inset: 0;
+  }
+
+  .concierge-contact__panel {
+    flex: 1 1 auto;
+    padding-block: 80px;
+    padding-inline: clamp(48px, 6.667vw, 96px);
+  }
+
+  .concierge-contact__content {
+    gap: 20px;
+  }
+
+  .concierge-contact__title {
+    font-size: var(--FONT-DISPLAY-M);
+    line-height: var(--LINE-HEIGHT-DISPLAY-M);
+  }
+
+  .concierge-contact__rows {
+    gap: 12px;
+    padding-block: 12px 8px;
+  }
+
+  .concierge-contact__row {
+    min-block-size: 25px;
+  }
+}

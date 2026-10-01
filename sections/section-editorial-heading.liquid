@@ -1,0 +1,176 @@
+<!-- /sections/section-editorial-heading.liquid -->
+{{ 'section-editorial-heading.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign eyebrow = section.settings.eyebrow | strip
+  assign title = section.settings.title | strip
+  assign text = section.settings.text
+  assign animation_anchor = '#EditorialHeading--' | append: section.id
+  assign animation_order = 0
+-%}
+
+<section
+  id="EditorialHeading--{{ section.id }}"
+  class="editorial-heading editorial-heading--{{ section.settings.alignment }} header-observer--{{ section.settings.header_observer_mode }}"
+  style="
+    --editorial-heading-bg: {{ section.settings.background_color }};
+    --editorial-heading-pt: {{ section.settings.padding_top }}px;
+    --editorial-heading-pb: {{ section.settings.padding_bottom }}px;
+    --editorial-heading-pt-mobile: {{ section.settings.padding_top_mobile }}px;
+    --editorial-heading-pb-mobile: {{ section.settings.padding_bottom_mobile }}px;
+  "
+  data-section-id="{{ section.id }}"
+  data-section-type="editorial-heading"
+  data-header-observer-mode="{{ section.settings.header_observer_mode }}"
+>
+  <div class="editorial-heading__inner">
+    {%- if eyebrow != blank -%}
+      {%- assign animation_order = animation_order | plus: 1 -%}
+      <p
+        class="editorial-heading__eyebrow"
+        data-aos="hero"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-order="{{ animation_order }}"
+      >
+        {{ eyebrow | escape }}
+      </p>
+    {%- endif -%}
+
+    {%- if title != blank -%}
+      {%- assign animation_order = animation_order | plus: 1 -%}
+      <h2
+        class="editorial-heading__title"
+        data-aos="hero"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-order="{{ animation_order }}"
+      >
+        {{ title | escape }}
+      </h2>
+    {%- endif -%}
+
+    {%- if text != blank -%}
+      {%- assign animation_order = animation_order | plus: 1 -%}
+      <div
+        class="editorial-heading__text"
+        data-aos="hero"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-order="{{ animation_order }}"
+      >
+        {{ text }}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Editorial heading",
+  "tag": "section",
+  "class": "section-editorial-heading",
+  "disabled_on": {
+    "groups": ["header", "aside", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header observer"
+    },
+    {
+      "type": "select",
+      "id": "header_observer_mode",
+      "label": "Header mode",
+      "default": "dark",
+      "options": [
+        {"value": "light", "label": "Light"},
+        {"value": "dark", "label": "Dark"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Eyebrow"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Editorial heading"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Introduce the section with a short description.</p>"
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Alignment",
+      "default": "center",
+      "options": [
+        {"value": "center", "label": "Center"},
+        {"value": "left", "label": "Left"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Top",
+      "default": 120
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 128
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Top (mobile)",
+      "default": 72
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom (mobile)",
+      "default": 80
+    }
+  ],
+  "presets": [
+    {
+      "name": "Editorial heading"
+    }
+  ]
+}
+{% endschema %}
