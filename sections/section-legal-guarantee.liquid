@@ -8,6 +8,13 @@
 -%}
 
 {%- style -%}
+  {%- comment -%} Overrides nav-menu.css's 75/150px page offset, which left a ~160px desktop gap under the title. The title moves with the announcement bar, so the offset does too. {%- endcomment -%}
+  @media (max-width: 1023px) {
+    main.main-content--page-legal-guarantee { padding-top: calc(var(--announcement-height, 0px) + 25px); }
+  }
+  @media (min-width: 1024px) {
+    main.main-content--page-legal-guarantee { padding-top: calc(var(--announcement-height, 0px) + 4px); }
+  }
   #LegalGuarantee--{{ section.id }} {
     padding: {{ section.settings.padding_top }}px 16px {{ section.settings.padding_bottom }}px;
   }
