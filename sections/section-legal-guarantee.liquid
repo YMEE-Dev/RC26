@@ -1,0 +1,91 @@
+<!-- /sections/section-legal-guarantee.liquid -->
+{%- liquid
+  assign notice_file = 'legal-guarantee-en.svg'
+  if request.locale.iso_code == 'it'
+    assign notice_file = 'legal-guarantee-it.svg'
+  endif
+  assign notice_url = notice_file | asset_url
+-%}
+
+{%- style -%}
+  #LegalGuarantee--{{ section.id }} {
+    padding: {{ section.settings.padding_top }}px 16px {{ section.settings.padding_bottom }}px;
+  }
+  #LegalGuarantee--{{ section.id }} .legal-guarantee__link {
+    display: block;
+    max-width: {{ section.settings.max_width }}px;
+    margin: 0 auto;
+  }
+  {%- comment -%} Served untouched as <img>: no CDN resizing, and the SVG's own .st* classes and clip-path ids stay out of the page DOM. {%- endcomment -%}
+  #LegalGuarantee--{{ section.id }} .legal-guarantee__image {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+{%- endstyle -%}
+
+<section id="LegalGuarantee--{{ section.id }}" class="legal-guarantee" data-section-id="{{ section.id }}">
+  <h1 class="visually-hidden">{{ page.title }}</h1>
+  <a class="legal-guarantee__link" href="{{ notice_url }}" target="_blank" rel="noopener">
+    <img
+      class="legal-guarantee__image"
+      src="{{ notice_url }}"
+      alt="{{ 'sections.legal_guarantee.alt' | t | escape }}"
+      width="595"
+      height="842"
+      loading="eager"
+      fetchpriority="high">
+    <span class="visually-hidden">{{ 'sections.legal_guarantee.open_full_size' | t }}</span>
+  </a>
+  {%- comment -%} Verbatim from Annex I of Implementing Reg. (EU) 2025/1960; the SVG's words are outlines, so this is the screen-reader copy. {%- endcomment -%}
+  <div class="visually-hidden">
+    {{ 'sections.legal_guarantee.transcript_1_html' | t }}
+    {{ 'sections.legal_guarantee.transcript_2_html' | t }}
+    {{ 'sections.legal_guarantee.transcript_3_html' | t }}
+    {{ 'sections.legal_guarantee.transcript_4_html' | t }}
+    {{ 'sections.legal_guarantee.transcript_5_html' | t }}
+    {{ 'sections.legal_guarantee.transcript_6_html' | t }}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Legal guarantee notice",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Shows assets/legal-guarantee-it.svg on the Italian storefront and assets/legal-guarantee-en.svg everywhere else."
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Maximum width",
+      "min": 400,
+      "max": 1400,
+      "step": 20,
+      "unit": "px",
+      "default": 900
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 60
+    }
+  ]
+}
+{% endschema %}
