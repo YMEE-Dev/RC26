@@ -1,8 +1,12 @@
 <!-- /sections/section-legal-guarantee.liquid -->
 {%- liquid
   assign notice_file = 'legal-guarantee-en.svg'
+  assign text_heading = section.settings.heading_en
+  assign text_body = section.settings.text_en
   if request.locale.iso_code == 'it'
     assign notice_file = 'legal-guarantee-it.svg'
+    assign text_heading = section.settings.heading_it
+    assign text_body = section.settings.text_it
   endif
   assign notice_url = notice_file | asset_url
 -%}
@@ -52,14 +56,19 @@
       fetchpriority="high">
     <span class="visually-hidden">{{ 'sections.legal_guarantee.open_full_size' | t }}</span>
   </a>
-  {%- comment -%} Verbatim from Annex I of Implementing Reg. (EU) 2025/1960. The SVG's words are outlines, so this is the readable/copyable version (same as the checkout Legal notice). {%- endcomment -%}
+  {%- comment -%} The SVG's words are outlines, so this is the readable/copyable version. EN/IT fields rather than Langify so the team can edit both in the theme editor; empty falls back to the Annex I wording in the locales. {%- endcomment -%}
   <div class="legal-guarantee__text rte body-large">
-    {{ 'sections.legal_guarantee.transcript_1_html' | t }}
-    {{ 'sections.legal_guarantee.transcript_2_html' | t }}
-    {{ 'sections.legal_guarantee.transcript_3_html' | t }}
-    {{ 'sections.legal_guarantee.transcript_4_html' | t }}
-    {{ 'sections.legal_guarantee.transcript_5_html' | t }}
-    {{ 'sections.legal_guarantee.transcript_6_html' | t }}
+    {%- if text_body != blank -%}
+      {%- if text_heading != blank -%}<h2>{{ text_heading | escape }}</h2>{%- endif -%}
+      {{ text_body }}
+    {%- else -%}
+      {{ 'sections.legal_guarantee.transcript_1_html' | t }}
+      {{ 'sections.legal_guarantee.transcript_2_html' | t }}
+      {{ 'sections.legal_guarantee.transcript_3_html' | t }}
+      {{ 'sections.legal_guarantee.transcript_4_html' | t }}
+      {{ 'sections.legal_guarantee.transcript_5_html' | t }}
+      {{ 'sections.legal_guarantee.transcript_6_html' | t }}
+    {%- endif -%}
   </div>
 </section>
 
@@ -100,6 +109,34 @@
       "step": 4,
       "unit": "px",
       "default": 60
+    },
+    {
+      "type": "header",
+      "content": "Text version (below the notice)"
+    },
+    {
+      "type": "paragraph",
+      "content": "Leave a text field empty to show the official EU wording."
+    },
+    {
+      "type": "text",
+      "id": "heading_en",
+      "label": "English heading"
+    },
+    {
+      "type": "richtext",
+      "id": "text_en",
+      "label": "English text"
+    },
+    {
+      "type": "text",
+      "id": "heading_it",
+      "label": "Italian heading"
+    },
+    {
+      "type": "richtext",
+      "id": "text_it",
+      "label": "Italian text"
     }
   ]
 }
