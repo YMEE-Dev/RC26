@@ -148,7 +148,8 @@
       </h6>
     {%  elsif template contains 'page' %}
       <h6 class="header__logo__meta__page">
-        <span>{{ page.title }}</span>
+        {%- comment -%} Legal guarantee title comes from the locales so IT gets it without Langify, and previews on other pages read right. {%- endcomment -%}
+        <span>{% if template.suffix == 'legal-guarantee' %}{{ 'sections.legal_guarantee.title' | t }}{% else %}{{ page.title }}{% endif %}</span>
       </h6>
     {%- elsif template.name == 'search' -%}
       <h6 class="header__logo__meta__page">

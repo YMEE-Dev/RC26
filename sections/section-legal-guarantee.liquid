@@ -18,10 +18,18 @@
   #LegalGuarantee--{{ section.id }} {
     padding: {{ section.settings.padding_top }}px 16px {{ section.settings.padding_bottom }}px;
   }
-  #LegalGuarantee--{{ section.id }} .legal-guarantee__link {
+  #LegalGuarantee--{{ section.id }} .legal-guarantee__link,
+  #LegalGuarantee--{{ section.id }} .legal-guarantee__text {
     display: block;
     max-width: {{ section.settings.max_width }}px;
     margin: 0 auto;
+  }
+  #LegalGuarantee--{{ section.id }} .legal-guarantee__text {
+    margin-top: 40px;
+  }
+  {%- comment -%} .rte's list margin leaves the bullets hanging outside the text column. {%- endcomment -%}
+  #LegalGuarantee--{{ section.id }} .legal-guarantee__text :is(ul, ol) {
+    margin-left: 1.5em;
   }
   {%- comment -%} Served untouched as <img>: no CDN resizing, and the SVG's own .st* classes and clip-path ids stay out of the page DOM. {%- endcomment -%}
   #LegalGuarantee--{{ section.id }} .legal-guarantee__image {
@@ -32,7 +40,7 @@
 {%- endstyle -%}
 
 <section id="LegalGuarantee--{{ section.id }}" class="legal-guarantee" data-section-id="{{ section.id }}">
-  <h1 class="visually-hidden">{{ page.title }}</h1>
+  <h1 class="visually-hidden">{{ 'sections.legal_guarantee.title' | t }}</h1>
   <a class="legal-guarantee__link" href="{{ notice_url }}" target="_blank" rel="noopener">
     <img
       class="legal-guarantee__image"
@@ -44,8 +52,8 @@
       fetchpriority="high">
     <span class="visually-hidden">{{ 'sections.legal_guarantee.open_full_size' | t }}</span>
   </a>
-  {%- comment -%} Verbatim from Annex I of Implementing Reg. (EU) 2025/1960; the SVG's words are outlines, so this is the screen-reader copy. {%- endcomment -%}
-  <div class="visually-hidden">
+  {%- comment -%} Verbatim from Annex I of Implementing Reg. (EU) 2025/1960. The SVG's words are outlines, so this is the readable/copyable version (same as the checkout Legal notice). {%- endcomment -%}
+  <div class="legal-guarantee__text rte body-large">
     {{ 'sections.legal_guarantee.transcript_1_html' | t }}
     {{ 'sections.legal_guarantee.transcript_2_html' | t }}
     {{ 'sections.legal_guarantee.transcript_3_html' | t }}
