@@ -4,6 +4,10 @@
     {%- render 'head' -%}
 
     {{ content_for_header }}
+    {%- comment -%}US is a separate store, so Markets can't emit it; the shop check keeps it off RC-UAE (synced from main).{%- endcomment -%}
+    {%- if request.page_type == 'index' and shop.permanent_domain == 'coin26.myshopify.com' %}
+    <link rel="alternate" hreflang="en-US" href="https://us.robertocoin.com/">
+    {%- endif %}
     {% include 'iub-cookie-banner' %}
     {%- render 'geo-country-hide' -%}
       <meta name="google-site-verification" content="bdybvdl_VIiAmW5jidwRvWO--uDOG8FBu9FMBdFgK1A" /> 
