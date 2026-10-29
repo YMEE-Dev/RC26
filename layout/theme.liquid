@@ -4,9 +4,24 @@
     {%- render 'head' -%}
 
     {{ content_for_header }}
-    {%- comment -%}US is a separate store, so Markets can't emit it; the shop check keeps it off RC-UAE (synced from main).{%- endcomment -%}
-    {%- if request.page_type == 'index' and shop.permanent_domain == 'coin26.myshopify.com' %}
+    {%- comment -%}
+      Extra hreflang Markets can't emit (en-GB beside its "en", US is a separate store).
+      en-GB mirrors Markets' "en" URL: the canonical without the /it prefix. The shop check keeps it off RC-UAE (synced from main).
+    {%- endcomment -%}
+    {%- if shop.permanent_domain == 'coin26.myshopify.com' and template.name != '404' -%}
+      {%- liquid
+        assign hreflang_en_path = canonical_url | remove_first: request.origin
+        unless request.locale.primary
+          assign hreflang_en_path = hreflang_en_path | remove_first: request.locale.root_url
+        endunless
+        if hreflang_en_path == blank
+          assign hreflang_en_path = '/'
+        endif
+      %}
+    <link rel="alternate" hreflang="en-GB" href="{{ request.origin }}{{ hreflang_en_path | escape }}">
+      {%- if request.page_type == 'index' %}
     <link rel="alternate" hreflang="en-US" href="https://us.robertocoin.com/">
+      {%- endif %}
     {%- endif %}
     {% include 'iub-cookie-banner' %}
     {%- render 'geo-country-hide' -%}
