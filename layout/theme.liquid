@@ -34,8 +34,10 @@
     <link rel="alternate" hreflang="{{ locale.iso_code }}" href="{{ hreflang_href }}">
         {%- endif -%}
       {%- endfor -%}
+      {%- comment -%}Generic "en" goes to the US site, matching the US store's own tags.{%- endcomment -%}
       {%- if request.page_type == 'index' %}
     <link rel="alternate" hreflang="en-US" href="https://us.robertocoin.com/">
+    <link rel="alternate" hreflang="en" href="https://us.robertocoin.com/">
       {%- endif %}
     {%- endif %}
     {% include 'iub-cookie-banner' %}
