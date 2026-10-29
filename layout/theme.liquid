@@ -5,20 +5,35 @@
 
     {{ content_for_header }}
     {%- comment -%}
-      Extra hreflang Markets can't emit (en-GB beside its "en", US is a separate store).
-      en-GB mirrors Markets' "en" URL: the canonical without the /it prefix. The shop check keeps it off RC-UAE (synced from main).
+      Shopify's automatic hreflang is OFF (Online Store > Preferences) so the primary language can be en-GB, not "en".
+      URLs mirror what Markets emitted: the canonical without the locale prefix, re-prefixed per language.
+      coin26 only: RC-UAE syncs from main and keeps Shopify's tags. US is a separate store.
     {%- endcomment -%}
     {%- if shop.permanent_domain == 'coin26.myshopify.com' and template.name != '404' -%}
       {%- liquid
-        assign hreflang_en_path = canonical_url | remove_first: request.origin
+        assign hreflang_path = canonical_url | remove_first: request.origin
         unless request.locale.primary
-          assign hreflang_en_path = hreflang_en_path | remove_first: request.locale.root_url
+          assign hreflang_path = hreflang_path | remove_first: request.locale.root_url
         endunless
-        if hreflang_en_path == blank
-          assign hreflang_en_path = '/'
+        if hreflang_path == blank
+          assign hreflang_path = '/'
         endif
+        assign hreflang_path = hreflang_path | escape
       %}
-    <link rel="alternate" hreflang="en-GB" href="{{ request.origin }}{{ hreflang_en_path | escape }}">
+    <link rel="alternate" hreflang="x-default" href="{{ request.origin }}{{ hreflang_path }}">
+      {%- for locale in shop.published_locales -%}
+        {%- if locale.primary %}
+    <link rel="alternate" hreflang="en-GB" href="{{ request.origin }}{{ hreflang_path }}">
+        {%- else -%}
+          {%- liquid
+            assign hreflang_href = request.origin | append: locale.root_url
+            unless hreflang_path == '/'
+              assign hreflang_href = hreflang_href | append: hreflang_path
+            endunless
+          %}
+    <link rel="alternate" hreflang="{{ locale.iso_code }}" href="{{ hreflang_href }}">
+        {%- endif -%}
+      {%- endfor -%}
       {%- if request.page_type == 'index' %}
     <link rel="alternate" hreflang="en-US" href="https://us.robertocoin.com/">
       {%- endif %}
