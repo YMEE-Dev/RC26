@@ -3,7 +3,7 @@
   const COUNTRY_REDIRECT_SHOWN_ATTRIBUTE = "data-country-redirect-shown";
   const COUNTRY_REDIRECT_OPEN_EVENT = "theme:country-redirect:opened";
   const STORE_INFO_POPUP_COOKIE_HOURS = 90 * 24;
-  // Popup hierarchy: cookie banner at once, geolocation popups at 5s, newsletter float at 15s.
+  // Popup hierarchy: cookie banner at once, geolocation popups at 5s, newsletter float at 10s.
   const STORE_INFO_POPUP_OPEN_DELAY_MS = 5000;
 
   class StoreInfoPopupCookie {
