@@ -2,6 +2,15 @@
 {%- liquid
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign image_blocks = section.blocks | where: 'type', 'image'
+  assign text_align = section.settings.text_alignment | default: 'center'
+  case text_align
+    when 'left'
+      assign flex_align = 'flex-start'
+    when 'right'
+      assign flex_align = 'flex-end'
+    else
+      assign flex_align = 'center'
+  endcase
 -%}
 
 {%- style -%}
@@ -9,6 +18,8 @@
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
     --questions-cta-bg: {{ section.settings.background_color }};
+    --questions-cta-text-align: {{ text_align }};
+    --questions-cta-align: {{ flex_align }};
   }
 {%- endstyle -%}
 
@@ -92,7 +103,8 @@
   .questions-cta__content {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: var(--questions-cta-align, center);
+    text-align: var(--questions-cta-text-align, center);
     gap: 20px;
     flex: 0 0 50%;
   }
@@ -145,7 +157,6 @@
 
   .questions-cta__text {
     color: var(--COLOR-TEXT);
-    text-align: center;
     font-family: var(--FONT-STACK-BODY);
     font-size: var(--FONT-SIZE-BASE);
     font-style: var(--FONT-STYLE-BODY);
@@ -233,12 +244,21 @@
   @media (max-width: 990px) {
     .questions-cta__content {
       display: contents;
-      text-align: center;
+    }
+
+    .questions-cta__heading,
+    .questions-cta__text,
+    .questions-cta__button-wrap {
+      align-self: var(--questions-cta-align, center);
     }
 
     .questions-cta__text,
     .questions-cta__button-wrap {
       order: 2;
+    }
+
+    .questions-cta__button-wrap {
+      justify-content: var(--questions-cta-align, center);
     }
 
     .questions-cta__content:not(:has(.questions-cta__text, .questions-cta__button-wrap))::after {
@@ -252,7 +272,7 @@
     }
     .questions-cta__button {
       width: fit-content;
-      margin: 0 auto;
+      margin: 0;
     }
 
     .questions-cta__media {
@@ -262,10 +282,6 @@
     .questions-cta__image,
     .questions-cta__placeholder {
       max-width: 300px;
-    }
-
-    .questions-cta__heading {
-      text-align: center;
     }
   }
 
@@ -382,6 +398,13 @@
         {"value": "wrapper--narrow", "label": "Narrow"},
         {"value": "wrapper--custom", "label": "Custom (max-width: 1232px)"}
       ]
+    },
+    {
+      "type": "text_alignment",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "info": "Also aligns the button.",
+      "default": "center"
     },
     {
       "type": "color",
