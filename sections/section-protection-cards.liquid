@@ -3,18 +3,28 @@
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign animation_anchor = '#ProtectionCards--' | append: section.id
   assign animation_order = 0
+  assign mobile_grid = false
+  if section.settings.layout_mobile != 'slider'
+    assign mobile_grid = true
+  endif
 -%}
 
 {%- style -%}
   #ProtectionCards--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
+    --card-gap: {{ section.settings.card_gap }}px;
+    --card-gap-mobile: {{ section.settings.card_gap_mobile }}px;
+    --heading-align: {{ section.settings.heading_alignment }};
+    {%- if mobile_grid %}
+      --columns-mobile: {{ section.settings.layout_mobile }};
+    {%- endif %}
   }
 {%- endstyle -%}
 
 <section
   id="ProtectionCards--{{ section.id }}"
-  class="protection-cards section-padding {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}"
+  class="protection-cards section-padding {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}{% if mobile_grid %} protection-cards--mobile-grid{% endif %}"
   data-section-id="{{ section.id }}"
   data-section-type="protection-cards"
   data-header-observer-mode="{{ section.settings.header_observer_mode }}"
@@ -36,7 +46,7 @@
       <div class="protection-cards__carousel-container grid-outer">
         <grid-slider>
           <div
-            class="protection-cards__grid grid grid--slider grid--mobile-slider"
+            class="protection-cards__grid grid grid--slider{% unless mobile_grid %} grid--mobile-slider{% endunless %}"
             data-grid-slider
             style="--column-count: 3;"
           >
@@ -176,7 +186,7 @@
         <div class="protection-cards__button-wrapper" style="margin-top: {{ section.settings.button_margin_top }}px;">
           <a
             href="{{ section.settings.button_link }}"
-            class="btn btn--primary btn--solid protection-cards__btn"
+            class="btn {{ section.settings.button_type }} btn--solid protection-cards__btn"
             data-aos="hero"
             data-aos-anchor="{{ animation_anchor }}"
             data-aos-order="{{ animation_order }}"
@@ -323,7 +333,7 @@
 
   .protection-cards__heading {
     color: #000;
-    text-align: center;
+    text-align: var(--heading-align, center);
     margin: 0 0 40px;
     font-family: var(--FONT-STACK-HEADING);
     font-style: normal;
@@ -512,7 +522,7 @@
   }
 
   .grid--slider .grid-item.protection-card {
-    margin-inline-end: 80px;
+    margin-inline-end: var(--card-gap);
     max-width: 33.33%;
   }
   .protection-cards__grid.grid.grid--slider {
@@ -521,16 +531,36 @@
 
   @media (max-width: 990px) {
     .grid--slider .grid-item.protection-card {
-      margin-inline-end: 40px;
+      margin-inline-end: calc(var(--card-gap) * 0.5);
       max-width: 60%;
     }
   }
 
   @media (max-width: 749px) {
     .grid--slider .grid-item.protection-card {
-      margin-inline-end: 20px;
+      margin-inline-end: var(--card-gap-mobile);
       max-width: 80%;
       width: 80%;
+    }
+
+    .protection-cards--mobile-grid .protection-cards__carousel-container {
+      padding-inline: 0;
+    }
+
+    .protection-cards--mobile-grid .protection-cards__grid {
+      display: grid;
+      grid-template-columns: repeat(var(--columns-mobile), minmax(0, 1fr));
+      gap: var(--card-gap-mobile);
+    }
+
+    .protection-cards--mobile-grid .grid--slider .grid-item.protection-card {
+      width: auto;
+      max-width: none;
+      margin-inline-end: 0;
+    }
+
+    .protection-cards--mobile-grid .slider__arrows {
+      display: none;
     }
   }
 {% endstylesheet %}
@@ -628,6 +658,12 @@
       ]
     },
     {
+      "type": "text_alignment",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "default": "center"
+    },
+    {
       "type": "header",
       "content": "Layout"
     },
@@ -641,6 +677,38 @@
         {"value": "wrapper", "label": "Normal"},
         {"value": "wrapper--narrow", "label": "Narrow"},
         {"value": "wrapper--custom", "label": "Custom (max-width: 1232px)"}
+      ]
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Gap between cards",
+      "info": "Halved on tablet.",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "card_gap_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Gap between cards on mobile",
+      "default": 20
+    },
+    {
+      "type": "select",
+      "id": "layout_mobile",
+      "label": "Mobile layout",
+      "default": "slider",
+      "options": [
+        {"value": "slider", "label": "Slider"},
+        {"value": "1", "label": "Grid, 1 column"},
+        {"value": "2", "label": "Grid, 2 columns"}
       ]
     },
     {
@@ -682,6 +750,16 @@
       "type": "url",
       "id": "button_link",
       "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_type",
+      "label": "Button style",
+      "default": "btn--primary",
+      "options": [
+        {"value": "btn--primary", "label": "Primary"},
+        {"value": "btn--secondary", "label": "Secondary"}
+      ]
     },
     {
       "type": "range",
