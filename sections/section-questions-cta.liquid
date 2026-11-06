@@ -1,12 +1,14 @@
 <!-- /sections/section-questions-cta.liquid -->
 {%- liquid
   assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign image_blocks = section.blocks | where: 'type', 'image'
 -%}
 
 {%- style -%}
   #QuestionsCta--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
+    --questions-cta-bg: {{ section.settings.background_color }};
   }
 {%- endstyle -%}
 
@@ -18,31 +20,22 @@
   data-header-observer-mode="{{ section.settings.header_observer_mode }}"
 >
   <div class="questions-cta__wrapper {{ section.settings.width }}">
-    <div
-      class="questions-cta__container"
-      style="background-color: {{ section.settings.background_color }};"
-    >
-      {%- for block in section.blocks -%}
-        {%- case block.type -%}
-          {%- when 'heading' -%}
-            <h2
-              class="questions-cta__heading {{ block.settings.heading_size }} mobile-display"
-              {{ block.shopify_attributes }}
-            >
-              {{ block.settings.text }}
-            </h2>
-        {%- endcase -%}
-      {%- endfor -%}
+    <div class="questions-cta__container">
       <div class="questions-cta__content">
         {%- for block in section.blocks -%}
           {%- case block.type -%}
             {%- when 'heading' -%}
               <h2
-                class="questions-cta__heading {{ block.settings.heading_size }} desktop-display"
+                class="questions-cta__heading {{ block.settings.heading_size }}"
                 {{ block.shopify_attributes }}
               >
                 {{ block.settings.text }}
               </h2>
+
+            {%- when 'text' -%}
+              <div class="questions-cta__text rte" {{ block.shopify_attributes }}>
+                {{ block.settings.text }}
+              </div>
 
             {%- when 'button' -%}
               <div class="questions-cta__button-wrap" {{ block.shopify_attributes }}>
@@ -50,7 +43,7 @@
                   href="{{ block.settings.link | default: '#' }}"
                   class="questions-cta__button"
                 >
-                  {{ block.settings.text | upcase }}
+                  {{- block.settings.text -}}
                 </a>
               </div>
           {%- endcase -%}
@@ -58,17 +51,22 @@
       </div>
 
       <div class="questions-cta__media">
-        {%- for block in section.blocks -%}
-          {%- if block.type == 'image' -%}
-            {%- if block.settings.image != blank -%}
-              <div class="questions-cta__image" {{ block.shopify_attributes }}>
-                {{ block.settings.image | image_url: width: 800 | image_tag: loading: 'lazy' }}
-              </div>
-            {%- else -%}
-              <div class="questions-cta__placeholder" {{ block.shopify_attributes }}>
-                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-              </div>
-            {%- endif -%}
+        {%- for block in image_blocks -%}
+          {%- if block.settings.image != blank -%}
+            <div class="questions-cta__image" {{ block.shopify_attributes }}>
+              {{
+                block.settings.image
+                | image_url: width: 1400
+                | image_tag:
+                  loading: 'lazy',
+                  widths: '300, 400, 600, 800, 1000, 1200, 1400',
+                  sizes: '(min-width: 1025px) 50vw, (min-width: 991px) 100vw, 300px'
+              }}
+            </div>
+          {%- else -%}
+            <div class="questions-cta__placeholder" {{ block.shopify_attributes }}>
+              {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+            </div>
           {%- endif -%}
         {%- endfor -%}
       </div>
@@ -88,6 +86,7 @@
     justify-content: space-between;
     padding: 0;
     gap: 0px;
+    background-color: var(--questions-cta-bg);
   }
 
   .questions-cta__content {
@@ -144,6 +143,24 @@
     line-height: 56px;
   }
 
+  .questions-cta__text {
+    color: var(--COLOR-TEXT);
+    text-align: center;
+    font-family: var(--FONT-STACK-BODY);
+    font-size: var(--FONT-SIZE-BASE);
+    font-style: var(--FONT-STYLE-BODY);
+    font-weight: var(--FONT-WEIGHT-BODY);
+    line-height: var(--LINE-HEIGHT-BODY);
+  }
+
+  .questions-cta__text > * {
+    margin: 0;
+  }
+
+  .questions-cta__text > * + * {
+    margin-top: 1em;
+  }
+
   .questions-cta__button-wrap {
     display: flex;
     width: 100%;
@@ -159,7 +176,7 @@
     color: #000;
     background-color: transparent;
     border: 1px solid #000;
-    font-family: Inter;
+    font-family: var(--BTN-FONT-STACK);
     font-size: 12px;
     font-style: normal;
     font-weight: 600;
@@ -213,15 +230,19 @@
     opacity: 0.3;
   }
 
-  .questions-cta__heading.mobile-display {
-    display: none;
-  }
-
-  /* Mobile adjustments */
   @media (max-width: 990px) {
     .questions-cta__content {
+      display: contents;
       text-align: center;
-      align-items: center;
+    }
+
+    .questions-cta__text,
+    .questions-cta__button-wrap {
+      order: 2;
+    }
+
+    .questions-cta__content:not(:has(.questions-cta__text, .questions-cta__button-wrap))::after {
+      content: '';
       order: 2;
     }
 
@@ -246,12 +267,6 @@
     .questions-cta__heading {
       text-align: center;
     }
-    .questions-cta__heading.mobile-display {
-      display: block;
-    }
-    .questions-cta__heading.desktop-display {
-      display: none;
-    }
   }
 
   @media (max-width: 768px) {
@@ -275,13 +290,12 @@
     {
       "type": "heading",
       "name": "Heading",
-      "limit": 1,
       "settings": [
         {
           "type": "text",
           "id": "text",
           "label": "Text",
-          "default": "Have More Questions?"
+          "default": "Have more questions?"
         },
         {
           "type": "select",
@@ -298,15 +312,26 @@
       ]
     },
     {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Share a short message with your customers.</p>"
+        }
+      ]
+    },
+    {
       "type": "button",
       "name": "Button",
-      "limit": 1,
       "settings": [
         {
           "type": "text",
           "id": "text",
           "label": "Button text",
-          "default": "Discover all the faq"
+          "default": "Discover all the FAQ"
         },
         {
           "type": "url",
@@ -318,7 +343,6 @@
     {
       "type": "image",
       "name": "Image",
-      "limit": 1,
       "settings": [
         {
           "type": "image_picker",
@@ -400,13 +424,13 @@
         {
           "type": "heading",
           "settings": {
-            "text": "Have More Questions?"
+            "text": "Have more questions?"
           }
         },
         {
           "type": "button",
           "settings": {
-            "text": "Discover all the faq"
+            "text": "Discover all the FAQ"
           }
         },
         {
