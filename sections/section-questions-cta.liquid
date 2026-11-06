@@ -20,6 +20,7 @@
     --questions-cta-bg: {{ section.settings.background_color }};
     --questions-cta-text-align: {{ text_align }};
     --questions-cta-align: {{ flex_align }};
+    --questions-cta-gap: {{ section.settings.image_gap }}px;
   }
 {%- endstyle -%}
 
@@ -241,6 +242,17 @@
     opacity: 0.3;
   }
 
+  @media (min-width: 1025px) {
+    .questions-cta__container {
+      gap: var(--questions-cta-gap, 0px);
+    }
+
+    .questions-cta__content,
+    .questions-cta__media {
+      flex-basis: calc(50% - var(--questions-cta-gap, 0px) / 2);
+    }
+  }
+
   @media (max-width: 990px) {
     .questions-cta__content {
       display: contents;
@@ -405,6 +417,17 @@
       "label": "Text alignment",
       "info": "Also aligns the button.",
       "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "image_gap",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Gap between image and content",
+      "info": "Desktop only, when image and content sit side by side.",
+      "default": 0
     },
     {
       "type": "color",
