@@ -4487,8 +4487,13 @@ body * {
 @media only screen and (max-width: 749px) {
   .section-padding {
     --padding-top: calc(var(--PT) * 0.5);
-    --padding-bottom: 0px;
+    --padding-bottom: calc(var(--PB) * 0.5);
     padding-top: var(--PT-MOBILE, var(--padding-top));
+  }
+
+  /* Mobile footer layout was built around 0; its 160px desktop value leaves a big gap here. */
+  .site-footer-wrapper.section-padding {
+    --padding-bottom: 0px;
   }
 }
 
