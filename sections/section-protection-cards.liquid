@@ -186,7 +186,7 @@
         <div class="protection-cards__button-wrapper" style="margin-top: {{ section.settings.button_margin_top }}px;">
           <a
             href="{{ section.settings.button_link }}"
-            class="btn {{ section.settings.button_type }} btn--solid protection-cards__btn"
+            class="btn {{ section.settings.button_type }} protection-cards__btn"
             data-aos="hero"
             data-aos-anchor="{{ animation_anchor }}"
             data-aos-order="{{ animation_order }}"
@@ -562,6 +562,11 @@
     .protection-cards--mobile-grid .slider__arrows {
       display: none;
     }
+
+    .protection-cards--mobile-grid .protection-card__title {
+      font-size: var(--FONT-HEADLINE);
+      line-height: var(--LINE-HEIGHT-HEADLINE);
+    }
   }
 {% endstylesheet %}
 
@@ -755,10 +760,10 @@
       "type": "select",
       "id": "button_type",
       "label": "Button style",
-      "default": "btn--primary",
+      "default": "btn--primary btn--solid",
       "options": [
-        {"value": "btn--primary", "label": "Primary"},
-        {"value": "btn--secondary", "label": "Secondary"}
+        {"value": "btn--primary btn--solid", "label": "Primary"},
+        {"value": "btn--secondary btn--outline", "label": "Secondary"}
       ]
     },
     {
