@@ -17,7 +17,7 @@
 
 <section
   id="GiftGuideSlider--{{ section.id }}"
-  class="gift-guide-slider section-padding {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}"
+  class="gift-guide-slider section-padding {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}{% if section.settings.card_size == 'compact' %} gift-guide-slider--compact{% endif %}"
   data-section-id="{{ section.id }}"
   data-section-type="gift-guide-slider"
   data-header-observer-mode="{{ section.settings.header_observer_mode }}"
@@ -76,7 +76,7 @@
     {%- assign gift_card_blocks = section.blocks | where: 'type', 'gift_card' -%}
     {%- if gift_card_blocks.size > 0 -%}
       <div class="gift-guide-slider__carousel-container">
-        <div class="swiper gift-guide-slider__swiper">
+        <div class="swiper gift-guide-slider__swiper"{% if section.settings.card_size == 'compact' %} data-card-size="compact"{% endif %}>
           <div class="swiper-wrapper">
             {%- for block in gift_card_blocks -%}
               {%- assign animation_order = animation_order | plus: 1 -%}
@@ -255,6 +255,17 @@
         {"value": "wrapper", "label": "Normal"},
         {"value": "wrapper--narrow", "label": "Narrow"},
         {"value": "wrapper--custom", "label": "Custom (max-width: 1232px)"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "card_size",
+      "label": "Card size",
+      "default": "",
+      "info": "Compact: landing-page tiles (320px, next card peeks in). Also changes heading and label type and section spacing.",
+      "options": [
+        {"value": "", "label": "Standard"},
+        {"value": "compact", "label": "Compact (next card peeks in)"}
       ]
     },
     {

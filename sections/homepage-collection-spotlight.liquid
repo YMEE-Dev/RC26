@@ -48,7 +48,7 @@
 
   <section
     id="HomepageCollectionSpotlight--{{ section.id }}"
-    class="homepage-collection-spotlight section-padding {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}{% if layout == 'reversed' %} homepage-collection-spotlight--reversed{% endif %} {% if mobile_layout == 'reversed' %} homepage-collection-spotlight--mobile_reversed{% endif %}"
+    class="homepage-collection-spotlight section-padding {{ color_scheme }} header-observer--{{ section.settings.header_observer_mode }}{% if layout == 'reversed' %} homepage-collection-spotlight--reversed{% endif %} {% if mobile_layout == 'reversed' %} homepage-collection-spotlight--mobile_reversed{% endif %}{% if section.settings.desktop_style == 'split' %} homepage-collection-spotlight--split{% endif %}"
     data-section-id="{{ section.id }}"
     data-section-type="homepage-collection-spotlight"
     data-header-observer-mode="{{ section.settings.header_observer_mode }}"
@@ -98,7 +98,7 @@
           <div class="homepage-collection-spotlight__products">
             <grid-slider>
               <div
-                class="grid grid--slider grid--mobile-slider{% if section.settings.product_list.count <= 1 %} grid--slider-disabled{% endif %}"
+                class="grid grid--slider grid--mobile-slider{% if section.settings.product_list.count == 1 %} grid--slider-disabled{% endif %}"
                 data-grid-slider
                 id="HomepageCollectionSpotlightSlider--{{ section.id }}"
               >
@@ -327,6 +327,17 @@
       "options": [
         {"value": "", "label": "Image top, content bottom"},
         {"value": "reversed", "label": "Content top, image bottom"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "desktop_style",
+      "label": "Style",
+      "default": "",
+      "info": "Split: landing-page layout with visible carousel arrows on desktop. Also changes mobile and tablet type, cards and image ratio.",
+      "options": [
+        {"value": "", "label": "Standard"},
+        {"value": "split", "label": "Split with carousel arrows"}
       ]
     },
     {

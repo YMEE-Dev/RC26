@@ -1,0 +1,70 @@
+/* Per the Figma SectionHeading component */
+.editorial-heading {
+  --editorial-heading-text-primary: #212121;
+  --editorial-heading-text-secondary: #646464;
+  padding-block: var(--editorial-heading-pt-mobile) var(--editorial-heading-pb-mobile);
+  padding-inline: var(--outer);
+  background-color: var(--editorial-heading-bg);
+}
+
+.editorial-heading__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  max-inline-size: 680px;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.editorial-heading--left .editorial-heading__inner {
+  align-items: flex-start;
+  margin-inline-start: 0;
+  text-align: start;
+}
+
+.editorial-heading__eyebrow {
+  margin: 0;
+  font-family: var(--FONT-STACK-BODY);
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--editorial-heading-text-secondary);
+}
+
+.editorial-heading__title {
+  margin: 0;
+  font-family: var(--FONT-STACK-HEADING);
+  font-size: var(--FONT-DISPLAY-S);
+  font-style: var(--FONT-STYLE-HEADING);
+  font-weight: var(--FONT-WEIGHT-HEADING);
+  line-height: var(--LINE-HEIGHT-DISPLAY-S);
+  letter-spacing: 0;
+  text-transform: none;
+  text-wrap: balance;
+  color: var(--editorial-heading-text-primary);
+}
+
+.editorial-heading__text {
+  max-inline-size: 520px;
+  font-family: var(--FONT-STACK-BODY);
+  font-size: 16px;
+  line-height: 26px;
+  color: var(--editorial-heading-text-secondary);
+}
+
+.editorial-heading__text p {
+  margin: 0;
+}
+
+@media only screen and (min-width: 750px) {
+  .editorial-heading {
+    padding-block: var(--editorial-heading-pt) var(--editorial-heading-pb);
+  }
+
+  .editorial-heading__title {
+    font-size: var(--FONT-DISPLAY-L);
+    line-height: var(--LINE-HEIGHT-DISPLAY-L);
+  }
+}

@@ -50,6 +50,9 @@
   data-section-type="featured-video"
   data-header-observer-mode="{{ header_observer_mode }}"
   data-overlay-header
+  {% if section.settings.page_overlay_header %}
+    data-page-overlay-header
+  {% endif %}
   style="{{ style }}"
 >
   <div class="frame {{ section.settings.width }} section-video__frame">
@@ -80,6 +83,53 @@
     -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 58%, transparent 100%);
     mask-image: linear-gradient(180deg, #000 0%, #000 58%, transparent 100%);
   }
+  @media only screen and (max-width: 749px) {
+    .seven-forty-four-height-hero--mobile {
+      min-height: 744px;
+    }
+  }
+
+  @media only screen and (min-width: 750px) {
+    .seven-eighty-height-hero {
+      min-height: 780px;
+    }
+  }
+
+  /* Opt-in pages: hero sits under the transparent nav. White until nav JS sets data-stuck='1' (pages
+     render dark server-side, so black would flash); specificity must beat nav-menu.css's page black (0,4,1). */
+  .main-content--page:has([data-page-overlay-header]) {
+    padding-block-start: 0;
+  }
+
+  /* "Full screen" heights: --full-height is a px snapshot from page load that phones never refresh, so a
+     shorter viewport later (Safari toolbars back, device switch) pushed the copy below the fold. */
+  @supports (height: 100svh) {
+    [data-page-overlay-header] {
+      --full-screen: 100svh;
+    }
+  }
+
+  /* Safari keeps a %-min-height grid item at its old height when the viewport shrinks; the grid stretch fills it anyway. */
+  [data-page-overlay-header] .hero__content__wrapper {
+    min-height: 0;
+  }
+
+  body:has([data-page-overlay-header]) :is(.rc-nav .header__logo__meta, .rc-mobile-crumbs) {
+    display: none;
+  }
+
+  body:has([data-page-overlay-header]) .rc-nav:is([data-scheme='light'], :not([data-stuck='1'])):not([data-open='1']) :is(.rc-d-link, .rc-d-icon, .rc-d-bag, .rc-d-bag__count, .icon, .rc-mobile-bar a, .rc-mobile-bar button) {
+    color: #fff;
+  }
+
+  body:has([data-page-overlay-header]) .rc-nav:is([data-scheme='light'], :not([data-stuck='1'])):not([data-open='1']) :is(.rc-d-icon, .rc-d-bag, .rc-mobile-bar) svg [stroke]:not([stroke='none']) {
+    stroke: #fff;
+  }
+
+  body:has([data-page-overlay-header]) .rc-nav:is([data-scheme='light'], :not([data-stuck='1'])):not([data-open='1']) :is(.rc-d-logo img, .rc-mobile-bar__logo) {
+    filter: none;
+  }
+
   @media screen and (max-width: 960px) {
     .hero__content__wrapper .hero__content {
       padding-top: 0;
@@ -112,6 +162,13 @@
         {"value": "light", "label": "Light"},
         {"value": "dark", "label": "Dark"}
       ]
+    },
+    {
+      "type": "checkbox",
+      "id": "page_overlay_header",
+      "label": "Sit under the header on pages",
+      "info": "For page templates that open with this hero. The header overlays the image like on the homepage, without the page title.",
+      "default": false
     },
     {
       "type": "header",
@@ -161,6 +218,11 @@
     {
       "type": "header",
       "content": "Typography"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow"
     },
     {
       "type": "text",
@@ -360,6 +422,7 @@
         {"value": "screen-height-two-thirds", "label": "2/3 of screen"},
         {"value": "screen-height-one-half", "label": "1/2 of screen"},
         {"value": "screen-height-one-third", "label": "1/3 of screen"},
+        {"value": "seven-eighty-height-hero", "label": "780px"},
         {"value": "seven-fifty-height-hero", "label": "750px"},
         {"value": "sixty-fifty-height-hero", "label": "650px"},
         {"value": "five-fifty-height-hero ", "label": "550px"},
@@ -389,6 +452,7 @@
         {"value": "screen-height-one-half--mobile", "label": "1/2 of screen"},
         {"value": "screen-height-one-third--mobile", "label": "1/3 of screen"},
         {"value": "seven-fifty-height-hero--mobile", "label": "750px"},
+        {"value": "seven-forty-four-height-hero--mobile", "label": "744px"},
         {"value": "sixty-fifty-height-hero--mobile", "label": "650px"},
         {"value": "five-fifty-height-hero--mobile", "label": "550px"},
         {"value": "four-fifty-height-hero--mobile", "label": "450px"}
@@ -439,7 +503,8 @@
       "options": [
         {"value": "disabled", "label": "Disabled"},
         {"value": "opacity", "label": "Opacity overlay"},
-        {"value": "text", "label": "Text underlay"}
+        {"value": "text", "label": "Text underlay"},
+        {"value": "gradient", "label": "Top and bottom gradient"}
       ]
     },
     {
