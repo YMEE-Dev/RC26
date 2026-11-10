@@ -755,6 +755,35 @@
                   assign card_color = card_alt | split: 'variant:' | last | split: ',' | first | strip | split: ' ' | join: '_'
                 endif
 
+                # untagged variant photo: match the variant's option value ("18kt rose gold") to a media tag ("rose_gold")
+                if card_color == blank and variant != blank
+                  for media in product.media
+                    assign media_alt = media.alt | downcase
+                    unless media_alt contains 'variant:'
+                      continue
+                    endunless
+
+                    assign media_color = media_alt | split: 'variant:' | last | split: ',' | first | strip | split: ' ' | join: '_'
+                    assign media_color_key = media_color | append: '|'
+                    assign media_color_suffix = '_' | append: media_color | append: '|'
+
+                    for option_value in variant.options
+                      assign option_color = option_value | downcase | strip | split: ' ' | join: '_'
+                      assign option_color_key = option_color | append: '|'
+                      assign option_color_suffix = '_' | append: option_color | append: '|'
+
+                      if option_color == media_color or option_color_key contains media_color_suffix or media_color_key contains option_color_suffix
+                        assign card_color = media_color
+                        break
+                      endif
+                    endfor
+
+                    if card_color != blank
+                      break
+                    endif
+                  endfor
+                endif
+
                 # variant card: its own photo leads and other metals' photos (alt "variant:<color>") are left out
                 if variant.featured_media != blank
                   assign slide_media = product.media | where: 'id', card_media.id
