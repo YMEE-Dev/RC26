@@ -749,14 +749,43 @@
               {%- liquid
                 assign slide_media = product.media
 
+                assign card_color = ''
+                assign card_alt = card_media.alt | downcase
+                if card_alt contains 'variant:'
+                  assign card_color = card_alt | split: 'variant:' | last | split: ',' | first | strip | split: ' ' | join: '_'
+                endif
+
+                # untagged variant photo: match the variant's option value ("18kt rose gold") to a media tag ("rose_gold")
+                if card_color == blank and variant != blank
+                  for media in product.media
+                    assign media_alt = media.alt | downcase
+                    unless media_alt contains 'variant:'
+                      continue
+                    endunless
+
+                    assign media_color = media_alt | split: 'variant:' | last | split: ',' | first | strip | split: ' ' | join: '_'
+                    assign media_color_key = media_color | append: '|'
+                    assign media_color_suffix = '_' | append: media_color | append: '|'
+
+                    for option_value in variant.options
+                      assign option_color = option_value | downcase | strip | split: ' ' | join: '_'
+                      assign option_color_key = option_color | append: '|'
+                      assign option_color_suffix = '_' | append: option_color | append: '|'
+
+                      if option_color == media_color or option_color_key contains media_color_suffix or media_color_key contains option_color_suffix
+                        assign card_color = media_color
+                        break
+                      endif
+                    endfor
+
+                    if card_color != blank
+                      break
+                    endif
+                  endfor
+                endif
+
                 # variant card: its own photo leads and other metals' photos (alt "variant:<color>") are left out
                 if variant.featured_media != blank
-                  assign card_color = ''
-                  assign card_alt = card_media.alt | downcase
-                  if card_alt contains 'variant:'
-                    assign card_color = card_alt | split: 'variant:' | last | split: ',' | first | strip | split: ' ' | join: '_'
-                  endif
-
                   assign slide_media = product.media | where: 'id', card_media.id
                   for media in product.media
                     if media.id == card_media.id
@@ -776,16 +805,41 @@
                   endfor
                 endif
 
-                assign has_common_model_hover_slide = false
+                # desktop hover shows the card metal's model shot ("variant:<color>, common:model"), else the shared "common:model"
+                assign own_model_ids = ','
+                assign shared_model_ids = ','
+                assign any_model_ids = ','
 
                 for media in slide_media limit: settings.image_hover_limit
-                  assign media_alt = media.alt | default: '' | downcase | strip
+                  assign media_alt = media.alt | default: '' | downcase
+                  unless media_alt contains 'common:model'
+                    continue
+                  endunless
 
-                  if media_alt contains 'common:model'
-                    assign has_common_model_hover_slide = true
-                    break
+                  assign media_key = media.id | append: ','
+                  assign any_model_ids = any_model_ids | append: media_key
+
+                  if media_alt contains 'variant:'
+                    assign media_color = media_alt | split: 'variant:' | last | split: ',' | first | strip | split: ' ' | join: '_'
+                    if card_color != blank and media_color == card_color
+                      assign own_model_ids = own_model_ids | append: media_key
+                    endif
+                  else
+                    assign shared_model_ids = shared_model_ids | append: media_key
                   endif
                 endfor
+
+                assign hover_model_ids = any_model_ids
+                if own_model_ids != ','
+                  assign hover_model_ids = own_model_ids
+                elsif shared_model_ids != ','
+                  assign hover_model_ids = shared_model_ids
+                endif
+
+                assign has_common_model_hover_slide = false
+                if hover_model_ids != ','
+                  assign has_common_model_hover_slide = true
+                endif
               -%}
 
               <hover-images class="product-item__bg__under{% unless hover_slider_mobile_enabled %} product-item__bg__under--desktop-only{% endunless %}">
@@ -794,10 +848,10 @@
                     {%- liquid
                       assign hover_slide_attr = ''
                       assign scale_class = ''
-                      assign media_alt = media.alt | default: '' | downcase | strip
 
                       if has_common_model_hover_slide
-                        if media_alt contains 'common:model'
+                        assign media_key = ',' | append: media.id | append: ','
+                        if hover_model_ids contains media_key
                           assign hover_slide_attr = ' data-hover-slide'
                         endif
                       else

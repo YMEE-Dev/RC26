@@ -167,7 +167,7 @@
     var mediaEl = productImagesEl.querySelector('[data-media-id="' + cssEscape(mediaId) + '"]');
     if (!mediaEl) return "";
     var kind = (mediaEl.getAttribute("data-media-kind") || "").toLowerCase();
-    if (kind !== "variant") return "";
+    if (kind !== "variant" && kind !== "common") return "";
     return (mediaEl.getAttribute("data-media-color") || "").toLowerCase();
   }
 
@@ -223,7 +223,8 @@
               if (v.options[optIdx] === inputValue && v.featured_media && v.featured_media.id) {
                 var mid = sectionId + "-" + v.featured_media.id;
                 var mel = productImagesEl.querySelector('[data-media-id="' + cssEscape(mid) + '"]');
-                if (mel && (mel.getAttribute("data-media-kind") || "").toLowerCase() === "variant") {
+                var melKind = mel ? (mel.getAttribute("data-media-kind") || "").toLowerCase() : "";
+                if (melKind === "variant" || melKind === "common") {
                   var c = (mel.getAttribute("data-media-color") || "").toLowerCase();
                   if (c) return c;
                 }
@@ -310,6 +311,7 @@
 
       var modelSlides = [];
       var variantSlides = [];
+      var ownCommonSlides = [];
       var commonSlides = [];
       var otherSlides = [];
       var hiddenSlides = [];
@@ -339,9 +341,16 @@
             slide.classList.add("product__slide--filtered-out");
           }
         } else if (kind === "common") {
-          commonSlides.push(slide);
-          slide.classList.remove("pdp-embla__slide--filtered-out");
-          slide.classList.remove("product__slide--filtered-out");
+          // a common slide with a color is that metal's own model shot
+          if (color && !colorsMatch(colorCode, color)) {
+            hiddenSlides.push(slide);
+            slide.classList.add("pdp-embla__slide--filtered-out");
+            slide.classList.add("product__slide--filtered-out");
+          } else {
+            (color ? ownCommonSlides : commonSlides).push(slide);
+            slide.classList.remove("pdp-embla__slide--filtered-out");
+            slide.classList.remove("product__slide--filtered-out");
+          }
         } else {
           otherSlides.push(slide);
           slide.classList.remove("pdp-embla__slide--filtered-out");
@@ -350,7 +359,11 @@
       });
 
       // Put visible slides in the container: model first, then variant, common, other
-      var visibleSlides = modelSlides.concat(variantSlides).concat(commonSlides).concat(otherSlides);
+      var visibleSlides = modelSlides
+        .concat(variantSlides)
+        .concat(ownCommonSlides)
+        .concat(commonSlides)
+        .concat(otherSlides);
       visibleSlides.forEach(function (slide) {
         container.appendChild(slide);
       });
