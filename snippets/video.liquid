@@ -288,7 +288,8 @@
           data-aos-anchor="{{ animation_anchor }}"
           data-aos-order="{{ animation_order }}"
         >
-          {{ title | escape }}
+          {%- comment -%} The brand name never breaks across lines {%- endcomment -%}
+          {{ title | escape | replace: 'Roberto Coin', 'Roberto&nbsp;Coin' }}
         </{{ heading_tag }}>
       {%- endif -%}
 
