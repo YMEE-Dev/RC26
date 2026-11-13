@@ -1,0 +1,181 @@
+<!-- /sections/section-gift-guide-signup.liquid -->
+
+{%- comment -%}
+  No visible block: a slide-out signup panel opened by any link to #<anchor>.
+  Reuses the footer newsletter drawer (element + CSS); the form is two-step.
+{%- endcomment -%}
+
+{%- assign anchor = section.settings.anchor | handleize | default: 'gift-guide-signup' -%}
+
+<footer-newsletter-drawer
+  class="gift-guide-signup"
+  data-open-hash="{{ anchor }}"
+  {% if section.settings.hide_newsletter_popup %}
+    data-suppress-newsletter-float
+  {% endif %}
+>
+  <div
+    id="GiftGuideSignupDrawer--{{ section.id }}"
+    class="collection__sidebar__slide-out footer-newsletter__drawer"
+    data-newsletter-drawer
+  >
+    <div class="collection__sidebar__head">
+      <button
+        type="button"
+        class="collection__sidebar__close footer-newsletter__drawer-close"
+        data-newsletter-drawer-close
+        aria-label="{{ 'general.accessibility.close' | t }}"
+      >
+        {%- render 'icon-close' -%}
+      </button>
+    </div>
+
+    <div class="footer-newsletter__drawer-body" data-scroll-lock-scrollable>
+      {%- render 'gift-guide-signup-form', section: section -%}
+    </div>
+  </div>
+
+  <div class="underlay" data-newsletter-drawer-close></div>
+</footer-newsletter-drawer>
+
+{% schema %}
+{
+  "name": "Gift guide signup",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Opens as a side panel from any button linking to #gift-guide-signup (or the anchor below). Select this section to preview the panel."
+    },
+    {
+      "type": "text",
+      "id": "anchor",
+      "label": "Anchor",
+      "default": "gift-guide-signup"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_newsletter_popup",
+      "label": "Hide the newsletter popup on this page",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Step 1: subscribe"
+    },
+    {
+      "type": "text",
+      "id": "step1_title",
+      "label": "Title",
+      "default": "Receive the Christmas Gift Guide"
+    },
+    {
+      "type": "richtext",
+      "id": "step1_text",
+      "label": "Text",
+      "default": "<p>Subscribe to our newsletter to receive our Christmas Gift Guide, and to be the first to know about our latest collections and future releases, discover collaborations and events.</p>"
+    },
+    {
+      "type": "text",
+      "id": "required_fields_label",
+      "label": "Required fields label",
+      "default": "*REQUIRED FIELD"
+    },
+    {
+      "type": "text",
+      "id": "step1_button",
+      "label": "Button",
+      "default": "Receive the Gift Guide"
+    },
+    {
+      "type": "richtext",
+      "id": "consent_label",
+      "label": "Consent label",
+      "default": "<p>I Confirm that I have read, understood and accepted your privacy information, that I am over 16, and I agree to receive this newsletter.</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "policy_text",
+      "label": "Policy text",
+      "default": "<p>Your personal data will be used by roberto coin s.p.a. to provide you with the newsletter service you have expressly requested. your data are safe with roberto coin s.p.a. please read the privacy policy, and the cookie policy for further information.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Step 2: optional details"
+    },
+    {
+      "type": "text",
+      "id": "step2_title",
+      "label": "Title",
+      "default": "Receive the Christmas Gift Guide"
+    },
+    {
+      "type": "richtext",
+      "id": "step2_text",
+      "label": "Text",
+      "default": "<p>The Gift Guide is on its way, please check your inbox.</p><p>If you wish, share a few more details with us.</p>"
+    },
+    {
+      "type": "text",
+      "id": "step2_save",
+      "label": "Save button",
+      "default": "Save"
+    },
+    {
+      "type": "header",
+      "content": "Final message"
+    },
+    {
+      "type": "text",
+      "id": "final_title",
+      "label": "Title",
+      "default": "Thank you for subscribing"
+    },
+    {
+      "type": "richtext",
+      "id": "final_text",
+      "label": "Text",
+      "default": "<p>Thank you for joining the world of Roberto Coin.</p><p>Please check your inbox - the Christmas Gift Guide is on its way.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Klaviyo"
+    },
+    {
+      "type": "text",
+      "id": "klaviyo_list_id",
+      "label": "List ID",
+      "default": "UAE2Jy",
+      "info": "Same list as the footer newsletter by default."
+    },
+    {
+      "type": "text",
+      "id": "klaviyo_source",
+      "label": "Source label",
+      "default": "Holiday Season 2026 PLP"
+    },
+    {
+      "type": "text",
+      "id": "klaviyo_event",
+      "label": "Klaviyo event name",
+      "default": "Requested Holiday Gift Guide",
+      "info": "Sent on every step 1 signup, including people already on the list, with `source`. Trigger the gift guide flow on this metric."
+    },
+    {
+      "type": "text",
+      "id": "klaviyo_company_id",
+      "label": "Company ID (public API key)",
+      "info": "Optional override. Leave blank to use Theme settings > Klaviyo public API key."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Gift guide signup",
+      "category": "Forms"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["*"]
+  }
+}
+{% endschema %}

@@ -295,6 +295,31 @@
     color: transparent;
   }
 
+  /* Safari colours the date parts itself, so the transparent colour above doesn't reach them */
+  .footer-newsletter-form__dob-field:not(.has-value):not(:focus-within) input[type='date']::-webkit-datetime-edit-fields-wrapper {
+    opacity: 0;
+  }
+
+  /* Firefox has no datetime-edit parts and draws its own calendar icon, which can't be hidden:
+     push it to the end of the field and let the custom trigger cover it */
+  @supports (-moz-appearance: none) {
+    .footer-newsletter-form__dob-field:not(.has-value):not(:focus-within) input[type='date'] {
+      color: transparent;
+    }
+
+    .footer-newsletter-form__dob-field .footer-newsletter-form__field {
+      padding-inline-end: 0;
+    }
+
+    .footer-newsletter-form__dob-trigger {
+      inset-inline-end: 0;
+      width: 30px;
+      justify-content: flex-end;
+      padding-inline-end: 7px;
+      background: var(--bg, #fff);
+    }
+  }
+
   /* Hide the custom placeholder once a value is set or the field is focused */
   .footer-newsletter-form__dob-field.has-value .footer-newsletter-form__dob-placeholder,
   .footer-newsletter-form__dob-field:focus-within .footer-newsletter-form__dob-placeholder {
@@ -545,7 +570,36 @@
         }
       });
 
+      this.setupHashTriggers();
       this.setupFloatPopup();
+    }
+
+    /* Page-level instances (e.g. gift guide signup) open from any link to #<data-open-hash>. */
+    setupHashTriggers() {
+      const hash = this.dataset.openHash;
+      if (!hash) {
+        return;
+      }
+
+      document.addEventListener('click', (event) => {
+        const link = event.target instanceof Element ? event.target.closest('a[href*="#"]') : null;
+        if (!link || link.hash !== `#${hash}` || link.pathname !== window.location.pathname) {
+          return;
+        }
+        event.preventDefault();
+        this.open();
+      });
+
+      if (window.location.hash === `#${hash}`) {
+        this.open();
+      }
+
+      document.addEventListener('shopify:section:select', (event) => {
+        if (event.target.contains(this)) this.open();
+      });
+      document.addEventListener('shopify:section:deselect', (event) => {
+        if (event.target.contains(this) && this.drawer.classList.contains('expanded')) this.close();
+      });
     }
 
     focusWithoutScroll(element) {
@@ -605,7 +659,11 @@
     }
 
     setupFloatPopup() {
-      if (!this.floatPopup || this.readCookie(this.dismissCookie) === '1') {
+      if (
+        !this.floatPopup ||
+        this.readCookie(this.dismissCookie) === '1' ||
+        document.querySelector('[data-suppress-newsletter-float]')
+      ) {
         return;
       }
 

@@ -7,8 +7,14 @@
 (function () {
   "use strict";
 
+  // Every form render adds its own <script>; a second copy would POST each signup twice.
+  if (window.rcKlaviyoSubscribeLoaded) return;
+  window.rcKlaviyoSubscribeLoaded = true;
+
   var API_REVISION = "2024-10-15";
   var DOB_SELECTOR = "input[data-footer-newsletter-dob]";
+  var CONSENT_FORM_SELECTOR = "[data-footer-newsletter-form], [data-gift-guide-subscribe]";
+  var DEFAULT_ERROR = "Something went wrong. Please try again.";
 
   function syncBirthDatePlaceholder(input) {
     if (!(input instanceof HTMLInputElement)) return;
@@ -37,7 +43,7 @@
   }
 
   function initConsentErrors() {
-    var forms = document.querySelectorAll("[data-footer-newsletter-form]");
+    var forms = document.querySelectorAll(CONSENT_FORM_SELECTOR);
     forms.forEach(function (form) {
       hideConsentError(form);
     });
@@ -112,45 +118,197 @@
     var submitBtn = form.querySelector('[type="submit"]');
     if (submitBtn) submitBtn.disabled = true;
 
-    var controller = new AbortController();
-    var timeoutId = setTimeout(function () {
-      controller.abort();
-    }, 8000);
-
-    fetch("https://a.klaviyo.com/client/subscriptions/?company_id=" + encodeURIComponent(companyId), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        revision: API_REVISION
-      },
-      body: JSON.stringify(payload),
-      signal: controller.signal
-    })
-      .then(function (response) {
-        clearTimeout(timeoutId);
-        if (response.ok || response.status === 202) {
-          identifyInKlaviyo(profile.email);
-          showSuccess(form);
-          return null;
-        }
-        return response.json().catch(function () {
-          return null;
-        }).then(function (body) {
-          throw new Error(extractError(body) || "Something went wrong. Please try again.");
-        });
+    postToKlaviyo("subscriptions", companyId, payload)
+      .then(function () {
+        identifyInKlaviyo(profile.email);
+        showSuccess(form);
       })
       .catch(function (error) {
-        clearTimeout(timeoutId);
-        if (error.name === "AbortError") {
-          showError(form, "Request timed out. Please try again.");
-        } else {
-          showError(form, error.message || "Something went wrong. Please try again.");
-        }
+        showError(form, error.message || DEFAULT_ERROR);
       })
       .finally(function () {
         if (submitBtn) submitBtn.disabled = false;
       });
   });
+
+  /* Gift guide, step 1: subscribe, then send the event that triggers the guide flow.
+   * Re-subscribing someone already on the list fires no "added to list" trigger, hence
+   * the event. No custom_source/language: Klaviyo overwrites $source on every subscription,
+   * so existing subscribers would lose theirs; the source rides on the event instead. */
+  document.addEventListener("submit", function (event) {
+    var form = event.target;
+    if (!form.hasAttribute("data-gift-guide-subscribe")) return;
+
+    event.preventDefault();
+    hideConsentError(form);
+    hideError(form);
+
+    var wrapper = form.closest("[data-gift-guide-form]");
+    var config = readConfig(wrapper);
+    var formData = new FormData(form);
+    var email = getFieldValue(formData, "email");
+
+    if (!config.companyId || !config.listId) {
+      showError(form, "Newsletter is temporarily unavailable. Please try again later.");
+      return;
+    }
+    if (!email) {
+      showError(form, "Please enter a valid email address.");
+      return;
+    }
+    if (!getFieldValue(formData, "consent")) {
+      showConsentError(form);
+      return;
+    }
+
+    var subscription = {
+      data: {
+        type: "subscription",
+        attributes: {
+          profile: {
+            data: {
+              type: "profile",
+              attributes: { email: email, properties: { gift_guide_2026: true } }
+            }
+          }
+        },
+        relationships: { list: { data: { type: "list", id: config.listId } } }
+      }
+    };
+
+    var submitBtn = form.querySelector('[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
+
+    postToKlaviyo("subscriptions", config.companyId, subscription)
+      .then(function () {
+        identifyInKlaviyo(email);
+        if (!config.eventName) return null;
+        return postToKlaviyo("events", config.companyId, {
+          data: {
+            type: "event",
+            attributes: {
+              properties: { source: config.source },
+              metric: { data: { type: "metric", attributes: { name: config.eventName } } },
+              profile: { data: { type: "profile", attributes: { email: email } } }
+            }
+          }
+        });
+      })
+      .then(function () {
+        wrapper.setAttribute("data-email", email);
+        showStep(wrapper, 2);
+      })
+      .catch(function (error) {
+        showError(form, error.message || DEFAULT_ERROR);
+      })
+      .finally(function () {
+        if (submitBtn) submitBtn.disabled = false;
+      });
+  });
+
+  /* Gift guide, step 2: optional details. Only filled fields are sent, so a blank field
+   * never clears existing data. No new subscription and no new event. */
+  document.addEventListener("submit", function (event) {
+    var form = event.target;
+    if (!form.hasAttribute("data-gift-guide-profile")) return;
+
+    event.preventDefault();
+    hideError(form);
+
+    var wrapper = form.closest("[data-gift-guide-form]");
+    var config = readConfig(wrapper);
+    var formData = new FormData(form);
+    var attributes = { email: wrapper.getAttribute("data-email") || "" };
+    var properties = {};
+    var firstName = getFieldValue(formData, "first_name");
+    var lastName = getFieldValue(formData, "last_name");
+    var birthDate = getFieldValue(formData, "date_of_birth");
+    var language = getFieldValue(formData, "language");
+
+    if (firstName) attributes.first_name = firstName;
+    if (lastName) attributes.last_name = lastName;
+    if (birthDate) properties.date_of_birth = birthDate;
+    if (language) properties.language = language;
+    if (birthDate || language) attributes.properties = properties;
+
+    if (!attributes.email || (!firstName && !lastName && !birthDate && !language)) {
+      showStep(wrapper, 3);
+      return;
+    }
+
+    var submitBtn = form.querySelector('[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
+
+    postToKlaviyo("profiles", config.companyId, { data: { type: "profile", attributes: attributes } })
+      .then(function () {
+        showStep(wrapper, 3);
+      })
+      .catch(function (error) {
+        showError(form, error.message || DEFAULT_ERROR);
+      })
+      .finally(function () {
+        if (submitBtn) submitBtn.disabled = false;
+      });
+  });
+
+  function readConfig(wrapper) {
+    var read = function (name) {
+      return ((wrapper && wrapper.getAttribute(name)) || "").trim();
+    };
+    return {
+      companyId: read("data-klaviyo-company-id"),
+      listId: read("data-klaviyo-list-id"),
+      source: read("data-klaviyo-source"),
+      eventName: read("data-klaviyo-event")
+    };
+  }
+
+  function showStep(wrapper, step) {
+    if (!wrapper) return;
+    var target = null;
+    wrapper.querySelectorAll("[data-gift-guide-step]").forEach(function (el) {
+      var isTarget = el.getAttribute("data-gift-guide-step") === String(step);
+      el.hidden = !isTarget;
+      if (isTarget) target = el;
+    });
+
+    var scroller = wrapper.closest("[data-scroll-lock-scrollable]");
+    if (scroller) scroller.scrollTop = 0;
+
+    var heading = target && target.querySelector("[data-gift-guide-step-heading]");
+    if (heading) heading.focus({ preventScroll: true });
+  }
+
+  /* Resolves on any 2xx (subscriptions/events answer 202); rejects with a user-facing message. */
+  function postToKlaviyo(endpoint, companyId, body) {
+    var controller = new AbortController();
+    var timeoutId = setTimeout(function () {
+      controller.abort();
+    }, 8000);
+
+    return fetch("https://a.klaviyo.com/client/" + endpoint + "/?company_id=" + encodeURIComponent(companyId), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        revision: API_REVISION
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal
+    })
+      .then(function (response) {
+        if (response.ok) return null;
+        return response.json().catch(function () {
+          return null;
+        }).then(function (responseBody) {
+          throw new Error(extractError(responseBody) || DEFAULT_ERROR);
+        });
+      }, function (error) {
+        throw new Error(error.name === "AbortError" ? "Request timed out. Please try again." : error.message);
+      })
+      .finally(function () {
+        clearTimeout(timeoutId);
+      });
+  }
 
   function getFieldValue(formData, fieldName) {
     var normalizedName = String(fieldName || "").toLowerCase();
@@ -206,6 +364,11 @@
     }
   }
 
+  function hideError(form) {
+    var errorEl = form.querySelector("[data-footer-newsletter-error]");
+    if (errorEl) errorEl.setAttribute("hidden", "hidden");
+  }
+
   function showConsentError(form) {
     var consentErrorEl = form.querySelector("[data-footer-newsletter-consent-error]");
     if (consentErrorEl) {
@@ -224,7 +387,7 @@
     var target = event.target;
     if (!(target instanceof HTMLInputElement)) return;
     if (target.name !== "consent") return;
-    if (!target.form || !target.form.hasAttribute("data-footer-newsletter-form")) return;
+    if (!target.form || !target.form.matches(CONSENT_FORM_SELECTOR)) return;
 
     if (target.checked) {
       hideConsentError(target.form);
@@ -235,27 +398,23 @@
     var target = event.target;
     if (!(target instanceof HTMLInputElement)) return;
     if (target.name !== "consent") return;
-    if (!target.form || !target.form.hasAttribute("data-footer-newsletter-form")) return;
+    if (!target.form || !target.form.matches(CONSENT_FORM_SELECTOR)) return;
 
     showConsentError(target.form);
   }, true);
 
+  /* Only the calendar icon opens the picker: opening it on a click in the field
+   * swallowed keystrokes, so a birth date couldn't be typed. */
   document.addEventListener("click", function (event) {
     var target = event.target;
     var trigger = target instanceof Element ? target.closest("[data-footer-newsletter-dob-trigger]") : null;
-    if (trigger) {
-      var wrapper = trigger.closest(".footer-newsletter-form__dob-field");
-      var dobInput = wrapper ? wrapper.querySelector(DOB_SELECTOR) : null;
-      if (dobInput instanceof HTMLInputElement) {
-        activateBirthDateInput(dobInput);
-      }
-      return;
+    if (!trigger) return;
+
+    var wrapper = trigger.closest(".footer-newsletter-form__dob-field");
+    var dobInput = wrapper ? wrapper.querySelector(DOB_SELECTOR) : null;
+    if (dobInput instanceof HTMLInputElement) {
+      activateBirthDateInput(dobInput);
     }
-
-    if (!(target instanceof HTMLInputElement)) return;
-    if (!target.matches(DOB_SELECTOR)) return;
-
-    activateBirthDateInput(target);
   });
 
   document.addEventListener("change", function (event) {
