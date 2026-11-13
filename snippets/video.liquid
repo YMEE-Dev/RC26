@@ -50,13 +50,17 @@
   assign overlay_type = block_settings.overlay_type
   assign opacity_overlay = false
   assign text_underlay = false
+  assign gradient_overlay = false
   if overlay_type == 'opacity'
     assign opacity_overlay = true
   elsif overlay_type == 'text'
     assign text_underlay = true
+  elsif overlay_type == 'gradient'
+    assign gradient_overlay = true
   endif
   assign animation_anchor = '#Video--' | append: section.id
 
+  assign eyebrow = block_settings.eyebrow | strip
   assign title = block_settings.title
   assign text = block_settings.text
   assign link_text = block_settings.link_text
@@ -238,13 +242,17 @@
   <div class="image-overlay"></div>
 {%- endif -%}
 
+{%- if gradient_overlay -%}
+  <div class="hero__gradient"></div>
+{%- endif -%}
+
 {%- if block_settings.link != blank and link_text == blank -%}
   </a>
 {%- else -%}
   </div>
 {%- endif -%}
 
-{%- if title != blank or text != blank or link_text != blank or show_video_popup -%}
+{%- if eyebrow != blank or title != blank or text != blank or link_text != blank or show_video_popup -%}
   <div
     class="hero__content__wrapper frame__item {{ flex_align_desktop }} {{ flex_align_mobile }}{% if show_header_backdrop %} backdrop--linear{% endif %}"
     id="Video--{{ section.id }}"
@@ -253,6 +261,18 @@
     <div
       class="hero__content hero__content--video {{ button_vertical_position_mobile }}{% if hero_transparent %} hero__content--transparent{% endif %}{% if text_underlay %} backdrop--radial{% endif %}"
     >
+      {%- if eyebrow != blank -%}
+        {%- assign animation_order = animation_order | plus: 1 -%}
+        <p
+          class="hero__eyebrow"
+          data-aos="hero"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-order="{{ animation_order }}"
+        >
+          {{ eyebrow | escape }}
+        </p>
+      {%- endif -%}
+
       {%- if title != blank -%}
         {%- liquid
           assign animation_order = animation_order | plus: 1
@@ -335,6 +355,76 @@
 {%- endif -%}
 
 {% stylesheet %}
+  /* Stops from the F&F Figma hero; keep white copy readable on bright photos */
+  .hero__gradient {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    background: linear-gradient(180deg, rgb(0 0 0 / 0.3) 0%, rgb(0 0 0 / 0) 18%, rgb(0 0 0 / 0) 40%, rgb(0 0 0 / 0.62) 100%);
+    pointer-events: none;
+  }
+
+  .hero__eyebrow {
+    margin-block: 0 14px;
+    font-family: var(--FONT-STACK-BODY);
+    font-size: 11px;
+    line-height: 16px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  /* An eyebrow opts the hero into the Figma copy block. 30px + the transparent-header wrapper's 10px = Figma's 40px */
+  .hero__content__wrapper .hero__content--video:has(> .hero__eyebrow) {
+    padding-block-end: 30px;
+  }
+
+  .hero__content--video:has(> .hero__eyebrow) .hero__title {
+    margin-block-end: 14px;
+    line-height: var(--LINE-HEIGHT-DISPLAY-S);
+    text-wrap: balance;
+  }
+
+  .hero__content--video:has(> .hero__eyebrow) .hero__description {
+    font-size: 14px;
+    line-height: 22px;
+  }
+
+  .hero__content--video:has(> .hero__eyebrow) .hero__description p {
+    margin: 0;
+  }
+
+  .hero__content--video:has(> .hero__eyebrow) > :last-child {
+    margin-block-end: 0;
+  }
+
+  @media only screen and (min-width: 750px) {
+    .hero__gradient {
+      background: linear-gradient(180deg, rgb(0 0 0 / 0.38) 0%, rgb(0 0 0 / 0) 26%, rgb(0 0 0 / 0) 48%, rgb(0 0 0 / 0.55) 100%);
+    }
+
+    .hero__eyebrow {
+      margin-block-end: 20px;
+      letter-spacing: 0.24em;
+    }
+
+    .hero__content__wrapper .hero__content--video:has(> .hero__eyebrow) {
+      padding-block-end: 80px;
+    }
+
+    .hero__content--video:has(> .hero__eyebrow) .hero__title {
+      margin-block-end: 20px;
+      line-height: var(--LINE-HEIGHT-DISPLAY-L);
+    }
+
+    /* 426px reproduces Figma's break after "pieces," (±12px) */
+    .hero__content--video:has(> .hero__eyebrow) .hero__description {
+      max-inline-size: 426px;
+      font-size: 16px;
+      line-height: 26px;
+    }
+  }
+
   .hero__button-group--video {
     justify-content: var(--video-button-justify-content, var(--alignment-justify-content, center));
   }

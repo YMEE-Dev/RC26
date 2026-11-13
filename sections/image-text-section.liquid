@@ -10,11 +10,13 @@
     assign resolved_image = resolved_image.value
   endif
 
-  if resolved_heading != blank or resolved_text != blank
+  assign button_label = section.settings.button_label | strip
+
+  if resolved_heading != blank or resolved_text != blank or button_label != blank
     assign has_copy = true
   endif
 
-  if resolved_heading != blank or resolved_text != blank or resolved_image != blank
+  if has_copy or resolved_image != blank
     assign has_any_content = true
   endif
 -%}
@@ -55,6 +57,14 @@
             {%- if resolved_text != blank -%}
               <div class="image-text-section__text body rte">
                 {{ resolved_text }}
+              </div>
+            {%- endif -%}
+
+            {%- if button_label != blank -%}
+              <div class="image-text-section__button-wrap">
+                <a href="{{ section.settings.button_link | default: '#' }}" class="image-text-section__button">
+                  {{- button_label | escape -}}
+                </a>
               </div>
             {%- endif -%}
           </div>
@@ -135,6 +145,39 @@
 
   .image-text-section__split--media-only {
     justify-content: center;
+  }
+
+  /* Same look as the Questions CTA button */
+  .image-text-section__button-wrap {
+    display: flex;
+    width: 100%;
+    max-width: 300px;
+    margin-top: 16px;
+  }
+
+  .image-text-section__button {
+    display: inline-flex;
+    padding: 14px 32px;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    color: #000;
+    background-color: transparent;
+    border: 1px solid #000;
+    font-family: var(--BTN-FONT-STACK);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 20px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .image-text-section__button:hover {
+    background-color: #000;
+    color: #fff;
   }
 
   @media (max-width: 989px) {
@@ -286,6 +329,18 @@
       "type": "richtext",
       "id": "text",
       "label": "Text"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "info": "Leave blank for no button."
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link",
+      "info": "Use #gift-guide-signup to open the gift guide signup panel."
     },
     {
       "type": "header",

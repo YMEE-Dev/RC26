@@ -1,0 +1,220 @@
+{% doc %}
+  Two-step gift guide signup: step 1 subscribes (email, consent) and sends the
+  guide event; step 2 optionally adds name, birth date and email language; step 3 is the final message.
+  Reuses the footer newsletter form classes and assets/klaviyo-subscribe.js.
+
+  @param {object} section - Gift guide signup section object
+
+  @example
+  {% render 'gift-guide-signup-form', section: section %}
+{% enddoc %}
+
+{%- liquid
+  assign klaviyo_company_id = section.settings.klaviyo_company_id | default: settings.klaviyo_public_api_key | strip
+  assign klaviyo_list_id = section.settings.klaviyo_list_id | strip
+  assign id_suffix = '--' | append: section.id
+-%}
+
+{%- if klaviyo_company_id != blank and klaviyo_list_id != blank -%}
+  <script src="{{ 'klaviyo-subscribe.js' | asset_url }}" defer="defer"></script>
+
+  <div
+    class="gift-guide-form"
+    data-footer-newsletter-wrapper
+    data-gift-guide-form
+    data-klaviyo-company-id="{{ klaviyo_company_id }}"
+    data-klaviyo-list-id="{{ klaviyo_list_id }}"
+    data-klaviyo-source="{{ section.settings.klaviyo_source | strip | escape }}"
+    data-klaviyo-event="{{ section.settings.klaviyo_event | strip | escape }}"
+  >
+    <div class="gift-guide-form__step" data-gift-guide-step="1">
+      <h2 class="modal__title navlink footer-newsletter-form__title" tabindex="-1" data-gift-guide-step-heading>
+        {{- section.settings.step1_title | escape -}}
+      </h2>
+      {%- if section.settings.step1_text != blank -%}
+        <div class="modal__description rte body footer-newsletter-form__description">{{ section.settings.step1_text }}</div>
+      {%- endif -%}
+
+      <form class="footer-newsletter-form" method="post" action="#" data-gift-guide-subscribe>
+        <div class="footer-newsletter-form__fields">
+          <div class="footer-newsletter-form__group">
+            {%- if section.settings.required_fields_label != blank -%}
+              <p class="footer-newsletter-form__eyebrow navlink">{{ section.settings.required_fields_label | escape }}</p>
+            {%- endif -%}
+
+            <label class="visually-hidden" for="GiftGuideEmail{{ id_suffix }}">Email</label>
+            <input
+              id="GiftGuideEmail{{ id_suffix }}"
+              class="footer-newsletter-form__field field label"
+              type="email"
+              name="email"
+              placeholder="E-mail"
+              value="{% if customer %}{{ customer.email | escape }}{% endif %}"
+              autocomplete="email"
+              autocorrect="off"
+              autocapitalize="off"
+              required
+            >
+          </div>
+
+          <div class="footer-newsletter-form__consent checkbox">
+            <input id="GiftGuideConsent{{ id_suffix }}" type="checkbox" name="consent" value="true" required>
+            <label for="GiftGuideConsent{{ id_suffix }}">
+              <span class="footer-newsletter-form__consent-copy rte body label">{{ section.settings.consent_label }}</span>
+            </label>
+            <span class="footer-newsletter-form__consent-error" data-footer-newsletter-consent-error hidden>
+              consent to marketing is required
+            </span>
+          </div>
+
+          <div class="footer-newsletter-form__group--submit">
+            <p class="footer-newsletter-form__error" data-footer-newsletter-error hidden></p>
+
+            <button type="submit" class="footer-newsletter-form__submit btn btn--primary btn--solid btn--full">
+              {{ section.settings.step1_button | escape }}
+            </button>
+
+            {%- if section.settings.policy_text != blank -%}
+              <div class="footer-newsletter-form__policy rte legal">{{ section.settings.policy_text }}</div>
+            {%- endif -%}
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="gift-guide-form__step" data-gift-guide-step="2" hidden>
+      <h2 class="modal__title navlink footer-newsletter-form__title" tabindex="-1" data-gift-guide-step-heading>
+        {{- section.settings.step2_title | escape -}}
+      </h2>
+      {%- if section.settings.step2_text != blank -%}
+        <div class="modal__description rte body footer-newsletter-form__description">{{ section.settings.step2_text }}</div>
+      {%- endif -%}
+
+      <form class="footer-newsletter-form" method="post" action="#" data-gift-guide-profile>
+        <div class="footer-newsletter-form__fields">
+          <div class="footer-newsletter-form__group">
+            <label class="visually-hidden" for="GiftGuideFirstName{{ id_suffix }}">First name</label>
+            <input
+              id="GiftGuideFirstName{{ id_suffix }}"
+              class="footer-newsletter-form__field field label"
+              type="text"
+              name="first_name"
+              placeholder="FIRST NAME"
+              autocomplete="given-name"
+            >
+
+            <label class="visually-hidden" for="GiftGuideLastName{{ id_suffix }}">Last name</label>
+            <input
+              id="GiftGuideLastName{{ id_suffix }}"
+              class="footer-newsletter-form__field field label"
+              type="text"
+              name="last_name"
+              placeholder="LAST NAME"
+              autocomplete="family-name"
+            >
+
+            <div class="footer-newsletter-form__dob-field">
+              <label class="visually-hidden" for="GiftGuideBirthDate{{ id_suffix }}">Date of birth</label>
+              <input
+                id="GiftGuideBirthDate{{ id_suffix }}"
+                class="footer-newsletter-form__field field label"
+                type="date"
+                name="date_of_birth"
+                autocomplete="bday"
+                min="1900-01-01"
+                max="{{ 'now' | date: '%Y-%m-%d' }}"
+                data-footer-newsletter-dob
+              >
+              <span class="footer-newsletter-form__dob-placeholder" aria-hidden="true">Date of birth</span>
+              <button
+                type="button"
+                class="footer-newsletter-form__dob-trigger"
+                data-footer-newsletter-dob-trigger
+                aria-label="Open date picker"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M3 1.5V3M13 1.5V3M1.75 5H14.25M2.75 3H13.25C13.8023 3 14.25 3.44772 14.25 4V13.25C14.25 13.8023 13.8023 14.25 13.25 14.25H2.75C2.19772 14.25 1.75 13.8023 1.75 13.25V4C1.75 3.44772 2.19772 3 2.75 3Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {%- comment -%} Starts empty: an untouched select must not overwrite the profile's language. {%- endcomment -%}
+          <div class="footer-newsletter-form__group footer-newsletter-form__group--language">
+            <p class="footer-newsletter-form__eyebrow navlink">I WANT TO RECEIVE EMAILS IN</p>
+
+            <label class="visually-hidden" for="GiftGuideLanguage{{ id_suffix }}">Language</label>
+            <select
+              id="GiftGuideLanguage{{ id_suffix }}"
+              class="footer-newsletter-form__field footer-newsletter-form__field--select label field"
+              name="language"
+            >
+              <option value="" selected></option>
+              <option value="English">English</option>
+              <option value="Italian">Italiano</option>
+              <option value="Japanese">日本語</option>
+            </select>
+          </div>
+
+          <div class="footer-newsletter-form__group--submit">
+            <p class="footer-newsletter-form__error" data-footer-newsletter-error hidden></p>
+
+            <button type="submit" class="btn btn--primary btn--solid btn--full">
+              {{ section.settings.step2_save | escape }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="gift-guide-form__step gift-guide-form__done" data-gift-guide-step="3" hidden>
+      <span class="footer-newsletter-form__thank-you-icon">
+        {%- render 'icon-check-circle-green' -%}
+      </span>
+      <h2 class="footer-newsletter-form__thank-you-title" tabindex="-1" data-gift-guide-step-heading>
+        {{- section.settings.final_title | escape -}}
+      </h2>
+      {%- if section.settings.final_text != blank -%}
+        <div class="gift-guide-form__done-text rte">{{ section.settings.final_text }}</div>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .gift-guide-form__step:not([hidden]) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+  }
+
+  .gift-guide-form__step [data-gift-guide-step-heading]:focus {
+    outline: none;
+  }
+
+  /* The drawer gives every intro <p> 80px below; between paragraphs keep one line of space */
+  .gift-guide-form .modal__description p:not(:last-child) {
+    padding-bottom: 22px;
+  }
+
+  .gift-guide-form__done:not([hidden]) {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .gift-guide-form__done-text p {
+    margin: 0;
+  }
+
+  .gift-guide-form__done-text p + p {
+    margin-top: 20px;
+  }
+
+  .gift-guide-form__done .icon-check-circle {
+    width: 64px;
+    height: 64px;
+    stroke: currentColor;
+  }
+{% endstylesheet %}
