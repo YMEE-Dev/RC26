@@ -133,8 +133,9 @@
 
   /* Gift guide, step 1: subscribe, then send the event that triggers the guide flow.
    * Re-subscribing someone already on the list fires no "added to list" trigger, hence
-   * the event. No custom_source/language: Klaviyo overwrites $source on every subscription,
-   * so existing subscribers would lose theirs; the source rides on the event instead. */
+   * the event. No custom_source: Klaviyo overwrites $source on every subscription, so
+   * existing subscribers would lose theirs; the source rides on the event instead.
+   * The event also carries the language, so the flow can pick the IT or EN email. */
   document.addEventListener("submit", function (event) {
     var form = event.target;
     if (!form.hasAttribute("data-gift-guide-subscribe")) return;
@@ -147,6 +148,7 @@
     var config = readConfig(wrapper);
     var formData = new FormData(form);
     var email = getFieldValue(formData, "email");
+    var language = getFieldValue(formData, "language");
 
     if (!config.companyId || !config.listId) {
       showError(form, "Newsletter is temporarily unavailable. Please try again later.");
@@ -168,7 +170,7 @@
           profile: {
             data: {
               type: "profile",
-              attributes: { email: email, properties: { gift_guide_2026: true } }
+              attributes: { email: email, properties: { gift_guide_2026: true, language: language } }
             }
           }
         },
@@ -187,7 +189,7 @@
           data: {
             type: "event",
             attributes: {
-              properties: { source: config.source },
+              properties: { source: config.source, language: language },
               metric: { data: { type: "metric", attributes: { name: config.eventName } } },
               profile: { data: { type: "profile", attributes: { email: email } } }
             }
@@ -219,19 +221,15 @@
     var config = readConfig(wrapper);
     var formData = new FormData(form);
     var attributes = { email: wrapper.getAttribute("data-email") || "" };
-    var properties = {};
     var firstName = getFieldValue(formData, "first_name");
     var lastName = getFieldValue(formData, "last_name");
     var birthDate = getFieldValue(formData, "date_of_birth");
-    var language = getFieldValue(formData, "language");
 
     if (firstName) attributes.first_name = firstName;
     if (lastName) attributes.last_name = lastName;
-    if (birthDate) properties.date_of_birth = birthDate;
-    if (language) properties.language = language;
-    if (birthDate || language) attributes.properties = properties;
+    if (birthDate) attributes.properties = { date_of_birth: birthDate };
 
-    if (!attributes.email || (!firstName && !lastName && !birthDate && !language)) {
+    if (!attributes.email || (!firstName && !lastName && !birthDate)) {
       showStep(wrapper, 3);
       return;
     }

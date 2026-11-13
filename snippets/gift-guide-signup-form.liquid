@@ -1,6 +1,6 @@
 {% doc %}
-  Two-step gift guide signup: step 1 subscribes (email, consent) and sends the
-  guide event; step 2 optionally adds name, birth date and email language; step 3 is the final message.
+  Two-step gift guide signup: step 1 subscribes (email, email language, consent) and sends the
+  guide event; step 2 optionally adds name and birth date; step 3 is the final message.
   Reuses the footer newsletter form classes and assets/klaviyo-subscribe.js.
 
   @param {object} section - Gift guide signup section object
@@ -55,6 +55,21 @@
               autocapitalize="off"
               required
             >
+          </div>
+
+          <div class="footer-newsletter-form__group footer-newsletter-form__group--language">
+            <p class="footer-newsletter-form__eyebrow navlink">I WANT TO RECEIVE EMAILS IN</p>
+
+            <label class="visually-hidden" for="GiftGuideLanguage{{ id_suffix }}">Language</label>
+            <select
+              id="GiftGuideLanguage{{ id_suffix }}"
+              class="footer-newsletter-form__field footer-newsletter-form__field--select label field"
+              name="language"
+              required
+            >
+              <option value="English">English</option>
+              <option value="Italian"{% if request.locale.iso_code == 'it' %} selected{% endif %}>Italiano</option>
+            </select>
           </div>
 
           <div class="footer-newsletter-form__consent checkbox">
@@ -137,23 +152,6 @@
                 </svg>
               </button>
             </div>
-          </div>
-
-          {%- comment -%} Starts empty: an untouched select must not overwrite the profile's language. {%- endcomment -%}
-          <div class="footer-newsletter-form__group footer-newsletter-form__group--language">
-            <p class="footer-newsletter-form__eyebrow navlink">I WANT TO RECEIVE EMAILS IN</p>
-
-            <label class="visually-hidden" for="GiftGuideLanguage{{ id_suffix }}">Language</label>
-            <select
-              id="GiftGuideLanguage{{ id_suffix }}"
-              class="footer-newsletter-form__field footer-newsletter-form__field--select label field"
-              name="language"
-            >
-              <option value="" selected></option>
-              <option value="English">English</option>
-              <option value="Italian">Italiano</option>
-              <option value="Japanese">日本語</option>
-            </select>
           </div>
 
           <div class="footer-newsletter-form__group--submit">
