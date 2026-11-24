@@ -34,10 +34,21 @@
     <link rel="alternate" hreflang="{{ locale.iso_code }}" href="{{ hreflang_href }}">
         {%- endif -%}
       {%- endfor -%}
-      {%- comment -%}Generic "en" goes to the US site, matching the US store's own tags.{%- endcomment -%}
-      {%- if request.page_type == 'index' %}
-    <link rel="alternate" hreflang="en-US" href="https://us.robertocoin.com/">
-    <link rel="alternate" hreflang="en" href="https://us.robertocoin.com/">
+      {%- comment -%}
+        Generic "en" goes to the US site, matching the US store's own tags.
+        Products only when custom.us_url is set: 1:1 pairs agreed with the US team, who add the return tags.
+      {%- endcomment -%}
+      {%- liquid
+        assign us_href = ''
+        if request.page_type == 'index'
+          assign us_href = 'https://us.robertocoin.com/'
+        elsif request.page_type == 'product'
+          assign us_href = product.metafields.custom.us_url.value | escape
+        endif
+      %}
+      {%- if us_href != blank %}
+    <link rel="alternate" hreflang="en-US" href="{{ us_href }}">
+    <link rel="alternate" hreflang="en" href="{{ us_href }}">
       {%- endif %}
     {%- endif %}
     {% include 'iub-cookie-banner' %}
